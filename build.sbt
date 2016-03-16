@@ -47,9 +47,20 @@ val `endpoints-server-play` =
     )
     .dependsOn(`endpoints-algebra-jvm`)
 
+val `endpoints-client-play` =
+  project.in(file("endpoints-client-play"))
+      .settings(commonSettings: _*)
+      .settings(
+        libraryDependencies ++= Seq(
+          "com.typesafe.play" %% "play-ws" % "2.4.3",
+          "io.circe" %% "circe-jawn" % "0.2.1"
+        )
+      )
+      .dependsOn(`endpoints-algebra-jvm`)
+
 val `endpoints` =
   project.in(file("."))
-    .aggregate(`endpoints-algebra-js`, `endpoints-algebra-jvm`, `endpoints-server-play`, `endpoints-client-xhr`)
+    .aggregate(`endpoints-algebra-js`, `endpoints-algebra-jvm`, `endpoints-server-play`, `endpoints-client-xhr`, `endpoints-client-play`)
 
 val `sample-shared` =
   crossProject.crossType(CrossType.Pure).in(file("sample/shared"))

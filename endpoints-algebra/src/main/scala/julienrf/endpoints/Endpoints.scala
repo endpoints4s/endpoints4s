@@ -2,7 +2,7 @@ package julienrf.endpoints
 
 import scala.language.higherKinds
 
-trait Endpoints {
+trait Endpoints extends EndpointType {
 
   type Path[A]
 
@@ -22,8 +22,6 @@ trait Endpoints {
 
   def jsonEntity[A](implicit O: ResponseMarshaller[A]): Response[A]
 
-
-  type Endpoint[I, O]
 
   type RequestMarshaller[A]
 
