@@ -18,11 +18,22 @@ class PlayCall extends Endpoints {
 
 
   type Request[A] = A => Call
+  type RequestEntity[A] = Unit
 
   type RequestMarshaller[A] = Unit
 
   def get[A](path: Path[A]) =
     a => Call("GET", path(a))
+
+  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
+    (ab: fc.Out) => {
+      val (a, b) = fc.unapply(ab)
+      Call("POST", path(a))
+    }
+
+  object request extends RequestApi {
+    def jsonEntity[A : RequestMarshaller] = ()
+  }
 
 
   type Response[A] = Unit

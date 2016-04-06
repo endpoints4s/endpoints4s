@@ -15,7 +15,17 @@ trait Endpoints extends EndpointType {
 
   type Request[A]
 
+  type RequestEntity[A]
+
   def get[A](path: Path[A]): Request[A]
+
+  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out]
+
+  val request: RequestApi
+
+  trait RequestApi {
+    def jsonEntity[A : RequestMarshaller]: RequestEntity[A]
+  }
 
 
   type Response[A]

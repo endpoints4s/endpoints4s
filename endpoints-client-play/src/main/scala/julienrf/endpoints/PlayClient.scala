@@ -1,7 +1,8 @@
 package julienrf.endpoints
 
 import cats.data.Xor
-import io.circe.{Error, Encoder, Decoder, jawn}
+import io.circe.{Json, Error, Encoder, Decoder, jawn}
+import play.api.http.{ContentTypes, Writeable}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
@@ -21,12 +22,29 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     }
 
 
-  type Request[A] = A => WSRequest
+  type Request[A] = A => Future[WSResponse]
+
+  type RequestEntity[A] = (A, WSRequest) => Future[WSResponse]
 
   type RequestMarshaller[A] = Encoder[A]
 
   def get[A](path: Path[A]) =
-    a => wsClient.url("/" ++ path(a)) // TODO Use an intermediate data type holding the HTTP verb
+    a => wsClient.url("/" ++ path(a)).get()
+
+  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
+    (ab: fc.Out) => {
+      val (a, b) = fc.unapply(ab)
+      val wsRequest = wsClient.url("/" ++ path(a))
+      entity(b, wsRequest)
+    }
+
+  object request extends RequestApi {
+    implicit val jsonWriteable: Writeable[Json] =
+      new Writeable[Json](_.noSpaces.getBytes("UTF-8"), Some(ContentTypes.JSON))
+    def jsonEntity[A : RequestMarshaller] = {
+      case (a, wsRequest) => wsRequest.post(Encoder[A].apply(a))
+    }
+  }
 
 
   type Response[A] = WSResponse => Xor[Error, A]
@@ -40,6 +58,6 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
   type Endpoint[I, O] = I => Future[Xor[Error, O]]
 
   def endpoint[A, B](request: Request[A], response: Response[B]) =
-    a => request(a).get().map(response)
+    a => request(a).map(response)
 
 }

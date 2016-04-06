@@ -43,7 +43,10 @@ val `endpoints-server-play` =
   project.in(file("endpoints-server-play"))
     .settings(commonSettings: _*)
     .settings(
-      libraryDependencies += "com.typesafe.play" %% "play-netty-server" % "2.4.6"
+      libraryDependencies ++= Seq(
+        "com.typesafe.play" %% "play-netty-server" % "2.4.6",
+        "io.circe" %% "circe-jawn" % "0.2.1"
+      )
     )
     .dependsOn(`endpoints-algebra-jvm`)
 

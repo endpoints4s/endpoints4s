@@ -21,15 +21,31 @@ trait XhrClient extends Endpoints {
     }
 
 
-  type Request[A] = js.Function1[A, XMLHttpRequest]
+  type Request[A] = js.Function1[A, (XMLHttpRequest, Option[js.Any])]
+
+  type RequestEntity[A] = js.Function2[A, XMLHttpRequest, String /* TODO String | Blob | FormData | … */]
 
   def get[A](path: Path[A]) =
     a => {
       val xhr = new XMLHttpRequest
       xhr.open("GET", "/" ++ path(a))
-      xhr
+      (xhr, None)
     }
 
+  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
+    (out: fc.Out) => {
+      val (a, b) = fc.unapply(out)
+      val xhr = new XMLHttpRequest
+      xhr.open("POST", "/" ++ path(a))
+      (xhr, Some(entity(b, xhr)))
+    }
+
+  object request extends RequestApi {
+    def jsonEntity[A : RequestMarshaller] = (a: A, xhr: XMLHttpRequest) => {
+      xhr.setRequestHeader("Content-Type", "application/json")
+      Encoder[A].apply(a).noSpaces
+    }
+  }
 
   type Response[A] = js.Function1[XMLHttpRequest, Xor[Exception, A]]
 
@@ -44,10 +60,10 @@ trait XhrClient extends Endpoints {
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     (a: A) =>
       new Promise[B]((resolve, error) => {
-        val xhr = request(a)
+        val (xhr, maybeEntity) = request(a)
         xhr.onload = _ => response(xhr).fold(exn => error(exn.getMessage), b => resolve(b))
         xhr.onerror = _ => error(xhr.responseText)
-        xhr.send()
+        xhr.send(maybeEntity.orNull)
       })
 
 }
