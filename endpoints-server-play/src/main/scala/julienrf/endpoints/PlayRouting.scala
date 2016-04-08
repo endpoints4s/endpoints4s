@@ -6,31 +6,55 @@ import io.circe.{Decoder, Encoder, Json, jawn}
 import play.api.http.Writeable
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.iteratee.Done
-import play.api.mvc.{BodyParsers, BodyParser, Action, Codec, Handler, RequestHeader, Result, Results}
+import play.api.mvc._
 
 trait PlayRouting extends Endpoints {
 
-  type Path[A] = List[String] => Option[(A, List[String])]
-
-  def static(segment: String) = {
-    case s :: ss if s == segment => Some(((), ss))
-    case _ => None
+  trait Path[A] {
+    def decode(segments: List[String]): Option[(A, List[String])]
+    def encode(a: A): String
   }
 
-  def dynamic: List[String] => Option[(String, List[String])] = {
-    case s :: ss => Some((s, ss))
-    case Nil => None
-  }
+  def static(segment: String): Path[Unit] =
+    new Path[Unit] {
+      def decode(segments: List[String]): Option[(Unit, List[String])] =
+        segments match {
+          case s :: ss if s == segment => Some(((), ss))
+          case _ => None
+        }
+      def encode(unit: Unit): String = segment
+    }
+
+  def dynamic: Path[String] =
+    new Path[String] {
+      def decode(segments: List[String]): Option[(String, List[String])] =
+        segments match {
+          case s :: ss => Some((s, ss))
+          case Nil => None
+        }
+
+      def encode(s: String) = s
+    }
 
   def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    ss =>
-      for {
-        (a, ss2) <- first(ss)
-        (b, ss3) <- second(ss2)
-      } yield (fc(a, b), ss3)
+    new Path[fc.Out] {
+      def decode(segments: List[String]) =
+        for {
+          (a, segments2) <- first.decode(segments)
+          (b, segments3) <- second.decode(segments2)
+        } yield (fc(a, b), segments3)
+      def encode(ab: fc.Out) = {
+        val (a, b) = fc.unapply(ab)
+        first.encode(a) ++ "/" ++ second.encode(b)
+      }
+    }
 
 
-  type Request[A] = RequestHeader => Option[BodyParser[A]]
+  trait Request[A] {
+    def decode(header: RequestHeader): Option[BodyParser[A]]
+    def encode(a: A): Call
+  }
+//  type Request[A] = RequestHeader => Option[BodyParser[A]]
 
   type RequestEntity[A] = BodyParser[A]
 
@@ -42,21 +66,30 @@ trait PlayRouting extends Endpoints {
           .drop(1)
           .split("/").to[List]
           .map(s => URLDecoder.decode(s, "utf-8"))
-    path(segments).collect { case (a, Nil) => a }
+    path.decode(segments).collect { case (a, Nil) => a }
   }
 
 
-  def get[A](path: Path[A]) =
-    request =>
-      if (request.method == "GET") {
-        extractFromPath(path, request).map(a => BodyParser(_ => Done(Right(a))))
-      } else None
+  def get[A](path: Path[A]): Request[A] =
+    new Request[A] {
+      def decode(requestHeader: RequestHeader) =
+        if (requestHeader.method == "GET") {
+          extractFromPath(path, requestHeader).map(a => BodyParser(_ => Done(Right(a))))
+        } else None
+      def encode(a: A) = Call("GET", "/" ++ path.encode(a))
+    }
 
   def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
-    request =>
-      if (request.method == "POST") {
-        extractFromPath(path, request).map(a => entity.map(b => fc.apply(a, b)))
-      } else None
+    new Request[fc.Out] {
+      def decode(requestHeader: RequestHeader) =
+        if (requestHeader.method == "POST") {
+          extractFromPath(path, requestHeader).map(a => entity.map(b => fc.apply(a, b)))
+        } else None
+      def encode(ab: fc.Out) = {
+        val (a, _) = fc.unapply(ab)
+        Call("POST", "/" ++ path.encode(a))
+      }
+    }
 
   object request extends RequestApi {
     def jsonEntity[A : RequestMarshaller] =
@@ -74,12 +107,13 @@ trait PlayRouting extends Endpoints {
 
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
+    def call(a: A): Call = request.encode(a)
     def withService(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandler(this, service)
   }
 
   case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => B) {
     def playHandler(header: RequestHeader): Option[Handler] =
-      endpoint.request(header)
+      endpoint.request.decode(header)
         .map(a => Action(a)(request => endpoint.response(service(request.body))))
   }
 

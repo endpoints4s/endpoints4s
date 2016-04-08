@@ -14,7 +14,7 @@ object Api extends ApiAlg with PlayRouting with Results {
 
   val routes = routesFromEndpoints(
     index.withService(name => User(name, 30)),
-    action.withService(param => ActionResult())
+    action.withService(param => ActionResult(index.call("Julien").url))
   )
 
 }

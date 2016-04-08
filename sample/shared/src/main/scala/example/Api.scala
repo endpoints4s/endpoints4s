@@ -32,7 +32,7 @@ object ActionParameter {
   implicit val dec: Decoder[ActionParameter] = deriveFor[ActionParameter].decoder
 }
 
-case class ActionResult()
+case class ActionResult(s: String)
 
 object ActionResult {
   implicit val enc: Encoder[ActionResult] = deriveFor[ActionResult].encoder
