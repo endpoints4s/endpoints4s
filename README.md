@@ -24,7 +24,7 @@ trait CounterAlg extends Endpoints {
     * Uses the HTTP verb “GET” and URL path “/current-value”.
     * The response entity is a JSON document representing the counter value.
     */
-  val currentValue = endpoint(get(path / "current-value"), responseJson[Counter])
+  val currentValue = endpoint(get(path / "current-value"), jsonResponse[Counter])
 
   /**
     * Increments the counter value.
@@ -32,7 +32,7 @@ trait CounterAlg extends Endpoints {
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.
     */
-  val increment = endpoint(post(path / "increment", requestJson[Increment]), response.empty)
+  val increment = endpoint(post(path / "increment", jsonRequest[Increment]), emptyResponse)
 
 }
 

@@ -40,22 +40,20 @@ trait XhrClient extends Endpoints {
       (xhr, Some(entity(b, xhr)))
     }
 
-  object request extends RequestApi {
-    def jsonEntity[A : RequestMarshaller] = (a: A, xhr: XMLHttpRequest) => {
-      xhr.setRequestHeader("Content-Type", "application/json")
-      Encoder[A].apply(a).noSpaces
-    }
+  def jsonRequest[A : JsonRequest] = (a: A, xhr: XMLHttpRequest) => {
+    xhr.setRequestHeader("Content-Type", "application/json")
+    Encoder[A].apply(a).noSpaces
   }
 
   type Response[A] = js.Function1[XMLHttpRequest, Xor[Exception, A]]
 
-  def jsonEntity[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Xor[Exception, A]] =
+  def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Xor[Exception, A]] =
     xhr => parse.parse(xhr.responseText).flatMap(decoder.decodeJson)
 
 
   type Endpoint[A, B] = js.Function1[A, Promise[B]]
-  type RequestMarshaller[A] = Encoder[A]
-  type ResponseMarshaller[A] = Decoder[A]
+  type JsonRequest[A] = Encoder[A]
+  type JsonResponse[A] = Decoder[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     (a: A) =>

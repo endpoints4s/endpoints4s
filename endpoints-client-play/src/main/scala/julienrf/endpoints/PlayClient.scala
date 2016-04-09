@@ -9,7 +9,6 @@ import scala.concurrent.ExecutionContext
 
 class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endpoints {
 
-//  type Path[A] = A => String
   class Path[A](val apply: A => String) extends PathOps[A]
 
   def static(segment: String) = new Path((_: Unit) => segment)
@@ -27,7 +26,7 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
 
   type RequestEntity[A] = (A, WSRequest) => Future[WSResponse]
 
-  type RequestMarshaller[A] = Encoder[A]
+  type JsonRequest[A] = Encoder[A]
 
   def get[A](path: Path[A]) =
     a => wsClient.url(path.apply(a)).get()
@@ -39,20 +38,19 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
       entity(b, wsRequest)
     }
 
-  object request extends RequestApi {
-    implicit val jsonWriteable: Writeable[Json] =
-      new Writeable[Json](_.noSpaces.getBytes("UTF-8"), Some(ContentTypes.JSON))
-    def jsonEntity[A : RequestMarshaller] = {
-      case (a, wsRequest) => wsRequest.post(Encoder[A].apply(a))
-    }
+  implicit val jsonWriteable: Writeable[Json] =
+    new Writeable[Json](_.noSpaces.getBytes("UTF-8"), Some(ContentTypes.JSON))
+
+  def jsonRequest[A : JsonRequest] = {
+    case (a, wsRequest) => wsRequest.post(Encoder[A].apply(a))
   }
 
 
   type Response[A] = WSResponse => Xor[Error, A]
 
-  type ResponseMarshaller[A] = Decoder[A]
+  type JsonResponse[A] = Decoder[A]
 
-  def jsonEntity[A](implicit decoder: Decoder[A]) =
+  def jsonResponse[A](implicit decoder: Decoder[A]) =
     response => jawn.parse(response.body).flatMap(decoder.decodeJson)
 
 

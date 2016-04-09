@@ -87,19 +87,17 @@ trait PlayRouting extends Endpoints {
       }
     }
 
-  object request extends RequestApi {
-    def jsonEntity[A : RequestMarshaller] =
-      BodyParsers.parse.raw.validate { buffer =>
-        jawn.parseFile(buffer.asFile)
-          .flatMap(Decoder[A].decodeJson).toEither
-          .left.map(error => Results.BadRequest)
-      }
-  }
+  def jsonRequest[A : JsonRequest] =
+    BodyParsers.parse.raw.validate { buffer =>
+      jawn.parseFile(buffer.asFile)
+        .flatMap(Decoder[A].decodeJson).toEither
+        .left.map(error => Results.BadRequest)
+    }
 
 
   type Response[A] = A => Result
 
-  def jsonEntity[A](implicit encoder: Encoder[A]) = a => Results.Ok(encoder.apply(a))
+  def jsonResponse[A](implicit encoder: Encoder[A]) = a => Results.Ok(encoder.apply(a))
 
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
@@ -113,9 +111,9 @@ trait PlayRouting extends Endpoints {
         .map(a => Action(a)(request => endpoint.response(service(request.body))))
   }
 
-  type RequestMarshaller[A] = Decoder[A]
+  type JsonRequest[A] = Decoder[A]
 
-  type ResponseMarshaller[A] = Encoder[A]
+  type JsonResponse[A] = Encoder[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     Endpoint(request, response)

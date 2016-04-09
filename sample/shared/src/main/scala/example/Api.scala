@@ -6,13 +6,17 @@ import io.circe.{Decoder, Encoder}
 
 trait ApiAlg extends Endpoints {
 
-  implicit def userOutput: ResponseMarshaller[User]
-  implicit def actionParameterRequest: RequestMarshaller[ActionParameter]
-  implicit def actionResultResponse: ResponseMarshaller[ActionResult]
+  class Api(implicit
+    userResponse: JsonResponse[User],
+    actionParameterRequest: JsonRequest[ActionParameter],
+    actionResultResponse: JsonResponse[ActionResult]
+  ) {
 
-  val index = endpoint(get(path / "user" / dynamic), jsonEntity[User])
+    val index = endpoint(get(path / "user" / dynamic), jsonResponse[User])
 
-  val action = endpoint(post(path / "action", request.jsonEntity[ActionParameter]), jsonEntity[ActionResult])
+    val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+
+  }
 
   // TODO cacheable assets
   // TODO media assets

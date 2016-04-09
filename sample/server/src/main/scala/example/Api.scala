@@ -8,13 +8,11 @@ import scala.language.higherKinds
 
 object Api extends ApiAlg with PlayRouting with Results {
 
-  implicit def userOutput: Encoder[User] = User.enc
-  implicit def actionParameterRequest: Decoder[ActionParameter] = ActionParameter.dec
-  implicit def actionResultResponse: Encoder[ActionResult] = ActionResult.enc
+  val api = new Api
 
   val routes = routesFromEndpoints(
-    index.withService(name => User(name, 30)),
-    action.withService(param => ActionResult(index.call("Julien").url))
+    api.index.withService(name => User(name, 30)),
+    api.action.withService(param => ActionResult(api.index.call("Julien").url))
   )
 
 }
