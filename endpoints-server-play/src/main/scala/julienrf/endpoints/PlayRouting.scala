@@ -54,7 +54,6 @@ trait PlayRouting extends Endpoints {
     def decode(header: RequestHeader): Option[BodyParser[A]]
     def encode(a: A): Call
   }
-//  type Request[A] = RequestHeader => Option[BodyParser[A]]
 
   type RequestEntity[A] = BodyParser[A]
 

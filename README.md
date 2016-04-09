@@ -24,7 +24,7 @@ trait CounterAlg extends Endpoints {
     * Uses the HTTP verb “GET” and URL path “/current-value”.
     * The response entity is a JSON document representing the counter value.
     */
-  val currentValue = endpoint(get(path / "current-value"), response.json[Counter])
+  val currentValue = endpoint(get(path / "current-value"), responseJson[Counter])
 
   /**
     * Increments the counter value.
@@ -32,7 +32,7 @@ trait CounterAlg extends Endpoints {
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.
     */
-  val increment = endpoint(post(path / "increment", request.json[Increment]), response.empty)
+  val increment = endpoint(post(path / "increment", requestJson[Increment]), response.empty)
 
 }
 
@@ -134,47 +134,52 @@ Thus, you can distribute a (fully working) JVM client, which is independent of y
 
 The `Endpoints` trait used in the first module provides members that bring *vocabulary* to describe HTTP
 endpoints (e.g. the `endpoint`, `get`, `post`, etc. methods), but these members are all abstract. Furthermore,
-their return type is also abstract. A simplified version of the `endpoint` member could be the following:
+their types are also abstract.
+
+For instance, consider the following truncated version of `Endpoints`:
 
 ~~~ scala
 trait Endpoints {
-  type Endpoint[A, B]
+  def get[A](url: Url[A]): Request[A]
+
+  /** A request that carries an `A` information */
   type Request[A]
-  type Response[A]
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B]
+  /** An URL that carries an `A` information */
+  type Url[A]
 }
 ~~~
 
-Then, traits `XhrClient`, `PlayRouting`, etc. implement these members. Let’s see a simplified implementation
-of the `XhrClient` trait:
+The `get` method builds a `Request[A]` out of an `Url[A]`. Let’s put aside the `Url[A]` type and focus on
+`Request[A]`.
+
+The `Request[A]` type defines an HTTP request that *carries* an information `A`. From a client point
+of view, this `A` is what is *needed* to build a `Request[A]`. From a server point of view, this `A`
+is what is *provided* when processing a `Request[A]`.
+
+Let’s see the semantics that is given to `Request[A]` by the `XhrClient` trait:
 
 ~~~ scala
 trait XhrClient extends Endpoints {
-  type Endpoint[A, B] = js.Function1[A, js.Promise[B]]
   type Request[A] = js.Function1[A, XMLHttpRequest]
-  type Response[A] = js.Function1[XMLHttpRequest, Option[B]]
-  def endpoint[A, B](request: Request[A], response: Response[B]) =
-    (a: A) => new Promise((resolve, error) => {
-      val xhr = request(a)
-      xhr.onload = _ => response(xhr).fold(error("Oops"), b => resolve(b))
-      xhr.send()
-    }
-})
-~~~
-
-And here is a simplified implementation of the `PlayRouting` trait:
-
-~~~ scala
-trait PlayRouting extends Endpoints {
-  type Endpoint[A, B] = (A => B) => (RequestHeader => Option[Result])
-  type Request[A] = RequestHeader => Option[A]
-  type Response[A] = A => Result
-  def endpoint[A, B](request: Request[A], response: Response[B]) =
-    implementation => requestHeader => request(requestHeader).map(implementation andThen response)
 }
 ~~~
 
-As you can see, each implementation chooses a different concrete own semantic type for `Endpoint[A, B]`.
+As previously said, from a client point of view we want to send requests and get responses. So, `Request[A]`
+has the semantics of a recipe to build an `XMLHttpRequest` out of an `A` value.
+
+Here is the semantics given by the `PlayRouting` trait:
+
+~~~ scala
+trait PlayRouting extends Endpoints {
+  type Request[A] = RequestHeader => Option[BodyParser[A]]
+}
+~~~
+
+The aim of the `PlayRouting` trait is to provide a Play router for a given set of HTTP endpoints. So,
+a `Request[A]` is a function that checks if an incoming request matches this endpoint, and in such
+a case it returns a `BodyParser[A]` that pulls an `A` out of the request.
+
+As you can see, each implementation chooses its own concrete semantic type for `Request[A]`.
 
 According to B. Oliveira [1], we say that `Endpoints` is an *object algebra interface* and that `XhrClient`
 and `PlayRouting` are *object algebras*. Note that we use an encoding borrowed from C. Hofer [2], which encodes
