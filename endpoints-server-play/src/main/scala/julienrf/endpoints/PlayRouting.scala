@@ -10,7 +10,7 @@ import play.api.mvc._
 
 trait PlayRouting extends Endpoints {
 
-  trait Path[A] {
+  trait Path[A] extends PathOps[A] {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
   }
@@ -60,12 +60,9 @@ trait PlayRouting extends Endpoints {
 
   private def extractFromPath[A](path: Path[A], request: RequestHeader): Option[A] = {
     val segments =
-      if (request.path == "" || request.path == "/") Nil
-      else
-        request.path
-          .drop(1)
-          .split("/").to[List]
-          .map(s => URLDecoder.decode(s, "utf-8"))
+      request.path
+        .split("/").to[List]
+        .map(s => URLDecoder.decode(s, "utf-8"))
     path.decode(segments).collect { case (a, Nil) => a }
   }
 
@@ -76,7 +73,7 @@ trait PlayRouting extends Endpoints {
         if (requestHeader.method == "GET") {
           extractFromPath(path, requestHeader).map(a => BodyParser(_ => Done(Right(a))))
         } else None
-      def encode(a: A) = Call("GET", "/" ++ path.encode(a))
+      def encode(a: A) = Call("GET", path.encode(a))
     }
 
   def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
@@ -87,7 +84,7 @@ trait PlayRouting extends Endpoints {
         } else None
       def encode(ab: fc.Out) = {
         val (a, _) = fc.unapply(ab)
-        Call("POST", "/" ++ path.encode(a))
+        Call("POST", path.encode(a))
       }
     }
 

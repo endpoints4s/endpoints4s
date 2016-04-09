@@ -8,17 +8,17 @@ import scala.scalajs.js
 
 trait XhrClient extends Endpoints {
 
-  type Path[A] = js.Function1[A, String]
+  class Path[A](val apply: js.Function1[A, String]) extends PathOps[A]
 
-  def static(segment: String) = _ => segment
+  def static(segment: String) = new Path(_ => segment)
 
-  def dynamic: js.Function1[String, String] = (s: String) => scalajs.js.URIUtils.encodeURIComponent(s)
+  def dynamic = new Path((s: String) => scalajs.js.URIUtils.encodeURIComponent(s))
 
   def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    (out: fc.Out) => {
+    new Path((out: fc.Out) => {
       val (a, b) = fc.unapply(out)
-      first(a) ++ "/" ++ second(b)
-    }
+      first.apply(a) ++ "/" ++ second.apply(b)
+    })
 
 
   type Request[A] = js.Function1[A, (XMLHttpRequest, Option[js.Any])]
@@ -28,7 +28,7 @@ trait XhrClient extends Endpoints {
   def get[A](path: Path[A]) =
     a => {
       val xhr = new XMLHttpRequest
-      xhr.open("GET", "/" ++ path(a))
+      xhr.open("GET", path.apply(a))
       (xhr, None)
     }
 
@@ -36,7 +36,7 @@ trait XhrClient extends Endpoints {
     (out: fc.Out) => {
       val (a, b) = fc.unapply(out)
       val xhr = new XMLHttpRequest
-      xhr.open("POST", "/" ++ path(a))
+      xhr.open("POST", path.apply(a))
       (xhr, Some(entity(b, xhr)))
     }
 

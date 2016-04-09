@@ -4,7 +4,12 @@ import scala.language.higherKinds
 
 trait Endpoints extends EndpointType {
 
-  type Path[A]
+  type Path[A] <: PathOps[A]
+
+  trait PathOps[A] { first: Path[A] =>
+    final def / (second: String): Path[A] = chained(first, static(second))
+    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chained(first, second)
+  }
 
   def static(segment: String): Path[Unit]
 
@@ -12,6 +17,7 @@ trait Endpoints extends EndpointType {
 
   def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
 
+  val path: Path[Unit] = static("")
 
   type Request[A]
 

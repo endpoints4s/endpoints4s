@@ -10,9 +10,9 @@ trait ApiAlg extends Endpoints {
   implicit def actionParameterRequest: RequestMarshaller[ActionParameter]
   implicit def actionResultResponse: ResponseMarshaller[ActionResult]
 
-  val index = endpoint(get(chained(static("user"), dynamic)), jsonEntity[User])
+  val index = endpoint(get(path / "user" / dynamic), jsonEntity[User])
 
-  val action = endpoint(post(static("action"), request.jsonEntity[ActionParameter]), jsonEntity[ActionResult])
+  val action = endpoint(post(path / "action", request.jsonEntity[ActionParameter]), jsonEntity[ActionResult])
 
   // TODO cacheable assets
   // TODO media assets

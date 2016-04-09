@@ -9,17 +9,18 @@ import scala.concurrent.ExecutionContext
 
 class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endpoints {
 
-  type Path[A] = A => String
+//  type Path[A] = A => String
+  class Path[A](val apply: A => String) extends PathOps[A]
 
-  def static(segment: String) = _ => segment
+  def static(segment: String) = new Path((_: Unit) => segment)
 
-  def dynamic = (s: String) => s
+  def dynamic = new Path((s: String) => s)
 
   def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    (ab: fc.Out) => {
+    new Path((ab: fc.Out) => {
       val (a, b) = fc.unapply(ab)
-      first(a) ++ "/" ++ second(b)
-    }
+      first.apply(a) ++ "/" ++ second.apply(b)
+    })
 
 
   type Request[A] = A => Future[WSResponse]
@@ -29,12 +30,12 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
   type RequestMarshaller[A] = Encoder[A]
 
   def get[A](path: Path[A]) =
-    a => wsClient.url("/" ++ path(a)).get()
+    a => wsClient.url(path.apply(a)).get()
 
   def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
     (ab: fc.Out) => {
       val (a, b) = fc.unapply(ab)
-      val wsRequest = wsClient.url("/" ++ path(a))
+      val wsRequest = wsClient.url(path.apply(a))
       entity(b, wsRequest)
     }
 
