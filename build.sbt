@@ -1,6 +1,6 @@
 val commonSettings = Seq(
   organization := "org.julienrf",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
@@ -34,7 +34,7 @@ val `client-xhr` =
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-parse" % "0.2.1",
-        "org.scala-js" %%% "scalajs-dom" % "0.8.2"
+        "org.scala-js" %%% "scalajs-dom" % "0.9.0"
       )
     )
     .dependsOn(`algebra-js`)
