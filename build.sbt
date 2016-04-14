@@ -44,7 +44,7 @@ val `server-play` =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-netty-server" % "2.4.6",
+        "com.typesafe.play" %% "play-server" % "2.5.1",
         "io.circe" %% "circe-jawn" % "0.2.1"
       )
     )
@@ -55,7 +55,7 @@ val `client-play` =
       .settings(commonSettings: _*)
       .settings(
         libraryDependencies ++= Seq(
-          "com.typesafe.play" %% "play-ws" % "2.4.3",
+          "com.typesafe.play" %% "play-ws" % "2.5.1",
           "io.circe" %% "circe-jawn" % "0.2.1"
         )
       )

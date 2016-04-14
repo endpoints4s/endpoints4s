@@ -5,7 +5,7 @@ import java.net.URLDecoder
 import io.circe.{Decoder, Encoder, Json, jawn}
 import play.api.http.Writeable
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.iteratee.Done
+import play.api.libs.streams.Accumulator
 import play.api.mvc._
 
 trait PlayRouting extends Endpoints {
@@ -70,7 +70,7 @@ trait PlayRouting extends Endpoints {
     new Request[A] {
       def decode(requestHeader: RequestHeader) =
         if (requestHeader.method == "GET") {
-          extractFromPath(path, requestHeader).map(a => BodyParser(_ => Done(Right(a))))
+          extractFromPath(path, requestHeader).map(a => BodyParser(_ => Accumulator.done(Right(a))))
         } else None
       def encode(a: A) = Call("GET", path.encode(a))
     }

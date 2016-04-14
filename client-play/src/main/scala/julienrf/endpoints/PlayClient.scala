@@ -1,9 +1,11 @@
 package julienrf.endpoints
 
 import cats.data.Xor
-import io.circe.{Json, Error, Encoder, Decoder, jawn}
+import io.circe.{Decoder, Encoder, Error, Json, jawn}
 import play.api.http.{ContentTypes, Writeable}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.mvc.Codec
+
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
@@ -38,8 +40,8 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
       entity(b, wsRequest)
     }
 
-  implicit val jsonWriteable: Writeable[Json] =
-    new Writeable[Json](_.noSpaces.getBytes("UTF-8"), Some(ContentTypes.JSON))
+  implicit def jsonWriteable(implicit codec: Codec): Writeable[Json] =
+    new Writeable[Json](json => codec.encode(json.noSpaces), Some(ContentTypes.JSON))
 
   def jsonRequest[A : JsonRequest] = {
     case (a, wsRequest) => wsRequest.post(Encoder[A].apply(a))
