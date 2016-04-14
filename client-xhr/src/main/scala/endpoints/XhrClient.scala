@@ -1,7 +1,7 @@
 package endpoints
 
 import cats.data.Xor
-import org.scalajs.dom.raw.XMLHttpRequest
+import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
@@ -40,6 +40,8 @@ trait XhrClient extends Endpoints {
     }
 
   type Response[A] = js.Function1[XMLHttpRequest, Xor[Exception, A]]
+
+  val emptyResponse: Response[Unit] = _ => Xor.Right(())
 
 
   type Endpoint[A, B] = js.Function1[A, js.Promise[B]]

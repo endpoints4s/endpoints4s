@@ -49,6 +49,8 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
 
   type Response[A] = WSResponse => Xor[Error, A]
 
+  val emptyResponse: Response[Unit] = _ => Xor.Right(())
+
   type JsonResponse[A] = Decoder[A]
 
   def jsonResponse[A](implicit decoder: Decoder[A]) =

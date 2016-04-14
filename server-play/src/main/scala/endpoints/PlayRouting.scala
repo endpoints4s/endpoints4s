@@ -90,6 +90,8 @@ trait PlayRouting extends Endpoints {
 
   type Response[A] = A => Result
 
+  val emptyResponse: Response[Unit] = _ => Results.Ok
+
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def call(a: A): Call = request.encode(a)

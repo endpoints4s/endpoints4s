@@ -32,6 +32,8 @@ trait Endpoints extends EndpointType {
 
   type Response[A]
 
+  def emptyResponse: Response[Unit]
+
   def jsonResponse[A : JsonResponse]: Response[A]
 
 
