@@ -1,7 +1,7 @@
 package example
 
+import endpoints.PlayRouting
 import io.circe.{Decoder, Encoder}
-import julienrf.endpoints.PlayRouting
 import play.api.mvc.Results
 
 import scala.language.higherKinds

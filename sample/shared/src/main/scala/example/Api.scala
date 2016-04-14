@@ -1,6 +1,6 @@
 package example
 
-import julienrf.endpoints.Endpoints
+import endpoints.Endpoints
 import io.circe.generic.JsonCodec
 import io.circe.{Decoder, Encoder}
 

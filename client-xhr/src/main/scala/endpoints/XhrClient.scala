@@ -1,4 +1,4 @@
-package julienrf.endpoints
+package endpoints
 
 import cats.data.Xor
 import io.circe.{Decoder, Encoder, parser}

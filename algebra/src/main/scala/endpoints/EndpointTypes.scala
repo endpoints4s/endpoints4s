@@ -1,4 +1,4 @@
-package julienrf.endpoints
+package endpoints
 
 trait EndpointType {
 

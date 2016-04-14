@@ -61,10 +61,6 @@ val `client-play` =
       )
       .dependsOn(`algebra-jvm`)
 
-val `endpoints` =
-  project.in(file("."))
-    .aggregate(`algebra-js`, `algebra-jvm`, `server-play`, `client-xhr`, `client-play`)
-
 val `sample-shared` =
   crossProject.crossType(CrossType.Pure).in(file("sample/shared"))
     .settings(commonSettings: _*)
@@ -91,3 +87,15 @@ val `sample-server` =
       unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value
     )
     .dependsOn(`sample-shared-jvm`, `server-play`)
+
+val endpoints =
+  project.in(file("."))
+    .aggregate(
+      `algebra-js`, `algebra-jvm`,
+      `server-play`,
+      `client-xhr`,
+      `client-play`,
+      `sample-shared-js`, `sample-shared-jvm`,
+      `sample-server`,
+      `sample-client`
+    )

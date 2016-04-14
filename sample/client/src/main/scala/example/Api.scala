@@ -1,6 +1,6 @@
 package example
 
-import julienrf.endpoints.XhrClient
+import endpoints.XhrClient
 
 object Api extends ApiAlg with XhrClient {
 

@@ -17,7 +17,7 @@ Let’s define a first artifact, cross-compiled for Scala.js, and containing a d
 endpoints of a Web service.
 
 ~~~ scala
-import julienrf.endpoints.Endpoints
+import endpoints.Endpoints
 import io.circe.generic.JsonCodec
 /**
   * Defines the HTTP endpoints description of a Web service implementing a counter.
@@ -55,7 +55,7 @@ case class Increment(step: Int)
 The following code is located in a Scala.js-only module, which depends on the first one.
 
 ~~~ scala
-import julienrf.endpoints.XhrClient
+import endpoints.XhrClient
 /**
   * Defines an HTTP client for the endpoints described in the `CounterAlg` trait.
   * The derived HTTP client uses XMLHttpRequest to perform requests.
@@ -88,7 +88,7 @@ val eventuallyDone: js.Promise[Unit] = Counter.increment(Increment(42))
 The following code is located in a JVM-only module, which depends on the first one.
 
 ~~~ scala
-import julienrf.endpoints.PlayRouting
+import endpoints.PlayRouting
 import scala.concurrent.stm.Ref
 
 /**

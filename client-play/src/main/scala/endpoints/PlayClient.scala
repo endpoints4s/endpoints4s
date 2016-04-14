@@ -1,4 +1,4 @@
-package julienrf.endpoints
+package endpoints
 
 import cats.data.Xor
 import io.circe.{Decoder, Encoder, Error, Json, jawn}
@@ -6,8 +6,7 @@ import play.api.http.{ContentTypes, Writeable}
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 import play.api.mvc.Codec
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endpoints {
 

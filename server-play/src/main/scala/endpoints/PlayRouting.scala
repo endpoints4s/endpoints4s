@@ -1,4 +1,4 @@
-package julienrf.endpoints
+package endpoints
 
 import java.net.URLDecoder
 
