@@ -1,18 +1,14 @@
 package example
 
-import endpoints.PlayRouting
-import io.circe.{Decoder, Encoder}
-import play.api.mvc.Results
+import endpoints.{CirceCodecsRouting, PlayRouting}
 
 import scala.language.higherKinds
 
-object Api extends ApiAlg with PlayRouting with Results {
-
-  val api = new Api
+object Api extends ApiAlg with PlayRouting with CirceCodecsRouting {
 
   val routes = routesFromEndpoints(
-    api.index.withService(name => User(name, 30)),
-    api.action.withService(param => ActionResult(api.index.call("Julien").url))
+    index.withService(name => User(name, 30)),
+    action.withService(param => ActionResult(index.call("Julien").url))
   )
 
 }

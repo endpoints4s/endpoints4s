@@ -2,7 +2,7 @@ package endpoints
 
 import java.net.URLDecoder
 
-import io.circe.{Decoder, Encoder, Json, jawn}
+import io.circe.Json
 import play.api.http.Writeable
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.streams.Accumulator
@@ -87,17 +87,8 @@ trait PlayRouting extends Endpoints {
       }
     }
 
-  def jsonRequest[A : JsonRequest] =
-    BodyParsers.parse.raw.validate { buffer =>
-      jawn.parseFile(buffer.asFile)
-        .flatMap(Decoder[A].decodeJson).toEither
-        .left.map(error => Results.BadRequest)
-    }
-
 
   type Response[A] = A => Result
-
-  def jsonResponse[A](implicit encoder: Encoder[A]) = a => Results.Ok(encoder.apply(a))
 
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
@@ -110,10 +101,6 @@ trait PlayRouting extends Endpoints {
       endpoint.request.decode(header)
         .map(a => Action(a)(request => endpoint.response(service(request.body))))
   }
-
-  type JsonRequest[A] = Decoder[A]
-
-  type JsonResponse[A] = Encoder[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     Endpoint(request, response)
@@ -129,6 +116,7 @@ trait PlayRouting extends Endpoints {
       loop(endpoints)
     }
 
+  // TODO Move out
   implicit def writeableJson(implicit codec: Codec): Writeable[Json] =
     new Writeable[Json](json => codec.encode(json.noSpaces), Some("application/json"))
 

@@ -10,14 +10,14 @@ object Main extends JSApp {
 
   @JSExport
   def main(): Unit = {
-    Api.api.index("Julien").`then`[Unit] { user =>
+    Api.index("Julien").`then`[Unit] { user =>
       val p = document.createElement("p")
       p.textContent = s"User(${user.name}, ${user.age})"
       document.body.appendChild(p)
       ()
     }
 
-    Api.api.action(ActionParameter()).`then`[Unit] { result =>
+    Api.action(ActionParameter()).`then`[Unit] { result =>
       val p = document.createElement("p")
       p.textContent = s"Result = $result"
       document.body.appendChild(p)

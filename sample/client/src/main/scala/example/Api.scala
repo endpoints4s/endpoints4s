@@ -1,9 +1,5 @@
 package example
 
-import endpoints.XhrClient
+import endpoints.{CirceCodecsClient, XhrClient}
 
-object Api extends ApiAlg with XhrClient {
-
-  val api = new Api
-
-}
+object Api extends ApiAlg with XhrClient with CirceCodecsClient

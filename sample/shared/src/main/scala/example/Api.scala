@@ -1,22 +1,13 @@
 package example
 
-import endpoints.Endpoints
+import endpoints.{CirceCodecs, Endpoints}
 import io.circe.generic.JsonCodec
-import io.circe.{Decoder, Encoder}
 
-trait ApiAlg extends Endpoints {
+trait ApiAlg extends Endpoints with CirceCodecs {
 
-  class Api(implicit
-    userResponse: JsonResponse[User],
-    actionParameterRequest: JsonRequest[ActionParameter],
-    actionResultResponse: JsonResponse[ActionResult]
-  ) {
+  val index = endpoint(get(path / "user" / dynamic), jsonResponse[User])
 
-    val index = endpoint(get(path / "user" / dynamic), jsonResponse[User])
-
-    val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
-
-  }
+  val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 
   // TODO cacheable assets
   // TODO media assets

@@ -18,13 +18,15 @@ endpoints of a Web service.
 
 ~~~ scala
 import endpoints.Endpoints
+import endpoints.CirceCodecs
 import io.circe.generic.JsonCodec
 /**
   * Defines the HTTP endpoints description of a Web service implementing a counter.
   * This Web service has two endpoints: one for getting the current value of the counter,
   * and one for incrementing it.
+  * It uses circe.io for JSON marshalling.
   */
-trait CounterAlg extends Endpoints {
+trait CounterAlg extends Endpoints with CirceCodecs {
 
   /**
     * Get the counter current value.
@@ -60,7 +62,7 @@ import endpoints.XhrClient
   * Defines an HTTP client for the endpoints described in the `CounterAlg` trait.
   * The derived HTTP client uses XMLHttpRequest to perform requests.
   */
-object Counter extends CounterAlg with XhrClient
+object Counter extends CounterAlg with XhrClient with CirceCodecsClient
 ~~~
 
 And then:
@@ -94,7 +96,7 @@ import scala.concurrent.stm.Ref
 /**
   * Defines a Play router (and reverse router) for the endpoints described in the `CounterAlg` trait.
   */
-object Counter extends CounterAlg with PlayRouting {
+object Counter extends CounterAlg with PlayRouting with CirceCodecsRouting {
 
   /** Dummy implementation of an in-memory counter */
   val counter = Ref(0)
