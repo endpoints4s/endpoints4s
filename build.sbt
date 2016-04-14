@@ -20,7 +20,7 @@ val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(commonSettings: _*)
     .settings(
-      libraryDependencies += "io.circe" %%% "circe-generic" % "0.2.1"
+      libraryDependencies += "io.circe" %%% "circe-generic" % "0.4.0"
     )
 
 val `algebra-js` = algebra.js
@@ -33,7 +33,7 @@ val `client-xhr` =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "io.circe" %%% "circe-parse" % "0.2.1",
+        "io.circe" %%% "circe-parser" % "0.4.0",
         "org.scala-js" %%% "scalajs-dom" % "0.9.0"
       )
     )
@@ -44,8 +44,8 @@ val `server-play` =
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-server" % "2.5.1",
-        "io.circe" %% "circe-jawn" % "0.2.1"
+        "com.typesafe.play" %% "play-netty-server" % "2.5.1",
+        "io.circe" %% "circe-jawn" % "0.4.0"
       )
     )
     .dependsOn(`algebra-jvm`)
@@ -56,7 +56,7 @@ val `client-play` =
       .settings(
         libraryDependencies ++= Seq(
           "com.typesafe.play" %% "play-ws" % "2.5.1",
-          "io.circe" %% "circe-jawn" % "0.2.1"
+          "io.circe" %% "circe-jawn" % "0.4.0"
         )
       )
       .dependsOn(`algebra-jvm`)
@@ -68,6 +68,9 @@ val `endpoints` =
 val `sample-shared` =
   crossProject.crossType(CrossType.Pure).in(file("sample/shared"))
     .settings(commonSettings: _*)
+    .settings(
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+    )
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(`algebra`)
 

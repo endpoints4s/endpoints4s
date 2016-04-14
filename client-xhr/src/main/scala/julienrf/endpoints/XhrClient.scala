@@ -1,8 +1,8 @@
 package julienrf.endpoints
 
 import cats.data.Xor
-import io.circe.{Decoder, Encoder, parse}
-import org.scalajs.dom.raw.{XMLHttpRequest, Promise}
+import io.circe.{Decoder, Encoder, parser}
+import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
 
@@ -48,16 +48,16 @@ trait XhrClient extends Endpoints {
   type Response[A] = js.Function1[XMLHttpRequest, Xor[Exception, A]]
 
   def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Xor[Exception, A]] =
-    xhr => parse.parse(xhr.responseText).flatMap(decoder.decodeJson)
+    xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson)
 
 
-  type Endpoint[A, B] = js.Function1[A, Promise[B]]
+  type Endpoint[A, B] = js.Function1[A, js.Promise[B]]
   type JsonRequest[A] = Encoder[A]
   type JsonResponse[A] = Decoder[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     (a: A) =>
-      new Promise[B]((resolve, error) => {
+      new js.Promise[B]((resolve, error) => {
         val (xhr, maybeEntity) = request(a)
         xhr.onload = _ => response(xhr).fold(exn => error(exn.getMessage), b => resolve(b))
         xhr.onerror = _ => error(xhr.responseText)

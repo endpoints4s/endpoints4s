@@ -1,7 +1,7 @@
 package example
 
 import julienrf.endpoints.Endpoints
-import io.circe.generic.semiauto.deriveFor
+import io.circe.generic.JsonCodec
 import io.circe.{Decoder, Encoder}
 
 trait ApiAlg extends Endpoints {
@@ -22,23 +22,11 @@ trait ApiAlg extends Endpoints {
   // TODO media assets
 }
 
+@JsonCodec
 case class User(name: String, age: Int)
 
-object User {
-  implicit val enc: Encoder[User] = deriveFor[User].encoder
-  implicit val dec: Decoder[User] = deriveFor[User].decoder
-}
-
+@JsonCodec
 case class ActionParameter()
 
-object ActionParameter {
-  implicit val enc: Encoder[ActionParameter] = deriveFor[ActionParameter].encoder
-  implicit val dec: Decoder[ActionParameter] = deriveFor[ActionParameter].decoder
-}
-
+@JsonCodec
 case class ActionResult(s: String)
-
-object ActionResult {
-  implicit val enc: Encoder[ActionResult] = deriveFor[ActionResult].encoder
-  implicit val dec: Decoder[ActionResult] = deriveFor[ActionResult].decoder
-}
