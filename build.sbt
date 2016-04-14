@@ -16,19 +16,19 @@ val commonSettings = Seq(
   )
 )
 
-val `endpoints-algebra` =
-  crossProject.crossType(CrossType.Pure).in(file("endpoints-algebra"))
+val algebra =
+  crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-generic" % "0.2.1"
     )
 
-val `endpoints-algebra-js` = `endpoints-algebra`.js
+val `algebra-js` = algebra.js
 
-val `endpoints-algebra-jvm` = `endpoints-algebra`.jvm
+val `algebra-jvm` = algebra.jvm
 
-val `endpoints-client-xhr` =
-  project.in(file("endpoints-client-xhr"))
+val `client-xhr` =
+  project.in(file("client-xhr"))
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
     .settings(
@@ -37,10 +37,10 @@ val `endpoints-client-xhr` =
         "org.scala-js" %%% "scalajs-dom" % "0.8.2"
       )
     )
-    .dependsOn(`endpoints-algebra-js`)
+    .dependsOn(`algebra-js`)
 
-val `endpoints-server-play` =
-  project.in(file("endpoints-server-play"))
+val `server-play` =
+  project.in(file("server-play"))
     .settings(commonSettings: _*)
     .settings(
       libraryDependencies ++= Seq(
@@ -48,10 +48,10 @@ val `endpoints-server-play` =
         "io.circe" %% "circe-jawn" % "0.2.1"
       )
     )
-    .dependsOn(`endpoints-algebra-jvm`)
+    .dependsOn(`algebra-jvm`)
 
-val `endpoints-client-play` =
-  project.in(file("endpoints-client-play"))
+val `client-play` =
+  project.in(file("client-play"))
       .settings(commonSettings: _*)
       .settings(
         libraryDependencies ++= Seq(
@@ -59,17 +59,17 @@ val `endpoints-client-play` =
           "io.circe" %% "circe-jawn" % "0.2.1"
         )
       )
-      .dependsOn(`endpoints-algebra-jvm`)
+      .dependsOn(`algebra-jvm`)
 
 val `endpoints` =
   project.in(file("."))
-    .aggregate(`endpoints-algebra-js`, `endpoints-algebra-jvm`, `endpoints-server-play`, `endpoints-client-xhr`, `endpoints-client-play`)
+    .aggregate(`algebra-js`, `algebra-jvm`, `server-play`, `client-xhr`, `client-play`)
 
 val `sample-shared` =
   crossProject.crossType(CrossType.Pure).in(file("sample/shared"))
     .settings(commonSettings: _*)
     .enablePlugins(ScalaJSPlugin)
-    .dependsOn(`endpoints-algebra`)
+    .dependsOn(`algebra`)
 
 val `sample-shared-jvm` = `sample-shared`.jvm
 
@@ -79,7 +79,7 @@ val `sample-client` =
   project.in(file("sample/client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
-    .dependsOn(`sample-shared-js`, `endpoints-client-xhr`)
+    .dependsOn(`sample-shared-js`, `client-xhr`)
 
 val `sample-server` =
   project.in(file("sample/server"))
@@ -87,4 +87,4 @@ val `sample-server` =
     .settings(
       unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value
     )
-    .dependsOn(`sample-shared-jvm`, `endpoints-server-play`)
+    .dependsOn(`sample-shared-jvm`, `server-play`)
