@@ -5,9 +5,9 @@ An embedded DSL for defining HTTP endpoints in Scala.
 Key features:
 
 - endpoints are **first-class Scala values**, which can be reused, combined and abstracted over ;
-- endpoints can be defined **independently of the HTTP server**, and thus can be used to define a statically typed HTTP client in just 1 line of code ;
-- the core algebra is **cross-compiled with Scala.js**, meaning that you can also get a Scala.js statically typed HTTP client in just 1 line of code ;
-- the core algebra is **highly extensible**: you can define your own vocabulary (e.g. to control the cache related HTTP headers in a way that is specific to your app) and your own semantics (e.g. swagger-like documentation).
+- endpoints can be defined **independently of the HTTP server**, and thus can be used to define a **statically typed HTTP client** in just 1 line of code ;
+- the core algebra is **cross-compiled with Scala.js**, meaning that you can also get a **Scala.js statically typed HTTP client** in just 1 line of code ;
+- the core algebra is **highly extensible**: you can define your own **vocabulary** (e.g. to control the cache related HTTP headers in a way that is specific to your app) and your own **semantics** (e.g. swagger-like documentation).
 
 ## Canonical example
 
@@ -141,9 +141,9 @@ Thus, you can distribute a (fully working) JVM client, which is independent of y
 
 ## How it works?
 
-The `Endpoints` trait used in the first module provides members that bring *vocabulary* to describe HTTP
+The `Endpoints` trait used in the first module provides members that bring **vocabulary** to describe HTTP
 endpoints (e.g. the `endpoint`, `get`, `post`, etc. methods), but these members are all abstract. Furthermore,
-their types are also abstract.
+**their types are also abstract**.
 
 For instance, consider the following truncated version of `Endpoints`:
 
@@ -162,8 +162,8 @@ The `get` method builds a `Request[A]` out of an `Url[A]`. Let’s put aside the
 `Request[A]`.
 
 The `Request[A]` type defines an HTTP request that *carries* an information `A`. From a client point
-of view, this `A` is what is *needed* to build a `Request[A]`. From a server point of view, this `A`
-is what is *provided* when processing a `Request[A]`.
+of view, this `A` is what is **needed** to build a `Request[A]`. From a server point of view, this `A`
+is what is **provided** when processing a `Request[A]`.
 
 Let’s see the semantics that is given to `Request[A]` by the `XhrClient` trait:
 
@@ -188,7 +188,7 @@ The aim of the `PlayRouting` trait is to provide a Play router for a given set o
 a `Request[A]` is a function that checks if an incoming request matches this endpoint, and in such
 a case it returns a `BodyParser[A]` that pulls an `A` out of the request.
 
-As you can see, each implementation chooses its own concrete semantic type for `Request[A]`.
+As you can see, each implementation brings its own **concrete semantic type** for `Request[A]`.
 
 According to B. Oliveira [1], we say that `Endpoints` is an *object algebra interface* and that `XhrClient`
 and `PlayRouting` are *object algebras*. Note that we use an encoding borrowed from C. Hofer [2], which encodes
@@ -208,7 +208,7 @@ and `PlayRouting` are *object algebras*. Note that we use an encoding borrowed f
 
 ### Autowire
 
-With autowire, all the communications go through a single HTTP endpoint and use the single marshalling format.
+With autowire, all the communications go through a single HTTP endpoint and use a single marshalling format.
 This has the following consequences :
 
 - You can not define RESTful APIs ;
