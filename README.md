@@ -140,14 +140,14 @@ Thus, you can distribute a (fully working) JVM client, which is independent of y
 
 ## How it works?
 
-The `Endpoints` trait used in the first module provides members that bring **vocabulary** to describe HTTP
+The `EndpointsAlg` trait used in the first module provides members that bring **vocabulary** to describe HTTP
 endpoints (e.g. the `endpoint`, `get`, `post`, etc. methods), but these members are all abstract. Furthermore,
 **their types are also abstract**.
 
-For instance, consider the following truncated version of `Endpoints`:
+For instance, consider the following truncated version of `EndpointsAlg`:
 
 ~~~ scala
-trait Endpoints {
+trait EndpointsAlg {
   def get[A](url: Url[A]): Request[A]
 
   /** A request that carries an `A` information */
@@ -167,7 +167,7 @@ is what is **provided** when processing a `Request[A]`.
 Let’s see the semantics that is given to `Request[A]` by the `XhrClient` trait:
 
 ~~~ scala
-trait XhrClient extends Endpoints {
+trait XhrClient extends EndpointsAlg {
   type Request[A] = js.Function1[A, XMLHttpRequest]
 }
 ~~~
@@ -178,7 +178,7 @@ has the semantics of a recipe to build an `XMLHttpRequest` out of an `A` value.
 Here is the semantics given by the `PlayRouting` trait:
 
 ~~~ scala
-trait PlayRouting extends Endpoints {
+trait PlayRouting extends EndpointsAlg {
   type Request[A] = RequestHeader => Option[BodyParser[A]]
 }
 ~~~
@@ -189,7 +189,7 @@ a case it returns a `BodyParser[A]` that pulls an `A` out of the request.
 
 As you can see, each implementation brings its own **concrete semantic type** for `Request[A]`.
 
-According to B. Oliveira [1], we say that `Endpoints` is an *object algebra interface* and that `XhrClient`
+According to B. Oliveira [1], we say that `EndpointsAlg` is an *object algebra interface* and that `XhrClient`
 and `PlayRouting` are *object algebras*. Note that we use an encoding borrowed from C. Hofer [2], which encodes
 *carrier types* with type members rather than type parameters.
 
