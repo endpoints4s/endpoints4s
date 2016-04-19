@@ -8,14 +8,14 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.streams.Accumulator
 import play.api.mvc._
 
-trait PlayRouting extends Endpoints {
+trait PlayRouting extends EndpointsAlg {
 
   trait Path[A] extends PathOps[A] {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
   }
 
-  def static(segment: String): Path[Unit] =
+  def staticPathSegment(segment: String): Path[Unit] =
     new Path[Unit] {
       def decode(segments: List[String]): Option[(Unit, List[String])] =
         segments match {
@@ -25,7 +25,7 @@ trait PlayRouting extends Endpoints {
       def encode(unit: Unit): String = segment
     }
 
-  def dynamic: Path[String] =
+  def dynamicPathSegment: Path[String] =
     new Path[String] {
       def decode(segments: List[String]): Option[(String, List[String])] =
         segments match {
@@ -36,7 +36,7 @@ trait PlayRouting extends Endpoints {
       def encode(s: String) = s
     }
 
-  def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path[fc.Out] {
       def decode(segments: List[String]) =
         for {

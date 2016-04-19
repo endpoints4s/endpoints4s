@@ -1,5 +1,6 @@
 package endpoints
 
+// TODO Replace with shapeless’s adjoin
 trait FlatConcat[A, B] {
   type Out
   def apply(a: A, b: B): Out

@@ -1,11 +1,11 @@
 package example
 
-import endpoints.{CirceCodecs, Endpoints}
+import endpoints.{CirceCodecs, EndpointsAlg}
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends Endpoints with CirceCodecs {
+trait ApiAlg extends EndpointsAlg with CirceCodecs {
 
-  val index = endpoint(get(path / "user" / dynamic), jsonResponse[User])
+  val index = endpoint(get(path / "user" / dynamicPathSegment), jsonResponse[User])
 
   val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 

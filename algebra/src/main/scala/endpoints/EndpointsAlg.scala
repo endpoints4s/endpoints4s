@@ -2,22 +2,25 @@ package endpoints
 
 import scala.language.higherKinds
 
-trait Endpoints extends EndpointType {
+trait EndpointsAlg {
 
   type Path[A] <: PathOps[A]
 
   trait PathOps[A] { first: Path[A] =>
-    final def / (second: String): Path[A] = chained(first, static(second))
-    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chained(first, second)
+    final def / (second: String): Path[A] = chainedPaths(first, staticPathSegment(second))
+    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chainedPaths(first, second)
   }
 
-  def static(segment: String): Path[Unit]
+  def staticPathSegment(segment: String): Path[Unit]
 
-  def dynamic: Path[String]
+  // TODO Path codecs
+  def dynamicPathSegment: Path[String]
 
-  def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
+  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
 
-  val path: Path[Unit] = static("")
+  val path: Path[Unit] = staticPathSegment("")
+
+  // TODO Query string
 
   type Request[A]
 
@@ -42,5 +45,7 @@ trait Endpoints extends EndpointType {
   type JsonRequest[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B]
+
+  type Endpoint[A, B]
 
 }

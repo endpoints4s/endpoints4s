@@ -3,7 +3,7 @@ package endpoints
 import io.circe.{Decoder, Encoder}
 
 // TODO Move out of core algebra
-trait CirceCodecs extends Endpoints {
+trait CirceCodecs extends EndpointsAlg {
 
   type JsonResponse[A] = CirceCodec[A]
   type JsonRequest[A] = CirceCodec[A]

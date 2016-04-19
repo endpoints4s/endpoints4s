@@ -8,15 +8,15 @@ import play.api.mvc.Codec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endpoints {
+class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointsAlg {
 
   class Path[A](val apply: A => String) extends PathOps[A]
 
-  def static(segment: String) = new Path((_: Unit) => segment)
+  def staticPathSegment(segment: String) = new Path((_: Unit) => segment)
 
-  def dynamic = new Path((s: String) => s)
+  def dynamicPathSegment = new Path((s: String) => s)
 
-  def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path((ab: fc.Out) => {
       val (a, b) = fc.unapply(ab)
       first.apply(a) ++ "/" ++ second.apply(b)

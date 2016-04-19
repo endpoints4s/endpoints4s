@@ -5,15 +5,15 @@ import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
-trait XhrClient extends Endpoints {
+trait XhrClient extends EndpointsAlg {
 
   class Path[A](val apply: js.Function1[A, String]) extends PathOps[A]
 
-  def static(segment: String) = new Path(_ => segment)
+  def staticPathSegment(segment: String) = new Path(_ => segment)
 
-  def dynamic = new Path((s: String) => scalajs.js.URIUtils.encodeURIComponent(s))
+  def dynamicPathSegment = new Path((s: String) => scalajs.js.URIUtils.encodeURIComponent(s))
 
-  def chained[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path((out: fc.Out) => {
       val (a, b) = fc.unapply(out)
       first.apply(a) ++ "/" ++ second.apply(b)
