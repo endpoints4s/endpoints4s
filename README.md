@@ -129,11 +129,11 @@ object Main extends App {
 You can also get a Scala/JVM client (which uses `play-ws` under the hood) as follows:
 
 ~~~ scala
-import julenrf.endpoints.PlayWsClient
+import endpoints.{PlayClient, PlayClientCirce}
 import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext
 
-class Counter(wsClient: WSClient)(implicit ec: ExecutionContext) extends PlayWsClient(wsClient) with CounterAlg
+class Counter(wsClient: WSClient)(implicit ec: ExecutionContext) extends PlayClient(wsClient) with CounterAlg with PlayClientCirce
 ~~~
 
 Thus, you can distribute a (fully working) JVM client, which is independent of your implementation.

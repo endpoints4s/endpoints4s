@@ -2,6 +2,7 @@ package endpoints
 
 import scala.language.higherKinds
 
+// TODO At some point, we will probably split this file into several smaller ones (`RequestsAlg`, `ResponsesAlg`, etc.)
 trait EndpointsAlg {
 
   type Path[A] <: PathOps[A]
