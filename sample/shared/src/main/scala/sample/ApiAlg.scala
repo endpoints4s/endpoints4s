@@ -5,7 +5,7 @@ import io.circe.generic.JsonCodec
 
 trait ApiAlg extends EndpointsAlg with CirceCodecs {
 
-  val index = endpoint(get(path / "user" / segment[String]), jsonResponse[User])
+  val index = endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
 
   val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 

@@ -5,11 +5,37 @@ import scala.language.higherKinds
 // TODO At some point, we will probably split this file into several smaller ones (`RequestsAlg`, `ResponsesAlg`, etc.)
 trait EndpointsAlg {
 
-  type Path[A] <: PathOps[A]
+  type Segment[A]
+
+  implicit def stringSegment: Segment[String]
+
+  implicit def intSegment: Segment[Int]
+
+
+  type QueryString[A] <: QueryStringOps[A]
+
+  trait QueryStringOps[A] { first: QueryString[A] =>
+    final def & [B](second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
+      combineQueryStrings(first, second)
+  }
+
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out]
+
+  def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A]
+
+  type QueryStringValue[A]
+
+  implicit def stringQueryString: QueryStringValue[String]
+
+  implicit def intQueryString: QueryStringValue[Int]
+
+
+  type Path[A] <: PathOps[A] with Url[A]
 
   trait PathOps[A] { first: Path[A] =>
     final def / (second: String): Path[A] = chainPaths(first, staticPathSegment(second))
     final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chainPaths(first, second)
+    final def /? [B](qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] = urlWithQueryString(first, qs)
   }
 
   def staticPathSegment(segment: String): Path[Unit]
@@ -20,22 +46,19 @@ trait EndpointsAlg {
 
   val path: Path[Unit] = staticPathSegment("")
 
-  type Segment[A]
 
-  implicit def stringSegment: Segment[String]
+  type Url[A]
 
-  implicit def intSegment: Segment[Int]
-
-  // TODO Query string
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out]
 
 
   type Request[A]
 
   type RequestEntity[A]
 
-  def get[A](path: Path[A]): Request[A]
+  def get[A](url: Url[A]): Request[A]
 
-  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out]
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out]
 
   def jsonRequest[A : JsonRequest]: RequestEntity[A]
 

@@ -11,9 +11,78 @@ import scala.util.Try
 
 trait PlayRouting extends EndpointsAlg {
 
-  trait Path[A] extends PathOps[A] {
+  val utf8Name = UTF_8.name()
+
+  trait Segment[A] {
+    def decode(segment: String): Option[A]
+    def encode(a: A): String
+  }
+
+  implicit def stringSegment: Segment[String] =
+    new Segment[String] {
+      def decode(segment: String) = Some(segment)
+      def encode(s: String) = URLEncoder.encode(s, utf8Name)
+    }
+
+  implicit def intSegment: Segment[Int] =
+    new Segment[Int] {
+      def decode(segment: String) = Try(segment.toInt).toOption
+      def encode(a: Int) = a.toString
+    }
+
+
+  trait QueryString[A] extends QueryStringOps[A] {
+    def decode(qs: Map[String, Seq[String]]): Option[A]
+    def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
+  }
+
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
+    new QueryString[fc.Out] {
+      def decode(qs: Map[String, Seq[String]]) =
+        for {
+          a <- first.decode(qs)
+          b <- second.decode(qs)
+        } yield fc(a, b)
+      def encode(ab: fc.Out) = {
+        val (a, b) = fc.unapply(ab)
+        first.encode(a) ++ second.encode(b)
+      }
+    }
+
+  def qs[A](name: String)(implicit value: QueryStringValue[A]) =
+    new QueryString[A] {
+      def decode(qs: Map[String, Seq[String]]) = value.decode(name, qs)
+      def encode(a: A) = value.encode(name, a)
+    }
+
+  trait QueryStringValue[A] {
+    def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
+    def encode(name: String, a: A): Map[String, Seq[String]]
+  }
+
+  implicit def stringQueryString: QueryStringValue[String] =
+    new QueryStringValue[String] {
+      def decode(name: String, qs: Map[String, Seq[String]]) =
+        qs.get(name).flatMap(_.headOption)
+      def encode(name: String, s: String) =
+        Map(name -> Seq(URLEncoder.encode(s, utf8Name)))
+    }
+
+  implicit def intQueryString: QueryStringValue[Int] =
+    new QueryStringValue[Int] {
+      def decode(name: String, qs: Map[String, Seq[String]]) =
+        qs.get(name).flatMap(_.headOption).flatMap(s => Try(s.toInt).toOption)
+      def encode(name: String, i: Int) =
+        Map(name -> Seq(i.toString))
+    }
+
+
+  trait Path[A] extends PathOps[A] with Url[A] {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
+
+    final def decodeUrl(requestHeader: RequestHeader) = extractFromPath(this, requestHeader)
+    final def encodeUrl(a: A) = encode(a)
   }
 
   def staticPathSegment(segment: String): Path[Unit] =
@@ -29,9 +98,9 @@ trait PlayRouting extends EndpointsAlg {
   def segment[A](implicit A: Segment[A]): Path[A] =
     new Path[A] {
       def decode(segments: List[String]) = {
-        def uncons[A](as: List[A]): Option[(A, List[A])] =
-          as match {
-            case a :: as => Some((a, as))
+        def uncons[B](bs: List[B]): Option[(B, List[B])] =
+          bs match {
+            case head :: tail => Some((head, tail))
             case Nil => None
           }
         for {
@@ -40,23 +109,6 @@ trait PlayRouting extends EndpointsAlg {
         } yield (a, ss)
       }
       def encode(a: A) = A.encode(a)
-    }
-
-  trait Segment[A] {
-    def decode(segment: String): Option[A]
-    def encode(a: A): String
-  }
-
-  implicit def stringSegment: Segment[String] =
-    new Segment[String] {
-      def decode(segment: String) = Some(segment)
-      def encode(s: String) = URLEncoder.encode(s, UTF_8.name())
-    }
-
-  implicit def intSegment: Segment[Int] =
-    new Segment[Int] {
-      def decode(segment: String) = Try(segment.toInt).toOption
-      def encode(a: Int) = a.toString
     }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
@@ -72,6 +124,29 @@ trait PlayRouting extends EndpointsAlg {
       }
     }
 
+  trait Url[A] {
+    def decodeUrl(requestHeader: RequestHeader): Option[A]
+    def encodeUrl(a: A): String
+  }
+
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] =
+    new Url[fc.Out] {
+      def decodeUrl(requestHeader: RequestHeader) =
+        for {
+          a <- extractFromPath(path, requestHeader)
+          b <- qs.decode(requestHeader.queryString)
+        } yield fc(a, b)
+      def encodeUrl(ab: fc.Out) = {
+        val (a, b) = fc.unapply(ab)
+        val encodedQs =
+          qs.encode(b)
+            .flatMap { case (n, vs) => vs.map(v => (n, v)) }
+            .map { case (n, v) => s"$n=$v" }
+            .mkString("&")
+        s"${path.encode(a)}?$encodedQs"
+      }
+    }
+
 
   trait Request[A] {
     def decode(header: RequestHeader): Option[BodyParser[A]]
@@ -84,29 +159,29 @@ trait PlayRouting extends EndpointsAlg {
     val segments =
       request.path
         .split("/").to[List]
-        .map(s => URLDecoder.decode(s, "utf-8"))
+        .map(s => URLDecoder.decode(s, utf8Name))
     path.decode(segments).collect { case (a, Nil) => a }
   }
 
 
-  def get[A](path: Path[A]): Request[A] =
+  def get[A](url: Url[A]): Request[A] =
     new Request[A] {
       def decode(requestHeader: RequestHeader) =
         if (requestHeader.method == "GET") {
-          extractFromPath(path, requestHeader).map(a => BodyParser(_ => Accumulator.done(Right(a))))
+          url.decodeUrl(requestHeader).map(a => BodyParser(_ => Accumulator.done(Right(a))))
         } else None
-      def encode(a: A) = Call("GET", path.encode(a))
+      def encode(a: A) = Call("GET", url.encodeUrl(a))
     }
 
-  def post[A, B](path: Path[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
     new Request[fc.Out] {
       def decode(requestHeader: RequestHeader) =
         if (requestHeader.method == "POST") {
-          extractFromPath(path, requestHeader).map(a => entity.map(b => fc.apply(a, b)))
+          url.decodeUrl(requestHeader).map(a => entity.map(b => fc.apply(a, b)))
         } else None
       def encode(ab: fc.Out) = {
         val (a, _) = fc.unapply(ab)
-        Call("POST", path.encode(a))
+        Call("POST", url.encodeUrl(a))
       }
     }
 
