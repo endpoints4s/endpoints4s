@@ -193,7 +193,7 @@ trait PlayRouting extends EndpointsAlg {
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def call(a: A): Call = request.encode(a)
-    def withService(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandler(this, service)
+    def implementedBy(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandler(this, service)
   }
 
   case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => B) {

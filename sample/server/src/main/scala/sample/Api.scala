@@ -7,8 +7,8 @@ import scala.language.higherKinds
 object Api extends ApiAlg with PlayRouting with CirceCodecsRouting {
 
   val routes = routesFromEndpoints(
-    index.withService { case (name, (age, _)) => User(name, age) },
-    action.withService(param => ActionResult(index.call(("Julien", (30, "a&b+c"))).url))
+    index.implementedBy { case (name, (age, _)) => User(name, age) },
+    action.implementedBy(param => ActionResult(index.call(("Julien", (30, "a&b+c"))).url))
   )
 
 }
