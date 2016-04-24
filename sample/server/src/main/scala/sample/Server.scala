@@ -18,7 +18,7 @@ object Server extends App with Results {
           |  </head>
           |  <body>
           |    <script src="/assets/sample-client-fastopt.js"></script>
-          |    <script>example.Main().main();</script>
+          |    <script>sample.Main().main();</script>
           |  </body>
           |</html>
         """.stripMargin
