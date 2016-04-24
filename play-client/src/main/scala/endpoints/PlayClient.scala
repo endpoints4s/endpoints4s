@@ -1,5 +1,8 @@
 package endpoints
 
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
 import cats.data.Xor
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
@@ -11,13 +14,22 @@ abstract class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) ext
 
   def staticPathSegment(segment: String) = new Path((_: Unit) => segment)
 
-  def dynamicPathSegment = new Path((s: String) => s)
+  def segment[A](implicit s: Segment[A]): Path[A] =
+    new Path(s)
 
-  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path((ab: fc.Out) => {
       val (a, b) = fc.unapply(ab)
       first.apply(a) ++ "/" ++ second.apply(b)
     })
+
+  type Segment[A] = A => String
+
+  implicit def stringSegment =
+    (s: String) => URLEncoder.encode(s, StandardCharsets.UTF_8.name())
+
+  implicit def intSegemnt =
+    (i: Int) => i.toString
 
 
   type Request[A] = A => Future[WSResponse]

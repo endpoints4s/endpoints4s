@@ -11,13 +11,22 @@ trait XhrClient extends EndpointsAlg {
 
   def staticPathSegment(segment: String) = new Path(_ => segment)
 
-  def dynamicPathSegment = new Path((s: String) => scalajs.js.URIUtils.encodeURIComponent(s))
+  def segment[A](implicit s: Segment[A]): Path[A] =
+    new Path(s)
 
-  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path((out: fc.Out) => {
       val (a, b) = fc.unapply(out)
       first.apply(a) ++ "/" ++ second.apply(b)
     })
+
+  type Segment[A] = js.Function1[A, String]
+
+  implicit def stringSegment: Segment[String] =
+    (s: String) => js.URIUtils.encodeURIComponent(s)
+
+  implicit def intSegment: Segment[Int] =
+    (i: Int) => i.toString
 
 
   type Request[A] = js.Function1[A, (XMLHttpRequest, Option[js.Any])]

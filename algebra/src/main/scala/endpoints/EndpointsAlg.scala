@@ -8,20 +8,26 @@ trait EndpointsAlg {
   type Path[A] <: PathOps[A]
 
   trait PathOps[A] { first: Path[A] =>
-    final def / (second: String): Path[A] = chainedPaths(first, staticPathSegment(second))
-    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chainedPaths(first, second)
+    final def / (second: String): Path[A] = chainPaths(first, staticPathSegment(second))
+    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chainPaths(first, second)
   }
 
   def staticPathSegment(segment: String): Path[Unit]
 
-  // TODO Path codecs
-  def dynamicPathSegment: Path[String]
+  def segment[A](implicit s: Segment[A]): Path[A]
 
-  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
 
   val path: Path[Unit] = staticPathSegment("")
 
+  type Segment[A]
+
+  implicit def stringSegment: Segment[String]
+
+  implicit def intSegment: Segment[Int]
+
   // TODO Query string
+
 
   type Request[A]
 

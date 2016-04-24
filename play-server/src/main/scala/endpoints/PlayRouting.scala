@@ -1,10 +1,13 @@
 package endpoints
 
-import java.net.URLDecoder
+import java.net.{URLDecoder, URLEncoder}
+import java.nio.charset.StandardCharsets.UTF_8
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.streams.Accumulator
-import play.api.mvc.{RequestHeader, BodyParser, Call, Result, Results, Handler, Action}
+import play.api.mvc.{Action, BodyParser, Call, Handler, RequestHeader, Result, Results}
+
+import scala.util.Try
 
 trait PlayRouting extends EndpointsAlg {
 
@@ -23,18 +26,40 @@ trait PlayRouting extends EndpointsAlg {
       def encode(unit: Unit): String = segment
     }
 
-  def dynamicPathSegment: Path[String] =
-    new Path[String] {
-      def decode(segments: List[String]): Option[(String, List[String])] =
-        segments match {
-          case s :: ss => Some((s, ss))
-          case Nil => None
-        }
-
-      def encode(s: String) = s
+  def segment[A](implicit A: Segment[A]): Path[A] =
+    new Path[A] {
+      def decode(segments: List[String]) = {
+        def uncons[A](as: List[A]): Option[(A, List[A])] =
+          as match {
+            case a :: as => Some((a, as))
+            case Nil => None
+          }
+        for {
+          (s, ss) <- uncons(segments)
+          a <- A.decode(s)
+        } yield (a, ss)
+      }
+      def encode(a: A) = A.encode(a)
     }
 
-  def chainedPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
+  trait Segment[A] {
+    def decode(segment: String): Option[A]
+    def encode(a: A): String
+  }
+
+  implicit def stringSegment: Segment[String] =
+    new Segment[String] {
+      def decode(segment: String) = Some(segment)
+      def encode(s: String) = URLEncoder.encode(s, UTF_8.name())
+    }
+
+  implicit def intSegment: Segment[Int] =
+    new Segment[Int] {
+      def decode(segment: String) = Try(segment.toInt).toOption
+      def encode(a: Int) = a.toString
+    }
+
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
     new Path[fc.Out] {
       def decode(segments: List[String]) =
         for {
