@@ -197,12 +197,6 @@ and `PlayRouting` are *object algebras*. Note that we use an encoding borrowed f
 2012 ([pdf](http://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf))
 - [2] C. Hofer at. al. Polymorphic Embedding of DSLs, GPCE, 2008 ([pdf](http://www.daimi.au.dk/~ko/papers/gpce50_hofer.pdf))
 
-## TODO
-
-- Pure JavaScript client ;
-- Cacheable assets ;
-- Server-Sent Events and Web-Sockets endpoints (seens by clients as reactive streams).
-
 ## Related works
 
 ### Autowire
@@ -216,7 +210,22 @@ This has the following consequences :
 
 Another difference is that `endpoints` uses no macros at all.
 
-### Thrift? Swagger?
+### Swagger
+
+Swagger provides a set of tools producing documentation resources from an API specification.
+The drawback of Swagger is that you have to maintain both the implementation and the
+specification and to keep them consistent (even when using the available “integrations”, which
+are only able to automate a small part of the specification generation).
+
+With `endpoints` you can write an object algebra producing documentation resources for
+endpoint definitions, so that your documentation is derived from the exact same code
+that is used to implement the API, hence being always consistent.
+
+### Thrift?
+
+## Contributing
+
+See the [open issues](https://github.com/julienrf/endpoints/issues).
 
 ## License
 
