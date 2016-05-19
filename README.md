@@ -9,6 +9,10 @@ Key features:
 - the core algebra is **cross-compiled with Scala.js**, meaning that you can also get a **Scala.js statically typed HTTP client** in just 1 line of code ;
 - the core algebra is **highly extensible**: you can define your own **vocabulary** (e.g. to control the cache related HTTP headers in a way that is specific to your app) and your own **semantics** (e.g. swagger-like documentation).
 
+## Documentation
+
+- [slides](http://julienrf.github.io/zrm-endpoints-2016/) of a talk, explaining the motivation and design.
+
 ## Canonical example
 
 ### Description of the HTTP endpoints
