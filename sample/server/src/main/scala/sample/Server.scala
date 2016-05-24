@@ -1,14 +1,13 @@
 package sample
 
-import controllers.Assets
-import play.api.mvc.{Results, Action}
+import play.api.mvc.{Action, Handler, RequestHeader, Results}
 import play.api.http.ContentTypes.HTML
 import play.core.server.NettyServer
 import play.api.routing.sird._
 
 object Server extends App with Results {
 
-  NettyServer.fromRouter()(Api.routes orElse {
+  NettyServer.fromRouter()(({
     case GET(p"/") => Action {
       val html =
         """
@@ -24,8 +23,8 @@ object Server extends App with Results {
         """.stripMargin
       Ok(html).as(HTML)
     }
-    case GET(p"/assets/$file*") =>
-      Assets.versioned("/", file)
-  })
+    case GET(p"/assets/sample-client-fastopt.js") =>
+      controllers.Assets.versioned("/", "sample-client-fastopt.js")
+  }: PartialFunction[RequestHeader, Handler]) orElse Api.routes)
 
 }

@@ -3,14 +3,16 @@ package sample
 import endpoints.{CirceCodecs, EndpointsAlg}
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends EndpointsAlg with CirceCodecs {
+trait ApiAlg extends EndpointsAlg with CirceCodecs with Assets {
 
   val index = endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
 
   val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 
-  // TODO cacheable assets
-  // TODO media assets
+  lazy val digests = AssetsDigests.digests
+
+  val assets = assetsEndpoint(path / "assets" / assetSegments)
+
 }
 
 @JsonCodec

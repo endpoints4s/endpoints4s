@@ -1,6 +1,7 @@
 package sample
 
 import org.scalajs.dom.document
+import org.scalajs.dom.AudioContext
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
@@ -22,6 +23,18 @@ object Main extends JSApp {
       p.textContent = s"Result = $result"
       document.body.appendChild(p)
       ()
+    }
+
+    Api.assets(Api.AssetInfo("medias", "chopin--funeral-march.mp3")).`then`[Unit] { arrayBuffer =>
+      val audioCtx = new AudioContext
+      audioCtx.decodeAudioData(arrayBuffer).`then`[Unit] { audioBuffer =>
+        val source = audioCtx.createBufferSource()
+        source.buffer = audioBuffer
+        source.connect(audioCtx.destination)
+        source.start()
+        source.stop(audioCtx.currentTime + 10)
+        ()
+      }
     }
     ()
   }

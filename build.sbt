@@ -1,3 +1,5 @@
+import org.scalajs.sbtplugin.cross.CrossProject
+
 val commonSettings = Seq(
   organization := "org.julienrf",
   scalaVersion := "2.11.8",
@@ -101,14 +103,28 @@ val `play-client-circe` =
     )
     .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
 
-val `sample-shared` =
-  crossProject.crossType(CrossType.Pure).in(file("sample/shared"))
+val `sample-shared` = {
+  val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
+  CrossProject("sample-shared-jvm", "sample-shared-js", file("sample/shared"), CrossType.Pure)
     .settings(commonSettings: _*)
     .settings(
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      (sourceGenerators in Compile) += Def.task {
+        assets.AssetsTasks.generateDigests(
+          baseDirectory = baseDirectory.value.getParentFile,
+          targetDirectory = (target in Compile).value,
+          generatedObjectName = "AssetsDigests",
+          generatedPackage = Some("sample"),
+          assetsPath = assetsDirectory
+        )
+      }.taskValue
+    )
+    .jvmSettings(
+      unmanagedResourceDirectories in Compile += assetsDirectory(baseDirectory.value.getParentFile)
     )
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(`algebra`, `algebra-circe`)
+}
 
 val `sample-shared-jvm` = `sample-shared`.jvm
 
