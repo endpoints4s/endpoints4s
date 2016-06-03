@@ -6,7 +6,7 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer
 
-trait AssetsClient extends Assets with XhrClient {
+trait AssetsClient extends AssetsAlg with XhrClient {
 
   case class AssetInfo(path: String, name: String) // FIXME Better DX
   type Asset = ArrayBuffer

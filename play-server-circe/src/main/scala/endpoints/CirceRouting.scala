@@ -5,7 +5,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}
 import PlayCirce.circeJsonWriteable
 
-trait CirceRouting extends PlayRouting with JsonEntities {
+trait CirceRouting extends PlayRouting with JsonEntitiesAlg {
 
   type JsonRequest[A] = Decoder[A]
 

@@ -2,7 +2,7 @@ package endpoints
 
 import io.circe.{Decoder, Encoder}
 
-trait CirceCodecs extends JsonEntities {
+trait CirceCodecs extends JsonEntitiesAlg {
 
   type JsonResponse[A] = CirceCodec[A]
   type JsonRequest[A] = CirceCodec[A]

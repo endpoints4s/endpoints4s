@@ -7,7 +7,7 @@ import play.api.libs.MimeTypes
 import play.api.mvc.Results
 import play.mvc.Http.HeaderNames
 
-trait AssetsRouting extends Assets with PlayRouting {
+trait AssetsRouting extends AssetsAlg with PlayRouting {
 
   case class AssetInfo(path: Seq[String], digest: String, name: String)
   type Asset = Option[(Source[ByteString, _], Option[Long], Option[String])]

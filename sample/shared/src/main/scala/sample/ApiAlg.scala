@@ -1,9 +1,9 @@
 package sample
 
-import endpoints.{Assets, CirceCodecs, EndpointsAlg}
+import endpoints.{AssetsAlg, CirceCodecs, EndpointsAlg}
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends EndpointsAlg with CirceCodecs with Assets {
+trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg {
 
   val index = endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
 
