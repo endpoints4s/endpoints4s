@@ -63,9 +63,9 @@ The following code is located in a Scala.js-only module, which depends on the fi
 import endpoints.{XhrClient, CirceCodecsClient}
 /**
   * Defines an HTTP client for the endpoints described in the `CounterAlg` trait.
-  * The derived HTTP client uses XMLHttpRequest to perform requests.
+  * The derived HTTP client uses XMLHttpRequest to perform requests and returns results in a `js.Thenable`.
   */
-object Counter extends CounterAlg with XhrClient with CirceCodecsClient
+object Counter extends CounterAlg with XhrClient with CirceCodecsClient with ThenableClient
 ~~~
 
 And then:
@@ -76,7 +76,7 @@ import scala.scalajs.js
   * Performs an XMLHttpRequest on the `currentValue` endpoint, and then deserializes the JSON
   * response as a `Counter`.
   */
-val eventuallyCounter: js.Promise[Counter] = Counter.currentValue()
+val eventuallyCounter: js.Thenable[Counter] = Counter.currentValue()
 ~~~
 
 And also:
@@ -85,7 +85,7 @@ And also:
 /**
   * Serializes the `Increment` value into JSON and performs an XMLHttpRequest on the `increment` endpoint.
   */
-val eventuallyDone: js.Promise[Unit] = Counter.increment(Increment(42))
+val eventuallyDone: js.Thenable[Unit] = Counter.increment(Increment(42))
 ~~~
 
 ### Service implementation (backed by Play framework)
