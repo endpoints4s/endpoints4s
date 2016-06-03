@@ -60,19 +60,11 @@ trait EndpointsAlg {
 
   def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out]
 
-  def jsonRequest[A : JsonRequest]: RequestEntity[A]
-
 
   type Response[A]
 
   def emptyResponse: Response[Unit]
 
-  def jsonResponse[A : JsonResponse]: Response[A]
-
-
-  type JsonResponse[A]
-
-  type JsonRequest[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B]
 
