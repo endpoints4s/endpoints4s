@@ -1,7 +1,6 @@
-package sample
+package endpoints
 
 import cats.data.Xor
-import endpoints.XhrClient
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js

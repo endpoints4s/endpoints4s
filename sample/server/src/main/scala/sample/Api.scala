@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.{CirceCodecsRouting, PlayRouting}
+import endpoints.{AssetsRouting, CirceCodecsRouting, PlayRouting}
 
 import scala.language.higherKinds
 

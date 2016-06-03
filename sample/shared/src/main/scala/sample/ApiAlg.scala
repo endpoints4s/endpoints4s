@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.{CirceCodecs, EndpointsAlg}
+import endpoints.{Assets, CirceCodecs, EndpointsAlg}
 import io.circe.generic.JsonCodec
 
 trait ApiAlg extends EndpointsAlg with CirceCodecs with Assets {

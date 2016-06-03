@@ -1,8 +1,7 @@
-package sample
+package endpoints
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
-import endpoints.PlayRouting
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.libs.MimeTypes
 import play.api.mvc.Results

@@ -1,6 +1,4 @@
-package sample
-
-import endpoints.EndpointsAlg
+package endpoints
 
 trait Assets extends EndpointsAlg {
 
