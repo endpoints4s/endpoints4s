@@ -3,6 +3,7 @@ package endpoints
 import cats.data.Xor
 import org.scalajs.dom.XMLHttpRequest
 
+import scala.language.higherKinds
 import scala.scalajs.js
 
 trait XhrClient extends EndpointsAlg {
