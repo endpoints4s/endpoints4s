@@ -2,6 +2,7 @@ import org.scalajs.sbtplugin.cross.CrossProject
 
 val commonSettings = Seq(
   organization := "org.julienrf",
+  version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.8",
   scalacOptions ++= Seq(
     "-feature",
@@ -22,6 +23,7 @@ val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-algebra",
       libraryDependencies += "org.typelevel" %%% "cats-core" % "0.4.1" // FIXME Lessen this dependency?
     )
 
@@ -33,6 +35,7 @@ val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-algebra-circe",
       libraryDependencies += "io.circe" %%% "circe-generic" % "0.4.0"
     )
     .dependsOn(`algebra`)
@@ -46,6 +49,7 @@ val `xhr-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-xhr-client",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
     )
     .dependsOn(`algebra-js`)
@@ -55,6 +59,7 @@ val `xhr-client-circe` =
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-xhr-client-circe",
       libraryDependencies += "io.circe" %%% "circe-parser" % "0.4.0"
     )
     .dependsOn(`xhr-client`, `algebra-circe-js`)
@@ -63,6 +68,7 @@ val `play-circe` =
   project.in(file("play-circe"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-play-circe",
       libraryDependencies ++= Seq(
         "com.typesafe.play" %% "play" % "2.5.1",
         "io.circe" %% "circe-core" % "0.4.0"
@@ -73,6 +79,7 @@ val `play-server` =
   project.in(file("play-server"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-play-server",
       libraryDependencies ++= Seq(
         "com.typesafe.play" %% "play-netty-server" % "2.5.1"
       )
@@ -83,6 +90,7 @@ val `play-server-circe` =
   project.in(file("play-server-circe"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-play-server-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `play-circe`)
@@ -91,6 +99,7 @@ val `play-client` =
   project.in(file("play-client"))
       .settings(commonSettings: _*)
       .settings(
+        name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.5.1"
       )
       .dependsOn(`algebra-jvm`)
@@ -99,6 +108,7 @@ val `play-client-circe` =
   project.in(file("play-client-circe"))
     .settings(commonSettings: _*)
     .settings(
+      name := "endpoints-play-client-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
     )
     .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
@@ -108,6 +118,7 @@ val `sample-shared` = {
   CrossProject("sample-shared-jvm", "sample-shared-js", file("sample/shared"), CrossType.Pure)
     .settings(commonSettings: _*)
     .settings(
+      publishArtifact := false,
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -134,12 +145,16 @@ val `sample-client` =
   project.in(file("sample/client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
+    .settings(
+      publishArtifact := false
+    )
     .dependsOn(`sample-shared-js`, `xhr-client-circe`)
 
 val `sample-server` =
   project.in(file("sample/server"))
     .settings(commonSettings: _*)
     .settings(
+      publishArtifact := false,
       unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value
     )
     .dependsOn(`sample-shared-jvm`, `play-server-circe`)
