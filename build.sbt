@@ -2,7 +2,6 @@ import org.scalajs.sbtplugin.cross.CrossProject
 
 val commonSettings = Seq(
   organization := "org.julienrf",
-  version := "0.1-SNAPSHOT",
   scalaVersion := "2.11.8",
   scalacOptions ++= Seq(
     "-feature",
@@ -19,9 +18,34 @@ val commonSettings = Seq(
   )
 )
 
+val publishSettings = commonSettings ++ Seq(
+  pomExtra :=
+    <developers>
+      <developer>
+        <id>julienrf</id>
+        <name>Julien Richard-Foy</name>
+        <url>http://julien.richard-foy.fr</url>
+      </developer>
+    </developers>,
+  scalacOptions in (Compile, doc) ++= Seq(
+    "-doc-source-url", s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
+    "-sourcepath", baseDirectory.in(LocalRootProject).value.getAbsolutePath
+  ),
+  apiURL := Some(url(s"http://julienrf.github.io/endpoints/${version.value}/api/")),
+  autoAPIMappings := true,
+  homepage := Some(url(s"https://github.com/julienrf/endpoints")),
+  licenses := Seq("MIT License" -> url("http://opensource.org/licenses/mit-license.php")),
+  scmInfo := Some(
+    ScmInfo(
+      url(s"https://github.com/julienrf/endpoints"),
+      s"scm:git:git@github.com:julienrf/endpoints.git"
+    )
+  )
+)
+
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-algebra",
       libraryDependencies += "org.typelevel" %%% "cats-core" % "0.4.1" // FIXME Lessen this dependency?
@@ -33,7 +57,7 @@ val `algebra-jvm` = algebra.jvm
 
 val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-algebra-circe",
       libraryDependencies += "io.circe" %%% "circe-generic" % "0.4.0"
@@ -47,17 +71,28 @@ val `algebra-circe-jvm` = `algebra-circe`.jvm
 val `xhr-client` =
   project.in(file("xhr-client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
     )
     .dependsOn(`algebra-js`)
 
+val `xhr-client-faithful` =
+  project.in(file("xhr-client-faithful"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "endpoints-xhr-client-faithful",
+      libraryDependencies += "org.julienrf" %%% "faithful" % "0.1-SNAPSHOT",
+      resolvers += Resolver.sonatypeRepo("snapshots")
+    )
+    .dependsOn(`xhr-client`)
+
 val `xhr-client-circe` =
   project.in(file("xhr-client-circe"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client-circe",
       libraryDependencies += "io.circe" %%% "circe-parser" % "0.4.0"
@@ -66,7 +101,7 @@ val `xhr-client-circe` =
 
 val `play-circe` =
   project.in(file("play-circe"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-circe",
       libraryDependencies ++= Seq(
@@ -77,7 +112,7 @@ val `play-circe` =
 
 val `play-server` =
   project.in(file("play-server"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
@@ -88,7 +123,7 @@ val `play-server` =
 
 val `play-server-circe` =
   project.in(file("play-server-circe"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-server-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
@@ -97,7 +132,7 @@ val `play-server-circe` =
 
 val `play-client` =
   project.in(file("play-client"))
-      .settings(commonSettings: _*)
+      .settings(publishSettings: _*)
       .settings(
         name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.5.1"
@@ -106,7 +141,7 @@ val `play-client` =
 
 val `play-client-circe` =
   project.in(file("play-client-circe"))
-    .settings(commonSettings: _*)
+    .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-client-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
@@ -161,6 +196,24 @@ val `sample-server` =
 
 val endpoints =
   project.in(file("."))
+      .settings(
+        publishArtifact := false/*,
+        releasePublishArtifactsAction := PgpKeys.publishSigned.value,
+        releaseProcess := Seq[ReleaseStep](checkSnapshotDependencies,
+          inquireVersions,
+          runClean,
+          runTest,
+          setReleaseVersion,
+          commitReleaseVersion,
+          tagRelease,
+          publishArtifacts,
+          ReleaseStep(action = Command.process("publishDoc", _)),
+          setNextVersion,
+          commitNextVersion,
+          ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+          pushChanges
+        )*/
+      )
     .aggregate(
       `algebra-js`, `algebra-jvm`,
       `algebra-circe-js`, `algebra-circe-jvm`,
@@ -168,6 +221,7 @@ val endpoints =
       `play-server`,
       `play-server-circe`,
       `xhr-client`,
+      `xhr-client-faithful`,
       `xhr-client-circe`,
       `play-client`,
       `play-client-circe`,
