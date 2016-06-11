@@ -31,7 +31,7 @@ val publishSettings = commonSettings ++ Seq(
     "-doc-source-url", s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
     "-sourcepath", baseDirectory.in(LocalRootProject).value.getAbsolutePath
   ),
-  apiURL := Some(url(s"http://julienrf.github.io/endpoints/${version.value}/api/")),
+  apiURL := Some(url(s"http://julienrf.github.io/${name.value}/${version.value}/api/")),
   autoAPIMappings := true,
   homepage := Some(url(s"https://github.com/julienrf/endpoints")),
   licenses := Seq("MIT License" -> url("http://opensource.org/licenses/mit-license.php")),
