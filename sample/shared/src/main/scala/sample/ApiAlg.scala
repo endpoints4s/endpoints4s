@@ -9,6 +9,8 @@ trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg {
 
   val action = endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 
+  val actionFut = endpoint(post(path / "actionFut", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+
   lazy val digests = AssetsDigests.digests
 
   val assets = assetsEndpoint(path / "assets" / assetSegments)
