@@ -195,21 +195,11 @@ trait PlayRouting extends EndpointsAlg {
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def call(a: A): Call = request.encode(a)
-    def implementedBy(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandlerSync(this, service)
-    def implementedByAsync(service: A => Future[B]): EndpointWithHandler[A, B] = EndpointWithHandlerAsync(this, service)
+    def implementedBy(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandler(this, service andThen Future.successful)
+    def implementedByAsync(service: A => Future[B]): EndpointWithHandler[A, B] = EndpointWithHandler(this, service)
   }
 
-  trait EndpointWithHandler[A, B] {
-    def playHandler(header: RequestHeader): Option[Handler]
-  }
-
-  case class EndpointWithHandlerSync[A, B](endpoint: Endpoint[A, B], service: A => B) extends EndpointWithHandler[A, B] {
-    def playHandler(header: RequestHeader): Option[Handler] =
-      endpoint.request.decode(header)
-        .map(a => Action(a)(request => endpoint.response(service(request.body))))
-  }
-
-  case class EndpointWithHandlerAsync[A, B](endpoint: Endpoint[A, B], service: A => Future[B]) extends EndpointWithHandler[A, B] {
+  case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => Future[B]) {
     def playHandler(header: RequestHeader): Option[Handler] =
       endpoint.request.decode(header)
         .map(a => Action.async(a){ request =>
