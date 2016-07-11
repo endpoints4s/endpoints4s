@@ -10,6 +10,17 @@ import play.mvc.Http.HeaderNames
 trait AssetsRouting extends AssetsAlg with PlayRouting {
 
   case class AssetInfo(path: Seq[String], digest: String, name: String)
+
+  private def makeAsset(path: Option[String], name: String): AssetInfo = {
+    val rawPath = path.fold(name)(p => s"$p/$name")
+    val digest = digests.getOrElse(rawPath, throw new Exception(s"No digest for asset $rawPath"))
+    AssetInfo(path.fold(Seq.empty[String])(_.split("/")), digest, name)
+  }
+
+  def AssetInfo(name: String): AssetInfo = makeAsset(None, name)
+
+  def AssetInfo(path: String, name: String): AssetInfo = makeAsset(Some(path), name)
+
   type Asset = Option[(Source[ByteString, _], Option[Long], Option[String])]
 
   lazy val assetSegments: Path[AssetInfo] = {

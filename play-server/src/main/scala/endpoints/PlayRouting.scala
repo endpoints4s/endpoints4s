@@ -4,10 +4,10 @@ import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.concurrent.Future
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Action, BodyParser, Call, Handler, RequestHeader, Result, Results}
+import play.twirl.api.Html
 
 import scala.util.Try
 
@@ -191,6 +191,9 @@ trait PlayRouting extends EndpointsAlg {
   type Response[A] = A => Result
 
   val emptyResponse: Response[Unit] = _ => Results.Ok
+
+  val htmlResponse: Response[Html] = html => Results.Ok(html)
+
 
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
