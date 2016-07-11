@@ -26,7 +26,7 @@ trait AssetsRouting extends AssetsAlg with PlayRouting {
           case Nil => None
         }
       def encode(s: AssetInfo) =
-        s.path.foldRight(stringPath.encode(s"/${s.name}-${s.digest}"))((segment, path) => s"/${stringPath.encode(segment)}$path")
+        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))((segment, path) => s"${stringPath.encode(segment)}/$path")
     }
   }
 
@@ -46,8 +46,11 @@ trait AssetsRouting extends AssetsAlg with PlayRouting {
 
   def assetsResources(pathPrefix: Option[String] = None): AssetInfo => Asset =
     assetInfo => {
-      if (digests.get(assetInfo.path.mkString("", "/", "/") ++ assetInfo.name).contains(assetInfo.digest)) {
-        Option(getClass.getResourceAsStream(pathPrefix.getOrElse("") ++ assetInfo.path.mkString("/", "/", "/") ++ assetInfo.name)).map { stream =>
+      val path =
+        if (assetInfo.path.nonEmpty) assetInfo.path.mkString("", "/", s"/${assetInfo.name}") else assetInfo.name
+      if (digests.get(path).contains(assetInfo.digest)) {
+        val resourcePath = pathPrefix.getOrElse("") ++ s"/$path"
+        Option(getClass.getResourceAsStream(resourcePath)).map { stream =>
           (
             StreamConverters.fromInputStream(() => stream),
             Some(stream.available().toLong),

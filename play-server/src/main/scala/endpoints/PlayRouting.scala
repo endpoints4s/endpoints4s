@@ -162,7 +162,7 @@ trait PlayRouting extends EndpointsAlg {
       request.path
         .split("/").to[List]
         .map(s => URLDecoder.decode(s, utf8Name))
-    path.decode(segments).collect { case (a, Nil) => a }
+    path.decode(if (segments.isEmpty) List("") else segments).collect { case (a, Nil) => a }
   }
 
 
