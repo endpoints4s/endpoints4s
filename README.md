@@ -5,7 +5,7 @@ An embedded DSL for defining HTTP endpoints in Scala.
 Key features:
 
 - endpoints are **first-class Scala values**, which can be reused, combined and abstracted over ;
-- endpoints can be defined **independently of the HTTP server**, and thus can be used to define a **statically typed HTTP client** in just 1 line of code ;
+- endpoints can be defined **independently of the HTTP server**, and thus can be used to derive a **statically typed HTTP client** in just 1 line of code ;
 - the core algebra is **cross-compiled with Scala.js**, meaning that you can also get a **Scala.js statically typed HTTP client** in just 1 line of code ;
 - the core algebra is **highly extensible**: you can define your own **vocabulary** (e.g. to control the cache related HTTP headers in a way that is specific to your app) and your own **semantics** (e.g. swagger-like documentation).
 
