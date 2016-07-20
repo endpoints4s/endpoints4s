@@ -89,7 +89,7 @@ trait XhrClient extends EndpointsAlg {
 
   type Task[A]
 
-  type Endpoint[A, B] = js.Function1[A, Task[B]]
+  type Endpoint[A, B] = TupledFunction[A, Task[B]]
 
   protected final def performXhr[A, B](
     request: Request[A],
