@@ -11,7 +11,8 @@ Key features:
 
 ## Documentation
 
-- [slides](http://julienrf.github.io/zrm-endpoints-2016/) of a talk, explaining the motivation and design.
+- [slides](http://julienrf.github.io/zrm-endpoints-2016/) of a talk, explaining the motivation and design ;
+- Using object algebras to design embedded DSLs ([slides](http://julienrf.github.io/curry-on-2016)).
 
 ## Canonical example
 
