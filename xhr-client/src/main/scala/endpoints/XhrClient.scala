@@ -91,4 +91,15 @@ trait XhrClient extends EndpointsAlg {
 
   type Endpoint[A, B] = js.Function1[A, Task[B]]
 
+  protected final def performXhr[A, B](
+    request: Request[A],
+    response: Response[B],
+    a: A
+  )(onload: Xor[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
+    val (xhr, maybeEntity) = request(a)
+    xhr.onload = _ => onload(response(xhr))
+    xhr.onerror = _ => onerror(xhr)
+    xhr.send(maybeEntity.orNull)
+  }
+
 }

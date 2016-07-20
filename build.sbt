@@ -78,6 +78,15 @@ val `xhr-client` =
     )
     .dependsOn(`algebra-js`)
 
+val `xhr-client-future` =
+  project.in(file("xhr-client-future"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(publishSettings: _*)
+    .settings(
+      name := "endpoints-xhr-client-future"
+    )
+    .dependsOn(`xhr-client`)
+
 val `xhr-client-faithful` =
   project.in(file("xhr-client-faithful"))
     .enablePlugins(ScalaJSPlugin)
@@ -221,6 +230,7 @@ val endpoints =
       `play-server`,
       `play-server-circe`,
       `xhr-client`,
+      `xhr-client-future`,
       `xhr-client-faithful`,
       `xhr-client-circe`,
       `play-client`,

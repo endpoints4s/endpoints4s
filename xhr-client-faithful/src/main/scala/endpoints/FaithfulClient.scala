@@ -9,10 +9,10 @@ trait FaithfulClient extends XhrClient {
   def endpoint[A, B](request: Request[A], response: Response[B]) =
     (a: A) => {
       val promise = new Promise[B]()
-      val (xhr, maybeEntity) = request(a)
-      xhr.onload = _ => response(xhr).fold(exn => promise.failure(new Exception(exn.getMessage)), promise.success)
-      xhr.onerror = _ => promise.failure(new Exception(xhr.responseText))
-      xhr.send(maybeEntity.orNull)
+      performXhr(request, response, a)(
+        _.fold(promise.failure, promise.success),
+        xhr => promise.failure(new Exception(xhr.responseText))
+      )
       promise.future
     }
 
