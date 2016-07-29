@@ -19,9 +19,9 @@ trait XhrClient extends EndpointsAlg {
 
   class QueryString[A](val apply: js.Function1[A, String]) extends QueryStringOps[A]
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
-    new QueryString[fc.Out]({ (ab: fc.Out) =>
-      val (a, b) = fc.unapply(ab)
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
+    new QueryString[tupler.Out]({ (ab: tupler.Out) =>
+      val (a, b) = tupler.unapply(ab)
       s"${first.apply(a)}&${second.apply(b)}"
     })
 
@@ -46,9 +46,9 @@ trait XhrClient extends EndpointsAlg {
   def segment[A](implicit s: Segment[A]): Path[A] =
     new Path(s)
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    new Path((out: fc.Out) => {
-      val (a, b) = fc.unapply(out)
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
+    new Path((out: tupler.Out) => {
+      val (a, b) = tupler.unapply(out)
       first.apply(a) ++ "/" ++ second.apply(b)
     })
 
@@ -56,9 +56,9 @@ trait XhrClient extends EndpointsAlg {
     def encodeUrl(a: A): String
   }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] =
-    (ab: fc.Out) => {
-      val (a, b) = fc.unapply(ab)
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
+    (ab: tupler.Out) => {
+      val (a, b) = tupler.unapply(ab)
       s"${path.apply(a)}?${qs.apply(b)}"
     }
 
@@ -74,9 +74,9 @@ trait XhrClient extends EndpointsAlg {
       (xhr, None)
     }
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
-    (out: fc.Out) => {
-      val (a, b) = fc.unapply(out)
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    (out: tupler.Out) => {
+      val (a, b) = tupler.unapply(out)
       val xhr = new XMLHttpRequest
       xhr.open("POST", url.encodeUrl(a))
       (xhr, Some(entity(b, xhr)))

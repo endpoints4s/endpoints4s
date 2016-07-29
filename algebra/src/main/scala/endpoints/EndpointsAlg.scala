@@ -15,11 +15,11 @@ trait EndpointsAlg {
   type QueryString[A] <: QueryStringOps[A]
 
   trait QueryStringOps[A] { first: QueryString[A] =>
-    final def & [B](second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
+    final def & [B](second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
       combineQueryStrings(first, second)
   }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out]
 
   def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A]
 
@@ -34,22 +34,22 @@ trait EndpointsAlg {
 
   trait PathOps[A] { first: Path[A] =>
     final def / (second: String): Path[A] = chainPaths(first, staticPathSegment(second))
-    final def / [B](second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] = chainPaths(first, second)
-    final def /? [B](qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] = urlWithQueryString(first, qs)
+    final def / [B](second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = chainPaths(first, second)
+    final def /? [B](qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = urlWithQueryString(first, qs)
   }
 
   def staticPathSegment(segment: String): Path[Unit]
 
   def segment[A](implicit s: Segment[A]): Path[A]
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]
 
   val path: Path[Unit] = staticPathSegment("")
 
 
   type Url[A]
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out]
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]
 
 
   type Request[A]
@@ -58,7 +58,7 @@ trait EndpointsAlg {
 
   def get[A](url: Url[A]): Request[A]
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out]
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out]
 
 
   type Response[A]

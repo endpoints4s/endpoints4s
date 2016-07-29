@@ -23,9 +23,9 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
 
   class QueryString[A](val apply: A => String) extends QueryStringOps[A]
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
-    new QueryString[fc.Out] ((ab: fc.Out) => {
-      val (a, b) = fc.unapply(ab)
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
+    new QueryString[tupler.Out] ((ab: tupler.Out) => {
+      val (a, b) = tupler.unapply(ab)
       s"${first.apply(a)}&${second.apply(b)}"
     })
 
@@ -50,9 +50,9 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
   def segment[A](implicit s: Segment[A]): Path[A] =
     new Path(s)
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    new Path((ab: fc.Out) => {
-      val (a, b) = fc.unapply(ab)
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
+    new Path((ab: tupler.Out) => {
+      val (a, b) = tupler.unapply(ab)
       first.apply(a) ++ "/" ++ second.apply(b)
     })
 
@@ -61,9 +61,9 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     def encodeUrl(a: A): String
   }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] =
-    (ab: fc.Out) => {
-      val (a, b) = fc.unapply(ab)
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
+    (ab: tupler.Out) => {
+      val (a, b) = tupler.unapply(ab)
       s"${path.apply(a)}?${qs.apply(b)}"
     }
 
@@ -75,9 +75,9 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
   def get[A](url: Url[A]) =
     a => wsClient.url(url.encodeUrl(a)).get()
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
-    (ab: fc.Out) => {
-      val (a, b) = fc.unapply(ab)
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    (ab: tupler.Out) => {
+      val (a, b) = tupler.unapply(ab)
       val wsRequest = wsClient.url(url.encodeUrl(a))
       entity(b, wsRequest)
     }

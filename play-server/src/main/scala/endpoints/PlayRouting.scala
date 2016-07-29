@@ -38,15 +38,15 @@ trait PlayRouting extends EndpointsAlg {
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit fc: FlatConcat[A, B]): QueryString[fc.Out] =
-    new QueryString[fc.Out] {
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
+    new QueryString[tupler.Out] {
       def decode(qs: Map[String, Seq[String]]) =
         for {
           a <- first.decode(qs)
           b <- second.decode(qs)
-        } yield fc(a, b)
-      def encode(ab: fc.Out) = {
-        val (a, b) = fc.unapply(ab)
+        } yield tupler(a, b)
+      def encode(ab: tupler.Out) = {
+        val (a, b) = tupler.unapply(ab)
         first.encode(a) ++ second.encode(b)
       }
     }
@@ -113,15 +113,15 @@ trait PlayRouting extends EndpointsAlg {
       def encode(a: A) = A.encode(a)
     }
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit fc: FlatConcat[A, B]): Path[fc.Out] =
-    new Path[fc.Out] {
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
+    new Path[tupler.Out] {
       def decode(segments: List[String]) =
         for {
           (a, segments2) <- first.decode(segments)
           (b, segments3) <- second.decode(segments2)
-        } yield (fc(a, b), segments3)
-      def encode(ab: fc.Out) = {
-        val (a, b) = fc.unapply(ab)
+        } yield (tupler(a, b), segments3)
+      def encode(ab: tupler.Out) = {
+        val (a, b) = tupler.unapply(ab)
         first.encode(a) ++ "/" ++ second.encode(b)
       }
     }
@@ -131,15 +131,15 @@ trait PlayRouting extends EndpointsAlg {
     def encodeUrl(a: A): String
   }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit fc: FlatConcat[A, B]): Url[fc.Out] =
-    new Url[fc.Out] {
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
+    new Url[tupler.Out] {
       def decodeUrl(requestHeader: RequestHeader) =
         for {
           a <- extractFromPath(path, requestHeader)
           b <- qs.decode(requestHeader.queryString)
-        } yield fc(a, b)
-      def encodeUrl(ab: fc.Out) = {
-        val (a, b) = fc.unapply(ab)
+        } yield tupler(a, b)
+      def encodeUrl(ab: tupler.Out) = {
+        val (a, b) = tupler.unapply(ab)
         val encodedQs =
           qs.encode(b)
             .flatMap { case (n, vs) => vs.map(v => (n, v)) }
@@ -175,14 +175,14 @@ trait PlayRouting extends EndpointsAlg {
       def encode(a: A) = Call("GET", url.encodeUrl(a))
     }
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit fc: FlatConcat[A, B]): Request[fc.Out] =
-    new Request[fc.Out] {
+  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    new Request[tupler.Out] {
       def decode(requestHeader: RequestHeader) =
         if (requestHeader.method == "POST") {
-          url.decodeUrl(requestHeader).map(a => entity.map(b => fc.apply(a, b)))
+          url.decodeUrl(requestHeader).map(a => entity.map(b => tupler.apply(a, b)))
         } else None
-      def encode(ab: fc.Out) = {
-        val (a, _) = fc.unapply(ab)
+      def encode(ab: tupler.Out) = {
+        val (a, _) = tupler.unapply(ab)
         Call("POST", url.encodeUrl(a))
       }
     }
