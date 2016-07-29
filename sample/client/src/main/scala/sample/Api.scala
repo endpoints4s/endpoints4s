@@ -1,5 +1,6 @@
 package sample
 
-import endpoints.{AssetsClient, CirceCodecsClient, ThenableClient, XhrClient}
+import endpoints._
 
-object Api extends ApiAlg with XhrClient with CirceCodecsClient with AssetsClient with ThenableClient
+object Api extends ApiAlg with XhrClient
+  with CirceCodecsClient with AssetsClient with ThenableClient with OptionalResponseClient
