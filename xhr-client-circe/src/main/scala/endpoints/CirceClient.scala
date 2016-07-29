@@ -1,6 +1,5 @@
 package endpoints
 
-import cats.data.Xor
 import io.circe.{Decoder, Encoder, parser}
 import org.scalajs.dom.raw.XMLHttpRequest
 
@@ -16,7 +15,7 @@ trait CirceClient extends XhrClient with JsonEntitiesAlg {
     Encoder[A].apply(a).noSpaces
   }
 
-  def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Xor[Exception, A]] =
-    xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson)
+  def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Either[Exception, A]] =
+    xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson).toEither
 
 }

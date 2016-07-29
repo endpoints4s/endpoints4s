@@ -47,8 +47,7 @@ val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(publishSettings: _*)
     .settings(
-      name := "endpoints-algebra",
-      libraryDependencies += "org.typelevel" %%% "cats-core" % "0.4.1" // FIXME Lessen this dependency?
+      name := "endpoints-algebra"
     )
 
 val `algebra-js` = algebra.js

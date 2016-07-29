@@ -1,6 +1,5 @@
 package endpoints
 
-import cats.data.Xor
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
@@ -34,11 +33,11 @@ trait AssetsClient extends AssetsAlg with XhrClient {
     (xhr: XMLHttpRequest) => {
       if (xhr.status < 300) {
         try {
-          Xor.right(xhr.response.asInstanceOf[ArrayBuffer])
+          Right(xhr.response.asInstanceOf[ArrayBuffer])
         } catch {
-          case exn: Exception => Xor.left(exn)
+          case exn: Exception => Left(exn)
         }
-      } else Xor.left(new Exception("Resource not found"))
+      } else Left(new Exception("Resource not found"))
     }
 
 }

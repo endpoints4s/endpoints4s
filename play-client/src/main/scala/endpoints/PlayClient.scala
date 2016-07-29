@@ -3,7 +3,6 @@ package endpoints
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 
-import cats.data.Xor
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -83,12 +82,12 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     }
 
 
-  type Response[A] = WSResponse => Xor[Throwable, A]
+  type Response[A] = WSResponse => Either[Throwable, A]
 
-  val emptyResponse: Response[Unit] = _ => Xor.Right(())
+  val emptyResponse: Response[Unit] = _ => Right(())
 
 
-  type Endpoint[I, O] = I => Future[Xor[Throwable, O]]
+  type Endpoint[I, O] = I => Future[Either[Throwable, O]]
 
   def endpoint[A, B](request: Request[A], response: Response[B]) =
     a => request(a).map(response)

@@ -1,6 +1,5 @@
 package endpoints
 
-import cats.data.Xor
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.language.higherKinds
@@ -82,9 +81,9 @@ trait XhrClient extends EndpointsAlg {
       (xhr, Some(entity(b, xhr)))
     }
 
-  type Response[A] = js.Function1[XMLHttpRequest, Xor[Exception, A]]
+  type Response[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
 
-  val emptyResponse: Response[Unit] = _ => Xor.Right(())
+  val emptyResponse: Response[Unit] = _ => Right(())
 
 
   type Task[A]
@@ -95,7 +94,7 @@ trait XhrClient extends EndpointsAlg {
     request: Request[A],
     response: Response[B],
     a: A
-  )(onload: Xor[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
+  )(onload: Either[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
     val (xhr, maybeEntity) = request(a)
     xhr.onload = _ => onload(response(xhr))
     xhr.onerror = _ => onerror(xhr)

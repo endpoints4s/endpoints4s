@@ -10,6 +10,6 @@ trait CirceCodecsClient extends CirceCodecs { this: PlayClient =>
   }
 
   def jsonResponse[A : CirceCodec]: Response[A] =
-    response => jawn.parse(response.body).flatMap(CirceCodec[A].decoder.decodeJson)
+    response => jawn.parse(response.body).flatMap(CirceCodec[A].decoder.decodeJson).toEither
 
 }
