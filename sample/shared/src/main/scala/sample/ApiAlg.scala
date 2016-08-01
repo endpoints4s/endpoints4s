@@ -1,9 +1,10 @@
 package sample
 
-import endpoints.{AssetsAlg, CirceCodecs, EndpointsAlg, OptionalResponseAlg}
+import endpoints._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg with OptionalResponseAlg {
+trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg
+  with OptionalResponseAlg with BasicAuthenticationAlg {
 
   val index =
     endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
@@ -21,6 +22,9 @@ trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg with OptionalR
 
   val maybe =
     endpoint(get(path / "option"), option(emptyResponse))
+
+  val auth =
+    endpoint(authenticatedGet(path / "auth"), emptyResponse)
 
 }
 
