@@ -52,13 +52,18 @@ trait EndpointsAlg {
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]
 
 
+  type Headers[A]
+
+  def emptyHeaders: Headers[Unit]
+
+
   type Request[A]
 
   type RequestEntity[A]
 
-  def get[A](url: Url[A]): Request[A]
+  def get[A, B](url: Url[A], headers: Headers[B] = emptyHeaders)(implicit tupler: Tupler[A, B]): Request[tupler.Out]
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out]
+  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C] = emptyHeaders)(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
 
 
   type Response[A]

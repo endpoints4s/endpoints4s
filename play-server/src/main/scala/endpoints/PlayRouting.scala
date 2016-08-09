@@ -5,15 +5,43 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.functional.{Applicative, Functor}
+import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Action, BodyParser, Call, Handler, RequestHeader, Result, Results}
 import play.twirl.api.Html
 
+import scala.language.higherKinds
 import scala.util.Try
 
 trait PlayRouting extends EndpointsAlg {
 
   val utf8Name = UTF_8.name()
+
+  // No Kleisli in play-functional…
+  type RequestExtractor[A] = RequestHeader => Option[A]
+
+  // FIXME Pull this algebra up to EndpointsAlg
+  implicit lazy val functorRequestExtractor: Functor[RequestExtractor] =
+    new Functor[RequestExtractor] {
+      def fmap[A, B](m: RequestExtractor[A], f: A => B): RequestExtractor[B] =
+        request => m(request).map(f)
+    }
+
+  implicit lazy val applicativeRequestExtractor: Applicative[RequestExtractor] =
+    new Applicative[RequestExtractor] {
+      def apply[A, B](mf: RequestExtractor[A => B], ma: RequestExtractor[A]): RequestExtractor[B] =
+        request => mf(request).flatMap(f => ma(request).map(f))
+      def pure[A](a: A): RequestExtractor[A] =
+        _ => Some(a)
+      def map[A, B](m: RequestExtractor[A], f: A => B): RequestExtractor[B] =
+        request => m(request).map(f)
+    }
+
+  // Temporary?
+  implicit final class ApplicativeMapSyntax[F[_], A](fa: F[A]) {
+    @inline def map[B](f: A => B)(implicit applicative: Applicative[F]): F[B] = applicative.map(fa, f)
+  }
 
   trait Segment[A] {
     def decode(segment: String): Option[A]
@@ -83,7 +111,7 @@ trait PlayRouting extends EndpointsAlg {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
 
-    final def decodeUrl(requestHeader: RequestHeader) = extractFromPath(this, requestHeader)
+    final val decodeUrl = pathExtractor(this)
     final def encodeUrl(a: A) = encode(a)
   }
 
@@ -127,17 +155,18 @@ trait PlayRouting extends EndpointsAlg {
     }
 
   trait Url[A] {
-    def decodeUrl(requestHeader: RequestHeader): Option[A]
+    def decodeUrl: RequestExtractor[A]
     def encodeUrl(a: A): String
   }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
     new Url[tupler.Out] {
-      def decodeUrl(requestHeader: RequestHeader) =
-        for {
-          a <- extractFromPath(path, requestHeader)
-          b <- qs.decode(requestHeader.queryString)
-        } yield tupler(a, b)
+
+      val decodeUrl: RequestExtractor[tupler.Out] =
+        pathExtractor(path)
+          .and(queryStringExtractor(qs))
+          .apply((a, b) => tupler(a, b))
+
       def encodeUrl(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)
         val encodedQs =
@@ -149,40 +178,59 @@ trait PlayRouting extends EndpointsAlg {
       }
     }
 
+  private def pathExtractor[A](path: Path[A]): RequestExtractor[A] =
+    request => {
+      val segments =
+        request.path
+          .split("/").to[List]
+          .map(s => URLDecoder.decode(s, utf8Name))
+      path.decode(if (segments.isEmpty) List("") else segments).collect { case (a, Nil) => a }
+    }
+
+  private def queryStringExtractor[A](qs: QueryString[A]): RequestExtractor[A] =
+    request => qs.decode(request.queryString)
+
+
+  type Headers[A] = RequestExtractor[A] // FIXME Use a more precise type (like play.api.mvc.Headers => Option[A])
+
+  lazy val emptyHeaders: Headers[Unit] = _ => Some(())
+
 
   trait Request[A] {
-    def decode(header: RequestHeader): Option[BodyParser[A]]
+    def decode: RequestExtractor[BodyParser[A]]
     def encode(a: A): Call
   }
 
   type RequestEntity[A] = BodyParser[A]
 
-  private def extractFromPath[A](path: Path[A], request: RequestHeader): Option[A] = {
-    val segments =
-      request.path
-        .split("/").to[List]
-        .map(s => URLDecoder.decode(s, utf8Name))
-    path.decode(if (segments.isEmpty) List("") else segments).collect { case (a, Nil) => a }
-  }
+  private def extractMethod(method: String): RequestExtractor[Unit] =
+    request =>
+      if (request.method == method) Some(())
+      else None
+
+  private def extractMethodUrlAndHeaders[A, B](method: String, url: Url[A], headers: Headers[B]): RequestExtractor[(A, B)] =
+    extractMethod(method)
+      .andKeep(url.decodeUrl)
+      .and(headers)
+      .tupled
 
 
-  def get[A](url: Url[A]): Request[A] =
-    new Request[A] {
-      def decode(requestHeader: RequestHeader) =
-        if (requestHeader.method == "GET") {
-          url.decodeUrl(requestHeader).map(a => BodyParser(_ => Accumulator.done(Right(a))))
-        } else None
-      def encode(a: A) = Call("GET", url.encodeUrl(a))
+  def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      val decode =
+        extractMethodUrlAndHeaders("GET", url, headers)
+          .map { case (a, b) => BodyParser(_ => Accumulator.done(Right(tupler.apply(a, b)))) }
+      def encode(ab: tupler.Out) = Call("GET", url.encodeUrl(tupler.unapply(ab)._1))
     }
 
-  def post[A, B](url: Url[A], entity: RequestEntity[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    new Request[tupler.Out] {
-      def decode(requestHeader: RequestHeader) =
-        if (requestHeader.method == "POST") {
-          url.decodeUrl(requestHeader).map(a => entity.map(b => tupler.apply(a, b)))
-        } else None
-      def encode(ab: tupler.Out) = {
-        val (a, _) = tupler.unapply(ab)
+  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+    new Request[tuplerABC.Out] {
+      val decode =
+        extractMethodUrlAndHeaders("POST", url, headers)
+          .map { case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c)) }
+      def encode(abc: tuplerABC.Out) = {
+        val (ab, c) = tuplerABC.unapply(abc)
+        val (a, b) = tuplerAB.unapply(ab)
         Call("POST", url.encodeUrl(a))
       }
     }
