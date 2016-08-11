@@ -195,6 +195,7 @@ val `sample-server` =
 
 val endpoints =
   project.in(file("."))
+      .settings(commonSettings: _*)
       .settings(
         publishArtifact := false/*,
         releasePublishArtifactsAction := PgpKeys.publishSigned.value,

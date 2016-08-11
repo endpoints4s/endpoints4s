@@ -19,8 +19,7 @@ trait XhrClient extends EndpointsAlg {
   class QueryString[A](val apply: js.Function1[A, String]) extends QueryStringOps[A]
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
-    new QueryString[tupler.Out]({ (ab: tupler.Out) =>
-      val (a, b) = tupler.unapply(ab)
+    new QueryString[tupler.Out]({ case tupler(a, b) =>
       s"${first.apply(a)}&${second.apply(b)}"
     })
 
@@ -46,8 +45,7 @@ trait XhrClient extends EndpointsAlg {
     new Path(s)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
-    new Path((out: tupler.Out) => {
-      val (a, b) = tupler.unapply(out)
+    new Path({ case tupler(a, b) =>
       first.apply(a) ++ "/" ++ second.apply(b)
     })
 
@@ -55,11 +53,10 @@ trait XhrClient extends EndpointsAlg {
     def encodeUrl(a: A): String
   }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
+    case tupler(a, b) =>
       s"${path.apply(a)}?${qs.apply(b)}"
-    }
+  }
 
 
   type Headers[A] = js.Function2[A, XMLHttpRequest, Unit]
@@ -71,17 +68,14 @@ trait XhrClient extends EndpointsAlg {
 
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, String /* TODO String | Blob | FormData | … */]
 
-  def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
+  def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] = {
+    case tupler(a, b) =>
       val xhr = makeXhr("GET", url, a, headers, b)
       (xhr, None)
-    }
+  }
 
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    (abc: tuplerABC.Out) => {
-      val (ab, c) = tuplerABC.unapply(abc)
-      val (a, b) = tuplerAB.unapply(ab)
+  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = {
+    case tuplerABC(tuplerAB(a, b), c) =>
       val xhr = makeXhr("POST", url, a, headers, c)
       (xhr, Some(entity(b, xhr)))
     }

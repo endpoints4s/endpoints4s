@@ -20,16 +20,17 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     (i: Int) => i.toString
 
 
-  class QueryString[A](val apply: A => String) extends QueryStringOps[A]
+  trait QueryString[A] extends QueryStringOps[A] {
+    def encode(a: A): String
+  }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
-    new QueryString[tupler.Out] ((ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
-      s"${first.apply(a)}&${second.apply(b)}"
-    })
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
+    case tupler(a, b) =>
+      s"${first.encode(a)}&${second.encode(b)}"
+  }
 
   def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A] =
-    new QueryString(a => s"$name=${value.apply(a)}")
+    a => s"$name=${value.apply(a)}"
 
   type QueryStringValue[A] = A => String
 
@@ -50,8 +51,7 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     new Path(s)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
-    new Path((ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
+    new Path({ case tupler(a, b) =>
       first.apply(a) ++ "/" ++ second.apply(b)
     })
 
@@ -60,11 +60,10 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     def encodeUrl(a: A): String
   }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
-      s"${path.apply(a)}?${qs.apply(b)}"
-    }
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
+    case tupler(a, b) =>
+      s"${path.apply(a)}?${qs.encode(b)}"
+  }
 
   type Headers[A] = (A, WSRequest) => WSRequest
 
@@ -75,20 +74,17 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
 
   type RequestEntity[A] = (A, WSRequest) => Future[WSResponse]
 
-  def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
+  def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] = {
+    case tupler(a, b) =>
       val wsRequest = wsClient.url(url.encodeUrl(a))
       headers(b, wsRequest).get()
-    }
+  }
 
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    (abc: tuplerABC.Out) => {
-      val (ab, c) = tuplerABC.unapply(abc)
-      val (a, b) = tuplerAB.unapply(ab)
+  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = {
+    case tuplerABC(tuplerAB(a, b), c) =>
       val wsRequest = wsClient.url(url.encodeUrl(a))
       entity(b, headers(c, wsRequest))
-    }
+  }
 
 
   type Response[A] = WSResponse => Either[Throwable, A]

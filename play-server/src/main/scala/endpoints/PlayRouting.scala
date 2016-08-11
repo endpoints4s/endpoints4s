@@ -74,7 +74,7 @@ trait PlayRouting extends EndpointsAlg {
           b <- second.decode(qs)
         } yield tupler(a, b)
       def encode(ab: tupler.Out) = {
-        val (a, b) = tupler.unapply(ab)
+        val tupler(a, b) = ab
         first.encode(a) ++ second.encode(b)
       }
     }
@@ -149,7 +149,7 @@ trait PlayRouting extends EndpointsAlg {
           (b, segments3) <- second.decode(segments2)
         } yield (tupler(a, b), segments3)
       def encode(ab: tupler.Out) = {
-        val (a, b) = tupler.unapply(ab)
+        val tupler(a, b) = ab
         first.encode(a) ++ "/" ++ second.encode(b)
       }
     }
@@ -168,7 +168,7 @@ trait PlayRouting extends EndpointsAlg {
           .apply((a, b) => tupler(a, b))
 
       def encodeUrl(ab: tupler.Out) = {
-        val (a, b) = tupler.unapply(ab)
+        val tupler(a, b) = ab
         val encodedQs =
           qs.encode(b)
             .flatMap { case (n, vs) => vs.map(v => (n, v)) }
@@ -219,18 +219,20 @@ trait PlayRouting extends EndpointsAlg {
     new Request[tupler.Out] {
       val decode =
         extractMethodUrlAndHeaders("GET", url, headers)
-          .map { case (a, b) => BodyParser(_ => Accumulator.done(Right(tupler.apply(a, b)))) }
-      def encode(ab: tupler.Out) = Call("GET", url.encodeUrl(tupler.unapply(ab)._1))
+          .map { case (a, b) => BodyParser(_ => Accumulator.done(Right(tupler(a, b)))) }
+      def encode(ab: tupler.Out) = {
+        val tupler(a, _) = ab
+        Call("GET", url.encodeUrl(a))
+      }
     }
 
   def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     new Request[tuplerABC.Out] {
       val decode =
         extractMethodUrlAndHeaders("POST", url, headers)
-          .map { case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c)) }
+          .map { case (a, c) => entity.map(b => tuplerABC(tuplerAB(a, b), c)) }
       def encode(abc: tuplerABC.Out) = {
-        val (ab, c) = tuplerABC.unapply(abc)
-        val (a, b) = tuplerAB.unapply(ab)
+        val tuplerABC(tuplerAB(a, _), _) = abc
         Call("POST", url.encodeUrl(a))
       }
     }

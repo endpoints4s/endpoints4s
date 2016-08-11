@@ -42,7 +42,7 @@ trait AssetsRouting extends AssetsAlg with PlayRouting {
   }
 
   def assetsEndpoint(url: Url[AssetInfo]): Endpoint[AssetInfo, Asset] =
-    endpoint(get(url), assetResponse)
+    endpoint(get(url), assetResponse) // TODO 304
 
   private def assetResponse: Response[Asset] = {
       case Some((resource, maybeLength, maybeContentType)) =>
