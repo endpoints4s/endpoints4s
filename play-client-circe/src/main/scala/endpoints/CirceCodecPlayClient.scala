@@ -3,7 +3,7 @@ package endpoints
 import io.circe.jawn
 import PlayCirce.circeJsonWriteable
 
-trait CirceCodecClient extends CirceCodecAlg { this: EndpointPlayClient =>
+trait CirceCodecPlayClient extends CirceCodecAlg { this: EndpointPlayClient =>
 
   def jsonRequest[A : CirceCodec]: RequestEntity[A] = {
     case (a, wsRequest) => wsRequest.post(CirceCodec[A].encoder.apply(a))
