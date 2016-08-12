@@ -14,7 +14,7 @@ import play.twirl.api.Html
 import scala.language.higherKinds
 import scala.util.Try
 
-trait PlayRouting extends EndpointsAlg {
+trait EndpointPlayRouting extends EndpointAlg {
 
   val utf8Name = UTF_8.name()
 

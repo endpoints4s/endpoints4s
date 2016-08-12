@@ -2,7 +2,7 @@ package endpoints
 
 import play.api.mvc.Results
 
-trait OptionalResponseRouting extends OptionalResponseAlg with PlayRouting {
+trait OptionalResponsePlayRouting extends OptionalResponseAlg with EndpointPlayRouting {
 
   /**
     * A response encoder that maps `None` to an empty HTTP result with status 404

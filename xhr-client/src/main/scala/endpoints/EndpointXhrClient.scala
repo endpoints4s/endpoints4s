@@ -5,7 +5,7 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.language.higherKinds
 import scala.scalajs.js
 
-trait XhrClient extends EndpointsAlg {
+trait EndpointXhrClient extends EndpointAlg {
 
   trait Segment[A] {
     def encode(a: A): String

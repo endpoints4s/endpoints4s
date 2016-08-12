@@ -3,7 +3,7 @@ package sample
 import endpoints._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends EndpointsAlg with CirceCodecs with AssetsAlg
+trait ApiAlg extends EndpointAlg with CirceCodecAlg with AssetAlg
   with OptionalResponseAlg with BasicAuthenticationAlg {
 
   val index =

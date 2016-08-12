@@ -1,6 +1,6 @@
 package endpoints
 
-trait AssetsAlg extends EndpointsAlg {
+trait AssetAlg extends EndpointAlg {
 
   type AssetInfo
   type Asset

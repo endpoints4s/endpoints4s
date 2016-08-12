@@ -2,7 +2,7 @@ package endpoints
 
 import scala.language.higherKinds
 
-trait JsonEntitiesAlg extends EndpointsAlg {
+trait JsonEntityAlg extends EndpointAlg {
 
   type JsonRequest[A]
 

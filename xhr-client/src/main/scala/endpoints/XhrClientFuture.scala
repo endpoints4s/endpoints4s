@@ -2,7 +2,7 @@ package endpoints
 
 import scala.concurrent.{Future, Promise}
 
-trait FutureClient extends XhrClient {
+trait XhrClientFuture extends EndpointXhrClient {
 
   type Task[A] = Future[A]
 

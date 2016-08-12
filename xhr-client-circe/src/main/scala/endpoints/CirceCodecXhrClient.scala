@@ -5,7 +5,7 @@ import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
 
-trait CirceCodecsClient extends XhrClient with CirceCodecs {
+trait CirceCodecXhrClient extends EndpointXhrClient with CirceCodecAlg {
 
   def jsonRequest[A : CirceCodec] = (a: A, xhr: XMLHttpRequest) => {
     xhr.setRequestHeader("Content-Type", "application/json")

@@ -7,7 +7,7 @@ import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointsAlg {
+class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointAlg {
 
   val utf8Name = UTF_8.name()
 

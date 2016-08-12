@@ -2,7 +2,7 @@ package endpoints
 
 import faithful.{Future, Promise}
 
-trait FaithfulClient extends XhrClient {
+trait XhrClientFaithful extends EndpointXhrClient {
 
   type Task[A] = Future[A]
 

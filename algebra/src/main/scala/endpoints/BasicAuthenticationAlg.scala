@@ -1,6 +1,6 @@
 package endpoints
 
-trait BasicAuthenticationAlg extends EndpointsAlg {
+trait BasicAuthenticationAlg extends EndpointAlg {
 
   def basicAuthentication: Headers[Credentials]
 

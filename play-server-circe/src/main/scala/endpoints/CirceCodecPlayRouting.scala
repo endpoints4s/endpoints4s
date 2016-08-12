@@ -5,7 +5,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}
 import PlayCirce.circeJsonWriteable
 
-trait CirceCodecsRouting extends PlayRouting with CirceCodecs {
+trait CirceCodecPlayRouting extends EndpointPlayRouting with CirceCodecAlg {
 
   def jsonRequest[A : CirceCodec] =
     BodyParsers.parse.raw.validate { buffer =>

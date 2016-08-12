@@ -2,7 +2,7 @@ package endpoints
 
 import scala.scalajs.js
 
-trait ThenableClient extends XhrClient {
+trait XhrClientThenable extends EndpointXhrClient {
 
   type Task[A] = js.Thenable[A]
 

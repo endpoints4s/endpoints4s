@@ -7,7 +7,7 @@ import play.api.libs.MimeTypes
 import play.api.mvc.Results
 import play.mvc.Http.HeaderNames
 
-trait AssetsRouting extends AssetsAlg with PlayRouting {
+trait AssetPlayRouting extends AssetAlg with EndpointPlayRouting {
 
   case class AssetInfo(path: Seq[String], digest: String, name: String)
 

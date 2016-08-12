@@ -2,7 +2,7 @@ package endpoints
 
 import org.scalajs.dom.window.btoa
 
-trait BasicAuthenticationClient extends BasicAuthenticationAlg with XhrClient {
+trait BasicAuthenticationXhrClient extends BasicAuthenticationAlg with EndpointXhrClient {
 
   lazy val basicAuthentication: Headers[Credentials] =
     (credentials, xhr) => {

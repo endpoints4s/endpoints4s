@@ -3,7 +3,7 @@ import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
-trait OptionalResponseClient extends OptionalResponseAlg with XhrClient {
+trait OptionalResponseXhrClient extends OptionalResponseAlg with EndpointXhrClient {
 
   /**
     * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.

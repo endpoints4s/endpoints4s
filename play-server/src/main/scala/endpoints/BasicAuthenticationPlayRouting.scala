@@ -4,7 +4,7 @@ import java.util.Base64
 
 import play.api.http.HeaderNames.AUTHORIZATION
 
-trait BasicAuthenticationRouting extends BasicAuthenticationAlg with PlayRouting {
+trait BasicAuthenticationPlayRouting extends BasicAuthenticationAlg with EndpointPlayRouting {
 
   lazy val basicAuthentication: Headers[Credentials] =
     requestHeader =>

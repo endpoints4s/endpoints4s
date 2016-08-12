@@ -4,8 +4,8 @@ import endpoints._
 
 import scala.concurrent.Future
 
-object Api extends ApiAlg with PlayRouting with CirceCodecsRouting with AssetsRouting
-  with OptionalResponseRouting with BasicAuthenticationRouting {
+object Api extends ApiAlg with EndpointPlayRouting with CirceCodecPlayRouting with AssetPlayRouting
+  with OptionalResponsePlayRouting with BasicAuthenticationPlayRouting {
 
   val routes = routesFromEndpoints(
     index.implementedBy { case (name, age, _) => User(name, age) },

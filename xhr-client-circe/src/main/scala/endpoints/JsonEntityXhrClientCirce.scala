@@ -5,7 +5,7 @@ import org.scalajs.dom.raw.XMLHttpRequest
 
 import scala.scalajs.js
 
-trait CirceClient extends XhrClient with JsonEntitiesAlg {
+trait JsonEntityXhrClientCirce extends EndpointXhrClient with JsonEntityAlg {
 
   type JsonRequest[A] = Encoder[A]
   type JsonResponse[A] = Decoder[A]
