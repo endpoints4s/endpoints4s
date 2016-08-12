@@ -11,25 +11,29 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
 
   val utf8Name = UTF_8.name()
 
-  type Segment[A] = A => String
+  trait Segment[A] {
+    def encode(a: A): String
+  }
 
-  implicit def stringSegment: Segment[String] =
+  implicit lazy val stringSegment: Segment[String] =
     (s: String) => URLEncoder.encode(s, utf8Name)
 
-  implicit def intSegment: Segment[Int] =
+  implicit lazy val intSegment: Segment[Int] =
     (i: Int) => i.toString
 
 
-  class QueryString[A](val apply: A => String) extends QueryStringOps[A]
+  trait QueryString[A] extends QueryStringOps[A] {
+    def encodeQueryString(a: A): String
+  }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
-    new QueryString[tupler.Out] ((ab: tupler.Out) => {
+    (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      s"${first.apply(a)}&${second.apply(b)}"
-    })
+      s"${first.encodeQueryString(a)}&${second.encodeQueryString(b)}"
+    }
 
   def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A] =
-    new QueryString(a => s"$name=${value.apply(a)}")
+    a => s"$name=${value.apply(a)}"
 
   type QueryStringValue[A] = A => String
 
@@ -40,30 +44,27 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     i => i.toString
 
 
-  class Path[A](val apply: A => String) extends PathOps[A] with Url[A] {
-    def encodeUrl(a: A) = apply(a)
-  }
+  trait Path[A] extends Url[A] with PathOps[A]
 
-  def staticPathSegment(segment: String) = new Path((_: Unit) => segment)
+  def staticPathSegment(segment: String) = (_: Unit) => segment
 
-  def segment[A](implicit s: Segment[A]): Path[A] =
-    new Path(s)
+  def segment[A](implicit s: Segment[A]): Path[A] = a => s.encode(a)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
-    new Path((ab: tupler.Out) => {
+    (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      first.apply(a) ++ "/" ++ second.apply(b)
-    })
+      first.encode(a) ++ "/" ++ second.encode(b)
+    }
 
 
   trait Url[A] {
-    def encodeUrl(a: A): String
+    def encode(a: A): String
   }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
     (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      s"${path.apply(a)}?${qs.apply(b)}"
+      s"${path.encode(a)}?${qs.encodeQueryString(b)}"
     }
 
   type Headers[A] = (A, WSRequest) => WSRequest
@@ -78,7 +79,7 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
   def get[A, B](url: Url[A], headers: Headers[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
     (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      val wsRequest = wsClient.url(url.encodeUrl(a))
+      val wsRequest = wsClient.url(url.encode(a))
       headers(b, wsRequest).get()
     }
 
@@ -86,7 +87,7 @@ class PlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends Endp
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val wsRequest = wsClient.url(url.encodeUrl(a))
+      val wsRequest = wsClient.url(url.encode(a))
       entity(b, headers(c, wsRequest))
     }
 

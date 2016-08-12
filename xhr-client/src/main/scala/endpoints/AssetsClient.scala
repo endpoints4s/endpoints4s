@@ -10,13 +10,12 @@ trait AssetsClient extends AssetsAlg with XhrClient {
   case class AssetInfo(path: String, name: String) // FIXME Better DX
   type Asset = ArrayBuffer
 
-  lazy val assetSegments =
-    new Path[AssetInfo]({
-      case AssetInfo(path, name) =>
-        val rawPath = s"$path/$name"
-        val digest = digests.getOrElse(rawPath, throw new Exception(s"Asset not found: $rawPath"))
-        s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
-    })
+  lazy val assetSegments: Path[AssetInfo] = {
+    case AssetInfo(path, name) =>
+      val rawPath = s"$path/$name"
+      val digest = digests.getOrElse(rawPath, throw new Exception(s"Asset not found: $rawPath"))
+      s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
+  }
 
   def assetsEndpoint(url: Url[AssetInfo]): Endpoint[AssetInfo, Asset] =
     endpoint(arrayBufferGet(url), arrayBufferResponse)
@@ -24,7 +23,7 @@ trait AssetsClient extends AssetsAlg with XhrClient {
   private def arrayBufferGet[A](url: Url[A]): Request[A] =
     (a: A) => {
       val xhr = new XMLHttpRequest
-      xhr.open("GET", url.encodeUrl(a))
+      xhr.open("GET", url.encode(a))
       xhr.responseType = "arraybuffer"
       (xhr, None)
     }

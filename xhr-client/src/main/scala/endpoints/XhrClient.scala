@@ -7,27 +7,33 @@ import scala.scalajs.js
 
 trait XhrClient extends EndpointsAlg {
 
-  type Segment[A] = js.Function1[A, String]
+  trait Segment[A] {
+    def encode(a: A): String
+  }
 
-  implicit def stringSegment: Segment[String] =
+  implicit lazy val stringSegment: Segment[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
 
-  implicit def intSegment: Segment[Int] =
+  implicit lazy val intSegment: Segment[Int] =
     (i: Int) => i.toString
 
 
-  class QueryString[A](val apply: js.Function1[A, String]) extends QueryStringOps[A]
+  trait QueryString[A] extends QueryStringOps[A] {
+    def encode(a: A): String
+  }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
-    new QueryString[tupler.Out]({ (ab: tupler.Out) =>
+    (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      s"${first.apply(a)}&${second.apply(b)}"
-    })
+      s"${first.encode(a)}&${second.encode(b)}"
+    }
 
   def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A] =
-    new QueryString(a => s"$name=${value(a)}")
+    a => s"$name=${value.encode(a)}"
 
-  type QueryStringValue[A] = js.Function1[A, String]
+  trait QueryStringValue[A] {
+    def encode(a: A): String
+  }
 
   implicit def stringQueryString: QueryStringValue[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
@@ -36,29 +42,26 @@ trait XhrClient extends EndpointsAlg {
     (i: Int) => i.toString
 
 
-  class Path[A](val apply: js.Function1[A, String]) extends PathOps[A] with Url[A] {
-    def encodeUrl(a: A) = apply(a)
-  }
+  trait Path[A] extends Url[A] with PathOps[A]
 
-  def staticPathSegment(segment: String) = new Path(_ => segment)
+  def staticPathSegment(segment: String) = (_: Unit) => segment
 
-  def segment[A](implicit s: Segment[A]): Path[A] =
-    new Path(s)
+  def segment[A](implicit s: Segment[A]): Path[A] = a => s.encode(a)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
-    new Path((out: tupler.Out) => {
+    (out: tupler.Out) => {
       val (a, b) = tupler.unapply(out)
-      first.apply(a) ++ "/" ++ second.apply(b)
-    })
+      first.encode(a) ++ "/" ++ second.encode(b)
+    }
 
   trait Url[A] {
-    def encodeUrl(a: A): String
+    def encode(a: A): String
   }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
     (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      s"${path.apply(a)}?${qs.apply(b)}"
+      s"${path.encode(a)}?${qs.encode(b)}"
     }
 
 
@@ -88,7 +91,7 @@ trait XhrClient extends EndpointsAlg {
 
   private def makeXhr[A, B](method: String, url: Url[A], a: A, headers: Headers[B], b: B): XMLHttpRequest = {
     val xhr = new XMLHttpRequest
-    xhr.open(method, url.encodeUrl(a))
+    xhr.open(method, url.encode(a))
     headers(b, xhr)
     xhr
   }

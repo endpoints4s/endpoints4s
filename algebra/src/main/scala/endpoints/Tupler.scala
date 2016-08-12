@@ -32,7 +32,6 @@ trait Tupler[A, B] {
 
 object Tupler extends Tupler4
 
-// General tupling rule
 trait Tupler1 {
   type Aux[A, B, Out0] = Tupler[A, B] { type Out = Out0 }
 
@@ -44,7 +43,6 @@ trait Tupler1 {
 
 }
 
-// Avoids tuple nesting
 trait Tupler2 extends Tupler1 {
 
   implicit def left[A, B, C]: Aux[A, (B, C), (A, B, C)] =
@@ -69,7 +67,6 @@ trait Tupler2 extends Tupler1 {
 
 }
 
-// Eliminates `Unit`
 trait Tupler3 extends Tupler2 {
 
   implicit def leftRight[A, B, C, D]: Aux[(A, B), (C, D), (A, B, C, D)] =
