@@ -59,7 +59,7 @@ val `algebra-circe` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-algebra-circe",
-      libraryDependencies += "io.circe" %%% "circe-generic" % "0.4.0"
+      libraryDependencies += "io.circe" %%% "circe-generic" % "0.5.0"
     )
     .dependsOn(`algebra`)
 
@@ -73,7 +73,7 @@ val `xhr-client` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client",
-      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.0"
+      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
     )
     .dependsOn(`algebra-js`)
 
@@ -83,8 +83,7 @@ val `xhr-client-faithful` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client-faithful",
-      libraryDependencies += "org.julienrf" %%% "faithful" % "0.1-SNAPSHOT",
-      resolvers += Resolver.sonatypeRepo("snapshots")
+      libraryDependencies += "org.julienrf" %%% "faithful" % "0.1"
     )
     .dependsOn(`xhr-client`)
 
@@ -94,7 +93,7 @@ val `xhr-client-circe` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client-circe",
-      libraryDependencies += "io.circe" %%% "circe-parser" % "0.4.0"
+      libraryDependencies += "io.circe" %%% "circe-parser" % "0.5.0"
     )
     .dependsOn(`xhr-client`, `algebra-circe-js`)
 
@@ -104,8 +103,8 @@ val `play-circe` =
     .settings(
       name := "endpoints-play-circe",
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play" % "2.5.1",
-        "io.circe" %% "circe-core" % "0.4.0"
+        "com.typesafe.play" %% "play" % "2.5.6",
+        "io.circe" %% "circe-core" % "0.5.0"
       )
     )
 
@@ -115,7 +114,7 @@ val `play-server` =
     .settings(
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-netty-server" % "2.5.1"
+        "com.typesafe.play" %% "play-netty-server" % "2.5.6"
       )
     )
     .dependsOn(`algebra-jvm`)
@@ -125,7 +124,7 @@ val `play-server-circe` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-server-circe",
-      libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
+      libraryDependencies += "io.circe" %% "circe-jawn" % "0.5.0"
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `play-circe`)
 
@@ -134,7 +133,7 @@ val `play-client` =
       .settings(publishSettings: _*)
       .settings(
         name := "endpoints-play-client",
-        libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.5.1"
+        libraryDependencies += "com.typesafe.play" %% "play-ws" % "2.5.6"
       )
       .dependsOn(`algebra-jvm`)
 
@@ -143,7 +142,7 @@ val `play-client-circe` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-play-client-circe",
-      libraryDependencies += "io.circe" %% "circe-jawn" % "0.4.0"
+      libraryDependencies += "io.circe" %% "circe-jawn" % "0.5.0"
     )
     .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
 
