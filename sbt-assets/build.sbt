@@ -2,8 +2,6 @@ name := "sbt-assets"
 
 organization := "org.julienrf"
 
-version := "0.1-SNAPSHOT"
-
 libraryDependencies += "commons-codec" % "commons-codec" % "1.10"
 
 sbtPlugin := true
@@ -21,8 +19,6 @@ scalacOptions in (Compile, doc) ++= Seq(
   "-doc-source-url", s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
   "-sourcepath", baseDirectory.in(LocalRootProject).value.getAbsolutePath
 )
-
-apiURL := Some(url(s"http://julienrf.github.io/${name.value}/${version.value}/api/"))
 
 autoAPIMappings := true
 
