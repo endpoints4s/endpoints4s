@@ -21,7 +21,7 @@ object AssetsTasks {
       val scalaCode = {
         val scalaMap =
           digests
-            .map { case (name, hash) => s""""${name.replace("\\", "\\\\").replace("\"", "\\\"")}" -> "$hash"""" }
+            .map { case (name, hash) => s""""${name.replace("\\", "/").replace("\"", "\\\"")}" -> "$hash"""" }
             .mkString("Map(", ", ", ")")
         s"""
            |${generatedPackage.fold("")(name => s"package $name")}
