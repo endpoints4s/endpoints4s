@@ -9,65 +9,94 @@ import play.mvc.Http.HeaderNames
 
 trait AssetPlayRouting extends AssetAlg with EndpointPlayRouting {
 
-  case class AssetInfo(path: Seq[String], digest: String, name: String)
+  case class AssetRequest(assetInfo: AssetPath, isGzipSupported: Boolean)
 
-  private def makeAsset(path: Option[String], name: String): AssetInfo = {
+  case class AssetPath(path: Seq[String], digest: String, name: String)
+
+  def asset(name: String): AssetRequest = makeAsset(None, name)
+
+  def asset(path: String, name: String): AssetRequest = makeAsset(Some(path), name)
+
+  private def makeAsset(path: Option[String], name: String): AssetRequest = {
     val rawPath = path.fold(name)(p => s"$p/$name")
     val digest = digests.getOrElse(rawPath, throw new Exception(s"No digest for asset $rawPath"))
-    AssetInfo(path.fold(Seq.empty[String])(_.split("/")), digest, name)
+    val assetPath = AssetPath(path.fold(Seq.empty[String])(_.split("/")), digest, name)
+    AssetRequest(assetPath, isGzipSupported = false) // HACK isGzipSupported makes no sense here
   }
 
-  def AssetInfo(name: String): AssetInfo = makeAsset(None, name)
+  // (data, content-length, content-type, gzipped)
+  type AssetResponse = Option[(Source[ByteString, _], Option[Long], Option[String], Boolean)]
 
-  def AssetInfo(path: String, name: String): AssetInfo = makeAsset(Some(path), name)
-
-  type Asset = Option[(Source[ByteString, _], Option[Long], Option[String])]
-
-  lazy val assetSegments: Path[AssetInfo] = {
+  lazy val assetSegments: Path[AssetPath] = {
     val stringPath = segment[String]
-    new Path[AssetInfo] {
+    new Path[AssetPath] {
       def decode(segments: List[String]) =
         segments.reverse match {
           case s :: p =>
             val i = s.lastIndexOf('-')
             if (i > 0) {
               val (name, digest) = s.splitAt(i)
-              Some((AssetInfo(p.reverse, digest.drop(1), name), Nil))
+              Some((AssetPath(p.reverse, digest.drop(1), name), Nil))
             } else None
           case Nil => None
         }
-      def encode(s: AssetInfo) =
+      def encode(s: AssetPath) =
         s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))((segment, path) => s"${stringPath.encode(segment)}/$path")
     }
   }
 
-  def assetsEndpoint(url: Url[AssetInfo]): Endpoint[AssetInfo, Asset] =
-    endpoint(get(url), assetResponse)
+  private lazy val gzipSupport: Headers[Boolean] =
+    request => request.headers.get(HeaderNames.ACCEPT_ENCODING).map(_.contains("gzip"))
 
-  private def assetResponse: Response[Asset] = {
-      case Some((resource, maybeLength, maybeContentType)) =>
-        Results.Ok
-          .sendEntity(HttpEntity.Streamed(resource, maybeLength, maybeContentType))
-          .withHeaders(
-            HeaderNames.CONTENT_DISPOSITION -> "inline",
-            HeaderNames.CACHE_CONTROL -> "public, max-age=31536000"
-          )
+  def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] = {
+    val request =
+      invariantFunctorRequest.inmap( // TODO remove this boilerplate using play-products
+        get(url, gzipSupport),
+        (t: (AssetPath, Boolean)) => AssetRequest(t._1, t._2),
+        (assetRequest: AssetRequest) => (assetRequest.assetInfo, assetRequest.isGzipSupported)
+      )
+
+    endpoint(request, assetResponse)
+  }
+
+  private def assetResponse: Response[AssetResponse] = {
+      case Some((resource, maybeLength, maybeContentType, isGzipped)) =>
+        val result =
+          Results.Ok
+            .sendEntity(HttpEntity.Streamed(resource, maybeLength, maybeContentType))
+            .withHeaders(
+              HeaderNames.CONTENT_DISPOSITION -> "inline",
+              HeaderNames.CACHE_CONTROL -> "public, max-age=31536000"
+            )
+        if (isGzipped) result.withHeaders(HeaderNames.CONTENT_ENCODING -> "gzip") else result
       case None => Results.NotFound
     }
 
-  def assetsResources(pathPrefix: Option[String] = None): AssetInfo => Asset =
-    assetInfo => {
+  def assetsResources(pathPrefix: Option[String] = None): AssetRequest => AssetResponse =
+    assetRequest => {
+      val assetInfo = assetRequest.assetInfo
       val path =
         if (assetInfo.path.nonEmpty) assetInfo.path.mkString("", "/", s"/${assetInfo.name}") else assetInfo.name
       if (digests.get(path).contains(assetInfo.digest)) {
         val resourcePath = pathPrefix.getOrElse("") ++ s"/$path"
-        Option(getClass.getResourceAsStream(resourcePath)).map { stream =>
-          (
-            StreamConverters.fromInputStream(() => stream),
-            Some(stream.available().toLong),
-            MimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY))
-          )
+        val maybeAsset = {
+          def nonGzippedAsset = Option(getClass.getResourceAsStream(resourcePath)).map((_, false))
+            if (assetRequest.isGzipSupported) {
+              Option(getClass.getResourceAsStream(s"$resourcePath.gz")).map((_, true))
+                .orElse(nonGzippedAsset)
+            } else {
+              nonGzippedAsset
+            }
         }
+        maybeAsset
+          .map { case (stream, isGzipped) =>
+            (
+              StreamConverters.fromInputStream(() => stream),
+              Some(stream.available().toLong),
+              MimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY)),
+              isGzipped
+            )
+          }
       } else None
     }
 

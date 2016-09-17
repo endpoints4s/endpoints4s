@@ -2,6 +2,7 @@ package endpoints
 
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Action, BodyParser, Call, Handler, RequestHeader, Result, Results}
@@ -20,6 +21,16 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting {
     def decode: RequestExtractor[BodyParser[A]]
     def encode(a: A): Call
   }
+
+  implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
+    new InvariantFunctor[Request] {
+      def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] =
+        new Request[B] {
+          def decode: RequestExtractor[BodyParser[B]] =
+            functorRequestExtractor.fmap(m.decode, (bodyParser: BodyParser[A]) => bodyParser.map(f1))
+          def encode(a: B): Call = m.encode(f2(a))
+        }
+    }
 
   type RequestEntity[A] = BodyParser[A]
 

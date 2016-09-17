@@ -158,12 +158,17 @@ val `sample-shared` = {
           baseDirectory = baseDirectory.value.getParentFile,
           targetDirectory = (target in Compile).value,
           generatedObjectName = "AssetsDigests",
-          generatedPackage = Some("sample"),
-          assetsPath = assetsDirectory
+          generatedPackage = Some("sample")
         )
       }.taskValue
     )
     .jvmSettings(
+      (resourceGenerators in Compile) += Def.task {
+        assets.AssetsTasks.gzipAssets(
+          baseDirectory = baseDirectory.value.getParentFile,
+          targetDirectory = (target in Compile).value
+        )
+      }.taskValue,
       unmanagedResourceDirectories in Compile += assetsDirectory(baseDirectory.value.getParentFile)
     )
     .enablePlugins(ScalaJSPlugin)
@@ -188,7 +193,8 @@ val `sample-server` =
     .settings(commonSettings: _*)
     .settings(
       publishArtifact := false,
-      unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value
+      unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value,
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
     )
     .dependsOn(`sample-shared-jvm`, `play-server-circe`)
 

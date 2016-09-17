@@ -7,24 +7,32 @@ import scala.scalajs.js.typedarray.ArrayBuffer
 
 trait AssetXhrClient extends AssetAlg with EndpointXhrClient {
 
-  case class AssetInfo(path: String, name: String) // FIXME Better DX
-  type Asset = ArrayBuffer
+  case class AssetRequest(assetInfo: AssetPath, acceptGzip: Boolean)
+  case class AssetPath(path: String, name: String)
+  type AssetResponse = ArrayBuffer
 
-  lazy val assetSegments: Path[AssetInfo] = {
-    case AssetInfo(path, name) =>
+  def asset(path: String, name: String): AssetRequest =
+    AssetRequest(
+      AssetPath(path, name),
+      acceptGzip = true // HACK Assumes that all browsers support gzip
+    )
+
+  lazy val assetSegments: Path[AssetPath] = {
+    case AssetPath(path, name) =>
       val rawPath = s"$path/$name"
       val digest = digests.getOrElse(rawPath, throw new Exception(s"Asset not found: $rawPath"))
       s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
   }
 
-  def assetsEndpoint(url: Url[AssetInfo]): Endpoint[AssetInfo, Asset] =
+  def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] =
     endpoint(arrayBufferGet(url), arrayBufferResponse)
 
-  private def arrayBufferGet[A](url: Url[A]): Request[A] =
-    (a: A) => {
+  private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
+    (assetRequest: AssetRequest) => {
       val xhr = new XMLHttpRequest
-      xhr.open("GET", url.encode(a))
+      xhr.open("GET", url.encode(assetRequest.assetInfo))
       xhr.responseType = "arraybuffer"
+      // HACK No need to set the Accept-Encoding header because it is automatically set by the browser
       (xhr, None)
     }
 

@@ -25,7 +25,7 @@ object Main extends js.JSApp {
       ()
     }, js.undefined)
 
-    Api.assets(Api.AssetInfo("medias", "chopin--funeral-march.mp3")).`then`[Unit] ({ arrayBuffer =>
+    Api.assets(Api.asset("medias", "chopin--funeral-march.mp3")).`then`[Unit] ({ arrayBuffer =>
       val audioCtx = new AudioContext
       audioCtx.decodeAudioData(arrayBuffer).`then`[Unit] { audioBuffer =>
         val source = audioCtx.createBufferSource()

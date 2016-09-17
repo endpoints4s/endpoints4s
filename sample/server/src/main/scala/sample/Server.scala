@@ -7,7 +7,7 @@ import play.api.routing.sird._
 
 object Server extends App with Results {
 
-  NettyServer.fromRouter()(({
+  val bootstrap: PartialFunction[RequestHeader, Handler] = {
     case GET(p"/") => Action {
       val html =
         """
@@ -25,6 +25,8 @@ object Server extends App with Results {
     }
     case GET(p"/assets/sample-client-fastopt.js") =>
       controllers.Assets.versioned("/", "sample-client-fastopt.js")
-  }: PartialFunction[RequestHeader, Handler]) orElse Api.routes)
+  }
+
+  NettyServer.fromRouter()(bootstrap orElse Api.routes)
 
 }
