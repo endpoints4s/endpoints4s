@@ -5,17 +5,21 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer
 
+/**
+  * Client that relies on the web browser to handle gzip compression
+  */
 trait AssetXhrClient extends AssetAlg with EndpointXhrClient {
 
-  case class AssetRequest(assetInfo: AssetPath, acceptGzip: Boolean)
   case class AssetPath(path: String, name: String)
+
+  /**
+    * As a client, we just need to give the path of the asset we are interested in, the web browser will
+    * automatically set HTTP headers to handle gzip compression (`Accept-Encoding`) and decompress the response.
+    */
+  type AssetRequest = AssetPath
   type AssetResponse = ArrayBuffer
 
-  def asset(path: String, name: String): AssetRequest =
-    AssetRequest(
-      AssetPath(path, name),
-      acceptGzip = true // HACK Assumes that all browsers support gzip
-    )
+  def asset(path: String, name: String): AssetRequest = AssetPath(path, name)
 
   lazy val assetSegments: Path[AssetPath] = {
     case AssetPath(path, name) =>
@@ -30,9 +34,8 @@ trait AssetXhrClient extends AssetAlg with EndpointXhrClient {
   private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
     (assetRequest: AssetRequest) => {
       val xhr = new XMLHttpRequest
-      xhr.open("GET", url.encode(assetRequest.assetInfo))
+      xhr.open("GET", url.encode(assetRequest))
       xhr.responseType = "arraybuffer"
-      // HACK No need to set the Accept-Encoding header because it is automatically set by the browser
       (xhr, None)
     }
 
