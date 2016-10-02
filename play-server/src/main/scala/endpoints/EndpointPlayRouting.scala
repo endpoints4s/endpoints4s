@@ -69,9 +69,9 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting {
 
   type Response[A] = A => Result
 
-  val emptyResponse: Response[Unit] = _ => Results.Ok
+  lazy val emptyResponse: Response[Unit] = _ => Results.Ok
 
-  val htmlResponse: Response[Html] = html => Results.Ok(html)
+  lazy val htmlResponse: Response[Html] = html => Results.Ok(html)
 
 
 
