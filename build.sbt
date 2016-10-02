@@ -83,7 +83,7 @@ val `xhr-client-faithful` =
     .settings(publishSettings: _*)
     .settings(
       name := "endpoints-xhr-client-faithful",
-      libraryDependencies += "org.julienrf" %%% "faithful" % "0.1"
+      libraryDependencies += "org.julienrf" %%% "faithful" % "0.2"
     )
     .dependsOn(`xhr-client`)
 
