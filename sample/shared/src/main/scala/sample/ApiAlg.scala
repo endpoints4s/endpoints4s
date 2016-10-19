@@ -24,7 +24,7 @@ trait ApiAlg extends EndpointAlg with CirceCodecAlg with AssetAlg
     endpoint(get(path / "option"), option(emptyResponse))
 
   val auth =
-    endpoint(get(path / "auth", basicAuthentication), emptyResponse)
+    authenticatedGetEndpoint(path / "auth", emptyResponse)
 
 }
 

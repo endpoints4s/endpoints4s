@@ -3,6 +3,7 @@ package sample
 import endpoints._
 
 import scala.concurrent.Future
+import scala.util.Random
 
 object Api extends ApiAlg with EndpointPlayRouting with CirceCodecPlayRouting with AssetPlayRouting
   with OptionalResponsePlayRouting with BasicAuthenticationPlayRouting {
@@ -13,7 +14,10 @@ object Api extends ApiAlg with EndpointPlayRouting with CirceCodecPlayRouting wi
     actionFut.implementedByAsync(param => Future.successful(ActionResult(index.call(("Julien", 30, "future")).url))),
     assets.implementedBy(assetsResources()),
     maybe.implementedBy(_ => if (util.Random.nextBoolean()) Some(()) else None),
-    auth.implementedBy { credentials => println(s"Authenticated request: ${credentials.username}"); () }
+    auth.implementedBy { credentials =>
+      println(s"Authenticated request: ${credentials.username}")
+      if (Random.nextBoolean()) Some(()) else None // Randomly return a forbidden
+    }
   )
 
 }

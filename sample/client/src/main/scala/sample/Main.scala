@@ -1,5 +1,6 @@
 package sample
 
+import endpoints.Credentials
 import org.scalajs.dom.document
 import org.scalajs.dom.AudioContext
 
@@ -35,6 +36,10 @@ object Main extends js.JSApp {
         source.stop(audioCtx.currentTime + 10)
         ()
       }
+    }, js.undefined)
+
+    Api.auth(Credentials("foo", "bar")).`then`[Unit]({ maybeResponse =>
+      println(s"Access granted: ${maybeResponse.isDefined}")
     }, js.undefined)
     ()
   }

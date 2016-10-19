@@ -9,18 +9,18 @@ import scala.language.higherKinds
   */
 trait EndpointAlg extends UrlAlg {
 
-  type Headers[A]
+  type RequestHeaders[A]
 
-  def emptyHeaders: Headers[Unit]
+  def emptyHeaders: RequestHeaders[Unit]
 
 
   type Request[A]
 
   type RequestEntity[A]
 
-  def get[A, B](url: Url[A], headers: Headers[B] = emptyHeaders)(implicit tupler: Tupler[A, B]): Request[tupler.Out]
+  def get[A, B](url: Url[A], headers: RequestHeaders[B] = emptyHeaders)(implicit tupler: Tupler[A, B]): Request[tupler.Out]
 
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: Headers[C] = emptyHeaders)(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
+  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C] = emptyHeaders)(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
 
 
   type Response[A]

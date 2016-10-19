@@ -45,8 +45,8 @@ trait AssetPlayRouting extends AssetAlg with EndpointPlayRouting {
     }
   }
 
-  private lazy val gzipSupport: Headers[Boolean] =
-    request => request.headers.get(HeaderNames.ACCEPT_ENCODING).map(_.contains("gzip"))
+  private lazy val gzipSupport: RequestHeaders[Boolean] =
+    headers => Right(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
 
   def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] = {
     val request =
