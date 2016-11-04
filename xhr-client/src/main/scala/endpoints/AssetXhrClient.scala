@@ -10,17 +10,40 @@ import scala.scalajs.js.typedarray.ArrayBuffer
   */
 trait AssetXhrClient extends AssetAlg with EndpointXhrClient {
 
-  case class AssetPath(path: String, name: String)
-
   /**
     * As a client, we just need to give the path of the asset we are interested in, the web browser will
     * automatically set HTTP headers to handle gzip compression (`Accept-Encoding`) and decompress the response.
     */
   type AssetRequest = AssetPath
+
+  /**
+    * {{{
+    *   // foo/bar/baz-123abc
+    *   AssetPath("foo/bar", "baz")
+    * }}}
+    */
+  case class AssetPath(path: String, name: String)
+
+  /**
+    * As we request the asset via an XMLHttpRequest, we get its content as an
+    * `ArrayBuffer`
+    */
   type AssetResponse = ArrayBuffer
 
+  /**
+    * Convenient constructor for building an [[AssetRequest]] from its path and name.
+    *
+    * {{{
+    *   myAssetsEndpoint(asset("foo/bar", "baz"))
+    * }}}
+    */
   def asset(path: String, name: String): AssetRequest = AssetPath(path, name)
 
+  /**
+    * Encodes an [[AssetPath]] as a request path.
+    * Throws an exception if the asset digest is not found.
+    */
+  // FIXME Check the asset digest in the `asset` smart constructor
   lazy val assetSegments: Path[AssetPath] = {
     case AssetPath(path, name) =>
       val rawPath = s"$path/$name"
@@ -28,6 +51,15 @@ trait AssetXhrClient extends AssetAlg with EndpointXhrClient {
       s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
   }
 
+  /**
+    * An endpoint for requesting assets.
+    *
+    * If the server fails to find the requested asset, this endpoint returns
+    * a failed response.
+    *
+    * @param url URL description
+    * @return An HTTP endpoint for requesting assets
+    */
   def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] =
     endpoint(arrayBufferGet(url), arrayBufferResponse)
 
