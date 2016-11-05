@@ -5,16 +5,34 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.language.higherKinds
 import scala.scalajs.js
 
+/**
+  * Interpreter for [[EndpointAlg]] that builds a client issuing requests
+  * using XMLHttpRequest.
+  */
 trait EndpointXhrClient extends EndpointAlg with UrlClient {
 
+  /**
+    * A function that takes the information `A` and the XMLHttpRequest
+    * and sets up some headers on it.
+    */
   type RequestHeaders[A] = js.Function2[A, XMLHttpRequest, Unit]
 
+  /** Sets up no headers on the given XMLHttpRequest */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, _) => ()
 
-
+  /**
+    * A function that takes the information `A` and returns an XMLHttpRequest
+    * with an optional request entity. If provided, the request entity must be
+    * compatible with the `send` method of XMLHttpRequest.
+    */
+  // FIXME Use a representation that makes it easier to set the request Content-Type header according to its entity type
   type Request[A] = js.Function1[A, (XMLHttpRequest, Option[js.Any])]
 
-  type RequestEntity[A] = js.Function2[A, XMLHttpRequest, String /* TODO String | Blob | FormData | … */]
+  /**
+    * A function that, given information `A` and an XMLHttpRequest, returns
+    * a request entity (as a String).
+    */
+  type RequestEntity[A] = js.Function2[A, XMLHttpRequest, String]
 
   def get[A, B](url: Url[A], headers: RequestHeaders[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
     (ab: tupler.Out) => {
@@ -38,14 +56,32 @@ trait EndpointXhrClient extends EndpointAlg with UrlClient {
     xhr
   }
 
+  /**
+    * Attempts to decode an `A` from an XMLHttpRequest’s response
+    */
   type Response[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
 
+  /**
+    * Successfully decodes no information from a response
+    */
   lazy val emptyResponse: Response[Unit] = _ => Right(())
 
-
-  type Task[A]
-
+  /**
+    * A function that takes the information needed to build a request and returns
+    * a task yielding the information carried by the response.
+    *
+    * @tparam A Information carried by the request
+    * @tparam B Information carried by the response
+    */
   type Endpoint[A, B] = js.Function1[A, Task[B]]
+
+  /**
+    * A task that eventually yields an `A`.
+    *
+    * Typically, concrete representation of `Task` will have an instance of `MonadError`, so
+    * that we can perform requests (sequentially and in parallel) and recover errors.
+    */
+  type Task[A]
 
   protected final def performXhr[A, B](
     request: Request[A],
