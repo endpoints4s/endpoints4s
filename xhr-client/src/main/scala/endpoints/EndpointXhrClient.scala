@@ -30,9 +30,11 @@ trait EndpointXhrClient extends EndpointAlg with UrlClient {
 
   /**
     * A function that, given information `A` and an XMLHttpRequest, returns
-    * a request entity (as a String).
+    * a request entity.
+    * Also, as a side-effect, the function can set the corresponding Content-Type header
+    * on the given XMLHttpRequest.
     */
-  type RequestEntity[A] = js.Function2[A, XMLHttpRequest, String]
+  type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
   def get[A, B](url: Url[A], headers: RequestHeaders[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
     (ab: tupler.Out) => {
@@ -69,9 +71,6 @@ trait EndpointXhrClient extends EndpointAlg with UrlClient {
   /**
     * A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
-    *
-    * @tparam A Information carried by the request
-    * @tparam B Information carried by the response
     */
   type Endpoint[A, B] = js.Function1[A, Task[B]]
 
