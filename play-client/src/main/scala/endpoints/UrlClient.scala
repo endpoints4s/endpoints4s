@@ -20,14 +20,14 @@ trait UrlClient extends UrlAlg {
       s"${first.encodeQueryString(a)}&${second.encodeQueryString(b)}"
     }
 
-  def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A] =
+  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
     a => s"$name=${value.apply(a)}"
 
-  type QueryStringValue[A] = A => String
+  type QueryStringParam[A] = A => String
 
-  implicit lazy val stringQueryString: QueryStringValue[String] = s => URLEncoder.encode(s, utf8Name)
+  implicit lazy val stringQueryString: QueryStringParam[String] = s => URLEncoder.encode(s, utf8Name)
 
-  implicit lazy val intQueryString: QueryStringValue[Int] = i => i.toString
+  implicit lazy val intQueryString: QueryStringParam[Int] = i => i.toString
 
 
   trait Segment[A] {

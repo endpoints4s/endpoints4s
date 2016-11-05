@@ -7,7 +7,9 @@ import scala.scalajs.js
   */
 trait UrlClient extends UrlAlg {
 
+  /** Defines how to build a path segment from an `A` */
   trait Segment[A] {
+    /** @return An URL encoded path segment (e.g. "foo%2Fbar") */
     def encode(a: A): String
   }
 
@@ -17,8 +19,11 @@ trait UrlClient extends UrlAlg {
   implicit lazy val intSegment: Segment[Int] =
     (i: Int) => i.toString
 
-
+  /**
+    * Defines how to build a query string from an `A`
+    */
   trait QueryString[A] extends QueryStringOps[A] {
+    /** @return A query string fragment (e.g. "foo=bar&baz=a%20b") */
     def encode(a: A): String
   }
 
@@ -28,20 +33,22 @@ trait UrlClient extends UrlAlg {
       s"${first.encode(a)}&${second.encode(b)}"
     }
 
-  def qs[A](name: String)(implicit value: QueryStringValue[A]): QueryString[A] =
+  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
     a => s"$name=${value.encode(a)}"
 
-  trait QueryStringValue[A] {
+  /** Defines how to build a query string parameter value from an `A` */
+  trait QueryStringParam[A] {
+    /** @return An URL encoded query string parameter value (e.g. "a%20b") */
     def encode(a: A): String
   }
 
-  implicit lazy val stringQueryString: QueryStringValue[String] =
+  implicit lazy val stringQueryString: QueryStringParam[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
 
-  implicit lazy val intQueryString: QueryStringValue[Int] =
+  implicit lazy val intQueryString: QueryStringParam[Int] =
     (i: Int) => i.toString
 
-
+  /** Builds an URL path from an `A` */
   trait Path[A] extends Url[A] with PathOps[A]
 
   def staticPathSegment(segment: String) = (_: Unit) => segment
@@ -54,6 +61,7 @@ trait UrlClient extends UrlAlg {
       first.encode(a) ++ "/" ++ second.encode(b)
     }
 
+  /** Builds an URL from an `A` */
   trait Url[A] {
     def encode(a: A): String
   }

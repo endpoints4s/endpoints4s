@@ -17,6 +17,11 @@ trait UrlPlayRouting extends UrlAlg {
 
   val utf8Name = UTF_8.name()
 
+  /**
+    * Convenient type alias modeling the extraction of an `A` information from request headers.
+    *
+    * This type has an instance of [[Applicative]].
+    */
   // No Kleisli in play-functional…
   type RequestExtractor[A] = RequestHeader => Option[A]
 
@@ -42,8 +47,13 @@ trait UrlPlayRouting extends UrlAlg {
     @inline def map[B](f: A => B)(implicit applicative: Applicative[F]): F[B] = applicative.map(fa, f)
   }
 
+  /** Defines how to decode and encode path segments */
   trait Segment[A] {
+    /**
+      * @param segment URL decoded path segment
+      */
     def decode(segment: String): Option[A]
+    /** @return URL encoded path segment */
     def encode(a: A): String
   }
 
@@ -59,9 +69,18 @@ trait UrlPlayRouting extends UrlAlg {
       def encode(a: Int) = a.toString
     }
 
-
+  /**
+    * Query string encoding and decoding
+    */
   trait QueryString[A] extends QueryStringOps[A] {
+    /**
+      * @param qs Map of identifiers and parameter values (these are already URL decoded)
+      */
     def decode(qs: Map[String, Seq[String]]): Option[A]
+
+    /**
+      * @return Map of identifiers and URL encoded parameter values
+      */
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
 
@@ -78,27 +97,27 @@ trait UrlPlayRouting extends UrlAlg {
       }
     }
 
-  def qs[A](name: String)(implicit value: QueryStringValue[A]) =
+  def qs[A](name: String)(implicit value: QueryStringParam[A]) =
     new QueryString[A] {
       def decode(qs: Map[String, Seq[String]]) = value.decode(name, qs)
       def encode(a: A) = value.encode(name, a)
     }
 
-  trait QueryStringValue[A] {
+  trait QueryStringParam[A] {
     def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
 
-  implicit def stringQueryString: QueryStringValue[String] =
-    new QueryStringValue[String] {
+  implicit def stringQueryString: QueryStringParam[String] =
+    new QueryStringParam[String] {
       def decode(name: String, qs: Map[String, Seq[String]]) =
         qs.get(name).flatMap(_.headOption)
       def encode(name: String, s: String) =
         Map(name -> Seq(URLEncoder.encode(s, utf8Name)))
     }
 
-  implicit def intQueryString: QueryStringValue[Int] =
-    new QueryStringValue[Int] {
+  implicit def intQueryString: QueryStringParam[Int] =
+    new QueryStringParam[Int] {
       def decode(name: String, qs: Map[String, Seq[String]]) =
         qs.get(name).flatMap(_.headOption).flatMap(s => Try(s.toInt).toOption)
       def encode(name: String, i: Int) =
