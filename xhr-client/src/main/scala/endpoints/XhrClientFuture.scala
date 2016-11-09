@@ -2,8 +2,12 @@ package endpoints
 
 import scala.concurrent.{Future, Promise}
 
+/**
+  * Implements [[EndpointXhrClient]] by using Scala’s [[Future]]s.
+  */
 trait XhrClientFuture extends EndpointXhrClient {
 
+  /** Maps `Task` to [[Future]] */
   type Task[A] = Future[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
