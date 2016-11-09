@@ -5,10 +5,17 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}
 import PlayCirce.circeJsonWriteable
 
+/**
+  * Interpreter for [[JsonEntityAlg]] that uses circe’s [[Decoder]] to decode
+  * JSON entities in HTTP requests, and circe’s [[Encoder]] to build JSON entities
+  * in HTTP responses.
+  */
 trait JsonEntityPlayRoutingCirce extends EndpointPlayRouting with JsonEntityAlg {
 
+  /** Decode requests using circe’s [[Decoder]] */
   type JsonRequest[A] = Decoder[A]
 
+  /** Encode responses using circe’s [[Encoder]] */
   type JsonResponse[A] = Encoder[A]
 
   def jsonRequest[A : Decoder] =
