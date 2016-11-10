@@ -50,6 +50,12 @@ val publishSettings = commonSettings ++ Seq(
   )
 )
 
+val noPublishSettings = Seq(
+  publishArtifact := false,
+  publish := (),
+  publishLocal := ()
+)
+
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(publishSettings: _*)
@@ -170,10 +176,9 @@ val `play-client-circe` =
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.12`: _*)
     .settings(
-      publishArtifact := false,
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -204,29 +209,93 @@ val `example-basic-shared-js` = `example-basic-shared`.js
 val `example-basic-client` =
   project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.12`: _*)
-    .settings(
-      publishArtifact := false
-    )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
 val `example-basic-server` =
   project.in(file("examples/basic/server"))
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.11`: _*)
     .settings(
-      publishArtifact := false,
       unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
     )
     .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
 
+
+// CQRS Example
+//
+//   +--------------+   +--------------+     +----------+
+//   | front-end-def|   | commands-def +-----+ commands |
+//   +---+------+---+   +---+----------+     +----------+
+//      /        \         /
+//     /          \       /
+// +--+-+       +--+-----+--+
+// | ui |       | front-end |
+// +----+       +--------+--+
+//                        \
+//                         \
+//                      +---+---------+       +---------+
+//                      | queries-def +-------+ queries |
+//                      +-------------+       +---------+
+
+// front-end endpoints definitions
+val `example-cqrs-front-end-def` =
+  CrossProject("example-cqrs-front-end-def-jvm", "example-cqrs-front-end-def-js", file("examples/cqrs/front-end-def"), CrossType.Pure)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`algebra`)
+
+val `example-cqrs-front-end-def-jvm` = `example-cqrs-front-end-def`.jvm
+
+val `example-cqrs-front-end-def-js` = `example-cqrs-front-end-def`.js
+
+// front-end implementation, *implements* the front-end definitions and *uses* the commands and queries definitions
+val `example-cqrs-front-end` =
+  project.in(file("examples/cqrs/front-end"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`play-server`, `play-client`)
+    .dependsOn(`example-cqrs-front-end-def-jvm`, `example-cqrs-commands-def`, `example-cqrs-queries-def`)
+
+// front-end ui, *uses* the front-end definitions
+val `example-cqrs-ui` =
+  project.in(file("examples/cqrs/ui"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`xhr-client-faithful`)
+    .dependsOn(`example-cqrs-front-end-def-js`)
+
+// commands endpoints definitions
+lazy val `example-cqrs-commands-def` =
+  project.in(file("examples/cqrs/commands-def"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`algebra-jvm`)
+
+// commands implementation
+val `example-cqrs-commands` =
+  project.in(file("examples/cqrs/commands"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`play-server`)
+    .dependsOn(`example-cqrs-commands-def`)
+
+// queries endpoints definitions
+lazy val `example-cqrs-queries-def` =
+  project.in(file("examples/cqrs/queries-def"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`algebra-jvm`)
+
+// queries implementation
+val `example-cqrs-queries` =
+  project.in(file("examples/cqrs/queries"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`play-server`)
+    .dependsOn(`example-cqrs-queries-def`)
+
 val endpoints =
   project.in(file("."))
     .enablePlugins(CrossPerProjectPlugin)
-      .settings(
-        publishArtifact := false/*,
+    .settings(noPublishSettings: _*)
+      .settings(/*,
         releasePublishArtifactsAction := PgpKeys.publishSigned.value,
         releaseProcess := Seq[ReleaseStep](checkSnapshotDependencies,
           inquireVersions,
@@ -254,7 +323,16 @@ val endpoints =
       `xhr-client-circe`,
       `play-client`,
       `play-client-circe`,
+      // basic example
       `example-basic-shared-js`, `example-basic-shared-jvm`,
       `example-basic-server`,
-      `example-basic-client`
+      `example-basic-client`,
+      // cqrs example
+      `example-cqrs-front-end-def-jvm`, `example-cqrs-front-end-def-js`,
+      `example-cqrs-front-end`,
+      `example-cqrs-ui`,
+      `example-cqrs-commands-def`,
+      `example-cqrs-commands`,
+      `example-cqrs-queries-def`,
+      `example-cqrs-queries`
     )
