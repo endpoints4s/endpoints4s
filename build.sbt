@@ -146,9 +146,9 @@ val `play-client-circe` =
     )
     .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
 
-val `sample-shared` = {
+val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
-  CrossProject("sample-shared-jvm", "sample-shared-js", file("sample/shared"), CrossType.Pure)
+  CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
     .settings(commonSettings: _*)
     .settings(
       publishArtifact := false,
@@ -175,28 +175,28 @@ val `sample-shared` = {
     .dependsOn(`algebra`, `algebra-circe`)
 }
 
-val `sample-shared-jvm` = `sample-shared`.jvm
+val `example-basic-shared-jvm` = `example-basic-shared`.jvm
 
-val `sample-shared-js` = `sample-shared`.js
+val `example-basic-shared-js` = `example-basic-shared`.js
 
-val `sample-client` =
-  project.in(file("sample/client"))
+val `example-basic-client` =
+  project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings: _*)
     .settings(
       publishArtifact := false
     )
-    .dependsOn(`sample-shared-js`, `xhr-client-circe`)
+    .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
-val `sample-server` =
-  project.in(file("sample/server"))
+val `example-basic-server` =
+  project.in(file("examples/basic/server"))
     .settings(commonSettings: _*)
     .settings(
       publishArtifact := false,
-      unmanagedResources in Compile += (fastOptJS in (`sample-client`, Compile)).map(_.data).value,
+      unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
     )
-    .dependsOn(`sample-shared-jvm`, `play-server-circe`)
+    .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
 
 val endpoints =
   project.in(file("."))
@@ -229,7 +229,7 @@ val endpoints =
       `xhr-client-circe`,
       `play-client`,
       `play-client-circe`,
-      `sample-shared-js`, `sample-shared-jvm`,
-      `sample-server`,
-      `sample-client`
+      `example-basic-shared-js`, `example-basic-shared-jvm`,
+      `example-basic-server`,
+      `example-basic-client`
     )
