@@ -227,7 +227,7 @@ With `endpoints` you can write an object algebra producing documentation resourc
 endpoint definitions, so that your documentation is derived from the exact same code
 that is used to implement the API, hence being always consistent.
 
-### Thrift?
+### Thrift? Finch? Rho? Lagom?
 
 ## Contributing
 
