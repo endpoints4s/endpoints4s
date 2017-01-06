@@ -2,11 +2,12 @@ package endpoints.play.routing
 
 import endpoints.algebra
 import endpoints.Tupler
+import endpoints.algebra.{Decoder, Encoder, Handler, MuxRequest}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
-import play.api.mvc._
+import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
 
 import scala.concurrent.Future
@@ -171,6 +172,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)
 
+  /** Something that can be used as a Play request handler */
+  trait ToPlayHandler {
+    def playHandler(header: RequestHeader): Option[PlayHandler]
+  }
 
   /**
     * Concrete representation of an `Endpoint` for routing purpose.
@@ -197,23 +202,48 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /**
     * An endpoint from which we can get a Play request handler.
     */
-  case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => Future[B]) {
+  case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => Future[B]) extends ToPlayHandler {
     /**
       * Builds a request `Handler` (a Play `Action`) if the incoming request headers matches
       * the `endpoint` definition.
       */
-    def playHandler(header: RequestHeader): Option[Handler] =
+    def playHandler(header: RequestHeader): Option[PlayHandler] =
       endpoint.request.decode(header)
-        .map(a => Action.async(a){ request =>
-          service(request.body).map { b =>
-            endpoint.response(b)
+        .map { bodyParser =>
+          Action.async(bodyParser) { request =>
+            service(request.body).map { b =>
+              endpoint.response(b)
+            }
           }
-        })
+        }
   }
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     Endpoint(request, response)
 
+  class MuxEndpoint[Req <: MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Response[Transport]
+  ) {
+    def implementedBy(
+      handler: Handler[Req, Resp]
+    )(implicit
+      decoder: Decoder[Transport, Req],
+      encoder: Encoder[Resp, Transport]
+    ): ToPlayHandler =
+      header =>
+        request.decode(header).map { bodyParser =>
+          Action(bodyParser) { request =>
+            response(encoder.encode(handler(decoder.decode(request.body).right.get /* TODO Handle failure */ .asInstanceOf[Req {type Response = Resp}])))
+          }
+        }
+  }
+
+  def muxEndpoint[Req <: MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Transport => Result
+  ): MuxEndpoint[Req, Resp, Transport] =
+    new MuxEndpoint[Req, Resp, Transport](request, response)
 
   /**
     * Builds a Play router out of endpoint definitions.
@@ -224,9 +254,9 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     *   )
     * }}}
     */
-  def routesFromEndpoints(endpoints: EndpointWithHandler[_, _]*): PartialFunction[RequestHeader, Handler] =
+  def routesFromEndpoints(endpoints: ToPlayHandler*): PartialFunction[RequestHeader, PlayHandler] =
     Function.unlift { request : RequestHeader =>
-      def loop(es: Seq[EndpointWithHandler[_, _]]): Option[Handler] =
+      def loop(es: Seq[ToPlayHandler]): Option[PlayHandler] =
         es match {
           case e +: es2 => e.playHandler(request).orElse(loop(es2))
           case Nil => None

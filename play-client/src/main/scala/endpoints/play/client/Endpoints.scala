@@ -1,18 +1,21 @@
 package endpoints.play.client
 
 import endpoints.algebra
+import endpoints.algebra.{Encoder, Decoder, MuxRequest}
 import endpoints.Tupler
+import endpoints.play.client.Endpoints.futureFromEither
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
-  * An interpreter for [[Endpoint]] that builds a client issuing requests using
+  * An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
   * Play’s [[WSClient]] HTTP client.
   *
+  * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
   * @param wsClient The underlying client to use
   */
-class Endpoints(wsClient: WSClient)(implicit ec: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
+class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -35,7 +38,6 @@ class Endpoints(wsClient: WSClient)(implicit ec: ExecutionContext) extends algeb
 
   lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) => req }
 
-
   def request[A, B, C, AB](
     method: Method, url: Url[A],
     entity: RequestEntity[B], headers: RequestHeaders[C]
@@ -43,7 +45,7 @@ class Endpoints(wsClient: WSClient)(implicit ec: ExecutionContext) extends algeb
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val wsRequest = method(entity(b, headers(c, wsClient.url(url.encode(a)))))
+      val wsRequest = method(entity(b, headers(c, wsClient.url(host ++ url.encode(a)))))
       wsRequest.execute()
     }
 
@@ -58,12 +60,42 @@ class Endpoints(wsClient: WSClient)(implicit ec: ExecutionContext) extends algeb
   /**
     * A function that, given an `A`, eventually attempts to decode the response.
     *
-    * Communication failures are represented by a `Future.failed`, while protocol
-    * failures are represented by successful Future containing a `Left(throwable)`.
+    * Communication failures and protocol failures are represented by a `Future.failed`.
     */
-  type Endpoint[A, B] = A => Future[Either[Throwable, B]]
+  type Endpoint[A, B] = A => Future[B]
 
-  def endpoint[A, B](request: Request[A], response: Response[B]) =
-    a => request(a).map(response)
+  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+    a => request(a).flatMap(response andThen futureFromEither)
 
+  class MuxEndpoint[Req <: algebra.MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Response[Transport]
+  ) {
+    def apply(
+      req: Req
+    )(implicit
+      encoder: Encoder[Req, Transport],
+      decoder: Decoder[Transport, Resp]
+    ): Future[req.Response] =
+      request(encoder.encode(req)).flatMap { wsResponse =>
+        futureFromEither(response(wsResponse).right.flatMap { t =>
+          decoder.decode(t).asInstanceOf[Either[Throwable, req.Response]]
+        })
+      }
+  }
+
+  def muxEndpoint[Req <: MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Response[Transport]
+  ): MuxEndpoint[Req, Resp, Transport] =
+    new MuxEndpoint[Req, Resp, Transport](request, response)
+
+}
+
+object Endpoints {
+  def futureFromEither[A](errorOrA: Either[Throwable, A]): Future[A] =
+    errorOrA match {
+      case Left(error) => Future.failed(error)
+      case Right(a)    => Future.successful(a)
+    }
 }

@@ -2,6 +2,7 @@ package endpoints.xhr
 
 import endpoints.algebra
 import endpoints.Tupler
+import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.language.higherKinds
@@ -89,5 +90,21 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     xhr.onerror = _ => onerror(xhr)
     xhr.send(maybeEntity.orNull)
   }
+
+  protected final def muxPerformXhr[Req <: MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Response[Transport],
+    req: Req
+  )(
+    onload: Either[Throwable, req.Response] => Unit,
+    onError: XMLHttpRequest => Unit
+  )(implicit
+    encoder: Encoder[Req, Transport],
+    decoder: Decoder[Transport, Resp]
+  ): Unit =
+    performXhr(request, response, encoder.encode(req))(
+      errorOrResp => onload(errorOrResp.right.flatMap(decoder.decode(_).asInstanceOf[Either[Throwable, req.Response]])),
+      onError
+    )
 
 }

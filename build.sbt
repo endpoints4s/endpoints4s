@@ -226,70 +226,70 @@ val `example-basic-server` =
 
 // CQRS Example
 //
-//   +--------------+   +--------------+     +----------+
-//   | front-end-def|   | commands-def +-----+ commands |
-//   +---+------+---+   +---+----------+     +----------+
-//      /        \         /
-//     /          \       /
-// +--+-+       +--+-----+--+
-// | ui |       | front-end |
-// +----+       +--------+--+
-//                        \
-//                         \
-//                      +---+---------+       +---------+
-//                      | queries-def +-------+ queries |
-//                      +-------------+       +---------+
+//    +-----------------+  +--------------------+     +----------+
+//    | public-endpoints|  | commands-endpoints +-----+ commands |
+//    +----+--------+---+  +------+-------------+     +----------+
+//        /          \           /
+//       /            \         /
+// +----+-------+    +-+-------+-----+
+// | web-client |    | public-server |
+// +------------+    +--------+------+
+//                             \
+//                              \
+//                           +---+---------------+     +---------+
+//                           | queries-endpoints +-----+ queries |
+//                           +-------------------+     +---------+
 
-// front-end endpoints definitions
-val `example-cqrs-front-end-def` =
-  CrossProject("example-cqrs-front-end-def-jvm", "example-cqrs-front-end-def-js", file("examples/cqrs/front-end-def"), CrossType.Pure)
+// public endpoints definitions
+val `example-cqrs-public-endpoints` =
+  CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`algebra`)
+    .dependsOn(`algebra-circe`)
 
-val `example-cqrs-front-end-def-jvm` = `example-cqrs-front-end-def`.jvm
+val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 
-val `example-cqrs-front-end-def-js` = `example-cqrs-front-end-def`.js
+val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
 
-// front-end implementation, *implements* the front-end definitions and *uses* the commands and queries definitions
-val `example-cqrs-front-end` =
-  project.in(file("examples/cqrs/front-end"))
+// public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
+val `example-cqrs-public-server` =
+  project.in(file("examples/cqrs/public-server"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server`, `play-client`)
-    .dependsOn(`example-cqrs-front-end-def-jvm`, `example-cqrs-commands-def`, `example-cqrs-queries-def`)
+    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
 
-// front-end ui, *uses* the front-end definitions
-val `example-cqrs-ui` =
-  project.in(file("examples/cqrs/ui"))
+// web-client, *uses* the public endpoints’ definitions
+val `example-cqrs-web-client` =
+  project.in(file("examples/cqrs/web-client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`xhr-client-faithful`)
-    .dependsOn(`example-cqrs-front-end-def-js`)
+    .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-js`)
 
 // commands endpoints definitions
-lazy val `example-cqrs-commands-def` =
-  project.in(file("examples/cqrs/commands-def"))
+lazy val `example-cqrs-commands-endpoints` =
+  project.in(file("examples/cqrs/commands-endpoints"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`algebra-jvm`)
+    .dependsOn(`algebra-circe-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server`)
-    .dependsOn(`example-cqrs-commands-def`)
+    .dependsOn(`play-server-circe`)
+    .dependsOn(`example-cqrs-commands-endpoints`)
 
 // queries endpoints definitions
-lazy val `example-cqrs-queries-def` =
-  project.in(file("examples/cqrs/queries-def"))
+lazy val `example-cqrs-queries-endpoints` =
+  project.in(file("examples/cqrs/queries-endpoints"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`algebra-jvm`)
+    .dependsOn(`algebra-circe-jvm`)
 
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server`)
-    .dependsOn(`example-cqrs-queries-def`)
+    .dependsOn(`play-server-circe`)
+    .dependsOn(`example-cqrs-queries-endpoints`)
 
 val endpoints =
   project.in(file("."))
@@ -328,11 +328,11 @@ val endpoints =
       `example-basic-server`,
       `example-basic-client`,
       // cqrs example
-      `example-cqrs-front-end-def-jvm`, `example-cqrs-front-end-def-js`,
-      `example-cqrs-front-end`,
-      `example-cqrs-ui`,
-      `example-cqrs-commands-def`,
+      `example-cqrs-public-endpoints-jvm`, `example-cqrs-public-endpoints-js`,
+      `example-cqrs-public-server`,
+      `example-cqrs-web-client`,
+      `example-cqrs-commands-endpoints`,
       `example-cqrs-commands`,
-      `example-cqrs-queries-def`,
+      `example-cqrs-queries-endpoints`,
       `example-cqrs-queries`
     )
