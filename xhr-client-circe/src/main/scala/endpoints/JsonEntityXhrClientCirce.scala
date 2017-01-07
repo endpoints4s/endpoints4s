@@ -24,6 +24,6 @@ trait JsonEntityXhrClientCirce extends EndpointXhrClient with JsonEntityAlg {
   }
 
   def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Either[Exception, A]] =
-    xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson).toEither
+    xhr => parser.parse(xhr.responseText).right.flatMap(decoder.decodeJson)
 
 }

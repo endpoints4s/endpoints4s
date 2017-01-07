@@ -15,6 +15,6 @@ trait CirceCodecPlayClient extends CirceCodecAlg { this: EndpointPlayClient =>
 
   /** Decodes a response entity by using the supplied codec */
   def jsonResponse[A : CirceCodec]: Response[A] =
-    response => jawn.parse(response.body).flatMap(CirceCodec[A].decoder.decodeJson).toEither
+    response => jawn.parse(response.body).right.flatMap(CirceCodec[A].decoder.decodeJson)
 
 }

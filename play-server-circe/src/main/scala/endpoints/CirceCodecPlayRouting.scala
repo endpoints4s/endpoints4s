@@ -14,7 +14,8 @@ trait CirceCodecPlayRouting extends EndpointPlayRouting with CirceCodecAlg {
   def jsonRequest[A : CirceCodec] =
     BodyParsers.parse.raw.validate { buffer =>
       jawn.parseFile(buffer.asFile)
-        .flatMap(CirceCodec[A].decoder.decodeJson).toEither
+        .right
+        .flatMap(CirceCodec[A].decoder.decodeJson)
         .left.map(error => Results.BadRequest)
     }
 
