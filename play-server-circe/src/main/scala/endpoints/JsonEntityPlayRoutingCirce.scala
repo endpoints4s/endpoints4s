@@ -21,7 +21,8 @@ trait JsonEntityPlayRoutingCirce extends EndpointPlayRouting with JsonEntityAlg 
   def jsonRequest[A : Decoder] =
     BodyParsers.parse.raw.validate { buffer =>
       jawn.parseFile(buffer.asFile)
-        .flatMap(Decoder[A].decodeJson).toEither
+         .right
+        .flatMap(Decoder[A].decodeJson)
         .left.map(error => Results.BadRequest)
     }
 

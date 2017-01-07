@@ -18,6 +18,6 @@ trait CirceCodecXhrClient extends EndpointXhrClient with CirceCodecAlg {
 
   /** Decodes the response entity by using the supplied codec */
   def jsonResponse[A : CirceCodec]: js.Function1[XMLHttpRequest, Either[Exception, A]] =
-    xhr => parser.parse(xhr.responseText).flatMap(CirceCodec[A].decoder.decodeJson).toEither
+    xhr => parser.parse(xhr.responseText).right.flatMap(CirceCodec[A].decoder.decodeJson _)
 
 }
