@@ -12,25 +12,20 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object Main extends App {
 
   implicit val actorSystem: ActorSystem = ActorSystem("public-server")
+  implicit val materializer: Materializer = ActorMaterializer()
 
   try {
 
-    val wsComponents =
-      new AhcWSComponents {
-        val applicationLifecycle = new DefaultApplicationLifecycle
-        val environment = Environment.simple(mode = Mode.Prod)
-        val materializer = ActorMaterializer()
-      }
+    val wsComponents: AhcWSComponents = new AhcWSComponents
 
     val queriesService = new QueriesService(wsComponents.wsClient)
 
     import queriesService.{circeJsonEncoder, circeJsonDecoder}
 
-    queriesService.query(FindAll)(circeJsonEncoder(Query.queryEncoder), circeJsonDecoder(QueryResult.queryDecoder))
+    queriesService.query(FindAll)(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder))
       .foreach { response =>
-        response: ResourceList
         println(s"find all response = $response")
-        wsComponents.applicationLifecycle.stop()
+        wsComponents.wsClient.close()
         actorSystem.terminate()
       }
 
@@ -42,16 +37,11 @@ object Main extends App {
 
 }
 
-trait AhcWSComponents {
-
-  def environment: Environment
-
-  def applicationLifecycle: ApplicationLifecycle
-
-  def materializer: Materializer
-
+class AhcWSComponents(implicit materializer: Materializer) {
+  val applicationLifecycle = new DefaultApplicationLifecycle
+  val environment = Environment.simple(mode = Mode.Prod)
   lazy val wsClientConfig: WSClientConfig = WSClientConfig()
   lazy val ahcWsClientConfig: AhcWSClientConfig = AhcWSClientConfig()
-  lazy val wsApi: WSAPI = new AhcWSAPI(environment, ahcWsClientConfig, applicationLifecycle)(materializer)
+  lazy val wsApi: WSAPI = new AhcWSAPI(environment, ahcWsClientConfig, applicationLifecycle)
   lazy val wsClient: WSClient = wsApi.client
 }

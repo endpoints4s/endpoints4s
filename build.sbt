@@ -243,7 +243,7 @@ val `example-basic-server` =
 // public endpoints definitions
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
-    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
     .dependsOn(`algebra-circe`)
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
@@ -268,20 +268,29 @@ val `example-cqrs-web-client` =
 // commands endpoints definitions
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
-    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
+    .settings(
+      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
+    )
     .dependsOn(`algebra-circe-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server-circe`)
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+      )
+    )
+    .dependsOn(`play-server-circe`, `play-client-circe` % Test)
     .dependsOn(`example-cqrs-commands-endpoints`)
 
 // queries endpoints definitions
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
-    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
     .dependsOn(`algebra-circe-jvm`)
 
 // queries implementation
