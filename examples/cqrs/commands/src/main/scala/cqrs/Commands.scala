@@ -16,34 +16,30 @@ import scala.concurrent.stm.{Ref, atomic}
 object Commands extends CommandsEndpoints with Endpoints with CirceEntities {
 
   val routes: Router.Routes = routesFromEndpoints(
-    command.implementedBy { commandReq =>
-      CommandResp(
-        processCommand(commandReq.maybeAggregateId, commandReq.command)
-      )
-    }
+    command.implementedBy(processCommand)
   )
 
   val aggregatesRef = Ref(Map.empty[UUID, Meter])
 
-  def processCommand(maybeAggregateId: Option[UUID], command: Command): Option[Event] =
+  def processCommand(command: Command): Option[Event] =
     atomic { implicit txn =>
 
-      def applyToAggregate(maybeAggregate: Option[Meter], command: Command): Option[Event] = {
-        val maybeEvent = Meter.handleCommand(maybeAggregate, command)
-
+      def handleEvent(maybeEvent: Option[Event], maybeAggregate: Option[Meter]): Option[Event] = {
         maybeEvent.foreach { event =>
           val aggregate = Meter.handleEvent(maybeAggregate, event)
+          // TODO Event log
           aggregatesRef()= aggregatesRef.get + (aggregate.id -> aggregate)
         }
-
         maybeEvent
       }
 
-      maybeAggregateId match {
-        case Some(aggregateId) =>
-          aggregatesRef.get.get(aggregateId)
-            .flatMap(aggregate => applyToAggregate(Some(aggregate), command))
-        case None => applyToAggregate(None, command)
+      command match {
+        case creation: CreationCommand =>
+          handleEvent(Meter.handleCreationCommand(creation), None)
+        case update: UpdateCommand =>
+          aggregatesRef.get.get(update.meterId).flatMap { aggregate =>
+            handleEvent(Meter.handleUpdateCommand(aggregate, update), Some(aggregate))
+          }
       }
     }
 

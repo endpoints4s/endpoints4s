@@ -10,43 +10,32 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 trait CommandsEndpoints extends Endpoints with CirceEntities {
 
-  val command: Endpoint[CommandReq, CommandResp] =
-    endpoint(post[Unit, CommandReq, Unit, CommandReq](path / "command", jsonRequest[CommandReq]), jsonResponse[CommandResp])
+  /**
+    * Application of a command.
+    *
+    * Returns the produced event, or `None` in case of failure (aggregate
+    * not found or invalid command).
+    */
+  val command: Endpoint[Command, Option[Event]] =
+    endpoint(post[Unit, Command, Unit, Command](path / "command", jsonRequest[Command]), jsonResponse[Option[Event]])
 
-}
-
-/** A request applying a command on the given aggregate */
-case class CommandReq(
-  maybeAggregateId: Option[UUID],
-  command: Command
-)
-
-object CommandReq {
-  implicit val decoder: Decoder[CommandReq] = deriveDecoder
-  implicit val encoder: Encoder[CommandReq] = deriveEncoder
-
-  // Convenient constructors
-  val createMeter: CommandReq = CommandReq(None, CreateMeter)
-  def addReading(id: UUID, date: OffsetDateTime, value: BigDecimal): CommandReq =
-    CommandReq(Some(id), AddReading(date, value))
-}
-
-/**
-  * The response resulting from the command application
-  *
-  * @param maybeEvent The produced event, or `None` in case of failure (aggregate
-  *                   not found or invalid command)
-  */
-case class CommandResp(maybeEvent: Option[Event])
-
-object CommandResp {
-  implicit val decoder: Decoder[CommandResp] = deriveDecoder
-  implicit val encoder: Encoder[CommandResp] = deriveEncoder
 }
 
 sealed trait Command
-case object CreateMeter extends Command
-case class AddReading(date: OffsetDateTime, value: BigDecimal) extends Command
+
+/** Base trait of commands creating a new resource */
+sealed trait CreationCommand extends Command
+
+/** Base trait of commands updating an existing resource */
+sealed trait UpdateCommand extends Command {
+  def meterId: UUID
+}
+
+/** Create a new meter */
+case object CreateMeter extends CreationCommand
+
+/** Add a record for an existing meter */
+case class AddRecord(meterId: UUID, date: OffsetDateTime, value: BigDecimal) extends UpdateCommand
 
 object Command {
   implicit val decoder: Decoder[Command] = deriveDecoder
@@ -55,7 +44,7 @@ object Command {
 
 sealed trait Event
 case class MeterCreated(id: UUID) extends Event
-case class ReadingAdded(date: OffsetDateTime, value: BigDecimal) extends Event
+case class RecordAdded(date: OffsetDateTime, value: BigDecimal) extends Event
 
 object Event {
   implicit val decoder: Decoder[Event] = deriveDecoder

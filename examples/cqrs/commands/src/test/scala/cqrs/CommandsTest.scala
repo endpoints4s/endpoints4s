@@ -11,7 +11,6 @@ import play.api.inject.{ApplicationLifecycle, DefaultApplicationLifecycle}
 import play.api.libs.ws.{WSAPI, WSClient, WSClientConfig}
 import play.api.libs.ws.ahc.{AhcWSAPI, AhcWSClientConfig}
 import play.core.server.NettyServer
-import CommandReq.{addReading, createMeter}
 import endpoints.play.client.{CirceEntities, Endpoints}
 
 import scala.concurrent.Future
@@ -40,33 +39,23 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     val arbitraryValue = BigDecimal(10)
 
     "create a new meter" in {
-      client.command(createMeter).map { response =>
-        assert(response.maybeEvent.collect { case MeterCreated(_) => () }.nonEmpty)
-      }
-    }
-    "CreateMeter applied to an existing meter should fail" in {
-      client.command(CommandReq(Some(UUID.randomUUID()), CreateMeter)).map { response =>
-        assert(response.maybeEvent.isEmpty)
+      client.command(CreateMeter).map { maybeEvent =>
+        assert(maybeEvent.collect { case MeterCreated(_) => () }.nonEmpty)
       }
     }
     "create a meter and add readings to it" in {
       for {
-        createdResponse <- client.command(createMeter)
+        maybeCreatedEvent <- client.command(CreateMeter)
         id <-
-          createdResponse.maybeEvent
+          maybeCreatedEvent
             .collect { case MeterCreated(id) => id }
             .fold[Future[UUID]](Future.failed(new NoSuchElementException))(Future.successful)
-        addedResponse <- client.command(addReading(id, arbitraryDate, arbitraryValue))
+        maybeAddedEvent <- client.command(AddRecord(id, arbitraryDate, arbitraryValue))
         _ <-
-          addedResponse.maybeEvent
-            .collect { case ReadingAdded(`arbitraryDate`, `arbitraryValue`) => () }
+          maybeAddedEvent
+            .collect { case RecordAdded(`arbitraryDate`, `arbitraryValue`) => () }
             .fold[Future[Unit]](Future.failed(new NoSuchElementException))(Future.successful)
       } yield assert(true)
-    }
-    "AddReading to a non existing meter should fail" in {
-      client.command(addReading(UUID.randomUUID(), arbitraryDate, arbitraryValue)).map { response =>
-        assert(response.maybeEvent.isEmpty)
-      }
     }
   }
 
