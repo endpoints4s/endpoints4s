@@ -173,6 +173,7 @@ val `play-client-circe` =
     )
     .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
 
+// Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
@@ -225,21 +226,6 @@ val `example-basic-server` =
 
 
 // CQRS Example
-//
-//    +-----------------+  +--------------------+     +----------+
-//    | public-endpoints|  | commands-endpoints +-----+ commands |
-//    +----+--------+---+  +------+-------------+     +----------+
-//        /          \           /
-//       /            \         /
-// +----+-------+    +-+-------+-----+
-// | web-client |    | public-server |
-// +------------+    +--------+------+
-//                             \
-//                              \
-//                           +---+---------------+     +---------+
-//                           | queries-endpoints +-----+ queries |
-//                           +-------------------+     +---------+
-
 // public endpoints definitions
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
@@ -297,8 +283,17 @@ lazy val `example-cqrs-queries-endpoints` =
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server-circe`)
-    .dependsOn(`example-cqrs-queries-endpoints`)
+    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
+
+// this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
+val `example-cqrs-infra` =
+  project.in(file("examples/cqrs/infra"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      cancelable in Global := true
+    )
+    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`)
 
 val endpoints =
   project.in(file("."))
@@ -337,6 +332,7 @@ val endpoints =
       `example-basic-server`,
       `example-basic-client`,
       // cqrs example
+      `example-cqrs-infra`,
       `example-cqrs-public-endpoints-jvm`, `example-cqrs-public-endpoints-js`,
       `example-cqrs-public-server`,
       `example-cqrs-web-client`,

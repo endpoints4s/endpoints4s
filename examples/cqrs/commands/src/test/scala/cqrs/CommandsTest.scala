@@ -3,15 +3,11 @@ package cqrs
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
-import akka.actor.ActorSystem
 import akka.stream.Materializer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
-import play.api.{Environment, Mode}
-import play.api.inject.{ApplicationLifecycle, DefaultApplicationLifecycle}
-import play.api.libs.ws.{WSAPI, WSClient, WSClientConfig}
-import play.api.libs.ws.ahc.{AhcWSAPI, AhcWSClientConfig}
-import play.core.server.NettyServer
 import endpoints.play.client.{CirceEntities, Endpoints}
+import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import play.core.server.NettyServer
 
 import scala.concurrent.Future
 import scala.math.BigDecimal
@@ -20,16 +16,16 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   private val server = NettyServer.fromRouter()(Commands.routes)
 
-  implicit val actorSystem: ActorSystem = server.actorSystem
   implicit val materializer: Materializer = server.materializer
-  val wsComponents = new AhcWSComponents
+  private val wsClient = AhcWSClient(AhcWSClientConfig())
 
   object client
-    extends Endpoints("http://localhost:9000", wsComponents.wsClient)
+    extends Endpoints("http://localhost:9000", wsClient)
       with CirceEntities
       with CommandsEndpoints
 
   override def afterAll(): Unit = {
+    wsClient.close()
     server.stop()
   }
 
@@ -59,13 +55,4 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     }
   }
 
-}
-
-class AhcWSComponents(implicit materializer: Materializer) {
-  val applicationLifecycle = new DefaultApplicationLifecycle
-  val environment = Environment.simple(mode = Mode.Prod)
-  lazy val wsClientConfig: WSClientConfig = WSClientConfig()
-  lazy val ahcWsClientConfig: AhcWSClientConfig = AhcWSClientConfig()
-  lazy val wsApi: WSAPI = new AhcWSAPI(environment, ahcWsClientConfig, applicationLifecycle)
-  lazy val wsClient: WSClient = wsApi.client
 }
