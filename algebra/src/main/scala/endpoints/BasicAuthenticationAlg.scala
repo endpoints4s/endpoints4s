@@ -12,31 +12,20 @@ trait BasicAuthenticationAlg extends EndpointAlg {
 
   private[endpoints] def authenticated[A](response: Response[A]): Response[Option[A]] // FIXME Use an extensible type to model authentication failure
 
-  // TODO Abstract over GET vs POST
   // TODO Allow users to supply additional `RequestHeaders`
   /**
-    * Defines a GET endpoint protected by Basic HTTP authentication
+    * Defines an endpoint protected by Basic HTTP authentication
     */
-  def authenticatedGetEndpoint[A, B](
+  def authenticatedEndpoint[A, B, C, AB](
+    method: Method,
     url: Url[A],
-    response: Response[B]
-  )(implicit
-    tupler: Tupler[A, Credentials]
-  ): Endpoint[tupler.Out, Option[B]] =
-    endpoint(get(url, basicAuthentication), authenticated(response))
-
-  /**
-    * Defines a POST endpoint protected by Basic HTTP authentication
-    */
-  def authenticatedPostEndpoint[A, B, C, AB](
-    url: Url[A],
-    requestEntity: RequestEntity[B],
+    requestEntity: RequestEntity[B] = emptyRequestEntity,
     response: Response[C]
   )(implicit
     tuplerAB: Tupler.Aux[A, B, AB],
     tuplerABC: Tupler[AB, Credentials]
   ): Endpoint[tuplerABC.Out, Option[C]] =
-    endpoint(post(url, requestEntity, basicAuthentication), authenticated(response))
+    endpoint(request(method, url, requestEntity, basicAuthentication), authenticated(response))
 
 }
 

@@ -7,13 +7,13 @@ trait ApiAlg extends EndpointAlg with CirceCodecAlg with AssetAlg
   with OptionalResponseAlg with BasicAuthenticationAlg {
 
   val index =
-    endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
+    endpoint(request(Get, path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
 
   val action =
-    endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+    endpoint(request(Post, path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 
   val actionFut =
-    endpoint(post(path / "actionFut", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+    endpoint(request(Post, path / "actionFut", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
 
   lazy val digests = AssetsDigests.digests
 
@@ -21,10 +21,10 @@ trait ApiAlg extends EndpointAlg with CirceCodecAlg with AssetAlg
     assetsEndpoint(path / "assets" / assetSegments)
 
   val maybe =
-    endpoint(get(path / "option"), option(emptyResponse))
+    endpoint(request(Get, path / "option"), option(emptyResponse))
 
   val auth =
-    authenticatedGetEndpoint(path / "auth", emptyResponse)
+    authenticatedEndpoint(Get, path / "auth", response = emptyResponse)
 
 }
 

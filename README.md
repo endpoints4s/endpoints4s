@@ -37,7 +37,7 @@ trait CounterEndpoints extends EndpointAlg with CirceCodecAlg {
     * Uses the HTTP verb “GET” and URL path “/current-value”.
     * The response entity is a JSON document representing the counter value.
     */
-  val currentValue = endpoint(get(path / "current-value"), jsonResponse[Counter])
+  val currentValue = endpoint(request(Get, path / "current-value"), jsonResponse[Counter])
 
   /**
     * Increments the counter value.
@@ -45,7 +45,7 @@ trait CounterEndpoints extends EndpointAlg with CirceCodecAlg {
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.
     */
-  val increment = endpoint(post(path / "increment", jsonRequest[Increment]), emptyResponse)
+  val increment = endpoint(request(Post, path / "increment", jsonRequest[Increment]), emptyResponse)
 
 }
 

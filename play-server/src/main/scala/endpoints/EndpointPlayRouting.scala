@@ -39,7 +39,7 @@ import scala.language.higherKinds
   *   val router = play.api.routing.Router.from(MyRouter.routes)
   * }}}
   */
-trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting {
+trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting with MethodsPlayRouting {
 
   /**
     * An attempt to extract an `A` from a request headers.
@@ -126,34 +126,20 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting {
   /** Decodes a request entity */
   type RequestEntity[A] = BodyParser[A]
 
-  private def extractMethod(method: String): RequestExtractor[Unit] =
-    request =>
-      if (request.method == method) Some(())
-      else None
+  override val emptyRequestEntity: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
-  private def extractMethodUrlAndHeaders[A, B](method: String, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
+
+  private def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
     new UrlAndHeaders[(A, B)] {
       val decode: RequestExtractor[Either[Result, (A, B)]] =
         request =>
-          extractMethod(method).andKeep(url.decodeUrl).apply(request).map { a =>
-            headers(request.headers).right.map((a, _))
+          (method.extract: RequestExtractor[Unit])
+            .andKeep(url.decodeUrl)
+            .apply(request)
+            .map { a => headers(request.headers).right.map((a, _))
           }
-      def encode(ab: (A, B)): Call = Call(method, url.encodeUrl(ab._1))
+      def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
     }
-
-  /**
-    * Decodes a request that uses the GET HTTP verb.
-    *
-    * @param url Request URL
-    * @param headers Request headers
-    */
-  def get[A, B](url: Url[A], headers: RequestHeaders[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    extractMethodUrlAndHeaders("GET", url, headers)
-      .toRequest { case (a, b) =>
-        BodyParser(_ => Accumulator.done(Right(tupler.apply(a, b))))
-      } { ab =>
-        tupler.unapply(ab)
-      }
 
   /**
     * Decodes a request that uses the POST HTTP verb.
@@ -161,8 +147,8 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting {
     * @param entity Request entity
     * @param headers Request headers
     */
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    extractMethodUrlAndHeaders("POST", url, headers)
+  override def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
         case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
       } { abc =>

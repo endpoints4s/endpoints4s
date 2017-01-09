@@ -9,7 +9,7 @@ import scala.scalajs.js
   * Interpreter for [[EndpointAlg]] that builds a client issuing requests
   * using XMLHttpRequest.
   */
-trait EndpointXhrClient extends EndpointAlg with UrlClient {
+trait EndpointXhrClient extends EndpointAlg with UrlClient with MethodsXhrClient{
 
   /**
     * A function that takes the information `A` and the XMLHttpRequest
@@ -36,18 +36,13 @@ trait EndpointXhrClient extends EndpointAlg with UrlClient {
     */
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
-  def get[A, B](url: Url[A], headers: RequestHeaders[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
-      val xhr = makeXhr("GET", url, a, headers, b)
-      (xhr, None)
-    }
+  override def emptyRequestEntity: RequestEntity[Unit] = (_,_) => null
 
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  override def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val xhr = makeXhr("POST", url, a, headers, c)
+      val xhr = makeXhr(method, url, a, headers, c)
       (xhr, Some(entity(b, xhr)))
     }
 

@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Play’s [[WSClient]] HTTP client.
   * @param wsClient The underlying client to use
   */
-class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointAlg with UrlClient {
+class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointAlg with UrlClient with MethodsClient {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -28,21 +28,20 @@ class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) exte
   /**
     * A function that, given an `A` information and a `WSRequest`, eventually returns a `WSResponse`
     */
-  type RequestEntity[A] = (A, WSRequest) => Future[WSResponse]
+  type RequestEntity[A] = (A, WSRequest) => WSRequest
 
-  def get[A, B](url: Url[A], headers: RequestHeaders[B])(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
-    (ab: tupler.Out) => {
-      val (a, b) = tupler.unapply(ab)
-      val wsRequest = wsClient.url(url.encode(a))
-      headers(b, wsRequest).get()
-    }
+  override val emptyRequestEntity: RequestEntity[Unit] = { case (_, req) => req }
 
-  def post[A, B, C, AB](url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+
+  override def request[A, B, C, AB](
+    method: Method, url: EndpointPlayClient.this.Url[A],
+    entity: RequestEntity[B], headers: EndpointPlayClient.this.RequestHeaders[C]
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): EndpointPlayClient.this.Request[tuplerABC.Out] =
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val wsRequest = wsClient.url(url.encode(a))
-      entity(b, headers(c, wsRequest))
+      val wsRequest = method(entity(b, headers(c, wsClient.url(url.encode(a)))))
+      wsRequest.execute()
     }
 
   /**
