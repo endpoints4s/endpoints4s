@@ -17,7 +17,7 @@ trait AssetAlg extends EndpointAlg {
     *   val assets = assetsEndpoint(get(path / "assets" / assetsSegments))
     * }}}
     *
-    *  Then, here is how the following requests are decoded:
+    * Then, here is how the following requests are decoded:
     * - `/assets/foo` => `foo`
     * - `/assets/foo/bar` => `foo/bar`
     */
