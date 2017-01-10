@@ -51,10 +51,10 @@ trait EndpointAlg extends UrlAlg with MethodAlg {
   /**
     * Helper method to perform GET request
     */
-  def get[A, C, AUnit](
+  def get[A, C](
     url: Url[A],
     headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, Unit, AUnit], tuplerABC: Tupler[AUnit, C]): Request[tuplerABC.Out] = request(Get, url, headers = headers)
+  )(implicit tuplerAC: Tupler[A, C]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
 
   /**
     * Helper method to perform POST request
