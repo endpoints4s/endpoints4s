@@ -30,10 +30,10 @@ class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) exte
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
-  override val emptyRequestEntity: RequestEntity[Unit] = { case (_, req) => req }
+  lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) => req }
 
 
-  override def request[A, B, C, AB](
+  def request[A, B, C, AB](
     method: Method, url: Url[A],
     entity: RequestEntity[B], headers: RequestHeaders[C]
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =

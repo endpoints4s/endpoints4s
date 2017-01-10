@@ -126,7 +126,7 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting with MethodPla
   /** Decodes a request entity */
   type RequestEntity[A] = BodyParser[A]
 
-  override val emptyRequestEntity: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
+  lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
 
   private def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
@@ -147,7 +147,7 @@ trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting with MethodPla
     * @param entity Request entity
     * @param headers Request headers
     */
-  override def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
   extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
         case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))

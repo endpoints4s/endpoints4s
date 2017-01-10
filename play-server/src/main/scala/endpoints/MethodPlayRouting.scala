@@ -14,12 +14,12 @@ trait MethodPlayRouting extends MethodAlg {
         else None
   }
 
-  override def Get = Method("GET")
+  def Get = Method("GET")
 
-  override def Post = Method("POST")
+  def Post = Method("POST")
 
-  override def Put = Method("PUT")
+  def Put = Method("PUT")
 
-  override def Delete = Method("DELETE")
+  def Delete = Method("DELETE")
 }
 
