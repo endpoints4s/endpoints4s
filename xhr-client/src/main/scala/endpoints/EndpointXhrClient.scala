@@ -36,9 +36,9 @@ trait EndpointXhrClient extends EndpointAlg with UrlClient with MethodXhrClient{
     */
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
-  override def emptyRequestEntity: RequestEntity[Unit] = (_,_) => null
+  lazy val emptyRequest: RequestEntity[Unit] = (_,_) => null
 
-  override def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)

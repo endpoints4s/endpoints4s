@@ -30,7 +30,7 @@ trait EndpointAlg extends UrlAlg with MethodAlg {
   /**
     * Empty request.
     */
-  def emptyRequestEntity: RequestEntity[Unit]
+  def emptyRequest: RequestEntity[Unit]
 
 
   /**
@@ -44,17 +44,17 @@ trait EndpointAlg extends UrlAlg with MethodAlg {
   def request[A, B, C, AB](
     method: Method,
     url: Url[A],
-    entity: RequestEntity[B] = emptyRequestEntity,
+    entity: RequestEntity[B] = emptyRequest,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
 
   /**
     * Helper method to perform GET request
     */
-  def get[A, C](
+  def get[A, B](
     url: Url[A],
-    headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAC: Tupler[A, C]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
+    headers: RequestHeaders[B] = emptyHeaders
+  )(implicit tuplerAC: Tupler[A, B]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
 
   /**
     * Helper method to perform POST request
