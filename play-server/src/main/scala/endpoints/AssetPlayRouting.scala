@@ -116,14 +116,14 @@ trait AssetPlayRouting extends AssetAlg with EndpointPlayRouting {
     * @return An HTTP endpoint serving assets
     */
   def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] = {
-    val request =
+    val req =
       invariantFunctorRequest.inmap( // TODO remove this boilerplate using play-products
-        get(url, gzipSupport),
+        request(Get, url, headers = gzipSupport),
         (t: (AssetPath, Boolean)) => AssetRequest(t._1, t._2),
         (assetRequest: AssetRequest) => (assetRequest.assetPath, assetRequest.isGzipSupported)
       )
 
-    endpoint(request, assetResponse)
+    endpoint(req, assetResponse)
   }
 
   /**
