@@ -7,7 +7,7 @@ import scala.language.higherKinds
   *
   * Requests and responses contain headers and entity.
   */
-trait EndpointAlg extends UrlAlg with MethodsAlg {
+trait EndpointAlg extends UrlAlg with MethodAlg {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]
@@ -47,6 +47,24 @@ trait EndpointAlg extends UrlAlg with MethodsAlg {
     entity: RequestEntity[B] = emptyRequestEntity,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
+
+  /**
+    * Helper method to perform GET request
+    */
+  def get[A, C, AUnit](
+    url: Url[A],
+    headers: RequestHeaders[C] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[A, Unit, AUnit], tuplerABC: Tupler[AUnit, C]): Request[tuplerABC.Out] = request(Get, url, headers = headers)
+
+  /**
+    * Helper method to perform POST request
+    */
+  final def post[A, B, C, AB](
+    url: Url[A],
+    entity: RequestEntity[B],
+    headers: RequestHeaders[C] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
+
 
   /** Information carried by a response */
   type Response[A]

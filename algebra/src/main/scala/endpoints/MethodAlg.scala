@@ -1,7 +1,7 @@
 package endpoints
 
 
-trait MethodsAlg {
+trait MethodAlg {
 
   type Method
 

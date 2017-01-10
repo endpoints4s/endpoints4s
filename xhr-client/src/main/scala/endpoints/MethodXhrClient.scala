@@ -3,7 +3,7 @@ package endpoints
 /**
   * Created by wpitula on 1/9/17.
   */
-trait MethodsXhrClient extends MethodsAlg {
+trait MethodXhrClient extends MethodAlg {
   override type Method = String
 
   override def Get: String = "GET"

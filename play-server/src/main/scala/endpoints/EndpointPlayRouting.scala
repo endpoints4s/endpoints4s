@@ -39,7 +39,7 @@ import scala.language.higherKinds
   *   val router = play.api.routing.Router.from(MyRouter.routes)
   * }}}
   */
-trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting with MethodsPlayRouting {
+trait EndpointPlayRouting extends EndpointAlg with UrlPlayRouting with MethodPlayRouting {
 
   /**
     * An attempt to extract an `A` from a request headers.

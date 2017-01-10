@@ -3,9 +3,9 @@ package endpoints
 import play.api.libs.ws.WSRequest
 
 /**
-  * [[MethodsAlg]] interpreter that builds URLs.
+  * [[MethodAlg]] interpreter that builds URLs.
   */
-trait MethodsClient extends MethodsAlg {
+trait MethodClient extends MethodAlg {
 
   /**
     * String representation of the method

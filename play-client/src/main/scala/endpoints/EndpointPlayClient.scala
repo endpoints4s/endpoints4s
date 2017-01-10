@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Play’s [[WSClient]] HTTP client.
   * @param wsClient The underlying client to use
   */
-class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointAlg with UrlClient with MethodsClient {
+class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointAlg with UrlClient with MethodClient {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -34,9 +34,9 @@ class EndpointPlayClient(wsClient: WSClient)(implicit ec: ExecutionContext) exte
 
 
   override def request[A, B, C, AB](
-    method: Method, url: EndpointPlayClient.this.Url[A],
-    entity: RequestEntity[B], headers: EndpointPlayClient.this.RequestHeaders[C]
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): EndpointPlayClient.this.Request[tuplerABC.Out] =
+    method: Method, url: Url[A],
+    entity: RequestEntity[B], headers: RequestHeaders[C]
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)

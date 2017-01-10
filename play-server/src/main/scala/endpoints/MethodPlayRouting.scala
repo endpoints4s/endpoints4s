@@ -3,14 +3,15 @@ package endpoints
 import play.api.mvc.RequestHeader
 
 /**
-  * [[MethodsAlg]] interpreter that decodes and encodes methods.
+  * [[MethodAlg]] interpreter that decodes and encodes methods.
   */
-trait MethodsPlayRouting extends MethodsAlg {
+trait MethodPlayRouting extends MethodAlg {
 
   case class Method(value: String) {
-    val extract = (request: RequestHeader) =>
-      if (request.method == value) Some(())
-      else None
+    val extract: (RequestHeader) => Option[Unit] =
+      (request: RequestHeader) =>
+        if (request.method == value) Some(())
+        else None
   }
 
   override def Get = Method("GET")

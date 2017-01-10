@@ -9,7 +9,7 @@ import scala.scalajs.js
   * Interpreter for [[EndpointAlg]] that builds a client issuing requests
   * using XMLHttpRequest.
   */
-trait EndpointXhrClient extends EndpointAlg with UrlClient with MethodsXhrClient{
+trait EndpointXhrClient extends EndpointAlg with UrlClient with MethodXhrClient{
 
   /**
     * A function that takes the information `A` and the XMLHttpRequest
