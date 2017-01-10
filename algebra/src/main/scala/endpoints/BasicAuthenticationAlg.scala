@@ -19,7 +19,7 @@ trait BasicAuthenticationAlg extends EndpointAlg {
   def authenticatedEndpoint[A, B, C, AB](
     method: Method,
     url: Url[A],
-    requestEntity: RequestEntity[B] = emptyRequestEntity,
+    requestEntity: RequestEntity[B] = emptyRequest,
     response: Response[C]
   )(implicit
     tuplerAB: Tupler.Aux[A, B, AB],

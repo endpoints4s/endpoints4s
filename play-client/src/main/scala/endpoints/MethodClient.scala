@@ -12,11 +12,14 @@ trait MethodClient extends MethodAlg {
     */
   type Method = WSRequest => WSRequest
 
-  private def setMethod(method:String): Method = (r: WSRequest) => r.withMethod(method)
+  private def setMethod(method: String): Method = (r: WSRequest) => r.withMethod(method)
 
-  override def Get = setMethod("GET")
-  override def Post = setMethod("POST")
-  override def Put = setMethod("PUT")
-  override def Delete = setMethod("DELETE")
+  def Get = setMethod("GET")
+
+  def Post = setMethod("POST")
+
+  def Put = setMethod("PUT")
+
+  def Delete = setMethod("DELETE")
 
 }
