@@ -1,14 +1,23 @@
-package cqrs
+package cqrs.commands
 
 import java.time.OffsetDateTime
 import java.util.UUID
 
-/** A meter has a time series of reading */
+/**
+  * This is the model used to validate commands.
+  * It is not necessary the same as the one for querying.
+  *
+  * For instance, here we use a `List` to store the records,
+  * because the ordering does not matter in the context of the
+  * application of a command. Conversely, the query model
+  * represents records as a `SortedMap` because it is useful
+  * to see the time series in chronological order.
+  */
 // TODO store the number of digits of the meter
-case class Meter(id: UUID, timeSeries: List[Reading])
+case class Meter(id: UUID, timeSeries: List[Record])
 
 /** A reading is a value at a certain date */
-case class Reading(date: OffsetDateTime, value: BigDecimal)
+case class Record(date: OffsetDateTime, value: BigDecimal)
 
 object Meter {
 
@@ -18,7 +27,7 @@ object Meter {
   // TODO Return meaningful information in case of invalid command
   def handleCreationCommand(creationCommand: CreationCommand): Option[Event] =
     creationCommand match {
-      case CreateMeter => Some(MeterCreated(UUID.randomUUID()))
+      case CreateMeter(label) => Some(MeterCreated(UUID.randomUUID(), label))
     }
 
   def handleUpdateCommand(meter: Meter, updateCommand: UpdateCommand): Option[Event] =
@@ -28,9 +37,9 @@ object Meter {
 
   def handleEvent(maybeMeter: Option[Meter], event: Event): Meter =
     (maybeMeter, event) match {
-      case (None, MeterCreated(id)) => Meter(id, Nil)
+      case (None, MeterCreated(id, _)) => Meter(id, Nil)
       case (Some(meter), RecordAdded(date, value)) =>
-        meter.copy(timeSeries = Reading(date, value) :: meter.timeSeries)
+        meter.copy(timeSeries = Record(date, value) :: meter.timeSeries)
       case e => sys.error(s"No event handlers defined for $e")
     }
 

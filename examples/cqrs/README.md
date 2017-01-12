@@ -17,6 +17,7 @@ meters, report their evolution over time, and visualize these data.
 
 The project is broken down into the following sub-projects:
 
+~~~
        +-----------------+  +--------------------+     +----------+
        | public-endpoints|  | commands-endpoints +-----+ commands |
        +----+--------+---+  +------+-----------+-+     +----------+
@@ -30,7 +31,7 @@ The project is broken down into the following sub-projects:
                            +------+------------+     +-+-------+
                            | queries-endpoints +-----+ queries |
                            +-------------------+     +---------+
-
+~~~
 
 - `public-server` provides the public HTTP server ;
 - `commands` and `queries` are internal microservices used by the public

@@ -1,4 +1,4 @@
-package cqrs
+package cqrs.commands
 
 import java.util.UUID
 

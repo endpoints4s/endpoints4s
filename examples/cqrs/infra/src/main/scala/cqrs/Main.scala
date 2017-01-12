@@ -1,4 +1,4 @@
-package cqrs
+package cqrs.infra
 
 import akka.actor.ActorSystem
 import akka.stream.{Materializer, ActorMaterializer}
@@ -10,7 +10,12 @@ import play.api.routing.Router
 import play.core.server.{NettyServer, ServerConfig}
 import play.core.{ApplicationProvider, DefaultWebCommands, SourceMapper, WebCommands}
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 import com.typesafe.config.ConfigFactory
+
+import cqrs.publicserver.PublicServer
+import cqrs.commands.Commands
+import cqrs.queries.Queries
 
 /**
   * In the real world we would run the different services on distinct
@@ -47,8 +52,14 @@ object Main extends App {
   implicit val actorSystem: ActorSystem = ActorSystem("public-service")
   implicit val materializer: Materializer = ActorMaterializer()
   val wsClient = AhcWSClient(AhcWSClientConfig())
-  val publicServer =
-    new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), wsClient)
+  val publicServer = {
+    val routes =
+      new cqrs.publicserver.Router(
+        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), wsClient)
+      ).routes
+    HttpServer(ServerConfig(port = Some(publicService.port)), Router.from(routes))
+  }
+
   // …
 
   Runtime.getRuntime.addShutdownHook(new Thread {
@@ -56,7 +67,7 @@ object Main extends App {
       wsClient.close()
       commandsServer.stop()
       queriesServer.stop()
-      // publicServer.stop()
+      publicServer.stop()
     }
   })
 

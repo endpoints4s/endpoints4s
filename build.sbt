@@ -230,6 +230,9 @@ val `example-basic-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
+    .settings(
+      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
+    )
     .dependsOn(`algebra-circe`)
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
@@ -277,7 +280,7 @@ val `example-cqrs-commands` =
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
-    .dependsOn(`algebra-circe-jvm`)
+    .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
 
 // queries implementation
 val `example-cqrs-queries` =

@@ -1,4 +1,4 @@
-package cqrs
+package cqrs.commands
 
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
@@ -35,16 +35,16 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     val arbitraryValue = BigDecimal(10)
 
     "create a new meter" in {
-      client.command(CreateMeter).map { maybeEvent =>
-        assert(maybeEvent.collect { case MeterCreated(_) => () }.nonEmpty)
+      client.command(CreateMeter("electricity")).map { maybeEvent =>
+        assert(maybeEvent.collect { case MeterCreated(_, "electricity") => () }.nonEmpty)
       }
     }
     "create a meter and add readings to it" in {
       for {
-        maybeCreatedEvent <- client.command(CreateMeter)
+        maybeCreatedEvent <- client.command(CreateMeter("water"))
         id <-
           maybeCreatedEvent
-            .collect { case MeterCreated(id) => id }
+            .collect { case MeterCreated(id, _) => id }
             .fold[Future[UUID]](Future.failed(new NoSuchElementException))(Future.successful)
         maybeAddedEvent <- client.command(AddRecord(id, arbitraryDate, arbitraryValue))
         _ <-

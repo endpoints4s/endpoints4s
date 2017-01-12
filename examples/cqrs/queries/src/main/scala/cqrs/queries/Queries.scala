@@ -1,4 +1,4 @@
-package cqrs
+package cqrs.queries
 
 import endpoints.algebra.Handler
 import endpoints.play.routing.{CirceEntities, Endpoints}

@@ -1,4 +1,4 @@
-package cqrs
+package cqrs.commands
 
 import java.time.OffsetDateTime
 import java.util.UUID
@@ -21,6 +21,13 @@ trait CommandsEndpoints extends Endpoints with CirceEntities {
 
 }
 
+/**
+  * Base trait of commands.
+  *
+  * Note that we could also have just reused the DTOs of the public API,
+  * but we chose to use distinct data types so that the public API is
+  * not cluttered with implementation details of the commands microservice.
+  */
 sealed trait Command
 
 /** Base trait of commands creating a new resource */
@@ -32,7 +39,7 @@ sealed trait UpdateCommand extends Command {
 }
 
 /** Create a new meter */
-case object CreateMeter extends CreationCommand
+case class CreateMeter(label: String) extends CreationCommand
 
 /** Add a record for an existing meter */
 case class AddRecord(meterId: UUID, date: OffsetDateTime, value: BigDecimal) extends UpdateCommand
@@ -43,7 +50,7 @@ object Command {
 }
 
 sealed trait Event
-case class MeterCreated(id: UUID) extends Event
+case class MeterCreated(id: UUID, label: String) extends Event
 case class RecordAdded(date: OffsetDateTime, value: BigDecimal) extends Event
 
 object Event {

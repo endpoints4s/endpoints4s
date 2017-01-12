@@ -1,4 +1,6 @@
-package cqrs
+package cqrs.queries
+
+import java.util.UUID
 
 import endpoints.algebra.{CirceEntities, Endpoints, MuxRequest}
 import io.circe.{Decoder, Encoder, Json}
@@ -19,16 +21,9 @@ trait QueryEndpoints extends Endpoints with CirceEntities {
 
 }
 
-case class Resource(version: Long, id: Long)
-
-object Resource {
-  implicit val resourceDecoder: Decoder[Resource] = deriveDecoder
-  implicit val resourceEncoder: Encoder[Resource] = deriveEncoder
-}
-
 /** A request carrying a query */
 sealed trait QueryReq extends MuxRequest
-final case class FindById(id: Long) extends QueryReq { type Response = MaybeResource }
+final case class FindById(id: UUID) extends QueryReq { type Response = MaybeResource }
 final case object FindAll extends QueryReq { type Response = ResourceList }
 final case class Find(/* TODO Some search criterias */) extends QueryReq { type Response = ResourceList }
 
@@ -40,8 +35,8 @@ object QueryReq {
 /** A response to a QueryReq */
 // TODO Enrich with failure information
 sealed trait QueryResp
-case class MaybeResource(value: Option[Resource]) extends QueryResp
-case class ResourceList(value: List[Resource]) extends QueryResp
+case class MaybeResource(value: Option[Meter]) extends QueryResp
+case class ResourceList(value: List[Meter]) extends QueryResp
 
 object QueryResp {
   implicit val queryDecoder: Decoder[QueryResp] = deriveDecoder
