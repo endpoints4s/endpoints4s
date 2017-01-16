@@ -1,6 +1,7 @@
 package sample
 
-import endpoints._
+import endpoints.xhr._
 
-object Api extends ApiAlg with EndpointXhrClient with CirceCodecXhrClient with AssetXhrClient
-  with XhrClientThenable with OptionalResponseXhrClient with BasicAuthenticationXhrClient
+object Api extends ApiAlg with Endpoints with CirceEntities with Assets
+  with thenable.Endpoints with OptionalResponses with BasicAuthentication
+

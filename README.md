@@ -22,7 +22,7 @@ Let’s define a first artifact, cross-compiled for Scala.js, and containing a d
 endpoints of a Web service.
 
 ~~~ scala
-import endpoints.{EndpointAlg, CirceCodecAlg}
+import endpoints.algebra.{Endpoints, CirceEntities}
 import io.circe.generic.JsonCodec
 /**
   * Defines the HTTP endpoints description of a Web service implementing a counter.
@@ -30,7 +30,7 @@ import io.circe.generic.JsonCodec
   * and one for incrementing it.
   * It uses circe.io for JSON marshalling.
   */
-trait CounterEndpoints extends EndpointAlg with CirceCodecAlg {
+trait CounterEndpoints extends Endpoints with CirceEntities {
 
   /**
     * Get the counter current value.
@@ -61,12 +61,12 @@ case class Increment(step: Int)
 The following code is located in a Scala.js-only module, which depends on the first one.
 
 ~~~ scala
-import endpoints.{CirceCodecXhrClient, XhrClientThenable}
+import endpoints.xhr
 /**
   * Defines an HTTP client for the endpoints described in the `CounterAlg` trait.
   * The derived HTTP client uses XMLHttpRequest to perform requests and returns results in a `js.Thenable`.
   */
-object Counter extends CounterEndpoints with XhrClientThenable with CirceCodecXhrClient
+object Counter extends CounterEndpoints with xhr.thenable.Endpoints with xhr.CirceEntities
 ~~~
 
 And then:
@@ -94,13 +94,13 @@ val eventuallyDone: js.Thenable[Unit] = Counter.increment(Increment(42))
 The following code is located in a JVM-only module, which depends on the first one.
 
 ~~~ scala
-import endpoints.{EndpointPlayRouting, CirceCodecPlayRouting}
+import endpoints.play
 import scala.concurrent.stm.Ref
 
 /**
   * Defines a Play router (and reverse router) for the endpoints described in the `CounterAlg` trait.
   */
-object Counter extends CounterEndpoints with EndpointPlayRouting with CirceCodecPlayRouting {
+object Counter extends CounterEndpoints with play.routing.Endpoints with play.routing.CirceEntities {
 
   /** Dummy implementation of an in-memory counter */
   val counter = Ref(0)
@@ -134,12 +134,12 @@ object Main extends App {
 You can also get a Scala/JVM client (which uses `play-ws` under the hood) as follows:
 
 ~~~ scala
-import endpoints.{EndpointPlayClient, CirceCodecPlayClient}
+import endpoints.play
 import play.api.libs.ws.WSClient
 import scala.concurrent.ExecutionContext
 
-class Counter(wsClient: WSClient)(implicit ec: ExecutionContext) extends EndpointPlayClient(wsClient)
-    with CounterEndpoints with CirceCodecPlayClient
+class Counter(wsClient: WSClient)(implicit ec: ExecutionContext) extends play.client.Endpoints(wsClient)
+    with CounterEndpoints with play.client.CirceEntities
 ~~~
 
 Thus, you can distribute a (fully working) JVM client, which is independent of your implementation.
@@ -150,10 +150,10 @@ The `EndpointAlg` trait used in the first module provides members that bring **v
 endpoints (e.g. the `endpoint`, `get`, `post`, etc. methods), but these members are all abstract. Furthermore,
 **their types are also abstract**.
 
-For instance, consider the following truncated version of `EndpointAlg`:
+For instance, consider the following truncated version of `algebra.Endpoints`:
 
 ~~~ scala
-trait EndpointAlg {
+trait Endpoints {
   def get[A](url: Url[A]): Request[A]
 
   /** A request that carries an `A` information */
@@ -170,10 +170,10 @@ The `Request[A]` type defines an HTTP request that *carries* an information `A`.
 of view, this `A` is what is **needed** to build a `Request[A]`. From a server point of view, this `A`
 is what is **provided** when processing a `Request[A]`.
 
-Let’s see the semantics that is given to `Request[A]` by the `EndpointXhrClient` trait:
+Let’s see the semantics that is given to `Request[A]` by the `xhr.Endpoints` trait:
 
 ~~~ scala
-trait EndpointXhrClient extends EndpointAlg {
+trait Endpoints extends algebra.Endpoints {
   type Request[A] = js.Function1[A, XMLHttpRequest]
 }
 ~~~
@@ -181,22 +181,22 @@ trait EndpointXhrClient extends EndpointAlg {
 As previously said, from a client point of view we want to send requests and get responses. So, `Request[A]`
 has the semantics of a recipe to build an `XMLHttpRequest` out of an `A` value.
 
-Here is the semantics given by the `EndpointPlayRouting` trait:
+Here is the semantics given by the `play.routing.Endpoints` trait:
 
 ~~~ scala
-trait EndpointPlayRouting extends EndpointAlg {
+trait Endpoints extends algebra.Endpoints {
   type Request[A] = RequestHeader => Option[BodyParser[A]]
 }
 ~~~
 
-The aim of the `EndpointPlayRouting` trait is to provide a Play router for a given set of HTTP endpoints. So,
+The aim of the `play.routing.Endpoints` trait is to provide a Play router for a given set of HTTP endpoints. So,
 a `Request[A]` is a function that checks if an incoming request matches this endpoint, and in such
 a case it returns a `BodyParser[A]` that pulls an `A` out of the request.
 
 As you can see, each implementation brings its own **concrete semantic type** for `Request[A]`.
 
-According to B. Oliveira [1], we say that `EndpointAlg` is an *object algebra interface* and that `EndpointXhrClient`
-and `EndpointPlayRouting` are *object algebras*. Note that we use an encoding borrowed from C. Hofer [2], which encodes
+According to B. Oliveira [1], we say that `algebra.Endpoints` is an *object algebra interface* and that `xhr.Endpoints`
+and `play.routing.Endpoints` are *object algebras*. Note that we use an encoding borrowed from C. Hofer [2], which encodes
 *carrier types* with type members rather than type parameters.
 
 - [1] B. C. d. S. Oliveira et. al. Extensibility for the Masses, Practical Extensibility with Object Algebras, ECOOP,

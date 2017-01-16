@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.Credentials
+import endpoints.algebra.BasicAuthentication.Credentials
 import org.scalajs.dom.document
 import org.scalajs.dom.AudioContext
 
