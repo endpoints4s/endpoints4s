@@ -2,14 +2,13 @@ package endpoints.play.routing
 
 import endpoints.algebra
 import endpoints.algebra.CirceEntities.CirceCodec
-import endpoints.play
 import io.circe.jawn
-import _root_.play.api.libs.concurrent.Execution.Implicits.defaultContext
-import _root_.play.api.mvc.{BodyParsers, Results}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.mvc.{BodyParsers, Results}
 import endpoints.PlayCirce.circeJsonWriteable
 
 /**
-  * Implements [[algebra.CirceEntities]] for [[play.routing.Endpoints]].
+  * Implements [[algebra.CirceEntities]] for [[Endpoints]].
   */
 trait CirceEntities extends Endpoints with algebra.CirceEntities {
 
