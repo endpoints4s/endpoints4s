@@ -1,10 +1,10 @@
 package sample
 
-import endpoints._
+import endpoints.algebra._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends EndpointAlg with CirceCodecAlg with AssetAlg
-  with OptionalResponseAlg with BasicAuthenticationAlg {
+trait ApiAlg extends Endpoints with CirceEntities with Assets
+  with OptionalResponses with BasicAuthentication {
 
   val index =
     endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])

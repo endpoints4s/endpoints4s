@@ -1,12 +1,12 @@
 package sample
 
-import endpoints._
+import endpoints.play.routing._
 
 import scala.concurrent.Future
 import scala.util.Random
 
-object Api extends ApiAlg with EndpointPlayRouting with CirceCodecPlayRouting with AssetPlayRouting
-  with OptionalResponsePlayRouting with BasicAuthenticationPlayRouting {
+object Api extends ApiAlg with Endpoints with CirceEntities with Assets
+  with OptionalResponses with BasicAuthentication {
 
   val routes = routesFromEndpoints(
     index.implementedBy { case (name, age, _) => User(name, age) },
