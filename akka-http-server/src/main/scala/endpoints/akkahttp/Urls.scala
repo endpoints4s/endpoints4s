@@ -1,7 +1,7 @@
 package endpoints.akkahttp
 
 import akka.http.scaladsl.server.util.{Tupler => AkkaTupler}
-import akka.http.scaladsl.server.{Directive, Directive1, Directives, PathMatcher1}
+import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, Unmarshaller}
 import endpoints.{Tupler, algebra}
 
@@ -56,8 +56,8 @@ trait Urls extends algebra.Urls {
   }
 
   def staticPathSegment(segment: String): Path[Unit] = {
-    val directive = Directives.pathPrefix(segment).tmap(_ => Tuple1(()))
-    new Path(directive)
+    val directive = Directives.pathPrefix(segment)
+    new Path(convToDirective1(directive))
   }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
@@ -68,10 +68,14 @@ trait Urls extends algebra.Urls {
   /**
     * Simpler alternative to [[Directive.&()]] method
     */
-  private def joinDirectives[T1, T2](dir1: Directive1[T1], dir2: Directive1[T2])(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
+  protected def joinDirectives[T1, T2](dir1: Directive1[T1], dir2: Directive1[T2])(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
     Directive[Tuple1[tupler.Out]] { inner =>
       dir1.tapply { case Tuple1(prefix) => dir2.tapply { case Tuple1(suffix) => inner(Tuple1(tupler(prefix, suffix))) } }
     }
+  }
+
+  protected def convToDirective1(directive: Directive0): Directive1[Unit] = {
+    directive.tmap(_ => Tuple1(()))
   }
 
 }

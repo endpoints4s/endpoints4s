@@ -53,7 +53,7 @@ trait Endpoints extends Urls with Methods {
   /**
     * Helper method to perform GET request
     */
-  def get[A, B](
+  final def get[A, B](
     url: Url[A],
     headers: RequestHeaders[B] = emptyHeaders
   )(implicit tuplerAC: Tupler[A, B]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
