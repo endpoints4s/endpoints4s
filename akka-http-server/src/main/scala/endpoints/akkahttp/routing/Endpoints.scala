@@ -1,4 +1,4 @@
-package endpoints.akkahttp
+package endpoints.akkahttp.routing
 
 import akka.http.javadsl.server.RouteResult
 import akka.http.scaladsl.model.StatusCodes
