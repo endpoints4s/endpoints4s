@@ -12,7 +12,7 @@ import scala.language.higherKinds
   *
   *
   */
-class Endpoints extends algebra.Endpoints with Urls with Methods {
+trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   type RequestHeaders[A] = Directive1[A]
 
@@ -24,13 +24,13 @@ class Endpoints extends algebra.Endpoints with Urls with Methods {
 
   type Endpoint[A, B] = (A => B) => Route
 
-  override def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
+  def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
-  override def emptyHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
+  def emptyHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
 
-  override def emptyResponse: Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
+  def emptyResponse: Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
 
-  override def request[A, B, C, AB](
+  def request[A, B, C, AB](
     method: Method,
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
@@ -46,7 +46,7 @@ class Endpoints extends algebra.Endpoints with Urls with Methods {
       headers)
   }
 
-  override def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     (implementation: A => B) => request { arguments =>
       response(implementation(arguments))
     }
