@@ -6,7 +6,7 @@ import endpoints.algebra.{CirceEntities, Endpoints, MuxRequest}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-trait QueryEndpoints extends Endpoints with CirceEntities {
+trait QueriesEndpoints extends Endpoints with CirceEntities {
 
   /**
     * This is our *internal* protocol for queries. We don’t have to suffer from
@@ -23,7 +23,7 @@ trait QueryEndpoints extends Endpoints with CirceEntities {
 
 /** A request carrying a query */
 sealed trait QueryReq extends MuxRequest
-final case class FindById(id: UUID) extends QueryReq { type Response = MaybeResource }
+final case class FindById(id: UUID, after: Option[Long]) extends QueryReq { type Response = MaybeResource }
 final case object FindAll extends QueryReq { type Response = ResourceList }
 final case class Find(/* TODO Some search criterias */) extends QueryReq { type Response = ResourceList }
 

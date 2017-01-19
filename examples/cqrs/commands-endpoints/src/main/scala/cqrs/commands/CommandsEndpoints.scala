@@ -16,8 +16,14 @@ trait CommandsEndpoints extends Endpoints with CirceEntities {
     * Returns the produced event, or `None` in case of failure (aggregate
     * not found or invalid command).
     */
-  val command: Endpoint[Command, Option[Event]] =
-    endpoint(post[Unit, Command, Unit, Command](path / "command", jsonRequest[Command]), jsonResponse[Option[Event]])
+  val command: Endpoint[Command, Option[StoredEvent]] =
+    endpoint(post[Unit, Command, Unit, Command](path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
+
+  /**
+    * Read the event long (optionally from a given timestamp).
+    */
+  val events: Endpoint[Option[Long], Vector[StoredEvent]] =
+    endpoint(get(path / "events" /? optQs[Long]("since")), jsonResponse[Vector[StoredEvent]])
 
 }
 
@@ -49,9 +55,16 @@ object Command {
   implicit val encoder: Encoder[Command] = deriveEncoder
 }
 
+case class StoredEvent(timestamp: Long, event: Event)
+
+object StoredEvent {
+  implicit val decoder: Decoder[StoredEvent] = deriveDecoder
+  implicit val encoder: Encoder[StoredEvent] = deriveEncoder
+}
+
 sealed trait Event
 case class MeterCreated(id: UUID, label: String) extends Event
-case class RecordAdded(date: OffsetDateTime, value: BigDecimal) extends Event
+case class RecordAdded(id: UUID, date: OffsetDateTime, value: BigDecimal) extends Event
 
 object Event {
   implicit val decoder: Decoder[Event] = deriveDecoder

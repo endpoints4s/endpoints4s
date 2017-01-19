@@ -294,7 +294,11 @@ val `example-cqrs-infra` =
   project.in(file("examples/cqrs/infra"))
     .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
     .settings(
-      cancelable in Global := true
+      cancelable in Global := true,
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+      )
     )
     .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`)
 

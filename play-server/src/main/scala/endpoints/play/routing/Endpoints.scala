@@ -2,7 +2,7 @@ package endpoints.play.routing
 
 import endpoints.algebra
 import endpoints.Tupler
-import endpoints.algebra.{Decoder, Encoder, Handler, MuxRequest}
+import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
@@ -226,15 +226,32 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     response: Response[Transport]
   ) {
     def implementedBy(
-      handler: Handler[Req, Resp]
+      handler: MuxHandler[Req, Resp]
+    )(implicit
+      decoder: Decoder[Transport, Req],
+      encoder: Encoder[Resp, Transport]
+    ): ToPlayHandler =
+      toPlayHandler(req => Future.successful(handler(req)))
+
+    def implementedByAsync(
+      handler: MuxHandlerAsync[Req, Resp]
+    )(implicit
+      decoder: Decoder[Transport, Req],
+      encoder: Encoder[Resp, Transport]
+    ): ToPlayHandler =
+      toPlayHandler(req => handler(req))
+
+    def toPlayHandler(
+      handler: Req { type Response = Resp } => Future[Resp]
     )(implicit
       decoder: Decoder[Transport, Req],
       encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
       header =>
         request.decode(header).map { bodyParser =>
-          Action(bodyParser) { request =>
-            response(encoder.encode(handler(decoder.decode(request.body).right.get /* TODO Handle failure */ .asInstanceOf[Req {type Response = Resp}])))
+          Action.async(bodyParser) { request =>
+            handler(decoder.decode(request.body).right.get /* TODO Handle failure */.asInstanceOf[Req { type Response = Resp}])
+              .map(resp => response(encoder.encode(resp)))
           }
         }
   }
@@ -264,4 +281,26 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       loop(endpoints)
     }
 
+}
+
+/**
+  * A function whose return type depends on the type
+  * of the given `req`.
+  *
+  * @tparam Req Request base type
+  * @tparam Resp Response base type
+  */
+trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
+  def apply[R <: Resp](req: Req { type Response = R }): Future[R]
+}
+
+/**
+  * A function whose return type depends on the type
+  * of the given `req`.
+  *
+  * @tparam Req Request base type
+  * @tparam Resp Response base type
+  */
+trait MuxHandler[Req <: MuxRequest, Resp] {
+  def apply[R <: Resp](req: Req { type Response = R }): R
 }

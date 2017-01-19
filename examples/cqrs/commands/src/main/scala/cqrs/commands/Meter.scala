@@ -32,13 +32,13 @@ object Meter {
 
   def handleUpdateCommand(meter: Meter, updateCommand: UpdateCommand): Option[Event] =
     updateCommand match {
-      case AddRecord(_, date, value) => Some(RecordAdded(date, value))
+      case AddRecord(id, date, value) => Some(RecordAdded(id, date, value))
     }
 
   def handleEvent(maybeMeter: Option[Meter], event: Event): Meter =
     (maybeMeter, event) match {
       case (None, MeterCreated(id, _)) => Meter(id, Nil)
-      case (Some(meter), RecordAdded(date, value)) =>
+      case (Some(meter), RecordAdded(_, date, value)) =>
         meter.copy(timeSeries = Record(date, value) :: meter.timeSeries)
       case e => sys.error(s"No event handlers defined for $e")
     }

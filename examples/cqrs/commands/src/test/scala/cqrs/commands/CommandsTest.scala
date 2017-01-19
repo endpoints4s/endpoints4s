@@ -25,8 +25,8 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
       with CommandsEndpoints
 
   override def afterAll(): Unit = {
-    wsClient.close()
     server.stop()
+    wsClient.close()
   }
 
   "Commands" - {
@@ -36,7 +36,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
     "create a new meter" in {
       client.command(CreateMeter("electricity")).map { maybeEvent =>
-        assert(maybeEvent.collect { case MeterCreated(_, "electricity") => () }.nonEmpty)
+        assert(maybeEvent.collect { case StoredEvent(_, MeterCreated(_, "electricity")) => () }.nonEmpty)
       }
     }
     "create a meter and add readings to it" in {
@@ -44,12 +44,12 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
         maybeCreatedEvent <- client.command(CreateMeter("water"))
         id <-
           maybeCreatedEvent
-            .collect { case MeterCreated(id, _) => id }
+            .collect { case StoredEvent(_, MeterCreated(id, _)) => id }
             .fold[Future[UUID]](Future.failed(new NoSuchElementException))(Future.successful)
         maybeAddedEvent <- client.command(AddRecord(id, arbitraryDate, arbitraryValue))
         _ <-
           maybeAddedEvent
-            .collect { case RecordAdded(`arbitraryDate`, `arbitraryValue`) => () }
+            .collect { case StoredEvent(_, RecordAdded(`id`, `arbitraryDate`, `arbitraryValue`)) => () }
             .fold[Future[Unit]](Future.failed(new NoSuchElementException))(Future.successful)
       } yield assert(true)
     }

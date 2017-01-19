@@ -123,14 +123,3 @@ trait Endpoints extends Urls with Methods {
 trait MuxRequest {
   type Response
 }
-
-/**
-  * A function whose return type depends on the type
-  * of the given `req`.
-  *
-  * @tparam Req Request base type
-  * @tparam Resp Response base type
-  */
-trait Handler[Req <: MuxRequest, Resp] {
-  def apply[R <: Resp](req: Req { type Response = R }): R
-}
