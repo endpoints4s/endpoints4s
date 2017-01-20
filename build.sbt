@@ -179,6 +179,18 @@ val `akka-http-server` =
     )
     .dependsOn(`algebra-jvm`)
 
+val `akka-http-server-circe` =
+  project.in(file("akka-http-server-circe"))
+    .settings(publishSettings: _*)
+    .settings(`scala2.12`: _*)
+    .settings(
+      name := "endpoints-akka-http-server-circe",
+      libraryDependencies ++= Seq(
+        "de.heikoseeberger" %% "akka-http-circe" % "1.11.0"
+      )
+    )
+    .dependsOn(`akka-http-server`, `algebra-circe-jvm`)
+
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
