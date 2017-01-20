@@ -25,7 +25,7 @@ trait QueriesEndpoints extends Endpoints with CirceEntities {
 sealed trait QueryReq extends MuxRequest
 final case class FindById(id: UUID, after: Option[Long]) extends QueryReq { type Response = MaybeResource }
 final case object FindAll extends QueryReq { type Response = ResourceList }
-final case class Find(/* TODO Some search criterias */) extends QueryReq { type Response = ResourceList }
+// TODO Add a type of query including complex filters
 
 object QueryReq {
   implicit val queryDecoder: Decoder[QueryReq] = deriveDecoder

@@ -18,7 +18,6 @@ class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints w
         query match {
           case FindById(id, t) => service.findById(id, t).map(MaybeResource)
           case FindAll         => service.findAll().map(ResourceList)
-          case Find()          => Future.successful(ResourceList(Nil)) // TODO
         }
     })(circeJsonDecoder(QueryReq.queryDecoder), circeJsonEncoder(QueryResp.queryEncoder)) // TODO Let the type inference do the work
 

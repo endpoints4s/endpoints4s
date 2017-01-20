@@ -34,6 +34,15 @@ class PublicServer(
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
 
+      listMeters.implementedByAsync { _ =>
+        queriesClient.query(FindAll)(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder))
+          .map(_.value)
+      },
+
+      getMeter.implementedByAsync { id =>
+        queriesClient.query(FindById(id, None))(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder)).map(_.value)
+      },
+
       createMeter.implementedByAsync { createData =>
         for {
           maybeEvent <- commandsClient.command(CreateMeter(createData.label))
@@ -51,11 +60,6 @@ class PublicServer(
       addRecord.implementedByAsync { case (id, addData) =>
         commandsClient.command(AddRecord(id, addData.date, addData.value))
           .flatMap(_.fold[Future[Unit]](Future.failed(new NoSuchElementException))(_ => Future.successful(())))
-      },
-
-      listMeters.implementedByAsync { _ =>
-        queriesClient.query(FindAll)(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder))
-          .map(_.value)
       }
 
     )
