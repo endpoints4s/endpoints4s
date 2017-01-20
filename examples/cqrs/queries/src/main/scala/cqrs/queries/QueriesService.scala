@@ -84,7 +84,7 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
       case StoredEvent(t, MeterCreated(id, label)) =>
         state.copy(
           lastEventTimestamp = Some(t),
-          meters = state.meters + (id -> Meter(label, SortedMap.empty))
+          meters = state.meters + (id -> Meter(id, label, SortedMap.empty))
         )
       case StoredEvent(t, RecordAdded(id, date, value)) =>
         val meter = state.meters(id)
