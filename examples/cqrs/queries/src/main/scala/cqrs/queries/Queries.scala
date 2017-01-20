@@ -19,8 +19,12 @@ class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints w
           case FindById(id, t) => service.findById(id, t).map(MaybeResource)
           case FindAll         => service.findAll().map(ResourceList)
         }
-    })(circeJsonDecoder(QueryReq.queryDecoder), circeJsonEncoder(QueryResp.queryEncoder)) // TODO Let the type inference do the work
+    })
 
   )
+
+  // These aliases are probably due to a limitation of circe
+  implicit private def circeDecoderReq: io.circe.Decoder[QueryReq] = QueryReq.queryDecoder
+  implicit private def circeEncoderResp: io.circe.Encoder[QueryResp] = QueryResp.queryEncoder
 
 }

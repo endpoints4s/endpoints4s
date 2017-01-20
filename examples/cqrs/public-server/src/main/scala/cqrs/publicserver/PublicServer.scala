@@ -35,12 +35,12 @@ class PublicServer(
     routesFromEndpoints(
 
       listMeters.implementedByAsync { _ =>
-        queriesClient.query(FindAll)(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder))
+        queriesClient.query(FindAll)
           .map(_.value)
       },
 
       getMeter.implementedByAsync { id =>
-        queriesClient.query(FindById(id, None))(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder)).map(_.value)
+        queriesClient.query(FindById(id, None)).map(_.value)
       },
 
       createMeter.implementedByAsync { createData =>
@@ -49,8 +49,7 @@ class PublicServer(
           maybeMeter <- Traverse[Option].flatSequence(
             maybeEvent.collect {
               case StoredEvent(t, MeterCreated(id, _)) =>
-                queriesClient.query(FindById(id, after = Some(t)))(circeJsonEncoder(QueryReq.queryEncoder), circeJsonDecoder(QueryResp.queryDecoder))
-                  .map(_.value)
+                queriesClient.query(FindById(id, after = Some(t))).map(_.value)
             }
           )
           meter <- maybeMeter.fold[Future[Meter]](Future.failed(new NoSuchElementException))(Future.successful)
@@ -69,5 +68,9 @@ class PublicServer(
       def decode(segment: String): Option[UUID] = Try(UUID.fromString(segment)).toOption
       def encode(uuid: UUID): String = URLEncoder.encode(uuid.toString, utf8Name)
     }
+
+  // These aliases are probably due to a limitation of circe
+  implicit private def circeEncoderReq: io.circe.Encoder[QueryReq] = QueryReq.queryEncoder
+  implicit private def circeDecoderResp: io.circe.Decoder[QueryResp] = QueryResp.queryDecoder
 
 }
