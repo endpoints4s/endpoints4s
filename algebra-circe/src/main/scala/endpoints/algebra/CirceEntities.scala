@@ -1,7 +1,7 @@
 package endpoints.algebra
 
 import endpoints.algebra.CirceEntities.CirceCodec
-import io.circe.{Decoder, Encoder}
+import io.circe.{Json, Decoder => CirceDecoder, Encoder => CirceEncoder}
 
 /**
   * Partial interpreter for [[JsonEntities]]: only fixes the carrier types, but does
@@ -11,7 +11,7 @@ import io.circe.{Decoder, Encoder}
   *
   * It means that, from a client
   * point of view, you will need a complete code even if you only want to build a request
-  * entity (despite that an [[Encoder]] would have sufficed).
+  * entity (despite that a [[io.circe.Encoder]] would have sufficed).
   *
   * The idea is to share codecs between client-side and server-side code,
   * thus guaranteeing consistency between both sides.
@@ -65,28 +65,38 @@ trait CirceEntities extends JsonEntities {
   type JsonResponse[A] = CirceCodec[A]
   type JsonRequest[A] = CirceCodec[A]
 
+  /** Provides a Json [[io.circe.Decoder]] based on an existing circe decoder */
+  implicit def circeJsonDecoder[A](implicit circeDecoder: CirceDecoder[A]): Decoder[Json, A] =
+    json =>
+      circeDecoder.decodeJson(json)
+        .fold(failure => Left(new Exception(failure.message)), Right(_))
+
+  /** Provides a Json [[Encoder]] based on an existing circe encoder */
+  implicit def circeJsonEncoder[A](implicit circeEncoder: CirceEncoder[A]): Encoder[A, Json] =
+    circeEncoder(_)
+
 }
 
 object CirceEntities {
 
   /**
-    * Combines both an [[Encoder]] and a [[Decoder]] into a single type class.
+    * Combines both an [[io.circe.Encoder]] and a [[io.circe.Decoder]] into a single type class.
     *
     * You don’t need to define instances by yourself as they can be derived from an existing pair
-    * of an [[Encoder]] and a [[Decoder]].
+    * of an [[io.circe.Encoder]] and a [[io.circe.Decoder]].
     *
     * @see https://github.com/travisbrown/circe/issues/301
     */
   trait CirceCodec[A] {
-    def encoder: Encoder[A]
-    def decoder: Decoder[A]
+    def encoder: CirceEncoder[A]
+    def decoder: CirceDecoder[A]
   }
 
   object CirceCodec {
 
     @inline def apply[A](implicit codec: CirceCodec[A]): CirceCodec[A] = codec
 
-    implicit def fromEncoderAndDecoder[A](implicit enc: Encoder[A], dec: Decoder[A]): CirceCodec[A] =
+    implicit def fromEncoderAndDecoder[A](implicit enc: CirceEncoder[A], dec: CirceDecoder[A]): CirceCodec[A] =
       new CirceCodec[A] {
         val decoder = dec
         val encoder = enc

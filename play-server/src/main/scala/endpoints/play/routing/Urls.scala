@@ -71,6 +71,12 @@ trait Urls extends algebra.Urls {
       def encode(a: Int) = a.toString
     }
 
+  implicit def longSegment: Segment[Long] =
+    new Segment[Long] {
+      def decode(segment: String) = Try(segment.toLong).toOption
+      def encode(a: Long) = a.toString
+    }
+
   /**
     * Query string encoding and decoding
     */
@@ -105,6 +111,14 @@ trait Urls extends algebra.Urls {
       def encode(a: A) = value.encode(name, a)
     }
 
+  def optQs[A](name: String)(implicit value: QueryStringParam[A]) =
+    new QueryString[Option[A]] {
+      def decode(qs: Map[String, Seq[String]]): Option[Option[A]] =
+        Some(value.decode(name, qs))
+      def encode(maybeA: Option[A]): Map[String, Seq[String]] =
+        maybeA.fold(Map.empty[String, Seq[String]])(value.encode(name, _))
+    }
+
   trait QueryStringParam[A] {
     def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
@@ -126,6 +140,13 @@ trait Urls extends algebra.Urls {
         Map(name -> Seq(i.toString))
     }
 
+  implicit def longQueryString: QueryStringParam[Long] =
+    new QueryStringParam[Long] {
+      def decode(name: String, qs: Map[String, Seq[String]]) =
+        qs.get(name).flatMap(_.headOption).flatMap(s => Try(s.toLong).toOption)
+      def encode(name: String, i: Long) =
+        Map(name -> Seq(i.toString))
+    }
 
   trait Path[A] extends PathOps[A] with Url[A] {
     def decode(segments: List[String]): Option[(A, List[String])]

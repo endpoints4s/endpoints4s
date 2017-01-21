@@ -2,30 +2,28 @@ package endpoints.xhr.circe
 
 import endpoints.algebra
 import endpoints.xhr.Endpoints
-import io.circe.{Decoder, Encoder, parser}
+import io.circe.{Decoder => CirceDecoder, Encoder => CirceEncoder, parser}
 import org.scalajs.dom.raw.XMLHttpRequest
 
-import scala.scalajs.js
-
 /**
-  * An interpreter for [[algebra.JsonEntities]] that uses circe’s [[Encoder]] to build JSON
-  * entities in HTTP requests, and circe’s [[Decoder]] to decode JSON entities from
+  * An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
+  * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
   * HTTP responses.
   */
 trait JsonEntities extends Endpoints with algebra.JsonEntities {
 
-  /** Encode an `A` using circe’s [[Encoder]] */
-  type JsonRequest[A] = Encoder[A]
+  /** Encode an `A` using circe’s [[io.circe.Encoder]] */
+  type JsonRequest[A] = CirceEncoder[A]
 
-  /** Decodes an `A` using circe’s [[Decoder]] */
-  type JsonResponse[A] = Decoder[A]
+  /** Decodes an `A` using circe’s [[io.circe.Decoder]] */
+  type JsonResponse[A] = CirceDecoder[A]
 
-  def jsonRequest[A : JsonRequest] = (a: A, xhr: XMLHttpRequest) => {
+  def jsonRequest[A : JsonRequest]: RequestEntity[A] = (a: A, xhr: XMLHttpRequest) => {
     xhr.setRequestHeader("Content-Type", "application/json")
-    Encoder[A].apply(a).noSpaces
+    CirceEncoder[A].apply(a).noSpaces
   }
 
-  def jsonResponse[A](implicit decoder: Decoder[A]): js.Function1[XMLHttpRequest, Either[Exception, A]] =
+  def jsonResponse[A](implicit decoder: CirceDecoder[A]): Response[A] =
     xhr => parser.parse(xhr.responseText).right.flatMap(decoder.decodeJson)
 
 }
