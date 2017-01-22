@@ -5,7 +5,7 @@ import endpoints.algebra.CirceEntities.CirceCodec
 import io.circe.jawn
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}
-import endpoints.PlayCirce.circeJsonWriteable
+import endpoints.play.PlayCirce.circeJsonWriteable
 
 /**
   * Implements [[algebra.CirceEntities]] for [[Endpoints]].

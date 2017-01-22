@@ -5,6 +5,7 @@ This example demonstrates the following features:
  - [x] internal communication (between microservices) using multiplexed
        endpoints ;
  - [x] statically typed Scala.js and JVM communication ;
+ - [ ] assets fetched by the Scala.js client can be cached for an infinite duration ;
  - [ ] HATEOAS ;
  - [ ] Human-readable generated documentation.
 

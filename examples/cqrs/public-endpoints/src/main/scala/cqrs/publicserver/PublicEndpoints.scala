@@ -16,6 +16,7 @@ import io.circe.java8.time._
   * We expose a REST interface for manipulating meters.
   */
 // TODO User authentication
+// TODO All the commands should return the timestamp of the last performed event (so that clients can get consistent “write and read”)
 trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
 
   /** Common path prefix for endpoints: “/meters” */
