@@ -235,8 +235,8 @@ val `example-basic-client` =
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
-val `example-basic-server` =
-  project.in(file("examples/basic/server"))
+val `example-basic-play-server` =
+  project.in(file("examples/basic/play-server"))
     .settings(commonSettings: _*)
     .settings(`scala2.11`: _*)
     .settings(
@@ -245,6 +245,15 @@ val `example-basic-server` =
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
     )
     .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
+
+val `example-basic-akkahttp-server` =
+  project.in(file("examples/basic/akkahttp-server"))
+    .settings(commonSettings: _*)
+    .settings(`scala2.11`: _*)
+    .settings(
+      publishArtifact := false
+    )
+    .dependsOn(`example-basic-shared-jvm`, `akka-http-server-circe`)
 
 val endpoints =
   project.in(file("."))
@@ -278,7 +287,10 @@ val endpoints =
       `xhr-client-circe`,
       `play-client`,
       `play-client-circe`,
+      `akka-http-server`,
+      `akka-http-server-circe`,
       `example-basic-shared-js`, `example-basic-shared-jvm`,
-      `example-basic-server`,
+      `example-basic-play-server`,
+      `example-basic-akkahttp-server`,
       `example-basic-client`
     )

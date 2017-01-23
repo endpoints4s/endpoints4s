@@ -5,7 +5,7 @@ import endpoints.play.routing._
 import scala.concurrent.Future
 import scala.util.Random
 
-object Api extends ApiAlg with Endpoints with CirceEntities with Assets
+object Api extends ApiAlg with AssetsAlg with Endpoints with CirceEntities with Assets
   with OptionalResponses with BasicAuthentication {
 
   val routes = routesFromEndpoints(

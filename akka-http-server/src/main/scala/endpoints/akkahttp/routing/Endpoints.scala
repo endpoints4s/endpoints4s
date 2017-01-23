@@ -5,7 +5,9 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import endpoints.{Tupler, algebra}
 
+import scala.concurrent.Future
 import scala.language.higherKinds
+import scala.util.{Failure, Success}
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
@@ -22,7 +24,19 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   type Response[A] = A => Route
 
-  type Endpoint[A, B] = (A => B) => Route
+  case class Endpoint[A, B](request: Request[A], response: Response[B]) {
+    def implementedBy(implementation: A => B): Route = request { arguments =>
+      response(implementation(arguments))
+    }
+
+    def implementedByAsync(implementation: A => Future[B]): Route = request { arguments =>
+      Directives.onComplete(implementation(arguments)){
+        case Success(result) => response(result)
+        case Failure(ex) => Directives.complete(ex)
+      }
+    }
+
+  }
 
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
@@ -46,9 +60,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       headers)
   }
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
-    (implementation: A => B) => request { arguments =>
-      response(implementation(arguments))
-    }
+  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = Endpoint(request, response)
+
 
 }

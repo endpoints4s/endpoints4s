@@ -3,8 +3,7 @@ package sample
 import endpoints.algebra._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends Endpoints with CirceEntities with Assets
-  with OptionalResponses with BasicAuthentication {
+trait ApiAlg extends Endpoints with CirceEntities with OptionalResponses with BasicAuthentication {
 
   val index =
     endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
@@ -14,11 +13,6 @@ trait ApiAlg extends Endpoints with CirceEntities with Assets
 
   val actionFut =
     endpoint(post(path / "actionFut", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
-
-  lazy val digests = AssetsDigests.digests
-
-  val assets =
-    assetsEndpoint(path / "assets" / assetSegments)
 
   val maybe =
     endpoint(get(path / "option"), option(emptyResponse))
