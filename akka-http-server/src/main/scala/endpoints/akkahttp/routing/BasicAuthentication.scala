@@ -12,7 +12,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
 
   /**
     * Extracts the credentials from the request headers.
-    * In case of absence of credentials, returns an `Unauthorized` result.
+    * In case of absence of credentials rejects request
     */
   private[endpoints] lazy val basicAuthentication: RequestHeaders[Credentials] =
     Directives.headerValue(extractCredentials)

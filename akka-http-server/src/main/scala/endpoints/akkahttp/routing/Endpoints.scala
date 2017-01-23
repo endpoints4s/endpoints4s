@@ -12,7 +12,6 @@ import scala.util.{Failure, Success}
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
   *
-  *
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
 

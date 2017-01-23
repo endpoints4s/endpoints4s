@@ -15,12 +15,11 @@ trait CirceEntities extends Endpoints with algebra.CirceEntities {
 
   def jsonRequest[A : CirceCodec] = {
     implicit val decoder = CirceCodec[A].decoder
-    val frum = implicitly[FromRequestUnmarshaller[A]]
-    Directives.entity[A](frum)
+    Directives.entity[A](implicitly[FromRequestUnmarshaller[A]])
   }
 
   def jsonResponse[A : CirceCodec] = a => {
-    implicit val decoder = implicitly[CirceCodec[A]].encoder
+    implicit val encoder = implicitly[CirceCodec[A]].encoder
     Directives.complete(a)
   }
 
