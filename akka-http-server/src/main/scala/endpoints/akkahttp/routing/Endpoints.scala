@@ -10,7 +10,7 @@ import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
+  * Interpreter for [[algebra.Endpoints]] that performs routing using akka-http.
   *
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
