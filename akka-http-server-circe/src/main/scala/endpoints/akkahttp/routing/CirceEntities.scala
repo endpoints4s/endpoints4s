@@ -5,16 +5,18 @@ import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import de.heikoseeberger.akkahttpcirce.CirceSupport
 import endpoints.algebra
 import endpoints.algebra.CirceEntities.CirceCodec
-import io.circe.jawn
 
 /**
   * Implements [[algebra.CirceEntities]] for [[Endpoints]].
   */
-trait CirceEntities extends Endpoints with algebra.CirceEntities with CirceSupport {
+trait CirceEntities extends Endpoints with algebra.CirceEntities {
+
+  import CirceSupport._
 
   def jsonRequest[A : CirceCodec] = {
-    implicit val decoder = implicitly[CirceCodec[A]].decoder
-    Directives.entity[A](implicitly[FromRequestUnmarshaller[A]])
+    implicit val decoder = CirceCodec[A].decoder
+    val frum = implicitly[FromRequestUnmarshaller[A]]
+    Directives.entity[A](frum)
   }
 
   def jsonResponse[A : CirceCodec] = a => {

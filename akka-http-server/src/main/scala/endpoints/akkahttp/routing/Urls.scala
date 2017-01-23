@@ -2,7 +2,7 @@ package endpoints.akkahttp.routing
 
 import akka.http.scaladsl.server.util.{Tupler => AkkaTupler}
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, Unmarshaller}
+import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
 import endpoints.{Tupler, algebra}
 
 /**
@@ -31,9 +31,9 @@ trait Urls extends algebra.Urls {
   // Query strings
   //***************
 
-  implicit def intQueryString: QueryStringParam[Int] = implicitly[Unmarshaller[String, Int]]
+  implicit def intQueryString: QueryStringParam[Int] = PredefinedFromStringUnmarshallers.intFromStringUnmarshaller
 
-  implicit def stringQueryString: QueryStringParam[String] = implicitly[Unmarshaller[String, String]]
+  implicit def stringQueryString: QueryStringParam[String] = Unmarshaller.identityUnmarshaller[String]
 
   def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] = {
     new QueryString[A](Directives.parameter(name.as[A]))
@@ -56,7 +56,10 @@ trait Urls extends algebra.Urls {
   }
 
   def staticPathSegment(segment: String): Path[Unit] = {
-    val directive = Directives.pathPrefix(segment)
+    val directive = if(segment.isEmpty) // We cannot use Directives.pathPrefix("") because it consumes also a leading slash
+      Directives.pass
+    else
+      Directives.pathPrefix(segment)
     new Path(convToDirective1(directive))
   }
 

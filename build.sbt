@@ -249,7 +249,7 @@ val `example-basic-play-server` =
 val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))
     .settings(commonSettings: _*)
-    .settings(`scala2.11`: _*)
+    .settings(`scala2.12`: _*)
     .settings(
       publishArtifact := false
     )
