@@ -50,6 +50,12 @@ val publishSettings = commonSettings ++ Seq(
   )
 )
 
+val noPublishSettings = Seq(
+  publishArtifact := false,
+  publish := (),
+  publishLocal := ()
+)
+
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
     .settings(publishSettings: _*)
@@ -191,13 +197,13 @@ val `akka-http-server-circe` =
     )
     .dependsOn(`akka-http-server`, `algebra-circe-jvm`)
 
+// Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.12`: _*)
     .settings(
-      publishArtifact := false,
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -228,19 +234,15 @@ val `example-basic-shared-js` = `example-basic-shared`.js
 val `example-basic-client` =
   project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.12`: _*)
-    .settings(
-      publishArtifact := false
-    )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
 val `example-basic-play-server` =
   project.in(file("examples/basic/play-server"))
-    .settings(commonSettings: _*)
+    .settings(commonSettings ++ noPublishSettings: _*)
     .settings(`scala2.11`: _*)
     .settings(
-      publishArtifact := false,
       unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
     )
@@ -255,11 +257,89 @@ val `example-basic-akkahttp-server` =
     )
     .dependsOn(`example-basic-shared-jvm`, `akka-http-server-circe`)
 
+
+// CQRS Example
+// public endpoints definitions
+val `example-cqrs-public-endpoints` =
+  CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
+    .settings(
+      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
+    )
+    .dependsOn(`algebra-circe`)
+
+val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
+
+val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
+
+// public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
+val `example-cqrs-public-server` =
+  project.in(file("examples/cqrs/public-server"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
+
+// web-client, *uses* the public endpoints’ definitions
+val `example-cqrs-web-client` =
+  project.in(file("examples/cqrs/web-client"))
+    .enablePlugins(ScalaJSPlugin)
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-js`)
+
+// commands endpoints definitions
+lazy val `example-cqrs-commands-endpoints` =
+  project.in(file("examples/cqrs/commands-endpoints"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
+    .settings(
+      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
+    )
+    .dependsOn(`algebra-circe-jvm`)
+
+// commands implementation
+val `example-cqrs-commands` =
+  project.in(file("examples/cqrs/commands"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+      )
+    )
+    .dependsOn(`play-server-circe`, `play-client-circe` % Test)
+    .dependsOn(`example-cqrs-commands-endpoints`)
+
+// queries endpoints definitions
+lazy val `example-cqrs-queries-endpoints` =
+  project.in(file("examples/cqrs/queries-endpoints"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.12`: _*)
+    .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
+
+// queries implementation
+val `example-cqrs-queries` =
+  project.in(file("examples/cqrs/queries"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
+
+// this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
+val `example-cqrs-infra` =
+  project.in(file("examples/cqrs/infra"))
+    .settings(commonSettings ++ noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      cancelable in Global := true,
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+      )
+    )
+    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`)
+
 val endpoints =
   project.in(file("."))
     .enablePlugins(CrossPerProjectPlugin)
-      .settings(
-        publishArtifact := false/*,
+    .settings(noPublishSettings: _*)
+      .settings(/*,
         releasePublishArtifactsAction := PgpKeys.publishSigned.value,
         releaseProcess := Seq[ReleaseStep](checkSnapshotDependencies,
           inquireVersions,
@@ -289,8 +369,18 @@ val endpoints =
       `play-client-circe`,
       `akka-http-server`,
       `akka-http-server-circe`,
+      // basic example
       `example-basic-shared-js`, `example-basic-shared-jvm`,
       `example-basic-play-server`,
       `example-basic-akkahttp-server`,
-      `example-basic-client`
+      `example-basic-client`,
+      // cqrs example
+      `example-cqrs-infra`,
+      `example-cqrs-public-endpoints-jvm`, `example-cqrs-public-endpoints-js`,
+      `example-cqrs-public-server`,
+      `example-cqrs-web-client`,
+      `example-cqrs-commands-endpoints`,
+      `example-cqrs-commands`,
+      `example-cqrs-queries-endpoints`,
+      `example-cqrs-queries`
     )

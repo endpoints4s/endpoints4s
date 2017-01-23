@@ -45,6 +45,13 @@ trait Urls {
   def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A]
 
   /**
+    * Builds a `QueryString` with one optional parameter of type `A`.
+    *
+    * @param name Parameter’s name
+    */
+  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]]
+
+  /**
     * A single query string parameter carrying an `A` information.
     */
   type QueryStringParam[A]
@@ -54,6 +61,9 @@ trait Urls {
 
   /** Ability to define `Int` query string parameters */
   implicit def intQueryString: QueryStringParam[Int]
+
+  /** Query string parameter containing a `Long` value */
+  implicit def longQueryString: QueryStringParam[Long]
 
   /**
     * An URL path segment carrying an `A` information.
@@ -65,6 +75,9 @@ trait Urls {
 
   /** Ability to define `Int` path segments */
   implicit def intSegment: Segment[Int]
+
+  /** Segment containing a `Long` value */
+  implicit def longSegment: Segment[Long]
 
   /** An URL path carrying an `A` information */
   type Path[A] <: PathOps[A] with Url[A]

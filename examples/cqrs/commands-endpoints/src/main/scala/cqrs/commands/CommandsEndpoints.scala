@@ -1,0 +1,72 @@
+package cqrs.commands
+
+import java.time.OffsetDateTime
+import java.util.UUID
+
+import endpoints.algebra.{CirceEntities, Endpoints}
+import io.circe.{Decoder, Encoder}
+import io.circe.java8.time._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+
+trait CommandsEndpoints extends Endpoints with CirceEntities {
+
+  /**
+    * Application of a command.
+    *
+    * Returns the produced event, or `None` in case of failure (aggregate
+    * not found or invalid command).
+    */
+  val command: Endpoint[Command, Option[StoredEvent]] =
+    endpoint(post[Unit, Command, Unit, Command](path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
+
+  /**
+    * Read the event long (optionally from a given timestamp).
+    */
+  val events: Endpoint[Option[Long], Vector[StoredEvent]] =
+    endpoint(get(path / "events" /? optQs[Long]("since")), jsonResponse[Vector[StoredEvent]])
+
+}
+
+/**
+  * Base trait of commands.
+  *
+  * Note that we could also have just reused the DTOs of the public API,
+  * but we chose to use distinct data types so that the public API is
+  * not cluttered with implementation details of the commands microservice.
+  */
+sealed trait Command
+
+/** Base trait of commands creating a new resource */
+sealed trait CreationCommand extends Command
+
+/** Base trait of commands updating an existing resource */
+sealed trait UpdateCommand extends Command {
+  def meterId: UUID
+}
+
+/** Create a new meter */
+case class CreateMeter(label: String) extends CreationCommand
+
+/** Add a record for an existing meter */
+case class AddRecord(meterId: UUID, date: OffsetDateTime, value: BigDecimal) extends UpdateCommand
+
+object Command {
+  implicit val decoder: Decoder[Command] = deriveDecoder
+  implicit val encoder: Encoder[Command] = deriveEncoder
+}
+
+case class StoredEvent(timestamp: Long, event: Event)
+
+object StoredEvent {
+  implicit val decoder: Decoder[StoredEvent] = deriveDecoder
+  implicit val encoder: Encoder[StoredEvent] = deriveEncoder
+}
+
+sealed trait Event
+case class MeterCreated(id: UUID, label: String) extends Event
+case class RecordAdded(id: UUID, date: OffsetDateTime, value: BigDecimal) extends Event
+
+object Event {
+  implicit val decoder: Decoder[Event] = deriveDecoder
+  implicit val encoder: Encoder[Event] = deriveEncoder
+}

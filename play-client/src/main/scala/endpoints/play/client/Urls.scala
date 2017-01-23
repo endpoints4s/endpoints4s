@@ -26,11 +26,18 @@ trait Urls extends algebra.Urls {
   def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
     a => s"$name=${value.apply(a)}"
 
+  def optQs[A](name: String)(implicit value: A => String): QueryString[Option[A]] = {
+    case Some(a) => qs[A](name).encodeQueryString(a)
+    case None => ""
+  }
+
   type QueryStringParam[A] = A => String
 
   implicit lazy val stringQueryString: QueryStringParam[String] = s => URLEncoder.encode(s, utf8Name)
 
   implicit lazy val intQueryString: QueryStringParam[Int] = i => i.toString
+
+  implicit lazy val longQueryString: QueryStringParam[Long] = i => i.toString
 
 
   trait Segment[A] {
@@ -40,6 +47,8 @@ trait Urls extends algebra.Urls {
   implicit lazy val stringSegment: Segment[String] = (s: String) => URLEncoder.encode(s, utf8Name)
 
   implicit lazy val intSegment: Segment[Int] = (i: Int) => i.toString
+
+  implicit lazy val longSegment: Segment[Long] = (i: Long) => i.toString
 
 
   trait Path[A] extends Url[A] with PathOps[A]
