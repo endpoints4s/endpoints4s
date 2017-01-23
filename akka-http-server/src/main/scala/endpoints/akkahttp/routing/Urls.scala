@@ -35,8 +35,14 @@ trait Urls extends algebra.Urls {
 
   implicit def stringQueryString: QueryStringParam[String] = Unmarshaller.identityUnmarshaller[String]
 
+  implicit def longQueryString: QueryStringParam[Long] = PredefinedFromStringUnmarshallers.longFromStringUnmarshaller
+
   def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] = {
     new QueryString[A](Directives.parameter(name.as[A]))
+  }
+
+  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
+    new QueryString[Option[A]](Directives.parameter(name.as[A].?))
   }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
@@ -50,6 +56,8 @@ trait Urls extends algebra.Urls {
   implicit def intSegment: Segment[Int] = IntNumber
 
   implicit def stringSegment: Segment[String] = Segment
+
+  implicit def longSegment: Segment[Long] = LongNumber
 
   def segment[A](implicit s: Segment[A]): Path[A] = {
     new Path(Directives.pathPrefix(s))
