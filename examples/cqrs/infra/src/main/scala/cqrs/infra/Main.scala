@@ -44,8 +44,10 @@ object Main extends App {
   val wsClient = AhcWSClient(AhcWSClientConfig())
 
   // Start the commands service
+  //#start-server
   val commandsServer =
     HttpServer(ServerConfig(port = Some(commandsService.port)), Router.from(Commands.routes))
+  //#start-server
 
   // Start the queries service
   val queriesServer = {

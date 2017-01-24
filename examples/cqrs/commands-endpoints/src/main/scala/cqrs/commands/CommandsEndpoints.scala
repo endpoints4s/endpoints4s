@@ -3,10 +3,12 @@ package cqrs.commands
 import java.time.OffsetDateTime
 import java.util.UUID
 
-import endpoints.algebra.{CirceEntities, Endpoints}
 import io.circe.{Decoder, Encoder}
 import io.circe.java8.time._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+
+//#endpoints
+import endpoints.algebra.{CirceEntities, Endpoints}
 
 trait CommandsEndpoints extends Endpoints with CirceEntities {
 
@@ -22,10 +24,11 @@ trait CommandsEndpoints extends Endpoints with CirceEntities {
   /**
     * Read the event long (optionally from a given timestamp).
     */
-  val events: Endpoint[Option[Long], Vector[StoredEvent]] =
-    endpoint(get(path / "events" /? optQs[Long]("since")), jsonResponse[Vector[StoredEvent]])
+  val events: Endpoint[Option[Long], Seq[StoredEvent]] =
+    endpoint(get(path / "events" /? optQs[Long]("since")), jsonResponse[Seq[StoredEvent]])
 
 }
+//#endpoints
 
 /**
   * Base trait of commands.

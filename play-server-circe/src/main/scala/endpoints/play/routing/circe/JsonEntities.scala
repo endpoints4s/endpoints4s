@@ -5,7 +5,7 @@ import endpoints.play.routing.Endpoints
 import io.circe.{Decoder => CirceDecoder, Encoder => CirceEncoder, jawn}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}
-import endpoints.PlayCirce.circeJsonWriteable
+import endpoints.play.PlayCirce.circeJsonWriteable
 
 /**
   * Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode

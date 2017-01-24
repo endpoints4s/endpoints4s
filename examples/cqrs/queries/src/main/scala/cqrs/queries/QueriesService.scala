@@ -7,7 +7,6 @@ import play.api.libs.ws.WSClient
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import cqrs.commands.{CommandsEndpoints, MeterCreated, RecordAdded, StoredEvent}
-import endpoints.play.client.{CirceEntities, Endpoints}
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.DurationInt
@@ -28,11 +27,15 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
 
   // --- internals
 
-  /** Client for the event store */
-  private object store
+  //#event-log-client
+  import endpoints.play.client.{CirceEntities, Endpoints}
+
+  /** Client for the event log */
+  private object eventLog
     extends Endpoints(commandsBaseUrl, wsClient)
       with CirceEntities
       with CommandsEndpoints
+  //#event-log-client
 
   /** In-memory state */
   private val stateRef = Ref(
@@ -42,7 +45,7 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
     )
   )
 
-  // periodically poll the event store to keep our state up to date
+  // periodically poll the event log to keep our state up to date
   val _ = scheduler.schedule(0.seconds, 5.seconds) { update(); () }
 
   /** Internal state */
@@ -65,18 +68,29 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
   }
 
   /** Update the projection by fetching the last events from the event store and applying them to our state */
-  private def update(): Future[State] =
-    store.events(stateRef.single.get.lastEventTimestamp).map { (newEvents: Vector[StoredEvent]) =>
+  private def update(): Future[State] = {
+
+    val maybeLastEventTimestamp = stateRef.single.get.lastEventTimestamp
+
+    def atomicallyApplyEvents(events: Seq[StoredEvent]): State =
       atomic { implicit txn =>
         val currentState = stateRef()
         val newState =
-          newEvents
+          events
             .dropWhile(e => currentState.lastEventTimestamp.exists(_ >= e.timestamp)) // Don’t apply events twice (in case several updates are performed in parallel)
             .foldLeft(currentState)(applyEvent)
-        stateRef()= newState
+        stateRef() = newState
         newState
       }
-    }
+
+    //#invocation
+    val eventuallyUpdatedState: Future[State] =
+      eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
+        atomicallyApplyEvents(newEvents)
+      }
+    //#invocation
+    eventuallyUpdatedState
+  }
 
   /** Apply an event to a given state */
   private def applyEvent(state: State, storedEvent: StoredEvent): State =

@@ -4,7 +4,7 @@ import endpoints.algebra
 import endpoints.algebra.CirceEntities.CirceCodec
 import endpoints.play
 import io.circe.jawn
-import endpoints.PlayCirce.circeJsonWriteable
+import endpoints.play.PlayCirce.circeJsonWriteable
 
 /**
   * Implements [[algebra.CirceEntities]] for [[play.client.Endpoints]]

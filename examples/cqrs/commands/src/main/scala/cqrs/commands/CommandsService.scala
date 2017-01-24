@@ -5,19 +5,24 @@ import java.util.UUID
 import scala.concurrent.stm.{Ref, atomic}
 
 /**
+  * Implementation of the commands service.
+  *
   * We use an in-memory storage for simplicity but we could easily, for instance, have
   * one cassandra node per aggregate.
   */
-object CommandHandler {
+object CommandsService {
 
   /** Aggregates’ states and event log */
   private val aggregatesRef = Ref(State(Map.empty, Vector.empty, 0))
 
+  // TODO more useful failure data
+  //#signatures
   /**
     * Atomically applies a command to the current aggregates.
-    * @return The completed event, or `None` if the command was not applicable (TODO more useful failure data)
+    * @return The completed event, or `None` if the command was not applicable
     */
-  def apply(command: Command): Option[StoredEvent] =
+  def apply(command: Command): Option[StoredEvent] = // …
+  //#signatures
     atomic { implicit txn =>
 
       val state = aggregatesRef()
@@ -53,8 +58,13 @@ object CommandHandler {
     lastTimestamp: Long
   )
 
-  /** API to retrieve events */
-  def events(maybeSince: Option[Long]): Vector[StoredEvent] =
+  //#signatures
+  /**
+    * @return The sequence of events stored in the log. Events that happened
+    *         before the given optional timestamp are discarded.
+    */
+  def events(maybeSince: Option[Long]): Vector[StoredEvent] = // …
+  //#signatures
     aggregatesRef.single().eventLog
       .dropWhile(e => maybeSince.exists(e.timestamp < _))
 
