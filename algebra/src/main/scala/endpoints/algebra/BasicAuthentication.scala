@@ -11,6 +11,12 @@ import endpoints.algebra.BasicAuthentication.Credentials
   */
 trait BasicAuthentication extends Endpoints {
 
+  /**
+    * Credentials encoded as HTTP Basic Auth header
+    *
+    * In routing interpreters if header is not present it should match the route and return 401 Unauthorized.
+    * @return
+    */
   private[endpoints] def basicAuthentication: RequestHeaders[Credentials]
 
   private[endpoints] def authenticated[A](response: Response[A]): Response[Option[A]] // FIXME Use an extensible type to model authentication failure

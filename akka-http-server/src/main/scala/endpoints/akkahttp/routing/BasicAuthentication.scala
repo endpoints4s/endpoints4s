@@ -1,10 +1,8 @@
 package endpoints.akkahttp.routing
 
-import java.util.Base64
-
-import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
+import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, HttpChallenge, HttpChallenges}
 import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes}
-import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.server.{Directive, Directives}
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
 
@@ -15,7 +13,16 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     * In case of absence of credentials rejects request
     */
   private[endpoints] lazy val basicAuthentication: RequestHeaders[Credentials] =
-    Directives.headerValue(extractCredentials)
+  Directives.optionalHeaderValue(extractCredentials).flatMap {
+    case Some(credentials) => Directives.pass.tmap(_ => credentials)
+    case None => Directive[Tuple1[Credentials]] { _ => //inner is ignored
+      import akka.http.scaladsl.model.headers
+      Directives.complete(HttpResponse(
+        StatusCodes.Unauthorized,
+        scala.collection.immutable.Seq[HttpHeader](headers.`WWW-Authenticate`(HttpChallenges.basic("Realm")))
+      ))
+    }
+  }
 
 
   /**
@@ -28,7 +35,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
   }
 
 
-  private def extractCredentials:  HttpHeader => Option[Credentials] = {
+  private def extractCredentials: HttpHeader => Option[Credentials] = {
     case Authorization(BasicHttpCredentials(username, password)) => Some(Credentials(username, password))
     case _ => None
   }
