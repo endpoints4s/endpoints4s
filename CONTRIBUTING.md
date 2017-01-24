@@ -16,8 +16,10 @@ $ sbt +test
 ## Preview the documentation
 
 ~~~ sh
-$ sbt +manual/previewSite
+$ sbt +manual/previewAuto
 ~~~
+
+And then go to http://localhost:4000.
 
 ## Publish the documentation
 

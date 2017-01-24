@@ -19,7 +19,7 @@ Noteworthy features:
 - Have a look at the [overview](overview.md) to understand in a few minutes what
   the library does and how its usage look like ;
 - [Install](installation.md) the library and follow the
-  [tutorial](tutorial/introduction.md) to progressively learn all the features ;
+  [tutorial](tutorial.md) to progressively learn all the features ;
 - Explore the [API documentation](api:endpoints.algebra.package) ;
 - Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
 

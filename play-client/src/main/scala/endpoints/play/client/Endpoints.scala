@@ -57,12 +57,14 @@ class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext)
   /** Successfully decodes no information from a response */
   val emptyResponse: Response[Unit] = _ => Right(())
 
+  //#concrete-carrier-type
   /**
-    * A function that, given an `A`, eventually attempts to decode the response.
+    * A function that, given an `A`, eventually attempts to decode the `B` response.
     *
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */
   type Endpoint[A, B] = A => Future[B]
+  //#concrete-carrier-type
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     a => request(a).flatMap(response andThen futureFromEither)

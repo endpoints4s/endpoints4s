@@ -7,11 +7,11 @@ Typically, your project will be broken down into several sub-projects:
 ~~~ mermaid
 graph BT
   endpoints
-  server --> endpoints
-  client --> endpoints
+  server -.-> endpoints
+  client -.-> endpoints
 ~~~
 
-The `endpoints` sub-project contains the *definition* of the communication
+The `endpoints` sub-project contains the *description* of the communication
 protocol. The `server` sub-project *implements* this communication protocol.
 The `client` sub-project *uses* the protocol to communicate with the `server`.
 
@@ -30,7 +30,7 @@ val server = project.dependsOn(endpoints)
 All the artifacts are published on maven central under the organization
 name `org.julienrf`.
 
-### Endpoint definitions
+### Endpoint descriptions
 
 Add the following dependencies to your `endpoints` sub-project:
 

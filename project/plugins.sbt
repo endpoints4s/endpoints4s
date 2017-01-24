@@ -10,7 +10,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
 addSbtPlugin("com.eed3si9n" % "sbt-doge" % "0.1.5")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.1.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.2.0")
 
 addSbtPlugin("com.novocode" % "sbt-ornate" % "0.3")
 
