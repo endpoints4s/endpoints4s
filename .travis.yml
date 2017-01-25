@@ -1,0 +1,23 @@
+language: scala
+
+scala:
+  - 2.11.8
+  - 2.12.1
+
+jdk:
+  - oraclejdk8
+
+cache:
+  directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
+
+
+script:
+  # +++ instead of ++ to use sbt-doge strict aggregation
+  - sbt "+++$TRAVIS_SCALA_VERSION test";
+
+  # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+  # Tricks to avoid unnecessary cache updates
+  - find $HOME/.sbt -name "*.lock" | xargs rm
+  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
