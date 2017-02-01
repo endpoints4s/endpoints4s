@@ -5,11 +5,11 @@ Typically, a project is broken down into several sub-projects:
 ~~~ mermaid
 graph BT
   endpoints
-  server --> endpoints
-  client --> endpoints
+  server -.-> endpoints
+  client -.-> endpoints
 ~~~
 
-The `endpoints` sub-project contains the *definition* of the communication
+The `endpoints` sub-project contains the *description* of the communication
 protocol. The `server` sub-project *implements* this communication protocol.
 The `client` sub-project *uses* the protocol to communicate with the `server`.
 

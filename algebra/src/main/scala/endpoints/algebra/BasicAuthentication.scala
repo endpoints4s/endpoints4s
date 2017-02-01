@@ -4,7 +4,7 @@ import endpoints.Tupler
 import endpoints.algebra.BasicAuthentication.Credentials
 
 /**
-  * Provides vocabulary to define endpoints that use Basic HTTP authentication.
+  * Provides vocabulary to describe endpoints that use Basic HTTP authentication.
   *
   * This trait works fine, but developers are likely to implement their own
   * authentication mechanism, specific to their application.
@@ -23,7 +23,7 @@ trait BasicAuthentication extends Endpoints {
 
   // TODO Allow users to supply additional `RequestHeaders`
   /**
-    * Defines an endpoint protected by Basic HTTP authentication
+    * Describes an endpoint protected by Basic HTTP authentication
     */
   def authenticatedEndpoint[A, B, C, AB](
     method: Method,

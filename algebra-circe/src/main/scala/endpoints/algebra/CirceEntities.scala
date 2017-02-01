@@ -43,7 +43,7 @@ import io.circe.{Json, Decoder => CirceDecoder, Encoder => CirceEncoder}
   * {{{
   *   /* client MyEndpointsClient.scala */
   *
-  *   object MyEndpointsClient extends MyEndpoints with CirceCodecXhrClient with XhrClientFaithful
+  *   object MyEndpointsClient extends MyEndpoints with xhr.CirceEntities with xhr.faithful.Endpoints
   *
   *   MyEndpointsClient.myEndpoint().map(myDto => println(myDto.i))
   * }}}
@@ -51,7 +51,7 @@ import io.circe.{Json, Decoder => CirceDecoder, Encoder => CirceEncoder}
   * {{{
   *   /* server MyEndpointsServer.scala */
   *
-  *   object MyEndpointsServer extends MyEndpoints with CirceCodecPlayRouting {
+  *   object MyEndpointsServer extends MyEndpoints with play.routing.CirceEntities {
   *
   *     val routes = routesFromEndpoints(
   *       myEndpoint.implementedBy(_ => MyDto(42, "foo"))

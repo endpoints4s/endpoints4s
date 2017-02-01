@@ -5,7 +5,7 @@ import endpoints.Tupler
 import scala.language.higherKinds
 
 /**
-  * Algebra interface for defining URLs made of a path and a query string.
+  * Algebra interface for describing URLs made of a path and a query string.
   *
   * A path is itself made of segments chained together.
   *

@@ -10,8 +10,8 @@ import scala.scalajs.js
   */
 trait Endpoints extends xhr.Endpoints {
 
-  /** Maps a `Task` to a [[js.Thenable]] */
-  type Task[A] = js.Thenable[A]
+  /** Maps a `Result` to a [[js.Thenable]] */
+  type Result[A] = js.Thenable[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     (a: A) =>

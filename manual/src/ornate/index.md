@@ -6,13 +6,13 @@ applications.
 
 Noteworthy features:
 
-- endpoints definitions are **first-class Scala value**, which can be reused,
+- endpoints descriptions are **first-class Scala value**, which can be reused,
   combined and abstracted over ;
-- **consistent client and server implementations** can be derived from endpoint definitions ;
+- **consistent client and server implementations** can be derived from endpoint descriptions ;
 - **high extensibility**: you can introduce both
-  - new characteristics of the protocol that are specific to your application (e.g. the usage
+  - new descriptions that are specific to your application (e.g. the usage
     of a particular HTTP header),
-  - new interpreters for endpoint definitions (e.g. generation of a swagger-like documentation).
+  - new interpreters for endpoint descriptions (e.g. generation of a swagger-like documentation).
 
 ## Getting started
 

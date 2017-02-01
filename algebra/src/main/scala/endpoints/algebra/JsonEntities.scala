@@ -3,7 +3,7 @@ package endpoints.algebra
 import scala.language.higherKinds
 
 /**
-  * Algebra interface for defining JSON entities in requests and responses.
+  * Algebra interface for describing JSON entities in requests and responses.
   */
 trait JsonEntities extends Endpoints {
 

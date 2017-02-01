@@ -1,5 +1,6 @@
 package endpoints.algebra
 
+/** Describes endpoints related to static assets (e.g. medias, scripts, stylesheets, etc.) */
 trait Assets extends Endpoints {
 
   /** An HTTP request to retrieve an asset */

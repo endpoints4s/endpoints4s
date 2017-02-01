@@ -5,7 +5,7 @@ import endpoints.Tupler
 import scala.language.higherKinds
 
 /**
-  * Algebra interface for defining endpoints made of requests and responses.
+  * Algebra interface for describing endpoints made of requests and responses.
   *
   * Requests and responses contain headers and entity.
   */

@@ -70,15 +70,15 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     * A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
     */
-  type Endpoint[A, B] = js.Function1[A, Task[B]]
+  type Endpoint[A, B] = js.Function1[A, Result[B]]
 
   /**
-    * A task that eventually yields an `A`.
+    * A value that eventually yields an `A`.
     *
-    * Typically, concrete representation of `Task` will have an instance of `MonadError`, so
+    * Typically, concrete representation of `Result` will have an instance of `MonadError`, so
     * that we can perform requests (sequentially and in parallel) and recover errors.
     */
-  type Task[A]
+  type Result[A]
 
   protected final def performXhr[A, B](
     request: Request[A],

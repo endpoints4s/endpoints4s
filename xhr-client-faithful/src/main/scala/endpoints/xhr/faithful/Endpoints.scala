@@ -9,8 +9,8 @@ import faithful.{Future, Promise}
   */
 trait Endpoints extends xhr.Endpoints {
 
-  /** Maps `Task` to [[Future]] */
-  type Task[A] = Future[A]
+  /** Maps `Result` to [[Future]] */
+  type Result[A] = Future[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B]) =
     (a: A) => {
