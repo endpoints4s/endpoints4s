@@ -417,8 +417,8 @@ val `example-cqrs` =
     .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`, `circe-instant-js`, `circe-instant-jvm`)
 
 lazy val `circe-instant` =
-  CrossProject("example-cqrs-circe-instant-jvm", "example-cqrs-circe-instante-js", file("examples/cqrs/circe-instant"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+  CrossProject("example-cqrs-circe-instant-jvm", "example-cqrs-circe-instant-js", file("examples/cqrs/circe-instant"), CrossType.Pure)
+    .settings(noPublishSettings ++ `scala2.12`: _*)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
