@@ -325,38 +325,57 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala2.12`: _*)
-    .settings(
-      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
-    )
-    .dependsOn(`algebra-circe`)
+    .dependsOn(`algebra-circe`, `circe-instant`)
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 
 val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
-
-// public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
-val `example-cqrs-public-server` =
-  project.in(file("examples/cqrs/public-server"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
-    .dependsOn(`play-server-circe`, `play-client-circe`)
-    .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
 
 // web-client, *uses* the public endpoints’ definitions
 val `example-cqrs-web-client` =
   project.in(file("examples/cqrs/web-client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      libraryDependencies ++= Seq(
+        "in.nvilla" %%% "monadic-html" % "0.2.2",
+        "in.nvilla" %%% "monadic-rx-cats" % "0.2.2",
+        "org.julienrf" %%% "faithful-cats" % "0.2",
+        "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
+      ),
+      persistLauncher := true
+    )
     .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
     .dependsOn(`example-cqrs-public-endpoints-js`)
+
+// public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
+val `example-cqrs-public-server` =
+  project.in(file("examples/cqrs/public-server"))
+    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      libraryDependencies += "com.typesafe.play" %% "twirl-api" % "1.2.0",
+      unmanagedResources in Compile ++= Seq(
+        (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
+        (packageScalaJSLauncher in (`example-cqrs-web-client`, Compile)).map(_.data).value
+      ),
+      (sourceGenerators in Compile) += Def.task {
+        assets.AssetsTasks.generateDigests(
+          baseDirectory = (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
+          targetDirectory = (target in Compile).value,
+          generatedObjectName = "BootstrapDigests",
+          generatedPackage = Some("cqrs.publicserver"),
+          assetsPath = identity
+        )
+      }.dependsOn(fastOptJS in Compile in `example-cqrs-web-client`).taskValue
+    )
+    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
 
 // commands endpoints definitions
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
     .settings(noPublishSettings ++ `scala2.12`: _*)
-    .settings(
-      libraryDependencies += "io.circe" %% "circe-java8" % circeVersion
-    )
-    .dependsOn(`algebra-circe-jvm`)
+    .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
@@ -395,7 +414,17 @@ val `example-cqrs` =
         "org.scalatest" %% "scalatest" % "3.0.1" % Test
       )
     )
-    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`)
+    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`, `circe-instant-js`, `circe-instant-jvm`)
+
+lazy val `circe-instant` =
+  CrossProject("example-cqrs-circe-instant-jvm", "example-cqrs-circe-instante-js", file("examples/cqrs/circe-instant"), CrossType.Pure)
+    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(
+      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
+    )
+
+lazy val `circe-instant-js` = `circe-instant`.js
+lazy val `circe-instant-jvm` = `circe-instant`.jvm
 
 val endpoints =
   project.in(file("."))

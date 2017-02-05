@@ -1,6 +1,6 @@
 package cqrs.commands
 
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
 /**
@@ -17,7 +17,7 @@ import java.util.UUID
 case class Meter(id: UUID, timeSeries: List[Record])
 
 /** A reading is a value at a certain date */
-case class Record(date: OffsetDateTime, value: BigDecimal)
+case class Record(date: Instant, value: BigDecimal)
 
 object Meter {
 

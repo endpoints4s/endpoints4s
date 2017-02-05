@@ -1,11 +1,11 @@
 package cqrs.commands
 
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
-import io.circe.{Decoder, Encoder}
-import io.circe.java8.time._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.java8.time._
+import io.circe.{Decoder, Encoder}
 
 //#endpoints
 import endpoints.algebra.{CirceEntities, Endpoints}
@@ -51,7 +51,7 @@ sealed trait UpdateCommand extends Command {
 case class CreateMeter(label: String) extends CreationCommand
 
 /** Add a record for an existing meter */
-case class AddRecord(meterId: UUID, date: OffsetDateTime, value: BigDecimal) extends UpdateCommand
+case class AddRecord(meterId: UUID, date: Instant, value: BigDecimal) extends UpdateCommand
 
 object Command {
   implicit val decoder: Decoder[Command] = deriveDecoder
@@ -67,7 +67,7 @@ object StoredEvent {
 
 sealed trait Event
 case class MeterCreated(id: UUID, label: String) extends Event
-case class RecordAdded(id: UUID, date: OffsetDateTime, value: BigDecimal) extends Event
+case class RecordAdded(id: UUID, date: Instant, value: BigDecimal) extends Event
 
 object Event {
   implicit val decoder: Decoder[Event] = deriveDecoder

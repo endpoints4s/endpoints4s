@@ -1,6 +1,6 @@
 package cqrs.publicserver
 
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
@@ -16,7 +16,6 @@ import io.circe.java8.time._
   * We expose a REST interface for manipulating meters.
   */
 // TODO User authentication
-// TODO All the commands should return the timestamp of the last performed event (so that clients can get consistent “write and read”)
 trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
 
   /** Common path prefix for endpoints: “/meters” */
@@ -35,8 +34,8 @@ trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponse
     endpoint(post[Unit, CreateMeter, Unit, CreateMeter](metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
 
   /** Add a record to an existing meter */
-  val addRecord: Endpoint[(UUID, AddRecord), Unit] =
-    endpoint(post[UUID, AddRecord, Unit, (UUID, AddRecord)](metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), emptyResponse)
+  val addRecord: Endpoint[(UUID, AddRecord), Meter] =
+    endpoint(post[UUID, AddRecord, Unit, (UUID, AddRecord)](metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), jsonResponse[Meter])
 
   implicit def uuidSegment: Segment[UUID]
 
@@ -51,7 +50,7 @@ object commands {
     implicit val encoder: Encoder[CreateMeter] = deriveEncoder
   }
 
-  case class AddRecord(date: OffsetDateTime, value: BigDecimal)
+  case class AddRecord(date: Instant, value: BigDecimal)
 
   object AddRecord {
     implicit val decoder: Decoder[AddRecord] = deriveDecoder

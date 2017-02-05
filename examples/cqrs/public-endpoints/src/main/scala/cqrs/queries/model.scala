@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import java.time.OffsetDateTime
+import java.time.Instant
 import java.util.UUID
 
 import io.circe.{Decoder, Encoder}
@@ -13,7 +13,7 @@ import scala.collection.immutable.SortedMap
   * This is the model used for querying.
   */
 // TODO Add useful stats
-case class Meter(id: UUID, label: String, timeSeries: SortedMap[OffsetDateTime, BigDecimal])
+case class Meter(id: UUID, label: String, timeSeries: SortedMap[Instant, BigDecimal])
 
 object Meter {
 

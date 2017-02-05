@@ -6,7 +6,7 @@ applications.
 
 Noteworthy features:
 
-- endpoints descriptions are **first-class Scala value**, which can be reused,
+- endpoints descriptions are **first-class Scala values**, which can be reused,
   combined and abstracted over ;
 - **consistent client and server implementations** can be derived from endpoint descriptions ;
 - **high extensibility**: you can introduce both

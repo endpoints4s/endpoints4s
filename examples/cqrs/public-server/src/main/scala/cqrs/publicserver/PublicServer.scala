@@ -57,8 +57,12 @@ class PublicServer(
       },
 
       addRecord.implementedByAsync { case (id, addData) =>
-        commandsClient.command(AddRecord(id, addData.date, addData.value))
-          .flatMap(_.fold[Future[Unit]](Future.failed(new NoSuchElementException))(_ => Future.successful(())))
+        for {
+          maybeEvent <- commandsClient.command(AddRecord(id, addData.date, addData.value))
+          findMeter = (evt: StoredEvent) => queriesClient.query(FindById(id, after = Some(evt.timestamp))).map(_.value)
+          maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
+          meter <- maybeMeter.fold[Future[Meter]](Future.failed(new NoSuchElementException))(Future.successful)
+        } yield meter
       }
 
     )
