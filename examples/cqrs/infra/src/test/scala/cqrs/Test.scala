@@ -73,12 +73,11 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
     }
 
     "create a new meter and add records to it" in {
-      val arbitraryDate = OffsetDateTime.of(LocalDateTime.of(2017, 1, 8, 12, 34, 56), ZoneOffset.UTC)
+      val arbitraryDate = OffsetDateTime.of(LocalDateTime.of(2017, 1, 8, 12, 34, 56), ZoneOffset.UTC).toInstant
       val arbitraryValue = BigDecimal(10)
       for {
         created <- api.createMeter(CreateMeter("Water"))
         _       <- api.addRecord((created.id, AddRecord(arbitraryDate, arbitraryValue)))
-        _       <- akka.pattern.after(6.seconds, actorSystem.scheduler)(Future.successful(()))
         updated <- api.getMeter(created.id)
       } yield assert(updated.exists(_.timeSeries == SortedMap(arbitraryDate -> arbitraryValue)))
     }

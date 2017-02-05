@@ -31,7 +31,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   "Commands" - {
 
-    val arbitraryDate = OffsetDateTime.of(LocalDateTime.of(2017, 1, 8, 12, 34, 56), ZoneOffset.UTC)
+    val arbitraryDate = OffsetDateTime.of(LocalDateTime.of(2017, 1, 8, 12, 34, 56), ZoneOffset.UTC).toInstant
     val arbitraryValue = BigDecimal(10)
 
     "create a new meter" in {
