@@ -50,11 +50,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = {
     val methodDirective = convToDirective1(Directives.method(method))
+    // we use Directives.pathPrefix to construct url directives, so now we close it
+    val urlDirective = joinDirectives(url.directive, convToDirective1(Directives.pathEndOrSingleSlash))
     joinDirectives(
       joinDirectives(
         joinDirectives(
           methodDirective,
-          url.directive),
+          urlDirective),
         entity),
       headers)
   }
