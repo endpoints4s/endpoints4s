@@ -172,7 +172,9 @@ val `akka-http-server` =
     .settings(
       name := "endpoints-akka-http-server",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-http" % "10.0.1"
+        "com.typesafe.akka" %% "akka-http" % "10.0.1",
+        "com.typesafe.akka" %% "akka-http-testkit" % "10.0.1" % Test,
+        "org.scalatest" %% "scalatest" % "3.0.1" % Test
       )
     )
     .dependsOn(`algebra-jvm`)
@@ -478,5 +480,6 @@ val endpoints =
       `example-cqrs-commands-endpoints`,
       `example-cqrs-commands`,
       `example-cqrs-queries-endpoints`,
-      `example-cqrs-queries`
+      `example-cqrs-queries`,
+      `circe-instant-js`, `circe-instant-jvm`
     )
