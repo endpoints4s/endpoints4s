@@ -7,7 +7,7 @@ based on a complete application.
 
 This section describes the application domain and architecture.
 For the sake of brevity, this tutorial only shows the parts of the code
-that are rely on the endpoints library. The complete
+that rely on the endpoints library. The complete
 source code (less than 1k lines of code) is available
 [here](https://github.com/julienrf/endpoints/tree/master/examples/cqrs).
 
@@ -36,7 +36,7 @@ graph LR
 In this diagram, the `web-client` application is a Scala.js application running in
 a web browser and communicating with the `public-server` through HTTP.
 
-Second, the `public-server` itself is broken down into smaller pieces. It follows a
+Second, the `public-server` itself is broken down into smaller pieces, following a
 [CQRS](https://martinfowler.com/bliki/CQRS.html) pattern:
 
 ~~~ mermaid
@@ -71,7 +71,7 @@ other by using the endpoints library.
 
 Let’s start with the `commands` microservice!
 
-## Defining a communication protocol
+## Describing an HTTP API
 
 ### Project layout
 
@@ -175,10 +175,11 @@ containing a `Seq[StoredEvent]`.
 
 In this section we have seen that, in order to get two applications communicate
 with each other, we first have to define a description of the HTTP endpoints
-they will use.
+they will use. This one is defined in a sub-project which is depended on by
+both the client and the server implementations.
 
-We achieve this with plain Scala expressions describing all the characteristics
-(verb, URL, entities, etc.) of each HTTP endpoint.
+The description of HTTP endpoints is achieved with plain Scala expressions
+describing all the characteristics (verb, URL, entities, etc.) of each endpoint.
 
 ## Deriving a server from a service description
 
@@ -350,9 +351,167 @@ The communication between microservices is achieved through a statically typed A
 From a developer perspective, remotely invoking an endpoint of a microservice
 consists in calling a function.
 
-## Queries service description
+## Multiplexed endpoints
 
-TODO.
+This section shows how the endpoints of the “queries” microservice are defined.
+This microservice supports query operations like “find all”, “find by id”, etc.
+
+Since this microservice is only called internally by our public server
+we don’t really care about using a nice REST interface for our communication.
+
+For instance, instead of using one HTTP endpoint per operation (`findAll`,
+`findById`, etc.) we can define a single HTTP endpoint taking as parameter
+either a “find all” type of query or a “find by id” type of query, and
+returning the corresponding result(s).
+
+Endpoints that handle several operations at once are called *multiplexed
+endpoints*.
+
+### Multiplexed endpoint description
+
+The difference between a non-multiplexed endpoint and a multiplexed endpoint
+is that the former has one type describing the HTTP request and one type
+describing the HTTP response, whereas in a multiplexed endpoint several
+types of request are supported, and the type of the response depends on the
+actual type of the request.
+
+We can see how this is reflected in the types. A non-multiplexed endpoint
+for the “find by id” operation would describe a request carrying an id
+of type `String` and a response carrying an `Option[Meter]`. The resulting
+endpoint would have type
+[`Endpoint[String, Option[Meter]]`](api:endpoints.algebra.Endpoints@Endpoint[A,B]).
+
+If we wanted to also handle the “find all” operation with the same endpoint,
+what would be the type of the response description? In the case of the “find
+by id” operation, this would still be `Option[Meter]`, but in the case of the
+“find all” operation, this would be `List[Meter]`. It is worth noting
+that the type of the response depends on the type of the request.
+Non-multiplexed endpoints can not express that.
+
+Here is how we can define a multiplexed endpoint handling both operations:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-endpoint
+~~~
+
+The type of this multiplexed endpoint is
+[`MuxEndpoint[QueryReq, QueryResp, Json]`](api:endpoints.algebra.Endpoints%40MuxEndpoint%5BReq%3C%3Aendpoints.algebra.MuxRequest%2CResp%2CTransport%5D).
+It describes an HTTP endpoint that handles request types that are subtypes of `QueryReq`
+and response types that subtypes of `QueryResp`, and that uses JSON documents to marshal information.
+
+The `QueryReq` type defines the possible types of requests:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-requests
+~~~
+
+It is defined as a `sealed trait` that extends `MuxRequest` and whose each alternative (`FindAll`
+and `FindById`) sets the `Response` type member to its corresponding response type.
+
+The `FindById` request type carries the information of the “find by id” operation:
+the `id` of the meter to look up, and an optional event timestamp
+that can be used to get consistency between writes and reads.
+
+The `FindAll` request type is the type of requests performing a “find all” operation.
+
+> {.note}
+> Alternatives *have to* be qualified as `final`, otherwise the type system will
+> fail to compile calls to the endpoint.
+
+The `QueryResp` type defines the possible types of responses as a regular
+algebraic data type:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-responses
+~~~
+
+The `MaybeResource` type carries the information of a response to a “find
+by id” request (an optional `Meter`), and the `ResourceList` type carries
+the information of a response to a “find all” request (a list of `Meter`s).
+
+### Invoking a multiplexed endpoint
+
+Our public server delegates to the queries service by invoking the
+multiplexed endpoints defined in the previous section.
+
+To invoke an endpoint as a client, we first have to derive a client for
+the endpoint descriptions:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/QueriesClient.scala
+~~~
+
+The process is the same as in the first part of the tutorial: we extend
+the trait that defines the endpoint descriptions (`QueriesEndpoints`)
+with traits that provide a client implementation (here, using the play framework
+under the hood).
+
+Once we have derived a client implementation, we can invoke the `query` endpoint
+like so:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation
+~~~
+
+We first instantiate the client and then invoke the `query` endpoint with a `FindAll` request.
+We get a result of type `Future[ResourceList]`.
+
+We can also invoke the “find by id” operation as follows:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation-find-by-id
+~~~
+
+Note that here the return type is `Future[MaybeResource]`.
+
+In order to get the `query` endpoint return different result types according to the type
+of the value that is passed as parameter (`FindAll` vs `FindById`), we use an advanced
+Scala feature named “path-dependent types”.
+
+From a client point of view, a simplified type signature of the `apply` method of a `MuxEndpoint`
+could be the following:
+
+~~~ scala
+trait MuxEndpoint[Req <: MuxRequest, Resp, Transport] {
+  def apply(req: Req): Future[req.Response]
+}
+~~~
+
+Translated in english, it means that one can invoke a `MuxEndpoint` by passing it a `Req` parameter,
+and the result is a `Future[req.Response]`. The important part is the `req.Response` type: that’s
+the `Response` type member of the `req` parameter. Thus, if we pass a `FindAll` request, we get
+a result of type `ResourceList` because `FindAll` defines its `Response` type to `ResourceList`.
+
+### Implementing a multiplexed endpoint
+
+Our queries microservice uses Play framework as an underlying HTTP server. Thus, we derive
+a server implementation of the `QueriesEndpoint` by mixing the `endpoints.play.routing.Endpoints`
+trait in it.
+
+Then, the essence of the implementation consists in pattern matching on the supplied `QueryReq`
+parameter:
+
+~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl-essence
+~~~
+
+Here we use a `service` abstraction that contains the actual implementation of the operations.
+We just transform the results of these operations into the `Response` type corresponding
+to each `QueryReq` (e.g. `MaybeResource` in the case of `FindById`, etc.).
+
+The complete implementation of the `query` multiplexed endpoint is a bit more complex:
+
+~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl
+~~~
+
+We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
+
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/routing/Endpoints.scala#mux-handler-async
+~~~
+
+This complex type signature is necessary to check that our implementation effectively
+returns a value that corresponds to the `Response` type member of the passed request.
+
+### Summary
+
+A multiplexed endpoint is an HTTP endpoint that can handle several operations. It can be useful
+to implement an internal communication protocol.
+
+To describe a multiplexed endpoint you have to first reify the possible request types and their
+respective response type as data types.
 
 ## Web client
 

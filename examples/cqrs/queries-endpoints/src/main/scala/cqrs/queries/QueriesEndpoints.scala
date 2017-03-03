@@ -16,15 +16,19 @@ trait QueriesEndpoints extends Endpoints with CirceEntities {
     *    via a statically typed API, so we can not build bad requests, by construction, and the response
     *    entity gives way more details about failures than status codes.
     */
+  //#mux-endpoint
   val query: MuxEndpoint[QueryReq, QueryResp, Json] =
     muxEndpoint[QueryReq, QueryResp, Json](post[Unit, Json, Unit, Json](path / "query", jsonRequest), jsonResponse)
+  //#mux-endpoint
 
 }
 
 /** A request carrying a query */
+//#mux-requests
 sealed trait QueryReq extends MuxRequest
 final case class FindById(id: UUID, after: Option[Long]) extends QueryReq { type Response = MaybeResource }
 final case object FindAll extends QueryReq { type Response = ResourceList }
+//#mux-requests
 // TODO Add a type of query including complex filters
 
 object QueryReq {
@@ -34,9 +38,11 @@ object QueryReq {
 
 /** A response to a QueryReq */
 // TODO Enrich with failure information
+//#mux-responses
 sealed trait QueryResp
 case class MaybeResource(value: Option[Meter]) extends QueryResp
 case class ResourceList(value: List[Meter]) extends QueryResp
+//#mux-responses
 
 object QueryResp {
   implicit val queryDecoder: Decoder[QueryResp] = deriveDecoder

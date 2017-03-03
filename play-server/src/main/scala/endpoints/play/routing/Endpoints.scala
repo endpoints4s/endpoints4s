@@ -283,6 +283,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
 }
 
+//#mux-handler-async
 /**
   * A function whose return type depends on the type
   * of the given `req`.
@@ -293,6 +294,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
   def apply[R <: Resp](req: Req { type Response = R }): Future[R]
 }
+//#mux-handler-async
 
 /**
   * A function whose return type depends on the type

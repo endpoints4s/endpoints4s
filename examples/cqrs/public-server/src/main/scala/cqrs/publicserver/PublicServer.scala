@@ -29,14 +29,18 @@ class PublicServer(
   with OptionalResponses {
 
   private val commandsClient = new CommandsClient(commandsBaseUrl, wsClient)
+  //#invocation
   private val queriesClient = new QueriesClient(queriesBaseUrl, wsClient)
+  //#invocation
 
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
 
       listMeters.implementedByAsync { _ =>
-        queriesClient.query(FindAll)
-          .map(_.value)
+        //#invocation
+        val metersList: Future[ResourceList] = queriesClient.query(FindAll)
+        //#invocation
+        metersList.map(_.value)
       },
 
       getMeter.implementedByAsync { id =>
@@ -49,7 +53,10 @@ class PublicServer(
           maybeMeter <- Traverse[Option].flatSequence(
             maybeEvent.collect {
               case StoredEvent(t, MeterCreated(id, _)) =>
-                queriesClient.query(FindById(id, after = Some(t))).map(_.value)
+                //#invocation-find-by-id
+                val maybeMeter: Future[MaybeResource] = queriesClient.query(FindById(id, after = Some(t)))
+                //#invocation-find-by-id
+                maybeMeter.map(_.value)
             }
           )
           meter <- maybeMeter.fold[Future[Meter]](Future.failed(new NoSuchElementException))(Future.successful)
