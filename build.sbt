@@ -478,5 +478,6 @@ val endpoints =
       `example-cqrs-commands-endpoints`,
       `example-cqrs-commands`,
       `example-cqrs-queries-endpoints`,
-      `example-cqrs-queries`
+      `example-cqrs-queries`,
+      `circe-instant-js`, `circe-instant-jvm`
     )

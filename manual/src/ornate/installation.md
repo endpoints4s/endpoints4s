@@ -53,7 +53,7 @@ Add the following dependencies to your `client` sub-project:
 libraryDependencies ++= Seq(
   // client based on Play framework
   "org.julienrf" %% "endpoints-play-client" % "{{version}}",
-  // JSON serialization using circe.io
+  // (optional) JSON serialization using circe.io
   "org.julienrf" %% "endpoints-play-client-circe" % "{{version}}"
 )
 ~~~

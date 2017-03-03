@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import endpoints.play.routing.{CirceEntities, Endpoints, MuxHandlerAsync}
+import endpoints.play.routing.{CirceEntities, Endpoints}
 import play.api.routing.Router
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,13 +13,19 @@ class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints w
 
   val routes: Router.Routes = routesFromEndpoints(
 
+    //#multiplexed-impl
+    import endpoints.play.routing.MuxHandlerAsync
+
     query.implementedByAsync(new MuxHandlerAsync[QueryReq, QueryResp] {
       def apply[R <: QueryResp](query: QueryReq { type Response = R }): Future[R] =
+        //#multiplexed-impl-essence
         query match {
           case FindById(id, t) => service.findById(id, t).map(MaybeResource)
           case FindAll         => service.findAll().map(ResourceList)
         }
+        //#multiplexed-impl-essence
     })
+    //#multiplexed-impl
 
   )
 
