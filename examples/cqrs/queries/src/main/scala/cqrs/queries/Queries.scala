@@ -11,10 +11,10 @@ import scala.concurrent.Future
   */
 class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints with CirceEntities {
 
-  val routes: Router.Routes = routesFromEndpoints(
+  //#multiplexed-impl
+  import endpoints.play.routing.MuxHandlerAsync
 
-    //#multiplexed-impl
-    import endpoints.play.routing.MuxHandlerAsync
+  val routes: Router.Routes = routesFromEndpoints(
 
     query.implementedByAsync(new MuxHandlerAsync[QueryReq, QueryResp] {
       def apply[R <: QueryResp](query: QueryReq { type Response = R }): Future[R] =
@@ -25,9 +25,9 @@ class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints w
         }
         //#multiplexed-impl-essence
     })
-    //#multiplexed-impl
 
   )
+  //#multiplexed-impl
 
   // These aliases are probably due to a limitation of circe
   implicit private def circeDecoderReq: io.circe.Decoder[QueryReq] = QueryReq.queryDecoder
