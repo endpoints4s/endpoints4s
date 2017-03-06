@@ -10,6 +10,21 @@ import scala.language.higherKinds
   * A path is itself made of segments chained together.
   *
   * A query string is made of named parameters.
+  *
+  * {{{
+  *   /**
+  *     * Describes an URL starting with a segment containing “articles”, followed
+  *     * by another `String` segment, and a query string containing
+  *     * a mandatory `Lang` parameter named “lang”, and an
+  *     * optional `Int` parameter named “page”.
+  *     *
+  *     * Examples of matching URLs:
+  *     *
+  *     * - /articles/kitchen?lang=fr
+  *     * - /articles/garden?lang=en&page=2
+  *     */
+  *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & optQs[Int]("page"))
+  * }}}
   */
 trait Urls {
 
