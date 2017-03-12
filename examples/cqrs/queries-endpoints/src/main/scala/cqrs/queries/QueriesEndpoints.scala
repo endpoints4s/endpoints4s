@@ -17,8 +17,10 @@ trait QueriesEndpoints extends Endpoints with CirceEntities {
     *    entity gives way more details about failures than status codes.
     */
   //#mux-endpoint
-  val query: MuxEndpoint[QueryReq, QueryResp, Json] =
-    muxEndpoint[QueryReq, QueryResp, Json](post[Unit, Json, Unit, Json](path / "query", jsonRequest), jsonResponse)
+  val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
+    val request = post(path / "query", jsonRequest[Json])
+    muxEndpoint[QueryReq, QueryResp, Json](request, jsonResponse)
+  }
   //#mux-endpoint
 
 }

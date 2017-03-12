@@ -1,4 +1,4 @@
-# Design
+# Design in a nutshell
 
 The `endpoints.algebra.Endpoints` trait used in the [overview](overview.md) provides members that
 bring **vocabulary** to describe HTTP endpoints (e.g. the `endpoint`, `get`, `post`,

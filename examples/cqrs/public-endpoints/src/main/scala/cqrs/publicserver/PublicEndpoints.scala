@@ -30,12 +30,12 @@ trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponse
     endpoint(get(metersPath / segment[UUID]), option(jsonResponse[Meter]))
 
   /** Registers a new meter */
-  val createMeter: Endpoint[CreateMeter, Meter] =
-    endpoint(post[Unit, CreateMeter, Unit, CreateMeter](metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
+  val createMeter/*: Endpoint[CreateMeter, Meter]*/ =
+    endpoint(post(metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
 
   /** Add a record to an existing meter */
-  val addRecord: Endpoint[(UUID, AddRecord), Meter] =
-    endpoint(post[UUID, AddRecord, Unit, (UUID, AddRecord)](metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), jsonResponse[Meter])
+  val addRecord/*: Endpoint[(UUID, AddRecord), Meter]*/ =
+    endpoint(post(metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), jsonResponse[Meter])
 
   implicit def uuidSegment: Segment[UUID]
 

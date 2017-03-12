@@ -18,8 +18,8 @@ trait CommandsEndpoints extends Endpoints with CirceEntities {
     * Returns the produced event, or `None` in case of failure (aggregate
     * not found or invalid command).
     */
-  val command: Endpoint[Command, Option[StoredEvent]] =
-    endpoint(post[Unit, Command, Unit, Command](path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
+  val command/*: Endpoint[Command, Option[StoredEvent]]*/ =
+    endpoint(post(path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
 
   /**
     * Read the event long (optionally from a given timestamp).

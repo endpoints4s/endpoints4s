@@ -196,6 +196,7 @@ val apiDoc =
     .settings(noPublishSettings ++ `scala2.11` ++ unidocSettings: _*)
     .settings(
       scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
+        "-diagrams",
         "-groups",
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
