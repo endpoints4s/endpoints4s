@@ -513,6 +513,127 @@ to implement an internal communication protocol.
 To describe a multiplexed endpoint you have to first reify the possible request types and their
 respective response type as data types.
 
-## Web client
+## Web client {#scalajs-client}
+
+The previous sections have shown how to achieve internal communication between the microservices of our
+`public-server` application.
+
+This section describes the implementation of the HTTP API between external clients and our public
+server.
+
+~~~ mermaid
+graph LR
+  web-client --> public-server
+~~~
+
+The difference with the previous sections is that since this API is public we really want to reuse most of the
+features of the HTTP protocol instead of re-implementing them on top of HTTP. For instance, requesting a non-
+existing resource should return a 404 (Not Found) response (whereas in our internal `query` service we would get
+a 200 (OK) response containing a `MaybeResource` entity whose `value` would be `None`).
+
+For the sake of illustration, our `web-client` will use this public API.
+
+### Public API description
+
+As usual, we introduce a `public-endpoints` project containing the endpoints description:
+
+~~~ mermaid
+graph BT
+  web-client -.-> interpreter2["endpoints-xhr-client-circe"]
+  web-client -.-> public-endpoints
+  web-client --> public-server
+  public-server -.-> public-endpoints
+  public-endpoints -.-> algebra["endpoints-algebra-circe"]
+  public-server -.-> interpreter["endpoints-play-server-circe"]
+  style algebra fill:#eee;
+  style interpreter fill:#eee;
+  style interpreter2 fill:#eee;
+~~~
+
+The `endpoints-xhr-client-circe` dependency provides a Scala.js interpreter that derives a client from endpoint
+descriptions.
+
+The public endpoints description defines four endpoints: `listMeters`, `getMeter`, `createMeter`
+and `addRecord`:
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#public-endpoints
+~~~
+
+We have already seen most of the used combinators that describe the endpoints. The `getMeter` endpoint
+uses some new combinators, though:
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#get-meter
+~~~
+
+The URL is described by the expression `metersPath / segment[UUID]`, which means the `/meters`
+URL prefix followed by a segment containing an `UUID`. A `segment[X]` expression describes
+a path segment that maps to a value of type `X`.
+
+It is worth noting that the endpoint library provides no support for `UUID`s, but this one
+can retroactively be added (as we do in this example): the `segment[A]` method takes an implicit
+parameter of type `Segment[A]` that defines how to encode or decode the `A` value into a
+path segment (thus, invoking `segment[X]` with an unsupported type `X` would raise an error at
+compile-time). Since this encoding or decoding process is the responsibility of the interpreter,
+and since we are only describing the endpoint, we added an abstract implicit method of type
+`Segment[UUID]`, which will be implemented by interpreters.
+
+The response of the `getMeter` endpoint is described by the expression
+`option(jsonResponse[Meter])`, which means that it
+can optionally be empty (for instance if a client queries this endpoint with a
+non-existing `UUID`). The `option` method, provided by the `OptionalResponses` algebra
+interface, takes a `Response[A]` description and
+turns it into a `Response[Option[A]]`, mapping the `None` case
+to a 404 (Not Found) response.
+
+### Client and server implementations
+
+The server implementation is very similar to what has been previously shown: we create a
+type that inherits from `PublicEndpoints` and the relevant interpreters. The only new thing
+is that we have to implement the abstract `uuidSegment: Segment[UUID]` member. In our
+server interpreter based on Play, the `Segment` type is defined as follows:
+
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/routing/Urls.scala#segment
+~~~
+
+The `decode` method is used when routing an incoming request, while the `encode` method is
+used for “reverse routing” (ie to generate (valid) URLs of endpoints).
+
+The implementation of the `uuidSegment` member is straightforward:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#segment-uuid
+~~~
+
+The client implementation is also straightforward: we create a type that inherits from
+`PublicEndpoints` and the relevant interpreters. In our case, we use an interpreter that
+derives a client performing `XMLHttpRequest`s to invoke the endpoints.
+
+Again, we have to implement the `uuidSegment` member. In our interpreter the `Segment` type
+is defined as follows:
+
+~~~ scala src=../../../xhr-client/src/main/scala/endpoints/xhr/Urls.scala#segment
+~~~
+
+Thus, we define the `uuidSegment` like so:
+
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/PublicEndpoints.scala#segment-uuid
+~~~
+
+Finally, here is an example of invocation of the `listMeters` endpoint from the Scala.js client:
+
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#list-meters-invocation
+~~~
+
+### Summary
+
+In this section we have seen that deriving a Scala.js client works the same way as deriving a JVM
+client.
+
+We have seen that the endpoints library provides a minimal infrastructure that is designed to
+be extended according to application-specific needs. In our case we saw how the `OptionalResponses`
+introduced a new method for describing responses such that empty responses are mapped to
+a 404 (Not Found) response. We also saw how support for custom data types (e.g. `UUID`) can
+be introduced.
+
+## HATEOS
 
 TODO.

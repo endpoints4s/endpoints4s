@@ -10,6 +10,9 @@ object PublicEndpoints
     with xhr.CirceEntities
     with xhr.OptionalResponses {
 
-  implicit lazy val uuidSegment: Segment[UUID] = (uuid: UUID) => uuid.toString
+  //#segment-uuid
+  implicit lazy val uuidSegment: Segment[UUID] =
+    (uuid: UUID) => stringSegment.encode(uuid.toString)
+  //#segment-uuid
 
 }

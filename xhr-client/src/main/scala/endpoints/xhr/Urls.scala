@@ -10,11 +10,13 @@ import scala.scalajs.js
   */
 trait Urls extends algebra.Urls {
 
+  //#segment
   /** Defines how to build a path segment from an `A` */
   trait Segment[A] {
     /** @return An URL encoded path segment (e.g. "foo%2Fbar") */
     def encode(a: A): String
   }
+  //#segment
 
   implicit lazy val stringSegment: Segment[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)

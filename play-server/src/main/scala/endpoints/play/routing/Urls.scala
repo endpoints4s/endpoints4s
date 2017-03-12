@@ -49,15 +49,15 @@ trait Urls extends algebra.Urls {
     @inline def map[B](f: A => B)(implicit applicative: Applicative[F]): F[B] = applicative.map(fa, f)
   }
 
+  //#segment
   /** Defines how to decode and encode path segments */
   trait Segment[A] {
-    /**
-      * @param segment URL decoded path segment
-      */
+    /** @param segment URL decoded path segment */
     def decode(segment: String): Option[A]
     /** @return URL encoded path segment */
     def encode(a: A): String
   }
+  //#segment
 
   implicit def stringSegment: Segment[String] =
     new Segment[String] {

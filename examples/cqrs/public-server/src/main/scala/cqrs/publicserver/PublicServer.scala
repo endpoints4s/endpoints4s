@@ -74,11 +74,13 @@ class PublicServer(
 
     )
 
-  implicit def uuidSegment: Segment[UUID] =
+  //#segment-uuid
+  implicit lazy val uuidSegment: Segment[UUID] =
     new Segment[UUID] {
       def decode(segment: String): Option[UUID] = Try(UUID.fromString(segment)).toOption
       def encode(uuid: UUID): String = URLEncoder.encode(uuid.toString, utf8Name)
     }
+  //#segment-uuid
 
   // These aliases are probably due to a limitation of circe
   implicit private def circeEncoderReq: io.circe.Encoder[QueryReq] = QueryReq.queryEncoder
