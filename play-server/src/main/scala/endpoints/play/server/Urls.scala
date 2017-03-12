@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8

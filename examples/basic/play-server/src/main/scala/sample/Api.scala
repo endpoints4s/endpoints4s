@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.play.routing._
+import endpoints.play.server._
 
 import scala.concurrent.Future
 import scala.util.Random

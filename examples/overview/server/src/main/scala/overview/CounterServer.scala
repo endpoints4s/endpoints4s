@@ -1,7 +1,7 @@
 package overview
 
 //#relevant-code
-import endpoints.play.routing
+import endpoints.play.server
 import scala.concurrent.stm.Ref
 
 /**
@@ -9,8 +9,8 @@ import scala.concurrent.stm.Ref
   */
 object CounterServer
   extends CounterEndpoints
-    with routing.Endpoints
-    with routing.CirceEntities {
+    with server.Endpoints
+    with server.CirceEntities {
 
   /** Simple implementation of an in-memory counter */
   val counter = Ref(0)

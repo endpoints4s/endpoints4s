@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import endpoints.play.routing.{CirceEntities, Endpoints}
+import endpoints.play.server.{CirceEntities, Endpoints}
 import play.api.routing.Router
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -12,7 +12,7 @@ import scala.concurrent.Future
 class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints with CirceEntities {
 
   //#multiplexed-impl
-  import endpoints.play.routing.MuxHandlerAsync
+  import endpoints.play.server.MuxHandlerAsync
 
   val routes: Router.Routes = routesFromEndpoints(
 

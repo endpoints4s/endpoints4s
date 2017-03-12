@@ -10,7 +10,7 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints.play.routing.{CirceEntities, Endpoints, OptionalResponses}
+import endpoints.play.server.{CirceEntities, Endpoints, OptionalResponses}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try

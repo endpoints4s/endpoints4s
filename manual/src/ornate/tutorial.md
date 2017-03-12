@@ -215,11 +215,11 @@ server as follows:
 
 Again, let’s detail line by line the above code.
 
-First, we import the [`Endpoints`](api:endpoints.play.routing.Endpoints) and
-[`CirceEntities`](api:endpoints.play.routing.CirceEntities) *interpreters* from the
-`endpoints.play.routing` package. Interpreters always have the same name as the
+First, we import the [`Endpoints`](api:endpoints.play.server.Endpoints) and
+[`CirceEntities`](api:endpoints.play.server.CirceEntities) *interpreters* from the
+`endpoints.play.server` package. Interpreters always have the same name as the
 algebra interface they implement, but they are not located in the `endpoints.algebra`
-package. The `endpoints.play.routing` package contains interpreters that rely
+package. The `endpoints.play.server` package contains interpreters that rely
 on Play framework to implement an HTTP server.
 
 Then, we extend the `CommandsEndpoints` trait that we defined in the previous section and we
@@ -240,7 +240,7 @@ and `events`:
 ~~~ scala src=../../../examples/cqrs/commands/src/main/scala/cqrs/commands/CommandsService.scala#signatures
 ~~~
 
-As you can see, the `play.routing` interpreter takes care of decoding HTTP requests and
+As you can see, the `play.server` interpreter takes care of decoding HTTP requests and
 encoding HTTP responses according to our endpoint descriptions, so that we can focus
 on implementing the actual logic of our service in terms of high-level data types.
 
@@ -479,7 +479,7 @@ a result of type `ResourceList` because `FindAll` defines its `Response` type to
 ### Implementing a multiplexed endpoint
 
 Our queries microservice uses Play framework as an underlying HTTP server. Thus, we derive
-a server implementation of the `QueriesEndpoint` by mixing the `endpoints.play.routing.Endpoints`
+a server implementation of the `QueriesEndpoint` by mixing the `endpoints.play.server.Endpoints`
 trait in it.
 
 Then, the essence of the implementation consists in pattern matching on the supplied `QueryReq`
@@ -499,7 +499,7 @@ The complete implementation of the `query` multiplexed endpoint is a bit more co
 
 We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
 
-~~~ scala src=../../../play-server/src/main/scala/endpoints/play/routing/Endpoints.scala#mux-handler-async
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Endpoints.scala#mux-handler-async
 ~~~
 
 This complex type signature is necessary to check that our implementation effectively
@@ -592,7 +592,7 @@ type that inherits from `PublicEndpoints` and the relevant interpreters. The onl
 is that we have to implement the abstract `uuidSegment: Segment[UUID]` member. In our
 server interpreter based on Play, the `Segment` type is defined as follows:
 
-~~~ scala src=../../../play-server/src/main/scala/endpoints/play/routing/Urls.scala#segment
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Urls.scala#segment
 ~~~
 
 The `decode` method is used when routing an incoming request, while the `encode` method is

@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import endpoints.algebra
 import endpoints.Tupler
@@ -27,7 +27,7 @@ import scala.language.higherKinds
   * You can get a router for them as follows:
   *
   * {{{
-  *   object MyRouter extends MyEndpoints with play.routing.Endpoints with play.routing.JsonEntities {
+  *   object MyRouter extends MyEndpoints with play.server.Endpoints with play.server.JsonEntities {
   *
   *     val routes = routesFromEndpoints(
   *       inc.implementedBy(x => x + 1)

@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
