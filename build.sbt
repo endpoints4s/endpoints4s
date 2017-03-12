@@ -429,26 +429,29 @@ lazy val `circe-instant` =
 lazy val `circe-instant-js` = `circe-instant`.js
 lazy val `circe-instant-jvm` = `circe-instant`.jvm
 
+import ReleaseTransformations._
+
 val endpoints =
   project.in(file("."))
     .enablePlugins(CrossPerProjectPlugin)
     .settings(noPublishSettings: _*)
-      .settings(/*,
-        releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-        releaseProcess := Seq[ReleaseStep](checkSnapshotDependencies,
+      .settings(
+        releaseProcess := Seq[ReleaseStep](
+          checkSnapshotDependencies,
           inquireVersions,
           runClean,
           runTest,
+          releaseStepTask(makeSite in manual),
           setReleaseVersion,
           commitReleaseVersion,
           tagRelease,
-          publishArtifacts,
-          ReleaseStep(action = Command.process("publishDoc", _)),
+          releaseStepTask(PgpKeys.publishSigned),
           setNextVersion,
           commitNextVersion,
-          ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+          releaseStepCommand(Sonatype.SonatypeCommand.sonatypeReleaseAll),
+          releaseStepTask(GhPagesKeys.pushSite in manual),
           pushChanges
-        )*/
+        )
       )
     .aggregate(
       `algebra-js`, `algebra-jvm`,
