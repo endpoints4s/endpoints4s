@@ -1,4 +1,4 @@
-package endpoints.akkahttp.routing
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.server.util.{Tupler => AkkaTupler}
 import akka.http.scaladsl.server._

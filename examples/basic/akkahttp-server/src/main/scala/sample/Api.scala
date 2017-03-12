@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.akkahttp.routing._
+import endpoints.akkahttp.server._
 
 import scala.concurrent.Future
 import scala.util.Random
