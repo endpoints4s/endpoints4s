@@ -80,7 +80,7 @@ trait Urls extends algebra.Urls {
   /**
     * Query string encoding and decoding
     */
-  trait QueryString[A] extends QueryStringOps[A] {
+  trait QueryString[A] {
     /**
       * @param qs Map of identifiers and parameter values (these are already URL decoded)
       */
@@ -148,7 +148,7 @@ trait Urls extends algebra.Urls {
         Map(name -> Seq(i.toString))
     }
 
-  trait Path[A] extends PathOps[A] with Url[A] {
+  trait Path[A] extends Url[A] {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
 
