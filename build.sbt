@@ -27,6 +27,11 @@ val `scala2.12` = Seq(
   crossScalaVersions := Seq("2.11.8", "2.12.1")
 )
 
+val `scala2.12_full` = Seq(
+  scalaVersion := "2.12.1",
+  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
+)
+
 val publishSettings = commonSettings ++ Seq(
   pomExtra :=
     <developers>
@@ -54,13 +59,13 @@ val publishSettings = commonSettings ++ Seq(
 
 val noPublishSettings = commonSettings ++ Seq(
   publishArtifact := false,
-  publish := (),
-  publishLocal := ()
+  publish := ()
+//  publishLocal := ()
 )
 
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
-    .settings(publishSettings ++ `scala2.12`: _*)
+    .settings(publishSettings ++ `scala2.12_full`: _*)
     .settings(
       name := "endpoints-algebra"
     )
@@ -73,7 +78,7 @@ val circeVersion = "0.6.1"
 
 val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
-    .settings(publishSettings ++ `scala2.12`: _*)
+    .settings(publishSettings ++ `scala2.12_full`: _*)
     .settings(
       name := "endpoints-algebra-circe",
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
@@ -190,6 +195,31 @@ val `akka-http-server-circe` =
       )
     )
     .dependsOn(`akka-http-server`, `algebra-circe-jvm`)
+
+val `scalaj-client` =
+  project.in(file("scalaj-client"))
+    .settings(publishSettings: _*)
+    .settings(`scala2.12_full`: _*)
+    .settings(
+      name := "endpoints-roshttp-client",
+      libraryDependencies ++= Seq(
+        "org.scalaj" %% "scalaj-http" % "2.3.0"
+      )
+    )
+    .dependsOn(`algebra-jvm`)
+
+val `scalaj-client-circe` =
+  project.in(file("roshttp-client-circe"))
+    .settings(publishSettings: _*)
+    .settings(`scala2.12_full`: _*)
+    .settings(
+      name := "endpoints-scalaj-client-circe",
+      libraryDependencies ++= Seq(
+        "org.scalaj" %% "scalaj-http" % "2.3.0"
+      )
+    )
+    .dependsOn(`scalaj-client`, `algebra-circe-jvm`)
+
 
 val apiDoc =
   project.in(file("api-doc"))
