@@ -67,13 +67,18 @@ trait CirceEntities extends JsonEntities {
 
   /** Provides a Json [[io.circe.Decoder]] based on an existing circe decoder */
   implicit def circeJsonDecoder[A](implicit circeDecoder: CirceDecoder[A]): Decoder[Json, A] =
-    json =>
-      circeDecoder.decodeJson(json)
+    new Decoder[Json, A] {
+      override def decode(from: Json): Either[Throwable, A] = circeDecoder
+        .decodeJson(from)
         .fold(failure => Left(new Exception(failure.message)), Right(_))
+    }
+
 
   /** Provides a Json [[Encoder]] based on an existing circe encoder */
   implicit def circeJsonEncoder[A](implicit circeEncoder: CirceEncoder[A]): Encoder[A, Json] =
-    circeEncoder(_)
+    new Encoder[A, Json] {
+      override def encode(from: A): Json = circeEncoder(from)
+    }
 
 }
 
@@ -89,6 +94,7 @@ object CirceEntities {
     */
   trait CirceCodec[A] {
     def encoder: CirceEncoder[A]
+
     def decoder: CirceDecoder[A]
   }
 
