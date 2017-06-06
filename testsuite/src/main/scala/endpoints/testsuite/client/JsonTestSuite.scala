@@ -1,8 +1,7 @@
 package endpoints.testsuite.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.testsuite.JsonTestApi
-import endpoints.testsuite.JsonTestApi._
+import endpoints.testsuite.{Address, JsonTestApi, User}
 
 
 trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {

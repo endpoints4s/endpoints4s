@@ -96,7 +96,8 @@ val testsuite =
       name := "endpoints-testsuite",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.6.0",
-        "org.scalatest" %% "scalatest" % "3.0.1"
+        "org.scalatest" %% "scalatest" % "3.0.1",
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
       )
     ).dependsOn(`algebra`, `algebra-circe`)
 
@@ -216,7 +217,7 @@ val `scalaj-client` =
     .settings(publishSettings: _*)
     .settings(`scala2.12_full`: _*)
     .settings(
-      name := "endpoints-roshttp-client",
+      name := "endpoints-scalaj-client",
       libraryDependencies ++= Seq(
         "org.scalaj" %% "scalaj-http" % "2.3.0"
       )
@@ -499,6 +500,7 @@ val endpoints =
     .aggregate(
       `algebra-js`, `algebra-jvm`,
       `algebra-circe-js`, `algebra-circe-jvm`,
+      `testsuite-js`, `testsuite-jvm`,
       `play-circe`,
       `play-server`,
       `play-server-circe`,
@@ -509,6 +511,8 @@ val endpoints =
       `play-client-circe`,
       `akka-http-server`,
       `akka-http-server-circe`,
+      `scalaj-client`,
+      `scalaj-client-circe`,
       // overview example
       `example-overview-endpoints-js`, `example-overview-endpoints-jvm`,
       `example-overview-server`,

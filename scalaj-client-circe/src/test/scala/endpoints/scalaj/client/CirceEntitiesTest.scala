@@ -2,7 +2,8 @@ package endpoints.scalaj.client
 
 import endpoints.algebra.CirceEntities.CirceCodec
 import endpoints.testsuite.JsonTestApi
-import endpoints.testsuite.JsonTestApi.{Address, User}
+import endpoints.testsuite.User
+import endpoints.testsuite.Address
 import endpoints.testsuite.client.JsonTestSuite
 import org.scalatest.WordSpec
 

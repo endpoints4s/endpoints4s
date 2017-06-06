@@ -1,7 +1,7 @@
 package endpoints.scalaj.client
 
-import endpoints.algebra.MuxRequest
 import endpoints.algebra
+import endpoints.algebra.MuxRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -27,7 +27,10 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
         callUnsafe(args)
       }
 
-    def callUnsafe(args: Req): Resp = response(request(args).asString).toTry.get
+    def callUnsafe(args: Req): Resp = response(request(args).asString) match {
+      case Left(ex) => throw ex
+      case Right(x) => x
+    }
 
     def call(args: Req): Either[Throwable, Resp] = response(request(args).asString)
   }
