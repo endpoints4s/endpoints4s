@@ -2,7 +2,7 @@ package cqrs.commands
 
 
 //#server
-import endpoints.play.routing.{CirceEntities, Endpoints}
+import endpoints.play.server.{CirceEntities, Endpoints}
 import play.api.routing.Router
 
 object Commands extends CommandsEndpoints with Endpoints with CirceEntities {

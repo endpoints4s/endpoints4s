@@ -21,9 +21,11 @@ object Main extends JSApp {
   val metersVar: Var[Map[UUID, Meter]] = Var(Map.empty)
 
   def main(): Unit = {
+    //#list-meters-invocation
     PublicEndpoints.listMeters(()).map { fetchedMeters =>
       metersVar := fetchedMeters.map(meter => meter.id -> meter).toMap
     }
+    //#list-meters-invocation
 
     val newMeterId = UUID.randomUUID().toString
 

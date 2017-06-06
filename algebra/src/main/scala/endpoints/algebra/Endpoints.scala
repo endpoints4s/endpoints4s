@@ -8,6 +8,16 @@ import scala.language.higherKinds
   * Algebra interface for describing endpoints made of requests and responses.
   *
   * Requests and responses contain headers and entity.
+  *
+  * {{{
+  *   /**
+  *     * Describes an HTTP endpoint whose:
+  *     *  - request uses verb “GET”,
+  *     *  - URL is made of path “/foo”,
+  *     *  - response has no entity
+  *     */
+  *   val example = endpoint(get(path / "foo"), emptyResponse)
+  * }}}
   */
 trait Endpoints extends Urls with Methods {
 

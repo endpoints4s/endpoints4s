@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import endpoints.algebra
 import endpoints.Tupler
@@ -27,7 +27,7 @@ import scala.language.higherKinds
   * You can get a router for them as follows:
   *
   * {{{
-  *   object MyRouter extends MyEndpoints with play.routing.Endpoints with play.routing.JsonEntities {
+  *   object MyRouter extends MyEndpoints with play.server.Endpoints with play.server.JsonEntities {
   *
   *     val routes = routesFromEndpoints(
   *       inc.implementedBy(x => x + 1)
@@ -283,6 +283,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
 }
 
+//#mux-handler-async
 /**
   * A function whose return type depends on the type
   * of the given `req`.
@@ -293,6 +294,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
   def apply[R <: Resp](req: Req { type Response = R }): Future[R]
 }
+//#mux-handler-async
 
 /**
   * A function whose return type depends on the type

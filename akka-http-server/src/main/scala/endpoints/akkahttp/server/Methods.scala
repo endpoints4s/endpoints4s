@@ -1,4 +1,4 @@
-package endpoints.akkahttp.routing
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.model.{HttpMethod, HttpMethods}
 import endpoints.algebra

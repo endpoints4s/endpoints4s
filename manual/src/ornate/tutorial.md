@@ -7,7 +7,7 @@ based on a complete application.
 
 This section describes the application domain and architecture.
 For the sake of brevity, this tutorial only shows the parts of the code
-that are rely on the endpoints library. The complete
+that rely on the endpoints library. The complete
 source code (less than 1k lines of code) is available
 [here](https://github.com/julienrf/endpoints/tree/master/examples/cqrs).
 
@@ -36,7 +36,7 @@ graph LR
 In this diagram, the `web-client` application is a Scala.js application running in
 a web browser and communicating with the `public-server` through HTTP.
 
-Second, the `public-server` itself is broken down into smaller pieces. It follows a
+Second, the `public-server` itself is broken down into smaller pieces, following a
 [CQRS](https://martinfowler.com/bliki/CQRS.html) pattern:
 
 ~~~ mermaid
@@ -71,7 +71,7 @@ other by using the endpoints library.
 
 Let’s start with the `commands` microservice!
 
-## Defining a communication protocol
+## Describing an HTTP API
 
 ### Project layout
 
@@ -175,10 +175,11 @@ containing a `Seq[StoredEvent]`.
 
 In this section we have seen that, in order to get two applications communicate
 with each other, we first have to define a description of the HTTP endpoints
-they will use.
+they will use. This one is defined in a sub-project which is depended on by
+both the client and the server implementations.
 
-We achieve this with plain Scala expressions describing all the characteristics
-(verb, URL, entities, etc.) of each HTTP endpoint.
+The description of HTTP endpoints is achieved with plain Scala expressions
+describing all the characteristics (verb, URL, entities, etc.) of each endpoint.
 
 ## Deriving a server from a service description
 
@@ -214,11 +215,11 @@ server as follows:
 
 Again, let’s detail line by line the above code.
 
-First, we import the [`Endpoints`](api:endpoints.play.routing.Endpoints) and
-[`CirceEntities`](api:endpoints.play.routing.CirceEntities) *interpreters* from the
-`endpoints.play.routing` package. Interpreters always have the same name as the
+First, we import the [`Endpoints`](api:endpoints.play.server.Endpoints) and
+[`CirceEntities`](api:endpoints.play.server.CirceEntities) *interpreters* from the
+`endpoints.play.server` package. Interpreters always have the same name as the
 algebra interface they implement, but they are not located in the `endpoints.algebra`
-package. The `endpoints.play.routing` package contains interpreters that rely
+package. The `endpoints.play.server` package contains interpreters that rely
 on Play framework to implement an HTTP server.
 
 Then, we extend the `CommandsEndpoints` trait that we defined in the previous section and we
@@ -239,7 +240,7 @@ and `events`:
 ~~~ scala src=../../../examples/cqrs/commands/src/main/scala/cqrs/commands/CommandsService.scala#signatures
 ~~~
 
-As you can see, the `play.routing` interpreter takes care of decoding HTTP requests and
+As you can see, the `play.server` interpreter takes care of decoding HTTP requests and
 encoding HTTP responses according to our endpoint descriptions, so that we can focus
 on implementing the actual logic of our service in terms of high-level data types.
 
@@ -350,10 +351,289 @@ The communication between microservices is achieved through a statically typed A
 From a developer perspective, remotely invoking an endpoint of a microservice
 consists in calling a function.
 
-## Queries service description
+## Multiplexed endpoints
 
-TODO.
+This section shows how the endpoints of the “queries” microservice are defined.
+This microservice supports query operations like “find all”, “find by id”, etc.
 
-## Web client
+Since this microservice is only called internally by our public server
+we don’t really care about using a nice REST interface for our communication.
+
+For instance, instead of using one HTTP endpoint per operation (`findAll`,
+`findById`, etc.) we can define a single HTTP endpoint taking as parameter
+either a “find all” type of query or a “find by id” type of query, and
+returning the corresponding result(s).
+
+Endpoints that handle several operations at once are called *multiplexed
+endpoints*.
+
+### Multiplexed endpoint description
+
+The difference between a non-multiplexed endpoint and a multiplexed endpoint
+is that the former has one type describing the HTTP request and one type
+describing the HTTP response, whereas in a multiplexed endpoint several
+types of request are supported, and the type of the response depends on the
+actual type of the request.
+
+We can see how this is reflected in the types. A non-multiplexed endpoint
+for the “find by id” operation would describe a request carrying an id
+of type `String` and a response carrying an `Option[Meter]`. The resulting
+endpoint would have type
+[`Endpoint[String, Option[Meter]]`](api:endpoints.algebra.Endpoints@Endpoint[A,B]).
+
+If we wanted to also handle the “find all” operation with the same endpoint,
+what would be the type of the response description? In the case of the “find
+by id” operation, this would still be `Option[Meter]`, but in the case of the
+“find all” operation, this would be `List[Meter]`. It is worth noting
+that the type of the response depends on the type of the request.
+Non-multiplexed endpoints can not express that.
+
+Here is how we can define a multiplexed endpoint handling both operations:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-endpoint
+~~~
+
+The type of this multiplexed endpoint is
+[`MuxEndpoint[QueryReq, QueryResp, Json]`](api:endpoints.algebra.Endpoints%40MuxEndpoint%5BReq%3C%3Aendpoints.algebra.MuxRequest%2CResp%2CTransport%5D).
+It describes an HTTP endpoint that handles request types that are subtypes of `QueryReq`
+and response types that subtypes of `QueryResp`, and that uses JSON documents to marshal information.
+
+The `QueryReq` type defines the possible types of requests:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-requests
+~~~
+
+It is defined as a `sealed trait` that extends `MuxRequest` and whose each alternative (`FindAll`
+and `FindById`) sets the `Response` type member to its corresponding response type.
+
+The `FindById` request type carries the information of the “find by id” operation:
+the `id` of the meter to look up, and an optional event timestamp
+that can be used to get consistency between writes and reads.
+
+The `FindAll` request type is the type of requests performing a “find all” operation.
+
+> {.note}
+> Alternatives *have to* be qualified as `final`, otherwise the type system will
+> fail to compile calls to the endpoint.
+
+The `QueryResp` type defines the possible types of responses as a regular
+algebraic data type:
+
+~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-responses
+~~~
+
+The `MaybeResource` type carries the information of a response to a “find
+by id” request (an optional `Meter`), and the `ResourceList` type carries
+the information of a response to a “find all” request (a list of `Meter`s).
+
+### Invoking a multiplexed endpoint
+
+Our public server delegates to the queries service by invoking the
+multiplexed endpoints defined in the previous section.
+
+To invoke an endpoint as a client, we first have to derive a client for
+the endpoint descriptions:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/QueriesClient.scala
+~~~
+
+The process is the same as in the first part of the tutorial: we extend
+the trait that defines the endpoint descriptions (`QueriesEndpoints`)
+with traits that provide a client implementation (here, using the play framework
+under the hood).
+
+Once we have derived a client implementation, we can invoke the `query` endpoint
+like so:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation
+~~~
+
+We first instantiate the client and then invoke the `query` endpoint with a `FindAll` request.
+We get a result of type `Future[ResourceList]`.
+
+We can also invoke the “find by id” operation as follows:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation-find-by-id
+~~~
+
+Note that here the return type is `Future[MaybeResource]`.
+
+In order to get the `query` endpoint return different result types according to the type
+of the value that is passed as parameter (`FindAll` vs `FindById`), we use an advanced
+Scala feature named “path-dependent types”.
+
+From a client point of view, a simplified type signature of the `apply` method of a `MuxEndpoint`
+could be the following:
+
+~~~ scala
+trait MuxEndpoint[Req <: MuxRequest, Resp, Transport] {
+  def apply(req: Req): Future[req.Response]
+}
+~~~
+
+Translated in english, it means that one can invoke a `MuxEndpoint` by passing it a `Req` parameter,
+and the result is a `Future[req.Response]`. The important part is the `req.Response` type: that’s
+the `Response` type member of the `req` parameter. Thus, if we pass a `FindAll` request, we get
+a result of type `ResourceList` because `FindAll` defines its `Response` type to `ResourceList`.
+
+### Implementing a multiplexed endpoint
+
+Our queries microservice uses Play framework as an underlying HTTP server. Thus, we derive
+a server implementation of the `QueriesEndpoint` by mixing the `endpoints.play.server.Endpoints`
+trait in it.
+
+Then, the essence of the implementation consists in pattern matching on the supplied `QueryReq`
+parameter:
+
+~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl-essence
+~~~
+
+Here we use a `service` abstraction that contains the actual implementation of the operations.
+We just transform the results of these operations into the `Response` type corresponding
+to each `QueryReq` (e.g. `MaybeResource` in the case of `FindById`, etc.).
+
+The complete implementation of the `query` multiplexed endpoint is a bit more complex:
+
+~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl
+~~~
+
+We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
+
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Endpoints.scala#mux-handler-async
+~~~
+
+This complex type signature is necessary to check that our implementation effectively
+returns a value that corresponds to the `Response` type member of the passed request.
+
+### Summary
+
+A multiplexed endpoint is an HTTP endpoint that can handle several operations. It can be useful
+to implement an internal communication protocol.
+
+To describe a multiplexed endpoint you have to first reify the possible request types and their
+respective response type as data types.
+
+## Web client {#scalajs-client}
+
+The previous sections have shown how to achieve internal communication between the microservices of our
+`public-server` application.
+
+This section describes the implementation of the HTTP API between external clients and our public
+server.
+
+~~~ mermaid
+graph LR
+  web-client --> public-server
+~~~
+
+The difference with the previous sections is that since this API is public we really want to reuse most of the
+features of the HTTP protocol instead of re-implementing them on top of HTTP. For instance, requesting a non-
+existing resource should return a 404 (Not Found) response (whereas in our internal `query` service we would get
+a 200 (OK) response containing a `MaybeResource` entity whose `value` would be `None`).
+
+For the sake of illustration, our `web-client` will use this public API.
+
+### Public API description
+
+As usual, we introduce a `public-endpoints` project containing the endpoints description:
+
+~~~ mermaid
+graph BT
+  web-client -.-> interpreter2["endpoints-xhr-client-circe"]
+  web-client -.-> public-endpoints
+  web-client --> public-server
+  public-server -.-> public-endpoints
+  public-endpoints -.-> algebra["endpoints-algebra-circe"]
+  public-server -.-> interpreter["endpoints-play-server-circe"]
+  style algebra fill:#eee;
+  style interpreter fill:#eee;
+  style interpreter2 fill:#eee;
+~~~
+
+The `endpoints-xhr-client-circe` dependency provides a Scala.js interpreter that derives a client from endpoint
+descriptions.
+
+The public endpoints description defines four endpoints: `listMeters`, `getMeter`, `createMeter`
+and `addRecord`:
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#public-endpoints
+~~~
+
+We have already seen most of the used combinators that describe the endpoints. The `getMeter` endpoint
+uses some new combinators, though:
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#get-meter
+~~~
+
+The URL is described by the expression `metersPath / segment[UUID]`, which means the `/meters`
+URL prefix followed by a segment containing an `UUID`. A `segment[X]` expression describes
+a path segment that maps to a value of type `X`.
+
+It is worth noting that the endpoint library provides no support for `UUID`s, but this one
+can retroactively be added (as we do in this example): the `segment[A]` method takes an implicit
+parameter of type `Segment[A]` that defines how to encode or decode the `A` value into a
+path segment (thus, invoking `segment[X]` with an unsupported type `X` would raise an error at
+compile-time). Since this encoding or decoding process is the responsibility of the interpreter,
+and since we are only describing the endpoint, we added an abstract implicit method of type
+`Segment[UUID]`, which will be implemented by interpreters.
+
+The response of the `getMeter` endpoint is described by the expression
+`option(jsonResponse[Meter])`, which means that it
+can optionally be empty (for instance if a client queries this endpoint with a
+non-existing `UUID`). The `option` method, provided by the `OptionalResponses` algebra
+interface, takes a `Response[A]` description and
+turns it into a `Response[Option[A]]`, mapping the `None` case
+to a 404 (Not Found) response.
+
+### Client and server implementations
+
+The server implementation is very similar to what has been previously shown: we create a
+type that inherits from `PublicEndpoints` and the relevant interpreters. The only new thing
+is that we have to implement the abstract `uuidSegment: Segment[UUID]` member. In our
+server interpreter based on Play, the `Segment` type is defined as follows:
+
+~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Urls.scala#segment
+~~~
+
+The `decode` method is used when routing an incoming request, while the `encode` method is
+used for “reverse routing” (ie to generate (valid) URLs of endpoints).
+
+The implementation of the `uuidSegment` member is straightforward:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#segment-uuid
+~~~
+
+The client implementation is also straightforward: we create a type that inherits from
+`PublicEndpoints` and the relevant interpreters. In our case, we use an interpreter that
+derives a client performing `XMLHttpRequest`s to invoke the endpoints.
+
+Again, we have to implement the `uuidSegment` member. In our interpreter the `Segment` type
+is defined as follows:
+
+~~~ scala src=../../../xhr-client/src/main/scala/endpoints/xhr/Urls.scala#segment
+~~~
+
+Thus, we define the `uuidSegment` like so:
+
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/PublicEndpoints.scala#segment-uuid
+~~~
+
+Finally, here is an example of invocation of the `listMeters` endpoint from the Scala.js client:
+
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#list-meters-invocation
+~~~
+
+### Summary
+
+In this section we have seen that deriving a Scala.js client works the same way as deriving a JVM
+client.
+
+We have seen that the endpoints library provides a minimal infrastructure that is designed to
+be extended according to application-specific needs. In our case we saw how the `OptionalResponses`
+introduced a new method for describing responses such that empty responses are mapped to
+a 404 (Not Found) response. We also saw how support for custom data types (e.g. `UUID`) can
+be introduced.
+
+## HATEOS
 
 TODO.

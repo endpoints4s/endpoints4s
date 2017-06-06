@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import java.util.Base64
 

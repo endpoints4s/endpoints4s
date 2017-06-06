@@ -51,7 +51,7 @@ import io.circe.{Json, Decoder => CirceDecoder, Encoder => CirceEncoder}
   * {{{
   *   /* server MyEndpointsServer.scala */
   *
-  *   object MyEndpointsServer extends MyEndpoints with play.routing.CirceEntities {
+  *   object MyEndpointsServer extends MyEndpoints with play.server.CirceEntities {
   *
   *     val routes = routesFromEndpoints(
   *       myEndpoint.implementedBy(_ => MyDto(42, "foo"))

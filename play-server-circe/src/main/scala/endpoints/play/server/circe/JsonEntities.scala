@@ -1,7 +1,7 @@
-package endpoints.play.routing.circe
+package endpoints.play.server.circe
 
 import endpoints.algebra
-import endpoints.play.routing.Endpoints
+import endpoints.play.server.Endpoints
 import io.circe.{Decoder => CirceDecoder, Encoder => CirceEncoder, jawn}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc.{BodyParsers, Results}

@@ -1,4 +1,4 @@
-package endpoints.akkahttp.routing
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives

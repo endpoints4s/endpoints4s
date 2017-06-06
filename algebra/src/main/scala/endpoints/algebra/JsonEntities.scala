@@ -4,6 +4,16 @@ import scala.language.higherKinds
 
 /**
   * Algebra interface for describing JSON entities in requests and responses.
+  *
+  * {{{
+  *   /**
+  *     * Describes an HTTP endpoint whose:
+  *     *  - request uses verb “GET”,
+  *     *  - URL is made of the segment “/user” followed by a `String` segment,
+  *     *  - response content type is JSON and contains a `User`
+  *     */
+  *   val example = endpoint(get(path / "user" / segment[UUID]), jsonResponse[User])
+  * }}}
   */
 trait JsonEntities extends Endpoints {
 

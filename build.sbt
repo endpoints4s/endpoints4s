@@ -220,12 +220,28 @@ val `scalaj-client-circe` =
     )
     .dependsOn(`scalaj-client`, `algebra-circe-jvm`)
 
+val testsuite =
+  crossProject.crossType(CrossType.Pure).in(file("testsuite"))
+    .settings(publishSettings ++ `scala2.12_full`: _*)
+    .settings(
+      name := "endpoints-testsuite",
+      libraryDependencies ++= Seq(
+        "com.github.tomakehurst" % "wiremock" % "2.6.0",
+        "org.scalatest" %% "scalatest" % "3.0.1"
+      )
+    ).dependsOn(`algebra`)
+
+val `testsuite-js` = testsuite.js
+
+val `testsuite-jvm` = testsuite.jvm
+
 
 val apiDoc =
   project.in(file("api-doc"))
     .settings(noPublishSettings ++ `scala2.11` ++ unidocSettings: _*)
     .settings(
       scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
+        "-diagrams",
         "-groups",
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
@@ -458,26 +474,29 @@ lazy val `circe-instant` =
 lazy val `circe-instant-js` = `circe-instant`.js
 lazy val `circe-instant-jvm` = `circe-instant`.jvm
 
+import ReleaseTransformations._
+
 val endpoints =
   project.in(file("."))
     .enablePlugins(CrossPerProjectPlugin)
     .settings(noPublishSettings: _*)
-      .settings(/*,
-        releasePublishArtifactsAction := PgpKeys.publishSigned.value,
-        releaseProcess := Seq[ReleaseStep](checkSnapshotDependencies,
+      .settings(
+        releaseProcess := Seq[ReleaseStep](
+          checkSnapshotDependencies,
           inquireVersions,
           runClean,
           runTest,
           setReleaseVersion,
+          releaseStepTask(makeSite in manual),
           commitReleaseVersion,
           tagRelease,
-          publishArtifacts,
-          ReleaseStep(action = Command.process("publishDoc", _)),
+          releaseStepTask(PgpKeys.publishSigned),
           setNextVersion,
           commitNextVersion,
-          ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+          releaseStepCommand(Sonatype.SonatypeCommand.sonatypeReleaseAll),
+          releaseStepTask(GhPagesKeys.pushSite in manual),
           pushChanges
-        )*/
+        )
       )
     .aggregate(
       `algebra-js`, `algebra-jvm`,

@@ -45,19 +45,6 @@ libraryDependencies ++= Seq(
 
 ### Client interpreters
 
-#### Client based on Play framework (JVM only)
-
-Add the following dependencies to your `client` sub-project:
-
-~~~ scala expandVars=true
-libraryDependencies ++= Seq(
-  // client based on Play framework
-  "org.julienrf" %% "endpoints-play-client" % "{{version}}",
-  // JSON serialization using circe.io
-  "org.julienrf" %% "endpoints-play-client-circe" % "{{version}}"
-)
-~~~
-
 #### Scala.js client using native `XMLHttpRequest`s
 
 Add the following dependencies to your `client` sub-project:
@@ -69,6 +56,19 @@ Add the following dependencies to your `client` sub-project:
   "org.julienrf" %% "endpoints-xhr-client-circe" % "{{version}}"
   // (optional) uses faithful’s `Future`
   "org.julienrf" %% "endpoints-xhr-faithful" % "{{version}}"
+)
+~~~
+
+#### Client based on Play framework (JVM only)
+
+Add the following dependencies to your `client` sub-project:
+
+~~~ scala expandVars=true
+libraryDependencies ++= Seq(
+  // client based on Play framework
+  "org.julienrf" %% "endpoints-play-client" % "{{version}}",
+  // (optional) JSON serialization using circe.io
+  "org.julienrf" %% "endpoints-play-client-circe" % "{{version}}"
 )
 ~~~
 
@@ -84,5 +84,18 @@ libraryDependencies ++= Seq(
   "org.julienrf" %% "endpoints-play-server" % "{{version}}",
   // (optional) JSON serialization using circe.io
   "org.julienrf" %% "endpoints-play-server-circe" % "{{version}}"
+)
+~~~
+
+#### Server based on Akka-HTTP
+
+Add the following dependencies to your `server` sub-project:
+
+~~~ scala expandVars=true
+libraryDependencies ++= Seq(
+  // server based on akka-http
+  "org.julienrf" %% "endpoints-akka-http-server" % "{{version}}",
+  // (optional) JSON serialization using circe.io
+  "org.julienrf" %% "endpoints-akka-http-server-circe" % "{{version}}"
 )
 ~~~

@@ -1,4 +1,4 @@
-package endpoints.akkahttp.routing
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{Directive1, Directives, Route}

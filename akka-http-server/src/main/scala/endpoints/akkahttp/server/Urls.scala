@@ -1,4 +1,4 @@
-package endpoints.akkahttp.routing
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.server.util.{Tupler => AkkaTupler}
 import akka.http.scaladsl.server._
@@ -12,11 +12,11 @@ trait Urls extends algebra.Urls {
 
   import akka.http.scaladsl.server.Directives._
 
-  class Path[T](override val directive: Directive1[T]) extends Url[T](directive) with PathOps[T]
+  class Path[T](override val directive: Directive1[T]) extends Url[T](directive)
 
   class Url[T](val directive: Directive1[T])
 
-  class QueryString[T](val directive: Directive1[T]) extends QueryStringOps[T]
+  class QueryString[T](val directive: Directive1[T])
 
   type QueryStringParam[T] = FromStringUnmarshaller[T]
 

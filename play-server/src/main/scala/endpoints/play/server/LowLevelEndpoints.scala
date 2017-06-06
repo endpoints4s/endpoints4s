@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import endpoints.algebra
 import play.api.libs.concurrent.Execution.Implicits.defaultContext

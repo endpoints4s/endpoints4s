@@ -1,4 +1,4 @@
-package endpoints.play.routing
+package endpoints.play.server
 
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
@@ -49,15 +49,15 @@ trait Urls extends algebra.Urls {
     @inline def map[B](f: A => B)(implicit applicative: Applicative[F]): F[B] = applicative.map(fa, f)
   }
 
+  //#segment
   /** Defines how to decode and encode path segments */
   trait Segment[A] {
-    /**
-      * @param segment URL decoded path segment
-      */
+    /** @param segment URL decoded path segment */
     def decode(segment: String): Option[A]
     /** @return URL encoded path segment */
     def encode(a: A): String
   }
+  //#segment
 
   implicit def stringSegment: Segment[String] =
     new Segment[String] {
@@ -80,7 +80,7 @@ trait Urls extends algebra.Urls {
   /**
     * Query string encoding and decoding
     */
-  trait QueryString[A] extends QueryStringOps[A] {
+  trait QueryString[A] {
     /**
       * @param qs Map of identifiers and parameter values (these are already URL decoded)
       */
@@ -148,7 +148,7 @@ trait Urls extends algebra.Urls {
         Map(name -> Seq(i.toString))
     }
 
-  trait Path[A] extends PathOps[A] with Url[A] {
+  trait Path[A] extends Url[A] {
     def decode(segments: List[String]): Option[(A, List[String])]
     def encode(a: A): String
 

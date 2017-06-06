@@ -1,6 +1,6 @@
 package cqrs.publicserver
 
-import endpoints.play.routing.{Assets, Endpoints}
+import endpoints.play.server.{Assets, Endpoints}
 import play.api.routing.{Router => PlayRouter}
 import play.twirl.api.{Html, StringInterpolation}
 

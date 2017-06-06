@@ -10,11 +10,13 @@ import scala.scalajs.js
   */
 trait Urls extends algebra.Urls {
 
+  //#segment
   /** Defines how to build a path segment from an `A` */
   trait Segment[A] {
     /** @return An URL encoded path segment (e.g. "foo%2Fbar") */
     def encode(a: A): String
   }
+  //#segment
 
   implicit lazy val stringSegment: Segment[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
@@ -28,7 +30,7 @@ trait Urls extends algebra.Urls {
   /**
     * Defines how to build a query string from an `A`
     */
-  trait QueryString[A] extends QueryStringOps[A] {
+  trait QueryString[A] {
     /** @return A query string fragment (e.g. "foo=bar&baz=a%20b") */
     def encode(a: A): String
   }
@@ -63,7 +65,7 @@ trait Urls extends algebra.Urls {
     (i: Long) => i.toString
 
   /** Builds an URL path from an `A` */
-  trait Path[A] extends Url[A] with PathOps[A]
+  trait Path[A] extends Url[A]
 
   def staticPathSegment(segment: String) = (_: Unit) => segment
 

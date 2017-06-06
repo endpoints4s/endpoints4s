@@ -13,7 +13,7 @@ trait Urls extends algebra.Urls {
 
   val utf8Name = UTF_8.name()
 
-  trait QueryString[A] extends QueryStringOps[A] {
+  trait QueryString[A] {
     def encodeQueryString(a: A): String
   }
 
@@ -51,7 +51,7 @@ trait Urls extends algebra.Urls {
   implicit lazy val longSegment: Segment[Long] = (i: Long) => i.toString
 
 
-  trait Path[A] extends Url[A] with PathOps[A]
+  trait Path[A] extends Url[A]
 
   def staticPathSegment(segment: String) = (_: Unit) => segment
 

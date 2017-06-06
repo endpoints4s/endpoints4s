@@ -5,7 +5,6 @@ import java.util.UUID
 
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.queries.Meter
-import endpoints.algebra.{CirceEntities, Endpoints, OptionalResponses}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.java8.time._
@@ -16,6 +15,9 @@ import io.circe.java8.time._
   * We expose a REST interface for manipulating meters.
   */
 // TODO User authentication
+//#public-endpoints
+import endpoints.algebra.{CirceEntities, Endpoints, OptionalResponses}
+
 trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
 
   /** Common path prefix for endpoints: “/meters” */
@@ -26,20 +28,23 @@ trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponse
     endpoint(get(metersPath), jsonResponse[List[Meter]])
 
   /** Find a meter by id */
+//#get-meter
   val getMeter: Endpoint[UUID, Option[Meter]] =
     endpoint(get(metersPath / segment[UUID]), option(jsonResponse[Meter]))
+//#get-meter
 
   /** Registers a new meter */
-  val createMeter: Endpoint[CreateMeter, Meter] =
-    endpoint(post[Unit, CreateMeter, Unit, CreateMeter](metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
+  val createMeter/*: Endpoint[CreateMeter, Meter]*/ =
+    endpoint(post(metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
 
   /** Add a record to an existing meter */
-  val addRecord: Endpoint[(UUID, AddRecord), Meter] =
-    endpoint(post[UUID, AddRecord, Unit, (UUID, AddRecord)](metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), jsonResponse[Meter])
+  val addRecord/*: Endpoint[(UUID, AddRecord), Meter]*/ =
+    endpoint(post(metersPath / segment[UUID] / "records", jsonRequest[AddRecord]), jsonResponse[Meter])
 
   implicit def uuidSegment: Segment[UUID]
 
 }
+//#public-endpoints
 
 object commands {
 

@@ -10,14 +10,29 @@ import scala.language.higherKinds
   * A path is itself made of segments chained together.
   *
   * A query string is made of named parameters.
+  *
+  * {{{
+  *   /**
+  *     * Describes an URL starting with a segment containing “articles”, followed
+  *     * by another `String` segment, and a query string containing
+  *     * a mandatory `Lang` parameter named “lang”, and an
+  *     * optional `Int` parameter named “page”.
+  *     *
+  *     * Examples of matching URLs:
+  *     *
+  *     * - /articles/kitchen?lang=fr
+  *     * - /articles/garden?lang=en&page=2
+  *     */
+  *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & optQs[Int]("page"))
+  * }}}
   */
 trait Urls {
 
   /** A query string carrying an `A` information */
-  type QueryString[A] <: QueryStringOps[A]
+  type QueryString[A]
 
-  /** Provides convenient methods on [[QueryString]]. Just mix this trait in your concrete representation of [[QueryString]] */
-  trait QueryStringOps[A] { first: QueryString[A] =>
+  /** Provides convenient methods on [[QueryString]]. */
+  implicit class QueryStringOps[A](first: QueryString[A]) {
     /**
       * Convenient method to concatenate two [[QueryString]]s.
       *
@@ -80,10 +95,10 @@ trait Urls {
   implicit def longSegment: Segment[Long]
 
   /** An URL path carrying an `A` information */
-  type Path[A] <: PathOps[A] with Url[A]
+  type Path[A] <: Url[A]
 
-  /** Convenient methods for [[Path]]s. Just mix this trait in your concrete representation of `Path` */
-  trait PathOps[A] { first: Path[A] =>
+  /** Convenient methods for [[Path]]s. */
+  implicit class PathOps[A](first: Path[A]) {
     /** Chains this path with the `second` constant path segment */
     final def / (second: String): Path[A] = chainPaths(first, staticPathSegment(second))
     /** Chains this path with the `second` path segment */
