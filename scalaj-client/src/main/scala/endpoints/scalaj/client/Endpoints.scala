@@ -24,10 +24,12 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
       */
     def callAsync(args: Req)(implicit ec: ExecutionContext): Future[Resp] =
       Future {
-        call(args)
+        callUnsafe(args)
       }
 
-    def call(args: Req): Resp = response(request(args).asString)
+    def callUnsafe(args: Req): Resp = response(request(args).asString).toTry.get
+
+    def call(args: Req): Either[Throwable, Resp] = response(request(args).asString)
   }
 
 }

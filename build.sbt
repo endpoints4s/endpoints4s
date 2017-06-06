@@ -98,7 +98,7 @@ val testsuite =
         "com.github.tomakehurst" % "wiremock" % "2.6.0",
         "org.scalatest" %% "scalatest" % "3.0.1"
       )
-    ).dependsOn(`algebra`)
+    ).dependsOn(`algebra`, `algebra-circe`)
 
 val `testsuite-js` = testsuite.js
 
@@ -224,16 +224,14 @@ val `scalaj-client` =
     .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
 
 val `scalaj-client-circe` =
-  project.in(file("roshttp-client-circe"))
+  project.in(file("scalaj-client-circe"))
     .settings(publishSettings: _*)
     .settings(`scala2.12_full`: _*)
     .settings(
       name := "endpoints-scalaj-client-circe",
-      libraryDependencies ++= Seq(
-        "org.scalaj" %% "scalaj-http" % "2.3.0"
-      )
+      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
     )
-    .dependsOn(`scalaj-client`, `algebra-circe-jvm`)
+    .dependsOn(`scalaj-client`, `algebra-circe-jvm`, `testsuite-jvm` % Test)
 
 
 val apiDoc =

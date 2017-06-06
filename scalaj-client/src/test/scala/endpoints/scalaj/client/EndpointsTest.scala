@@ -9,7 +9,7 @@ class EndpointsTest extends SimpleTestSuite[TestClient] {
 
   override val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
-  override def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.call(args)
+  override def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
 
 
   clientTestSuite()
