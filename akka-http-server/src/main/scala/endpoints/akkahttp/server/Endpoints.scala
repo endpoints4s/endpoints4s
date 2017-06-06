@@ -43,6 +43,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   def emptyResponse: Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
 
+  def stringResponse: Response[String] = x => Directives.complete((StatusCodes.OK, x))
+
   def request[A, B, C, AB](
     method: Method,
     url: Url[A],

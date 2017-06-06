@@ -89,6 +89,21 @@ val `algebra-circe-js` = `algebra-circe`.js
 
 val `algebra-circe-jvm` = `algebra-circe`.jvm
 
+val testsuite =
+  crossProject.crossType(CrossType.Pure).in(file("testsuite"))
+    .settings(publishSettings ++ `scala2.12_full`: _*)
+    .settings(
+      name := "endpoints-testsuite",
+      libraryDependencies ++= Seq(
+        "com.github.tomakehurst" % "wiremock" % "2.6.0",
+        "org.scalatest" %% "scalatest" % "3.0.1"
+      )
+    ).dependsOn(`algebra`)
+
+val `testsuite-js` = testsuite.js
+
+val `testsuite-jvm` = testsuite.jvm
+
 val `xhr-client` =
   project.in(file("xhr-client"))
     .enablePlugins(ScalaJSPlugin)
@@ -206,7 +221,7 @@ val `scalaj-client` =
         "org.scalaj" %% "scalaj-http" % "2.3.0"
       )
     )
-    .dependsOn(`algebra-jvm`)
+    .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
 
 val `scalaj-client-circe` =
   project.in(file("roshttp-client-circe"))
@@ -219,21 +234,6 @@ val `scalaj-client-circe` =
       )
     )
     .dependsOn(`scalaj-client`, `algebra-circe-jvm`)
-
-val testsuite =
-  crossProject.crossType(CrossType.Pure).in(file("testsuite"))
-    .settings(publishSettings ++ `scala2.12_full`: _*)
-    .settings(
-      name := "endpoints-testsuite",
-      libraryDependencies ++= Seq(
-        "com.github.tomakehurst" % "wiremock" % "2.6.0",
-        "org.scalatest" %% "scalatest" % "3.0.1"
-      )
-    ).dependsOn(`algebra`)
-
-val `testsuite-js` = testsuite.js
-
-val `testsuite-jvm` = testsuite.jvm
 
 
 val apiDoc =
