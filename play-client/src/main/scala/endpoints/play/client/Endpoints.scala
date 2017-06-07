@@ -57,8 +57,8 @@ class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext)
   /** Successfully decodes no information from a response */
   val emptyResponse: Response[Unit] = _ => Right(())
 
-  /** Successfully decodes no information from a response */
-  val stringResponse: Response[String] = x => Right(x.body)
+  /** Successfully decodes string information from a response */
+  val textResponse: Response[String] = x => Right(x.body)
 
   //#concrete-carrier-type
   /**

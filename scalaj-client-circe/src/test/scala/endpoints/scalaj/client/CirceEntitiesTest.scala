@@ -11,20 +11,18 @@ class TestClient(val address: String ) extends JsonTestApi with Endpoints with C
 
   import io.circe.generic.auto._
 
-  override implicit def userCodec: CirceCodec[User] = CirceCodec.fromEncoderAndDecoder[User]
+  implicit def userCodec: CirceCodec[User] = CirceCodec.fromEncoderAndDecoder[User]
 
-  override implicit def addresCodec: CirceCodec[Address] = CirceCodec.fromEncoderAndDecoder[Address]
+  implicit def addresCodec: CirceCodec[Address] = CirceCodec.fromEncoderAndDecoder[Address]
 
 }
 
 class CirceEntitiesTest extends JsonTestSuite[TestClient] {
 
+  val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
-  override val client: TestClient = new TestClient(s"localhost:$wiremockPort")
-
-  override def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
+  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
 
   clientTestSuite()
-
 
 }

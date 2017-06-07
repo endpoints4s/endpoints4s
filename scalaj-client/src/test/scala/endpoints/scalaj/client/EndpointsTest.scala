@@ -10,9 +10,9 @@ class TestClient(val address: String) extends SimpleTestApi
 
 class EndpointsTest extends SimpleTestSuite[TestClient] with BasicAuthTestSuite[TestClient] {
 
-  override val client: TestClient = new TestClient(s"localhost:$wiremockPort")
+  val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
-  override def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
+  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
 
 
   clientTestSuite()

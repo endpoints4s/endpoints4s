@@ -15,6 +15,6 @@ trait Responses {
   /**
     * String response.
     */
-  def stringResponse: Response[String]
+  def textResponse: Response[String]
 
 }

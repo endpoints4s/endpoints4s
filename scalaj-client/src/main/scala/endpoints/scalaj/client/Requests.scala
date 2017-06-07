@@ -8,15 +8,15 @@ import scalaj.http.HttpRequest
 trait Requests extends algebra.Requests with Urls with Methods{
 
 
-  override type RequestHeaders[A] = A => Seq[(String, String)]
+   type RequestHeaders[A] = A => Seq[(String, String)]
 
-  override type Request[A] = A => HttpRequest
+   type Request[A] = A => HttpRequest
 
-  override type RequestEntity[A] = (A, HttpRequest) => HttpRequest
+   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
-  override def emptyHeaders: RequestHeaders[Unit] = _ => Seq()
+   def emptyHeaders: RequestHeaders[Unit] = _ => Seq()
 
-  override def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
+   def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
 
 
   def request[U, E, H, UE](method: Method,

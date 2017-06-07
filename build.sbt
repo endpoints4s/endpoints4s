@@ -18,16 +18,16 @@ val commonSettings = Seq(
     "-Xexperimental"
   )
 )
-val `scala2.11` = Seq(
+val `scala 2.11` = Seq(
   scalaVersion := "2.11.8",
   crossScalaVersions := Seq("2.11.8")
 )
-val `scala2.12` = Seq(
+val `scala 2.11 to 2.12` = Seq(
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.11.8", "2.12.1")
 )
 
-val `scala2.12_full` = Seq(
+val `scala 2.10 to 2.12` = Seq(
   scalaVersion := "2.12.1",
   crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
 )
@@ -65,7 +65,7 @@ val noPublishSettings = commonSettings ++ Seq(
 
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
-    .settings(publishSettings ++ `scala2.12_full`: _*)
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra"
     )
@@ -78,7 +78,7 @@ val circeVersion = "0.6.1"
 
 val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
-    .settings(publishSettings ++ `scala2.12_full`: _*)
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-circe",
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
@@ -91,7 +91,7 @@ val `algebra-circe-jvm` = `algebra-circe`.jvm
 
 val testsuite =
   crossProject.crossType(CrossType.Pure).in(file("testsuite"))
-    .settings(publishSettings ++ `scala2.12_full`: _*)
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-testsuite",
       libraryDependencies ++= Seq(
@@ -108,7 +108,7 @@ val `testsuite-jvm` = testsuite.jvm
 val `xhr-client` =
   project.in(file("xhr-client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(publishSettings ++ `scala2.12`: _*)
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-xhr-client",
       libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
@@ -118,7 +118,7 @@ val `xhr-client` =
 val `xhr-client-faithful` =
   project.in(file("xhr-client-faithful"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(publishSettings ++ `scala2.11`: _*)
+    .settings(publishSettings ++ `scala 2.11`: _*)
     .settings(
       name := "endpoints-xhr-client-faithful",
       libraryDependencies += "org.julienrf" %%% "faithful" % "0.2"
@@ -128,7 +128,7 @@ val `xhr-client-faithful` =
 val `xhr-client-circe` =
   project.in(file("xhr-client-circe"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(publishSettings ++ `scala2.12`: _*)
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-xhr-client-circe",
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
@@ -139,7 +139,7 @@ val playVersion = "2.5.6"
 
 val `play-circe` =
   project.in(file("play-circe"))
-    .settings(publishSettings ++ `scala2.11`: _*)
+    .settings(publishSettings ++ `scala 2.11`: _*)
     .settings(
       name := "endpoints-play-circe",
       libraryDependencies ++= Seq(
@@ -150,7 +150,7 @@ val `play-circe` =
 
 val `play-server` =
   project.in(file("play-server"))
-    .settings(publishSettings ++ `scala2.11`: _*)
+    .settings(publishSettings ++ `scala 2.11`: _*)
     .settings(
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
@@ -161,7 +161,7 @@ val `play-server` =
 
 val `play-server-circe` =
   project.in(file("play-server-circe"))
-    .settings(publishSettings ++ `scala2.11`: _*)
+    .settings(publishSettings ++ `scala 2.11`: _*)
     .settings(
       name := "endpoints-play-server-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
@@ -170,7 +170,7 @@ val `play-server-circe` =
 
 val `play-client` =
   project.in(file("play-client"))
-      .settings(publishSettings ++ `scala2.11`: _*)
+      .settings(publishSettings ++ `scala 2.11`: _*)
       .settings(
         name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ws" % playVersion
@@ -179,7 +179,7 @@ val `play-client` =
 
 val `play-client-circe` =
   project.in(file("play-client-circe"))
-    .settings(publishSettings ++ `scala2.11`: _*)
+    .settings(publishSettings ++ `scala 2.11`: _*)
     .settings(
       name := "endpoints-play-client-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
@@ -189,7 +189,7 @@ val `play-client-circe` =
 val `akka-http-server` =
   project.in(file("akka-http-server"))
     .settings(publishSettings: _*)
-    .settings(`scala2.12`: _*)
+    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-akka-http-server",
       libraryDependencies ++= Seq(
@@ -203,7 +203,7 @@ val `akka-http-server` =
 val `akka-http-server-circe` =
   project.in(file("akka-http-server-circe"))
     .settings(publishSettings: _*)
-    .settings(`scala2.12`: _*)
+    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-akka-http-server-circe",
       libraryDependencies ++= Seq(
@@ -215,7 +215,7 @@ val `akka-http-server-circe` =
 val `scalaj-client` =
   project.in(file("scalaj-client"))
     .settings(publishSettings: _*)
-    .settings(`scala2.12_full`: _*)
+    .settings(`scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-scalaj-client",
       libraryDependencies ++= Seq(
@@ -227,7 +227,7 @@ val `scalaj-client` =
 val `scalaj-client-circe` =
   project.in(file("scalaj-client-circe"))
     .settings(publishSettings: _*)
-    .settings(`scala2.12_full`: _*)
+    .settings(`scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-scalaj-client-circe",
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
@@ -237,7 +237,7 @@ val `scalaj-client-circe` =
 
 val apiDoc =
   project.in(file("api-doc"))
-    .settings(noPublishSettings ++ `scala2.11` ++ unidocSettings: _*)
+    .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
     .settings(
       scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
         "-diagrams",
@@ -283,7 +283,7 @@ val manual =
 val `example-overview-endpoints` =
   crossProject.crossType(CrossType.Pure)
     .in(file("examples/overview/endpoints"))
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     )
@@ -296,24 +296,24 @@ val `example-overview-endpoints-js` = `example-overview-endpoints`.js
 val `example-overview-client` =
   project.in(file("examples/overview/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`example-overview-endpoints-js`, `xhr-client-circe`)
 
 val `example-overview-server` =
   project.in(file("examples/overview/server"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .dependsOn(`example-overview-endpoints-jvm`, `play-server-circe`)
 
 val `example-overview-play-client` =
   project.in(file("examples/overview/play-client"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .dependsOn(`example-overview-endpoints-jvm`, `play-client-circe`)
 
 // Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
@@ -345,12 +345,12 @@ val `example-basic-shared-js` = `example-basic-shared`.js
 val `example-basic-client` =
   project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
 val `example-basic-play-server` =
   project.in(file("examples/basic/play-server"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
@@ -360,7 +360,7 @@ val `example-basic-play-server` =
 val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))
     .settings(commonSettings: _*)
-    .settings(`scala2.12`: _*)
+    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
       publishArtifact := false
     )
@@ -371,7 +371,7 @@ val `example-basic-akkahttp-server` =
 // public endpoints definitions
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`algebra-circe`, `circe-instant`)
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
@@ -382,7 +382,7 @@ val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
 val `example-cqrs-web-client` =
   project.in(file("examples/cqrs/web-client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.2.2",
@@ -398,7 +398,7 @@ val `example-cqrs-web-client` =
 // public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
 val `example-cqrs-public-server` =
   project.in(file("examples/cqrs/public-server"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       libraryDependencies += "com.typesafe.play" %% "twirl-api" % "1.2.0",
       unmanagedResources in Compile ++= Seq(
@@ -421,13 +421,13 @@ val `example-cqrs-public-server` =
 // commands endpoints definitions
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
@@ -440,20 +440,20 @@ val `example-cqrs-commands` =
 // queries endpoints definitions
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
 
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .dependsOn(`play-server-circe`, `play-client-circe`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
 val `example-cqrs` =
   project.in(file("examples/cqrs/infra"))
-    .settings(noPublishSettings ++ `scala2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
@@ -465,7 +465,7 @@ val `example-cqrs` =
 
 lazy val `circe-instant` =
   CrossProject("example-cqrs-circe-instant-jvm", "example-cqrs-circe-instant-js", file("examples/cqrs/circe-instant"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )

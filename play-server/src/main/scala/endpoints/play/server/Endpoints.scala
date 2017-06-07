@@ -170,7 +170,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   lazy val emptyResponse: Response[Unit] = _ => Results.Ok
 
   /** A successful HTTP response (status code 200) with string entity */
-  lazy val stringResponse: Response[String] = x => Results.Ok(x)
+  lazy val textResponse: Response[String] = x => Results.Ok(x)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)

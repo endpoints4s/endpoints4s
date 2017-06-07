@@ -2,9 +2,6 @@ package endpoints.xhr
 
 import endpoints.algebra
 
-/**
-  * Created by wpitula on 1/9/17.
-  */
 trait Methods extends algebra.Methods {
   type Method = String
 

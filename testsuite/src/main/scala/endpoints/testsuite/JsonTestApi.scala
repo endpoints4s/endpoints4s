@@ -3,9 +3,6 @@ package endpoints.testsuite
 import endpoints.algebra
 import io.circe.generic.JsonCodec
 
-/**
-  * Created by wpitula on 6/5/17.
-  */
 trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities {
 
   implicit def userCodec: JsonRequest[User]

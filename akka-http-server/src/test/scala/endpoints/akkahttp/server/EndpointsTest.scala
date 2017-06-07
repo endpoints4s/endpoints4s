@@ -6,9 +6,6 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.{Matchers, WordSpec}
 import scala.language.reflectiveCalls
 
-/**
-  * Created by wpitula on 2/26/17.
-  */
 class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new Endpoints {

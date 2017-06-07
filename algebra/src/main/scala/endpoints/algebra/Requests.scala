@@ -39,28 +39,28 @@ trait Requests extends Urls with Methods {
     * @param headers Request headers
     */
   def request[A, B, C, AB](
-                            method: Method,
-                            url: Url[A],
-                            entity: RequestEntity[B] = emptyRequest,
-                            headers: RequestHeaders[C] = emptyHeaders
-                          )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
+    method: Method,
+    url: Url[A],
+    entity: RequestEntity[B] = emptyRequest,
+    headers: RequestHeaders[C] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
 
   /**
     * Helper method to perform GET request
     */
   final def get[A, B](
-                       url: Url[A],
-                       headers: RequestHeaders[B] = emptyHeaders
-                     )(implicit tuplerAC: Tupler[A, B]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
+    url: Url[A],
+    headers: RequestHeaders[B] = emptyHeaders
+  )(implicit tuplerAC: Tupler[A, B]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
 
   /**
     * Helper method to perform POST request
     */
   final def post[A, B, C, AB](
-                               url: Url[A],
-                               entity: RequestEntity[B],
-                               headers: RequestHeaders[C] = emptyHeaders
-                             )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
+    url: Url[A],
+    entity: RequestEntity[B],
+    headers: RequestHeaders[C] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
 
 
 }

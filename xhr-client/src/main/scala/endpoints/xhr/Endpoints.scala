@@ -69,7 +69,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /**
     * Successfully decodes string information from a response
     */
-  lazy val stringResponse: Response[String] = x => Right(x.responseText)
+  lazy val textResponse: Response[String] = x => Right(x.responseText)
 
   /**
     * A function that takes the information needed to build a request and returns
