@@ -8,7 +8,7 @@ import endpoints.algebra
   */
 trait Methods extends algebra.Methods {
 
-  override type Method = HttpMethod
+  type Method = HttpMethod
 
   def Get = HttpMethods.GET
 

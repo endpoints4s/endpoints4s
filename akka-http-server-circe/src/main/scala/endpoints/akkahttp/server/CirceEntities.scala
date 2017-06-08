@@ -13,12 +13,12 @@ trait CirceEntities extends Endpoints with algebra.CirceEntities {
 
   import CirceSupport._
 
-  def jsonRequest[A : CirceCodec] = {
+  def jsonRequest[A : CirceCodec]: RequestEntity[A] = {
     implicit val decoder = CirceCodec[A].decoder
     Directives.entity[A](implicitly[FromRequestUnmarshaller[A]])
   }
 
-  def jsonResponse[A : CirceCodec] = a => {
+  def jsonResponse[A : CirceCodec]: Response[A] = (a: A) => {
     implicit val encoder = implicitly[CirceCodec[A]].encoder
     Directives.complete(a)
   }

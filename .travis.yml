@@ -1,6 +1,7 @@
 language: scala
 
 scala:
+  - 2.10.6
   - 2.11.8
   - 2.12.1
 
@@ -15,7 +16,8 @@ cache:
 
 script:
   # +++ instead of ++ to use sbt-doge strict aggregation
-  - sbt "+++$TRAVIS_SCALA_VERSION test";
+  - sbt "+++$TRAVIS_SCALA_VERSION compile"
+  - sbt "+++$TRAVIS_SCALA_VERSION test"
 
   # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
   # Tricks to avoid unnecessary cache updates
