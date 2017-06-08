@@ -23,8 +23,10 @@ trait SimpleTestSuite[T <: SimpleTestApi] extends ClientTestBase[T] {
             .withBody(response)))
 
         val result = call(client.smokeEndpoint, ("userId", "name1", 18))
+        val result2 = call(client.smokeEndpointViaBuilder, ("userId", "name1", 18))
 
         result shouldEqual response
+        result2 shouldEqual response
 
       }
 
@@ -37,6 +39,9 @@ trait SimpleTestSuite[T <: SimpleTestApi] extends ClientTestBase[T] {
 
         a[Exception] should be thrownBy {
           call(client.smokeEndpoint, ("userId", "name1", 18))
+        }
+        a[Exception] should be thrownBy {
+          call(client.smokeEndpointViaBuilder, ("userId", "name1", 18))
         }
 
       }

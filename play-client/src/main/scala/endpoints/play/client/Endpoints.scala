@@ -26,6 +26,15 @@ class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext)
   /** Does not modify the request */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, wsRequest) => wsRequest
 
+  /** Put both sets of headers in request */
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out] = {
+    (h1h2, wsRequest) => {
+      val (h1p, h2p) = tupler.unapply(h1h2)
+      h2(h2p, h1(h1p, wsRequest))
+    }
+  }
+
+
   /**
     * A function that takes an `A` information and eventually returns a `WSResponse`
     */

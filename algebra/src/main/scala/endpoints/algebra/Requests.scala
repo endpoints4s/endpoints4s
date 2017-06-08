@@ -17,6 +17,9 @@ trait Requests extends Urls with Methods {
     */
   def emptyHeaders: RequestHeaders[Unit]
 
+  /** Join informations carried by two sets of headers */
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out]
+
 
   /** Information carried by a whole request (headers and entity) */
   type Request[A]
@@ -38,12 +41,12 @@ trait Requests extends Urls with Methods {
     * @param entity Request entity
     * @param headers Request headers
     */
-  def request[A, B, C, AB](
+  def request[U, E, H, UE](
     method: Method,
-    url: Url[A],
-    entity: RequestEntity[B] = emptyRequest,
-    headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
+    url: Url[U],
+    entity: RequestEntity[E] = emptyRequest,
+    headers: RequestHeaders[H] = emptyHeaders
+  )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler[UE, H]): Request[tuplerUEH.Out]
 
   /**
     * Helper method to perform GET request

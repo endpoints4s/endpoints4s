@@ -16,7 +16,13 @@ trait Requests extends algebra.Requests with Urls with Methods{
 
    def emptyHeaders: RequestHeaders[Unit] = _ => Seq()
 
-   def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out] =
+    h1h2 => {
+      val (hp1, hp2) = tupler.unapply(h1h2)
+      h1(hp1) ++ h2(hp2)
+    }
+
+  def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
 
 
   def request[U, E, H, UE](method: Method,

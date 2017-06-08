@@ -1,14 +1,18 @@
 package endpoints.scalaj.client
 
-import endpoints.testsuite.{BasicAuthTestApi, SimpleTestApi}
-import endpoints.testsuite.client.{BasicAuthTestSuite, SimpleTestSuite}
+import endpoints.testsuite.{BasicAuthTestApi, OptionalResponsesTestApi, SimpleTestApi}
+import endpoints.testsuite.client.{BasicAuthTestSuite, OptionalResponsesTestSuite, SimpleTestSuite}
 
 class TestClient(val address: String) extends SimpleTestApi
   with BasicAuthTestApi
+  with OptionalResponsesTestApi
   with Endpoints
   with BasicAuthentication
+  with OptionalResponses
 
-class EndpointsTest extends SimpleTestSuite[TestClient] with BasicAuthTestSuite[TestClient] {
+class EndpointsTest extends SimpleTestSuite[TestClient]
+  with BasicAuthTestSuite[TestClient]
+  with OptionalResponsesTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
@@ -18,5 +22,7 @@ class EndpointsTest extends SimpleTestSuite[TestClient] with BasicAuthTestSuite[
   clientTestSuite()
 
   basicAuthSuite()
+
+  optionalResponsesSuite()
 
 }

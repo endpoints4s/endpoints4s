@@ -41,6 +41,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   def emptyHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
 
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out] = {
+    h1.flatMap(h1p => h2.map(h2p => tupler.apply(h1p, h2p)))
+  }
+
   def emptyResponse: Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
 
   def textResponse: Response[String] = x => Directives.complete((StatusCodes.OK, x))

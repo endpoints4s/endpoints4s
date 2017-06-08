@@ -1,18 +1,28 @@
 package endpoints.testsuite
 
 import endpoints.algebra
+import endpoints.algebra.JsonBuilders
 import io.circe.generic.JsonCodec
 
-trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities {
+trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities with JsonBuilders {
 
   implicit def userCodec: JsonRequest[User]
+
   implicit def addresCodec: JsonResponse[Address]
 
 
-  val smokeEndpoint = endpoint(
+  val jsonEndpoint = endpoint(
     post(path / "user", jsonRequest[User]),
     jsonResponse[Address]
   )
+
+  val jsonEndpointViaBuilder =
+    anEndpoint
+      .withMethod(Post)
+      .withUrl(path / "user")
+      .withJsonRequest[User]
+      .withJsonResponse[Address]
+      .build
 
 }
 

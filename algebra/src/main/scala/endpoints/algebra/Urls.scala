@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import endpoints.Tupler
 
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -96,6 +96,9 @@ trait Urls {
 
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]
+
+  // This should remove false positive error in Intellij when using path as an url
+  implicit def pathToUrl[A](path: Path[A]): Url[A] = path
 
   /** Convenient methods for [[Path]]s. */
   implicit class PathOps[A](first: Path[A]) {
