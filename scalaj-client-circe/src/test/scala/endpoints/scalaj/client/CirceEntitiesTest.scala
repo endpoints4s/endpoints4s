@@ -23,6 +23,6 @@ class CirceEntitiesTest extends JsonTestSuite[TestClient] {
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
 
-  clientTestSuite()
+  jsonTestSuite()
 
 }

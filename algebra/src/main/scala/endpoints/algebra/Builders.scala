@@ -6,7 +6,7 @@ import endpoints.algebra.BasicAuthentication.Credentials
 trait Builders {
   self: Endpoints =>
 
-  def anEndpoint: EndpointBuilder[Unit, Unit, Unit, Unit] = EndpointBuilder(Get, path, emptyHeaders, emptyRequest, emptyResponse)
+  val anEndpoint: EndpointBuilder[Unit, Unit, Unit, Unit] = EndpointBuilder(Get, path, emptyHeaders, emptyRequest, emptyResponse)
 
   case class EndpointBuilder[U, ReqH, ReqE, RespE]
   (method: Method,
@@ -66,7 +66,7 @@ trait JsonBuilders extends Builders {
 trait BasicAuthBuilders extends Builders {
   self: BasicAuthentication =>
 
-  implicit class EndpointJsonOps[U, ReqH, ReqE, RespE](endp: EndpointBuilder[U, ReqH, ReqE, RespE]) {
+  implicit class EndpointBasicAuthOps[U, ReqH, ReqE, RespE](endp: EndpointBuilder[U, ReqH, ReqE, RespE]) {
 
     def withBasicAuth(implicit tupler: Tupler[ReqH, Credentials]): EndpointBuilder[U, tupler.Out, ReqE, Option[RespE]] = {
       val newResponse = authenticated(endp.response)
@@ -82,7 +82,7 @@ trait BasicAuthBuilders extends Builders {
 trait OptionalResponseBuilders extends Builders {
   self: OptionalResponses =>
 
-  implicit class EndpointJsonOps[U, ReqH, ReqE, RespE](endp: EndpointBuilder[U, ReqH, ReqE, RespE]) {
+  implicit class EndpointOptionalResponseOps[U, ReqH, ReqE, RespE](endp: EndpointBuilder[U, ReqH, ReqE, RespE]) {
 
     def withOptionalResponse[NewResp](resp: Response[NewResp]): EndpointBuilder[U, ReqH, ReqE, Option[NewResp]] = {
       val newResponse = option(resp)

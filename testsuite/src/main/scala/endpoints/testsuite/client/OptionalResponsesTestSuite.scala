@@ -8,15 +8,14 @@ trait OptionalResponsesTestSuite[T <: OptionalResponsesTestApi] extends ClientTe
 
   def optionalResponsesSuite() = {
 
-    "Client interpreter" should {
+    "Optional responses interpreter" should {
 
       "return the content if present" in {
 
         val credentials = BasicAuthentication.Credentials("user1", "pass2")
         val response = "wiremockeResponse"
 
-        wireMockServer.stubFor(get(urlEqualTo("/users"))
-          .withBasicAuth(credentials.username, credentials.password)
+        wireMockServer.stubFor(get(urlEqualTo("/user"))
           .willReturn(aResponse()
             .withStatus(200)
             .withBody(response)))
@@ -36,7 +35,7 @@ trait OptionalResponsesTestSuite[T <: OptionalResponsesTestApi] extends ClientTe
 
         val credentials = BasicAuthentication.Credentials("user1", "pass2")
 
-        wireMockServer.stubFor(get(urlEqualTo("/users"))
+        wireMockServer.stubFor(get(urlEqualTo("/user"))
           .willReturn(aResponse()
             .withStatus(404)
             .withBody("")))

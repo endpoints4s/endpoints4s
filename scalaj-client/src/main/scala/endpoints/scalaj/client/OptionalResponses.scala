@@ -1,7 +1,8 @@
 package endpoints.scalaj.client
 
+import endpoints.algebra
 
-trait OptionalResponses extends Endpoints {
+trait OptionalResponses extends algebra.OptionalResponses { self: Endpoints =>
 
   def option[A](response: Response[A]): Response[Option[A]] =
     resp => {

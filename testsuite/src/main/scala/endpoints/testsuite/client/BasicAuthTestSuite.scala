@@ -8,7 +8,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
   def basicAuthSuite() = {
 
-    "Client interpreter" should {
+    "Basic auth interpreter" should {
 
       "authenticate with given credentials" in {
 
