@@ -16,9 +16,15 @@ trait DocumentedEndpoints
     * @param info General information about the documentation to generate
     * @param endpoints The endpoints to generate the documentation for
     */
-  def openApi(info: Info)(endpoints: DocumentedEndpoint*): OpenApi =
-    // TODO Merge endpoints that share the same path
-    OpenApi(info, endpoints.map(e => (e.path, e.item)).toMap)
+  def openApi(info: Info)(endpoints: DocumentedEndpoint*): OpenApi = {
+    val items =
+      endpoints
+        .groupBy(_.path)
+        .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
+          PathItem(item.operations ++ e2.item.operations)
+        })
+    OpenApi(info, items)
+  }
 
   type Endpoint[A, B] = DocumentedEndpoint
   case class DocumentedEndpoint(path: String, item: PathItem)
