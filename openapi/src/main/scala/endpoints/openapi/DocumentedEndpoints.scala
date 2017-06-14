@@ -1,6 +1,8 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.MuxRequest
+
 /**
   * Interpreter for [[algebra.DocumentedEndpoints]] that produces
   * an [[OpenApi]] instance for endpoints.
@@ -26,7 +28,40 @@ trait DocumentedEndpoints
     OpenApi(info, items)
   }
 
+  type RequestHeaders[A] = List[String]
+
+  def emptyHeaders = Nil
+
+  type Request[A] = DocumentedRequest
+
+  case class DocumentedRequest(
+    method: Method,
+    url: DocumentedUrl,
+    entity: DocumentedRequestEntity
+  )
+
+  type RequestEntity[A] = DocumentedRequestEntity
+
+  case class DocumentedRequestEntity(content: Map[String, MediaType])
+
+  def emptyRequest = DocumentedRequestEntity(Map.empty)
+
+  def request[A, B, C, AB](
+    method: Method,
+    url: Url[A],
+    entity: RequestEntity[B] = emptyRequest,
+    headers: RequestHeaders[C] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+    DocumentedRequest(method, url, entity)
+
+  type Response[A] = DocumentedResponse
+
+  case class DocumentedResponse(status: Int, description: String)
+
+  def emptyResponse(description: String) = DocumentedResponse(200, description)
+
   type Endpoint[A, B] = DocumentedEndpoint
+
   case class DocumentedEndpoint(path: String, item: PathItem)
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = {
@@ -37,10 +72,13 @@ trait DocumentedEndpoints
         case Post => "post"
         case Delete => "delete"
       }
+    val parameters =
+      request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
+      request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required))
     val operation =
       Operation(
-        request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
-        request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)),
+        parameters,
+        request.entity.content,
         Map(
           response.status -> endpoints.openapi.Response(response.description),
           500 -> endpoints.openapi.Response("Internal Server Error")
@@ -50,18 +88,11 @@ trait DocumentedEndpoints
     DocumentedEndpoint(request.url.path, item)
   }
 
-  type Request[A] = DocumentedRequest
-  case class DocumentedRequest(
-    method: Method,
-    url: DocumentedUrl
-  )
+  type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint
 
-  def request[A](method: Method, url: Url[A]): Request[A] =
-    DocumentedRequest(method, url)
-
-  type Response[A] = DocumentedResponse
-  case class DocumentedResponse(status: Int, description: String)
-
-  def emptyResponse(description: String) = DocumentedResponse(200, description)
+  def muxEndpoint[Req <: MuxRequest, Resp, Transport](
+    request: Request[Transport],
+    response: Response[Transport]
+  ): MuxEndpoint[Req, Resp, Transport] = endpoint(request, response)
 
 }

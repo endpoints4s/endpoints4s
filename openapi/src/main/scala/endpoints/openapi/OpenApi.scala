@@ -24,35 +24,54 @@ object OpenApi {
           openApi.paths.to[List].map { case (path, item) =>
             val itemObj =
               Json.obj(
-                item.operations.to[List].map { case (name, op) =>
-                  name -> Json.obj(
-                    "parameters" -> Json.arr(
-                      op.parameters.map { parameter =>
-                        val fields = Seq(
-                          "name" -> Json.fromString(parameter.name),
-                          "in" -> Json.fromString(parameter.in match {
-                            case In.Cookie => "cookie"
-                            case In.Header => "header"
-                            case In.Path   => "path"
-                            case In.Query  => "query"
-                          })
+                item.operations.to[List].map { case (verb, op) =>
+                  val fields =
+                    (
+                      "parameters" -> Json.arr(
+                        op.parameters.map { parameter =>
+                          val fields = Seq(
+                            "name" -> Json.fromString(parameter.name),
+                            "in" -> Json.fromString(parameter.in match {
+                              case In.Cookie => "cookie"
+                              case In.Header => "header"
+                              case In.Path   => "path"
+                              case In.Query  => "query"
+                            })
+                          )
+                          Json.obj(
+                            (
+                              if (parameter.required) fields :+ ("required" -> Json.fromBoolean(true))
+                              else fields
+                              ): _*
+                          )
+                        }: _*
+                      )
+                    ) ::
+                    (
+                      "responses" -> Json.obj(
+                        op.responses.to[List].map { case (status, resp) =>
+                          status.toString -> Json.obj(
+                            "description" -> Json.fromString(resp.description)
+                          )
+                        }: _*
+                      )
+                    ) ::
+                    Nil
+
+                  val fieldsWithRequestEntity =
+                    if (op.requestBody.nonEmpty) {
+                      (
+                        "requestBody" -> Json.obj(
+                          "content" -> Json.obj(
+                            op.requestBody.to[List].map { case (tpe, mediaType) =>
+                              tpe -> Json.obj() // TODO
+                            }: _*
+                          )
                         )
-                        Json.obj(
-                          (
-                            if (parameter.required) fields :+ ("required" -> Json.fromBoolean(true))
-                            else fields
-                          ): _*
-                        )
-                      }: _*
-                    ),
-                    "responses" -> Json.obj(
-                      op.responses.to[List].map { case (status, resp) =>
-                        status.toString -> Json.obj(
-                          "description" -> Json.fromString(resp.description)
-                        )
-                      }: _*
-                    )
-                  )
+                      ):: fields
+                    } else fields
+
+                  verb -> Json.obj(fieldsWithRequestEntity: _*)
                 }: _*
               )
             (path, itemObj)
@@ -75,6 +94,7 @@ case class PathItem(
 // TODO requestBody
 case class Operation(
   parameters: List[Parameter],
+  requestBody: Map[String, MediaType],
   responses: Map[Int, Response]
 )
 
@@ -95,3 +115,7 @@ object In {
   case object Header extends In
   case object Cookie extends In
 }
+
+case class MediaType(schema: Option[Schema])
+
+sealed trait Schema
