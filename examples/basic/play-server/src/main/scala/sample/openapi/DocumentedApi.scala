@@ -13,20 +13,23 @@ object DocumentedApi
     *   {
     *     "openapi": "3.0.0",
     *     "info": {
-    *       "title": "API to get information about users",
+    *       "title": "API to get information about items",
     *       "version": "1.0.0"
     *     },
     *     "paths": {
-    *       "/users/{id}": {
+    *       "/items/{category}": {
     *         "get": {
     *           "parameters": [{
-    *             "name": "id",
+    *             "name": "category",
     *             "in": "path",
     *             "required": true
+    *           }, {
+    *             "name": "page",
+    *             "in": "query"
     *           }],
     *           "responses": {
     *             "200": {
-    *               "description": "Details of the user"
+    *               "description": "List all the items of the given category"
     *             },
     *             "500": {
     *               "description": "Internal Server Error"
@@ -40,7 +43,7 @@ object DocumentedApi
     */
   val documentation: OpenApi =
     openApi(
-      Info("API to get information about users", "1.0.0")
+      Info("API to get information about items", "1.0.0")
     )(
       getUser
     )

@@ -39,20 +39,25 @@ trait DocumentedEndpoints
       }
     val operation =
       Operation(
-        request.path.parameters,
+        request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
+        request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)),
         Map(
           response.status -> endpoints.openapi.Response(response.description),
           500 -> endpoints.openapi.Response("Internal Server Error")
         )
       )
     val item = PathItem(Map(method -> operation))
-    DocumentedEndpoint(request.path.path, item)
+    DocumentedEndpoint(request.url.path, item)
   }
 
   type Request[A] = DocumentedRequest
-  case class DocumentedRequest(method: Method, path: DocumentedPath)
+  case class DocumentedRequest(
+    method: Method,
+    url: DocumentedUrl
+  )
 
-  def request[A](method: Method, url: Url[A]): Request[A] = DocumentedRequest(method, url)
+  def request[A](method: Method, url: Url[A]): Request[A] =
+    DocumentedRequest(method, url)
 
   type Response[A] = DocumentedResponse
   case class DocumentedResponse(status: Int, description: String)

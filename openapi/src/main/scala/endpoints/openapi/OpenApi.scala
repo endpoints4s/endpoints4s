@@ -39,7 +39,7 @@ object OpenApi {
                         )
                         Json.obj(
                           (
-                            if (parameter.in == In.Path) fields :+ ("required" -> Json.fromBoolean(true))
+                            if (parameter.required) fields :+ ("required" -> Json.fromBoolean(true))
                             else fields
                           ): _*
                         )
@@ -84,7 +84,8 @@ case class Response(
 
 case class Parameter(
   name: String,
-  in: In
+  in: In,
+  required: Boolean
 )
 
 sealed trait In

@@ -4,8 +4,8 @@ trait DocumentedApi extends endpoints.algebra.DocumentedEndpoints {
 
   val getUser =
     endpoint(
-      get(path / "users" / segment[Long]("id")),
-      emptyResponse("Details of the user")
+      get(path / "items" / segment[String]("category") /? optQs[Int]("page")),
+      emptyResponse("List all the items of the given category")
     )
 
 }
