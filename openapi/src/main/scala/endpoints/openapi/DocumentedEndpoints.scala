@@ -54,11 +54,11 @@ trait DocumentedEndpoints
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     DocumentedRequest(method, url, entity)
 
-  type Response[A] = DocumentedResponse
+  type Response[A] = List[DocumentedResponse]
 
   case class DocumentedResponse(status: Int, description: String)
 
-  def emptyResponse(description: String) = DocumentedResponse(200, description)
+  def emptyResponse(description: String) = DocumentedResponse(200, description) :: Nil
 
   type Endpoint[A, B] = DocumentedEndpoint
 
@@ -79,10 +79,7 @@ trait DocumentedEndpoints
       Operation(
         parameters,
         request.entity.content,
-        Map(
-          response.status -> endpoints.openapi.Response(response.description),
-          500 -> endpoints.openapi.Response("Internal Server Error")
-        )
+        response.map(r => r.status -> endpoints.openapi.Response(r.description)).toMap
       )
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)
