@@ -2,7 +2,8 @@ package sample.algebra
 
 trait DocumentedApi
   extends endpoints.algebra.DocumentedEndpoints
-    with endpoints.algebra.DocumentedOptionalResponses {
+    with endpoints.algebra.DocumentedOptionalResponses
+    with endpoints.algebra.DocumentedBasicAuthentication {
 
   val items =
     endpoint(
@@ -16,6 +17,15 @@ trait DocumentedApi
     endpoint(
       get(path / "item" / itemId),
       option(emptyResponse("The item identified by 'id'"), "Item not found")
+    )
+
+  val admin =
+    authenticatedEndpoint(
+      Get,
+      path / "admin",
+      emptyRequest,
+      emptyResponse("Administration page"),
+      "Authentication error"
     )
 
 }

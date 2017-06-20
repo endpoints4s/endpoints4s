@@ -28,15 +28,18 @@ trait DocumentedEndpoints
     OpenApi(info, items)
   }
 
-  type RequestHeaders[A] = List[String]
+  type RequestHeaders[A] = DocumentedHeaders
 
-  def emptyHeaders = Nil
+  case class DocumentedHeaders(value: List[String])
+
+  def emptyHeaders = DocumentedHeaders(Nil)
 
   type Request[A] = DocumentedRequest
 
   case class DocumentedRequest(
     method: Method,
     url: DocumentedUrl,
+    headers: DocumentedHeaders,
     entity: DocumentedRequestEntity
   )
 
@@ -52,7 +55,7 @@ trait DocumentedEndpoints
     entity: RequestEntity[B] = emptyRequest,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    DocumentedRequest(method, url, entity)
+    DocumentedRequest(method, url, headers, entity)
 
   type Response[A] = List[DocumentedResponse]
 
@@ -74,7 +77,8 @@ trait DocumentedEndpoints
       }
     val parameters =
       request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
-      request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required))
+      request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)) ++
+      request.headers.value.map(h => Parameter(h, In.Header, required = true))
     val operation =
       Operation(
         parameters,
