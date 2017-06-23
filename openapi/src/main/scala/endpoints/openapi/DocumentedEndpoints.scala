@@ -40,14 +40,14 @@ trait DocumentedEndpoints
     method: Method,
     url: DocumentedUrl,
     headers: DocumentedHeaders,
-    entity: DocumentedRequestEntity
+    entity: Option[DocumentedRequestEntity]
   )
 
-  type RequestEntity[A] = DocumentedRequestEntity
+  type RequestEntity[A] = Option[DocumentedRequestEntity]
 
-  case class DocumentedRequestEntity(content: Map[String, MediaType])
+  case class DocumentedRequestEntity(description: Option[String], content: Map[String, MediaType])
 
-  def emptyRequest = DocumentedRequestEntity(Map.empty)
+  def emptyRequest = None
 
   def request[A, B, C, AB](
     method: Method,
@@ -59,9 +59,9 @@ trait DocumentedEndpoints
 
   type Response[A] = List[DocumentedResponse]
 
-  case class DocumentedResponse(status: Int, description: String)
+  case class DocumentedResponse(status: Int, description: String, content: Map[String, MediaType])
 
-  def emptyResponse(description: String) = DocumentedResponse(200, description) :: Nil
+  def emptyResponse(description: String): Response[Unit] = DocumentedResponse(200, description, Map.empty) :: Nil
 
   type Endpoint[A, B] = DocumentedEndpoint
 
@@ -82,8 +82,8 @@ trait DocumentedEndpoints
     val operation =
       Operation(
         parameters,
-        request.entity.content,
-        response.map(r => r.status -> endpoints.openapi.Response(r.description)).toMap
+        request.entity.map(r => RequestBody(r.description, r.content)),
+        response.map(r => r.status -> openapi.Response(r.description, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)

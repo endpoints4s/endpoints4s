@@ -33,6 +33,6 @@ object Server extends App with Results {
     }
   }
 
-  NettyServer.fromRouter()(bootstrap orElse Api.routes orElse DocumentedApi.delegate.routes)
+  NettyServer.fromRouter()(bootstrap orElse Api.routes orElse DocumentedApi.routes)
 
 }

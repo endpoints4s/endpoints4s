@@ -15,6 +15,6 @@ trait DocumentedBasicAuthentication
     DocumentedHeaders("Authorization" :: Nil)
 
   private[endpoints] def authenticated[A](response: Response[A], description: String): Response[Option[A]] =
-    DocumentedResponse(401, description) :: response
+    DocumentedResponse(401, description, content = Map.empty) :: response
 
 }

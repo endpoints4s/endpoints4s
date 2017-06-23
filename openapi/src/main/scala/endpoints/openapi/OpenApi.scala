@@ -14,68 +14,71 @@ object OpenApi {
 
   implicit val jsonEncoder: ObjectEncoder[OpenApi] =
     ObjectEncoder.instance { openApi =>
+
+      def jsonMediaTypes(mediaTypes: Map[String, MediaType]): Json =
+        Json.fromFields(mediaTypes.map { case (tpe, mediaType) => tpe -> Json.obj() /* TODO */ })
+
       JsonObject.fromMap(Map(
         "openapi" -> Json.fromString("3.0.0"),
         "info" -> Json.obj(
           "title" -> Json.fromString(openApi.info.title),
           "version" -> Json.fromString(openApi.info.version)
         ),
-        "paths" -> Json.obj(
+        "paths" -> Json.fromFields(
           openApi.paths.to[List].map { case (path, item) =>
             val itemObj =
-              Json.obj(
+              Json.fromFields(
                 item.operations.to[List].map { case (verb, op) =>
                   val fields =
                     (
-                      "parameters" -> Json.arr(
+                      "parameters" -> Json.fromValues(
                         op.parameters.map { parameter =>
-                          val fields = Seq(
-                            "name" -> Json.fromString(parameter.name),
+                          val fields =
+                            "name" -> Json.fromString(parameter.name) ::
                             "in" -> Json.fromString(parameter.in match {
                               case In.Cookie => "cookie"
                               case In.Header => "header"
                               case In.Path   => "path"
                               case In.Query  => "query"
-                            })
+                            }) ::
+                            Nil
+                          Json.fromFields(
+                            if (parameter.required) "required" -> Json.fromBoolean(true) :: fields
+                            else fields
                           )
-                          Json.obj(
-                            (
-                              if (parameter.required) fields :+ ("required" -> Json.fromBoolean(true))
-                              else fields
-                              ): _*
-                          )
-                        }: _*
+                        }
                       )
                     ) ::
                     (
-                      "responses" -> Json.obj(
+                      "responses" -> Json.fromFields(
                         op.responses.to[List].map { case (status, resp) =>
-                          status.toString -> Json.obj(
-                            "description" -> Json.fromString(resp.description)
+                          status.toString -> Json.fromFields(
+                            "description" -> Json.fromString(resp.description) ::
+                            (if (resp.content.nonEmpty) {
+                              "content" -> jsonMediaTypes(resp.content) ::
+                              Nil
+                            } else Nil)
                           )
-                        }: _*
+                        }
                       )
                     ) ::
                     Nil
 
                   val fieldsWithRequestEntity =
-                    if (op.requestBody.nonEmpty) {
-                      (
-                        "requestBody" -> Json.obj(
-                          "content" -> Json.obj(
-                            op.requestBody.to[List].map { case (tpe, mediaType) =>
-                              tpe -> Json.obj() // TODO
-                            }: _*
-                          )
-                        )
-                      ):: fields
-                    } else fields
+                    op.requestBody.map { requestBody =>
+                      "requestBody" -> Json.fromFields({
+                        val requiredFields =
+                          "content" -> jsonMediaTypes(requestBody.content) ::
+                          Nil
+                        requestBody.description.fold(requiredFields)(d => "description" -> Json.fromString(d) :: requiredFields)
+                      })
+                    }.fold(fields)(_ :: fields)
 
-                  verb -> Json.obj(fieldsWithRequestEntity: _*)
-                }: _*
+                  verb -> Json.fromFields(fieldsWithRequestEntity)
+                }
               )
             (path, itemObj)
-          }: _*
+          }
         )
       ))
     }
@@ -91,15 +94,22 @@ case class PathItem(
   operations: Map[String, Operation]
 )
 
-// TODO requestBody
 case class Operation(
   parameters: List[Parameter],
-  requestBody: Map[String, MediaType],
+  requestBody: Option[RequestBody],
   responses: Map[Int, Response]
 )
 
+case class RequestBody(
+  description: Option[String],
+  content: Map[String, MediaType]
+) {
+  assert(content.nonEmpty)
+}
+
 case class Response(
-  description: String
+  description: String,
+  content: Map[String, MediaType]
 )
 
 case class Parameter(
