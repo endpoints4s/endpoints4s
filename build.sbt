@@ -240,7 +240,7 @@ val openapi =
     .settings(
       name := "endpoints-openapi",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
-    ).dependsOn(`algebra`)
+    ).dependsOn(`algebra`, testsuite % Test)
 
 val `openapi-js` = openapi.js
 val `openapi-jvm` = openapi.jvm

@@ -4,7 +4,7 @@ package algebra
 import scala.language.higherKinds
 
 /**
-  * Algebra interfaces for describing json entities including documentation.
+  * Algebra interface for describing json entities including documentation.
   *
   * This interface is modeled after [[JsonEntities]] but some methods take
   * additional parameters carrying documentation.
