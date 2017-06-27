@@ -9,8 +9,8 @@ import endpoints.algebra.MuxRequest
   */
 trait DocumentedEndpoints
   extends algebra.DocumentedEndpoints
-    with DocumentedUrls
-    with Methods {
+    with DocumentedRequests
+    with DocumentedResponses {
 
   /**
     * @return An [[OpenApi]] instance for the given endpoint descriptions
@@ -27,41 +27,6 @@ trait DocumentedEndpoints
         })
     OpenApi(info, items)
   }
-
-  type RequestHeaders[A] = DocumentedHeaders
-
-  case class DocumentedHeaders(value: List[String])
-
-  def emptyHeaders = DocumentedHeaders(Nil)
-
-  type Request[A] = DocumentedRequest
-
-  case class DocumentedRequest(
-    method: Method,
-    url: DocumentedUrl,
-    headers: DocumentedHeaders,
-    entity: Option[DocumentedRequestEntity]
-  )
-
-  type RequestEntity[A] = Option[DocumentedRequestEntity]
-
-  case class DocumentedRequestEntity(description: Option[String], content: Map[String, MediaType])
-
-  def emptyRequest = None
-
-  def request[A, B, C, AB](
-    method: Method,
-    url: Url[A],
-    entity: RequestEntity[B] = emptyRequest,
-    headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    DocumentedRequest(method, url, headers, entity)
-
-  type Response[A] = List[DocumentedResponse]
-
-  case class DocumentedResponse(status: Int, description: String, content: Map[String, MediaType])
-
-  def emptyResponse(description: String): Response[Unit] = DocumentedResponse(200, description, Map.empty) :: Nil
 
   type Endpoint[A, B] = DocumentedEndpoint
 

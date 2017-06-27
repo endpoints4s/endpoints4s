@@ -13,7 +13,7 @@ trait Responses {
   def emptyResponse: Response[Unit]
 
   /**
-    * String response.
+    * Text response.
     */
   def textResponse: Response[String]
 
