@@ -30,6 +30,10 @@ trait DocumentedEndpoints
 
   type Endpoint[A, B] = DocumentedEndpoint
 
+  /**
+    * @param path Path template (e.g. “/user/{id}”)
+    * @param item Item documentation
+    */
   case class DocumentedEndpoint(path: String, item: PathItem)
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = {

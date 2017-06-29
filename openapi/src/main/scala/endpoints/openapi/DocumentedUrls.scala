@@ -8,9 +8,17 @@ trait DocumentedUrls extends algebra.DocumentedUrls {
 
   type QueryString[A] = DocumentedQueryString
 
+  /**
+    * @param parameters List of query string parameters
+    */
   case class DocumentedQueryString(parameters: List[DocumentedParameter])
 
-  case class DocumentedParameter(name: String, required: Boolean) // TODO Schema
+  /**
+    * @param name Name of the parameter
+    * @param required Whether this parameter is required or not (MUST be true for path parameters)
+    */
+  // TODO Add documentation about the type of the parameter
+  case class DocumentedParameter(name: String, required: Boolean)
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)
@@ -53,6 +61,11 @@ trait DocumentedUrls extends algebra.DocumentedUrls {
 
   type Url[A] = DocumentedUrl
 
+  /**
+    * @param path Path template (e.g. “/user/{id}”)
+    * @param pathParameters Path parameters
+    * @param queryParameters Query string parameters
+    */
   case class DocumentedUrl(path: String, pathParameters: List[DocumentedParameter], queryParameters: List[DocumentedParameter])
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =

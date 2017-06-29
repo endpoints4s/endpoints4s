@@ -11,7 +11,11 @@ trait DocumentedRequests
 
   type RequestHeaders[A] = DocumentedHeaders
 
-  case class DocumentedHeaders(value: List[String])
+  /**
+    * @param value List of request header names (e.g. “Authorization”)
+    */
+  case class DocumentedHeaders(value: List[HeaderName])
+  type HeaderName = String
 
   def emptyHeaders = DocumentedHeaders(Nil)
 
@@ -26,6 +30,10 @@ trait DocumentedRequests
 
   type RequestEntity[A] = Option[DocumentedRequestEntity]
 
+  /**
+    * @param description Human readable description of the request entity
+    * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
+    */
   case class DocumentedRequestEntity(description: Option[String], content: Map[String, MediaType])
 
   def emptyRequest = None
