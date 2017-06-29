@@ -31,6 +31,15 @@ navigate through the algebra interfaces hierarchy.
 |[`OptionalResponses`](api:endpoints.algebra.OptionalResponses)|Optional response entities|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
 |[`CirceEntities`](api:endpoints.algebra.CirceEntities)|JSON request and response entities using Circe codecs|[endpoints-algebra-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-circe)|
 
+**Note**: A similar but slightly different set of algebra interfaces can be used to define endpoint
+descriptions containing documentation. These algebra interfaces have the same names as those
+described in above table, but live in the
+[endpoints.documented.algebra](api:endpoints.documented.algebra.package) package and are provided
+by the [endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)
+artifact. This artifact also provides its interpreters (in the
+[endpoints.documented.openapi](api:endpoints.documented.openapi.package) and
+[endpoints.documented.delegate](api:endpoints.documented.delegate.package) packages).
+
 ## Interpreters
 
 | Artifact id | Description |
@@ -44,3 +53,5 @@ navigate through the algebra interfaces hierarchy.
 |[endpoints-xhr-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client)|Scala.js clients using `XMLHttpRequest` and returning responses in `Future` or `js.Thenable` values|
 |[endpoints-xhr-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-circe)|Interpreter for `CirceEntities` compatible with `endpoints-xhr-client`|
 |[endpoints-xhr-client-faithful](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-faithful)|Scala.js client returning responses [faithful](https://github.com/julienrf/faithful)’s `Future` values|
+|[endpoints-scalaj-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-scalaj-client)|JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)|
+|[endpoints-scalaj-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-scalaj-client-circe)|Interpreter for `CirceEntities` compatible with `endpoints-scalaj-client`|

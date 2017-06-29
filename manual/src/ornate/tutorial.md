@@ -634,6 +634,171 @@ introduced a new method for describing responses such that empty responses are m
 a 404 (Not Found) response. We also saw how support for custom data types (e.g. `UUID`) can
 be introduced.
 
+## Deriving an OpenAPI definition file from a service description
+
+The [OpenAPI](https://www.openapis.org/) initiative standardizes a description format that
+can be processed by tools like [swagger-ui](https://swagger.io/swagger-ui/) or
+[Amazon API Gateway](http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-import-api.html).
+
+### Documented service description
+
+The OpenAPI format requires richer service descriptions than what we currently have. For instance,
+each response must have a human readable description. Because of such differences, we use
+different algebra interfaces to define our service description. These algebra interfaces
+are provided by the `endpoints-openapi` artifact:
+
+~~~ mermaid
+graph BT
+  web-client -.-> interpreter2["endpoints-xhr-client-circe"]
+  web-client -.-> public-endpoints
+  web-client --> public-server
+  public-server -.-> public-endpoints
+  public-endpoints -.-> algebra["endpoints-algebra-circe"]
+  public-endpoints -.-> openapi["endpoints-openapi-circe"]
+  public-server -.-> interpreter["endpoints-play-server-circe"]
+  style algebra fill:#eee;
+  style interpreter fill:#eee;
+  style interpreter2 fill:#eee;
+  style openapi fill:#eee;
+~~~
+
+The “documented” description of the `listMeters` and `getMeter` endpoints looks like the following:
+
+~~~ scala
+import endpoints.documented.algebra.{CirceEntities, Endpoints, OptionalResponses}
+
+trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
+
+  /** Common path prefix for endpoints: “/meters” */
+  private val metersPath = path / "meters"
+
+  /** Lists all the registered meters */
+  val listMeters: Endpoint[Unit, List[Meter]] =
+    endpoint(get(metersPath), jsonResponse[List[Meter]]("All the meters of the application"))
+
+  /** Find a meter by id */
+  val getMeter: Endpoint[UUID, Option[Meter]] =
+    endpoint(
+      get(
+        metersPath / segment[UUID]("id")),
+        option(
+          jsonResponse[Meter](documentation = "The meter identified by 'id'"),
+          notFoundDocumentation = "Meter not found"
+        )
+      )
+}
+~~~
+
+A first difference with the previous definition of `PublicEndpoints` is that now we
+import our algebra interfaces from the
+[endpoints.documented.algebra](api:endpoints.documented.algebra.package) package instead
+of `endpoints.algebra`. Though the name of the package is different, the names of the interfaces
+are the same, and the API is very similar but contains additional pieces of information. Let’s
+detail them:
+
+- Responses now have a human readable documentation. For instance, the documentation for the
+  `listMeters` endpoint response is “All the meters of the application”,
+- Path parameters have an associated identifier. This one is used as a placeholder in the
+  OpenAPI file. For instance, the identifier of the meter id, in the `getMeter` endpoint,
+  is “id”. Consequently, the OpenAPI file definition shows the following path template
+  for this endpoint: `/meters/{id}`.
+
+The `endpoints.documented.algebra` package contains algebra interface definitions that have
+the same name and same methods as those that are in the `endpoints.algebra` package, but their
+methods sometimes take additional parameters carrying documentation information. Thus, if you
+want to turn a service description into a _documented_ service description, all you have to do
+is to change one import and supply the missing parameters here and there.
+
+### Deriving an OpenAPI file definition from a documented service description
+
+To derive an OpenAPI file definition from our endpoint descriptions we use
+the interpreters defined in the
+[endpoints.documented.openapi](api:endpoints.documented.openapi.package) package:
+
+~~~ scala
+import endpoints.documented.openapi.{CirceEntities, Endpoints, OptionalResponses}
+
+object Documentation
+  extends PublicEndpoints
+    with Endpoints
+    with CirceEntities
+    with OptionalResponses {
+
+  val documentation: OpenApi =
+    openApi(Info(title = "API to query meters", version = "1.0.0"))(
+      listMeters,
+      getMeter
+    )
+
+}
+~~~
+
+Here, the
+[openApi](api:endpoints.documented.openapi.Endpoints@openApi(info:endpoints.documented.openapi.Info)(endpoints:Endpoints.this.DocumentedEndpoint*):endpoints.documented.openapi.OpenApi)
+method generates an abstract [OpenApi](api:endpoints.documented.openapi.OpenApi) model, which
+can eventually be serialized in JSON.
+
+### Deriving clients and servers from a documented service description
+
+Since our documented endpoints are not defined by the algebra interfaces provided in the
+`endpoints.algebra` package, we can not directly apply the interpreters introduced in the previous
+sections. We have to use *delegation* to apply them:
+
+~~~ scala
+import endpoints.documented.delegate
+import endpoints.play
+
+object PublicServer
+  extends PublicEndpoints
+    with delegate.Endpoints
+    with delegate.CirceEntities
+    with delegate.OptionalResponses {
+
+  lazy val delegate =
+    new play.server.Endpoints
+      with play.server.CirceEntities
+      with play.server.OptionalResponses
+
+  val routes = delegate.routesFromEndpoints(
+    listMeters,
+    getMeter
+  )
+
+}
+~~~
+
+~~~ scala
+import endpoints.documented.delegate
+import endpoints.xhr
+
+object PublicEndpoints
+  extends PublicEndpoints
+    with delegate.Endpoints
+    with delegate.CirceEntities
+    with delegate.OptionalResponses {
+
+  lazy val delegate =
+    new xhr.Endpoints
+      with xhr.CirceEntities
+      with xhr.OptionalResponses
+
+}
+~~~
+
+### Summary
+
+To generate an OpenAPI definition from your service description this one
+must be written using a different set of algebra interfaces, which live
+in the `endpoints.documented.algebra` package.
+
+You can then derive an OpenAPI definition from your documented endpoints
+by applying the interpreters defined in the `endpoints.documented.openapi`
+package.
+
+None of the “documented” and “non-documented” algebra interfaces is a
+subtype of each other, but “documented” interpreters can delegate to
+“non-documented” ones.
+
 ## HATEOS
 
 TODO.
