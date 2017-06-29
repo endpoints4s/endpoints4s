@@ -260,7 +260,9 @@ val apiDoc =
         `play-circe`,
         `play-client`, `play-client-circe`,
         `play-server`, `play-server-circe`,
-        `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`
+        `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
+        `scalaj-client`, `scalaj-client-circe`,
+        `openapi-jvm`
       )
     )
 
