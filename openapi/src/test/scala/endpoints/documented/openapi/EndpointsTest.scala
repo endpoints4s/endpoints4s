@@ -1,16 +1,14 @@
 package endpoints
+package documented
 package openapi
 
-import endpoints.algebra.documented
-import endpoints.documented.algebra
-import endpoints.documented.openapi.Info
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 
-class DocumentedEndpointsTest extends WordSpec with Matchers with OptionValues {
+class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
   "Path parameters" should {
     "Appear as patterns between braces in the documentation" in {
-      DocumentedEndpointsFixtures.baz.path shouldBe "/baz/{quux}"
+      Fixtures.baz.path shouldBe "/baz/{quux}"
     }
   }
 
@@ -18,7 +16,7 @@ class DocumentedEndpointsTest extends WordSpec with Matchers with OptionValues {
     "be grouped together" in {
 
       val fooItem =
-        DocumentedEndpointsFixtures.documentation.paths.get("/foo").value
+        Fixtures.documentation.paths.get("/foo").value
 
       fooItem.operations.size shouldBe 2
       fooItem.operations.get("get") shouldBe defined
@@ -29,7 +27,7 @@ class DocumentedEndpointsTest extends WordSpec with Matchers with OptionValues {
 
 }
 
-trait DocumentedEndpointsFixtures extends algebra.Endpoints {
+trait Fixtures extends algebra.Endpoints {
 
   val foo = endpoint(get(path / "foo"), emptyResponse("Foo response"))
 
@@ -39,9 +37,9 @@ trait DocumentedEndpointsFixtures extends algebra.Endpoints {
 
 }
 
-object DocumentedEndpointsFixtures
-  extends DocumentedEndpointsFixtures
-    with DocumentedEndpoints {
+object Fixtures
+  extends Fixtures
+    with Endpoints {
 
   val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz)
 
