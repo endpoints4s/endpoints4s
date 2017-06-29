@@ -1,4 +1,5 @@
 package endpoints
+package documented
 package algebra
 
 import scala.language.higherKinds
@@ -6,10 +7,10 @@ import scala.language.higherKinds
 /**
   * Algebra interface for describing requests.
   *
-  * This interface is modeled after [[Requests]] but some
+  * This interface is modeled after [[endpoints.algebra.Requests]] but some
   * methods take additional parameters carrying documentation.
   */
-trait DocumentedRequests extends DocumentedUrls with Methods {
+trait Requests extends Urls with endpoints.algebra.Methods {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]

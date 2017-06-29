@@ -1,10 +1,11 @@
 package endpoints
+package documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.Methods]]
+  * Interpreter for [[endpoints.algebra.Methods]]
   */
-trait Methods extends algebra.Methods {
+trait Methods extends endpoints.algebra.Methods {
 
   sealed trait Method
   case object Get extends Method

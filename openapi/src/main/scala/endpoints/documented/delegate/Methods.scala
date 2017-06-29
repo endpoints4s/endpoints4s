@@ -1,13 +1,14 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.Methods]] that delegates to
+  * Interpreter for [[endpoints.algebra.Methods]] that delegates to
   * another interpreter.
   */
-trait Methods extends algebra.Methods {
+trait Methods extends endpoints.algebra.Methods {
 
-  val delegate: algebra.Methods
+  val delegate: endpoints.algebra.Methods
 
   type Method = delegate.Method
 

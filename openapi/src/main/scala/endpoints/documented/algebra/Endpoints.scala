@@ -1,5 +1,8 @@
 package endpoints
+package documented
 package algebra
+
+import endpoints.algebra.MuxRequest
 
 import scala.language.higherKinds
 
@@ -7,12 +10,12 @@ import scala.language.higherKinds
   * Algebra interface for describing endpoints including documentation
   * (such as human readable descriptions of things).
   *
-  * This interface is modeled after [[Endpoints]] but some methods
+  * This interface is modeled after [[endpoints.algebra.Endpoints]] but some methods
   * take additional parameters carrying the documentation part.
   */
-trait DocumentedEndpoints
-  extends DocumentedRequests
-    with DocumentedResponses {
+trait Endpoints
+  extends Requests
+    with Responses {
 
   /**
     * Information carried by an HTTP endpoint

@@ -1,14 +1,15 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.DocumentedUrls]] that ignores information
-  * related to documentation and delegates to another [[algebra.Urls]]
+  * Interpreter for [[algebra.Urls]] that ignores information
+  * related to documentation and delegates to another [[endpoints.algebra.Urls]]
   * interpreter.
   */
-trait DocumentedUrls extends algebra.DocumentedUrls {
+trait Urls extends algebra.Urls {
 
-  val delegate: algebra.Urls
+  val delegate: endpoints.algebra.Urls
 
   type QueryString[A] = delegate.QueryString[A]
 

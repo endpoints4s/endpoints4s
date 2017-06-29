@@ -1,15 +1,16 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.DocumentedAssets]] that ignores information related
-  * to documentation and delegates to another [[algebra.Assets]] interpreter.
+  * Interpreter for [[algebra.Assets]] that ignores information related
+  * to documentation and delegates to another [[endpoints.algebra.Assets]] interpreter.
   */
-trait DocumentedAssets
-  extends algebra.DocumentedAssets
-    with DocumentedEndpoints {
+trait Assets
+  extends algebra.Assets
+    with Endpoints {
 
-  val delegate: algebra.Assets
+  val delegate: endpoints.algebra.Assets
 
   type AssetRequest = delegate.AssetRequest
   type AssetPath = delegate.AssetPath

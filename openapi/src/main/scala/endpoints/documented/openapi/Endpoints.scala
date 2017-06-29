@@ -1,16 +1,17 @@
 package endpoints
+package documented
 package openapi
 
 import endpoints.algebra.MuxRequest
 
 /**
-  * Interpreter for [[algebra.DocumentedEndpoints]] that produces
+  * Interpreter for [[algebra.Endpoints]] that produces
   * an [[OpenApi]] instance for endpoints.
   */
-trait DocumentedEndpoints
-  extends algebra.DocumentedEndpoints
-    with DocumentedRequests
-    with DocumentedResponses {
+trait Endpoints
+  extends algebra.Endpoints
+    with Requests
+    with Responses {
 
   /**
     * @return An [[OpenApi]] instance for the given endpoint descriptions
@@ -52,7 +53,7 @@ trait DocumentedEndpoints
       Operation(
         parameters,
         request.entity.map(r => RequestBody(r.description, r.content)),
-        response.map(r => r.status -> openapi.Response(r.description, r.content)).toMap
+        response.map(r => r.status -> documented.openapi.Response(r.description, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)

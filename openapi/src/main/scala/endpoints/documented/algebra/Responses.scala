@@ -1,4 +1,5 @@
 package endpoints
+package documented
 package algebra
 
 import scala.language.higherKinds
@@ -6,10 +7,10 @@ import scala.language.higherKinds
 /**
   * Algebra interface for describing responses.
   *
-  * This interface is modeled after [[Responses]] but some
+  * This interface is modeled after [[endpoints.algebra.Responses]] but some
   * methods take additional parameters carrying documentation.
   */
-trait DocumentedResponses {
+trait Responses {
 
   /** Information carried by a response */
   type Response[A]

@@ -1,4 +1,5 @@
 package endpoints
+package documented
 package openapi
 
 import endpoints.algebra.BasicAuthentication.Credentials
@@ -7,9 +8,9 @@ import endpoints.algebra.BasicAuthentication.Credentials
   * Interpreter for [[algebra.BasicAuthentication]] that produces
   * OpenAPI documentation.
   */
-trait DocumentedBasicAuthentication
-  extends algebra.DocumentedBasicAuthentication
-    with DocumentedEndpoints {
+trait BasicAuthentication
+  extends algebra.BasicAuthentication
+    with Endpoints {
 
   private[endpoints] def basicAuthentication: RequestHeaders[Credentials] =
     DocumentedHeaders("Authorization" :: Nil)

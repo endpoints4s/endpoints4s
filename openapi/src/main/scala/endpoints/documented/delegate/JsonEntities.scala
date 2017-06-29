@@ -1,16 +1,17 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.DocumentedJsonEntities]] that ignores
+  * Interpreter for [[algebra.JsonEntities]] that ignores
   * information related to documentation and delegates to another
-  * [[algebra.JsonEntities]] interpreter.
+  * [[endpoints.algebra.JsonEntities]] interpreter.
   */
-trait DocumentedJsonEntities
-  extends algebra.DocumentedJsonEntities
-    with DocumentedEndpoints {
+trait JsonEntities
+  extends algebra.JsonEntities
+    with Endpoints {
 
-  val delegate: algebra.JsonEntities
+  val delegate: endpoints.algebra.JsonEntities
 
   type JsonRequest[A] = delegate.JsonRequest[A]
 

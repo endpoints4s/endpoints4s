@@ -1,12 +1,13 @@
 package endpoints
+package documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.DocumentedRequests]].
+  * Interpreter for [[algebra.Requests]].
   */
-trait DocumentedRequests
-  extends algebra.DocumentedRequests
-    with DocumentedUrls
+trait Requests
+  extends algebra.Requests
+    with Urls
     with Methods {
 
   type RequestHeaders[A] = DocumentedHeaders

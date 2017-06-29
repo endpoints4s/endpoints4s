@@ -1,4 +1,5 @@
 package endpoints
+package documented
 package algebra
 
 import endpoints.algebra.BasicAuthentication.Credentials
@@ -6,9 +7,9 @@ import endpoints.algebra.BasicAuthentication.Credentials
 /**
   * Algebra interface for describing HTTP Basic authentication.
   *
-  * This interface is modeled after [[BasicAuthentication]].
+  * This interface is modeled after [[endpoints.algebra.BasicAuthentication]].
   */
-trait DocumentedBasicAuthentication extends DocumentedEndpoints {
+trait BasicAuthentication extends Endpoints {
 
   /**
     * Credentials encoded as HTTP Basic Auth header

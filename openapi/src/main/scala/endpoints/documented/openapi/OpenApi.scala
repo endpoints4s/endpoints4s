@@ -1,7 +1,7 @@
-package endpoints.openapi
+package endpoints.documented.openapi
 
-import io.circe.{Json, JsonObject, ObjectEncoder}
 import io.circe.syntax._
+import io.circe.{Json, JsonObject, ObjectEncoder}
 
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/OpenAPI.next/versions/3.0.md]]

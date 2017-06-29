@@ -1,14 +1,15 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.DocumentedResponses]] that ignores information
-  * related to documentation and delegates to another [[algebra.Responses]]
+  * Interpreter for [[algebra.Responses]] that ignores information
+  * related to documentation and delegates to another [[endpoints.algebra.Responses]]
   * interpreter.
   */
-trait DocumentedResponses extends algebra.DocumentedResponses {
+trait Responses extends algebra.Responses {
 
-  val delegate: algebra.Responses
+  val delegate: endpoints.algebra.Responses
 
   type Response[A] = delegate.Response[A]
 

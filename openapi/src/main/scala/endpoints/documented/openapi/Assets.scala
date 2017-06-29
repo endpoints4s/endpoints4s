@@ -1,12 +1,13 @@
 package endpoints
+package documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.DocumentedAssets]]
+  * Interpreter for [[algebra.Assets]]
   */
-trait DocumentedAssets
-  extends algebra.DocumentedAssets
-    with DocumentedEndpoints {
+trait Assets
+  extends algebra.Assets
+    with Endpoints {
 
   type AssetRequest = Nothing
   type AssetPath = Nothing

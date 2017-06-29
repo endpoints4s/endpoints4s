@@ -1,11 +1,12 @@
 package endpoints
+package documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.DocumentedResponses]]
+  * Interpreter for [[algebra.Responses]]
   */
-trait DocumentedResponses
-  extends algebra.DocumentedResponses {
+trait Responses
+  extends algebra.Responses {
 
   type Response[A] = List[DocumentedResponse]
 

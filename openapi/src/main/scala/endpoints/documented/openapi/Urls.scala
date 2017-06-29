@@ -1,10 +1,11 @@
 package endpoints
+package documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.DocumentedUrls]]
+  * Interpreter for [[algebra.Urls]]
   */
-trait DocumentedUrls extends algebra.DocumentedUrls {
+trait Urls extends algebra.Urls {
 
   type QueryString[A] = DocumentedQueryString
 

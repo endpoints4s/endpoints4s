@@ -1,13 +1,14 @@
 package endpoints
+package documented
 package algebra
 
 /**
   * Algebra interface for describing assets.
   *
-  * This interface is modeled after [[Assets]] but some methods
+  * This interface is modeled after [[endpoints.algebra.Assets]] but some methods
   * take additional parameters carrying documentation.
   */
-trait DocumentedAssets extends DocumentedEndpoints {
+trait Assets extends Endpoints {
 
   /** An HTTP request to retrieve an asset */
   type AssetRequest

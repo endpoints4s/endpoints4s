@@ -1,14 +1,15 @@
 package sample.play.server
 
-import endpoints._
+import endpoints.documented.delegate
+import endpoints.play
 import sample.algebra.Item
 
 object DocumentedApi
   extends sample.algebra.DocumentedApi
-    with delegate.DocumentedEndpoints
-    with delegate.DocumentedOptionalResponses
-    with delegate.DocumentedBasicAuthentication
-    with delegate.DocumentedJsonEntities {
+    with delegate.Endpoints
+    with delegate.OptionalResponses
+    with delegate.BasicAuthentication
+    with delegate.JsonEntities {
 
   // Note: scalac (2.11.8) crashes if I use an object definition instead of this lazy val
   lazy val delegate =

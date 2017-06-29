@@ -1,4 +1,5 @@
 package endpoints
+package documented
 package algebra
 
 import scala.language.higherKinds
@@ -6,10 +7,10 @@ import scala.language.higherKinds
 /**
   * Algebra interface for describing json entities including documentation.
   *
-  * This interface is modeled after [[JsonEntities]] but some methods take
+  * This interface is modeled after [[endpoints.algebra.JsonEntities]] but some methods take
   * additional parameters carrying documentation.
   */
-trait DocumentedJsonEntities extends DocumentedEndpoints {
+trait JsonEntities extends Endpoints {
 
   /** Type class defining how to represent the `A` information as a JSON request entity */
   type JsonRequest[A]

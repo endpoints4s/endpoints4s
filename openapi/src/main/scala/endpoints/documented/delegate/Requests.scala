@@ -1,17 +1,18 @@
 package endpoints
+package documented
 package delegate
 
 /**
-  * Interpreter for [[algebra.DocumentedRequests]] that ignores information
-  * related to documentation and delegates to another [[algebra.Requests]]
+  * Interpreter for [[algebra.Requests]] that ignores information
+  * related to documentation and delegates to another [[endpoints.algebra.Requests]]
   * interpreter.
   */
-trait DocumentedRequests
-  extends algebra.DocumentedRequests
-    with DocumentedUrls
+trait Requests
+  extends algebra.Requests
+    with Urls
     with Methods {
 
-  val delegate: algebra.Requests
+  val delegate: endpoints.algebra.Requests
 
   type RequestHeaders[A] = delegate.RequestHeaders[A]
 

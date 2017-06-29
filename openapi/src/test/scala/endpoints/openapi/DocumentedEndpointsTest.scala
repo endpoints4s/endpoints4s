@@ -1,6 +1,9 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.documented
+import endpoints.documented.algebra
+import endpoints.documented.openapi.Info
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 
 class DocumentedEndpointsTest extends WordSpec with Matchers with OptionValues {
@@ -26,7 +29,7 @@ class DocumentedEndpointsTest extends WordSpec with Matchers with OptionValues {
 
 }
 
-trait DocumentedEndpointsFixtures extends algebra.DocumentedEndpoints {
+trait DocumentedEndpointsFixtures extends algebra.Endpoints {
 
   val foo = endpoint(get(path / "foo"), emptyResponse("Foo response"))
 

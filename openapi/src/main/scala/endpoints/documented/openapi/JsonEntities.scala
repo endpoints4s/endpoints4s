@@ -1,12 +1,12 @@
-package endpoints
+package endpoints.documented
 package openapi
 
 /**
-  * Interpreter for [[algebra.DocumentedJsonEntities]].
+  * Interpreter for [[algebra.JsonEntities]].
   */
-trait DocumentedJsonEntities
-  extends algebra.DocumentedJsonEntities
-    with DocumentedEndpoints {
+trait JsonEntities
+  extends algebra.JsonEntities
+    with Endpoints {
 
   // We don’t provide (yet!) a useful JSON schema
   case class JsonSchema[A]()

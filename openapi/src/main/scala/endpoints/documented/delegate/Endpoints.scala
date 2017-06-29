@@ -1,19 +1,20 @@
 package endpoints
+package documented
 package delegate
 
 import endpoints.algebra.MuxRequest
 
 /**
-  * Interpreter for [[algebra.DocumentedEndpoints]] that ignores information
-  * related to documentation and delegates to another [[algebra.Endpoints]]
+  * Interpreter for [[algebra.Endpoints]] that ignores information
+  * related to documentation and delegates to another [[endpoints.algebra.Endpoints]]
   * interpreter.
   */
-trait DocumentedEndpoints
-  extends algebra.DocumentedEndpoints
-    with DocumentedRequests
-    with DocumentedResponses {
+trait Endpoints
+  extends algebra.Endpoints
+    with Requests
+    with Responses {
 
-  val delegate: algebra.Endpoints
+  val delegate: endpoints.algebra.Endpoints
 
   type Endpoint[A, B] = delegate.Endpoint[A, B]
 

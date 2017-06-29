@@ -1,17 +1,16 @@
 package endpoints
+package documented
 package algebra
-
-import endpoints.Tupler
 
 import scala.language.higherKinds
 
 /**
   * Algebra interface for describing URL including documentation.
   *
-  * This interface is modeled after [[Urls]] but some methods
+  * This interface is modeled after [[endpoints.algebra.Urls]] but some methods
   * take additional parameters carrying the documentation part.
   */
-trait DocumentedUrls {
+trait Urls {
 
   /** A query string carrying an `A` information */
   type QueryString[A]

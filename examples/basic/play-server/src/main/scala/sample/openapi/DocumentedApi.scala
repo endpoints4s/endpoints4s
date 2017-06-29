@@ -1,14 +1,15 @@
 package sample.openapi
 
-import endpoints.openapi.{Info, OpenApi}
+import endpoints.documented.openapi
+import endpoints.documented.openapi.{Info, OpenApi}
 import sample.algebra.Item
 
 object DocumentedApi
   extends sample.algebra.DocumentedApi
-    with endpoints.openapi.DocumentedEndpoints
-    with endpoints.openapi.DocumentedOptionalResponses
-    with endpoints.openapi.DocumentedBasicAuthentication
-    with endpoints.openapi.DocumentedJsonEntities {
+    with openapi.Endpoints
+    with openapi.OptionalResponses
+    with openapi.BasicAuthentication
+    with openapi.JsonEntities {
 
   /**
     * Produces an OpenAPI description of the endpoints.
