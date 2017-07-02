@@ -9,22 +9,19 @@ object DocumentedApi
     with delegate.Endpoints
     with delegate.OptionalResponses
     with delegate.BasicAuthentication
-    with delegate.JsonEntities {
+    with delegate.CirceEntities {
 
   // Note: scalac (2.11.8) crashes if I use an object definition instead of this lazy val
   lazy val delegate =
     new play.server.Endpoints
       with play.server.OptionalResponses
       with play.server.BasicAuthentication
-      with play.server.circe.JsonEntities
+      with play.server.CirceEntities
 
   lazy val routes = delegate.routesFromEndpoints(
     item.implementedBy(id => if (id == "123abc") Some(Item("foo")) else None),
     items.implementedBy(category => Item("foo") :: Item("bar") :: Nil),
     admin.implementedBy(credentials => if (credentials.password == "password") Some(()) else None)
   )
-
-  def itemDecoder = implicitly
-  def listDecoder[A : JsonResponse] = implicitly
 
 }

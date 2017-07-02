@@ -2,14 +2,13 @@ package sample.openapi
 
 import endpoints.documented.openapi
 import endpoints.documented.openapi.{Info, OpenApi}
-import sample.algebra.Item
 
 object DocumentedApi
   extends sample.algebra.DocumentedApi
     with openapi.Endpoints
     with openapi.OptionalResponses
     with openapi.BasicAuthentication
-    with openapi.JsonEntities {
+    with openapi.CirceEntities {
 
   /**
     * Produces an OpenAPI description of the endpoints.
@@ -21,6 +20,4 @@ object DocumentedApi
       items, item, admin
     )
 
-  def itemDecoder: JsonSchema[Item] = JsonSchema.universal
-  def listDecoder[A](implicit ev: JsonSchema[A]): JsonSchema[List[A]] = JsonSchema.universal
 }

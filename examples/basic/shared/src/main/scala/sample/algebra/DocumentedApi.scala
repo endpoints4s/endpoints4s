@@ -1,13 +1,13 @@
 package sample.algebra
 
-import endpoints.documented.algebra.{BasicAuthentication, Endpoints, JsonEntities, OptionalResponses}
+import endpoints.documented.algebra.{BasicAuthentication, Endpoints, CirceEntities, OptionalResponses}
 import io.circe.generic.JsonCodec
 
 trait DocumentedApi
   extends Endpoints
     with OptionalResponses
     with BasicAuthentication
-    with JsonEntities {
+    with CirceEntities {
 
   val items =
     endpoint(
@@ -31,9 +31,6 @@ trait DocumentedApi
       emptyResponse("Administration page"),
       "Authentication error"
     )
-
-  implicit def itemDecoder: JsonResponse[Item]
-  implicit def listDecoder[A : JsonResponse]: JsonResponse[List[A]]
 
 }
 

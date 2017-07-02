@@ -245,6 +245,17 @@ val openapi =
 val `openapi-js` = openapi.js
 val `openapi-jvm` = openapi.jvm
 
+val `openapi-circe` =
+  crossProject.crossType(CrossType.Pure).in(file("openapi-circe"))
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(
+      name := "endpoints-openapi-circe",
+      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
+    ).dependsOn(openapi, `algebra-circe`, testsuite % Test)
+
+val `openapi-circe-js` = `openapi-circe`.js
+val `openapi-circe-jvm` = `openapi-circe`.jvm
+
 val apiDoc =
   project.in(file("api-doc"))
     .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
@@ -347,7 +358,7 @@ val `example-basic-shared` = {
       unmanagedResourceDirectories in Compile += assetsDirectory(baseDirectory.value.getParentFile)
     )
     .enablePlugins(ScalaJSPlugin)
-    .dependsOn(`algebra`, `algebra-circe`, openapi)
+    .dependsOn(`algebra`, `algebra-circe`, `openapi-circe`)
 }
 
 val `example-basic-shared-jvm` = `example-basic-shared`.jvm
@@ -526,6 +537,7 @@ val endpoints =
       `scalaj-client`,
       `scalaj-client-circe`,
       `openapi-js`, `openapi-jvm`,
+      `openapi-circe-js`, `openapi-circe-jvm`,
       // overview example
       `example-overview-endpoints-js`, `example-overview-endpoints-jvm`,
       `example-overview-server`,
