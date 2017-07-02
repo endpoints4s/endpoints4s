@@ -13,7 +13,7 @@ trait OptionalResponses
 
   val delegate: endpoints.algebra.OptionalResponses
 
-  def option[A](response: Response[A], description: String): Response[Option[A]] =
+  def option[A](response: Response[A], notFoundDocumentation: String): Response[Option[A]] =
     delegate.option(response)
 
 }

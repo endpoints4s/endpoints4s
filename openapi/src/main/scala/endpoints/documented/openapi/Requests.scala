@@ -32,10 +32,10 @@ trait Requests
   type RequestEntity[A] = Option[DocumentedRequestEntity]
 
   /**
-    * @param description Human readable description of the request entity
+    * @param documentation Human readable documentation of the request entity
     * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
     */
-  case class DocumentedRequestEntity(description: Option[String], content: Map[String, MediaType])
+  case class DocumentedRequestEntity(documentation: Option[String], content: Map[String, MediaType])
 
   def emptyRequest = None
 

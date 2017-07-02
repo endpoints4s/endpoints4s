@@ -18,7 +18,7 @@ trait Assets
 
   def assetSegments(name: String): Path[AssetPath] = delegate.assetSegments
 
-  def assetsEndpoint(url: Url[AssetPath], description: String, notFoundDescription: String): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String): Endpoint[AssetRequest, AssetResponse] =
     delegate.assetsEndpoint(url)
 
   def digests: Map[String, String] = delegate.digests

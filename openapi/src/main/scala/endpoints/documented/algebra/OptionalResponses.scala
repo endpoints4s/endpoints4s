@@ -15,8 +15,8 @@ trait OptionalResponses
     * @return A description of an HTTP response that can be either 404 (Not found)
     *         or the underlying `response`.
     * @param response Underlying response
-    * @param description Description in case there is no result
+    * @param notFoundDocumentation Description in case there is no result
     */
-  def option[A](response: Response[A], description: String): Response[Option[A]]
+  def option[A](response: Response[A], notFoundDocumentation: String): Response[Option[A]]
 
 }

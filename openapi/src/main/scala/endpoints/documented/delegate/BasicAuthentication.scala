@@ -17,7 +17,7 @@ trait BasicAuthentication
   private[endpoints] def basicAuthentication: RequestHeaders[Credentials] =
     delegate.basicAuthentication
 
-  private[endpoints] def authenticated[A](response: Response[A], description: String): Response[Option[A]] =
+  private[endpoints] def authenticated[A](response: Response[A], documentation: String): Response[Option[A]] =
     delegate.authenticated(response)
 
 }

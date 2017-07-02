@@ -9,7 +9,7 @@ trait OptionalResponses
   extends algebra.OptionalResponses
     with Endpoints {
 
-  def option[A](response: Response[A], description: String): Response[Option[A]] =
-    DocumentedResponse(404, description, content = Map.empty) :: response
+  def option[A](response: Response[A], notFoundDocumentation: String): Response[Option[A]] =
+    DocumentedResponse(404, notFoundDocumentation, content = Map.empty) :: response
 
 }

@@ -8,10 +8,10 @@ trait JsonEntities
   extends algebra.JsonEntities
     with Endpoints {
 
-  def jsonRequest[A : JsonRequest](description: Option[String]): RequestEntity[A] =
-    Some(DocumentedRequestEntity(description, Map("application/json" -> MediaType(None))))
+  def jsonRequest[A : JsonRequest](documentation: Option[String]): RequestEntity[A] =
+    Some(DocumentedRequestEntity(documentation, Map("application/json" -> MediaType(None))))
 
-  def jsonResponse[A : JsonResponse](description: String): Response[A] =
-    DocumentedResponse(200, description, Map("application/json" -> MediaType(None))) :: Nil
+  def jsonResponse[A : JsonResponse](documentation: String): Response[A] =
+    DocumentedResponse(200, documentation, Map("application/json" -> MediaType(None))) :: Nil
 
 }

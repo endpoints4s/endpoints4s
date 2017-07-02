@@ -21,9 +21,9 @@ trait BasicAuthentication extends Endpoints {
 
   /**
     * @param response Inner response (in case the authentication succeeds)
-    * @param description Description of the authentication error
+    * @param documentation Description of the authentication error
     */
-  private[endpoints] def authenticated[A](response: Response[A], description: String): Response[Option[A]]
+  private[endpoints] def authenticated[A](response: Response[A], documentation: String): Response[Option[A]]
 
   /**
     * Describes an endpoint protected by Basic HTTP authentication
@@ -33,11 +33,11 @@ trait BasicAuthentication extends Endpoints {
     url: Url[A],
     requestEntity: RequestEntity[B] = emptyRequest,
     response: Response[C],
-    description: String
+    documentation: String
   )(implicit
     tuplerAB: Tupler.Aux[A, B, AB],
     tuplerABC: Tupler[AB, Credentials]
   ): Endpoint[tuplerABC.Out, Option[C]] =
-    endpoint(request(method, url, requestEntity, basicAuthentication), authenticated(response, description))
+    endpoint(request(method, url, requestEntity, basicAuthentication), authenticated(response, documentation))
 
 }

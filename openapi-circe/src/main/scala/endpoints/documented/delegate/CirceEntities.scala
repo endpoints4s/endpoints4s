@@ -13,8 +13,8 @@ trait CirceEntities
 
   val delegate: endpoints.algebra.CirceEntities
 
-  def jsonRequest[A : JsonRequest](description: Option[String]): delegate.RequestEntity[A] = delegate.jsonRequest[A]
+  def jsonRequest[A : JsonRequest](documentation: Option[String]): delegate.RequestEntity[A] = delegate.jsonRequest[A]
 
-  def jsonResponse[A : JsonResponse](description: String): delegate.Response[A] = delegate.jsonResponse[A]
+  def jsonResponse[A : JsonResponse](documentation: String): delegate.Response[A] = delegate.jsonResponse[A]
 
 }

@@ -35,7 +35,7 @@ trait Assets extends Endpoints {
     * @param url URL description
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath], description: String, notFoundDescription: String): Endpoint[AssetRequest, AssetResponse]
+  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String): Endpoint[AssetRequest, AssetResponse]
 
   /** The digests of the assets */
   def digests: Map[String, String]

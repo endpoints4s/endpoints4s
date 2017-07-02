@@ -653,7 +653,6 @@ graph BT
   web-client -.-> public-endpoints
   web-client --> public-server
   public-server -.-> public-endpoints
-  public-endpoints -.-> algebra["endpoints-algebra-circe"]
   public-endpoints -.-> openapi["endpoints-openapi-circe"]
   public-server -.-> interpreter["endpoints-play-server-circe"]
   style algebra fill:#eee;
@@ -662,46 +661,31 @@ graph BT
   style openapi fill:#eee;
 ~~~
 
-The “documented” description of the `listMeters` and `getMeter` endpoints looks like the following:
+The “documented” description of the public endpoints looks like the following:
 
-~~~ scala
-import endpoints.documented.algebra.{CirceEntities, Endpoints, OptionalResponses}
-
-trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
-
-  /** Common path prefix for endpoints: “/meters” */
-  private val metersPath = path / "meters"
-
-  /** Lists all the registered meters */
-  val listMeters: Endpoint[Unit, List[Meter]] =
-    endpoint(get(metersPath), jsonResponse[List[Meter]]("All the meters of the application"))
-
-  /** Find a meter by id */
-  val getMeter: Endpoint[UUID, Option[Meter]] =
-    endpoint(
-      get(
-        metersPath / segment[UUID]("id")),
-        option(
-          jsonResponse[Meter](documentation = "The meter identified by 'id'"),
-          notFoundDocumentation = "Meter not found"
-        )
-      )
-}
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#public-endpoints
 ~~~
 
 A first difference with the previous definition of `PublicEndpoints` is that now we
 import our algebra interfaces from the
 [endpoints.documented.algebra](api:endpoints.documented.algebra.package) package instead
-of `endpoints.algebra`. Though the name of the package is different, the names of the interfaces
-are the same, and the API is very similar but contains additional pieces of information. Let’s
+of `endpoints.algebra`. Though the name of the package is different, the names of the traits
+are the same, and their methods are very similar but sometimes take additional parameters. Let’s
 detail them:
 
 - Responses now have a human readable documentation. For instance, the documentation for the
-  `listMeters` endpoint response is “All the meters of the application”,
+  `listMeters` endpoint response is “All the meters”,
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#list-meters
+~~~
+
 - Path parameters have an associated identifier. This one is used as a placeholder in the
   OpenAPI file. For instance, the identifier of the meter id, in the `getMeter` endpoint,
   is “id”. Consequently, the OpenAPI file definition shows the following path template
   for this endpoint: `/meters/{id}`.
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#meter-id
+~~~
 
 The `endpoints.documented.algebra` package contains algebra interface definitions that have
 the same name and same methods as those that are in the `endpoints.algebra` package, but their
@@ -715,22 +699,7 @@ To derive an OpenAPI file definition from our endpoint descriptions we use
 the interpreters defined in the
 [endpoints.documented.openapi](api:endpoints.documented.openapi.package) package:
 
-~~~ scala
-import endpoints.documented.openapi.{CirceEntities, Endpoints, OptionalResponses}
-
-object Documentation
-  extends PublicEndpoints
-    with Endpoints
-    with CirceEntities
-    with OptionalResponses {
-
-  val documentation: OpenApi =
-    openApi(Info(title = "API to query meters", version = "1.0.0"))(
-      listMeters,
-      getMeter
-    )
-
-}
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/documented/PublicEndpointsDocumentation.scala#documentation
 ~~~
 
 Here, the
@@ -742,47 +711,17 @@ can eventually be serialized in JSON.
 
 Since our documented endpoints are not defined by the algebra interfaces provided in the
 `endpoints.algebra` package, we can not directly apply the interpreters introduced in the previous
-sections. We have to use *delegation* to apply them:
+sections. We have to use *delegation* to apply them.
 
-~~~ scala
-import endpoints.documented.delegate
-import endpoints.play
+For instance, here is the beginning of the `PublicServer` class definition, which applies
+interpreters of the `endpoints.play.server` package to the `documented.PublicEndpoints`:
 
-object PublicServer
-  extends PublicEndpoints
-    with delegate.Endpoints
-    with delegate.CirceEntities
-    with delegate.OptionalResponses {
-
-  lazy val delegate =
-    new play.server.Endpoints
-      with play.server.CirceEntities
-      with play.server.OptionalResponses
-
-  val routes = delegate.routesFromEndpoints(
-    listMeters,
-    getMeter
-  )
-
-}
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/documented/PublicServer.scala#delegate-interpreter
 ~~~
 
-~~~ scala
-import endpoints.documented.delegate
-import endpoints.xhr
+Here is the definition of the client interpreter:
 
-object PublicEndpoints
-  extends PublicEndpoints
-    with delegate.Endpoints
-    with delegate.CirceEntities
-    with delegate.OptionalResponses {
-
-  lazy val delegate =
-    new xhr.Endpoints
-      with xhr.CirceEntities
-      with xhr.OptionalResponses
-
-}
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/documented/PublicEndpoints.scala
 ~~~
 
 ### Summary

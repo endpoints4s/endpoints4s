@@ -16,11 +16,11 @@ trait Assets
   def assetSegments(name: String): Path[AssetPath] =
     DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true)), Nil)
 
-  def assetsEndpoint(url: Url[AssetPath], description: String, notFoundDescription: String): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyHeaders, emptyRequest),
-      DocumentedResponse(200, description, Map.empty) ::
-      DocumentedResponse(404, notFoundDescription, Map.empty) ::
+      DocumentedResponse(200, documentation, Map.empty) ::
+      DocumentedResponse(404, notFoundDocumentation, Map.empty) ::
       Nil
     )
 

@@ -52,8 +52,8 @@ trait Endpoints
     val operation =
       Operation(
         parameters,
-        request.entity.map(r => RequestBody(r.description, r.content)),
-        response.map(r => r.status -> documented.openapi.Response(r.description, r.content)).toMap
+        request.entity.map(r => RequestBody(r.documentation, r.content)),
+        response.map(r => r.status -> documented.openapi.Response(r.documentation, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)

@@ -12,13 +12,13 @@ trait Responses
 
   /**
     * @param status Response status code (e.g. 200)
-    * @param description Human readable description
+    * @param documentation Human readable documentation
     * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
     */
-  case class DocumentedResponse(status: Int, description: String, content: Map[String, MediaType])
+  case class DocumentedResponse(status: Int, documentation: String, content: Map[String, MediaType])
 
-  def emptyResponse(description: String): Response[Unit] = DocumentedResponse(200, description, Map.empty) :: Nil
+  def emptyResponse(documentation: String): Response[Unit] = DocumentedResponse(200, documentation, Map.empty) :: Nil
 
-  def textResponse(description: String): Response[String] = DocumentedResponse(200, description, Map("text/plain" -> MediaType(None))) :: Nil
+  def textResponse(documentation: String): Response[String] = DocumentedResponse(200, documentation, Map("text/plain" -> MediaType(None))) :: Nil
 
 }

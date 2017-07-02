@@ -395,7 +395,7 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
-    .dependsOn(`algebra-circe`, `circe-instant`)
+    .dependsOn(`openapi-circe`, `circe-instant`)
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 
