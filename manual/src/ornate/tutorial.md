@@ -634,6 +634,110 @@ introduced a new method for describing responses such that empty responses are m
 a 404 (Not Found) response. We also saw how support for custom data types (e.g. `UUID`) can
 be introduced.
 
+## Deriving an OpenAPI definition file from a service description
+
+The [OpenAPI](https://www.openapis.org/) initiative standardizes a description format that
+can be processed by tools like [swagger-ui](https://swagger.io/swagger-ui/) or
+[Amazon API Gateway](http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-import-api.html).
+
+### Documented service description
+
+The OpenAPI format requires richer service descriptions than what we currently have. For instance,
+each response must have a human readable description. Because of such differences, we use
+different algebra interfaces to define our service description. These algebra interfaces
+are provided by the `endpoints-openapi` artifact:
+
+~~~ mermaid
+graph BT
+  web-client -.-> interpreter2["endpoints-xhr-client-circe"]
+  web-client -.-> public-endpoints
+  web-client --> public-server
+  public-server -.-> public-endpoints
+  public-endpoints -.-> openapi["endpoints-openapi-circe"]
+  public-server -.-> interpreter["endpoints-play-server-circe"]
+  style algebra fill:#eee;
+  style interpreter fill:#eee;
+  style interpreter2 fill:#eee;
+  style openapi fill:#eee;
+~~~
+
+The “documented” description of the public endpoints looks like the following:
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#public-endpoints
+~~~
+
+A first difference with the previous definition of `PublicEndpoints` is that now we
+import our algebra interfaces from the
+[endpoints.documented.algebra](api:endpoints.documented.algebra.package) package instead
+of `endpoints.algebra`. Though the name of the package is different, the names of the traits
+are the same, and their methods are very similar but sometimes take additional parameters. Let’s
+detail them:
+
+- Responses now have a human readable documentation. For instance, the documentation for the
+  `listMeters` endpoint response is “All the meters”,
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#list-meters
+~~~
+
+- Path parameters have an associated identifier. This one is used as a placeholder in the
+  OpenAPI file. For instance, the identifier of the meter id, in the `getMeter` endpoint,
+  is “id”. Consequently, the OpenAPI file definition shows the following path template
+  for this endpoint: `/meters/{id}`.
+
+~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/documented/PublicEndpoints.scala#meter-id
+~~~
+
+The `endpoints.documented.algebra` package contains algebra interface definitions that have
+the same name and same methods as those that are in the `endpoints.algebra` package, but their
+methods sometimes take additional parameters carrying documentation information. Thus, if you
+want to turn a service description into a _documented_ service description, all you have to do
+is to change one import and supply the missing parameters here and there.
+
+### Deriving an OpenAPI file definition from a documented service description
+
+To derive an OpenAPI file definition from our endpoint descriptions we use
+the interpreters defined in the
+[endpoints.documented.openapi](api:endpoints.documented.openapi.package) package:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/documented/PublicEndpointsDocumentation.scala#documentation
+~~~
+
+Here, the
+[openApi](api:endpoints.documented.openapi.Endpoints@openApi(info:endpoints.documented.openapi.Info)(endpoints:Endpoints.this.DocumentedEndpoint*):endpoints.documented.openapi.OpenApi)
+method generates an abstract [OpenApi](api:endpoints.documented.openapi.OpenApi) model, which
+can eventually be serialized in JSON.
+
+### Deriving clients and servers from a documented service description
+
+Since our documented endpoints are not defined by the algebra interfaces provided in the
+`endpoints.algebra` package, we can not directly apply the interpreters introduced in the previous
+sections. We have to use *delegation* to apply them.
+
+For instance, here is the beginning of the `PublicServer` class definition, which applies
+interpreters of the `endpoints.play.server` package to the `documented.PublicEndpoints`:
+
+~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/documented/PublicServer.scala#delegate-interpreter
+~~~
+
+Here is the definition of the client interpreter:
+
+~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/documented/PublicEndpoints.scala
+~~~
+
+### Summary
+
+To generate an OpenAPI definition from your service description this one
+must be written using a different set of algebra interfaces, which live
+in the `endpoints.documented.algebra` package.
+
+You can then derive an OpenAPI definition from your documented endpoints
+by applying the interpreters defined in the `endpoints.documented.openapi`
+package.
+
+None of the “documented” and “non-documented” algebra interfaces is a
+subtype of each other, but “documented” interpreters can delegate to
+“non-documented” ones.
+
 ## HATEOS
 
 TODO.
