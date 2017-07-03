@@ -9,7 +9,7 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
   import io.circe.generic.auto._
   import io.circe.syntax._
 
-  def clientTestSuite() = {
+  def jsonTestSuite() = {
 
     "Client interpreter" should {
 
@@ -25,9 +25,11 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(addressStr)))
 
-        val result = call(client.smokeEndpoint, user)
+        val result = call(client.jsonEndpoint, user)
+        val result2 = call(client.jsonEndpointViaBuilder, user)
 
         result shouldEqual address
+        result2 shouldEqual address
 
       }
 

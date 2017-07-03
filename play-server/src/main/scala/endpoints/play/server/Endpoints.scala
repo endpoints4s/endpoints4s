@@ -56,6 +56,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** Always succeeds in extracting no information from the headers */
   lazy val emptyHeaders: RequestHeaders[Unit] = _ => Right(())
 
+  /** Succeeds if both informations can be extracted from headers*/
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out] = {
+    headers => {
+      h1(headers).right.flatMap(h1p => h2(headers).right.map(h2p => tupler.apply(h1p, h2p)))
+    }
+  }
+
   /**
     * An HTTP request.
     *

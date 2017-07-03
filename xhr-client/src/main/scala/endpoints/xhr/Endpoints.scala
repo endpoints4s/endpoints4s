@@ -23,6 +23,18 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** Sets up no headers on the given XMLHttpRequest */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, _) => ()
 
+  /** Join two sets of headers*/
+  def joinHeaders[H1, H2](h1: RequestHeaders[H1], h2: RequestHeaders[H2])(implicit tupler: Tupler[H1, H2]): RequestHeaders[tupler.Out] = {
+    (headers, xhr) => {
+      val (h1p, h2p) = tupler.unapply(headers)
+      h1(h1p, xhr)
+      h2(h2p, xhr)
+      ()
+    }
+
+
+  }
+
   /**
     * A function that takes the information `A` and returns an XMLHttpRequest
     * with an optional request entity. If provided, the request entity must be

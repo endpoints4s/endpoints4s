@@ -8,7 +8,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
   def basicAuthSuite() = {
 
-    "Client interpreter" should {
+    "Basic auth interpreter" should {
 
       "authenticate with given credentials" in {
 
@@ -23,7 +23,10 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
         val result = call(client.protectedEndpoint, credentials)
 
+        val resultViaBuilder = call(client.protectedEndpointViaBuilder, credentials)
+
         result shouldEqual Some(response)
+        resultViaBuilder shouldEqual Some(response)
 
       }
 
@@ -38,7 +41,10 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
         val result = call(client.protectedEndpoint, credentials)
 
+        val resultViaBuilder = call(client.protectedEndpointViaBuilder, credentials)
+
         result shouldEqual None
+        resultViaBuilder shouldEqual None
 
       }
 
