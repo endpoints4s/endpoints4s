@@ -326,7 +326,7 @@ of type `Endpoint[Option[Long], Seq[StoredEvent]]`. But now we see that its type
 This works because `Endpoint[A, B]` is an abstract type member that is refined by
 interpreters. Our client interpreter defines the `Endpoint` type as follows:
 
-~~~ scala src=../../../play-client/src/main/scala/endpoints/play/client/Endpoints.scala#concrete-carrier-type
+~~~ scala src=../../../../play/client/src/main/scala/endpoints/play/client/Endpoints.scala#concrete-carrier-type
 ~~~
 
 Let’s read again the code that invokes the `events` endpoint:
@@ -499,7 +499,7 @@ The complete implementation of the `query` multiplexed endpoint is a bit more co
 
 We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
 
-~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Endpoints.scala#mux-handler-async
+~~~ scala src=../../../../play/server/src/main/scala/endpoints/play/server/Endpoints.scala#mux-handler-async
 ~~~
 
 This complex type signature is necessary to check that our implementation effectively
@@ -592,7 +592,7 @@ type that inherits from `PublicEndpoints` and the relevant interpreters. The onl
 is that we have to implement the abstract `uuidSegment: Segment[UUID]` member. In our
 server interpreter based on Play, the `Segment` type is defined as follows:
 
-~~~ scala src=../../../play-server/src/main/scala/endpoints/play/server/Urls.scala#segment
+~~~ scala src=../../../../play/server/src/main/scala/endpoints/play/server/Urls.scala#segment
 ~~~
 
 The `decode` method is used when routing an incoming request, while the `encode` method is
@@ -610,7 +610,7 @@ derives a client performing `XMLHttpRequest`s to invoke the endpoints.
 Again, we have to implement the `uuidSegment` member. In our interpreter the `Segment` type
 is defined as follows:
 
-~~~ scala src=../../../xhr-client/src/main/scala/endpoints/xhr/Urls.scala#segment
+~~~ scala src=../../../../xhr/client/src/main/scala/endpoints/xhr/Urls.scala#segment
 ~~~
 
 Thus, we define the `uuidSegment` like so:
@@ -655,7 +655,6 @@ graph BT
   public-server -.-> public-endpoints
   public-endpoints -.-> openapi["endpoints-openapi-circe"]
   public-server -.-> interpreter["endpoints-play-server-circe"]
-  style algebra fill:#eee;
   style interpreter fill:#eee;
   style interpreter2 fill:#eee;
   style openapi fill:#eee;
