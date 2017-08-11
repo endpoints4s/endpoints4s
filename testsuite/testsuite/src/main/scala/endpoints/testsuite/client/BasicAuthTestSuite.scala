@@ -4,6 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.BasicAuthentication
 import endpoints.testsuite.{BasicAuthTestApi, SimpleTestApi}
 
+import scala.concurrent.Future
+
 trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
   def basicAuthSuite() = {
@@ -21,9 +23,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        val result = call(client.protectedEndpoint, credentials)
-
-        result shouldEqual Some(response)
+        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual Some(response))
 
       }
 
@@ -36,16 +36,9 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
             .withStatus(403)
             .withBody("")))
 
-        val result = call(client.protectedEndpoint, credentials)
-
-        result shouldEqual None
+        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual None)
 
       }
-
-
     }
-
   }
-
-
 }

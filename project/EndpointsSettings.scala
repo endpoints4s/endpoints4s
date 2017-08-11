@@ -67,5 +67,4 @@ object EndpointsSettings {
   // --- Common dependencies
 
   val circeVersion = "0.6.1"
-
 }

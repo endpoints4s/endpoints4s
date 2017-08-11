@@ -25,9 +25,7 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(addressStr)))
 
-        val result = call(client.smokeEndpoint, user)
-
-        result shouldEqual address
+        whenReady(call(client.smokeEndpoint, user))(_ shouldEqual address)
 
       }
 

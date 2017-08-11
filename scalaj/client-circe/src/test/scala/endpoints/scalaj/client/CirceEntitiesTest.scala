@@ -5,7 +5,9 @@ import endpoints.testsuite.JsonTestApi
 import endpoints.testsuite.User
 import endpoints.testsuite.Address
 import endpoints.testsuite.client.JsonTestSuite
-import org.scalatest.WordSpec
+import scala.concurrent.ExecutionContext.Implicits.global
+
+import scala.concurrent.Future
 
 class TestClient(val address: String ) extends JsonTestApi with Endpoints with CirceEntities {
 
@@ -21,7 +23,8 @@ class CirceEntitiesTest extends JsonTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
-  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Resp = endpoint.callUnsafe(args)
+  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp] =
+    endpoint.callAsync(args)
 
   clientTestSuite()
 
