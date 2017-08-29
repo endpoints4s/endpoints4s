@@ -2,6 +2,7 @@ package endpoints
 package documented
 package openapi
 
+import endpoints.documented.openapi.model.Info
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 
 class EndpointsTest extends WordSpec with Matchers with OptionValues {

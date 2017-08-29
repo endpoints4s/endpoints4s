@@ -34,13 +34,15 @@ class PublicServer(
   ec: ExecutionContext
 ) extends PublicEndpoints
   with delegate.Endpoints
-  with delegate.CirceEntities
+  with delegate.CirceJsonSchemaEntities
   with delegate.OptionalResponses {
 
   lazy val delegate =
     new play.server.Endpoints
       with play.server.CirceEntities
       with play.server.OptionalResponses
+
+  import delegate.{circeJsonDecoder, circeJsonEncoder}
 
 //#delegate-interpreter
   private val commandsClient = new CommandsClient(commandsBaseUrl, wsClient)

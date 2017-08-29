@@ -8,8 +8,8 @@ import endpoints.xhr
 object PublicEndpoints
   extends cqrs.publicserver.documented.PublicEndpoints
     with delegate.Endpoints
-    with delegate.CirceEntities
-    with delegate.OptionalResponses{
+    with delegate.CirceJsonSchemaEntities
+    with delegate.OptionalResponses {
 
   lazy val delegate =
     new xhr.faithful.Endpoints

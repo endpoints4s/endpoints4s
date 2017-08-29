@@ -65,7 +65,7 @@ trait CirceEntities extends JsonEntities {
   type JsonResponse[A] = CirceCodec[A]
   type JsonRequest[A] = CirceCodec[A]
 
-  /** Provides a Json [[io.circe.Decoder]] based on an existing circe decoder */
+  /** Provides a Json [[Decoder]] based on an existing circe decoder */
   implicit def circeJsonDecoder[A](implicit circeDecoder: CirceDecoder[A]): Decoder[Json, A] =
     new Decoder[Json, A] {
       def decode(from: Json): Either[Throwable, A] = circeDecoder

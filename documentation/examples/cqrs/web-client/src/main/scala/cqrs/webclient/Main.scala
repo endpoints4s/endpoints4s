@@ -22,7 +22,7 @@ object Main extends JSApp {
 
   def main(): Unit = {
     //#list-meters-invocation
-    PublicEndpoints.listMeters(()).map { fetchedMeters =>
+    documented.PublicEndpoints.listMeters(()).map { fetchedMeters =>
       metersVar := fetchedMeters.map(meter => meter.id -> meter).toMap
     }
     //#list-meters-invocation
@@ -34,7 +34,7 @@ object Main extends JSApp {
       val name = input.value.trim
       if (name.isEmpty) dom.window.alert("Please type a name for the meter to create")
       else {
-        PublicEndpoints.createMeter(CreateMeter(name)).map { createdMeter =>
+        documented.PublicEndpoints.createMeter(CreateMeter(name)).map { createdMeter =>
           metersVar := metersVar.value + (createdMeter.id -> createdMeter)
           input.value = ""
         }.handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))
@@ -50,7 +50,7 @@ object Main extends JSApp {
         Try(BigDecimal(value)).toOption match {
           case None => dom.window.alert("Unable to parse the value as a number")
           case Some(decimal) =>
-            PublicEndpoints.addRecord((meter.id, AddRecord(Instant.now(), decimal))).map { updatedMeter =>
+            documented.PublicEndpoints.addRecord((meter.id, AddRecord(Instant.now(), decimal))).map { updatedMeter =>
               metersVar := metersVar.value + (updatedMeter.id -> updatedMeter)
             }.handleError(error => dom.window.alert(s"Unable to add the value (error is $error)"))
             ()

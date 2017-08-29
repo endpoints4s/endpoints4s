@@ -3,6 +3,7 @@ package documented
 package openapi
 
 import endpoints.algebra.MuxRequest
+import endpoints.documented.openapi.model._
 
 /**
   * Interpreter for [[algebra.Endpoints]] that produces
@@ -53,7 +54,7 @@ trait Endpoints
       Operation(
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
-        response.map(r => r.status -> documented.openapi.Response(r.documentation, r.content)).toMap
+        response.map(r => r.status -> Response(r.documentation, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)
