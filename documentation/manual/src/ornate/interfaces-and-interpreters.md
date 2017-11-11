@@ -46,6 +46,8 @@ artifact. This artifact also provides its interpreters (in the
 |---|---|
 |[endpoints-akka-http-server](https://index.scala-lang.org/julienrf/endpoints/endpoints-akka-http-server)|Server backed by Akka-http|
 |[endpoints-akka-http-server-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-akka-http-server)|Interpreter for `CirceEntities` compatible with `endpoints-akka-http-server`|
+|[endpoints-akka-http-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-akka-client)|Client backed by Akka-http|
+|[endpoints-akka-http-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-akka-http-client-circe)|Interpreter for `CirceEntities` compatible with `endpoints-akka-http-client`|
 |[endpoints-play-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-play-client)|Client backed by Play framework|
 |[endpoints-play-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-play-client-circe)|Interpreter for `CirceEntities` compatible with `endpoints-play-client`|
 |[endpoints-play-server](https://index.scala-lang.org/julienrf/endpoints/endpoints-play-server)|Server backed by Play framework|
