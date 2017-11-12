@@ -5,7 +5,7 @@ val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `testsuite-jvm` = LocalProject("testsuiteJVM")
 
 val akkaHttpVersion = "10.0.1"
-val akkaHttpJsonVersion = "1.17.0"
+val akkaHttpJsonVersion = "1.18.1"
 
 val `akka-http-client` =
   project.in(file("client"))

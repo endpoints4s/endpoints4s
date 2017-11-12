@@ -29,13 +29,13 @@ val apiDoc =
   project.in(file("api-doc"))
     .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
     .settings(
-      scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
+      scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
         "-diagrams",
         "-groups",
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
       ),
-      sbtunidoc.Plugin.UnidocKeys.unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(
+      sbtunidoc.Plugin.UnidocKeys.unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`,
         `play-circe`,
         `play-client`, `play-client-circe`,
@@ -50,8 +50,7 @@ val ornateTarget = Def.setting(target.value / "ornate")
 
 val manual =
   project.in(file("manual"))
-    .enablePlugins(OrnatePlugin)
-    .settings(noPublishSettings ++ ghpages.settings: _*)
+    .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
       scalaVersion := "2.11.8",
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
@@ -94,6 +93,7 @@ val `example-overview-client` =
 val `example-overview-server` =
   project.in(file("examples/overview/server"))
     .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
     .dependsOn(`example-overview-endpoints-jvm`, `play-server-circe`)
 
 val `example-overview-play-client` =
@@ -144,8 +144,9 @@ val `example-basic-play-server` =
   project.in(file("examples/basic/play-server"))
     .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
-      unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile)).map(_.data).value,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2"
+      unmanagedResources in Compile += (fastOptJS in(`example-basic-client`, Compile)).map(_.data).value,
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2",
+      libraryDependencies += "com.typesafe.play" %% "play" % "2.6.7"
     )
     .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
 
@@ -214,12 +215,13 @@ val `example-cqrs-public-server` =
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
     .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
@@ -238,13 +240,14 @@ lazy val `example-cqrs-queries-endpoints` =
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .dependsOn(`play-server-circe`, `play-client-circe`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
 val `example-cqrs` =
   project.in(file("examples/cqrs/infra"))
+    //cant update to 2.12 because it depends on faithful
     .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       cancelable in Global := true,

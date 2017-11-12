@@ -29,6 +29,15 @@ $ sbt +compile
 $ sbt +test
 ~~~
 
+or for faster feedback loop:
+
+~~~ sh
+$ sbt "+++ 2.10.6 test"
+$ sbt "+++ 2.11.11 test"
+$ sbt "+++ 2.12.4 test"
+~~~
+
+
 ### Preview the documentation
 
 ~~~ sh
@@ -41,4 +50,10 @@ And then go to http://localhost:4000.
 
 ~~~ sh
 $ sbt +manual/ghpagesPushSite
+~~~
+
+### Run the examples 
+
+~~~ sh
++++ 2.12.4 example-basic-play-server/run
 ~~~

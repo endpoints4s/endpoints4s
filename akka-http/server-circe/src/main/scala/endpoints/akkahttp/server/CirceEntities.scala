@@ -2,7 +2,7 @@ package endpoints.akkahttp.server
 
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-import de.heikoseeberger.akkahttpcirce.CirceSupport
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport
 import endpoints.algebra
 import endpoints.algebra.CirceEntities.CirceCodec
 
@@ -11,7 +11,7 @@ import endpoints.algebra.CirceEntities.CirceCodec
   */
 trait CirceEntities extends Endpoints with algebra.CirceEntities {
 
-  import CirceSupport._
+  import FailFastCirceSupport._
 
   def jsonRequest[A : CirceCodec]: RequestEntity[A] = {
     implicit val decoder = CirceCodec[A].decoder
