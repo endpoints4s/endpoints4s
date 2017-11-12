@@ -51,3 +51,9 @@ And then go to http://localhost:4000.
 ~~~ sh
 $ sbt +manual/ghpagesPushSite
 ~~~
+
+### Run the examples 
+
+~~~ sh
++++ 2.12.4 example-basic-play-server/run
+~~~

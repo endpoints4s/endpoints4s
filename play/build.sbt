@@ -3,17 +3,6 @@ import EndpointsSettings._
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 
-val `play-circe` =
-  project.in(file("circe"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-play-circe",
-      libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play" % playVersion,
-        "io.circe" %% "circe-core" % circeVersion
-      )
-    )
-
 val `play-server` =
   project.in(file("server"))
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
@@ -32,7 +21,7 @@ val `play-server-circe` =
       name := "endpoints-play-server-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
     )
-    .dependsOn(`play-server`, `algebra-circe-jvm`, `play-circe`)
+    .dependsOn(`play-server`, `algebra-circe-jvm`)
 
 val `play-client` =
   project.in(file("client"))
@@ -50,5 +39,5 @@ val `play-client-circe` =
       name := "endpoints-play-client-circe",
       libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
     )
-    .dependsOn(`play-client`, `algebra-circe-jvm`, `play-circe`)
+    .dependsOn(`play-client`, `algebra-circe-jvm`)
 
