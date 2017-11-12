@@ -11,8 +11,6 @@ val `algebra-js` = algebra.js
 
 val `algebra-jvm` = algebra.jvm
 
-val circeVersion = "0.6.1"
-
 val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
     .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)

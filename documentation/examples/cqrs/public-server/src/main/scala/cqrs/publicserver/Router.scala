@@ -2,9 +2,9 @@ package cqrs.publicserver
 
 import play.api.routing.{Router => PlayRouter}
 
-class Router(publicServer: PublicServer) {
+class Router(publicServer: PublicServer, endpoints: BootstrapEndpoints) {
 
   val routes: PlayRouter.Routes =
-    BootstrapEndpoints.routes orElse publicServer.routes
+    endpoints.routes orElse publicServer.routes
 
 }

@@ -6,11 +6,12 @@ import endpoints.play.server.circe.JsonEntities
 import endpoints.play.server.{Assets, Endpoints}
 import play.api.routing.{Router => PlayRouter}
 import play.twirl.api.{Html, StringInterpolation}
+import play.api.http.FileMimeTypes
 
 /**
   * These endpoints serve the web page and the assets.
   */
-object BootstrapEndpoints extends Endpoints with Assets with JsonEntities {
+class BootstrapEndpoints(val fileMimeTypes: FileMimeTypes) extends Endpoints with Assets with JsonEntities {
 
   val index: Endpoint[Unit, Html] =
     endpoint(get(path), htmlResponse)

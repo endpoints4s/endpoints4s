@@ -11,9 +11,12 @@ import play.core.{ApplicationProvider, DefaultWebCommands, SourceMapper, WebComm
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import com.typesafe.config.ConfigFactory
-import cqrs.publicserver.PublicServer
+import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.commands.Commands
 import cqrs.queries.{Queries, QueriesService}
+import play.api.http.HttpConfiguration.HttpConfigurationProvider
+import play.api.http.DefaultFileMimeTypesProvider
+import play.api.inject.DefaultApplicationLifecycle
 
 /**
   * In the real world we would run the different services on distinct
@@ -58,9 +61,12 @@ object Main extends App {
 
   // Start the public server
   val publicServer = {
+    val httpConfiguration = new HttpConfigurationProvider(Configuration.load(Environment.simple()), Environment.simple()).get
+    val fileMimeTypes = new DefaultFileMimeTypesProvider(httpConfiguration.fileMimeTypes).get
     val routes =
       new cqrs.publicserver.Router(
-        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), wsClient)
+        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), wsClient),
+        new BootstrapEndpoints(fileMimeTypes)
       ).routes
     HttpServer(ServerConfig(port = Some(publicService.port)), Router.from(routes))
   }
@@ -86,6 +92,9 @@ object HttpServer {
     lazy val sourceMapper: Option[SourceMapper] = None
     lazy val webCommands: WebCommands = new DefaultWebCommands
     lazy val configuration: Configuration = Configuration(ConfigFactory.load())
+    lazy val applicationLifecycle: play.api.inject.ApplicationLifecycle = new DefaultApplicationLifecycle
+    def httpFilters: Seq[play.api.mvc.EssentialFilter] = Nil
+
 
     def serverStopHook(): Future[_] = Future.successful(())
 

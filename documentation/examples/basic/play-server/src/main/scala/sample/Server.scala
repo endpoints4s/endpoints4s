@@ -31,8 +31,39 @@ object Server extends App with Results {
       import io.circe.syntax._
       Ok(sample.openapi.DocumentedApi.documentation.asJson)
     }
+    case GET(p"/api/ui") => Action {
+      val html =
+        """
+          |<!DOCTYPE html>
+          |<html>
+          |  <head>
+          |    <title>ReDoc</title>
+          |    <!-- needed for adaptive design -->
+          |    <meta charset="utf-8"/>
+          |    <meta name="viewport" content="width=device-width, initial-scale=1">
+          |
+          |    <!--
+          |    ReDoc doesn't change outer page styles
+          |    -->
+          |    <style>
+          |      body {
+          |        margin: 0;
+          |        padding: 0;
+          |      }
+          |    </style>
+          |  </head>
+          |  <body>
+          |    <redoc spec-url='/api/description'></redoc>
+          |    <script src="https://rebilly.github.io/ReDoc/releases/latest/redoc.min.js"> </script>
+          |  </body>
+          |</html>
+        """.stripMargin
+      Ok(html).as(HTML)
+    }
   }
 
-  NettyServer.fromRouter()(bootstrap orElse Api.routes orElse DocumentedApi.routes)
+  val api = new Api(???)
+
+  NettyServer.fromRouter()(bootstrap orElse api.routes orElse DocumentedApi.routes)
 
 }

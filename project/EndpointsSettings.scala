@@ -20,17 +20,17 @@ object EndpointsSettings {
     )
   )
   val `scala 2.11` = Seq(
-    scalaVersion := "2.11.8",
-    crossScalaVersions := Seq("2.11.8")
+    scalaVersion := "2.11.11",
+    crossScalaVersions := Seq("2.11.11")
   )
   val `scala 2.11 to 2.12` = Seq(
-    scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.11.8", "2.12.1")
+    scalaVersion := "2.12.4",
+    crossScalaVersions := Seq("2.11.11", "2.12.4")
   )
 
   val `scala 2.10 to 2.12` = Seq(
-    scalaVersion := "2.12.1",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
+    scalaVersion := "2.12.4",
+    crossScalaVersions := Seq("2.10.6", "2.11.11", "2.12.4")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -66,5 +66,6 @@ object EndpointsSettings {
 
   // --- Common dependencies
 
-  val circeVersion = "0.6.1"
+  val circeVersion = "0.8.0"
+  val playVersion = "2.6.7"
 }
