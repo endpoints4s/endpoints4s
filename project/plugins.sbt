@@ -20,6 +20,9 @@ resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 
+addSbtPlugin("com.heroku" % "sbt-heroku" % "2.1.0") // Used by the example-documented project
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6")
+
 lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 
 val build = project.in(file(".")).dependsOn(`sbt-assets`)

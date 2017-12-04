@@ -11,7 +11,7 @@ import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
 
 import scala.concurrent.Future
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
@@ -175,6 +175,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)
 
+  /**
+    * @return An HTTP response redirecting to another endpoint (using 303 code status).
+    * @param other Endpoint to redirect to
+    * @param args Arguments to pass to the endpoint to generate its URL
+    */
+  def redirect[A](other: => Endpoint[A, _])(args: A): Response[Unit] = _ => Results.Redirect(other.call(args))
+
   /** Something that can be used as a Play request handler */
   trait ToPlayHandler {
     def playHandler(header: RequestHeader): Option[PlayHandler]
@@ -283,6 +290,9 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
         }
       loop(endpoints)
     }
+
+  implicit def EmptyEndpointToPlayHandler[A, B](endpoint: Endpoint[A, B])(implicit ev: Unit =:= B): ToPlayHandler =
+    endpoint.implementedBy(_ => ())
 
 }
 

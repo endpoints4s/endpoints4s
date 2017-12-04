@@ -5,6 +5,19 @@ applications.
 
 See the [documentation](http://julienrf.github.io/endpoints) to learn more.
 
+## Running the Examples
+
+~~~
+$ sbt
+> wow 2.11.8
+> <example>/reStart
+~~~
+
+Where `<example>` can be either [`example-cqrs`](documentation/examples/cqrs)
+or [`example-documented`](documentation/examples/documented).
+
+And then browse http://localhost:9000.
+
 ## Contributing
 
 See the [open issues](https://github.com/julienrf/endpoints/issues).
