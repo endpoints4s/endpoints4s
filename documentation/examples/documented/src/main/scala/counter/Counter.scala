@@ -11,10 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger
 import play.api.Environment
 import play.api.http.{DefaultFileMimeTypes, HttpConfiguration}
 import play.core.server.{NettyServer, ServerConfig}
-import endpoints.documented.openapi.model.{Info, OpenApi}
-import endpoints.documented.{algebra, delegate, generic, openapi}
-import endpoints.play
 
+//#domain
 // Our domain model just contains a counter value
 case class Counter(value: Int)
 
@@ -28,8 +26,12 @@ object Operation {
   case class Add(delta: Int) extends Operation
 
 }
+//#domain
 
 // Description of the HTTP API
+//#documented-endpoints
+import endpoints.documented.{algebra, generic}
+
 trait CounterEndpoints
   extends algebra.Endpoints
     with algebra.JsonSchemaEntities
@@ -67,8 +69,13 @@ trait CounterEndpoints
   implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = genericJsonSchema
 
 }
+//#documented-endpoints
 
 // OpenAPI documentation for the HTTP API described in `CounterEndpoints`
+//#openapi
+import endpoints.documented.openapi
+import endpoints.documented.openapi.model.{Info, OpenApi}
+
 object CounterDocumentation
   extends CounterEndpoints
     with openapi.Endpoints
@@ -80,8 +87,13 @@ object CounterDocumentation
     )(currentValue, update)
 
 }
+//#openapi
 
 // Implementation of the HTTP API and its business logic
+//#delegation
+import endpoints.documented.delegate
+import endpoints.play
+
 object CounterServer
   extends CounterEndpoints
     with delegate.Endpoints
@@ -89,7 +101,8 @@ object CounterServer
 
   // We delegate the implementation of the HTTP server to Play framework
   lazy val delegate = new play.server.Endpoints with play.server.CirceEntities
-
+//#delegation
+//#business-logic
   // Internal state of our counter
   private val value = new AtomicInteger(0)
 
@@ -114,13 +127,14 @@ object CounterServer
     }
 
   )
-
+//#business-logic
+//#entry-point
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
 
     val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
 
-    object DocumentationEndpoints extends play.server.Endpoints with play.server.circe.JsonEntities with play.server.Assets {
+    object DocumentationServer extends play.server.Endpoints with play.server.circe.JsonEntities with play.server.Assets {
 
       // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
       // ''/documentation.json''. Returns an OpenAPI document.
@@ -143,8 +157,8 @@ object CounterServer
     }
 
     val _ = NettyServer.fromRouter(playConfig)(
-      CounterServer.routes orElse DocumentationEndpoints.routes
+      CounterServer.routes orElse DocumentationServer.routes
     )
   }
-
+//#entry-point
 }
