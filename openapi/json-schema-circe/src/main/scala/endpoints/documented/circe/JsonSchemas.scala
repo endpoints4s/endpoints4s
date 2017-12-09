@@ -113,6 +113,8 @@ trait JsonSchemas
 
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] = JsonSchema(implicitly, implicitly)
 
+  implicit def doubleJsonSchema: JsonSchema[Double] = JsonSchema(implicitly, implicitly)
+
   implicit def booleanJsonSchema: JsonSchema[Boolean] = JsonSchema(implicitly, implicitly)
 
   implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =

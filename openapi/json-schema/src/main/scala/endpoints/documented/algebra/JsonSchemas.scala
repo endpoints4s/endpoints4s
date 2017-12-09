@@ -123,6 +123,9 @@ trait JsonSchemas {
   /** A JSON schema for type `BigDecimal` */
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal]
 
+  /** A JSON schema for type `Double` */
+  implicit def doubleJsonSchema: JsonSchema[Double]
+
   /** A JSON schema for type `Boolean` */
   implicit def booleanJsonSchema: JsonSchema[Boolean]
 

@@ -61,6 +61,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   lazy val bigdecimalJsonSchema: DocumentedJsonSchema = Primitive("number")
 
+  lazy val doubleJsonSchema: DocumentedJsonSchema = Primitive("number")
+
   lazy val booleanJsonSchema: DocumentedJsonSchema = Primitive("boolean")
 
   def arrayJsonSchema[C[X] <: Seq[X], A](implicit
