@@ -51,7 +51,12 @@ sub-project:
 
 ~~~ scala expandVars=true
 libraryDependencies ++= Seq(
-  "org.julienrf" %% "endpoints-openapi" % "{{version}}"
+  // core API
+  "org.julienrf" %% "endpoints-openapi" % "{{version}}",
+  // (optional) JSON serialization using circe.io
+  "org.julienrf" %% "endpoints-openapi-circe" % "{{version}}",
+  // (optional) generic derivation of JSON schemas
+  "org.julienrf" %% "endpoints-openapi-json-schema-generic" % "{{version}}"
 )
 ~~~
 
@@ -98,6 +103,17 @@ libraryDependencies ++= Seq(
   "org.julienrf" %% "endpoints-scalaj-client" % "{{version}}",
   // (optional) JSON serialization using circe.io
   "org.julienrf" %% "endpoints-scalaj-client-circe" % "{{version}}"
+)
+~~~
+
+#### Client backed by akka-http (JVM only)
+
+~~~ scala expandVars=true
+libraryDependencies ++= Seq(
+  // client based on akka-http
+  "org.julienrf" %% "endpoints-akka-http-client" % "{{version}}",
+  // (optional) JSON serialization using circe.io
+  "org.julienrf" %% "endpoints-akka-http-client-circe" % "{{version}}"
 )
 ~~~
 

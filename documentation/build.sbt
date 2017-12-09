@@ -23,6 +23,8 @@ val `scalaj-client-circe` = LocalProject("scalaj-client-circe")
 val `openapi-jvm` = LocalProject("openapiJVM")
 val `openapi-circe-jvm` = LocalProject("openapi-circeJVM")
 
+val `json-schema-jvm` = LocalProject("json-schemaJVM")
+val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
 import sbtunidoc.Plugin.UnidocKeys.unidoc
@@ -44,7 +46,7 @@ val apiDoc =
         `play-server`, `play-server-circe`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
         `scalaj-client`, `scalaj-client-circe`,
-        `openapi-jvm`, `openapi-circe-jvm`
+        `openapi-jvm`, `openapi-circe-jvm`, `json-schema-jvm`, `json-schema-circe-jvm`, `json-schema-generic-jvm`
       )
     )
 
