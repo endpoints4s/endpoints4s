@@ -30,13 +30,13 @@ releaseProcess := Seq[ReleaseStep](
   runClean,
   releaseStepCommandAndRemaining("+test"),
   setReleaseVersion,
-  releaseStepTask(makeSite in LocalProject("manual")),
+  releaseStepTask(makeSite in LocalProject("; wow 2.11.12; manual")),
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
   setNextVersion,
   commitNextVersion,
   releaseStepCommand(Sonatype.SonatypeCommand.sonatypeReleaseAll),
-  releaseStepCommandAndRemaining("+manual/ghpagesPushSite"),
+  releaseStepCommandAndRemaining("; wow 2.11.12; manual/ghpagesPushSite"),
   pushChanges
 )
