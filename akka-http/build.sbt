@@ -42,7 +42,7 @@ val `akka-http-server` =
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+        scalaTestDependency
       )
     )
     .dependsOn(`algebra-jvm`)

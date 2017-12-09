@@ -23,6 +23,8 @@ val `scalaj-client-circe` = LocalProject("scalaj-client-circe")
 val `openapi-jvm` = LocalProject("openapiJVM")
 val `openapi-circe-jvm` = LocalProject("openapi-circeJVM")
 
+val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
+
 import sbtunidoc.Plugin.UnidocKeys.unidoc
 
 val apiDoc =
@@ -165,7 +167,7 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
-    .dependsOnLocalCrossProjects("openapi-circe", "example-cqrs-circe-instant")
+    .dependsOnLocalCrossProjects("openapi-circe", "example-cqrs-circe-instant", "json-schema-generic")
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 
@@ -183,7 +185,7 @@ val `example-cqrs-web-client` =
         "org.julienrf" %%% "faithful-cats" % "0.2",
         "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
       ),
-      persistLauncher := true
+      scalaJSUseMainModuleInitializer := true
     )
     .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
     .dependsOn(`example-cqrs-public-endpoints-js`)
@@ -194,10 +196,7 @@ val `example-cqrs-public-server` =
     .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       libraryDependencies += "com.typesafe.play" %% "twirl-api" % "1.2.0",
-      unmanagedResources in Compile ++= Seq(
-        (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
-        (packageScalaJSLauncher in (`example-cqrs-web-client`, Compile)).map(_.data).value
-      ),
+      unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
@@ -225,7 +224,7 @@ val `example-cqrs-commands` =
     .settings(
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
-        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+        scalaTestDependency
       )
     )
     .dependsOn(`play-server-circe`, `play-client-circe` % Test)
@@ -253,7 +252,7 @@ val `example-cqrs` =
       cancelable in Global := true,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
-        "org.scalatest" %% "scalatest" % "3.0.1" % Test
+        scalaTestDependency
       )
     )
     .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`/*, `circe-instant-js`*/ /*, `circe-instant-jvm`*/)
@@ -267,3 +266,31 @@ lazy val `circe-instant` =
 
 lazy val `circe-instant-js` = `circe-instant`.js
 lazy val `circe-instant-jvm` = `circe-instant`.jvm
+
+val `example-documented` =
+  project.in(file("examples/documented"))
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(
+      herokuAppName in Compile := "documented-counter",
+      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
+      herokuSkipSubProjects in Compile := false,
+      herokuProcessTypes in Compile := Map(
+        "web" -> ("java -Dhttp.port=$PORT -jar " ++ (crossTarget.value / s"${name.value}-assembly-${version.value}.jar").relativeTo(baseDirectory.value).get.toString)
+      ),
+      assemblyMergeStrategy in assembly := {
+        case x if x.endsWith("io.netty.versions.properties") => MergeStrategy.first
+        case x =>
+          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          oldStrategy(x)
+      },
+      (sourceGenerators in Compile) += Def.task {
+        assets.AssetsTasks.generateDigests(
+          baseDirectory = baseDirectory.value,
+          targetDirectory = (sourceManaged in Compile).value,
+          generatedObjectName = "AssetsDigests",
+          generatedPackage = Some("counter"),
+          assetsPath = _ / "src" / "main" / "resources" / "public"
+        )
+      }.taskValue
+    )
+    .dependsOn(`openapi-circe-jvm`, `play-server-circe`, `json-schema-generic-jvm`)

@@ -1,4 +1,4 @@
-package endpoints.documented.openapi
+package endpoints.documented.openapi.model
 
 import io.circe.syntax._
 import io.circe.{Json, JsonObject, ObjectEncoder}
@@ -148,8 +148,53 @@ case class MediaType(schema: Option[Schema])
 object MediaType {
 
   def jsonMediaTypes(mediaTypes: Map[String, MediaType]): Json =
-    Json.fromFields(mediaTypes.map { case (tpe, mediaType) => tpe -> Json.obj() /* TODO Document the media schema */ })
+    Json.fromFields(mediaTypes.map { case (tpe, mediaType) =>
+      tpe -> Json.obj("schema" -> mediaType.schema.fold[Json](Json.obj())(_.asJson))
+    })
 
 }
 
 sealed trait Schema
+object Schema {
+  case class Object(properties: List[Property], description: Option[String]) extends Schema
+  case class Array(elementType: Schema) extends Schema
+  case class Property(name: String, schema: Schema, isRequired: Boolean)
+  case class Primitive(name: String) extends Schema
+  case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
+
+  implicit val jsonEncoder: ObjectEncoder[Schema] =
+    ObjectEncoder.instance {
+      case Primitive(name) => JsonObject.singleton("type", Json.fromString(name))
+      case Array(elementType) =>
+        JsonObject.fromIterable(
+          "type" -> Json.fromString("array") ::
+          "items" -> jsonEncoder.apply(elementType) ::
+          Nil
+        )
+      case Object(properties, description) =>
+        val fields =
+          "type" -> Json.fromString("object") ::
+          "properties" -> Json.fromFields(
+            properties.map { property =>
+              property.name -> jsonEncoder.apply(property.schema)
+            }
+          ) ::
+          Nil
+        val fieldsWithDescription =
+          description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
+        val requiredProperties = properties.filter(_.isRequired)
+        val fieldsWithRequired =
+          if (requiredProperties.isEmpty) fieldsWithDescription
+          else "required" -> Json.arr(requiredProperties.map(p => Json.fromString(p.name)): _*) :: fieldsWithDescription
+        JsonObject.fromIterable(fieldsWithRequired)
+      case OneOf(alternatives, description) =>
+        val fields =
+          "type" -> Json.fromString("object") ::
+          "oneOf" -> Json.fromValues(alternatives.map(jsonEncoder.apply)) ::
+          Nil
+        val fieldsWithDescription =
+          description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
+        JsonObject.fromIterable(fieldsWithDescription)
+    }
+
+}

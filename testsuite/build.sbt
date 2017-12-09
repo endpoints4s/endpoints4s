@@ -8,7 +8,7 @@ val testsuite =
       name := "endpoints-testsuite",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.6.0",
-        "org.scalatest" %% "scalatest" % "3.0.1",
+        "org.scalatest" %%% "scalatest" % scalaTestVersion,
         compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
       )
     )

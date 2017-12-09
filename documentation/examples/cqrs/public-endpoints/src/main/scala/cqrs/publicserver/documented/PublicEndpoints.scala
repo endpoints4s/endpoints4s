@@ -1,9 +1,12 @@
 package cqrs.publicserver.documented
 
+import java.time.Instant
 import java.util.UUID
 
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.queries.Meter
+
+import scala.collection.immutable.SortedMap
 
 /**
   * Definition of the public HTTP API of our application using an
@@ -15,9 +18,13 @@ import cqrs.queries.Meter
   * the goal is to show that there is little difference between both.
   */
 //#public-endpoints
-import endpoints.documented.algebra.{CirceEntities, Endpoints, OptionalResponses}
+import endpoints.documented.algebra.{Endpoints, JsonSchemaEntities, OptionalResponses}
 
-trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
+trait PublicEndpoints
+  extends Endpoints
+    with JsonSchemaEntities
+    with endpoints.documented.generic.JsonSchemas
+    with OptionalResponses {
 
   /** Common path prefix for endpoints: “/meters” */
   private val metersPath = path / "meters"
@@ -61,6 +68,31 @@ trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponse
     )
 
   implicit def uuidSegment: Segment[UUID]
+
+  implicit lazy val instantJsonSchema: Record[Instant] =
+    (
+      field[Long]("seconds") zip
+      field[Long]("nanos")
+    ).invmap[Instant] { case (seconds, nanos) => Instant.ofEpochSecond(seconds, nanos) }(instant => (instant.getEpochSecond, instant.getNano.toLong))
+
+  implicit lazy val uuidJsonSchema: JsonSchema[UUID] = stringJsonSchema.invmap(UUID.fromString)(_.toString) // TODO have a total `andThen` operator
+
+  implicit lazy val timeSeriesJsonSchema: JsonSchema[SortedMap[Instant, BigDecimal]] = {
+    implicit val entriesJsonSchema: Record[(Instant, BigDecimal)] = field[Instant]("key") zip field[BigDecimal]("value")
+    arrayJsonSchema[List, (Instant, BigDecimal)]
+      .invmap(entries => (SortedMap.newBuilder[Instant, BigDecimal] ++= entries).result())(_.to[List])
+  }
+
+  implicit lazy val meterJsonSchema: Record[Meter] =
+    (
+      field[UUID]("id") :×:
+      field[String]("label") :×:
+      field[SortedMap[Instant, BigDecimal]]("timeSeries")
+    ).as[Meter]
+
+  implicit lazy val createMeterJsonSchema: JsonSchema[CreateMeter] = genericJsonSchema[CreateMeter]
+
+  implicit lazy val addRecordJsonSchema: JsonSchema[AddRecord] = genericJsonSchema[AddRecord]
 
 }
 //#public-endpoints

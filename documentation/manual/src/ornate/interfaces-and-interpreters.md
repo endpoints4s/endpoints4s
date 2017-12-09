@@ -1,6 +1,6 @@
 # Algebra interfaces and their interpreters
 
-Because of this library’s modular design it might be difficult to find which
+Because of the modular design of _endpoints_ it might be difficult to find which
 modules are relevant for a given use case. This page aims to make it easier to
 navigate through the algebra interfaces hierarchy.
 

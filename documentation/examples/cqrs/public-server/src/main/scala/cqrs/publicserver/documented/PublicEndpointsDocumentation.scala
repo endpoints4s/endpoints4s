@@ -2,12 +2,12 @@ package cqrs.publicserver.documented
 
 //#documentation
 import endpoints.documented.openapi
-import endpoints.documented.openapi.{Info, OpenApi}
+import endpoints.documented.openapi.model.{Info, OpenApi}
 
 object PublicEndpointsDocumentation
   extends PublicEndpoints
     with openapi.Endpoints
-    with openapi.CirceEntities
+    with openapi.JsonSchemaEntities
     with openapi.OptionalResponses {
 
   val documentation: OpenApi =

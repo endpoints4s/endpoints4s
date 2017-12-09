@@ -1,5 +1,6 @@
 import sbt._
 import sbt.Keys._
+import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.toScalaJSGroupID
 
 object EndpointsSettings {
 
@@ -68,4 +69,9 @@ object EndpointsSettings {
 
   val circeVersion = "0.8.0"
   val playVersion = "2.6.7"
+
+  val scalaTestVersion = "3.0.1"
+  val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+  val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
+
 }

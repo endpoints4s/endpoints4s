@@ -2,6 +2,8 @@ package endpoints
 package documented
 package openapi
 
+import endpoints.documented.openapi.model.MediaType
+
 /**
   * Interpreter for [[algebra.Requests]].
   */
