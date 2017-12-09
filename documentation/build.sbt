@@ -89,25 +89,25 @@ val `example-overview-endpoints-js` = `example-overview-endpoints`.js
 val `example-overview-client` =
   project.in(file("examples/overview/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`example-overview-endpoints-js`, `xhr-client-circe`)
 
 val `example-overview-server` =
   project.in(file("examples/overview/server"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
     .dependsOn(`example-overview-endpoints-jvm`, `play-server-circe`)
 
 val `example-overview-play-client` =
   project.in(file("examples/overview/play-client"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`example-overview-endpoints-jvm`, `play-client-circe`)
 
 // Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
@@ -139,23 +139,23 @@ val `example-basic-shared-js` = `example-basic-shared`.js
 val `example-basic-client` =
   project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
 val `example-basic-play-server` =
   project.in(file("examples/basic/play-server"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       unmanagedResources in Compile += (fastOptJS in(`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2",
-      libraryDependencies += "com.typesafe.play" %% "play" % "2.6.7"
+      libraryDependencies += "com.typesafe.play" %% "play" % playVersion
     )
     .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
 
 val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))
     .settings(commonSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
+    .settings(`scala 2.11 to 2.12`)
     .settings(
       publishArtifact := false
     )
@@ -166,7 +166,7 @@ val `example-basic-akkahttp-server` =
 // public endpoints definitions
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOnLocalCrossProjects("openapi-circe", "example-cqrs-circe-instant", "json-schema-generic")
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
@@ -177,12 +177,12 @@ val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
 val `example-cqrs-web-client` =
   project.in(file("examples/cqrs/web-client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.2.2",
         "in.nvilla" %%% "monadic-rx-cats" % "0.2.2",
-        "org.julienrf" %%% "faithful-cats" % "0.2",
+        "org.julienrf" %%% "faithful-cats" % "1.0.0",
         "org.scala-js" %%% "scalajs-java-time" % "0.2.0"
       ),
       scalaJSUseMainModuleInitializer := true
@@ -193,7 +193,7 @@ val `example-cqrs-web-client` =
 // public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
 val `example-cqrs-public-server` =
   project.in(file("examples/cqrs/public-server"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies += "com.typesafe.play" %% "twirl-api" % "1.2.0",
       unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
@@ -213,14 +213,14 @@ val `example-cqrs-public-server` =
 // commands endpoints definitions
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
     .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.13.4" % Test,
@@ -233,13 +233,13 @@ val `example-cqrs-commands` =
 // queries endpoints definitions
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
 
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`play-server-circe`, `play-client-circe`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
@@ -247,7 +247,7 @@ val `example-cqrs-queries` =
 val `example-cqrs` =
   project.in(file("examples/cqrs/infra"))
     //cant update to 2.12 because it depends on faithful
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
@@ -259,7 +259,7 @@ val `example-cqrs` =
 
 lazy val `circe-instant` =
   CrossProject("example-cqrs-circe-instantJVM", "example-cqrs-circe-instantJS", file("examples/cqrs/circe-instant"), CrossType.Pure)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
@@ -269,7 +269,7 @@ lazy val `circe-instant-jvm` = `circe-instant`.jvm
 
 val `example-documented` =
   project.in(file("examples/documented"))
-    .settings(noPublishSettings ++ `scala 2.11`: _*)
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       herokuAppName in Compile := "documented-counter",
       herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
