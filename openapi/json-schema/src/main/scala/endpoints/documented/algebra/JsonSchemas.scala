@@ -70,7 +70,7 @@ trait JsonSchemas {
     */
   type Tagged[A] <: JsonSchema[A]
 
-  /** The JSON schema of a record with a single field name of type A` */
+  /** The JSON schema of a record with a single field `name` of type `A` */
   def field[A](name: String)(implicit tpe: JsonSchema[A]): Record[A]
 
   /** The JSON schema of a record with a single optional field `name` of type `A` */
