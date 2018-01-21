@@ -13,10 +13,6 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
     Endpoint(request, response)
   }
 
-  def muxEndpoint[Req <: MuxRequest, Resp, Transport](request: Request[Transport], response: Response[Transport]): MuxEndpoint[Req, Resp, Transport] =
-    throw new UnsupportedOperationException("Not implemented")
-
-
   case class Endpoint[Req, Resp](request: Request[Req], response: Response[Resp]) {
 
     /**

@@ -499,7 +499,7 @@ The complete implementation of the `query` multiplexed endpoint is a bit more co
 
 We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
 
-~~~ scala src=../../../../play/server/src/main/scala/endpoints/play/server/Endpoints.scala#mux-handler-async
+~~~ scala src=../../../../play/server/src/main/scala/endpoints/play/server/MuxEndpoints.scala#mux-handler-async
 ~~~
 
 This complex type signature is necessary to check that our implementation effectively

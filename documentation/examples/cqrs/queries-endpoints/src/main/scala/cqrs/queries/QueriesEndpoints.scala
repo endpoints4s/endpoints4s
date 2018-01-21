@@ -2,28 +2,28 @@ package cqrs.queries
 
 import java.util.UUID
 
-import endpoints.algebra.{CirceEntities, Endpoints, MuxRequest}
+import endpoints.algebra.{CirceEntities, MuxEndpoints, MuxRequest}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-trait QueriesEndpoints extends Endpoints with CirceEntities {
+/**
+  * This is our *internal* protocol for queries. We don’t have to suffer from
+  * REST conventions:
+  *  - our client doesn’t care about the “semantic” difference between POST and GET.
+  *  - status codes other than 500 and 200 are useless: the query is built
+  *    via a statically typed API, so we can not build bad requests, by construction, and the response
+  *    entity gives way more details about failures than status codes.
+  */
+//#mux-endpoint
+trait QueriesEndpoints extends MuxEndpoints with CirceEntities {
 
-  /**
-    * This is our *internal* protocol for queries. We don’t have to suffer from
-    * REST conventions:
-    *  - our client doesn’t care about the “semantic” difference between POST and GET.
-    *  - status codes other than 500 and 200 are useless: the query is built
-    *    via a statically typed API, so we can not build bad requests, by construction, and the response
-    *    entity gives way more details about failures than status codes.
-    */
-  //#mux-endpoint
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
     val request = post(path / "query", jsonRequest[Json])
     muxEndpoint[QueryReq, QueryResp, Json](request, jsonResponse)
   }
-  //#mux-endpoint
 
 }
+//#mux-endpoint
 
 /** A request carrying a query */
 //#mux-requests

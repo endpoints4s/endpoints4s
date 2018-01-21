@@ -1,7 +1,6 @@
 package endpoints.play.client
 
 import endpoints.algebra
-import endpoints.algebra.{Encoder, Decoder, MuxRequest}
 import endpoints.Tupler
 import endpoints.play.client.Endpoints.futureFromEither
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
@@ -15,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
   * @param wsClient The underlying client to use
   */
-class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
+class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -71,29 +70,6 @@ class Endpoints(host: String, wsClient: WSClient)(implicit ec: ExecutionContext)
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     a => request(a).flatMap(response andThen futureFromEither)
-
-  class MuxEndpoint[Req <: algebra.MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
-  ) {
-    def apply(
-      req: Req
-    )(implicit
-      encoder: Encoder[Req, Transport],
-      decoder: Decoder[Transport, Resp]
-    ): Future[req.Response] =
-      request(encoder.encode(req)).flatMap { wsResponse =>
-        futureFromEither(response(wsResponse).right.flatMap { t =>
-          decoder.decode(t).asInstanceOf[Either[Throwable, req.Response]]
-        })
-      }
-  }
-
-  def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
-  ): MuxEndpoint[Req, Resp, Transport] =
-    new MuxEndpoint[Req, Resp, Transport](request, response)
 
 }
 

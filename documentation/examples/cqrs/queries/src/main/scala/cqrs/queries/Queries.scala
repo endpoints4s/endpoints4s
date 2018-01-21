@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import endpoints.play.server.{CirceEntities, Endpoints}
+import endpoints.play.server.{CirceEntities, MuxEndpoints}
 import play.api.routing.Router
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -9,7 +9,7 @@ import scala.concurrent.Future
 /**
   * Implementation of the queries service.
   */
-class Queries(service: QueriesService) extends QueriesEndpoints with Endpoints with CirceEntities {
+class Queries(service: QueriesService) extends QueriesEndpoints with MuxEndpoints with CirceEntities {
 
   //#multiplexed-impl
   import endpoints.play.server.MuxHandlerAsync
