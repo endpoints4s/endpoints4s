@@ -1,18 +1,23 @@
 package sample
 
-import _root_.play.api.mvc.{Action, Handler, RequestHeader, Results}
 import _root_.play.api.http.ContentTypes.HTML
-import _root_.play.core.server.NettyServer
+import _root_.play.api.mvc.{Handler, RequestHeader, Results}
 import _root_.play.api.routing.sird._
-import _root_.play.api.{Configuration, Environment}
-import _root_.play.api.http.HttpConfiguration.HttpConfigurationProvider
-import _root_.play.api.http.DefaultFileMimeTypesProvider
+import _root_.play.core.server.ServerConfig
+import controllers.{AssetsBuilder, AssetsConfiguration, DefaultAssetsMetadata}
+import endpoints.play.server.{DefaultPlayComponents, HttpServer}
 import sample.play.server.DocumentedApi
 
 object Server extends App with Results {
 
+  val config = ServerConfig()
+  val playComponents = new DefaultPlayComponents(config)
+  val assetsMetadata = new DefaultAssetsMetadata(playComponents.environment, AssetsConfiguration.fromConfiguration(playComponents.configuration), playComponents.fileMimeTypes)
+  val assets = new AssetsBuilder(playComponents.httpErrorHandler, assetsMetadata)
+  val action = playComponents.actionBuilder
+
   val bootstrap: PartialFunction[RequestHeader, Handler] = {
-    case GET(p"/") => Action {
+    case GET(p"/") => action {
       val html =
         """
           |<!DOCTYPE html>
@@ -28,13 +33,13 @@ object Server extends App with Results {
       Ok(html).as(HTML)
     }
     case GET(p"/assets/sample-client-fastopt.js") =>
-      controllers.Assets.versioned("/", "sample-client-fastopt.js")
-    case GET(p"/api/description") => Action {
+      assets.versioned("/", "sample-client-fastopt.js")
+    case GET(p"/api/description") => action {
       import endpoints.play.server.Util.circeJsonWriteable
       import io.circe.syntax._
       Ok(sample.openapi.DocumentedApi.documentation.asJson)
     }
-    case GET(p"/api/ui") => Action {
+    case GET(p"/api/ui") => action {
       val html =
         """
           |<!DOCTYPE html>
@@ -65,10 +70,9 @@ object Server extends App with Results {
     }
   }
 
-  val httpConfiguration = new HttpConfigurationProvider(Configuration.load(Environment.simple()), Environment.simple()).get
-  val fileMimeTypes = new DefaultFileMimeTypesProvider(httpConfiguration.fileMimeTypes).get
-  val api = new Api(fileMimeTypes)
+  val api = new Api(playComponents)
+  val documentedApi = new DocumentedApi(playComponents)
 
-  NettyServer.fromRouter()(bootstrap orElse api.routes orElse DocumentedApi.routes)
+  HttpServer(config, playComponents, bootstrap orElse api.routes orElse documentedApi.routes)
 
 }

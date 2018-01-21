@@ -3,7 +3,6 @@ package cqrs.webclient
 import java.time.Instant
 import java.util.UUID
 
-import scala.scalajs.js.JSApp
 import cats.implicits._
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import mhtml.{Var, mount}
@@ -16,11 +15,11 @@ import org.scalajs.dom.raw.HTMLInputElement
 
 import scala.util.Try
 
-object Main extends JSApp {
+object Main {
 
   val metersVar: Var[Map[UUID, Meter]] = Var(Map.empty)
 
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     //#list-meters-invocation
     PublicEndpoints.listMeters(()).map { fetchedMeters =>
       metersVar := fetchedMeters.map(meter => meter.id -> meter).toMap

@@ -1,9 +1,12 @@
 package overview
 
 //#relevant-code
-import play.core.server.NettyServer
+import endpoints.play.server.{DefaultPlayComponents, HttpServer}
+import play.core.server.ServerConfig
 
 object Main extends App {
-  NettyServer.fromRouter()(CounterServer.routes)
+  val config = ServerConfig()
+  val playComponents = new DefaultPlayComponents(config)
+  HttpServer(config, playComponents, new CounterServer(playComponents).routes)
 }
 //#relevant-code

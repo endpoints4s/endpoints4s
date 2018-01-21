@@ -6,54 +6,56 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
+import cqrs.commands.Commands
+import cqrs.infra.PlayService
+import cqrs.publicserver.commands.{AddRecord, CreateMeter}
+import cqrs.publicserver.{PublicEndpoints, PublicServer}
+import cqrs.queries.{Queries, QueriesService}
+import endpoints.play.client.{CirceEntities, Endpoints, OptionalResponses}
+import endpoints.play.server.HttpServer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.core.server.ServerConfig
-import play.api.routing.Router
-import cqrs.commands.Commands
-import cqrs.queries.{Queries, QueriesService}
-import cqrs.publicserver.{PublicEndpoints, PublicServer}
-import cqrs.publicserver.commands.{AddRecord, CreateMeter}
-import cqrs.infra.HttpServer
-import endpoints.play.client.{CirceEntities, Endpoints, OptionalResponses}
 
 import scala.collection.immutable.SortedMap
-import scala.concurrent.Future
-import scala.concurrent.duration.DurationInt
 import scala.math.BigDecimal
 
 class Test extends AsyncFreeSpec with BeforeAndAfterAll {
 
-  val commandsPort = 9000
-  val queriesPort = 9001
-  val publicPort = 9002
   def baseUrl(port: Int): String = s"http://localhost:$port"
 
-  implicit val actorSystem: ActorSystem = ActorSystem()
-  implicit val materializer: Materializer = ActorMaterializer()
-  private val wsClient = AhcWSClient(AhcWSClientConfig())
+  val actorSystem: ActorSystem = ActorSystem()
+  val materializer: Materializer = ActorMaterializer()(actorSystem)
+  val wsClient = AhcWSClient(AhcWSClientConfig())(materializer)
 
-  val commandsServer =
-    HttpServer(ServerConfig(port = Some(commandsPort)), Router.from(Commands.routes))
-
-  val queriesServer = {
-    val service = new QueriesService(baseUrl(commandsPort), wsClient, actorSystem.scheduler)
-    val queries = new Queries(service)
-    HttpServer(ServerConfig(port = Some(queriesPort)), Router.from(queries.routes))
+  object commandsServer extends PlayService(9000) {
+    val commands = new Commands(playComponents)
+    val httpServer = HttpServer(config, playComponents, commands.routes)
   }
 
-  private val publicService = new PublicServer(baseUrl(commandsPort), baseUrl(queriesPort), wsClient)
-  private val publicServer = HttpServer(ServerConfig(port = Some(publicPort)), Router.from(publicService.routes))
+  object queriesServer extends PlayService (9001) {
+    val service = new QueriesService(baseUrl(commandsServer.port), wsClient, actorSystem.scheduler)
+    val queries = new Queries(service, playComponents)
+    val httpServer = HttpServer(config, playComponents, queries.routes)
+  }
+
+  object publicServer extends PlayService(9002) {
+    val server = new PublicServer(baseUrl(commandsServer.port), baseUrl(queriesServer.port), wsClient, playComponents)
+    val httpServer = HttpServer(config, playComponents, server.routes)
+  }
+
+  commandsServer
+  queriesServer
+  publicServer
 
   override def afterAll(): Unit = {
-    publicServer.stop()
+    publicServer.httpServer.stop()
     wsClient.close()
-    queriesServer.stop()
-    commandsServer.stop()
+    queriesServer.httpServer.stop()
+    commandsServer.httpServer.stop()
   }
 
   object api
-    extends Endpoints(baseUrl(publicPort), wsClient)
+    extends Endpoints(baseUrl(publicServer.port), wsClient)
       with CirceEntities
       with OptionalResponses
       with PublicEndpoints {

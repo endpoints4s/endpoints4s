@@ -11,8 +11,9 @@ import cqrs.publicserver.{CommandsClient, QueriesClient}
 import cqrs.queries._
 import cats.instances.option._
 import cats.instances.future._
+import endpoints.play.server.PlayComponents
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Try
 
 //#delegate-interpreter
@@ -30,17 +31,21 @@ import endpoints.play
 class PublicServer(
   commandsBaseUrl: String,
   queriesBaseUrl: String,
-  wsClient: WSClient)(implicit
-  ec: ExecutionContext
+  wsClient: WSClient,
+  protected val playComponents: PlayComponents
 ) extends PublicEndpoints
   with delegate.Endpoints
   with delegate.CirceJsonSchemaEntities
-  with delegate.OptionalResponses {
+  with delegate.OptionalResponses { publicServer =>
+
+  import playComponents.executionContext
 
   lazy val delegate =
     new play.server.Endpoints
       with play.server.CirceEntities
-      with play.server.OptionalResponses
+      with play.server.OptionalResponses {
+      protected lazy val playComponents = publicServer.playComponents
+    }
 
   import delegate.{circeJsonDecoder, circeJsonEncoder}
 

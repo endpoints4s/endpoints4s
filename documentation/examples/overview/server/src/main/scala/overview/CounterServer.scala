@@ -2,12 +2,14 @@ package overview
 
 //#relevant-code
 import endpoints.play.server
+import endpoints.play.server.PlayComponents
+
 import scala.concurrent.stm.Ref
 
 /**
   * Defines a Play router (and reverse router) for the endpoints described in the `CounterAlg` trait.
   */
-object CounterServer
+class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with server.Endpoints
     with server.CirceEntities {

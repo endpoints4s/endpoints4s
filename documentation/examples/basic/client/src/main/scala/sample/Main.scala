@@ -5,13 +5,10 @@ import org.scalajs.dom.document
 import org.scalajs.dom.AudioContext
 
 import scala.scalajs.js
-import scala.scalajs.js.annotation.JSExport
 
-@JSExport
-object Main extends js.JSApp {
+object Main {
 
-  @JSExport
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     Api.index(("Julien", 30, "foo&bar+baz")).`then`[Unit] ({ user =>
       val p = document.createElement("p")
       p.textContent = s"User(${user.name}, ${user.age})"
