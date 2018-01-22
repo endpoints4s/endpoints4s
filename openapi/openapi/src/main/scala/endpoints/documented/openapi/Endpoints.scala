@@ -2,7 +2,6 @@ package endpoints
 package documented
 package openapi
 
-import endpoints.algebra.MuxRequest
 import endpoints.documented.openapi.model._
 
 /**
@@ -59,12 +58,5 @@ trait Endpoints
     val item = PathItem(Map(method -> operation))
     DocumentedEndpoint(request.url.path, item)
   }
-
-  type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint
-
-  def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
-  ): MuxEndpoint[Req, Resp, Transport] = endpoint(request, response)
 
 }
