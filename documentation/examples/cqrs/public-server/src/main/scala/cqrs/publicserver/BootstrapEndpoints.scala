@@ -3,15 +3,14 @@ package cqrs.publicserver
 import cqrs.publicserver.documented.PublicEndpointsDocumentation
 import endpoints.documented.openapi.model.OpenApi
 import endpoints.play.server.circe.JsonEntities
-import endpoints.play.server.{Assets, Endpoints}
+import endpoints.play.server.{Assets, Endpoints, PlayComponents}
 import play.api.routing.{Router => PlayRouter}
 import play.twirl.api.{Html, StringInterpolation}
-import play.api.http.FileMimeTypes
 
 /**
   * These endpoints serve the web page and the assets.
   */
-class BootstrapEndpoints(val fileMimeTypes: FileMimeTypes) extends Endpoints with Assets with JsonEntities {
+class BootstrapEndpoints(protected val playComponents: PlayComponents) extends Endpoints with Assets with JsonEntities {
 
   val index: Endpoint[Unit, Html] =
     endpoint(get(path), htmlResponse)

@@ -1,15 +1,11 @@
 package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse, Uri}
 import akka.stream.{ActorMaterializer, Materializer}
-import akka.stream.scaladsl.{Sink, Source}
 import endpoints.testsuite.{BasicAuthTestApi, SimpleTestApi}
 import endpoints.testsuite.client.{BasicAuthTestSuite, SimpleTestSuite}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.concurrent.duration._
 
 class TestClient(settings: EndpointsSettings)
                 (implicit EC: ExecutionContext, M: Materializer)

@@ -2,12 +2,13 @@ package endpoints.play.server
 
 import endpoints.algebra
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
-import play.api.mvc.{Action, Result}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.mvc.Result
 
 import scala.concurrent.Future
 
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
+
+  import playComponents.executionContext
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](
     request: Request[Transport],
@@ -37,7 +38,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
     ): ToPlayHandler =
       header =>
         request.decode(header).map { bodyParser =>
-          Action.async(bodyParser) { request =>
+          playComponents.actionBuilder.async(bodyParser) { request =>
             handler(decoder.decode(request.body).right.get /* TODO Handle failure */.asInstanceOf[Req { type Response = Resp}])
               .map(resp => response(encoder.encode(resp)))
           }

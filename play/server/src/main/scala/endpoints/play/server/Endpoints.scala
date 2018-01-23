@@ -1,8 +1,6 @@
 package endpoints.play.server
 
-import endpoints.algebra
-import endpoints.Tupler
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import endpoints.{Tupler, algebra}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
@@ -10,7 +8,7 @@ import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
 
 import scala.concurrent.Future
-import scala.language.{higherKinds, implicitConversions}
+import scala.language.implicitConversions
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
@@ -42,6 +40,10 @@ import scala.language.{higherKinds, implicitConversions}
   * }}}
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
+
+  protected val playComponents: PlayComponents
+
+  import playComponents.executionContext
 
   /**
     * An attempt to extract an `A` from a request headers.
@@ -219,7 +221,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       endpoint.request.decode(header)
         .map { bodyParser =>
-          Action.async(bodyParser) { request =>
+          playComponents.actionBuilder.async(bodyParser) { request =>
             service(request.body).map { b =>
               endpoint.response(b)
             }

@@ -2,9 +2,8 @@ package endpoints.play.server.circe
 
 import endpoints.algebra
 import endpoints.play.server.Endpoints
-import io.circe.{Decoder => CirceDecoder, Encoder => CirceEncoder, jawn}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.mvc.{BodyParsers, Results}
+import io.circe.{jawn, Decoder => CirceDecoder, Encoder => CirceEncoder}
+import play.api.mvc.Results
 import endpoints.play.server.Util.circeJsonWriteable
 
 /**
@@ -14,6 +13,8 @@ import endpoints.play.server.Util.circeJsonWriteable
   */
 trait JsonEntities extends Endpoints with algebra.JsonEntities {
 
+  import playComponents.executionContext
+
   /** Decode requests using circe’s [[io.circe.Decoder]] */
   type JsonRequest[A] = CirceDecoder[A]
 
@@ -21,7 +22,7 @@ trait JsonEntities extends Endpoints with algebra.JsonEntities {
   type JsonResponse[A] = CirceEncoder[A]
 
   def jsonRequest[A : CirceDecoder]: RequestEntity[A] =
-    BodyParsers.parse.raw.validate { buffer =>
+    playComponents.playBodyParsers.raw.validate { buffer =>
       jawn.parseFile(buffer.asFile)
         .right.flatMap(CirceDecoder[A].decodeJson)
         .left.map(error => Results.BadRequest)

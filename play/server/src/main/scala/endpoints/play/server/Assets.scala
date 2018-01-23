@@ -4,17 +4,13 @@ import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import endpoints.algebra
 import play.api.http.{ContentTypes, HttpEntity}
-import play.api.http.FileMimeTypes
 import play.api.mvc.Results
-import play.mvc.Http
 import play.mvc.Http.HeaderNames
 
 /**
   * Interpreter for [[algebra.Assets]] that performs routing using Play framework
   */
 trait Assets extends algebra.Assets with Endpoints {
-
-  def fileMimeTypes: FileMimeTypes
 
   /**
     * @param assetPath Path of the requested asset
@@ -173,7 +169,7 @@ trait Assets extends algebra.Assets with Endpoints {
             Found(
               StreamConverters.fromInputStream(() => stream),
               Some(stream.available().toLong),
-              fileMimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY)),
+              playComponents.fileMimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY)),
               isGzipped
             )
           }.getOrElse(NotFound)

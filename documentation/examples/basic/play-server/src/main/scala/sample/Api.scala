@@ -1,13 +1,12 @@
 package sample
 
-import _root_.play.api.http.FileMimeTypes
 import endpoints.play.server._
 
 import scala.concurrent.Future
 import scala.util.Random
 
-class Api(val fileMimeTypes: FileMimeTypes) extends ApiAlg with AssetsAlg with Endpoints with CirceEntities with Assets
-  with OptionalResponses with BasicAuthentication {
+class Api(protected val playComponents: PlayComponents) extends ApiAlg with AssetsAlg with Endpoints with CirceEntities
+  with Assets with OptionalResponses with BasicAuthentication {
 
   val routes = routesFromEndpoints(
     index.implementedBy { case (name, age, _) => User(name, age) },

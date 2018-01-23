@@ -2,10 +2,10 @@ package cqrs.commands
 
 
 //#server
-import endpoints.play.server.{CirceEntities, Endpoints}
+import endpoints.play.server.{CirceEntities, Endpoints, PlayComponents}
 import play.api.routing.Router
 
-object Commands extends CommandsEndpoints with Endpoints with CirceEntities {
+class Commands(protected val playComponents: PlayComponents) extends CommandsEndpoints with Endpoints with CirceEntities {
 
   val routes: Router.Routes = routesFromEndpoints(
 

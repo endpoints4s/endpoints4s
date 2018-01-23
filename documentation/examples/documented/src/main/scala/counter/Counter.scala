@@ -8,9 +8,8 @@ package counter
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import play.api.Environment
-import play.api.http.{DefaultFileMimeTypes, HttpConfiguration}
-import play.core.server.{NettyServer, ServerConfig}
+import endpoints.play.server.{DefaultPlayComponents, HttpServer, PlayComponents}
+import play.core.server.ServerConfig
 
 //#domain
 // Our domain model just contains a counter value
@@ -94,13 +93,13 @@ object CounterDocumentation
 import endpoints.documented.delegate
 import endpoints.play
 
-object CounterServer
+class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with delegate.Endpoints
-    with delegate.CirceJsonSchemaEntities {
+    with delegate.CirceJsonSchemaEntities { parent =>
 
   // We delegate the implementation of the HTTP server to Play framework
-  lazy val delegate = new play.server.Endpoints with play.server.CirceEntities
+  lazy val delegate = new play.server.Endpoints with play.server.CirceEntities { lazy val playComponents = parent.playComponents }
 //#delegation
 //#business-logic
   // Internal state of our counter
@@ -128,37 +127,38 @@ object CounterServer
 
   )
 //#business-logic
-//#entry-point
+}
+
+object Main {
+  //#entry-point
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
-
     val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
-
-    object DocumentationServer extends play.server.Endpoints with play.server.circe.JsonEntities with play.server.Assets {
-
-      // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
-      // ''/documentation.json''. Returns an OpenAPI document.
-      val documentation = endpoint(get(path / "documentation.json"), jsonResponse[OpenApi])
-
-      // We “render” the OpenAPI document using the swagger-ui, provided as static assets
-      val assets = assetsEndpoint(path / "assets" / assetSegments)
-
-      // Redirect the root URL “/” to the “index.html” asset for convenience
-      val root = endpoint(get(path), redirect(assets)(asset("index.html")))
-
-      val routes = routesFromEndpoints(
-        documentation.implementedBy(_ => CounterDocumentation.api),
-        assets.implementedBy(assetsResources(pathPrefix = Some("/public"))),
-        root
-      )
-
-      lazy val digests = AssetsDigests.digests
-      lazy val fileMimeTypes = new DefaultFileMimeTypes(HttpConfiguration.fromConfiguration(playConfig.configuration, Environment.simple(mode = playConfig.mode)).fileMimeTypes)
-    }
-
-    val _ = NettyServer.fromRouter(playConfig)(
-      CounterServer.routes orElse DocumentationServer.routes
-    )
+    val playComponents = new DefaultPlayComponents(playConfig)
+    val routes = new CounterServer(playComponents).routes orElse new DocumentationServer(playComponents).routes
+    val _ = HttpServer(playConfig, playComponents, routes)
   }
-//#entry-point
+
+  class DocumentationServer(protected val playComponents: PlayComponents)
+    extends play.server.Endpoints with play.server.circe.JsonEntities with play.server.Assets {
+
+    // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
+    // ''/documentation.json''. Returns an OpenAPI document.
+    val documentation = endpoint(get(path / "documentation.json"), jsonResponse[OpenApi])
+
+    // We “render” the OpenAPI document using the swagger-ui, provided as static assets
+    val assets = assetsEndpoint(path / "assets" / assetSegments)
+
+    // Redirect the root URL “/” to the “index.html” asset for convenience
+    val root = endpoint(get(path), redirect(assets)(asset("index.html")))
+
+    val routes = routesFromEndpoints(
+      documentation.implementedBy(_ => CounterDocumentation.api),
+      assets.implementedBy(assetsResources(pathPrefix = Some("/public"))),
+      root
+    )
+
+    lazy val digests = AssetsDigests.digests
+  }
+  //#entry-point
 }

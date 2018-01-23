@@ -6,15 +6,16 @@ import java.util.UUID
 import akka.stream.Materializer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
 import endpoints.play.client.{CirceEntities, Endpoints}
+import endpoints.play.server.DefaultPlayComponents
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.core.server.NettyServer
+import play.core.server.{NettyServer, ServerConfig}
 
 import scala.concurrent.Future
 import scala.math.BigDecimal
 
 class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
-  private val server = NettyServer.fromRouter()(Commands.routes)
+  private val server = NettyServer.fromRouter()(new Commands(new DefaultPlayComponents(ServerConfig())).routes)
 
   implicit val materializer: Materializer = server.materializer
   private val wsClient = AhcWSClient(AhcWSClientConfig())

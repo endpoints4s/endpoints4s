@@ -1,22 +1,11 @@
 package cqrs.infra
 
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
-import play.api.{BuiltInComponents, Configuration, Environment}
-import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.api.routing.Router
-import play.core.server.{NettyServer, ServerConfig}
-import play.core.{ApplicationProvider, DefaultWebCommands, SourceMapper, WebCommands}
-
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import com.typesafe.config.ConfigFactory
-import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.commands.Commands
+import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import play.api.http.HttpConfiguration.HttpConfigurationProvider
-import play.api.http.DefaultFileMimeTypesProvider
-import play.api.inject.DefaultApplicationLifecycle
+import endpoints.play.server.{DefaultPlayComponents, HttpServer}
+import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import play.core.server.ServerConfig
 
 /**
   * In the real world we would run the different services on distinct
@@ -28,78 +17,53 @@ import play.api.inject.DefaultApplicationLifecycle
   */
 object Main extends App {
 
-  object publicService {
-    val port = 9000
+  object commandsService extends PlayService(port = 9001) {
+    //#start-server
+    val commands = new Commands(playComponents)
+    val server = HttpServer(config, playComponents,commands.routes)
+    //#start-server
   }
 
-  object commandsService {
-    val port = 9001
+  object queriesService extends PlayService(port = 9002) {
+    import playComponents.materializer
+    val wsClient = AhcWSClient(AhcWSClientConfig())
+    val service = new QueriesService(baseUrl(commandsService.port), wsClient, playComponents.actorSystem.scheduler)
+    val queries = new Queries(service, playComponents)
+    val server = HttpServer(config, playComponents, queries.routes)
   }
 
-  object queriesService {
-    val port = 9002
+  object publicService extends PlayService(port = 9000) {
+    val routes =
+      new cqrs.publicserver.Router(
+        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), queriesService.wsClient, playComponents),
+        new BootstrapEndpoints(playComponents)
+      ).routes
+    val server = HttpServer(config, playComponents, routes)
   }
 
   def baseUrl(port: Int): String = s"http://localhost:$port"
 
-  implicit val actorSystem: ActorSystem = ActorSystem("public-service")
-  implicit val materializer: Materializer = ActorMaterializer()
-  val wsClient = AhcWSClient(AhcWSClientConfig())
-
   // Start the commands service
-  //#start-server
-  val commandsServer =
-    HttpServer(ServerConfig(port = Some(commandsService.port)), Router.from(Commands.routes))
-  //#start-server
-
+  commandsService
   // Start the queries service
-  val queriesServer = {
-    val service = new QueriesService(baseUrl(commandsService.port), wsClient, actorSystem.scheduler)
-    val queries = new Queries(service)
-    HttpServer(ServerConfig(port = Some(queriesService.port)), Router.from(queries.routes))
-  }
-
+  queriesService
   // Start the public server
-  val publicServer = {
-    val httpConfiguration = new HttpConfigurationProvider(Configuration.load(Environment.simple()), Environment.simple()).get
-    val fileMimeTypes = new DefaultFileMimeTypesProvider(httpConfiguration.fileMimeTypes).get
-    val routes =
-      new cqrs.publicserver.Router(
-        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), wsClient),
-        new BootstrapEndpoints(fileMimeTypes)
-      ).routes
-    HttpServer(ServerConfig(port = Some(publicService.port)), Router.from(routes))
-  }
+  publicService
 
   // …
 
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run(): Unit = {
-      wsClient.close()
-      commandsServer.stop()
-      queriesServer.stop()
-      publicServer.stop()
+      queriesService.wsClient.close()
+      commandsService.server.stop()
+      queriesService.server.stop()
+      publicService.server.stop()
     }
   })
 
 }
 
-object HttpServer {
-
-  def apply(config: ServerConfig, _router: Router): NettyServer = new BuiltInComponents {
-    val router: Router = _router
-    lazy val environment: Environment = Environment.simple(mode = config.mode)
-    lazy val sourceMapper: Option[SourceMapper] = None
-    lazy val webCommands: WebCommands = new DefaultWebCommands
-    lazy val configuration: Configuration = Configuration(ConfigFactory.load())
-    lazy val applicationLifecycle: play.api.inject.ApplicationLifecycle = new DefaultApplicationLifecycle
-    def httpFilters: Seq[play.api.mvc.EssentialFilter] = Nil
-
-
-    def serverStopHook(): Future[_] = Future.successful(())
-
-    val server =
-      new NettyServer(config, ApplicationProvider(application), serverStopHook _, actorSystem)
-  }.server
-
+class PlayService(val port: Int) {
+  val config = ServerConfig(port = Some(port))
+  val playComponents = new DefaultPlayComponents(config)
 }

@@ -10,9 +10,9 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints.play.server.{CirceEntities, Endpoints, OptionalResponses}
+import endpoints.play.server.{CirceEntities, Endpoints, OptionalResponses, PlayComponents}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Try
 
 /**
@@ -21,12 +21,14 @@ import scala.util.Try
 class PublicServer(
   commandsBaseUrl: String,
   queriesBaseUrl: String,
-  wsClient: WSClient)(implicit
-  ec: ExecutionContext
+  wsClient: WSClient,
+  protected val playComponents: PlayComponents
 ) extends PublicEndpoints
-  with Endpoints
-  with CirceEntities
-  with OptionalResponses {
+    with Endpoints
+    with CirceEntities
+    with OptionalResponses {
+
+  import playComponents.executionContext
 
   private val commandsClient = new CommandsClient(commandsBaseUrl, wsClient)
   //#invocation
