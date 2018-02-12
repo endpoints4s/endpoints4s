@@ -12,14 +12,16 @@ import endpoints.algebra.{CirceEntities, Endpoints}
 
 trait CommandsEndpoints extends Endpoints with CirceEntities {
 
+//#microservice-endpoint-description
   /**
     * Application of a command.
     *
     * Returns the produced event, or `None` in case of failure (aggregate
     * not found or invalid command).
     */
-  val command/*: Endpoint[Command, Option[StoredEvent]]*/ =
+  val command =
     endpoint(post(path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
+//#microservice-endpoint-description
 
   /**
     * Read the event long (optionally from a given timestamp).
