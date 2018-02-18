@@ -10,6 +10,7 @@ import mhtml.cats._
 import org.scalajs.dom
 import faithful.cats.Instances._
 import cqrs.queries.Meter
+import faithful.Future
 import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLInputElement
 
@@ -33,7 +34,10 @@ object Main {
       val name = input.value.trim
       if (name.isEmpty) dom.window.alert("Please type a name for the meter to create")
       else {
-        PublicEndpoints.createMeter(CreateMeter(name)).map { createdMeter =>
+        //#webapps-invocation
+        val eventuallyCreatedMeter: Future[Meter] = PublicEndpoints.createMeter(CreateMeter(name))
+        //#webapps-invocation
+        eventuallyCreatedMeter.map { createdMeter =>
           metersVar := metersVar.value + (createdMeter.id -> createdMeter)
           input.value = ""
         }.handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))

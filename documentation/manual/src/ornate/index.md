@@ -27,6 +27,7 @@ Noteworthy features:
 
 - Have a look at the [overview](overview.md) to understand in a few minutes what
   the library does and how its usage look like ;
+- Check out the [use cases](use-cases.md) to know where *endpoints* shines ;
 - [Install](installation.md) the library and follow the
   [tutorial](tutorial.md) to progressively learn all the features ;
 - Explore the [API documentation](api:endpoints.algebra.package) ;

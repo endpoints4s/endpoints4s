@@ -50,8 +50,12 @@ class PublicServer(
       },
 
       createMeter.implementedByAsync { createData =>
+        //#microservice-endpoint-invocation
+        val eventuallyMaybeEvent: Future[Option[StoredEvent]] =
+          commandsClient.command(CreateMeter(createData.label))
+        //#microservice-endpoint-invocation
         for {
-          maybeEvent <- commandsClient.command(CreateMeter(createData.label))
+          maybeEvent <- eventuallyMaybeEvent
           maybeMeter <- Traverse[Option].flatSequence(
             maybeEvent.collect {
               case StoredEvent(t, MeterCreated(id, _)) =>
