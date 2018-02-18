@@ -16,7 +16,7 @@ val `algebra-circe` =
     .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-circe",
-      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
+      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
     .dependsOn(`algebra`)
 
