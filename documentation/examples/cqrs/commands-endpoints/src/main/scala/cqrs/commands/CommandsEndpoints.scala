@@ -21,6 +21,7 @@ trait CommandsEndpoints extends Endpoints with CirceEntities {
     */
   val command =
     endpoint(post(path / "command", jsonRequest[Command]), jsonResponse[Option[StoredEvent]])
+  // command: Endpoint[Command, Option[StoredEvent]]
 //#microservice-endpoint-description
 
   /**

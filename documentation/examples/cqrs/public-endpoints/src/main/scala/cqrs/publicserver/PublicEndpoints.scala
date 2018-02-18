@@ -37,6 +37,7 @@ trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponse
   /** Registers a new meter */
   val createMeter =
     endpoint(post(metersPath, jsonRequest[CreateMeter]), jsonResponse[Meter])
+  // createMeter: Endpoint[CreateMeter, Meter]
   //#webapps-endpoint
 
   /** Add a record to an existing meter */
