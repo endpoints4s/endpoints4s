@@ -80,7 +80,8 @@ val `example-overview-endpoints` =
     .in(file("examples/overview/endpoints"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
     .dependsOnLocalCrossProjects("algebra-circe")
 
@@ -119,7 +120,8 @@ val `example-basic-shared` = {
           generatedObjectName = "AssetsDigests",
           generatedPackage = Some("sample")
         )
-      }.taskValue
+      }.taskValue,
+      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
     .jvmSettings(
       (resourceGenerators in Compile) += Def.task {
@@ -169,6 +171,9 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .settings(
+      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
+    )
     .dependsOnLocalCrossProjects("openapi-circe", "example-cqrs-circe-instant", "json-schema-generic")
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
@@ -216,7 +221,12 @@ val `example-cqrs-public-server` =
 lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
+    .settings(
+      libraryDependencies ++= Seq(
+        "org.scala-stm" %% "scala-stm" % "0.8",
+        "io.circe" %% "circe-generic" % circeVersion
+      )
+    )
     .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
 
 // commands implementation

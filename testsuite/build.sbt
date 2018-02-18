@@ -7,6 +7,7 @@ val testsuite =
     .settings(
       name := "endpoints-testsuite",
       libraryDependencies ++= Seq(
+        "io.circe" %%% "circe-generic" % circeVersion,
         "com.github.tomakehurst" % "wiremock" % "2.6.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
         compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
