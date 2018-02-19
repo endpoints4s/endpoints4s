@@ -1,6 +1,6 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, HttpChallenge, HttpChallenges}
+import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, HttpChallenges}
 import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{Directive, Directives}
 import endpoints.algebra

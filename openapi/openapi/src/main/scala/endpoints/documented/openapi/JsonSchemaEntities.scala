@@ -4,8 +4,6 @@ package openapi
 
 import endpoints.documented.openapi.model.{MediaType, Schema}
 
-import scala.language.higherKinds
-
 /**
   * Interpreter for [[algebra.JsonSchemaEntities]] that produces a documentation of the JSON schemas.
   */

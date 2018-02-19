@@ -1,6 +1,5 @@
 package cqrs.publicserver
 
-import cqrs.publicserver.documented.PublicEndpointsDocumentation
 import endpoints.documented.openapi.model.OpenApi
 import endpoints.play.server.circe.JsonEntities
 import endpoints.play.server.{Assets, Endpoints, PlayComponents}
@@ -24,8 +23,7 @@ class BootstrapEndpoints(protected val playComponents: PlayComponents) extends E
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
       index.implementedBy(_ => indexHtml),
-      assets.implementedBy(assetsResources(/*pathPrefix = Some("/public")*/)),
-      documentation.implementedBy(_ => PublicEndpointsDocumentation.documentation)
+      assets.implementedBy(assetsResources(/*pathPrefix = Some("/public")*/))
     )
 
   lazy val digests = BootstrapDigests.digests

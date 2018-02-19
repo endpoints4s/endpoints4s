@@ -2,8 +2,6 @@ package endpoints
 package documented
 package algebra
 
-import scala.language.higherKinds
-
 /**
   * Partially applies the [[JsonEntities]] algebra interface to fix the
   * `JsonRequest` and `JsonResponse` types to be `JsonSchema`.

@@ -10,7 +10,7 @@ class JsonSchemasTest extends FreeSpec {
     extends algebra.JsonSchemasTest
       with circe.JsonSchemas
 
-  import JsonSchemasCodec.{User, Foo, Bar, Baz}
+  import JsonSchemasCodec.{User, Foo, Bar}
 
   "case class" in {
     val userJson =

@@ -4,7 +4,6 @@ import akka.http.scaladsl.marshalling.ToResponseMarshaller
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 
-import scala.language.higherKinds
 import endpoints._
 
 /**

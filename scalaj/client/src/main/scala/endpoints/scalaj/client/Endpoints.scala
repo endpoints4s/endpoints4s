@@ -1,7 +1,6 @@
 package endpoints.scalaj.client
 
 import endpoints.algebra
-import endpoints.algebra.MuxRequest
 
 import scala.concurrent.{ExecutionContext, Future}
 

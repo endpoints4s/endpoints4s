@@ -2,9 +2,7 @@ package endpoints.testsuite.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.BasicAuthentication
-import endpoints.testsuite.{BasicAuthTestApi, SimpleTestApi}
-
-import scala.concurrent.Future
+import endpoints.testsuite.BasicAuthTestApi
 
 trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
