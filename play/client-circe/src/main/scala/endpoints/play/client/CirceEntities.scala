@@ -6,10 +6,9 @@ import io.circe.{Json, jawn}
 import play.api.libs.ws.{BodyWritable, InMemoryBody}
 import play.api.mvc.Codec
 import play.api.http.ContentTypes
-import endpoints.play
 
 /**
-  * Implements [[algebra.CirceEntities]] for [[play.client.Endpoints]]
+  * Implements [[algebra.CirceEntities]] for [[endpoints.play.client.Endpoints]]
   */
 trait CirceEntities extends algebra.CirceEntities { this: Endpoints =>
 

@@ -5,7 +5,6 @@ import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import endpoints.{Tupler, algebra}
 
 import scala.concurrent.Future
-import scala.language.higherKinds
 import scala.util.{Failure, Success}
 
 /**

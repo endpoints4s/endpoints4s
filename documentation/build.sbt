@@ -202,7 +202,6 @@ val `example-cqrs-public-server` =
   project.in(file("examples/cqrs/public-server"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
-      libraryDependencies += "com.typesafe.play" %% "twirl-api" % "1.2.0",
       unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(

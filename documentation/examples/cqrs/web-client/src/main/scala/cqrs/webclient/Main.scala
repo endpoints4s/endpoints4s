@@ -6,7 +6,6 @@ import java.util.UUID
 import cats.implicits._
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import mhtml.{Var, mount}
-import mhtml.cats._
 import org.scalajs.dom
 import faithful.cats.Instances._
 import cqrs.queries.Meter

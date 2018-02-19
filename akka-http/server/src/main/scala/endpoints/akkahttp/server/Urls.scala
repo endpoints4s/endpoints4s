@@ -1,6 +1,5 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.server.util.{Tupler => AkkaTupler}
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
 import endpoints.{Tupler, algebra}
