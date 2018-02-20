@@ -78,7 +78,7 @@ Add the following dependencies to your `client` sub-project:
   // (optional) JSON serialization using circe.io
   "org.julienrf" %%% "endpoints-xhr-client-circe" % "{{version}}",
   // (optional) uses faithful’s `Future`
-  "org.julienrf" %%% "endpoints-xhr-faithful" % "{{version}}"
+  "org.julienrf" %%% "endpoints-xhr-client-faithful" % "{{version}}"
 )
 ~~~
 
