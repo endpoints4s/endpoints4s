@@ -112,7 +112,7 @@ Our `commands` service to handles two actions:
 
 Here is how we define a communication protocol for these actions:
 
-~~~ scala src=../../../examples/cqrs/commands-endpoints/src/main/scala/cqrs/commands/CommandsEndpoints.scala#endpoints
+~~~ scala src=../../../documentation/examples/cqrs/commands-endpoints/src/main/scala/cqrs/commands/CommandsEndpoints.scala#endpoints
 ~~~
 
 Let’s explain this code line by line.
@@ -210,7 +210,7 @@ graph BT
 Then we can create a `Commands` object interpreting the service description as a
 server as follows:
 
-~~~ scala src=../../../examples/cqrs/commands/src/main/scala/cqrs/commands/Commands.scala#server
+~~~ scala src=../../../documentation/examples/cqrs/commands/src/main/scala/cqrs/commands/Commands.scala#server
 ~~~
 
 Again, let’s detail line by line the above code.
@@ -237,7 +237,7 @@ delegate to a `CommandsService` object. The underlying implementation details ar
 for this tutorial, but let’s just have a look at the type signature of these methods `apply`
 and `events`:
 
-~~~ scala src=../../../examples/cqrs/commands/src/main/scala/cqrs/commands/CommandsService.scala#signatures
+~~~ scala src=../../../documentation/examples/cqrs/commands/src/main/scala/cqrs/commands/CommandsService.scala#signatures
 ~~~
 
 As you can see, the `play.server` interpreter takes care of decoding HTTP requests and
@@ -291,7 +291,7 @@ graph BT
 Then we can create an `eventLog` object interpreting the service description as
 a client as follows:
 
-~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#event-log-client
+~~~ scala src=../../../documentation/examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#event-log-client
 ~~~
 
 The pattern is similar to the code applying a server interpreter: we extend our `CommandsEndpoints`
@@ -307,7 +307,7 @@ Our queries service builds a model of the state of the application by periodical
 that are appended to the log. To achieve this, it calls the `events` endpoint of the commands
 service as follows:
 
-~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#invocation
+~~~ scala src=../../../documentation/examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#invocation
 ~~~
 
 From the perspective of a client, and endpoint is modeled as a function that takes as parameter
@@ -331,7 +331,7 @@ interpreters. Our client interpreter defines the `Endpoint` type as follows:
 
 Let’s read again the code that invokes the `events` endpoint:
 
-~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#invocation
+~~~ scala src=../../../documentation/examples/cqrs/queries/src/main/scala/cqrs/queries/QueriesService.scala#invocation
 ~~~
 
 We supply a parameter, `maybeLastEventTimestamp`, that contains the timestamp of the last event that
@@ -390,7 +390,7 @@ Non-multiplexed endpoints can not express that.
 
 Here is how we can define a multiplexed endpoint handling both operations:
 
-~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-endpoint
+~~~ scala src=../../../documentation/examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-endpoint
 ~~~
 
 The type of this multiplexed endpoint is
@@ -400,7 +400,7 @@ and response types that subtypes of `QueryResp`, and that uses JSON documents to
 
 The `QueryReq` type defines the possible types of requests:
 
-~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-requests
+~~~ scala src=../../../documentation/examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-requests
 ~~~
 
 It is defined as a `sealed trait` that extends `MuxRequest` and whose each alternative (`FindAll`
@@ -419,7 +419,7 @@ The `FindAll` request type is the type of requests performing a “find all” o
 The `QueryResp` type defines the possible types of responses as a regular
 algebraic data type:
 
-~~~ scala src=../../../examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-responses
+~~~ scala src=../../../documentation/examples/cqrs/queries-endpoints/src/main/scala/cqrs/queries/QueriesEndpoints.scala#mux-responses
 ~~~
 
 The `MaybeResource` type carries the information of a response to a “find
@@ -434,7 +434,7 @@ multiplexed endpoints defined in the previous section.
 To invoke an endpoint as a client, we first have to derive a client for
 the endpoint descriptions:
 
-~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/QueriesClient.scala
+~~~ scala src=../../../documentation/examples/cqrs/public-server/src/main/scala/cqrs/publicserver/QueriesClient.scala
 ~~~
 
 The process is the same as in the first part of the tutorial: we extend
@@ -445,7 +445,7 @@ under the hood).
 Once we have derived a client implementation, we can invoke the `query` endpoint
 like so:
 
-~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation
+~~~ scala src=../../../documentation/examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation
 ~~~
 
 We first instantiate the client and then invoke the `query` endpoint with a `FindAll` request.
@@ -453,7 +453,7 @@ We get a result of type `Future[ResourceList]`.
 
 We can also invoke the “find by id” operation as follows:
 
-~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation-find-by-id
+~~~ scala src=../../../documentation/examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#invocation-find-by-id
 ~~~
 
 Note that here the return type is `Future[MaybeResource]`.
@@ -485,7 +485,7 @@ trait in it.
 Then, the essence of the implementation consists in pattern matching on the supplied `QueryReq`
 parameter:
 
-~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl-essence
+~~~ scala src=../../../documentation/examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl-essence
 ~~~
 
 Here we use a `service` abstraction that contains the actual implementation of the operations.
@@ -494,7 +494,7 @@ to each `QueryReq` (e.g. `MaybeResource` in the case of `FindById`, etc.).
 
 The complete implementation of the `query` multiplexed endpoint is a bit more complex:
 
-~~~ scala src=../../../examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl
+~~~ scala src=../../../documentation/examples/cqrs/queries/src/main/scala/cqrs/queries/Queries.scala#multiplexed-impl
 ~~~
 
 We wrapped our match expression into a `MuxHandlerAsync`, whose definition is the following:
@@ -556,13 +556,13 @@ descriptions.
 The public endpoints description defines four endpoints: `listMeters`, `getMeter`, `createMeter`
 and `addRecord`:
 
-~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#public-endpoints
+~~~ scala src=../../../documentation/examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#public-endpoints
 ~~~
 
 We have already seen most of the used combinators that describe the endpoints. The `getMeter` endpoint
 uses some new combinators, though:
 
-~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#get-meter
+~~~ scala src=../../../documentation/examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#get-meter
 ~~~
 
 The URL is described by the expression `metersPath / segment[UUID]`, which means the `/meters`
@@ -600,7 +600,7 @@ used for “reverse routing” (ie to generate (valid) URLs of endpoints).
 
 The implementation of the `uuidSegment` member is straightforward:
 
-~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#segment-uuid
+~~~ scala src=../../../documentation/examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#segment-uuid
 ~~~
 
 The client implementation is also straightforward: we create a type that inherits from
@@ -615,12 +615,12 @@ is defined as follows:
 
 Thus, we define the `uuidSegment` like so:
 
-~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/PublicEndpoints.scala#segment-uuid
+~~~ scala src=../../../documentation/examples/cqrs/web-client/src/main/scala/cqrs/webclient/PublicEndpoints.scala#segment-uuid
 ~~~
 
 Finally, here is an example of invocation of the `listMeters` endpoint from the Scala.js client:
 
-~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#list-meters-invocation
+~~~ scala src=../../../documentation/examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#list-meters-invocation
 ~~~
 
 ### Summary
