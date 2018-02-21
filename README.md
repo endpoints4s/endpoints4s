@@ -1,4 +1,4 @@
-# endpoints
+# endpoints [![Gitter](https://badges.gitter.im/.svg)](https://gitter.im/julienrf/endpoints)
 
 *endpoints* is a Scala library for defining communication protocols over HTTP between
 applications.
