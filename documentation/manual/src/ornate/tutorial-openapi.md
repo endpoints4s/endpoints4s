@@ -63,7 +63,7 @@ that serve the OpenAPI documentation.
 The business domain of our application is defined by the following algebraic data
 types:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#domain
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#domain
 ~~~
 
 ## Description of the HTTP endpoints
@@ -71,7 +71,7 @@ types:
 We want to define two endpoints: one for querying the counter value and one for
 modifying it.
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#documented-endpoints
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#documented-endpoints
 ~~~
 
 Note that we first import
@@ -108,7 +108,7 @@ To derive an OpenAPI file definition from our endpoint descriptions we use
 the interpreters defined in the
 [endpoints.documented.openapi](api:endpoints.documented.openapi.package) package:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#openapi
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#openapi
 ~~~
 
 Here, the
@@ -125,7 +125,7 @@ other [tutorial](tutorial.md). But we can use *delegation* to apply them.
 For instance, here is the beginning of our `CounterServer` class definition, which applies
 interpreters of the `endpoints.play.server` package to the `CounterEndpoints`:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#delegation
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#delegation
 ~~~
 
 We first mix interpreters provided in the `delegate` package to our `CounterEndpoints`
@@ -137,7 +137,7 @@ case we use an interpreter based on Play framework.
 
 For the sake of completeness, here is how the business logic is implemented:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#business-logic
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#business-logic
 ~~~
 
 There is nothing specific to “documented” endpoints here: we create Play routes
@@ -145,7 +145,7 @@ by attaching a business logic to each HTTP endpoint.
 
 And here the JVM entry point, which starts the HTTP server:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#entry-point
+~~~ scala src=../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#entry-point
 ~~~
 
 The `DocumentationServer` object contains both description and implementation of HTTP
