@@ -37,30 +37,40 @@ trait Requests extends Urls with Methods {
     * @param url Request URL
     * @param entity Request entity
     * @param headers Request headers
+    * @tparam UrlP Payload carried by url
+    * @tparam BodyP Payload carried by body
+    * @tparam HeadersP Payload carried by headers
+    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
     */
-  def request[A, B, C, AB](
+  def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled](
     method: Method,
-    url: Url[A],
-    entity: RequestEntity[B] = emptyRequest,
-    headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out]
+    url: Url[UrlP],
+    entity: RequestEntity[BodyP] = emptyRequest,
+    headers: RequestHeaders[HeadersP] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerABC: Tupler[UrlAndBodyPTupled, HeadersP]): Request[tuplerABC.Out]
 
   /**
     * Helper method to perform GET request
+    * @tparam UrlP Payload carried by url
+    * @tparam HeadersP Payload carried by headers
     */
-  final def get[A, B](
-    url: Url[A],
-    headers: RequestHeaders[B] = emptyHeaders
-  )(implicit tuplerAC: Tupler[A, B]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
+  final def get[UrlP, HeadersP](
+    url: Url[UrlP],
+    headers: RequestHeaders[HeadersP] = emptyHeaders
+  )(implicit tuplerAC: Tupler[UrlP, HeadersP]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
 
   /**
     * Helper method to perform POST request
+    * @tparam UrlP Payload carried by url
+    * @tparam BodyP Payload carried by body
+    * @tparam HeadersP Payload carried by headers
+    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
     */
-  final def post[A, B, C, AB](
-    url: Url[A],
-    entity: RequestEntity[B],
-    headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
+  final def post[UrlP, BodyP, HeadersP, UrlAndBodyPTupled](
+    url: Url[UrlP],
+    entity: RequestEntity[BodyP],
+    headers: RequestHeaders[HeadersP] = emptyHeaders
+  )(implicit tuplerAB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerABC: Tupler[UrlAndBodyPTupled, HeadersP]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
 
 
 }
