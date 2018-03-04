@@ -11,10 +11,8 @@ trait Responses extends algebra.Responses {
 
 
    def emptyResponse: Response[Unit] = {
-    case x if x.isError => Try(x.throwError) match {
-      case Failure(ex) => Left(ex)
-      case Success(_) => Right(())
-    }
+    case response if response.code >= 200 && response.code <300 => Right(())
+    case response => Left(new Throwable(s"Unexpected status code: ${response.code}"))
   }
 
    def textResponse: Response[String] = x => if(x.code == 200) Right(x.body) else Left(new Throwable(s"Unexpected status code: ${x.code}"))

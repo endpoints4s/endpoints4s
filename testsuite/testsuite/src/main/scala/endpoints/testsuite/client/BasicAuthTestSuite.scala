@@ -25,7 +25,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 
       }
 
-      "return None is authentication failed" in {
+      "return None if authentication failed" in {
 
         val credentials = BasicAuthentication.Credentials("user1", "pass2")
 

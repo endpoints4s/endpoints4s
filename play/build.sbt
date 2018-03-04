@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `testsuite-jvm` = LocalProject("testsuiteJVM")
 
 val `play-server` =
   project.in(file("server"))
@@ -30,7 +31,7 @@ val `play-client` =
         name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ahc-ws" % playVersion
       )
-      .dependsOn(`algebra-jvm`)
+      .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
 
 val `play-client-circe` =
   project.in(file("client-circe"))

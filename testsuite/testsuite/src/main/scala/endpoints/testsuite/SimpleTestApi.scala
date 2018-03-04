@@ -10,4 +10,10 @@ trait SimpleTestApi extends algebra.Endpoints {
     textResponse
   )
 
+
+  val emptyResponseSmokeEndpoint = endpoint(
+    get(path / "user" / segment[String] / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    emptyResponse
+  )
+
 }
