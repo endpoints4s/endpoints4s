@@ -2,7 +2,7 @@ package endpoints.testsuite.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.BasicAuthentication
-import endpoints.testsuite.{BasicAuthTestApi, OptionalResponsesTestApi}
+import endpoints.testsuite.OptionalResponsesTestApi
 
 trait OptionalResponsesTestSuite[T <: OptionalResponsesTestApi] extends ClientTestBase[T] {
 
@@ -24,8 +24,6 @@ trait OptionalResponsesTestSuite[T <: OptionalResponsesTestApi] extends ClientTe
       }
 
       "return None if server returned 404" in {
-
-        val credentials = BasicAuthentication.Credentials("user1", "pass2")
 
         wireMockServer.stubFor(get(urlEqualTo("/users/1"))
           .willReturn(aResponse()
