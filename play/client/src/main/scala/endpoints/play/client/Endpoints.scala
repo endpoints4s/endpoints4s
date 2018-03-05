@@ -54,10 +54,16 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   type Response[A] = WSResponse => Either[Throwable, A]
 
   /** Successfully decodes no information from a response */
-  val emptyResponse: Response[Unit] = _ => Right(())
+  val emptyResponse: Response[Unit] = {
+    case resp if resp.status >= 200 && resp.status < 300 => Right(())
+    case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
+  }
 
   /** Successfully decodes string information from a response */
-  val textResponse: Response[String] = x => Right(x.body)
+  val textResponse: Response[String] = {
+    case resp if resp.status >= 200 && resp.status < 300 => Right(resp.body)
+    case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
+  }
 
   //#concrete-carrier-type
   /**

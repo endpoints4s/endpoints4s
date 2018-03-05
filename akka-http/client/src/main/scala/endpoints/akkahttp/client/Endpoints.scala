@@ -7,7 +7,10 @@ import endpoints.{Tupler, algebra}
 import scala.concurrent.{ExecutionContext, Future}
 
 class Endpoints(val settings: EndpointsSettings)
-               (implicit val EC: ExecutionContext, val M: Materializer) extends algebra.Endpoints with Urls with Methods {
+  (implicit val EC: ExecutionContext, val M: Materializer)
+  extends algebra.Endpoints
+    with Urls
+    with Methods {
   type RequestHeaders[A] = (A, List[HttpHeader]) => List[HttpHeader]
 
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, req) => req
@@ -19,9 +22,9 @@ class Endpoints(val settings: EndpointsSettings)
   lazy val emptyRequest: RequestEntity[Unit] = (_, req) => req
 
   def request[A, B, C, AB](
-                            method: Method, url: Url[A],
-                            entity: RequestEntity[B], headers: RequestHeaders[C]
-                          )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+    method: Method, url: Url[A],
+    entity: RequestEntity[B], headers: RequestHeaders[C]
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     (abc: tuplerABC.Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
@@ -37,7 +40,12 @@ class Endpoints(val settings: EndpointsSettings)
 
   type Response[A] = HttpResponse => Future[Either[Throwable, A]]
 
-  val emptyResponse: Response[Unit] = _ => Future.successful(Right(()))
+  val emptyResponse: Response[Unit] = x =>
+    if (x.status == StatusCodes.OK) {
+      Future.successful(Right(()))
+    } else {
+      Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
+    }
 
   val textResponse: Response[String] = x =>
     if (x.status == StatusCodes.OK) {
@@ -56,7 +64,9 @@ class Endpoints(val settings: EndpointsSettings)
       for {
         resp <- request(a)
         result <- response(resp).flatMap(futureFromEither)
+        _ = resp.discardEntityBytes() //Fix for https://github.com/akka/akka-http/issues/1495
       } yield result
+
 
   private[client] def futureFromEither[A](errorOrA: Either[Throwable, A]): Future[A] =
     errorOrA match {
