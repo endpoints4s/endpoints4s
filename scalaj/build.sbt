@@ -15,14 +15,3 @@ val `scalaj-client` =
       )
     )
     .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
-
-val `scalaj-client-circe` =
-  project.in(file("client-circe"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.10 to 2.12`: _*)
-    .settings(
-      name := "endpoints-scalaj-client-circe",
-      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
-    )
-    .dependsOn(`scalaj-client`, `algebra-circe-jvm`, `testsuite-jvm` % Test)
-

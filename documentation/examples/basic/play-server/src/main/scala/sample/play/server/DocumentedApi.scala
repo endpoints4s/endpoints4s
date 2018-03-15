@@ -10,14 +10,14 @@ class DocumentedApi(protected val playComponents: PlayComponents)
     with delegate.Endpoints
     with delegate.OptionalResponses
     with delegate.BasicAuthentication
-    with delegate.CirceEntities { parent =>
+    with delegate.circe.JsonEntitiesFromCodec { parent =>
 
   // Note: scalac (2.11.8) crashes if I use an object definition instead of this lazy val
   lazy val delegate =
     new play.server.Endpoints
       with play.server.OptionalResponses
       with play.server.BasicAuthentication
-      with play.server.CirceEntities {
+      with play.server.circe.JsonEntitiesFromCodec {
       lazy val playComponents = parent.playComponents
     }
 

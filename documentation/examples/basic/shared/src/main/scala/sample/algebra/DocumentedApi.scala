@@ -1,13 +1,13 @@
 package sample.algebra
 
-import endpoints.documented.algebra.{BasicAuthentication, Endpoints, CirceEntities, OptionalResponses}
+import endpoints.documented.algebra.{BasicAuthentication, circe, Endpoints, OptionalResponses}
 import io.circe.generic.JsonCodec
 
 trait DocumentedApi
   extends Endpoints
     with OptionalResponses
     with BasicAuthentication
-    with CirceEntities {
+    with circe.JsonEntitiesFromCodec {
 
   val items =
     endpoint(

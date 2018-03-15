@@ -5,7 +5,7 @@ import java.util.UUID
 
 import akka.stream.Materializer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
-import endpoints.play.client.{CirceEntities, Endpoints}
+import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
 import endpoints.play.server.DefaultPlayComponents
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
@@ -22,7 +22,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   object client
     extends Endpoints("http://localhost:9000", wsClient)
-      with CirceEntities
+      with JsonEntitiesFromCodec
       with CommandsEndpoints
 
   override def afterAll(): Unit = {

@@ -8,7 +8,7 @@ object DocumentedApi
     with openapi.Endpoints
     with openapi.OptionalResponses
     with openapi.BasicAuthentication
-    with openapi.CirceEntities {
+    with openapi.JsonEntities {
 
   /**
     * Produces an OpenAPI description of the endpoints.

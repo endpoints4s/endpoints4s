@@ -1,7 +1,8 @@
 package overview
 
 //#relevant-code
-import endpoints.algebra.{Endpoints, CirceEntities}
+import endpoints.algebra.Endpoints
+import endpoints.algebra.circe.JsonEntitiesFromCodec
 import io.circe.generic.JsonCodec
 
 /**
@@ -10,7 +11,7 @@ import io.circe.generic.JsonCodec
   * and one for incrementing it.
   * It uses circe.io for JSON marshalling.
   */
-trait CounterEndpoints extends Endpoints with CirceEntities {
+trait CounterEndpoints extends Endpoints with JsonEntitiesFromCodec {
 
   /**
     * Get the counter current value.

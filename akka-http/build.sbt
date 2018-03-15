@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `testsuite-jvm` = LocalProject("testsuiteJVM")
 
 val akkaHttpVersion = "10.0.1"
@@ -21,18 +22,6 @@ val `akka-http-client` =
     )
     .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
 
-val `akka-http-client-circe` =
-  project.in(file("client-circe"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-akka-http-client-circe",
-      libraryDependencies ++= Seq(
-        "io.circe" %% "circe-parser" % circeVersion
-      )
-    )
-    .dependsOn(`akka-http-client`, `algebra-circe-jvm`)
-
 val `akka-http-server` =
   project.in(file("server"))
     .settings(publishSettings: _*)
@@ -46,15 +35,3 @@ val `akka-http-server` =
       )
     )
     .dependsOn(`algebra-jvm`)
-
-val `akka-http-server-circe` =
-  project.in(file("server-circe"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-akka-http-server-circe",
-      libraryDependencies ++= Seq(
-        "de.heikoseeberger" %% "akka-http-circe" % akkaHttpJsonVersion
-      )
-    )
-    .dependsOn(`akka-http-server`, `algebra-circe-jvm`)

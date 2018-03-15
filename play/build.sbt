@@ -20,7 +20,7 @@ val `play-server-circe` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-play-server-circe",
-      libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
+      libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`)
 
@@ -32,13 +32,3 @@ val `play-client` =
         libraryDependencies += "com.typesafe.play" %% "play-ahc-ws" % playVersion
       )
       .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
-
-val `play-client-circe` =
-  project.in(file("client-circe"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-play-client-circe",
-      libraryDependencies += "io.circe" %% "circe-jawn" % circeVersion
-    )
-    .dependsOn(`play-client`, `algebra-circe-jvm`)
-

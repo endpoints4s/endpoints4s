@@ -96,10 +96,10 @@ import endpoints.play
 class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with delegate.Endpoints
-    with delegate.CirceJsonSchemaEntities { parent =>
+    with delegate.circe.JsonSchemaEntities { parent =>
 
   // We delegate the implementation of the HTTP server to Play framework
-  lazy val delegate = new play.server.Endpoints with play.server.CirceEntities { lazy val playComponents = parent.playComponents }
+  lazy val delegate = new play.server.Endpoints with play.server.circe.JsonEntitiesFromCodec { lazy val playComponents = parent.playComponents }
 //#delegation
 //#business-logic
   // Internal state of our counter

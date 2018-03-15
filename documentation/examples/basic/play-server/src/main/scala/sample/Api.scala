@@ -5,7 +5,7 @@ import endpoints.play.server._
 import scala.concurrent.Future
 import scala.util.Random
 
-class Api(protected val playComponents: PlayComponents) extends ApiAlg with AssetsAlg with Endpoints with CirceEntities
+class Api(protected val playComponents: PlayComponents) extends ApiAlg with AssetsAlg with Endpoints with circe.JsonEntitiesFromCodec
   with Assets with OptionalResponses with BasicAuthentication {
 
   val routes = routesFromEndpoints(

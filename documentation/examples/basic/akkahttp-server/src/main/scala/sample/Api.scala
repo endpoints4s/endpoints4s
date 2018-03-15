@@ -5,7 +5,7 @@ import endpoints.akkahttp.server._
 import scala.concurrent.Future
 import scala.util.Random
 
-object Api extends ApiAlg with Endpoints with CirceEntities with OptionalResponses with BasicAuthentication {
+object Api extends ApiAlg with Endpoints with JsonEntitiesFromCodec with OptionalResponses with BasicAuthentication {
 
   import akka.http.scaladsl.server.Directives._
 

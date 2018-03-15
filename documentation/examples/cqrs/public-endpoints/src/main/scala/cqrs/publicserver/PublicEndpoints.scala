@@ -16,9 +16,9 @@ import io.circe.java8.time._
   */
 // TODO User authentication
 //#public-endpoints
-import endpoints.algebra.{CirceEntities, Endpoints, OptionalResponses}
+import endpoints.algebra.{circe, Endpoints, OptionalResponses}
 
-trait PublicEndpoints extends Endpoints with CirceEntities with OptionalResponses {
+trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodec with OptionalResponses {
 
   /** Common path prefix for endpoints: “/meters” */
   private val metersPath = path / "meters"

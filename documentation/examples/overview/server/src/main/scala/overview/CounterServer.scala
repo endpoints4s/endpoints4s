@@ -12,7 +12,7 @@ import scala.concurrent.stm.Ref
 class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with server.Endpoints
-    with server.CirceEntities {
+    with server.JsonEntitiesFromCodec {
 
   /** Simple implementation of an in-memory counter */
   val counter = Ref(0)

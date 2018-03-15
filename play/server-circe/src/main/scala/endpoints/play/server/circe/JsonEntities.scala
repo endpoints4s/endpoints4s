@@ -2,9 +2,9 @@ package endpoints.play.server.circe
 
 import endpoints.algebra
 import endpoints.play.server.Endpoints
-import io.circe.{jawn, Decoder => CirceDecoder, Encoder => CirceEncoder}
+import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 import play.api.mvc.Results
-import endpoints.play.server.Util.circeJsonWriteable
+import Util.circeJsonWriteable
 
 /**
   * Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode
@@ -22,10 +22,10 @@ trait JsonEntities extends Endpoints with algebra.JsonEntities {
   type JsonResponse[A] = CirceEncoder[A]
 
   def jsonRequest[A : CirceDecoder]: RequestEntity[A] =
-    playComponents.playBodyParsers.raw.validate { buffer =>
-      jawn.parseFile(buffer.asFile)
+    playComponents.playBodyParsers.tolerantText.validate { text =>
+      parser.parse(text)
         .right.flatMap(CirceDecoder[A].decodeJson)
-        .left.map(error => Results.BadRequest)
+        .left.map(ignoredError => Results.BadRequest)
     }
 
   def jsonResponse[A : CirceEncoder]: Response[A] = a => Results.Ok(CirceEncoder[A].apply(a))
