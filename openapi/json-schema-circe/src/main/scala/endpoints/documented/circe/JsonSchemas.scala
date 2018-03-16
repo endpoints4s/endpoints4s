@@ -2,7 +2,7 @@ package endpoints
 package documented
 package circe
 
-import endpoints.algebra.CirceEntities.CirceCodec
+import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
 import scala.collection.generic.CanBuildFrom
@@ -20,7 +20,7 @@ trait JsonSchemas
   }
 
   object JsonSchema {
-    def apply[A](_encoder: io.circe.Encoder[A], _decoder: io.circe.Decoder[A]): JsonSchema[A] =
+    def apply[A](_encoder: Encoder[A], _decoder: Decoder[A]): JsonSchema[A] =
       new JsonSchema[A] { def encoder = _encoder; def decoder = _decoder }
 
     implicit def toCirceCodec[A](implicit jsonSchema: JsonSchema[A]): CirceCodec[A] =

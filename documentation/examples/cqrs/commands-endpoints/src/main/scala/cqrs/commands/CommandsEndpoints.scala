@@ -8,9 +8,10 @@ import io.circe.java8.time._
 import io.circe.{Decoder, Encoder}
 
 //#endpoints
-import endpoints.algebra.{CirceEntities, Endpoints}
+import endpoints.algebra.Endpoints
+import endpoints.algebra.circe.JsonEntitiesFromCodec
 
-trait CommandsEndpoints extends Endpoints with CirceEntities {
+trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodec {
 
 //#microservice-endpoint-description
   /**

@@ -4,21 +4,19 @@ import org.scalajs.sbtplugin.cross.CrossProject
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
-val `play-circe` = LocalProject("play-circe")
 val `play-client` = LocalProject("play-client")
-val `play-client-circe` = LocalProject("play-client-circe")
 val `play-server` = LocalProject("play-server")
 val `play-server-circe` = LocalProject("play-server-circe")
 
-val `akka-http-server-circe` = LocalProject("akka-http-server-circe")
+val `akka-http-server` = LocalProject("akka-http-server")
 
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
 val `xhr-client-faithful` = LocalProject("xhr-client-faithful")
 
 val `scalaj-client` = LocalProject("scalaj-client")
-val `scalaj-client-circe` = LocalProject("scalaj-client-circe")
 
 val `openapi-jvm` = LocalProject("openapiJVM")
 val `openapi-circe-jvm` = LocalProject("openapi-circeJVM")
@@ -40,12 +38,11 @@ val apiDoc =
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
       ),
       sbtunidoc.Plugin.UnidocKeys.unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
-        `algebra-jvm`, `algebra-circe-jvm`,
-        `play-circe`,
-        `play-client`, `play-client-circe`,
+        `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
+        `play-client`,
         `play-server`, `play-server-circe`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
-        `scalaj-client`, `scalaj-client-circe`,
+        `scalaj-client`,
         `openapi-jvm`, `openapi-circe-jvm`, `json-schema-jvm`, `json-schema-circe-jvm`, `json-schema-generic-jvm`
       )
     )
@@ -104,7 +101,7 @@ val `example-overview-server` =
 val `example-overview-play-client` =
   project.in(file("examples/overview/play-client"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .dependsOn(`example-overview-endpoints-jvm`, `play-client-circe`)
+    .dependsOn(`example-overview-endpoints-jvm`, `play-client`)
 
 // Basic example
 val `example-basic-shared` = {
@@ -163,7 +160,7 @@ val `example-basic-akkahttp-server` =
     .settings(
       publishArtifact := false
     )
-    .dependsOn(`example-basic-shared-jvm`, `akka-http-server-circe`)
+    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)
 
 
 // CQRS Example
@@ -213,7 +210,7 @@ val `example-cqrs-public-server` =
         )
       }.dependsOn(fastOptJS in Compile in `example-cqrs-web-client`).taskValue
     )
-    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`play-server-circe`, `play-client`)
     .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
 
 // commands endpoints definitions
@@ -238,7 +235,7 @@ val `example-cqrs-commands` =
         scalaTestDependency
       )
     )
-    .dependsOn(`play-server-circe`, `play-client-circe` % Test)
+    .dependsOn(`play-server-circe`, `play-client` % Test)
     .dependsOn(`example-cqrs-commands-endpoints`)
 
 // queries endpoints definitions
@@ -251,7 +248,7 @@ lazy val `example-cqrs-queries-endpoints` =
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .dependsOn(`play-server-circe`, `play-client-circe`)
+    .dependsOn(`play-server-circe`, `play-client`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services

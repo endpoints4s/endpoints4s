@@ -35,7 +35,7 @@ object Server extends App with Results {
     case GET(p"/assets/sample-client-fastopt.js") =>
       assets.versioned("/", "sample-client-fastopt.js")
     case GET(p"/api/description") => action {
-      import endpoints.play.server.Util.circeJsonWriteable
+      import endpoints.play.server.circe.Util.circeJsonWriteable
       import io.circe.syntax._
       Ok(sample.openapi.DocumentedApi.documentation.asJson)
     }

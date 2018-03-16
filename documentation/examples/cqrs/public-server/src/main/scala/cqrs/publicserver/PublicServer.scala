@@ -10,7 +10,7 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints.play.server.{CirceEntities, Endpoints, OptionalResponses, PlayComponents}
+import endpoints.play.server.{JsonEntitiesFromCodec, Endpoints, OptionalResponses, PlayComponents}
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -25,7 +25,7 @@ class PublicServer(
   protected val playComponents: PlayComponents
 ) extends PublicEndpoints
     with Endpoints
-    with CirceEntities
+    with JsonEntitiesFromCodec
     with OptionalResponses {
 
   import playComponents.executionContext

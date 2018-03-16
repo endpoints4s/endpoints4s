@@ -117,10 +117,10 @@ Here is how we define a communication protocol for these actions:
 
 Let’s explain this code line by line.
 
-First, we import the `Endpoints` and `CirceEntities` traits from the `endpoints.algebra` package.
+First, we import the `Endpoints` and `JsonEntitiesFromCirce` traits from the `endpoints.algebra` package.
 All the traits that live in the `algebra` package provide methods for *describing* HTTP endpoints.
 In our case, the [Endpoints](api:endpoints.algebra.Endpoints) trait provides the core methods
-while the (optional) [CirceEntities](api:endpoints.algebra.CirceEntities) trait allows us to
+while the (optional) [JsonEntitiesFromCodec](api:endpoints.algebra.circe.JsonEntitiesFromCodec) trait allows us to
 use [circe](https://circe.github.io/circe/) encoders and decoders to marshal JSON entities in
 requests and responses.
 
@@ -216,14 +216,14 @@ server as follows:
 Again, let’s detail line by line the above code.
 
 First, we import the [`Endpoints`](api:endpoints.play.server.Endpoints) and
-[`CirceEntities`](api:endpoints.play.server.CirceEntities) *interpreters* from the
+[`JsonEntitiesFromCodec`](api:endpoints.play.server.JsonEntitiesFromCodec) *interpreters* from the
 `endpoints.play.server` package. Interpreters always have the same name as the
 algebra interface they implement, but they are not located in the `endpoints.algebra`
 package. The `endpoints.play.server` package contains interpreters that rely
 on Play framework to implement an HTTP server.
 
 Then, we extend the `CommandsEndpoints` trait that we defined in the previous section and we
-mix the `Endpoints` and `CirceEntities` interpreters into it. That’s really the fact that
+mix the `Endpoints` and `JsonEntitiesFromCodec` interpreters into it. That’s really the fact that
 we mix the interpreters into our service description that is responsible of giving it a
 concrete semantics.
 
@@ -296,7 +296,7 @@ a client as follows:
 
 The pattern is similar to the code applying a server interpreter: we extend our `CommandsEndpoints`
 trait and mix the [`endpoints.play.client.Endpoints`](api:endpoints.play.client.Endpoints)
-and [`endpoints.play.client.CirceEntities`](api:endpoints.play.client.CirceEntities) interpreters to it.
+and [`endpoints.play.client.JsonEntitiesFromCodec`](api:endpoints.play.client.JsonEntitiesFromCodec) interpreters to it.
 
 The `commandsBaseUrl` and `wsClient` parameters (whose definition is not shown here for brevity)
 define the base URL of the commands service

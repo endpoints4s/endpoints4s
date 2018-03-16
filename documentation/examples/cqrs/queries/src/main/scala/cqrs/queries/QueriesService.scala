@@ -28,12 +28,12 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
   // --- internals
 
   //#event-log-client
-  import endpoints.play.client.{CirceEntities, Endpoints}
+  import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
 
   /** Client for the event log */
   private object eventLog
     extends Endpoints(commandsBaseUrl, wsClient)
-      with CirceEntities
+      with JsonEntitiesFromCodec
       with CommandsEndpoints
   //#event-log-client
 
