@@ -18,11 +18,7 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec { th
   def jsonResponse[A](implicit codec: Codec[String, A]): Response[A] = { response =>
     for {
       strictEntity <- response.entity.toStrict(settings.toStrictTimeout)
-      res <- codec.decode(settings.stringContentExtractor(strictEntity)) match {
-        case Left(err) => Future.successful(Left(err))
-        case Right(a)  => Future.successful(Right(a))
-      }
-    } yield res
+    } yield codec.decode(settings.stringContentExtractor(strictEntity))
   }
 
 }
