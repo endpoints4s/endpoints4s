@@ -23,12 +23,12 @@ trait JsonSchemaEntities
     documentedCodec match {
       case DocumentedRecord(fields) =>
         val fieldsSchema =
-          fields.map(f => Schema.Property(f.name, toSchema(f.tpe), f.isOptional))
+          fields.map(f => Schema.Property(f.name, toSchema(f.tpe), !f.isOptional, f.documentation))
         Schema.Object(fieldsSchema, None)
       case DocumentedCoProd(alternatives) =>
         val alternativesSchemas =
           alternatives.map { case (tag, record) =>
-            Schema.Object(Schema.Property(tag, toSchema(record), isRequired = true) :: Nil, None)
+            Schema.Object(Schema.Property(tag, toSchema(record), isRequired = true, description = None) :: Nil, None)
           }
         Schema.OneOf(alternativesSchemas, None)
       case Primitive(name) => Schema.Primitive(name)

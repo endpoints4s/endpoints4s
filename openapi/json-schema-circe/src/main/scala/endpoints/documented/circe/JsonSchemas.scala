@@ -53,14 +53,14 @@ trait JsonSchemas
       }
   }
 
-  def field[A](name: String)(implicit tpe: JsonSchema[A]): Record[A] =
+  def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
     JsonSchema(
       io.circe.Encoder.instance[A](a => Json.obj(name -> tpe.encoder.apply(a))),
       io.circe.Decoder.instance[A](cursor => tpe.decoder.tryDecode(cursor.downField(name)))
     )
 
   // FIXME Check that this is the correct way to model optional fields with circe
-  def optField[A](name: String)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
+  def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
     JsonSchema(
       io.circe.Encoder.instance[Option[A]](a => Json.obj(name -> io.circe.Encoder.encodeOption(tpe.encoder).apply(a))),
       io.circe.Decoder.instance[Option[A]](cursor => io.circe.Decoder.decodeOption(tpe.decoder).tryDecode(cursor.downField(name)))
