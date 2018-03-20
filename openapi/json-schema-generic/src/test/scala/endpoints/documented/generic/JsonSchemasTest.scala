@@ -30,8 +30,8 @@ class JsonSchemasTest extends FreeSpec {
   "case class" in {
     val expectedSchema =
       DocumentedRecord(
-        Field("bar", DocumentedGenericSchemas.stringJsonSchema, isOptional = false) ::
-        Field("baz", DocumentedGenericSchemas.intJsonSchema, isOptional = false) ::
+        Field("bar", DocumentedGenericSchemas.stringJsonSchema, isOptional = false, documentation = None) ::
+        Field("baz", DocumentedGenericSchemas.intJsonSchema, isOptional = false, documentation = None) ::
         Nil
       )
     assert(DocumentedGenericSchemas.Foo.schema == expectedSchema)
@@ -40,9 +40,9 @@ class JsonSchemasTest extends FreeSpec {
   "sealed trait" in {
     val expectedSchema =
       DocumentedCoProd(
-        ("QuuxA", DocumentedRecord(Field("s", DocumentedGenericSchemas.stringJsonSchema, isOptional = false) :: Nil)) ::
-        ("QuuxB", DocumentedRecord(Field("i", DocumentedGenericSchemas.intJsonSchema, isOptional = false) :: Nil)) ::
-        ("QuuxC", DocumentedRecord(Field("b", DocumentedGenericSchemas.booleanJsonSchema, isOptional = false) :: Nil)) ::
+        ("QuuxA", DocumentedRecord(Field("s", DocumentedGenericSchemas.stringJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
+        ("QuuxB", DocumentedRecord(Field("i", DocumentedGenericSchemas.intJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
+        ("QuuxC", DocumentedRecord(Field("b", DocumentedGenericSchemas.booleanJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         Nil
       )
     assert(DocumentedGenericSchemas.Quux.schema == expectedSchema)
