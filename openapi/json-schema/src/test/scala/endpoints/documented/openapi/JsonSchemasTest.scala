@@ -14,8 +14,8 @@ class JsonSchemasTest extends FreeSpec {
   "case class" in {
     val expectedSchema =
       DocumentedRecord(
-        Field("name", DocumentedJsonSchemas.stringJsonSchema, isOptional = false) ::
-        Field("age", DocumentedJsonSchemas.intJsonSchema, isOptional = false) ::
+        Field("name", DocumentedJsonSchemas.stringJsonSchema, isOptional = false, documentation = Some("Name of the user")) ::
+        Field("age", DocumentedJsonSchemas.intJsonSchema, isOptional = false, documentation = None) ::
         Nil
       )
     assert(DocumentedJsonSchemas.User.schema == expectedSchema)
@@ -24,8 +24,8 @@ class JsonSchemasTest extends FreeSpec {
   "sealed trait" in {
     val expectedSchema =
       DocumentedCoProd(
-        ("Bar", DocumentedRecord(Field("s", DocumentedJsonSchemas.stringJsonSchema, isOptional = false) :: Nil)) ::
-        ("Baz", DocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema, isOptional = false) :: Nil)) ::
+        ("Bar", DocumentedRecord(Field("s", DocumentedJsonSchemas.stringJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
+        ("Baz", DocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         Nil
       )
     assert(DocumentedJsonSchemas.Foo.schema == expectedSchema)

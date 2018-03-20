@@ -2,7 +2,7 @@ package endpoints
 package documented
 package openapi
 
-import endpoints.documented.openapi.model.Info
+import endpoints.documented.openapi.model.{Info, Schema}
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 
 class EndpointsTest extends WordSpec with Matchers with OptionValues {
@@ -26,6 +26,19 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Fields documentation" should {
+    "be exposed in JSON schema" in {
+      val expectedSchema =
+        Schema.Object(
+          Schema.Property("name", Schema.Primitive("string"), isRequired = true, description = Some("Name of the user")) ::
+          Schema.Property("age", Schema.Primitive("integer"), isRequired = true, description = None) ::
+          Nil,
+          None
+        )
+      Fixtures.toSchema(Fixtures.User.schema) shouldBe expectedSchema
+    }
+  }
+
 }
 
 trait Fixtures extends algebra.Endpoints {
@@ -40,7 +53,9 @@ trait Fixtures extends algebra.Endpoints {
 
 object Fixtures
   extends Fixtures
-    with Endpoints {
+    with algebra.JsonSchemasTest
+    with Endpoints
+    with JsonSchemaEntities {
 
   val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz)
 

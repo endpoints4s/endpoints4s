@@ -13,7 +13,7 @@ trait JsonSchemasTest extends JsonSchemas {
 
   object User {
     implicit val schema: JsonSchema[User] = (
-      field[String]("name") zip
+      field[String]("name", Some("Name of the user")) zip
       field[Int]("age")
     ).invmap((User.apply _).tupled)(Function.unlift(User.unapply))
   }

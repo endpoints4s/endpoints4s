@@ -47,7 +47,7 @@ val openapi =
       name := "endpoints-openapi",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
-    .dependsOn(`json-schema`)
+    .dependsOn(`json-schema` % "test->test;compile->compile")
     .jsConfigure(_.dependsOn(LocalProject("testsuiteJS") % Test))
     .jvmConfigure(_.dependsOn(LocalProject("testsuiteJVM") % Test))
     .dependsOnLocalCrossProjects("algebra")

@@ -22,7 +22,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
   object DocumentedJsonSchema {
 
     case class DocumentedRecord(fields: List[Field]) extends DocumentedJsonSchema
-    case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean)
+    case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
     case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)]) extends DocumentedJsonSchema
 
@@ -32,11 +32,11 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
-  def field[A](name: String)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
-    DocumentedRecord(Field(name, tpe, isOptional = false) :: Nil)
+  def field[A](name: String, documentation: Option[String] = None)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
+    DocumentedRecord(Field(name, tpe, isOptional = false, documentation) :: Nil)
 
-  def optField[A](name: String)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
-    DocumentedRecord(Field(name, tpe, isOptional = true) :: Nil)
+  def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
+    DocumentedRecord(Field(name, tpe, isOptional = true, documentation) :: Nil)
 
   def taggedRecord[A](recordA: DocumentedRecord, tag: String): DocumentedCoProd =
     DocumentedCoProd(List(tag -> recordA))

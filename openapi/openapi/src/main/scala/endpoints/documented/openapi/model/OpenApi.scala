@@ -158,7 +158,7 @@ sealed trait Schema
 object Schema {
   case class Object(properties: List[Property], description: Option[String]) extends Schema
   case class Array(elementType: Schema) extends Schema
-  case class Property(name: String, schema: Schema, isRequired: Boolean)
+  case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
   case class Primitive(name: String) extends Schema
   case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
 
@@ -176,7 +176,12 @@ object Schema {
           "type" -> Json.fromString("object") ::
           "properties" -> Json.fromFields(
             properties.map { property =>
-              property.name -> jsonEncoder.apply(property.schema)
+              val propertyFields =
+                property.description match {
+                  case None    => jsonEncoder.apply(property.schema)
+                  case Some(s) => Json.fromFields(("description" -> Json.fromString(s)) +: jsonEncoder.encodeObject(property.schema).toVector)
+                }
+              property.name -> propertyFields
             }
           ) ::
           Nil
