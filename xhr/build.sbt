@@ -6,7 +6,10 @@ val `xhr-client` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       name := "endpoints-xhr-client",
-      libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.9.1"
+      libraryDependencies ++= Seq(
+        "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
+      )
     )
     .dependsOn(LocalProject("algebraJS"))
 

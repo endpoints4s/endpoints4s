@@ -65,11 +65,14 @@ trait Assets extends algebra.Assets with Endpoints {
     endpoint(arrayBufferGet(url), arrayBufferResponse)
 
   private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
-    (assetRequest: AssetRequest) => {
-      val xhr = new XMLHttpRequest
-      xhr.open("GET", url.encode(assetRequest))
-      xhr.responseType = "arraybuffer"
-      (xhr, None)
+    new Request[AssetRequest] {
+      def apply(assetRequest: AssetRequest): (XMLHttpRequest, Option[js.Any]) = {
+        val xhr = new XMLHttpRequest
+        xhr.open("GET", url.encode(assetRequest))
+        xhr.responseType = "arraybuffer"
+        (xhr, None)
+      }
+      def href(assetRequest: AssetRequest): String = url.encode(assetRequest)
     }
 
   private def arrayBufferResponse: Response[ArrayBuffer] =
