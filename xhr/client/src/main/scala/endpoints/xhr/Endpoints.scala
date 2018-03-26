@@ -28,7 +28,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     * compatible with the `send` method of XMLHttpRequest.
     */
   // FIXME Use a representation that makes it easier to set the request Content-Type header according to its entity type
-  type Request[A] = js.Function1[A, (XMLHttpRequest, Option[js.Any])]
+  trait Request[A] {
+    def apply(a: A): (XMLHttpRequest, Option[js.Any])
+    def href(a: A): String
+  }
 
   /**
     * A function that, given information `A` and an XMLHttpRequest, returns
@@ -41,11 +44,18 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   lazy val emptyRequest: RequestEntity[Unit] = (_,_) => null
 
   def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    (abc: tuplerABC.Out) => {
-      val (ab, c) = tuplerABC.unapply(abc)
-      val (a, b) = tuplerAB.unapply(ab)
-      val xhr = makeXhr(method, url, a, headers, c)
-      (xhr, Some(entity(b, xhr)))
+    new Request[tuplerABC.Out] {
+      def apply(abc: tuplerABC.Out) = {
+        val (ab, c) = tuplerABC.unapply(abc)
+        val (a, b) = tuplerAB.unapply(ab)
+        val xhr = makeXhr(method, url, a, headers, c)
+        (xhr, Some(entity(b, xhr)))
+      }
+      def href(abc: tuplerABC.Out) = {
+        val (ab, _) = tuplerABC.unapply(abc)
+        val (a, _) = tuplerAB.unapply(ab)
+        url.encode(a)
+      }
     }
 
   private def makeXhr[A, B](method: String, url: Url[A], a: A, headers: RequestHeaders[B], b: B): XMLHttpRequest = {
@@ -74,7 +84,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     * A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
     */
-  type Endpoint[A, B] = js.Function1[A, Result[B]]
+  abstract class Endpoint[A, B](request: Request[A]) {
+    def apply(a: A): Result[B]
+    def href(a: A): String = request.href(a)
+  }
 
   /**
     * A value that eventually yields an `A`.
