@@ -1,4 +1,4 @@
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.21")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.8.0")
 
@@ -22,6 +22,9 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 
 addSbtPlugin("com.heroku" % "sbt-heroku" % "2.1.0") // Used by the example-documented project
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.6")
+
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
+
 
 lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 
