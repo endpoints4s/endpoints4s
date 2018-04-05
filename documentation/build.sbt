@@ -113,7 +113,7 @@ val `example-basic-shared` = {
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
-          targetDirectory = (target in Compile).value,
+          targetDirectory = (sourceManaged in Compile).value,
           generatedObjectName = "AssetsDigests",
           generatedPackage = Some("sample")
         )
@@ -203,7 +203,7 @@ val `example-cqrs-public-server` =
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
-          targetDirectory = (target in Compile).value,
+          targetDirectory = (sourceManaged in Compile).value,
           generatedObjectName = "BootstrapDigests",
           generatedPackage = Some("cqrs.publicserver"),
           assetsPath = identity
