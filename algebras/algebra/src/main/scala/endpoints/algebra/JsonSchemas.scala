@@ -1,4 +1,4 @@
-package endpoints.documented.algebra
+package endpoints.algebra
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds

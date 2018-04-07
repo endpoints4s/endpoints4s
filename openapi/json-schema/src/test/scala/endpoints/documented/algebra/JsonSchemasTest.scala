@@ -1,5 +1,7 @@
 package endpoints.documented.algebra
 
+import endpoints.algebra.JsonSchemas
+
 /**
   * This file doesn’t contain actual tests.
   *

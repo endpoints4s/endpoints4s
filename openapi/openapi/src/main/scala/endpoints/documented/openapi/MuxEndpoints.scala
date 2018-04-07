@@ -1,7 +1,7 @@
 package endpoints.documented.openapi
 
 import endpoints.algebra.MuxRequest
-import endpoints.documented.algebra
+import endpoints.algebra
 
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
 

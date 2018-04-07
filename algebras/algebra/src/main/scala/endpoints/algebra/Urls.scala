@@ -111,7 +111,7 @@ trait Urls {
   def staticPathSegment(segment: String): Path[Unit]
 
   /** Builds a path segment carrying an `A` information */
-  def segment[A](implicit s: Segment[A]): Path[A]
+  def segment[A](name: String = "")(implicit s: Segment[A]): Path[A]
 
   /** Chains the two paths */
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]

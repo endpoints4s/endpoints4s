@@ -6,10 +6,10 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 /**
-  * An interpreter for [[algebra.JsonSchemas]] that produces a JSON schema for
+  * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
   */
-trait JsonSchemas extends algebra.JsonSchemas {
+trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   import DocumentedJsonSchema._
 

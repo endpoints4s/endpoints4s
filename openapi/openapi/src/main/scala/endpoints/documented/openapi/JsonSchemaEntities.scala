@@ -2,6 +2,7 @@ package endpoints
 package documented
 package openapi
 
+import endpoints.algebra
 import endpoints.documented.openapi.model.{MediaType, Schema}
 
 /**

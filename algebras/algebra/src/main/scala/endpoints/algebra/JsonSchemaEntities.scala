@@ -1,13 +1,11 @@
-package endpoints
-package documented
-package algebra
+package endpoints.algebra
 
 /**
-  * Partially applies the [[JsonEntities]] algebra interface to fix the
+  * Partially applies the [[endpoints.algebra.JsonEntities]] algebra interface to fix the
   * `JsonRequest` and `JsonResponse` types to be `JsonSchema`.
   */
 trait JsonSchemaEntities
-  extends JsonEntities
+  extends endpoints.algebra.JsonEntities
     with JsonSchemas {
 
   type JsonRequest[A] = JsonSchema[A]

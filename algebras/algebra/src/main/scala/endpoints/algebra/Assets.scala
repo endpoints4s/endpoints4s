@@ -22,15 +22,15 @@ trait Assets extends Endpoints {
     * - `/assets/foo` => `foo`
     * - `/assets/foo/bar` => `foo/bar`
     */
-  def assetSegments: Path[AssetPath]
+  def assetSegments(name: String = ""): Path[AssetPath]
 
   /**
     * @param url URL description
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse]
+  def assetsEndpoint(url: Url[AssetPath], documentation: String = "", notFoundDocumentation: String = ""): Endpoint[AssetRequest, AssetResponse]
 
   /** The digests of the assets */
-  def digests: Map[String, String] // FIXME Move as a method parameter
+  def digests: Map[String, String]
 
 }

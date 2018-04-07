@@ -2,6 +2,7 @@ package endpoints.documented
 package openapi
 
 import endpoints.documented.openapi.model.MediaType
+import endpoints.algebra
 
 /**
   * Partial interpreter for [[algebra.JsonEntities]].

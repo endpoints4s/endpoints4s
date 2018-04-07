@@ -2,6 +2,7 @@ package endpoints
 package documented
 package generic
 
+import endpoints.algebra.JsonSchemas
 import shapeless.labelled.{FieldType, field => shapelessField}
 import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
@@ -9,7 +10,7 @@ import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, Labe
 import scala.language.implicitConversions
 
 /**
-  * Enriches [[algebra.JsonSchemas]] with two kinds of operations:
+  * Enriches [[JsonSchemas]] with two kinds of operations:
   *
   * - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic
   *   data type `A`;
@@ -42,7 +43,7 @@ import scala.language.implicitConversions
   * }}}
   *
   */
-trait JsonSchemas extends algebra.JsonSchemas {
+trait JsonSchemas extends JsonSchemas {
 
   trait GenericJsonSchema[A] {
     def jsonSchema: JsonSchema[A]

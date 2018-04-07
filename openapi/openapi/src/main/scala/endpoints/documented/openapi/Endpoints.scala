@@ -3,6 +3,7 @@ package documented
 package openapi
 
 import endpoints.documented.openapi.model._
+import endpoints.algebra
 
 /**
   * Interpreter for [[algebra.Endpoints]] that produces
@@ -15,8 +16,7 @@ trait Endpoints
 
   /**
     * @return An [[OpenApi]] instance for the given endpoint descriptions
-    *
-    * @param info General information about the documentation to generate
+    * @param info      General information about the documentation to generate
     * @param endpoints The endpoints to generate the documentation for
     */
   def openApi(info: Info)(endpoints: DocumentedEndpoint*): OpenApi = {
@@ -37,7 +37,11 @@ trait Endpoints
     */
   case class DocumentedEndpoint(path: String, item: PathItem)
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = {
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Option[String] = None,
+    description: Option[String] = None): Endpoint[A, B] = {
     val method =
       request.method match {
         case Get => "get"
@@ -47,10 +51,12 @@ trait Endpoints
       }
     val parameters =
       request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
-      request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)) ++
-      request.headers.value.map(h => Parameter(h, In.Header, required = true))
+        request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)) ++
+        request.headers.value.map(h => Parameter(h, In.Header, required = true))
     val operation =
       Operation(
+        summary,
+        description,
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
         response.map(r => r.status -> Response(r.documentation, r.content)).toMap

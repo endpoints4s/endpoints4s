@@ -46,6 +46,8 @@ object PathItem {
 }
 
 case class Operation(
+  summary: Option[String],
+  description: Option[String],
   parameters: List[Parameter],
   requestBody: Option[RequestBody],
   responses: Map[Int, Response]
@@ -55,6 +57,11 @@ object Operation {
 
   implicit val jsonEncoder: ObjectEncoder[Operation] =
     ObjectEncoder.instance { op =>
+      val optFields = List(
+        op.summary.map(x => "summary" -> x.asJson),
+        op.description.map(x => "description" -> x.asJson),
+        op.requestBody.map(x => "requestBody" -> x.asJson)
+      ).flatten
       val fields =
         "parameters" -> Json.fromValues(op.parameters.map(_.asJson)) ::
         (
@@ -70,14 +77,9 @@ object Operation {
             }
           )
         ) ::
-        Nil
+          optFields
 
-      val fieldsWithRequestEntity =
-        op.requestBody.map { requestBody =>
-          "requestBody" -> requestBody.asJson
-        }.fold(fields)(_ :: fields)
-
-      JsonObject.fromIterable(fieldsWithRequestEntity)
+      JsonObject.fromIterable(fields)
     }
 
 }

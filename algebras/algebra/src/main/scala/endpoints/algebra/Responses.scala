@@ -10,11 +10,11 @@ trait Responses {
   /**
     * Empty response.
     */
-  def emptyResponse: Response[Unit]
+  def emptyResponse(documentation: String): Response[Unit]
 
   /**
     * Text response.
     */
-  def textResponse: Response[String]
+  def textResponse(documentation: String): Response[String]
 
 }

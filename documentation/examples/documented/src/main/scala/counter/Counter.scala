@@ -8,6 +8,7 @@ package counter
 
 import java.util.concurrent.atomic.AtomicInteger
 
+import endpoints.algebra.JsonSchemaEntities
 import endpoints.play.server.{DefaultPlayComponents, HttpServer, PlayComponents}
 import play.core.server.ServerConfig
 
@@ -33,7 +34,7 @@ import endpoints.documented.{algebra, generic}
 
 trait CounterEndpoints
   extends algebra.Endpoints
-    with algebra.JsonSchemaEntities
+    with JsonSchemaEntities
     with generic.JsonSchemas {
 
   // HTTP endpoint for querying the current value of the counter. Uses the HTTP

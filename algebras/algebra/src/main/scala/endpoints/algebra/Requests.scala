@@ -1,10 +1,10 @@
 package endpoints.algebra
 
-import endpoints.Tupler
+import endpoints._
 
 import scala.language.higherKinds
 
-trait Requests extends Urls with Methods {
+trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupKSyntax {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]
@@ -28,6 +28,9 @@ trait Requests extends Urls with Methods {
     * Empty request.
     */
   def emptyRequest: RequestEntity[Unit]
+
+  implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders]
+  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
 
 
   /**

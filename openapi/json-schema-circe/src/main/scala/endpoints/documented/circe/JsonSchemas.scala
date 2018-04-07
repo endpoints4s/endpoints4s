@@ -2,6 +2,8 @@ package endpoints
 package documented
 package circe
 
+import endpoints.algebra
+import endpoints.algebra.JsonSchemas
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -9,7 +11,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 /**
-  * An interpreter for [[algebra.JsonSchemas]] that produces a circe codec.
+  * An interpreter for [[JsonSchemas]] that produces a circe codec.
   */
 trait JsonSchemas
   extends algebra.JsonSchemas {
