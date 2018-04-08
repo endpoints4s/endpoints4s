@@ -1,4 +1,4 @@
-package endpoints.documented.openapi
+package endpoints.openapi
 
 import endpoints.algebra.MuxRequest
 import endpoints.algebra

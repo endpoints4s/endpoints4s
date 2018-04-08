@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import endpoints.InvariantFunctor
+
 import scala.language.higherKinds
 
 /**
@@ -23,13 +25,11 @@ trait JsonEntities extends Endpoints {
   /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
   def jsonRequest[A : JsonRequest](documentation: Option[String] = None): RequestEntity[A]
 
-
   /** Type class defining how to represent the `A` information as a JSON response entity */
   type JsonResponse[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]` */
   def jsonResponse[A : JsonResponse](documentation: String): Response[A]
-
 }
 
 /**

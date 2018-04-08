@@ -1,5 +1,4 @@
 package endpoints
-package documented
 package openapi
 
 import scala.collection.generic.CanBuildFrom

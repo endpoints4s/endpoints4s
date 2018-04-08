@@ -12,4 +12,8 @@ trait Methods {
 
   def Delete: Method
 
+  def Patch: Method
+
+  def Options: Method
+
 }

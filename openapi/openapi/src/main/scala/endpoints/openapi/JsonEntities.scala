@@ -1,7 +1,7 @@
-package endpoints.documented
+package endpoints
 package openapi
 
-import endpoints.documented.openapi.model.MediaType
+import endpoints.openapi.model.MediaType
 import endpoints.algebra
 
 /**

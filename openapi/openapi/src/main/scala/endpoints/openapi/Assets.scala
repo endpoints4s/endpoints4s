@@ -1,8 +1,9 @@
 package endpoints
-package documented
 package openapi
 
 import endpoints.algebra
+
+import endpoints.openapi.model._
 
 /**
   * Interpreter for [[algebra.Assets]]

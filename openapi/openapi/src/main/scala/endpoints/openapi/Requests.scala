@@ -1,8 +1,7 @@
 package endpoints
-package documented
 package openapi
 
-import endpoints.documented.openapi.model.MediaType
+import endpoints.openapi.model.MediaType
 
 /**
   * Interpreter for [[algebra.Requests]].
@@ -18,6 +17,7 @@ trait Requests
     * @param value List of request header names (e.g. “Authorization”)
     */
   case class DocumentedHeaders(value: List[HeaderName])
+
   type HeaderName = String
 
   def emptyHeaders = DocumentedHeaders(Nil)
@@ -35,7 +35,7 @@ trait Requests
 
   /**
     * @param documentation Human readable documentation of the request entity
-    * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
+    * @param content       Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
     */
   case class DocumentedRequestEntity(documentation: Option[String], content: Map[String, MediaType])
 
@@ -48,5 +48,17 @@ trait Requests
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     DocumentedRequest(method, url, headers, entity)
+
+  implicit val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
+    def xmap[From, To](x: RequestEntity[From], map: From => To, contramap: To => From): RequestEntity[To] = x
+  }
+  implicit val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+    def xmap[From, To](x: RequestHeaders[From], map: From => To, contramap: To => From): RequestHeaders[To] = x
+  }
+  implicit val reqHeadersSemigroupK: endpoints.SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+    def add[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
+      DocumentedHeaders(fa.value ++ fb.value)
+  }
+
 
 }

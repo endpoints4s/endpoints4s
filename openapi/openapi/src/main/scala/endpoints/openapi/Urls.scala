@@ -1,5 +1,4 @@
 package endpoints
-package documented
 package openapi
 
 /**
@@ -61,6 +60,11 @@ trait Urls extends algebra.Urls {
     DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true)), Nil)
 
   type Url[A] = DocumentedUrl
+
+  implicit val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+    def xmap[From, To](url: Url[From], map: From => To, contramap: To => From): Url[To] = url
+  }
+
 
   /**
     * @param path Path template (e.g. “/user/{id}”)

@@ -2,6 +2,7 @@ package endpoints
 
 import scala.language.higherKinds
 
+/** Defines way to transform give type constructor F */
 trait InvariantFunctor[F[_]] {
 
   def xmap[From, To](f: F[From], map: From => To, contramap: To => From): F[To]

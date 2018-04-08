@@ -1,8 +1,7 @@
 package endpoints
-package documented
 package openapi
 
-import endpoints.documented.openapi.model._
+import endpoints.openapi.model._
 import endpoints.algebra
 
 /**
@@ -48,6 +47,8 @@ trait Endpoints
         case Put => "put"
         case Post => "post"
         case Delete => "delete"
+        case Options => "options"
+        case Patch => "patch"
       }
     val parameters =
       request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++

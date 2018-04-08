@@ -1,9 +1,8 @@
 package endpoints
-package documented
 package openapi
 
 import endpoints.algebra
-import endpoints.documented.openapi.model.{MediaType, Schema}
+import endpoints.openapi.model.{MediaType, Schema}
 
 /**
   * Interpreter for [[algebra.JsonSchemaEntities]] that produces a documentation of the JSON schemas.

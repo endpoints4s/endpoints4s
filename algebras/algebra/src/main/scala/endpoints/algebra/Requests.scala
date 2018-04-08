@@ -17,6 +17,9 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     */
   def emptyHeaders: RequestHeaders[Unit]
 
+  implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders]
+  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
+
 
   /** Information carried by a whole request (headers and entity) */
   type Request[A]
@@ -24,14 +27,12 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
   /** Information carried by request entity */
   type RequestEntity[A]
 
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
+
   /**
     * Empty request.
     */
   def emptyRequest: RequestEntity[Unit]
-
-  implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders]
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
-
 
   /**
     * Request for given parameters

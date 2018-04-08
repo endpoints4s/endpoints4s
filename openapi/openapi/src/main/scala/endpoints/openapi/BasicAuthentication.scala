@@ -1,5 +1,4 @@
 package endpoints
-package documented
 package openapi
 
 import endpoints.algebra.BasicAuthentication.Credentials

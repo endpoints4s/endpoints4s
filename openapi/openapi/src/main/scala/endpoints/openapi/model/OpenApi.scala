@@ -1,4 +1,4 @@
-package endpoints.documented.openapi.model
+package endpoints.openapi.model
 
 import io.circe.syntax._
 import io.circe.{Json, JsonObject, ObjectEncoder}

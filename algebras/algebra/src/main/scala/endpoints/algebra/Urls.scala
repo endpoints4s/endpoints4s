@@ -1,8 +1,8 @@
 package endpoints.algebra
 
-import endpoints.Tupler
+import endpoints.{InvariantFunctor, Tupler}
 
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -97,6 +97,9 @@ trait Urls {
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]
 
+  /** Implicit conversion to get rid of intellij errors when defining paths. Effectively should not be called.*/
+  implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
+
   /** Convenient methods for [[Path]]s. */
   implicit class PathOps[A](first: Path[A]) {
     /** Chains this path with the `second` constant path segment */
@@ -132,6 +135,9 @@ trait Urls {
     * An URL carrying an `A` information
     */
   type Url[A]
+
+  implicit def urlInvFunctor: InvariantFunctor[Url]
+
 
   /** Builds an URL from the given path and query string */
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]

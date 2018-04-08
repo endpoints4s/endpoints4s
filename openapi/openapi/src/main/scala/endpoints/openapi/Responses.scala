@@ -1,8 +1,7 @@
 package endpoints
-package documented
 package openapi
 
-import endpoints.documented.openapi.model.MediaType
+import endpoints.openapi.model.MediaType
 
 /**
   * Interpreter for [[algebra.Responses]]
@@ -23,4 +22,6 @@ trait Responses
 
   def textResponse(documentation: String): Response[String] = DocumentedResponse(200, documentation, Map("text/plain" -> MediaType(None))) :: Nil
 
+  def option[A](response: Response[A], notFoundDocumentation: String): Response[Option[A]] =
+    DocumentedResponse(404, notFoundDocumentation, content = Map.empty) :: response
 }
