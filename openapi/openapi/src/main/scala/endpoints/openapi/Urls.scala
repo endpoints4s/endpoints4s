@@ -17,17 +17,16 @@ trait Urls extends algebra.Urls {
     * @param name Name of the parameter
     * @param required Whether this parameter is required or not (MUST be true for path parameters)
     */
-  // TODO Add documentation about the type of the parameter
-  case class DocumentedParameter(name: String, required: Boolean)
+  case class DocumentedParameter(name: String, required: Boolean, description: Option[String])
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)
 
-  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = true)))
+  def qs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[A] =
+    DocumentedQueryString(List(DocumentedParameter(name, required = true, description)))
 
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = false)))
+  def optQs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
+    DocumentedQueryString(List(DocumentedParameter(name, required = false, description)))
 
   type QueryStringParam[A] = Unit
 
@@ -56,8 +55,8 @@ trait Urls extends algebra.Urls {
       first.queryParameters ++ second.queryParameters // (In practice this should be empty…)
     )
 
-  def segment[A](name: String)(implicit A: Segment[A]): Path[A] =
-    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true)), Nil)
+  def segment[A](name: String, description: Option[String])(implicit A: Segment[A]): Path[A] =
+    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, description)), Nil)
 
   type Url[A] = DocumentedUrl
 

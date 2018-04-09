@@ -57,14 +57,14 @@ trait Urls {
     * @param name Parameter’s name
     * @tparam A Type of the value carried by the parameter
     */
-  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A]
+  def qs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[A]
 
   /**
     * Builds a `QueryString` with one optional parameter of type `A`.
     *
     * @param name Parameter’s name
     */
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]]
+  def optQs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[Option[A]]
 
   /**
     * A single query string parameter carrying an `A` information.
@@ -114,7 +114,7 @@ trait Urls {
   def staticPathSegment(segment: String): Path[Unit]
 
   /** Builds a path segment carrying an `A` information */
-  def segment[A](name: String = "")(implicit s: Segment[A]): Path[A]
+  def segment[A](name: String = "", description: Option[String] = None)(implicit s: Segment[A]): Path[A]
 
   /** Chains the two paths */
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]

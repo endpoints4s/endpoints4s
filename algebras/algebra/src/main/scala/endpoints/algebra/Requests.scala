@@ -17,6 +17,10 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     */
   def emptyHeaders: RequestHeaders[Unit]
 
+  def header(name: String, description: Option[String] = None): RequestHeaders[String]
+
+  def optHeader(name: String, description: Option[String] = None): RequestHeaders[Option[String]]
+
   implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders]
   implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
 

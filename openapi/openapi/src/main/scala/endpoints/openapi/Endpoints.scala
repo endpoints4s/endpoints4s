@@ -51,9 +51,9 @@ trait Endpoints
         case Patch => "patch"
       }
     val parameters =
-      request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++
-        request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required)) ++
-        request.headers.value.map(h => Parameter(h, In.Header, required = true))
+      request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required, p.description)) ++
+        request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required, p.description)) ++
+        request.headers.value.map(h => Parameter(h.name, In.Header, required = h.required, h.description))
     val operation =
       Operation(
         summary,

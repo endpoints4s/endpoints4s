@@ -29,7 +29,7 @@ trait JsonEntities extends Endpoints {
   type JsonResponse[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]` */
-  def jsonResponse[A : JsonResponse](documentation: String): Response[A]
+  def jsonResponse[A : JsonResponse](documentation: String = ""): Response[A]
 }
 
 /**

@@ -16,11 +16,18 @@ trait Requests
   /**
     * @param value List of request header names (e.g. “Authorization”)
     */
-  case class DocumentedHeaders(value: List[HeaderName])
+  case class DocumentedHeaders(value: List[DocumentedHeader])
 
-  type HeaderName = String
+  case class DocumentedHeader(name: String, description: Option[String], required: Boolean)
 
   def emptyHeaders = DocumentedHeaders(Nil)
+
+  def header(name: String, description: Option[String]): RequestHeaders[String] =
+    DocumentedHeaders(List(DocumentedHeader(name, description, required = true)))
+
+  def optHeader(name: String, description: Option[String]): RequestHeaders[Option[String]] =
+    DocumentedHeaders(List(DocumentedHeader(name, description, required = false)))
+
 
   type Request[A] = DocumentedRequest
 

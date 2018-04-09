@@ -17,6 +17,7 @@ trait BasicAuthentication extends Endpoints {
     * In routing interpreters if header is not present it should match the route and return 401 Unauthorized.
     * @return
     */
+  //TODO we could implement this in algebra via header("Authorization).xmap() but how to enforce 401?
   private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials]
 
   /**
@@ -28,19 +29,26 @@ trait BasicAuthentication extends Endpoints {
   /**
     * Describes an endpoint protected by Basic HTTP authentication
     */
-  def authenticatedEndpoint[A, B, C, D, AB, DCred](
+  def authenticatedEndpoint[U, E, R, H, UE, DCred](
     method: Method,
-    url: Url[A],
-    requestEntity: RequestEntity[B] = emptyRequest,
-    requestHeaders: RequestHeaders[D] = emptyHeaders,
-    response: Response[C],
-    documentation: String = ""
+    url: Url[U],
+    response: Response[R],
+    requestEntity: RequestEntity[E] = emptyRequest,
+    requestHeaders: RequestHeaders[H] = emptyHeaders,
+    unauthenticatedDoc: String = "",
+    summary: Option[String] = None,
+    description: Option[String] = None
   )(implicit
-    tuplerAB: Tupler.Aux[A, B, AB],
-    tuplerDCred: Tupler.Aux[D, Credentials, DCred],
-    tuplerABC: Tupler[AB, DCred]
-  ): Endpoint[tuplerABC.Out, Option[C]] =
-    endpoint(request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader), authenticated(response, documentation))
+    tuplerAB: Tupler.Aux[U, E, UE],
+    tuplerDCred: Tupler.Aux[H, Credentials, DCred],
+    tuplerABDCred: Tupler[UE, DCred]
+  ): Endpoint[tuplerABDCred.Out, Option[R]] =
+    endpoint(
+      request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader),
+      authenticated(response, unauthenticatedDoc),
+      summary,
+      description
+    )
 
 }
 

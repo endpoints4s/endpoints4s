@@ -113,7 +113,8 @@ case class Response(
 case class Parameter(
   name: String,
   in: In,
-  required: Boolean
+  required: Boolean,
+  description: Option[String]
 )
 
 object Parameter {
@@ -127,8 +128,9 @@ object Parameter {
           case In.Header => "header"
           case In.Path => "path"
           case In.Query => "query"
-        }) ::
-        Nil
+        }) :: List(
+          parameter.description.map(s => "description" -> Json.fromString(s))
+        ).flatten
       JsonObject.fromIterable(
         if (parameter.required) "required" -> Json.fromBoolean(true) :: fields
         else fields

@@ -16,10 +16,10 @@ trait Assets
   type AssetPath = Nothing
   type AssetResponse = Nothing
 
-  def assetSegments(name: String): Path[AssetPath] =
-    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true)), Nil)
+  def assetSegments(name: String, description: Option[String]): Path[AssetPath] =
+    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, description)), Nil)
 
-  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String = ""): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyHeaders, emptyRequest),
       DocumentedResponse(200, documentation, Map.empty) ::

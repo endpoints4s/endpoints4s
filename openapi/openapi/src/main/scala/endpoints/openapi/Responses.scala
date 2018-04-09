@@ -13,7 +13,7 @@ trait Responses
 
   /**
     * @param status Response status code (e.g. 200)
-    * @param documentation Human readable documentation
+    * @param documentation Human readable documentation. Not optional because its required by openapi
     * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
     */
   case class DocumentedResponse(status: Int, documentation: String, content: Map[String, MediaType])
