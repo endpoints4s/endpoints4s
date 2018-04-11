@@ -5,6 +5,8 @@ val testsuite =
   crossProject.crossType(CrossType.Pure).in(file("testsuite"))
     .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
+      // testsuite project, so we don't need coverage here.
+      coverageEnabled := false,
       name := "endpoints-testsuite",
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,

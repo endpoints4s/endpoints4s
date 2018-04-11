@@ -6,6 +6,8 @@ val `xhr-client` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       name := "endpoints-xhr-client",
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false,
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % "0.9.1",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
@@ -19,6 +21,8 @@ val `xhr-client-faithful` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       name := "endpoints-xhr-client-faithful",
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false,
       libraryDependencies += "org.julienrf" %%% "faithful" % "1.0.0"
     )
     .dependsOn(`xhr-client`)
@@ -29,6 +33,8 @@ val `xhr-client-circe` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       name := "endpoints-xhr-client-circe",
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
     )
     .dependsOn(`xhr-client`, LocalProject("algebra-circeJS"))
