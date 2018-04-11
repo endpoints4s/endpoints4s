@@ -1,7 +1,6 @@
 package endpoints.testsuite.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.algebra.BasicAuthentication
 import endpoints.testsuite.OptionalResponsesTestApi
 
 trait OptionalResponsesTestSuite[T <: OptionalResponsesTestApi] extends ClientTestBase[T] {

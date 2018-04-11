@@ -12,4 +12,7 @@ trait Methods extends algebra.Methods {
   def Put: String = "PUT"
 
   def Delete: String = "DELETE"
+
+  def Patch: String = "PATCH"
+
 }

@@ -17,5 +17,8 @@ trait Methods extends algebra.Methods {
   def Put = HttpMethods.PUT
 
   def Delete = HttpMethods.DELETE
+
+  def Patch = HttpMethods.PATCH
+
 }
 
