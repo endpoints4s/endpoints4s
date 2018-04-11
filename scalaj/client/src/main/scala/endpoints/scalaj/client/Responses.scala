@@ -3,8 +3,6 @@ package endpoints.scalaj.client
 import scalaj.http.HttpResponse
 import endpoints.algebra
 
-import scala.util.{Failure, Success, Try}
-
 trait Responses extends algebra.Responses {
 
    type Response[A] = HttpResponse[String] => Either[Throwable, A]

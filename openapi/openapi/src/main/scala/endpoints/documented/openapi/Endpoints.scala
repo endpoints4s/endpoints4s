@@ -44,6 +44,7 @@ trait Endpoints
         case Put => "put"
         case Post => "post"
         case Delete => "delete"
+        case Patch => "patch"
       }
     val parameters =
       request.url.pathParameters.map(p => Parameter(p.name, In.Path, p.required)) ++

@@ -12,5 +12,6 @@ trait Methods extends endpoints.algebra.Methods {
   case object Post extends Method
   case object Put extends Method
   case object Delete extends Method
+  case object Patch extends Method
 
 }

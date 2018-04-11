@@ -20,4 +20,6 @@ trait Methods extends endpoints.algebra.Methods {
 
   def Delete: Method = delegate.Delete
 
+  def Patch: Method = delegate.Patch
+
 }

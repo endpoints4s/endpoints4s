@@ -4,14 +4,16 @@ import endpoints.algebra
 
 trait Methods extends algebra.Methods {
 
-   type Method = String
+  type Method = String
 
-   def Get: Method = "GET"
+  def Get: Method = "GET"
 
-   def Post: Method = "POST"
+  def Post: Method = "POST"
 
-   def Put: Method = "PUT"
+  def Put: Method = "PUT"
 
-   def Delete: Method = "DELETE"
+  def Delete: Method = "DELETE"
+
+  def Patch: Method = "PATCH"
 
 }
