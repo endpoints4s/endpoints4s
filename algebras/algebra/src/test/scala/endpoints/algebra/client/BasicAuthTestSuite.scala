@@ -1,8 +1,7 @@
-package endpoints.testsuite.client
+package endpoints.algebra.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.algebra.BasicAuthentication
-import endpoints.testsuite.BasicAuthTestApi
+import endpoints.algebra.{BasicAuthTestApi, BasicAuthentication}
 
 trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
 

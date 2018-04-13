@@ -22,15 +22,15 @@ trait Assets extends Endpoints {
     * - `/assets/foo` => `foo`
     * - `/assets/foo/bar` => `foo/bar`
     */
-  def assetSegments(name: String = "", description: Option[String] = None): Path[AssetPath]
+  def assetSegments(name: String = "", docs: Documentation = None): Path[AssetPath]
 
   /**
     * @param url URL description
-    * @param documentation description of a response when asset is found. Required by openapi
-    * @param notFoundDocumentation description of a not found asset response. Required by openapi
+    * @param docs description of a response when asset is found. Required by openapi
+    * @param notFoundDocs description of a not found asset response. Required by openapi
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath], documentation: String = "", notFoundDocumentation: String = ""): Endpoint[AssetRequest, AssetResponse]
+  def assetsEndpoint(url: Url[AssetPath], docs: Documentation = None, notFoundDocs: Documentation = None): Endpoint[AssetRequest, AssetResponse]
 
   /** The digests of the assets */
   def digests: Map[String, String]

@@ -38,8 +38,8 @@ trait Endpoints extends Requests with Responses {
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Option[String] = None,
-    description: Option[String] = None
+    summary: Documentation = None,
+    description: Documentation = None
   ): Endpoint[A, B]
 
 }

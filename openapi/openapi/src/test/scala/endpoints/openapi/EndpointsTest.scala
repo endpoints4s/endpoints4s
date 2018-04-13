@@ -42,11 +42,11 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
 trait Fixtures extends algebra.Endpoints {
 
-  val foo = endpoint(get(path / "foo"), emptyResponse("Foo response"))
+  val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")))
 
-  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse("Bar response"))
+  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse(Some("Bar response")))
 
-  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse("Baz response"))
+  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")))
 
 }
 

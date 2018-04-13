@@ -1,7 +1,8 @@
-package endpoints.testsuite.client
+package endpoints.algebra.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.testsuite.{Address, JsonFromCodecTestApi, User}
+import endpoints.algebra.JsonFromCodecTestApi
+import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
 trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T] {
 

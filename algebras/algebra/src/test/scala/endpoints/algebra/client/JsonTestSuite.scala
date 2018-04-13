@@ -1,13 +1,10 @@
-package endpoints.testsuite.client
+package endpoints.algebra.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.testsuite.{Address, JsonTestApi, User}
+import endpoints.algebra.{Address, JsonTestApi, User}
 
 
 trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
-
-  import io.circe.generic.auto._
-  import io.circe.syntax._
 
   def clientTestSuite() = {
 
@@ -16,10 +13,9 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
       "return server json response" in {
 
         val user = User("name2", 19)
-        val userStr = user.asJson.noSpaces
+        val userStr = """{"name":"name2","age":19}"""
         val address = Address("avenue1", "NY")
-        val addressStr = address.asJson.noSpaces
-
+        val addressStr = """{"street":"avenue1","city":"NY"}"""
         wireMockServer.stubFor(post(urlEqualTo("/user")).withRequestBody(equalToJson(userStr))
           .willReturn(aResponse()
             .withStatus(200)

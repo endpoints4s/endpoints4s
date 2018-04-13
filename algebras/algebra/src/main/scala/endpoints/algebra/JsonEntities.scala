@@ -23,13 +23,13 @@ trait JsonEntities extends Endpoints {
   type JsonRequest[A]
 
   /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
-  def jsonRequest[A : JsonRequest](documentation: Option[String] = None): RequestEntity[A]
+  def jsonRequest[A : JsonRequest](docs: Documentation = None): RequestEntity[A]
 
   /** Type class defining how to represent the `A` information as a JSON response entity */
   type JsonResponse[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]` */
-  def jsonResponse[A : JsonResponse](documentation: String = ""): Response[A]
+  def jsonResponse[A : JsonResponse](docs: Documentation = None): Response[A]
 }
 
 /**

@@ -2,7 +2,7 @@ package endpoints
 package openapi
 
 import endpoints.algebra
-
+import endpoints.algebra.Documentation
 import endpoints.openapi.model._
 
 /**
@@ -19,11 +19,11 @@ trait Assets
   def assetSegments(name: String, description: Option[String]): Path[AssetPath] =
     DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, description)), Nil)
 
-  def assetsEndpoint(url: Url[AssetPath], documentation: String, notFoundDocumentation: String = ""): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyHeaders, emptyRequest),
-      DocumentedResponse(200, documentation, Map.empty) ::
-      DocumentedResponse(404, notFoundDocumentation, Map.empty) ::
+      DocumentedResponse(200, docs.getOrElse(""), Map.empty) ::
+      DocumentedResponse(404, notFoundDocs.getOrElse(""), Map.empty) ::
       Nil
     )
 

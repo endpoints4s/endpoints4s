@@ -3,6 +3,7 @@ package openapi
 
 import endpoints.openapi.model._
 import endpoints.algebra
+import endpoints.algebra.Documentation
 
 /**
   * Interpreter for [[algebra.Endpoints]] that produces
@@ -39,8 +40,8 @@ trait Endpoints
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Option[String] = None,
-    description: Option[String] = None): Endpoint[A, B] = {
+    summary: Documentation = None,
+    description: Documentation = None): Endpoint[A, B] = {
     val method =
       request.method match {
         case Get => "get"

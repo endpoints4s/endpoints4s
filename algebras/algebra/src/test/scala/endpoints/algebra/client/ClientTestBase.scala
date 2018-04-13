@@ -1,4 +1,4 @@
-package endpoints.testsuite.client
+package endpoints.algebra.client
 
 import java.net.ServerSocket
 

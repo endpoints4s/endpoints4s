@@ -1,6 +1,7 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.Documentation
 import endpoints.openapi.model.MediaType
 
 /**
@@ -18,10 +19,10 @@ trait Responses
     */
   case class DocumentedResponse(status: Int, documentation: String, content: Map[String, MediaType])
 
-  def emptyResponse(documentation: String): Response[Unit] = DocumentedResponse(200, documentation, Map.empty) :: Nil
+  def emptyResponse(docs: Documentation): Response[Unit] = DocumentedResponse(200, docs.getOrElse(""), Map.empty) :: Nil
 
-  def textResponse(documentation: String): Response[String] = DocumentedResponse(200, documentation, Map("text/plain" -> MediaType(None))) :: Nil
+  def textResponse(docs: Documentation): Response[String] = DocumentedResponse(200, docs.getOrElse(""), Map("text/plain" -> MediaType(None))) :: Nil
 
-  def option[A](response: Response[A], notFoundDocumentation: String): Response[Option[A]] =
-    DocumentedResponse(404, notFoundDocumentation, content = Map.empty) :: response
+  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+    DocumentedResponse(404, notFoundDocs.getOrElse(""), content = Map.empty) :: response
 }

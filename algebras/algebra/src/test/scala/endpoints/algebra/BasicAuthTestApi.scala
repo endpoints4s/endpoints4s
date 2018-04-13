@@ -1,4 +1,4 @@
-package endpoints.testsuite
+package endpoints.algebra
 
 import endpoints.algebra
 
@@ -8,8 +8,7 @@ trait BasicAuthTestApi extends algebra.Endpoints with algebra.BasicAuthenticatio
   val protectedEndpoint = authenticatedEndpoint(
     Get,
     path / "users",
-    emptyRequest,
-    textResponse
+    textResponse()
   )
 
 }

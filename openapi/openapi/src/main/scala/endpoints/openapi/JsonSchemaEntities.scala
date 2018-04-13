@@ -2,6 +2,7 @@ package endpoints
 package openapi
 
 import endpoints.algebra
+import endpoints.algebra.Documentation
 import endpoints.openapi.model.{MediaType, Schema}
 
 /**
@@ -12,11 +13,11 @@ trait JsonSchemaEntities
     with Endpoints
     with JsonSchemas {
 
-  def jsonRequest[A](documentation: Option[String])(implicit codec: JsonSchema[A]): Option[DocumentedRequestEntity] =
-    Some(DocumentedRequestEntity(documentation, Map("application/json" -> MediaType(Some(toSchema(codec))))))
+  def jsonRequest[A](docs: Documentation)(implicit codec: JsonSchema[A]): Option[DocumentedRequestEntity] =
+    Some(DocumentedRequestEntity(docs, Map("application/json" -> MediaType(Some(toSchema(codec))))))
 
-  def jsonResponse[A](documentation: String)(implicit codec: JsonSchema[A]): List[DocumentedResponse] =
-    DocumentedResponse(200, documentation, Map("application/json" -> MediaType(Some(toSchema(codec))))) :: Nil
+  def jsonResponse[A](docs: Documentation)(implicit codec: JsonSchema[A]): List[DocumentedResponse] =
+    DocumentedResponse(200, docs.getOrElse(""), Map("application/json" -> MediaType(Some(toSchema(codec))))) :: Nil
 
   def toSchema(documentedCodec: DocumentedJsonSchema): Schema = {
     import DocumentedJsonSchema._

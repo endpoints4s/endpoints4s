@@ -1,6 +1,8 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.Documentation
+
 /**
   * Interpreter for [[algebra.Urls]]
   */
@@ -22,11 +24,11 @@ trait Urls extends algebra.Urls {
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)
 
-  def qs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[A] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = true, description)))
+  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
+    DocumentedQueryString(List(DocumentedParameter(name, required = true, docs)))
 
-  def optQs[A](name: String, description: Option[String])(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = false, description)))
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
+    DocumentedQueryString(List(DocumentedParameter(name, required = false, docs)))
 
   type QueryStringParam[A] = Unit
 
@@ -55,8 +57,8 @@ trait Urls extends algebra.Urls {
       first.queryParameters ++ second.queryParameters // (In practice this should be empty…)
     )
 
-  def segment[A](name: String, description: Option[String])(implicit A: Segment[A]): Path[A] =
-    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, description)), Nil)
+  def segment[A](name: String, docs: Documentation)(implicit A: Segment[A]): Path[A] =
+    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, docs)), Nil)
 
   type Url[A] = DocumentedUrl
 

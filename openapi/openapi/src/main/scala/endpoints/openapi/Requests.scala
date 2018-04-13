@@ -1,6 +1,7 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.Documentation
 import endpoints.openapi.model.MediaType
 
 /**
@@ -22,11 +23,11 @@ trait Requests
 
   def emptyHeaders = DocumentedHeaders(Nil)
 
-  def header(name: String, description: Option[String]): RequestHeaders[String] =
-    DocumentedHeaders(List(DocumentedHeader(name, description, required = true)))
+  def header(name: String, docs: Documentation): RequestHeaders[String] =
+    DocumentedHeaders(List(DocumentedHeader(name, docs, required = true)))
 
-  def optHeader(name: String, description: Option[String]): RequestHeaders[Option[String]] =
-    DocumentedHeaders(List(DocumentedHeader(name, description, required = false)))
+  def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] =
+    DocumentedHeaders(List(DocumentedHeader(name, docs, required = false)))
 
 
   type Request[A] = DocumentedRequest

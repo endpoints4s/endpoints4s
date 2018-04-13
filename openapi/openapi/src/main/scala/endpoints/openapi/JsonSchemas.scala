@@ -1,6 +1,8 @@
 package endpoints
 package openapi
 
+import endpoints.algebra.Documentation
+
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
@@ -31,11 +33,11 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   }
 
-  def field[A](name: String, documentation: Option[String] = None)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
-    DocumentedRecord(Field(name, tpe, isOptional = false, documentation) :: Nil)
+  def field[A](name: String, docs: Documentation)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
+    DocumentedRecord(Field(name, tpe, isOptional = false, docs) :: Nil)
 
-  def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
-    DocumentedRecord(Field(name, tpe, isOptional = true, documentation) :: Nil)
+  def optField[A](name: String, docs: Documentation)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
+    DocumentedRecord(Field(name, tpe, isOptional = true, docs) :: Nil)
 
   def taggedRecord[A](recordA: DocumentedRecord, tag: String): DocumentedCoProd =
     DocumentedCoProd(List(tag -> recordA))
