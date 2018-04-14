@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import java.nio.charset.{Charset, StandardCharsets}
+
 import endpoints._
 
 import scala.language.higherKinds
@@ -36,7 +38,13 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
   /**
     * Empty request.
     */
+  //TODO rename to emptyBody
   def emptyRequest: RequestEntity[Unit]
+
+  /**
+    * Request with string body.
+    */
+  def textRequest(encoding: Charset = StandardCharsets.UTF_8, docs: Documentation = None): RequestEntity[String]
 
   /**
     * Request for given parameters

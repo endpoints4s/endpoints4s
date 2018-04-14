@@ -1,5 +1,8 @@
 package endpoints.algebra
 
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
+
 import endpoints.algebra
 
 trait EndpointsTestApi extends algebra.Endpoints {
@@ -33,7 +36,17 @@ trait EndpointsTestApi extends algebra.Endpoints {
     textResponse()
   )
 
-//  val url1 = (path / segment[Long]()).xmap[String](_.toString, _.toLong)
+  val url1 = (path / "xmapUrlEndpoint" / segment[Long]() : Url[Long]).xmap[String](_.toString, _.toLong)
+  val xmapUrlEndpoint = endpoint(
+    get(url1),
+    textResponse()
+  )
 
+  val dateTimeFormatter = DateTimeFormatter.ISO_DATE
+  val reqBody1 = textRequest().xmap[LocalDate](s => LocalDate.parse(s, dateTimeFormatter), d => dateTimeFormatter.format(d))
+  val xmapReqBodyEndpoint = endpoint(
+    post(path / "xmapReqBodyEndpoint", reqBody1),
+    textResponse()
+  )
 
 }

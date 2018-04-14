@@ -1,8 +1,10 @@
 package endpoints
 package openapi
 
+import java.nio.charset.Charset
+
 import endpoints.algebra.Documentation
-import endpoints.openapi.model.MediaType
+import endpoints.openapi.model.{MediaType, Schema}
 
 /**
   * Interpreter for [[algebra.Requests]].
@@ -48,6 +50,10 @@ trait Requests
   case class DocumentedRequestEntity(documentation: Option[String], content: Map[String, MediaType])
 
   def emptyRequest = None
+
+  override def textRequest(encoding: Charset, docs: Documentation): Option[DocumentedRequestEntity] = Some(
+    DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.Primitive("string")))))
+  )
 
   def request[A, B, C, AB](
     method: Method,

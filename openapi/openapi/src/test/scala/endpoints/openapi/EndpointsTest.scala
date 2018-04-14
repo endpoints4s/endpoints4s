@@ -4,6 +4,7 @@ import endpoints.algebra
 import org.scalatest.{Matchers, OptionValues, WordSpec}
 import endpoints.openapi.model._
 
+//TODO cover tests from algebra package
 class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
   "Path parameters" should {
@@ -38,6 +39,16 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Text response" should {
+    "be properly encoded" in {
+      val reqBody = Fixtures.documentation.paths("/textRequestEndpoint").operations("post").requestBody
+
+      reqBody shouldBe defined
+      reqBody.value.description.value shouldEqual "Text Req"
+      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string")
+    }
+  }
+
 }
 
 trait Fixtures extends algebra.Endpoints {
@@ -48,6 +59,8 @@ trait Fixtures extends algebra.Endpoints {
 
   val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")))
 
+  val textRequestEndpoint = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
+
 }
 
 object Fixtures
@@ -56,6 +69,6 @@ object Fixtures
     with Endpoints
     with JsonSchemaEntities {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz)
+  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndpoint)
 
 }

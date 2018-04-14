@@ -5,6 +5,10 @@ import mill.scalalib._
 import mill.scalalib.publish._
 import mill.scalajslib._
 import ammonite.ops.up
+import mill.define.{Discover, ExternalModule}
+import mill.eval.Evaluator
+
+import scala.xml.XML
 
 //val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
 val `scala 2.10 to 2.12` = Seq("2.12.4")
@@ -70,10 +74,12 @@ object algebras extends Module {
         ivy"com.github.tomakehurst:wiremock:2.6.0"
       )
     }
+
   }
 
   class AlgebraCirceModule(val crossVersion: String) extends EndpointsModule {
     override def artifactName = s"endpoints-algebra-circe"
+
     override def millSourcePath = super.millSourcePath / up / "algebra-circe"
 
     override def ivyDeps = Agg(
@@ -84,17 +90,21 @@ object algebras extends Module {
 
     object test extends Tests with EndpointsTests {
       override def moduleDeps = super.moduleDeps ++ Seq(algebras.algebra(crossVersion).test)
+
       override def scalacPluginIvyDeps = super.scalacPluginIvyDeps() ++ Agg(
         ivy"org.scalamacros:::paradise:2.1.0"
       )
+
       override def ivyDeps = super.ivyDeps() ++ Agg(
         ivy"io.circe::circe-generic:$circeVersion"
       )
     }
+
   }
 
   class AlgebraPlayjsonModule(val crossVersion: String) extends EndpointsModule {
     override def artifactName = s"endpoints-algebra-playjson"
+
     override def millSourcePath = super.millSourcePath / up / "algebra-playjson"
 
     override def ivyDeps = Agg(ivy"com.typesafe.play::play-json:$playVersion")
@@ -104,6 +114,7 @@ object algebras extends Module {
     object test extends Tests with EndpointsTests {
       override def moduleDeps = super.moduleDeps ++ Seq(algebras.algebra(crossVersion).test)
     }
+
   }
 
 }
@@ -120,6 +131,7 @@ object openapi extends Module {
     override def millSourcePath = super.millSourcePath / up / "json-schema"
 
     object test extends Tests with EndpointsTests
+
   }
 
   class OpenApiModule(val crossVersion: String) extends EndpointsModule {
@@ -139,3 +151,20 @@ object openapi extends Module {
 
 }
 
+def genidea(ev: Evaluator[Any]) = T.command {
+  mill.scalalib.GenIdeaImpl(
+    implicitly,
+    ev.rootModule,
+    ev.rootModule.millDiscover
+  )
+  import ammonite.ops._
+  val files = (ls ! pwd / ".idea_modules")
+    .filter(_.toString().endsWith("test.iml"))
+  files.foreach { file =>
+    val content = read(file)
+    val regex = """<content url="file://\$MODULE_DIR\$/\.\./(.*)">""".r
+    val replacement = """<content url="file://\$MODULE_DIR\$/\.\./$1/src/test">"""
+    val newContent = regex.replaceFirstIn(content, replacement)
+    write.over(file, newContent)
+  }
+}

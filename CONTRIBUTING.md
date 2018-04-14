@@ -57,3 +57,11 @@ $ sbt +manual/ghpagesPushSite
 ~~~ sh
 +++ 2.12.4 example-basic-play-server/run
 ~~~
+
+## Working with mill
+
+~~~sh
+mill genidea #generate idea project config
+mill all __.compile #compile everything
+mill all __.test #test everything
+~~~
