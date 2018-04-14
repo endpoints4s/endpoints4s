@@ -54,7 +54,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
       "properly handle xmaped headers" in {
         val response = UUID.randomUUID().toString
-        wireMockServer.stubFor(get(urlEqualTo("/joinedHeadersEndpoint"))
+        wireMockServer.stubFor(get(urlEqualTo("/xmapHeadersEndpoint"))
           .withHeader("C", equalTo("11"))
           .willReturn(aResponse()
             .withStatus(200)
@@ -79,7 +79,6 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         val date = LocalDate.parse(dateString)
         wireMockServer.stubFor(post(urlEqualTo("/xmapReqBodyEndpoint"))
           .withRequestBody(equalTo(dateString))
-          .withHeader("C", equalTo("11"))
           .willReturn(aResponse()
             .withStatus(200)
             .withBody(response)))

@@ -111,7 +111,7 @@ trait Urls {
   }
 
   /** Builds a static path segment */
-  def staticPathSegment(segment: String): Path[Unit]
+  def  staticPathSegment(segment: String): Path[Unit]
 
   /** Builds a path segment carrying an `A` information */
   //TODO is this name default ok?

@@ -44,7 +44,7 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
   /**
     * Request with string body.
     */
-  def textRequest(encoding: Charset = StandardCharsets.UTF_8, docs: Documentation = None): RequestEntity[String]
+  def textRequest(docs: Documentation = None): RequestEntity[String]
 
   /**
     * Request for given parameters

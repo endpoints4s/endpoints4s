@@ -51,7 +51,7 @@ trait Requests
 
   def emptyRequest = None
 
-  override def textRequest(encoding: Charset, docs: Documentation): Option[DocumentedRequestEntity] = Some(
+  override def textRequest(docs: Documentation): Option[DocumentedRequestEntity] = Some(
     DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.Primitive("string")))))
   )
 
