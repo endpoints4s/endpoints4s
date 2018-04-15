@@ -33,12 +33,12 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     case (None, req) => req
   }
 
-  implicit val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
     override def xmap[From, To](f: (From, WSRequest) => WSRequest, map: From => To, contramap: To => From): (To, WSRequest) => WSRequest =
       (to, req) => f(contramap(to), req)
   }
 
-  implicit val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
     override def add[A, B](fa: (A, WSRequest) => WSRequest, fb: (B, WSRequest) => WSRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, WSRequest) => WSRequest =
       (out, req) => {
         val (a, b) = tupler.unapply(out)
@@ -63,7 +63,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   def textRequest(docs: Documentation): (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
-  implicit val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
     override def xmap[From, To](f: (From, WSRequest) => WSRequest, map: From => To, contramap: To => From): (To, WSRequest) => WSRequest =
       (to, req) => f(contramap(to), req)
   }

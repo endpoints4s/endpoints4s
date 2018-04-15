@@ -19,14 +19,14 @@ class Endpoints(val settings: EndpointsSettings)
 
   type RequestHeaders[A] = (A, List[HttpHeader]) => List[HttpHeader]
 
-  implicit val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+  implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
     override def xmap[From, To](f: (From, List[HttpHeader]) => List[HttpHeader], map: From => To, contramap: To => From): (To, List[HttpHeader]) => List[HttpHeader] = {
       (to, headers) =>
         f(contramap(to), headers)
     }
   }
 
-  implicit val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
     override def add[A, B](fa: (A, List[HttpHeader]) => List[HttpHeader], fb: (B, List[HttpHeader]) => List[HttpHeader])(implicit tupler: Tupler[A, B]): (tupler.Out, List[HttpHeader]) => List[HttpHeader] =
       (tuplerOut, headers) => {
         val (left, right) = tupler.unapply(tuplerOut)
@@ -60,7 +60,7 @@ class Endpoints(val settings: EndpointsSettings)
 
   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
-  implicit val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity]{
+  implicit lazy val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity]{
     override def xmap[From, To](f: (From, HttpRequest) => HttpRequest, map: From => To, contramap: To => From): (To, HttpRequest) => HttpRequest = {
       (to, req) => f(contramap(to), req)
     }

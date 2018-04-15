@@ -3,7 +3,16 @@ package endpoints.akkahttp.server
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.{Matchers, WordSpec}
+
 import scala.language.reflectiveCalls
+import endpoints.algebra
+import endpoints.algebra.JsonFromCodecTestApi
+
+class EndpointsTestApi extends Endpoints
+  with BasicAuthentication
+  with algebra.BasicAuthTestApi
+  with algebra.EndpointsTestApi
+//  with JsonFromCodecTestApi
 
 
 //TODO use EndpointsApi from algebra tests

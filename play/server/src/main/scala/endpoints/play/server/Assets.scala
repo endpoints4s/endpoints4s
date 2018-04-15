@@ -3,6 +3,7 @@ package endpoints.play.server
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
 import endpoints.algebra
+import endpoints.algebra.Documentation
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.mvc.Results
 import play.mvc.Http.HeaderNames
@@ -88,8 +89,8 @@ trait Assets extends algebra.Assets with Endpoints {
   /**
     * Decodes and encodes an [[AssetPath]] into a URL path.
     */
-  lazy val assetSegments: Path[AssetPath] = {
-    val stringPath = segment[String]
+  def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
+    val stringPath = segment[String](name, docs)
     new Path[AssetPath] {
       def decode(segments: List[String]) =
         segments.reverse match {
@@ -115,7 +116,7 @@ trait Assets extends algebra.Assets with Endpoints {
     * @param url URL description
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] = {
+  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] = {
     val req =
       invariantFunctorRequest.inmap( // TODO remove this boilerplate using play-products
         request(Get, url, headers = gzipSupport),

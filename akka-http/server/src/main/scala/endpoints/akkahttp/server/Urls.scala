@@ -49,7 +49,7 @@ trait Urls extends algebra.Urls {
     new QueryString(joinDirectives(first.directive, second.directive))
   }
 
-  implicit val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+  implicit lazy val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
     override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] =
       new Url(f.directive.map(map))
   }

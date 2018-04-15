@@ -48,7 +48,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     Directives.entity[String](um)
   }
 
-  implicit val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = directive1InvFunctor
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = directive1InvFunctor
 
   /* ************************
       HEADERS
@@ -60,8 +60,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
-  implicit val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
-  implicit val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
+  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
     override def add[A, B](fa: Directive1[A], fb: Directive1[B])(implicit tupler: Tupler[A, B]): Directive1[tupler.Out] = joinDirectives(fa, fb)
   }
 
@@ -104,7 +104,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     description: Documentation = None
   ): Endpoint[A, B] = Endpoint(request, response)
 
-  val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {
+  lazy val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {
     override def xmap[From, To](f: Directive1[From], map: From => To, contramap: To => From): Directive1[To] = f.map(map)
   }
 
