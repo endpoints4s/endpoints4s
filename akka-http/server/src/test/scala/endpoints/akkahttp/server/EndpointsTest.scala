@@ -5,12 +5,14 @@ import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.{Matchers, WordSpec}
 import scala.language.reflectiveCalls
 
+
+//TODO use EndpointsApi from algebra tests
 class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new Endpoints {
     val singleStaticGetSegment = endpoint[Unit, Unit](
       get[Unit, Unit](path / "segment1"),
-      _ => complete("Ok")
+      (_: Unit) => complete("Ok")
     ).implementedBy(_ => ())
   }
 

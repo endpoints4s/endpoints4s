@@ -65,4 +65,4 @@ mill genidea #generate idea project config
 mill all __.compile #compile everything
 mill all __.test #test everything
 ~~~
-After generating intellij project navigate to Settings -> Languages & Frameworks -> Worksheet and set inteprpretation mode to "Always Ammonite"
+After generating intellij project you may need to navigate to Settings -> Languages & Frameworks -> Worksheet and set inteprpretation mode to "Always Ammonite"

@@ -16,8 +16,29 @@ trait AkkaHttpModule extends Module {
 
   object client extends mill.Cross[AkkaHttpClientModule](`scala 2.10 to 2.12`: _*)
 
+  object server extends mill.Cross[AkkaHttpClientModule](`scala 2.10 to 2.12`: _*)
+
+
   class AkkaHttpClientModule(val crossVersion: String) extends EndpointsModule {
     override def artifactName = s"endpoints-akkahttp-client"
+
+    override def moduleDeps = Seq(algebra(crossVersion))
+
+    override def ivyDeps = Agg(
+      ivy"com.typesafe.akka::akka-http:$akkaHttpVersion"
+    )
+
+    object test extends Tests with EndpointsTests {
+      override def ivyDeps = Agg(
+        ivy"com.typesafe.akka::akka-http-testkit:$akkaHttpVersion"
+      )
+      override def moduleDeps = super.moduleDeps ++ Seq(algebra(crossVersion).test)
+    }
+
+  }
+
+  class AkkaHttpServerModule(val crossVersion: String) extends EndpointsModule {
+    override def artifactName = s"endpoints-akkahttp-server"
 
     override def moduleDeps = Seq(algebra(crossVersion))
 

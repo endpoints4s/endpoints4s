@@ -2,7 +2,8 @@ package endpoints.akkahttp.server
 
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
-import endpoints.{Tupler, algebra}
+import endpoints.algebra.Documentation
+import endpoints.{InvariantFunctor, Tupler, algebra}
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
@@ -36,16 +37,21 @@ trait Urls extends algebra.Urls {
 
   implicit def longQueryString: QueryStringParam[Long] = PredefinedFromStringUnmarshallers.longFromStringUnmarshaller
 
-  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] = {
+  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] = {
     new QueryString[A](Directives.parameter(name.as[A]))
   }
 
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
     new QueryString[Option[A]](Directives.parameter(name.as[A].?))
   }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
     new QueryString(joinDirectives(first.directive, second.directive))
+  }
+
+  implicit val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] =
+      new Url(f.directive.map(map))
   }
 
   // ********
@@ -58,7 +64,7 @@ trait Urls extends algebra.Urls {
 
   implicit def longSegment: Segment[Long] = LongNumber
 
-  def segment[A](implicit s: Segment[A]): Path[A] = {
+  def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = {
     new Path(Directives.pathPrefix(s))
   }
 
@@ -86,6 +92,10 @@ trait Urls extends algebra.Urls {
 
   protected def convToDirective1(directive: Directive0): Directive1[Unit] = {
     directive.tmap(_ => Tuple1(()))
+  }
+
+  implicit class Directive0Ops(val dir0: Directive0) {
+    def dir1: Directive1[Unit] = convToDirective1(dir0)
   }
 
 }
