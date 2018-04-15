@@ -1,7 +1,7 @@
 package endpoints.scalaj.client
 
-import endpoints.Tupler
-import endpoints.algebra
+import endpoints.{InvariantFunctor, Tupler, algebra}
+import endpoints.algebra.Documentation
 
 import scalaj.http.{Http, HttpRequest}
 
@@ -39,15 +39,15 @@ trait Urls extends algebra.Urls {
    implicit def longSegment: Segment[Long] = _.toString
 
 
-   def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
+   def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
     a => Seq((name, value(a)))
 
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
     a => a.map(x => Seq((name, value(x)))).getOrElse(Seq())
 
    def staticPathSegment(segment: String): Path[Unit] = Path(_ => segment)
 
-  def segment[A](implicit s: Segment[A]): Path[A] = Path(s)
+  def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = Path(s)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
     Path(ab => {
@@ -66,6 +66,11 @@ trait Urls extends algebra.Urls {
       path.toReq(a)
         .params(qs(b))
     })
+  }
+
+  implicit lazy val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] =
+      new Url(to => f.toReq(contramap(to)))
   }
 
 }

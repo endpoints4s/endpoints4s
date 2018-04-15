@@ -4,13 +4,14 @@ import java.util.Base64
 
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
+import endpoints.algebra.Documentation
 
 trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
 
   /**
     * Supplies the credential into the request headers
     */
-  private[endpoints] lazy val basicAuthentication: RequestHeaders[Credentials] =
+  private[endpoints] lazy val basicAuthenticationHeader: RequestHeaders[Credentials] =
     (credentials) => {
       Seq(("Authorization", "Basic " + new String(Base64.getEncoder.encode((credentials.username + ":" + credentials.password).getBytes))))
     }
@@ -18,7 +19,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
   /**
     * Checks that the result is not `Forbidden`
     */
-  private[endpoints] def authenticated[A](response: Response[A]): Response[Option[A]] =
+  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
     resp =>
       if (resp.code == 403) Right(None)
       else response(resp).right.map(Some(_))

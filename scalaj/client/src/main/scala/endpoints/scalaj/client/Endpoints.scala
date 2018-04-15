@@ -1,6 +1,7 @@
 package endpoints.scalaj.client
 
 import endpoints.algebra
+import endpoints.algebra.Documentation
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -8,7 +9,12 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
 
   type MuxEndpoint[A, B, Transport] = Nothing
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = {
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Documentation,
+    description: Documentation
+  ): Endpoint[A, B] = {
     Endpoint(request, response)
   }
 
