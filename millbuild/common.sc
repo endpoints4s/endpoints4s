@@ -2,6 +2,8 @@ import mill._
 import mill.scalalib._
 import mill.scalalib.publish._
 import ammonite.ops.up
+import mill.define.{Discover, ExternalModule}
+import mill.eval.Evaluator
 
 
 //val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
@@ -47,3 +49,23 @@ trait EndpointsModule extends SbtModule with PublishModule {
 //  trait EndpointsSJSModule extends EndpointsModule with ScalaJSModule {
 //    override def scalaJSVersion = "0.6.22"
 //  }
+
+def genideaImpl(ev: Evaluator[Any]) = T.command {
+  import ammonite.ops._
+  mill.scalalib.GenIdeaImpl(
+    implicitly,
+    ev.rootModule,
+    ev.rootModule.millDiscover
+  )
+  // to have proper highlghting in intellij each project needs to be rooted in different directory. so we move all tests
+  // from module to module/src/test. It does not affect anything in practice.
+  val files = (ls ! pwd / ".idea_modules")
+    .filter(_.toString().endsWith("test.iml"))
+  files.foreach { file =>
+    val content = read(file)
+    val regex = """<content url="file://\$MODULE_DIR\$/\.\./(.*)">""".r
+    val replacement = """<content url="file://\$MODULE_DIR\$/\.\./$1/src/test">"""
+    val newContent = regex.replaceFirstIn(content, replacement)
+    write.over(file, newContent)
+  }
+}
