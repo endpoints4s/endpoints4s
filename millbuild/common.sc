@@ -8,6 +8,7 @@ import mill.eval.Evaluator
 
 //val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
 val `scala 2.10 to 2.12` = Seq("2.12.4")
+val `scala 2.11 to 2.12` = Seq("2.12.4")
 
 trait EndpointsModule extends SbtModule with PublishModule {
   def crossVersion: String
