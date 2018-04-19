@@ -1,15 +1,18 @@
 import $file.common
-import common.{EndpointsModule, `scala 2.10 to 2.12`}
+import common.{EndpointsModule, EndpointsJsModule, `scala 2.10 to 2.12`}
 
 import mill._
 import mill.scalalib._
 import ammonite.ops._
 
+
 trait AlgebrasModule  extends Module {
 
   def jsonSchema(crossVersion: String): EndpointsModule
+  def jsonSchemaJs(crossVersion: String): EndpointsJsModule
 
   object algebra extends mill.Cross[AlgebraModule](`scala 2.10 to 2.12`: _*)
+  object algebraJs extends mill.Cross[AlgebraJsModule](`scala 2.10 to 2.12`: _*)
 
   object algebraCirce extends mill.Cross[AlgebraCirceModule](`scala 2.10 to 2.12`: _*)
 
@@ -26,6 +29,11 @@ trait AlgebrasModule  extends Module {
       )
     }
 
+  }
+  class AlgebraJsModule(crossVersion: String) extends AlgebraModule(crossVersion) with EndpointsJsModule {
+    override def millSourcePath = super.millSourcePath / up / "algebra"
+
+    override def moduleDeps = Seq(jsonSchemaJs(crossVersion))
   }
 
   class AlgebraCirceModule(val crossVersion: String) extends EndpointsModule {

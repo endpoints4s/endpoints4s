@@ -15,6 +15,6 @@ trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitie
   }
 
   def jsonResponse[A](implicit codec: Codec[String, A]) =
-    xhr => codec.decode(xhr.responseText)
+    (xhr: XMLHttpRequest) => codec.decode(xhr.responseText)
 
 }

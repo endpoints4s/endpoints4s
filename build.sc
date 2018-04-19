@@ -5,17 +5,19 @@ import $file.millbuild.algebrasBuild
 import $file.millbuild.openapiBuild
 import $file.millbuild.playBuild
 import $file.millbuild.scalajBuild
+import $file.millbuild.xhrBuild
 
-import common.{EndpointsModule, `scala 2.10 to 2.12`}
 import akkahttp.AkkaHttpModule
 import algebrasBuild.AlgebrasModule
 import openapiBuild.OpenapiModule
 import playBuild.PlayModule
 import scalajBuild.ScalajModule
+import xhrBuild.XhrModule
 import mill.eval.Evaluator
 
 object algebras extends AlgebrasModule {
   override def jsonSchema(crossVersion: String) = openapi.jsonSchema(crossVersion)
+  override def jsonSchemaJs(crossVersion: String) = openapi.jsonSchemaJs(crossVersion)
 }
 
 object openapi extends OpenapiModule {
@@ -33,5 +35,10 @@ object play extends PlayModule {
 object scalaj extends ScalajModule {
   override def algebra(crossVersion: String) = algebras.algebra(crossVersion)
 }
+
+object xhr extends XhrModule {
+  override def algebraJs(crossVersion: String) = algebras.algebraJs(crossVersion)
+}
+
 
 def genidea(ev: Evaluator[Any]) = common.genideaImpl(ev)

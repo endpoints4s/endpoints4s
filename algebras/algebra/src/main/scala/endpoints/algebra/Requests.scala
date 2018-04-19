@@ -38,7 +38,7 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
   /**
     * Empty request.
     */
-  //TODO rename to emptyBody
+  //TODO rename to emptyBody and maybe make uniform with all other by adding ()
   def emptyRequest: RequestEntity[Unit]
 
   /**

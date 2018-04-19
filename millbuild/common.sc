@@ -4,6 +4,7 @@ import mill.scalalib.publish._
 import ammonite.ops.up
 import mill.define.{Discover, ExternalModule}
 import mill.eval.Evaluator
+import mill.scalajslib._
 
 
 //val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
@@ -38,8 +39,9 @@ trait EndpointsModule extends SbtModule with PublishModule {
 
   override def millSourcePath = super.millSourcePath / up
 
-  trait EndpointsTests extends TestModule {
-    override def ivyDeps = Agg(ivy"org.scalatest::scalatest:3.0.4")
+  trait EndpointsTests extends Tests {
+
+    override def ivyDeps = super.ivyDeps() ++ Agg(ivy"org.scalatest::scalatest::3.0.4")
 
     def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
@@ -47,9 +49,14 @@ trait EndpointsModule extends SbtModule with PublishModule {
   def test: EndpointsTests
 }
 
-//  trait EndpointsSJSModule extends EndpointsModule with ScalaJSModule {
-//    override def scalaJSVersion = "0.6.22"
-//  }
+trait EndpointsJsModule extends EndpointsModule with ScalaJSModule {
+
+  def scalaJSVersion = "0.6.22"
+
+  trait EndpointsJsTests extends EndpointsTests with ScalaJSModule {
+    def scalaJSVersion = "0.6.22"
+  }
+}
 
 def genideaImpl(ev: Evaluator[Any]) = T.command {
   import ammonite.ops._

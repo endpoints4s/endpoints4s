@@ -1,14 +1,19 @@
 import $file.common
-import common.{EndpointsModule, `scala 2.10 to 2.12`}
+import common.{EndpointsModule, EndpointsJsModule, `scala 2.10 to 2.12`}
 import mill._
 import mill.scalalib._
 import ammonite.ops.up
+import mill.scalajslib.{ScalaJSModule, _}
+
 
 trait OpenapiModule extends Module {
 
   def algebra(crossVersion: String): EndpointsModule
 
+  //TODO move out of here? it should probably be part of algebra package
   object jsonSchema extends mill.Cross[JsonSchemaModule](`scala 2.10 to 2.12`: _*)
+
+  object jsonSchemaJs extends mill.Cross[JsonSchemaJsModule](`scala 2.10 to 2.12`: _*)
 
   object openapi extends mill.Cross[OpenApiModule](`scala 2.10 to 2.12`: _*)
 
@@ -18,6 +23,12 @@ trait OpenapiModule extends Module {
     override def millSourcePath = super.millSourcePath / up / "json-schema"
 
     object test extends Tests with EndpointsTests
+
+  }
+
+  class JsonSchemaJsModule(crossVersion: String) extends JsonSchemaModule(crossVersion) with EndpointsJsModule {
+
+    override def artifactName = s"endpoints-openapi-json-schema"
 
   }
 

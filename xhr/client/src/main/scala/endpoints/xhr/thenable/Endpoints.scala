@@ -1,5 +1,6 @@
 package endpoints.xhr.thenable
 
+import endpoints.algebra.Documentation
 import endpoints.xhr
 
 import scala.scalajs.js
@@ -12,7 +13,7 @@ trait Endpoints extends xhr.Endpoints {
   /** Maps a `Result` to a [[js.Thenable]] */
   type Result[A] = js.Thenable[A]
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) =
         new js.Promise[B]((resolve, error) => {

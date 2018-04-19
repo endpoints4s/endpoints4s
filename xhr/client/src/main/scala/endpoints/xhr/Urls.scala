@@ -1,7 +1,7 @@
 package endpoints.xhr
 
-import endpoints.Tupler
-import endpoints.algebra
+import endpoints.algebra.Documentation
+import endpoints.{InvariantFunctor, Tupler, algebra}
 
 import scala.scalajs.js
 
@@ -41,10 +41,10 @@ trait Urls extends algebra.Urls {
       s"${first.encode(a)}&${second.encode(b)}"
     }
 
-  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A] =
+  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
     a => s"$name=${value.encode(a)}"
 
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
     case Some(a) => qs[A](name).encode(a)
     case None => ""
   }
@@ -69,7 +69,7 @@ trait Urls extends algebra.Urls {
 
   def staticPathSegment(segment: String) = (_: Unit) => segment
 
-  def segment[A](implicit s: Segment[A]): Path[A] = a => s.encode(a)
+  def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = a => s.encode(a)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
     (out: tupler.Out) => {
@@ -88,4 +88,9 @@ trait Urls extends algebra.Urls {
       s"${path.encode(a)}?${qs.encode(b)}"
     }
 
+  implicit val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] = new Url[To] {
+      override def encode(a: To): String = f.encode(contramap(a))
+    }
+  }
 }
