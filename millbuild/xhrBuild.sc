@@ -21,15 +21,10 @@ trait XhrModule extends Module {
 
     override def moduleDeps = Seq(algebraJs(crossVersion))
 
-//    override def ivyDeps = Agg(
-//      ivy"org.scalaj::scalaj-http:2.3.0"
-//    )
-//
-//    object test extends Tests with EndpointsTests {
-//      override def moduleDeps = super.moduleDeps ++ Seq(algebra(crossVersion).test)
-//    }
+    object test extends EndpointsJsTests {
+      override def moduleDeps = super.moduleDeps ++ Seq(algebraJs(crossVersion).test)
+    }
 
-    object test extends EndpointsJsTests
   }
 
 }

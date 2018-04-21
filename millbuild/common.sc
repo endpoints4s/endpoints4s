@@ -2,9 +2,12 @@ import mill._
 import mill.scalalib._
 import mill.scalalib.publish._
 import ammonite.ops.up
-import mill.define.{Discover, ExternalModule}
+import mill.define.Cross.Factory
+import mill.define.{Cross, Discover, ExternalModule}
 import mill.eval.Evaluator
 import mill.scalajslib._
+
+// THIS FILE HAS TO BE ON THE SAME LEVEL AS FILES USING IT BECAUSE OF A BUG IN AMMONITE
 
 
 //val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
@@ -46,17 +49,45 @@ trait EndpointsModule extends SbtModule with PublishModule {
     def testFrameworks = Seq("org.scalatest.tools.Framework")
   }
 
-  def test: EndpointsTests
+  def crossModuleDeps: Seq[EndpointsGroupingModule] = Seq()
+
 }
 
 trait EndpointsJsModule extends EndpointsModule with ScalaJSModule {
-
   def scalaJSVersion = "0.6.22"
 
-  trait EndpointsJsTests extends EndpointsTests with ScalaJSModule {
-    def scalaJSVersion = "0.6.22"
-  }
+  trait EndpointsJsTests extends EndpointsTests with Tests
+
+  def test: EndpointsJsTests
+
+  override def moduleDeps: Seq[PublishModule] =
+    super.moduleDeps ++ this.crossModuleDeps.map(_.js(crossVersion))
+
 }
+
+trait EndpointsJvmModule extends EndpointsModule {
+
+  trait EndpointsJvmTests extends EndpointsTests with Tests
+
+  def test: EndpointsJvmTests
+
+  override def moduleDeps: Seq[PublishModule] =
+    super.moduleDeps ++ this.crossModuleDeps.map(_.jvm(crossVersion))
+}
+
+trait EndpointsGroupingModule extends Module {
+  override def millSourcePath = super.millSourcePath / up
+
+  def crossVersions: Seq[String] = `scala 2.10 to 2.12`
+
+  type Js <: EndpointsJsModule
+  type Jvm <: EndpointsJvmModule
+
+  def js: Cross[Js]
+
+  def jvm: Cross[Jvm]
+}
+
 
 def genideaImpl(ev: Evaluator[Any]) = T.command {
   import ammonite.ops._

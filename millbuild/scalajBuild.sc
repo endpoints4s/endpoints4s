@@ -1,12 +1,12 @@
 import $file.common
-import common.{EndpointsModule, `scala 2.11 to 2.12`}
+import common.{EndpointsModule, EndpointsJvmModule, `scala 2.11 to 2.12`}
 import mill._
 import mill.scalalib._
 import ammonite.ops.up
 
 trait ScalajModule extends Module {
 
-  def algebra(crossVersion: String): EndpointsModule
+  def algebra(crossVersion: String): EndpointsJvmModule
 
   object client extends mill.Cross[ScalajClientModule](`scala 2.11 to 2.12`: _*)
 

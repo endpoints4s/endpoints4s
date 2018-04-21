@@ -1,5 +1,5 @@
 import $file.common
-import common.{EndpointsModule, `scala 2.10 to 2.12`}
+import common.{EndpointsModule, EndpointsJvmModule, `scala 2.10 to 2.12`}
 
 import mill.scalalib._
 import mill._
@@ -9,7 +9,7 @@ trait AkkaHttpModule extends Module {
 
   val akkaHttpVersion = "10.0.10"
 
-  def algebra(crossVersion: String): EndpointsModule
+  def algebra(crossVersion: String): EndpointsJvmModule
 
 
   override def millSourcePath = super.millSourcePath / up / "akka-http"
