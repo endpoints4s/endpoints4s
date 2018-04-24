@@ -89,7 +89,7 @@ trait JsonSchemas
         recordA.encoder.apply(a).deepMerge(recordB.encoder.apply(b))
       }
     val decoder = new io.circe.Decoder[(A, B)] {
-      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c, c)
+      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c)
     }
     JsonSchema(encoder, decoder)
   }

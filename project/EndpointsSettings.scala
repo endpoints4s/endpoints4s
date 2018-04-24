@@ -67,8 +67,8 @@ object EndpointsSettings {
 
   // --- Common dependencies
 
-  val circeVersion = "0.8.0"
-  val playVersion = "2.6.7"
+  val circeVersion = "0.9.3"
+  val playVersion = "2.6.9"
 
   val scalaTestVersion = "3.0.1"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
