@@ -20,8 +20,6 @@ import ReleaseTransformations._
 
 noPublishSettings
 
-enablePlugins(CrossPerProjectPlugin)
-
 releaseCrossBuild := false
 
 releaseProcess := Seq[ReleaseStep](

@@ -25,7 +25,7 @@ object AssetsTasks {
     assetsPath: File => File = _ / "src" / "main" / "assets"
   ): Seq[File] = {
       val assetsDirectory = assetsPath(baseDirectory)
-      val assets = assetsDirectory.***.get
+      val assets = assetsDirectory.allPaths.get
       val digests = assets.collect {
         case asset if asset.isFile =>
           val hash = org.apache.commons.codec.digest.DigestUtils.md5Hex(IO.readBytes(asset))
@@ -64,7 +64,7 @@ object AssetsTasks {
     assetsPath: File => File = _ / "src" / "main" / "assets"
   ): Seq[File] = {
     val assetsDirectory = assetsPath(baseDirectory)
-    val assets = assetsDirectory.***.get
+    val assets = assetsDirectory.allPaths.get
     assets.collect {
       case asset if asset.isFile =>
         val assetPath = asset.relativeTo(assetsDirectory).get.getPath

@@ -25,11 +25,10 @@ val `json-schema-jvm` = LocalProject("json-schemaJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
-import sbtunidoc.Plugin.UnidocKeys.unidoc
-
 val apiDoc =
   project.in(file("api-doc"))
-    .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
+    .enablePlugins(ScalaUnidocPlugin)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
@@ -38,7 +37,7 @@ val apiDoc =
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
       ),
-      sbtunidoc.Plugin.UnidocKeys.unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
+      unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
         `play-client`,
         `play-server`, `play-server-circe`,
@@ -65,7 +64,7 @@ val manual =
       mappings in ornate := {
         val _ = ornate.value
         val output = ornateTarget.value
-        output ** AllPassFilter --- output pair relativeTo(output)
+        output ** AllPassFilter --- output pair sbt.io.Path.relativeTo(output)
       },
       siteSubdirName in packageDoc := s"api/${version.value}",
       addMappingsToSiteDir(mappings in ScalaUnidoc in packageDoc in apiDoc, siteSubdirName in packageDoc),
