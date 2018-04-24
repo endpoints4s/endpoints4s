@@ -23,7 +23,7 @@ val `xhr-client-faithful` =
       name := "endpoints-xhr-client-faithful",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
-      libraryDependencies += "org.julienrf" %%% "faithful" % "1.0.0"
+      libraryDependencies += "org.julienrf" %%% "faithful" % "1.1.0"
     )
     .dependsOn(`xhr-client`)
 
