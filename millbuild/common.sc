@@ -47,6 +47,8 @@ trait EndpointsModule extends SbtModule with PublishModule {
     override def ivyDeps = super.ivyDeps() ++ Agg(ivy"org.scalatest::scalatest::3.0.4")
 
     def testFrameworks = Seq("org.scalatest.tools.Framework")
+
+    def crossModuleDeps: Seq[EndpointsGroupingModule] = Seq()
   }
 
   def crossModuleDeps: Seq[EndpointsGroupingModule] = Seq()
@@ -56,7 +58,9 @@ trait EndpointsModule extends SbtModule with PublishModule {
 trait EndpointsJsModule extends EndpointsModule with ScalaJSModule {
   def scalaJSVersion = "0.6.22"
 
-  trait EndpointsJsTests extends EndpointsTests with Tests
+  trait EndpointsJsTests extends EndpointsTests with Tests {
+    override def moduleDeps = super.moduleDeps ++ crossModuleDeps.map(_.js(crossVersion).test)
+  }
 
   def test: EndpointsJsTests
 
@@ -67,7 +71,9 @@ trait EndpointsJsModule extends EndpointsModule with ScalaJSModule {
 
 trait EndpointsJvmModule extends EndpointsModule {
 
-  trait EndpointsJvmTests extends EndpointsTests with Tests
+  trait EndpointsJvmTests extends EndpointsTests with Tests {
+    override def moduleDeps = super.moduleDeps ++ crossModuleDeps.map(_.jvm(crossVersion).test)
+  }
 
   def test: EndpointsJvmTests
 
