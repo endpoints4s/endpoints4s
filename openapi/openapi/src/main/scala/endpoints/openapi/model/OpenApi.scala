@@ -64,19 +64,19 @@ object Operation {
       ).flatten
       val fields =
         "parameters" -> Json.fromValues(op.parameters.map(_.asJson)) ::
-        (
-          "responses" -> Json.fromFields(
-            op.responses.to[List].map { case (status, resp) =>
-              status.toString -> Json.fromFields(
-                "description" -> Json.fromString(resp.description) ::
-                (if (resp.content.nonEmpty) {
-                  "content" -> MediaType.jsonMediaTypes(resp.content) ::
-                    Nil
-                } else Nil)
-              )
-            }
-          )
-        ) ::
+          (
+            "responses" -> Json.fromFields(
+              op.responses.to[List].map { case (status, resp) =>
+                status.toString -> Json.fromFields(
+                  "description" -> Json.fromString(resp.description) ::
+                    (if (resp.content.nonEmpty) {
+                      "content" -> MediaType.jsonMediaTypes(resp.content) ::
+                        Nil
+                    } else Nil)
+                )
+              }
+            )
+            ) ::
           optFields
 
       JsonObject.fromIterable(fields)
@@ -98,7 +98,7 @@ object RequestBody {
       JsonObject.fromIterable({
         val requiredFields =
           "content" -> MediaType.jsonMediaTypes(requestBody.content) ::
-          Nil
+            Nil
         requestBody.description.fold(requiredFields)(d => "description" -> Json.fromString(d) :: requiredFields)
       })
     }
@@ -114,7 +114,8 @@ case class Parameter(
   name: String,
   in: In,
   required: Boolean,
-  description: Option[String]
+  description: Option[String],
+  schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
 )
 
 object Parameter {
@@ -123,14 +124,16 @@ object Parameter {
     ObjectEncoder.instance { parameter =>
       val fields =
         "name" -> Json.fromString(parameter.name) ::
-        "in" -> Json.fromString(parameter.in match {
-          case In.Cookie => "cookie"
-          case In.Header => "header"
-          case In.Path => "path"
-          case In.Query => "query"
-        }) :: List(
-          parameter.description.map(s => "description" -> Json.fromString(s))
-        ).flatten
+          "in" -> Json.fromString(parameter.in match {
+            case In.Cookie => "cookie"
+            case In.Header => "header"
+            case In.Path => "path"
+            case In.Query => "query"
+          }) ::
+          "schema" -> parameter.schema.asJson ::
+          List(
+            parameter.description.map(s => "description" -> Json.fromString(s))
+          ).flatten
       JsonObject.fromIterable(
         if (parameter.required) "required" -> Json.fromBoolean(true) :: fields
         else fields
@@ -140,11 +143,17 @@ object Parameter {
 }
 
 sealed trait In
+
 object In {
+
   case object Query extends In
+
   case object Path extends In
+
   case object Header extends In
+
   case object Cookie extends In
+
 }
 
 case class MediaType(schema: Option[Schema])
@@ -159,12 +168,21 @@ object MediaType {
 }
 
 sealed trait Schema
+
 object Schema {
+
   case class Object(properties: List[Property], description: Option[String]) extends Schema
+
   case class Array(elementType: Schema) extends Schema
+
   case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
+
   case class Primitive(name: String) extends Schema
+
   case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
+
+  val simpleString = Primitive("string")
+  val simpleInteger = Primitive("integer")
 
   implicit val jsonEncoder: ObjectEncoder[Schema] =
     ObjectEncoder.instance {
@@ -172,23 +190,23 @@ object Schema {
       case Array(elementType) =>
         JsonObject.fromIterable(
           "type" -> Json.fromString("array") ::
-          "items" -> jsonEncoder.apply(elementType) ::
-          Nil
+            "items" -> jsonEncoder.apply(elementType) ::
+            Nil
         )
       case Object(properties, description) =>
         val fields =
           "type" -> Json.fromString("object") ::
-          "properties" -> Json.fromFields(
-            properties.map { property =>
-              val propertyFields =
-                property.description match {
-                  case None    => jsonEncoder.apply(property.schema)
-                  case Some(s) => Json.fromFields(("description" -> Json.fromString(s)) +: jsonEncoder.encodeObject(property.schema).toVector)
-                }
-              property.name -> propertyFields
-            }
-          ) ::
-          Nil
+            "properties" -> Json.fromFields(
+              properties.map { property =>
+                val propertyFields =
+                  property.description match {
+                    case None => jsonEncoder.apply(property.schema)
+                    case Some(s) => Json.fromFields(("description" -> Json.fromString(s)) +: jsonEncoder.encodeObject(property.schema).toVector)
+                  }
+                property.name -> propertyFields
+              }
+            ) ::
+            Nil
         val fieldsWithDescription =
           description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
         val requiredProperties = properties.filter(_.isRequired)
@@ -199,8 +217,8 @@ object Schema {
       case OneOf(alternatives, description) =>
         val fields =
           "type" -> Json.fromString("object") ::
-          "oneOf" -> Json.fromValues(alternatives.map(jsonEncoder.apply)) ::
-          Nil
+            "oneOf" -> Json.fromValues(alternatives.map(jsonEncoder.apply)) ::
+            Nil
         val fieldsWithDescription =
           description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
         JsonObject.fromIterable(fieldsWithDescription)

@@ -49,6 +49,16 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Empty segment name" should {
+    "be substituted with auto generated name" in {
+      val path = Fixtures.documentation.paths.find(_._1.startsWith("/emptySegmentNameEndp")).get
+
+      path._1 shouldEqual "/emptySegmentNameEndp/{_arg2}"
+      val param = path._2.operations("post").parameters.head
+      param.name shouldEqual "_arg2"
+    }
+  }
+
 }
 
 trait Fixtures extends algebra.Endpoints {
@@ -59,7 +69,9 @@ trait Fixtures extends algebra.Endpoints {
 
   val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")))
 
-  val textRequestEndpoint = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
+  val textRequestEndp = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
+
+  val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int](), textRequest()), emptyResponse())
 
 }
 
@@ -69,6 +81,6 @@ object Fixtures
     with Endpoints
     with JsonSchemaEntities {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndpoint)
+  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp)
 
 }

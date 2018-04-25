@@ -12,8 +12,7 @@ trait BasicAuthentication
   extends algebra.BasicAuthentication
     with Endpoints {
 
-  private[endpoints] def basicAuthentication: RequestHeaders[Credentials] =
-    DocumentedHeaders(DocumentedHeader("Authorization", None, required = true) :: Nil)
+  private[endpoints] def basicAuthentication: RequestHeaders[Credentials] = header("Authorization")
 
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
     DocumentedResponse(401, docs.getOrElse(""), content = Map.empty) :: response

@@ -2,6 +2,7 @@ package endpoints
 package openapi
 
 import endpoints.algebra.Documentation
+import endpoints.openapi.model.Schema
 
 /**
   * Interpreter for [[algebra.Urls]]
@@ -19,46 +20,46 @@ trait Urls extends algebra.Urls {
     * @param name Name of the parameter
     * @param required Whether this parameter is required or not (MUST be true for path parameters)
     */
-  case class DocumentedParameter(name: String, required: Boolean, description: Option[String])
+  case class DocumentedParameter(name: String, required: Boolean, description: Option[String], schema: Schema)
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)
 
   def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = true, docs)))
+    DocumentedQueryString(List(DocumentedParameter(name, required = true, docs, value)))
 
   def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = false, docs)))
+    DocumentedQueryString(List(DocumentedParameter(name, required = false, docs, value)))
 
-  type QueryStringParam[A] = Unit
+  type QueryStringParam[A] = Schema
 
-  def stringQueryString: QueryStringParam[String] = ()
+  def stringQueryString: QueryStringParam[String] = Schema.simpleString
 
-  def intQueryString: QueryStringParam[Int] = ()
+  def intQueryString: QueryStringParam[Int] = Schema.simpleInteger
 
-  def longQueryString: QueryStringParam[Long] = ()
+  def longQueryString: QueryStringParam[Long] = Schema.simpleInteger
 
-  type Segment[A] = Unit
+  type Segment[A] = Schema
 
-  def stringSegment: Segment[String] = ()
+  def stringSegment: Segment[String] = Schema.simpleString
 
-  def intSegment: Segment[Int] = ()
+  def intSegment: Segment[Int] = Schema.simpleInteger
 
-  def longSegment: Segment[Long] = ()
+  def longSegment: Segment[Long] = Schema.simpleInteger
 
   type Path[A] = DocumentedUrl
 
-  def staticPathSegment(segment: String): Path[Unit] = DocumentedUrl(segment, Nil, Nil)
+  def staticPathSegment(segment: String): Path[Unit] = DocumentedUrl(Left(segment) :: Nil, Nil)
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
     DocumentedUrl(
-      first.path ++ "/" ++ second.path,
-      first.pathParameters ++ second.pathParameters,
+      first.path ++ second.path,
       first.queryParameters ++ second.queryParameters // (In practice this should be empty…)
     )
 
-  def segment[A](name: String, docs: Documentation)(implicit A: Segment[A]): Path[A] =
-    DocumentedUrl(s"{$name}", List(DocumentedParameter(name, required = true, docs)), Nil)
+  def segment[A](name: String, docs: Documentation)(implicit A: Segment[A]): Path[A] = {
+    DocumentedUrl(Right(DocumentedParameter(name, required = true, docs, A)):: Nil, Nil)
+  }
 
   type Url[A] = DocumentedUrl
 
@@ -68,11 +69,10 @@ trait Urls extends algebra.Urls {
 
 
   /**
-    * @param path Path template (e.g. “/user/{id}”)
-    * @param pathParameters Path parameters
+    * @param path List of path segments. Left is a static segment, right i path parameter
     * @param queryParameters Query string parameters
     */
-  case class DocumentedUrl(path: String, pathParameters: List[DocumentedParameter], queryParameters: List[DocumentedParameter])
+  case class DocumentedUrl(path: List[Either[String, DocumentedParameter]], queryParameters: List[DocumentedParameter])
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
     path.copy(queryParameters = path.queryParameters ++ qs.parameters)

@@ -21,15 +21,15 @@ trait Requests
     */
   case class DocumentedHeaders(value: List[DocumentedHeader])
 
-  case class DocumentedHeader(name: String, description: Option[String], required: Boolean)
+  case class DocumentedHeader(name: String, description: Option[String], required: Boolean, schema: Schema)
 
   def emptyHeaders = DocumentedHeaders(Nil)
 
   def header(name: String, docs: Documentation): RequestHeaders[String] =
-    DocumentedHeaders(List(DocumentedHeader(name, docs, required = true)))
+    DocumentedHeaders(List(DocumentedHeader(name, docs, required = true, Schema.simpleString)))
 
   def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] =
-    DocumentedHeaders(List(DocumentedHeader(name, docs, required = false)))
+    DocumentedHeaders(List(DocumentedHeader(name, docs, required = false, Schema.simpleString)))
 
 
   type Request[A] = DocumentedRequest
