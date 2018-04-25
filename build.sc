@@ -29,7 +29,8 @@ object akkaHttp extends AkkaHttpModule {
 }
 
 object play extends PlayModule {
-  override def algebra(crossVersion: String) = algebras.algebra.jvm(crossVersion)
+  override def algebraJvm(crossVersion: String) = algebras.algebra.jvm(crossVersion)
+  override def algebraCirceJvm(crossVersion: String) = algebras.algebraCirce.jvm(crossVersion)
 }
 
 object scalaj extends ScalajModule {
