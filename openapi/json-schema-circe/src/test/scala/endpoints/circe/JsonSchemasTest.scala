@@ -1,4 +1,4 @@
-package endpoints.documented
+package endpoints
 package circe
 
 import io.circe.{DecodingFailure, Json}

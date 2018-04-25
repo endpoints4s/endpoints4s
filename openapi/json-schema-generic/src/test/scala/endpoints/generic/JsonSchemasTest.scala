@@ -1,5 +1,7 @@
-package endpoints.documented
+package endpoints
 package generic
+
+import endpoints.openapi
 
 import org.scalatest.FreeSpec
 

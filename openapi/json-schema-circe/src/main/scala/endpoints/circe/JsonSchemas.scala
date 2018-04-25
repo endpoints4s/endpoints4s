@@ -1,9 +1,7 @@
 package endpoints
-package documented
 package circe
 
 import endpoints.algebra
-import endpoints.algebra.JsonSchemas
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -11,7 +9,7 @@ import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
 /**
-  * An interpreter for [[JsonSchemas]] that produces a circe codec.
+  * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
   */
 trait JsonSchemas
   extends algebra.JsonSchemas {
@@ -91,7 +89,7 @@ trait JsonSchemas
         recordA.encoder.apply(a).deepMerge(recordB.encoder.apply(b))
       }
     val decoder = new io.circe.Decoder[(A, B)] {
-      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c, c)
+      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c)
     }
     JsonSchema(encoder, decoder)
   }

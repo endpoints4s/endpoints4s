@@ -1,8 +1,7 @@
 package endpoints
-package documented
 package generic
 
-import endpoints.algebra.JsonSchemas
+import endpoints.algebra
 import shapeless.labelled.{FieldType, field => shapelessField}
 import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
@@ -43,7 +42,7 @@ import scala.language.implicitConversions
   * }}}
   *
   */
-trait JsonSchemas extends JsonSchemas {
+trait JsonSchemas extends algebra.JsonSchemas {
 
   trait GenericJsonSchema[A] {
     def jsonSchema: JsonSchema[A]

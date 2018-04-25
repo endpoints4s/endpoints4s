@@ -18,7 +18,9 @@ import mill.eval.Evaluator
 object algebras extends AlgebrasModule
 
 object openapi extends OpenapiModule {
-  override def algebra(crossVersion: String) = algebras.algebra.jvm(crossVersion)
+  override def algebra = algebras.algebra
+  override def algebraCirce = algebras.algebraCirce
+  override def jsonSchema = algebras.jsonSchema
 }
 
 object akkaHttp extends AkkaHttpModule {
