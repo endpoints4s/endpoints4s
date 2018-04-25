@@ -9,8 +9,13 @@ import mill.scalajslib.ScalaJSModule
 trait XhrModule extends Module {
 
   def algebraJs(crossVersion: String): EndpointsJsModule
+  def algebraCirceJs(crossVersion: String): EndpointsJsModule
 
   object client extends mill.Cross[XhrClientModule](`scala 2.10 to 2.12`: _*)
+
+  object clientCirce extends mill.Cross[XhrClientCirceModule](`scala 2.10 to 2.12`: _*)
+
+  object clientFaithful extends mill.Cross[XhrFaithfulCirceModule](`scala 2.10 to 2.12`: _*)
 
   class XhrClientModule(val crossVersion: String) extends EndpointsJsModule {
     override def artifactName = s"endpoints-xhr-client"
@@ -26,5 +31,30 @@ trait XhrModule extends Module {
     }
 
   }
+
+  class XhrClientCirceModule(val crossVersion: String) extends EndpointsJsModule {
+    override def artifactName = s"endpoints-xhr-client-circe"
+    override def millSourcePath = super.millSourcePath / up / "client-circe"
+
+    def ivyDeps = super.ivyDeps() ++ Agg(ivy"io.circe::circe-parser::$circeVersion")
+
+    override def moduleDeps = Seq(algebraCirceJs(crossVersion), client(crossVersion))
+
+    object test extends EndpointsJsTests
+
+  }
+
+  class XhrFaithfulCirceModule(val crossVersion: String) extends EndpointsJsModule {
+    override def artifactName = s"endpoints-xhr-client-faithful"
+    override def millSourcePath = super.millSourcePath / up / "client-faithful"
+
+    def ivyDeps = super.ivyDeps() ++ Agg(ivy"org.julienrf::faithful::1.0.0")
+
+    override def moduleDeps = Seq(client(crossVersion))
+
+    object test extends EndpointsJsTests
+
+  }
+
 
 }

@@ -39,6 +39,7 @@ object scalaj extends ScalajModule {
 
 object xhr extends XhrModule {
   override def algebraJs(crossVersion: String) = algebras.algebra.js(crossVersion)
+  override def algebraCirceJs(crossVersion: String) = algebras.algebraCirce.js(crossVersion)
 }
 
 
