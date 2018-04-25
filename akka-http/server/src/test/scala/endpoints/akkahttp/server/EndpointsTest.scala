@@ -7,12 +7,16 @@ import org.scalatest.{Matchers, WordSpec}
 import scala.language.reflectiveCalls
 import endpoints.algebra
 import endpoints.algebra.JsonFromCodecTestApi
+import endpoints.algebra.circe
 
 class EndpointsTestApi extends Endpoints
   with BasicAuthentication
   with algebra.BasicAuthTestApi
   with algebra.EndpointsTestApi
-//  with JsonFromCodecTestApi
+  with JsonFromCodecTestApi
+  with circe.JsonFromCirceCodecTestApi
+  with JsonEntitiesFromCodec
+  with circe.JsonEntitiesFromCodec
 
 
 //TODO use EndpointsApi from algebra tests

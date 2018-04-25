@@ -4,23 +4,25 @@ import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import endpoints.algebra._
 import endpoints.algebra.client._
+import endpoints.algebra.circe
 
 import scala.concurrent.{ExecutionContext, Future}
 
-//TODO should we test JsonFromCodecTestApi here or just in supported json backends?
 class TestClient(settings: EndpointsSettings)
   (implicit EC: ExecutionContext, M: Materializer)
   extends Endpoints(settings)
     with BasicAuthentication
     with EndpointsTestApi
     with BasicAuthTestApi
-//    with JsonEntitiesFromCodec
-//    with JsonFromCodecTestApi
+    with JsonFromCodecTestApi
+    with circe.JsonFromCirceCodecTestApi
+    with JsonEntitiesFromCodec
+    with circe.JsonEntitiesFromCodec
 
 class EndpointsTest
   extends EndpointsTestSuite[TestClient]
     with BasicAuthTestSuite[TestClient]
-//    with JsonFromCodecTestSuite[TestClient]
+    with JsonFromCodecTestSuite[TestClient]
 {
 
   implicit val system = ActorSystem()
@@ -33,5 +35,5 @@ class EndpointsTest
 
   clientTestSuite()
   basicAuthSuite()
-  //  jsonFromCodecTestSuite()
+  jsonFromCodecTestSuite()
 }

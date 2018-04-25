@@ -9,8 +9,9 @@ trait AkkaHttpModule extends Module {
 
   val akkaHttpVersion = "10.0.10"
 
-  def algebra(crossVersion: String): EndpointsJvmModule
-
+  //dependencies
+  def algebraJvm(crossVersion: String): EndpointsJvmModule
+  def algebraCirceJvm(crossVersion: String): EndpointsJvmModule
 
   override def millSourcePath = super.millSourcePath / up / "akka-http"
 
@@ -22,7 +23,7 @@ trait AkkaHttpModule extends Module {
   class AkkaHttpClientModule(val crossVersion: String) extends EndpointsModule {
     override def artifactName = s"endpoints-akkahttp-client"
 
-    override def moduleDeps = Seq(algebra(crossVersion))
+    override def moduleDeps = Seq(algebraJvm(crossVersion))
 
     override def ivyDeps = Agg(
       ivy"com.typesafe.akka::akka-http:$akkaHttpVersion"
@@ -32,7 +33,10 @@ trait AkkaHttpModule extends Module {
       override def ivyDeps = Agg(
         ivy"com.typesafe.akka::akka-http-testkit:$akkaHttpVersion"
       )
-      override def moduleDeps = super.moduleDeps ++ Seq(algebra(crossVersion).test)
+      override def moduleDeps = super.moduleDeps ++ Seq(
+        algebraJvm(crossVersion).test,
+        algebraCirceJvm(crossVersion).test
+      )
     }
 
   }
@@ -40,7 +44,7 @@ trait AkkaHttpModule extends Module {
   class AkkaHttpServerModule(val crossVersion: String) extends EndpointsModule {
     override def artifactName = s"endpoints-akkahttp-server"
 
-    override def moduleDeps = Seq(algebra(crossVersion))
+    override def moduleDeps = Seq(algebraJvm(crossVersion))
 
     override def ivyDeps = Agg(
       ivy"com.typesafe.akka::akka-http:$akkaHttpVersion"
@@ -50,7 +54,10 @@ trait AkkaHttpModule extends Module {
       override def ivyDeps = Agg(
         ivy"com.typesafe.akka::akka-http-testkit:$akkaHttpVersion"
       )
-      override def moduleDeps = super.moduleDeps ++ Seq(algebra(crossVersion).test)
+      override def moduleDeps = super.moduleDeps ++ Seq(
+        algebraJvm(crossVersion).test,
+        algebraCirceJvm(crossVersion).test
+      )
     }
 
   }
