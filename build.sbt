@@ -34,9 +34,9 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
-  setNextVersion,
-  commitNextVersion,
   releaseStepCommand(Sonatype.SonatypeCommand.sonatypeReleaseAll),
   releaseStepCommandAndRemaining("; wow 2.11.12; manual/ghpagesPushSite"),
+  setNextVersion,
+  commitNextVersion,
   pushChanges
 )
