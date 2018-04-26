@@ -30,7 +30,7 @@ releaseProcess := Seq[ReleaseStep](
   runClean,
   releaseStepCommandAndRemaining("+test"),
   setReleaseVersion,
-  releaseStepTask(makeSite in LocalProject("; wow 2.11.12; manual")),
+  releaseStepCommandAndRemaining("; wow 2.11.12; manual/makeSite"),
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("+publishSigned"),
