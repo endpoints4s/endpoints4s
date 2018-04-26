@@ -3,16 +3,17 @@ import mill.scalalib._
 import mill.scalalib.publish._
 import ammonite.ops.up
 import mill.define.Cross.Factory
-import mill.define.{Cross, Discover, ExternalModule}
+import mill.define.{Cross, Discover, ExternalModule, Target}
 import mill.eval.Evaluator
 import mill.scalajslib._
 
 // THIS FILE HAS TO BE ON THE SAME LEVEL AS FILES USING IT BECAUSE OF A BUG IN AMMONITE
 
 
-//val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
-val `scala 2.10 to 2.12` = Seq("2.12.4")
-val `scala 2.11 to 2.12` = Seq("2.12.4")
+//val `scala 2.10 to 2.12` = Seq("2.12.4")
+val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
+//val `scala 2.11 to 2.12` = Seq("2.12.4")
+val `scala 2.11 to 2.12` = Seq("2.11.12", "2.12.4")
 
 trait EndpointsModule extends SbtModule with PublishModule {
   def crossVersion: String
@@ -52,6 +53,20 @@ trait EndpointsModule extends SbtModule with PublishModule {
   }
 
   def crossModuleDeps: Seq[EndpointsGroupingModule] = Seq()
+
+  override def scalacOptions = super.scalacOptions() ++ Seq(
+    "-feature",
+    "-deprecation",
+    "-encoding", "UTF-8",
+    "-unchecked",
+    "-Xlint",
+    "-Yno-adapted-args",
+    "-Ywarn-dead-code",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-value-discard",
+    "-Xfuture",
+    "-Xexperimental"
+  )
 
 }
 

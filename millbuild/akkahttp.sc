@@ -1,5 +1,5 @@
 import $file.common
-import common.{EndpointsModule, EndpointsJvmModule, `scala 2.10 to 2.12`}
+import common.{EndpointsModule, EndpointsJvmModule, `scala 2.11 to 2.12`}
 
 import mill.scalalib._
 import mill._
@@ -15,9 +15,9 @@ trait AkkaHttpModule extends Module {
 
   override def millSourcePath = super.millSourcePath / up / "akka-http"
 
-  object client extends mill.Cross[AkkaHttpClientModule](`scala 2.10 to 2.12`: _*)
+  object client extends mill.Cross[AkkaHttpClientModule](`scala 2.11 to 2.12`: _*)
 
-  object server extends mill.Cross[AkkaHttpClientModule](`scala 2.10 to 2.12`: _*)
+  object server extends mill.Cross[AkkaHttpClientModule](`scala 2.11 to 2.12`: _*)
 
 
   class AkkaHttpClientModule(val crossVersion: String) extends EndpointsModule {

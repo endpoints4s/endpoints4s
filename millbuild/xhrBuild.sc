@@ -1,5 +1,5 @@
 import $file.common
-import common.{EndpointsJsModule, EndpointsModule, `scala 2.10 to 2.12`}
+import common.{EndpointsJsModule, EndpointsModule, `scala 2.11 to 2.12`}
 
 import mill._
 import mill.scalalib._
@@ -11,11 +11,11 @@ trait XhrModule extends Module {
   def algebraJs(crossVersion: String): EndpointsJsModule
   def algebraCirceJs(crossVersion: String): EndpointsJsModule
 
-  object client extends mill.Cross[XhrClientModule](`scala 2.10 to 2.12`: _*)
+  object client extends mill.Cross[XhrClientModule](`scala 2.11 to 2.12`: _*)
 
-  object clientCirce extends mill.Cross[XhrClientCirceModule](`scala 2.10 to 2.12`: _*)
+  object clientCirce extends mill.Cross[XhrClientCirceModule](`scala 2.11 to 2.12`: _*)
 
-  object clientFaithful extends mill.Cross[XhrFaithfulCirceModule](`scala 2.10 to 2.12`: _*)
+  object clientFaithful extends mill.Cross[XhrFaithfulCirceModule](`scala 2.11 to 2.12`: _*)
 
   class XhrClientModule(val crossVersion: String) extends EndpointsJsModule {
     override def artifactName = s"endpoints-xhr-client"

@@ -1,5 +1,5 @@
 import $file.common
-import common.{EndpointsModule, EndpointsJvmModule, EndpointsJsModule, EndpointsGroupingModule, `scala 2.10 to 2.12`}
+import common.{EndpointsModule, EndpointsJvmModule, EndpointsJsModule, EndpointsGroupingModule, `scala 2.11 to 2.12`}
 import mill._
 import mill.scalalib._
 import ammonite.ops.up
@@ -75,7 +75,6 @@ trait OpenapiModule extends Module {
       override def ivyDeps = super.ivyDeps() ++
         Agg(ivy"com.chuusai::shapeless::2.3.2")
 
-
       trait JsonSchemaGenericTest extends EndpointsTests {
         def crossModuleDeps = Seq(openapi)
       }
@@ -88,6 +87,7 @@ trait OpenapiModule extends Module {
       object test extends JsonSchemaGenericTest with EndpointsJsTests
     }
 
+    def crossVersions: Seq[String] = `scala 2.11 to 2.12`
     object js extends Cross[Js](crossVersions: _*)
     object jvm extends Cross[Jvm](crossVersions: _*)
   }

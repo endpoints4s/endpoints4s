@@ -69,7 +69,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new endpoints.InvariantFunctor[RequestHeaders] {
     override def xmap[From, To](f: Headers => Either[Result, From], map: From => To, contramap: To => From): Headers => Either[Result, To] =
-      headers => f(headers).map(map)
+      headers => f(headers).right.map(map)
   }
 
   implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
@@ -77,7 +77,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       headers => {
         val a = fa(headers)
         val b = fb(headers)
-        a.flatMap(aV => b.map(bV => tupler.apply(aV, bV)))
+        a.right.flatMap(aV => b.right.map(bV => tupler.apply(aV, bV)))
       }
   }
 
