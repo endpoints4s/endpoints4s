@@ -9,9 +9,9 @@ trait OptionalResponses[R[_]] extends endpoints.algebra.OptionalResponses { self
     def option[A](inner: Response[A]): Response[Option[A]] = new SttpResponse[Option[A]] {
       override type RB = inner.RB
       override def responseAs = inner.responseAs
-      override def validateResponse(response: sttp.Response[inner.RB]): Either[String, Option[A]] = {
-        if (response.code == 404) Right(None)
-        else inner.validateResponse(response).right.map(Some(_))
+      override def validateResponse(response: sttp.Response[inner.RB]): R[Option[A]] = {
+        if (response.code == 404) backend.responseMonad.unit(None)
+        else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
       }
     }
 }

@@ -20,11 +20,13 @@ import scala.language.higherKinds
   */
 class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods {
 
+  type SttpRequest = sttp.Request[_, Nothing]
+
   /**
     * A function that, given an `A` and a request model, returns an updated request
     * containing additional headers
     */
-  type RequestHeaders[A] = (A, sttp.Request[_, Nothing]) => sttp.Request[_, Nothing]
+  type RequestHeaders[A] = (A, SttpRequest) => SttpRequest
 
   /** Does not modify the request */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, request) => request
@@ -32,12 +34,12 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   /**
     * A function that takes an `A` information and returns a `sttp.Request`
     */
-  type Request[A] = A => sttp.Request[_, Nothing]
+  type Request[A] = A => SttpRequest
 
   /**
     * A function that, given an `A` information and a `sttp.Request`, eventually returns a `sttp.Request`
     */
-  type RequestEntity[A] = (A, sttp.Request[_, Nothing]) => sttp.Request[_, Nothing]
+  type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
   lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) => req }
 
@@ -50,8 +52,8 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
       val (a, b) = tuplerAB.unapply(ab)
 
       val uri: sttp.Id[sttp.Uri] = sttp.Uri(new URI(s"${host}${url.encode(a)}"))
-      val reqId: sttp.Request[_, Nothing] = method(sttp.sttp.get(uri = uri))
-      entity(b, headers(c, reqId))
+      val sttpRequest: SttpRequest = method(sttp.sttp.get(uri = uri))
+      entity(b, headers(c, sttpRequest))
     }
 
   /**
@@ -71,7 +73,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     /**
       * Function to validate the response (headers, code). This can also modify the type of the received body
       */
-    def validateResponse(response: sttp.Response[RB]): Either[String, A]
+    def validateResponse(response: sttp.Response[RB]): R[A]
   }
 
   type Response[A] = SttpResponse[A]
@@ -81,8 +83,8 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     type RB = Unit
     override def responseAs = sttp.ignore
     override def validateResponse(response: sttp.Response[Unit]) = {
-      if (response.isSuccess) response.body
-      else Left(s"Unexpected status code: ${response.code}")
+      if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
+      else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
     }
   }
 
@@ -91,22 +93,22 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     type RB = String
     override def responseAs = sttp.asString
     override def validateResponse(response: sttp.Response[String]) = {
-      if (response.isSuccess) response.body
-      else Left(s"Unexpected status code: ${response.code}")
+      if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
+      else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
     }
   }
 
   /**
     * A function that, given an `A`, eventually attempts to decode the `B` response.
     */
-  type Endpoint[A, B] = A => R[Either[String, B]]
+  type Endpoint[A, B] = A => R[B]
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     a => {
       val req: sttp.Request[response.RB, Nothing] = request(a).response(response.responseAs)
 
       val result = backend.send(req)
-      backend.responseMonad.map(result)(response.validateResponse)
+      backend.responseMonad.flatMap(result)(response.validateResponse)
     }
 
 }

@@ -23,9 +23,9 @@ trait BasicAuthentication[R[_]] extends algebra.BasicAuthentication { self: Endp
     new SttpResponse[Option[A]] {
       override type RB = inner.RB
       override def responseAs = inner.responseAs
-      override def validateResponse(response: sttp.Response[inner.RB]): Either[String, Option[A]] = {
-        if (response.code == 403) Right(None)
-        else inner.validateResponse(response).right.map(Some(_))
+      override def validateResponse(response: sttp.Response[inner.RB]): R[Option[A]] = {
+        if (response.code == 403) backend.responseMonad.unit(None)
+        else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
       }
     }
   }
