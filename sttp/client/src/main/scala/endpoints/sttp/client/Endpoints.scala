@@ -63,24 +63,24 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     /**
       * The type of the received body from the server
       */
-    type RB
+    type ReceivedBody
 
     /**
       * To read the response body
       */
-    def responseAs: sttp.ResponseAs[RB, Nothing]
+    def responseAs: sttp.ResponseAs[ReceivedBody, Nothing]
 
     /**
       * Function to validate the response (headers, code). This can also modify the type of the received body
       */
-    def validateResponse(response: sttp.Response[RB]): R[A]
+    def validateResponse(response: sttp.Response[ReceivedBody]): R[A]
   }
 
   type Response[A] = SttpResponse[A]
 
   /** Successfully decodes no information from a response */
   val emptyResponse: Response[Unit] = new SttpResponse[Unit] {
-    type RB = Unit
+    override type ReceivedBody = Unit
     override def responseAs = sttp.ignore
     override def validateResponse(response: sttp.Response[Unit]) = {
       if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
@@ -90,7 +90,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   /** Successfully decodes string information from a response */
   val textResponse: Response[String] = new SttpResponse[String] {
-    type RB = String
+    override type ReceivedBody = String
     override def responseAs = sttp.asString
     override def validateResponse(response: sttp.Response[String]) = {
       if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
@@ -105,7 +105,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
     a => {
-      val req: sttp.Request[response.RB, Nothing] = request(a).response(response.responseAs)
+      val req: sttp.Request[response.ReceivedBody, Nothing] = request(a).response(response.responseAs)
 
       val result = backend.send(req)
       backend.responseMonad.flatMap(result)(response.validateResponse)

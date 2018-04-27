@@ -25,7 +25,7 @@ class EndpointsTestSync
     with BasicAuthTestSuite[TestClient[Try]]
     with OptionalResponsesTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]] {
-  
+
   val backend = TryHttpURLConnectionBackend()
 
   val client: TestClient[Try] = new TestClient(s"http://localhost:$wiremockPort", backend)

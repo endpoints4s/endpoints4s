@@ -15,9 +15,9 @@ trait JsonEntitiesFromCodec[R[_]] extends endpoints.algebra.JsonEntitiesFromCode
   }
 
   def jsonResponse[A](implicit codec: Codec[String, A]): Response[A] = new SttpResponse[A] {
-    override type RB = Either[Exception, A]
+    override type ReceivedBody = Either[Exception, A]
     override def responseAs = sttp.asString.map(str => codec.decode(str))
-    override def validateResponse(response: sttp.Response[RB]): R[A] = {
+    override def validateResponse(response: sttp.Response[ReceivedBody]): R[A] = {
       response.unsafeBody match {
         case Right(a) => backend.responseMonad.unit(a)
         case Left(exception) => backend.responseMonad.error(exception)
