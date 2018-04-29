@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import akka.http.scaladsl.unmarshalling.{FromRequestUnmarshaller, Unmarshaller}
 import endpoints.algebra.Documentation
-import endpoints.{InvariantFunctor, SemigroupK, Tupler, algebra}
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -61,7 +61,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
   implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
-  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     override def add[A, B](fa: Directive1[A], fb: Directive1[B])(implicit tupler: Tupler[A, B]): Directive1[tupler.Out] = joinDirectives(fa, fb)
   }
 

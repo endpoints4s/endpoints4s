@@ -1,7 +1,7 @@
 package endpoints.play.server
 
 import endpoints.algebra.Documentation
-import endpoints.{SemigroupK, Tupler, algebra}
+import endpoints.{Semigroupal, Tupler, algebra}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
@@ -72,7 +72,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       headers => f(headers).right.map(map)
   }
 
-  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     override def add[A, B](fa: Headers => Either[Result, A], fb: Headers => Either[Result, B])(implicit tupler: Tupler[A, B]): Headers => Either[Result, tupler.Out] =
       headers => {
         val a = fa(headers)
@@ -202,11 +202,11 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   /** A successful HTTP response (status code 200) with no entity */
   def emptyResponse(docs: Documentation): Response[Unit] = _emptyResponse
-  lazy val _emptyResponse: Response[Unit] = _ => Results.Ok
+  private lazy val _emptyResponse: Response[Unit] = _ => Results.Ok
 
   /** A successful HTTP response (status code 200) with string entity */
   def textResponse(docs: Documentation): Response[String] = _textResponse
-  lazy val _textResponse: Response[String] = x => Results.Ok(x)
+  private lazy val _textResponse: Response[String] = x => Results.Ok(x)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)

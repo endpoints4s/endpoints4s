@@ -53,12 +53,17 @@ trait Endpoints
       }
     val correctPathSegments: List[Either[String, DocumentedParameter]] = {
       val prefix = "_arg"
-      request.url.path.zipWithIndex.map{
-        case (Right(param), idx) if param.name.isEmpty => Right(param.copy(name = s"$prefix$idx"))
-        case (x, _) => x
-      }
+      request.url.path
+        .foldLeft((0, List[Either[String, DocumentedParameter]]())) { // (num of empty-named args, new args list)
+          case ((nextEmptyArgNum, args), Right(arg)) if arg.name.isEmpty =>
+            val renamed = arg.copy(name = s"$prefix$nextEmptyArgNum")
+            (nextEmptyArgNum + 1, Right(renamed) :: args)
+          case ((x, args), elem) => (x, elem::args)
+        }
+        ._2
+        .reverse
     }
-    val pathParams = correctPathSegments.collect{ case Right(param) => param}
+    val pathParams = correctPathSegments.collect { case Right(param) => param }
     val parameters =
       pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
         request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required, p.description, p.schema)) ++
@@ -72,7 +77,7 @@ trait Endpoints
         response.map(r => r.status -> Response(r.documentation, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
-    val path = correctPathSegments.collect{
+    val path = correctPathSegments.collect {
       case Left(str) => str
       case Right(param) => s"{${param.name}}"
     }.mkString("/")

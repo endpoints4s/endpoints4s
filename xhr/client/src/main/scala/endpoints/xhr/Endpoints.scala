@@ -1,6 +1,6 @@
 package endpoints.xhr
 
-import endpoints.{InvariantFunctor, SemigroupK, Tupler, algebra}
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
@@ -33,7 +33,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       (to, xhr) => f(contramap(to), xhr)
   }
 
-  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders]{
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders]{
     override def add[A, B](fa: js.Function2[A, XMLHttpRequest, Unit], fb: js.Function2[B, XMLHttpRequest, Unit])(implicit tupler: Tupler[A, B]): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
       (out, xhr) => {
         val (a, b) = tupler.unapply(out)

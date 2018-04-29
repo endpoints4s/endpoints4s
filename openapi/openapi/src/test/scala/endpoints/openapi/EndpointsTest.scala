@@ -53,9 +53,10 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     "be substituted with auto generated name" in {
       val path = Fixtures.documentation.paths.find(_._1.startsWith("/emptySegmentNameEndp")).get
 
-      path._1 shouldEqual "/emptySegmentNameEndp/{_arg2}"
-      val param = path._2.operations("post").parameters.head
-      param.name shouldEqual "_arg2"
+      path._1 shouldEqual "/emptySegmentNameEndp/{_arg0}/x/{_arg1}"
+      val pathParams = path._2.operations("post").parameters
+      pathParams(0).name shouldEqual "_arg0"
+      pathParams(1).name shouldEqual "_arg1"
     }
   }
 
@@ -71,7 +72,7 @@ trait Fixtures extends algebra.Endpoints {
 
   val textRequestEndp = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
 
-  val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int](), textRequest()), emptyResponse())
+  val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest()), emptyResponse())
 
 }
 

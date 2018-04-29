@@ -69,7 +69,7 @@ trait Requests
   implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
     def xmap[From, To](x: RequestHeaders[From], map: From => To, contramap: To => From): RequestHeaders[To] = x
   }
-  implicit lazy val reqHeadersSemigroupK: endpoints.SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupal: endpoints.Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     def add[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
       DocumentedHeaders(fa.value ++ fb.value)
   }

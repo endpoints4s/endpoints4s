@@ -1,6 +1,6 @@
 package endpoints.scalaj.client
 
-import endpoints.{InvariantFunctor, SemigroupK, Tupler, algebra}
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.Documentation
 
 import scalaj.http.HttpRequest
@@ -26,7 +26,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
       to => f(contramap(to))
   }
 
-  implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     override def add[A, B](fa: A => Seq[(String, String)], fb: B => Seq[(String, String)])(implicit tupler: Tupler[A, B]): tupler.Out => Seq[(String, String)] =
       out => {
         val (a, b) = tupler.unapply(out)

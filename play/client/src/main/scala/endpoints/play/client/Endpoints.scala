@@ -1,6 +1,6 @@
 package endpoints.play.client
 
-import endpoints.{InvariantFunctor, SemigroupK, Tupler, algebra}
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.Documentation
 import endpoints.play.client.Endpoints.futureFromEither
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
@@ -38,7 +38,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
       (to, req) => f(contramap(to), req)
   }
 
-  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     override def add[A, B](fa: (A, WSRequest) => WSRequest, fb: (B, WSRequest) => WSRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, WSRequest) => WSRequest =
       (out, req) => {
         val (a, b) = tupler.unapply(out)
@@ -86,14 +86,14 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
 
   /** Successfully decodes no information from a response */
   def emptyResponse(docs: Documentation): Response[Unit] = _emptyResponse
-  val _emptyResponse: Response[Unit] = {
+  private lazy val _emptyResponse: Response[Unit] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(())
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
   /** Successfully decodes string information from a response */
   def textResponse(docs: Documentation): Response[String] = _textResponse
-  val _textResponse: Response[String] = {
+  private lazy val _textResponse: Response[String] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(resp.body)
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }

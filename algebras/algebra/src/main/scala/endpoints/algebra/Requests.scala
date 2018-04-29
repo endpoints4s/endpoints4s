@@ -6,7 +6,7 @@ import endpoints._
 
 import scala.language.higherKinds
 
-trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupKSyntax {
+trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupalSyntax {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]
@@ -23,7 +23,7 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
 
   def optHeader(name: String, docs: Documentation = None): RequestHeaders[Option[String]]
 
-  implicit def reqHeadersSemigroupK: SemigroupK[RequestHeaders]
+  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
   implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
 
 

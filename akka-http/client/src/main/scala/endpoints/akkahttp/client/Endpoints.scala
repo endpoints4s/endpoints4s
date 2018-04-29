@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.HttpHeader.ParsingResult
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
 import endpoints.algebra.Documentation
-import endpoints.{InvariantFunctor, SemigroupK, Tupler, algebra}
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +26,7 @@ class Endpoints(val settings: EndpointsSettings)
     }
   }
 
-  implicit lazy val reqHeadersSemigroupK: SemigroupK[RequestHeaders] = new SemigroupK[RequestHeaders] {
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     override def add[A, B](fa: (A, List[HttpHeader]) => List[HttpHeader], fb: (B, List[HttpHeader]) => List[HttpHeader])(implicit tupler: Tupler[A, B]): (tupler.Out, List[HttpHeader]) => List[HttpHeader] =
       (tuplerOut, headers) => {
         val (left, right) = tupler.unapply(tuplerOut)
@@ -91,7 +91,7 @@ class Endpoints(val settings: EndpointsSettings)
 
   type Response[A] = HttpResponse => Future[Either[Throwable, A]]
 
-  val _emptyResponse: Response[Unit] = x =>
+  private lazy val _emptyResponse: Response[Unit] = x =>
     if (x.status == StatusCodes.OK) {
       Future.successful(Right(()))
     } else {
@@ -100,7 +100,7 @@ class Endpoints(val settings: EndpointsSettings)
 
   def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = _emptyResponse
 
-  val _textResponse: Response[String] = x =>
+  private lazy val _textResponse: Response[String] = x =>
     if (x.status == StatusCodes.OK) {
       x.entity.toStrict(settings.toStrictTimeout)
         .map(settings.stringContentExtractor)
