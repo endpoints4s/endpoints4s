@@ -1,25 +1,43 @@
 language: scala
 
-scala:
-  - 2.10.6
-  - 2.11.11
-  - 2.12.4
+cache:
+  - directories:
+    - $HOME/.ivy2/cache
+    - $HOME/.sbt/boot
 
 jdk:
   - oraclejdk8
 
-cache:
-  directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot
-
-
-script:
-  # +++ instead of ++ to use sbt-doge strict aggregation
-  - sbt "+++$TRAVIS_SCALA_VERSION compile"
-  - sbt "+++$TRAVIS_SCALA_VERSION test"
-
-  # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+jobs:
+  include:
+    - stage: test
+      scala: 2.10.6
+      script:
+        # +++ instead of ++ to use sbt-doge strict aggregation
+        - sbt "+++$TRAVIS_SCALA_VERSION test"
+        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+        # Tricks to avoid unnecessary cache updates
+        - find $HOME/.sbt -name "*.lock" | xargs rm
+        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+    - stage: test
+      scala: 2.11.11
+      script:
+        # +++ instead of ++ to use sbt-doge strict aggregation
+        - sbt "+++$TRAVIS_SCALA_VERSION test"
+        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+        # Tricks to avoid unnecessary cache updates
+        - find $HOME/.sbt -name "*.lock" | xargs rm
+        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+    - stage: test
+      scala: 2.12.4
+      script:
+        # +++ instead of ++ to use sbt-doge strict aggregation
+        - sbt "+++$TRAVIS_SCALA_VERSION test"
+        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+        # Tricks to avoid unnecessary cache updates
+        - find $HOME/.sbt -name "*.lock" | xargs rm
+        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+    - stage: coverage
+      script: sbt coverage test coverageReport coverageAggregate
+      after_success:
+        - codecov

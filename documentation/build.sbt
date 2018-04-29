@@ -31,6 +31,7 @@ val apiDoc =
   project.in(file("api-doc"))
     .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
     .settings(
+      coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
         "-diagrams",
         "-groups",
@@ -53,6 +54,7 @@ val manual =
   project.in(file("manual"))
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
+      coverageEnabled := false,
       scalaVersion := "2.11.8",
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
       ornateSourceDir := Some(sourceDirectory.value / "ornate"),
@@ -76,6 +78,11 @@ val `example-overview-endpoints` =
   crossProject.crossType(CrossType.Pure)
     .in(file("examples/overview/endpoints"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
+    .jsSettings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
+    .jvmSettings(coverageEnabled := true)
     .settings(
       addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
@@ -89,7 +96,11 @@ val `example-overview-endpoints-js` = `example-overview-endpoints`.js
 val `example-overview-client` =
   project.in(file("examples/overview/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .settings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false,
+      noPublishSettings ++ `scala 2.11 to 2.12`
+    )
     .dependsOn(`example-overview-endpoints-js`, `xhr-client-circe`)
 
 val `example-overview-server` =
@@ -113,14 +124,19 @@ val `example-basic-shared` = {
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
-          targetDirectory = (target in Compile).value,
+          targetDirectory = (sourceManaged in Compile).value,
           generatedObjectName = "AssetsDigests",
           generatedPackage = Some("sample")
         )
       }.taskValue,
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
+    .jsSettings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
     .jvmSettings(
+      coverageEnabled := true,
       (resourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.gzipAssets(
           baseDirectory = baseDirectory.value.getParentFile,
@@ -140,7 +156,11 @@ val `example-basic-shared-js` = `example-basic-shared`.js
 val `example-basic-client` =
   project.in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .settings(
+      noPublishSettings ++ `scala 2.11 to 2.12`,
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
 val `example-basic-play-server` =
@@ -168,6 +188,11 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .jsSettings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
+    .jvmSettings(coverageEnabled := true)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
@@ -183,6 +208,8 @@ val `example-cqrs-web-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false,
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.2.2",
         "in.nvilla" %%% "monadic-rx-cats" % "0.2.2",
@@ -203,7 +230,7 @@ val `example-cqrs-public-server` =
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
-          targetDirectory = (target in Compile).value,
+          targetDirectory = (sourceManaged in Compile).value,
           generatedObjectName = "BootstrapDigests",
           generatedPackage = Some("cqrs.publicserver"),
           assetsPath = identity
@@ -268,6 +295,11 @@ val `example-cqrs` =
 lazy val `circe-instant` =
   CrossProject("example-cqrs-circe-instantJVM", "example-cqrs-circe-instantJS", file("examples/cqrs/circe-instant"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .jsSettings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
+    .jvmSettings(coverageEnabled := true)
     .settings(
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )

@@ -2,6 +2,7 @@ package endpoints.scalaj.client
 
 import scalaj.http.HttpResponse
 import endpoints.algebra
+
 import endpoints.algebra.Documentation
 
 trait Responses extends algebra.Responses {

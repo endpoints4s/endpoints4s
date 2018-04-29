@@ -3,8 +3,6 @@ package endpoints.akkahttp.client
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints.algebra.{Codec, Documentation}
 
-import scala.concurrent.Future
-
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON request
   * and decodes JSON responses using Akka HTTP.
