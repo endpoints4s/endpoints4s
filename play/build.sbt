@@ -13,7 +13,7 @@ val `play-server` =
         "com.typesafe.play" %% "play-netty-server" % playVersion
       )
     )
-    .dependsOn(`algebra-jvm`)
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
 
 val `play-server-circe` =
   project.in(file("server-circe"))
@@ -31,4 +31,4 @@ val `play-client` =
         name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ahc-ws" % playVersion
       )
-      .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
+      .dependsOn(`algebra-jvm` % "test->test;compile->compile")

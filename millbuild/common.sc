@@ -38,7 +38,7 @@ trait EndpointsModule extends SbtModule with PublishModule {
     )
   )
 
-  val circeVersion = "0.9.0"
+  val circeVersion = "0.8.0"
   val playVersion = "2.6.7"
 
   override def millSourcePath = super.millSourcePath / up

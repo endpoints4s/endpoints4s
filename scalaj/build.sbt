@@ -14,4 +14,4 @@ val `scalaj-client` =
         "org.scalaj" %% "scalaj-http" % "2.3.0"
       )
     )
-    .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")

@@ -60,6 +60,8 @@ $ sbt +manual/ghpagesPushSite
 
 ## Working with mill
 
+Endpoints comes with experimental mill build which is meant for evaluating mill as a replacecement for sbt
+
 ~~~sh
 mill genidea #generate idea project config
 mill all __.compile #compile everything

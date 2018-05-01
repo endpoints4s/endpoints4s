@@ -3,7 +3,6 @@ import EndpointsSettings._
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
-val `testsuite-jvm` = LocalProject("testsuiteJVM")
 
 val akkaHttpVersion = "10.0.1"
 val akkaHttpJsonVersion = "1.18.1"
@@ -20,7 +19,8 @@ val `akka-http-client` =
         scalaTestDependency
       )
     )
-    .dependsOn(`algebra-jvm`, `testsuite-jvm` % Test)
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`algebra-circe-jvm` % "test->test")
 
 val `akka-http-server` =
   project.in(file("server"))
@@ -34,4 +34,5 @@ val `akka-http-server` =
         scalaTestDependency
       )
     )
-    .dependsOn(`algebra-jvm`)
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`algebra-circe-jvm` % "test->test")

@@ -18,6 +18,4 @@ trait Methods extends algebra.Methods {
 
    def Options: Method = "OPTIONS"
 
-   def Patch: Method = "PATCH"
-
 }
