@@ -2,7 +2,6 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
-val `testsuite-jvm` = LocalProject("testsuiteJVM")
 
 val `scalaj-client` =
   project.in(file("client"))
@@ -15,3 +14,4 @@ val `scalaj-client` =
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`algebra-circe-jvm` % "test->test")

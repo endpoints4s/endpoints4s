@@ -1,18 +1,17 @@
 package sample.algebra
 
-import endpoints.documented.algebra.{BasicAuthentication, circe, Endpoints, OptionalResponses}
+import endpoints.algebra.{BasicAuthentication, circe, Endpoints}
 import io.circe.generic.JsonCodec
 
 trait DocumentedApi
   extends Endpoints
-    with OptionalResponses
     with BasicAuthentication
     with circe.JsonEntitiesFromCodec {
 
   val items =
     endpoint(
       get(path / "items" / segment[String]("category") /? optQs[Int]("page")),
-      jsonResponse[List[Item]]("List all the items of the given category")
+      jsonResponse[List[Item]](Some("List all the items of the given category"))
     )
 
   val itemId = segment[String]("id")
@@ -20,16 +19,16 @@ trait DocumentedApi
   val item =
     endpoint(
       get(path / "item" / itemId),
-      option(jsonResponse[Item]("The item identified by 'id'"), "Item not found")
+      option(jsonResponse[Item](Some("The item identified by 'id'")), Some("Item not found"))
     )
 
   val admin =
     authenticatedEndpoint(
       Get,
       path / "admin",
-      emptyRequest,
-      emptyResponse("Administration page"),
-      "Authentication error"
+      requestEntity = emptyRequest,
+      response = emptyResponse(Some("Administration page")),
+      summary = Some("Authentication error")
     )
 
 }

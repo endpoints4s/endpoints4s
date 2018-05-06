@@ -11,7 +11,7 @@ import scala.language.higherKinds
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
   */
-trait JsonSchemas
+trait  JsonSchemas
   extends algebra.JsonSchemas {
 
   trait JsonSchema[A] {

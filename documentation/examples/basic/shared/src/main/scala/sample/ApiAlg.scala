@@ -3,22 +3,22 @@ package sample
 import endpoints.algebra._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodec with OptionalResponses with BasicAuthentication {
+trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodec with BasicAuthentication {
 
   val index =
-    endpoint(get(path / "user" / segment[String] /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User])
+    endpoint(get(path / "user" / segment[String]() /? (qs[Int]("age") & qs[String]("toto"))), jsonResponse[User]())
 
   val action =
-    endpoint(post(path / "action", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+    endpoint(post(path / "action", jsonRequest[ActionParameter]()), jsonResponse[ActionResult]())
 
   val actionFut =
-    endpoint(post(path / "actionFut", jsonRequest[ActionParameter]), jsonResponse[ActionResult])
+    endpoint(post(path / "actionFut", jsonRequest[ActionParameter]()), jsonResponse[ActionResult]())
 
   val maybe =
-    endpoint(get(path / "option"), option(emptyResponse))
+    endpoint(get(path / "option"), option(emptyResponse()))
 
   val auth =
-    authenticatedEndpoint(Get, path / "auth", response = emptyResponse)
+    authenticatedEndpoint(Get, path / "auth", response = emptyResponse())
 
 }
 

@@ -580,7 +580,7 @@ and since we are only describing the endpoint, we added an abstract implicit met
 The response of the `getMeter` endpoint is described by the expression
 `option(jsonResponse[Meter])`, which means that it
 can optionally be empty (for instance if a client queries this endpoint with a
-non-existing `UUID`). The `option` method, provided by the `OptionalResponses` algebra
+non-existing `UUID`). The `option` method, provided by the `Responses` algebra
 interface, takes a `Response[A]` description and
 turns it into a `Response[Option[A]]`, mapping the `None` case
 to a 404 (Not Found) response.
@@ -629,7 +629,7 @@ In this section we have seen that deriving a Scala.js client works the same way 
 client.
 
 We have seen that the endpoints library provides a minimal infrastructure that is designed to
-be extended according to application-specific needs. In our case we saw how the `OptionalResponses`
+be extended according to application-specific needs. In our case we saw how the `OptionalResponses` //TODO OptionalResponses are no longer there
 introduced a new method for describing responses such that empty responses are mapped to
 a 404 (Not Found) response. We also saw how support for custom data types (e.g. `UUID`) can
 be introduced.

@@ -1,6 +1,7 @@
 package endpoints.xhr
 
 import endpoints.algebra
+import endpoints.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
@@ -45,7 +46,7 @@ trait Assets extends algebra.Assets with Endpoints {
     * Throws an exception if the asset digest is not found.
     */
   // FIXME Check the asset digest in the `asset` smart constructor
-  lazy val assetSegments: Path[AssetPath] = {
+  def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
     case AssetPath(path, name) =>
       val rawPath = s"$path/$name"
       val digest = digests.getOrElse(rawPath, throw new Exception(s"Asset not found: $rawPath"))
@@ -61,7 +62,7 @@ trait Assets extends algebra.Assets with Endpoints {
     * @param url URL description
     * @return An HTTP endpoint for requesting assets
     */
-  def assetsEndpoint(url: Url[AssetPath]): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
     endpoint(arrayBufferGet(url), arrayBufferResponse)
 
   private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
