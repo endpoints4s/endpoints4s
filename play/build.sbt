@@ -33,4 +33,4 @@ val `play-client` =
         name := "endpoints-play-client",
         libraryDependencies += "com.typesafe.play" %% "play-ahc-ws" % playVersion
       )
-      .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+      .dependsOn(`algebra-jvm` % "test->test;compile->compile", `algebra-circe-jvm` % "compile->test;test->test")

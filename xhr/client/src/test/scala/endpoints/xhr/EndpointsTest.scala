@@ -7,7 +7,8 @@ object Fixtures extends thenable.Endpoints {
   val bar = endpoint(post(path / "bar" /? qs[Int]("quux"), emptyRequest), emptyResponse())
 }
 
-// TODO try to use traits defined in algebra tests. It cannot be simply reused because dependency on wiremock which is not available for js
+// TODO try to use traits defined in algebra tests.
+// It cannot be simply reused because dependency on wiremock which is not available for js
 class EndpointsTest extends FreeSpec {
 
   "href" in {
