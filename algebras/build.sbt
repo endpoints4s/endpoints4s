@@ -19,7 +19,7 @@ val algebra =
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.6.0" % Test,
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test,
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" % Test cross CrossVersion.full )
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" % Test cross CrossVersion.full)
       )
     )
     .dependsOn(`json-schema` % "test->test;compile->compile")
@@ -33,8 +33,11 @@ val `algebra-circe` =
     .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-circe",
-      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
-      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion % Test
+      libraryDependencies ++= Seq(
+        "io.circe" %%% "circe-parser" % circeVersion,
+        "io.circe" %%% "circe-generic" % circeVersion % Test,
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" % Test cross CrossVersion.full)
+      )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
 
