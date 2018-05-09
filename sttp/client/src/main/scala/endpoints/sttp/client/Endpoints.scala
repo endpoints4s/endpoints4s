@@ -2,8 +2,8 @@ package endpoints.sttp.client
 
 import java.net.URI
 
-import endpoints.algebra
-import endpoints.Tupler
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.algebra.Documentation
 import com.softwaremill.sttp
 
 import scala.language.higherKinds
@@ -14,9 +14,9 @@ import scala.language.higherKinds
   *
   * Doest not support streaming responses for now
   *
-  * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
-  * @param backend  The underlying backend to use
-  * @tparam R       The monad wrapping the response. It is defined by the backend
+  * @param host    Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
+  * @param backend The underlying backend to use
+  * @tparam R The monad wrapping the response. It is defined by the backend
   */
 class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods {
 
@@ -31,6 +31,27 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   /** Does not modify the request */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, request) => request
 
+  def header(name: String, docs: Documentation): RequestHeaders[String] = (value, request) => request.header(name, value)
+
+  def optHeader(name: String, docs: Documentation): (Option[String], SttpRequest) => SttpRequest = {
+    case (Some(value), request) => request.header(name, value)
+    case (None, request) => request
+  }
+
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+    override def xmap[From, To](f: (From, SttpRequest) => SttpRequest, map: From => To, contramap: To => From): (To, SttpRequest) => SttpRequest =
+      (to, request) => f(contramap(to), request)
+  }
+
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
+    override def add[A, B](fa: (A, SttpRequest) => SttpRequest, fb: (B, SttpRequest) => SttpRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, SttpRequest) => SttpRequest =
+      (ab, request) => {
+        val (a, b) = tupler.unapply(ab)
+        fa(a, fb(b, request))
+      }
+  }
+
+
   /**
     * A function that takes an `A` information and returns a `sttp.Request`
     */
@@ -41,7 +62,18 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) => req }
+  lazy val emptyRequest: RequestEntity[Unit] = {
+    case (_, req) => req
+  }
+
+  def textRequest(docs: Option[String]): RequestEntity[String] = {
+    case (bodyValue, request) => request.body(bodyValue)
+  }
+
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
+    override def xmap[From, To](f: (From, SttpRequest) => SttpRequest, map: From => To, contramap: To => From): (To, SttpRequest) => SttpRequest =
+      (to, req) => f(contramap(to), req)
+  }
 
   def request[A, B, C, AB](
     method: Method, url: Url[A],
@@ -79,9 +111,13 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   type Response[A] = SttpResponse[A]
 
   /** Successfully decodes no information from a response */
-  val emptyResponse: Response[Unit] = new SttpResponse[Unit] {
+  def emptyResponse(docs: Documentation): SttpResponse[Unit] = _emptyResponse
+
+  private lazy val _emptyResponse: Response[Unit] = new SttpResponse[Unit] {
     override type ReceivedBody = Unit
+
     override def responseAs = sttp.ignore
+
     override def validateResponse(response: sttp.Response[Unit]) = {
       if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
       else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
@@ -89,12 +125,27 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   }
 
   /** Successfully decodes string information from a response */
-  val textResponse: Response[String] = new SttpResponse[String] {
+  def textResponse(docs: Documentation): SttpResponse[String] = _textResponse
+
+  private val _textResponse: Response[String] = new SttpResponse[String] {
     override type ReceivedBody = String
+
     override def responseAs = sttp.asString
+
     override def validateResponse(response: sttp.Response[String]) = {
       if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
       else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
+    }
+  }
+
+  def option[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new SttpResponse[Option[A]] {
+    override type ReceivedBody = inner.ReceivedBody
+
+    override def responseAs = inner.responseAs
+
+    override def validateResponse(response: sttp.Response[inner.ReceivedBody]): R[Option[A]] = {
+      if (response.code == 404) backend.responseMonad.unit(None)
+      else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
     }
   }
 
@@ -103,7 +154,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     */
   type Endpoint[A, B] = A => R[B]
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation): Endpoint[A, B] =
     a => {
       val req: sttp.Request[response.ReceivedBody, Nothing] = request(a).response(response.responseAs)
 
