@@ -36,6 +36,6 @@ class EndpointsTest
 
   clientTestSuite()
   basicAuthSuite()
-//  jsonFromCodecTestSuite()
+  jsonFromCodecTestSuite()
 }
 
