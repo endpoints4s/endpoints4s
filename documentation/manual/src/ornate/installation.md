@@ -60,8 +60,8 @@ libraryDependencies ++= Seq(
 )
 ~~~
 
-And then use the traits that live in the [endpoints.documented](api:endpoints.documented.package)
-package.
+And then use the traits that live in the [endpoints.algebra](api:endpoints.algebra.package)
+package as you would do with standard description.
 
 Note that this dependency comes with its own interpreters, so you don’t need to add
 other dependencies to your other sbt sub-projects.

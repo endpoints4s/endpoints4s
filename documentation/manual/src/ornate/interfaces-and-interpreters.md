@@ -31,14 +31,6 @@ navigate through the algebra interfaces hierarchy.
 |[`circe.JsonEntitiesFromCodec`](api:endpoints.algebra.circe.JsonEntitiesFromCodec)|JSON request and response entities using Circe codecs|[endpoints-algebra-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-circe)|
 |[`playjson.JsonEntitiesFromCodec`](api:endpoints.algebra.playjson.JsonEntitiesFromCodec)|JSON request and response entities using Play JSON codecs|[endpoints-algebra-playjson](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-playjson)|
 
-**Note**: A similar but slightly different set of algebra interfaces can be used to define endpoint
-descriptions containing documentation. These algebra interfaces have the same names as those
-described in above table, but live in the
-[endpoints.documented.algebra](api:endpoints.documented.algebra.package) package and are provided
-by the [endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)
-artifact. This artifact also provides its interpreters (in the
-[endpoints.documented.openapi](api:endpoints.documented.openapi.package) and
-[endpoints.documented.delegate](api:endpoints.documented.delegate.package) packages).
 
 ## Interpreters
 
