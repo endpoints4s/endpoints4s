@@ -60,7 +60,7 @@ class Endpoints(val settings: EndpointsSettings)
 
   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
-  implicit lazy val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity]{
+  implicit lazy val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
     override def xmap[From, To](f: (From, HttpRequest) => HttpRequest, map: From => To, contramap: To => From): (To, HttpRequest) => HttpRequest = {
       (to, req) => f(contramap(to), req)
     }
@@ -91,16 +91,14 @@ class Endpoints(val settings: EndpointsSettings)
 
   type Response[A] = HttpResponse => Future[Either[Throwable, A]]
 
-  private lazy val _emptyResponse: Response[Unit] = x =>
+  def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = x =>
     if (x.status == StatusCodes.OK) {
       Future.successful(Right(()))
     } else {
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
 
-  def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = _emptyResponse
-
-  private lazy val _textResponse: Response[String] = x =>
+  def textResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, String]] = x =>
     if (x.status == StatusCodes.OK) {
       x.entity.toStrict(settings.toStrictTimeout)
         .map(settings.stringContentExtractor)
@@ -108,8 +106,6 @@ class Endpoints(val settings: EndpointsSettings)
     } else {
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
-
-  def textResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, String]] = _textResponse
 
   override def option[A](inner: HttpResponse => Future[Either[Throwable, A]], notFoundDocs: Documentation): HttpResponse => Future[Either[Throwable, Option[A]]] = {
     {

@@ -201,12 +201,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   type Response[A] = A => Result
 
   /** A successful HTTP response (status code 200) with no entity */
-  def emptyResponse(docs: Documentation): Response[Unit] = _emptyResponse
-  private lazy val _emptyResponse: Response[Unit] = _ => Results.Ok
+  def emptyResponse(docs: Documentation): Response[Unit] = _ => Results.Ok
 
   /** A successful HTTP response (status code 200) with string entity */
-  def textResponse(docs: Documentation): Response[String] = _textResponse
-  private lazy val _textResponse: Response[String] = x => Results.Ok(x)
+  def textResponse(docs: Documentation): Response[String] = x => Results.Ok(x)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)

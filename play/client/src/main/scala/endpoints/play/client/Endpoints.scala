@@ -85,15 +85,13 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   type Response[A] = WSResponse => Either[Throwable, A]
 
   /** Successfully decodes no information from a response */
-  def emptyResponse(docs: Documentation): Response[Unit] = _emptyResponse
-  private lazy val _emptyResponse: Response[Unit] = {
+  def emptyResponse(docs: Documentation): Response[Unit] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(())
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
   /** Successfully decodes string information from a response */
-  def textResponse(docs: Documentation): Response[String] = _textResponse
-  private lazy val _textResponse: Response[String] = {
+  def textResponse(docs: Documentation): Response[String] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(resp.body)
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }

@@ -64,12 +64,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   lazy val emptyRequest: RequestEntity[Unit] = (_, _) => null
 
-  private lazy val _textRequest: RequestEntity[String] = (body, xhr) => {
+  def textRequest(docs: endpoints.algebra.Documentation): RequestEntity[String] = (body, xhr) => {
     xhr.setRequestHeader("Content-type", "text/plain; charset=utf8")
     body
   }
-
-  def textRequest(docs: endpoints.algebra.Documentation): RequestEntity[String] = _textRequest
 
   implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
     override def xmap[From, To](f: js.Function2[From, XMLHttpRequest, js.Any], map: From => To, contramap: To => From): js.Function2[To, XMLHttpRequest, js.Any] =
@@ -107,16 +105,12 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /**
     * Successfully decodes no information from a response
     */
-  def emptyResponse(docs: Documentation): Response[Unit] = _emptyResponse
-
-  private lazy val _emptyResponse: Response[Unit] = _ => Right(())
+  def emptyResponse(docs: Documentation): Response[Unit] = _ => Right(())
 
   /**
     * Successfully decodes string information from a response
     */
-  def textResponse(docs: Documentation): Response[String] = _textResponse
-
-  private lazy val _textResponse: Response[String] = x => Right(x.responseText)
+  def textResponse(docs: Documentation): Response[String] = x => Right(x.responseText)
 
   /**
     * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.

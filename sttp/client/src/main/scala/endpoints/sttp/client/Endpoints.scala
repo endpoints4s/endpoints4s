@@ -111,9 +111,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   type Response[A] = SttpResponse[A]
 
   /** Successfully decodes no information from a response */
-  def emptyResponse(docs: Documentation): SttpResponse[Unit] = _emptyResponse
-
-  private lazy val _emptyResponse: Response[Unit] = new SttpResponse[Unit] {
+  def emptyResponse(docs: Documentation): SttpResponse[Unit] = new SttpResponse[Unit] {
     override type ReceivedBody = Unit
 
     override def responseAs = sttp.ignore
@@ -125,9 +123,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   }
 
   /** Successfully decodes string information from a response */
-  def textResponse(docs: Documentation): SttpResponse[String] = _textResponse
-
-  private val _textResponse: Response[String] = new SttpResponse[String] {
+  def textResponse(docs: Documentation): SttpResponse[String] = new SttpResponse[String] {
     override type ReceivedBody = String
 
     override def responseAs = sttp.asString
