@@ -39,7 +39,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def add[A, B](fa: (A, WSRequest) => WSRequest, fb: (B, WSRequest) => WSRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, WSRequest) => WSRequest =
+    override def product[A, B](fa: (A, WSRequest) => WSRequest, fb: (B, WSRequest) => WSRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, WSRequest) => WSRequest =
       (out, req) => {
         val (a, b) = tupler.unapply(out)
         fb(b, fa(a, req))

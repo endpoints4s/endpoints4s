@@ -27,7 +27,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
   }
 
   implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def add[A, B](fa: A => Seq[(String, String)], fb: B => Seq[(String, String)])(implicit tupler: Tupler[A, B]): tupler.Out => Seq[(String, String)] =
+    override def product[A, B](fa: A => Seq[(String, String)], fb: B => Seq[(String, String)])(implicit tupler: Tupler[A, B]): tupler.Out => Seq[(String, String)] =
       out => {
         val (a, b) = tupler.unapply(out)
         fa(a) ++ fb(b)

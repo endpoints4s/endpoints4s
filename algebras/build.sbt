@@ -4,7 +4,7 @@ val `json-schema` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema"))
     .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
     .settings(
-      name := "endpoints-openapi-json-schema",
+      name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency
     )
 
@@ -18,8 +18,7 @@ val algebra =
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.6.0" % Test,
-        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test,
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" % Test cross CrossVersion.full)
+        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
     .dependsOn(`json-schema` % "test->test;compile->compile")
@@ -56,3 +55,17 @@ val `algebra-playjson` =
 
 val `algebra-playjson-js` = `algebra-playjson`.js
 val `algebra-playjson-jvm` = `algebra-playjson`.jvm
+
+lazy val `json-schema-circe` =
+  crossProject.crossType(CrossType.Pure).in(file("json-schema-circe"))
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(
+      name := "endpoints-json-schema-circe",
+      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
+    )
+    .jsConfigure(_.dependsOn(`json-schema-js` % "test->test;compile->compile"))
+    .jvmConfigure(_.dependsOn(`json-schema-jvm` % "test->test;compile->compile"))
+    .dependsOn(`algebra-circe`) // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
+
+lazy val `json-schema-circe-js` = `json-schema-circe`.js
+lazy val `json-schema-circe-jvm` = `json-schema-circe`.jvm

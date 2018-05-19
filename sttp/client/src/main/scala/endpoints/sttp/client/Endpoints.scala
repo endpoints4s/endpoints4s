@@ -44,7 +44,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def add[A, B](fa: (A, SttpRequest) => SttpRequest, fb: (B, SttpRequest) => SttpRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, SttpRequest) => SttpRequest =
+    override def product[A, B](fa: (A, SttpRequest) => SttpRequest, fb: (B, SttpRequest) => SttpRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, SttpRequest) => SttpRequest =
       (ab, request) => {
         val (a, b) = tupler.unapply(ab)
         fa(a, fb(b, request))

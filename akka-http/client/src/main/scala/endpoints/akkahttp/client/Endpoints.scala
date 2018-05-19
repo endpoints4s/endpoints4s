@@ -27,7 +27,7 @@ class Endpoints(val settings: EndpointsSettings)
   }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def add[A, B](fa: (A, List[HttpHeader]) => List[HttpHeader], fb: (B, List[HttpHeader]) => List[HttpHeader])(implicit tupler: Tupler[A, B]): (tupler.Out, List[HttpHeader]) => List[HttpHeader] =
+    override def product[A, B](fa: (A, List[HttpHeader]) => List[HttpHeader], fb: (B, List[HttpHeader]) => List[HttpHeader])(implicit tupler: Tupler[A, B]): (tupler.Out, List[HttpHeader]) => List[HttpHeader] =
       (tuplerOut, headers) => {
         val (left, right) = tupler.unapply(tuplerOut)
         val leftResult = fa(left, headers)

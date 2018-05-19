@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import endpoints.InvariantFunctor
-
 import scala.language.higherKinds
 
 /**

@@ -45,3 +45,7 @@ navigate through the algebra interfaces hierarchy.
 |[endpoints-xhr-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-circe)|Interpreter for `JsonEntities` that uses Circe to encode requests and decode responses, and which is compatible with `endpoints-xhr-client`|
 |[endpoints-xhr-client-faithful](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-faithful)|Scala.js client returning responses [faithful](https://github.com/julienrf/faithful)’s `Future` values|
 |[endpoints-scalaj-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-scalaj-client)|JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)|
+|[endpoints-sttp-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-sttp-client)|JVM client backed by [sttp](https://github.com/softwaremill/sttp)|
+|[endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)|Interpreter that creates OpenAPI json from endpoints description |
+|[endpoints-openapi-json-schema-generic](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi-json-schema-generic)|Interpreter that allows generic derivation of json-schema|
+|[endpoints-json-schema-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi-json-schema-circe)|Interpreter that produces circe codec based on schema definition|

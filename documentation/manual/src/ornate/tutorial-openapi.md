@@ -18,17 +18,16 @@ The application is defined in a single sbt project with the following dependenci
 
 ~~~ mermaid
 graph BT
-  counter -.-> endpoints-openapi-circe
+  counter -.-> endpoints-algebra-circe
   counter -.-> endpoints-openapi-json-schema-generic
   counter -.-> endpoints-play-server-circe
-  style endpoints-openapi-circe fill:#eee;
+  style endpoints-circe fill:#eee;
   style endpoints-play-server-circe fill:#eee;
   style endpoints-openapi-json-schema-generic fill:#eee;
 ~~~
 
-The `endpoints-openapi-circe` dependency provides an algebra interface to describe
-HTTP endpoints that can produce an OpenAPI documentation as well as JSON encoders
-and decoders for circe.
+The `endpoints-algebra-circe` dependency provides an algebra interface to describe
+HTTP endpoints that can produce JSON encoders and decoders for circe as well as OpenAPI documentation.
 
 The `endpoints-openapi-json-schema-generic` dependency provides generic JSON schema
 descriptions for algebraic data types.
@@ -41,8 +40,6 @@ We break down the application into the following components:
 ~~~ mermaid
 graph BT
   CounterEndpoints-.->endpoints-openapi-json-schema-generic
-  CounterEndpoints-.->endpoints-openapi-circe
-  CounterDocumentation-.->endpoints-openapi-circe
   CounterServer-.->endpoints-play-server-circe
   DocumentationServer-.->endpoints-play-server-circe
   subgraph counter
@@ -50,7 +47,6 @@ graph BT
     CounterServer-->CounterEndpoints
     DocumentationServer-.->CounterDocumentation
   end
-  style endpoints-openapi-circe fill:#eee;
   style endpoints-play-server-circe fill:#eee;
   style endpoints-openapi-json-schema-generic fill:#eee;
 ~~~

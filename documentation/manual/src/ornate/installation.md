@@ -54,17 +54,11 @@ libraryDependencies ++= Seq(
   // core API
   "org.julienrf" %% "endpoints-openapi" % "{{version}}",
   // (optional) JSON serialization using circe.io
-  "org.julienrf" %% "endpoints-openapi-circe" % "{{version}}",
+  "org.julienrf" %% "endpoints-algebra-circe" % "{{version}}",
   // (optional) generic derivation of JSON schemas
   "org.julienrf" %% "endpoints-openapi-json-schema-generic" % "{{version}}"
 )
 ~~~
-
-And then use the traits that live in the [endpoints.algebra](api:endpoints.algebra.package)
-package as you would do with standard description.
-
-Note that this dependency comes with its own interpreters, so you don’t need to add
-other dependencies to your other sbt sub-projects.
 
 ### Client interpreters
 

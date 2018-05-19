@@ -1,6 +1,6 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import akka.http.scaladsl.unmarshalling.{FromRequestUnmarshaller, Unmarshaller}
 import endpoints.algebra.Documentation
@@ -62,14 +62,14 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def add[A, B](fa: Directive1[A], fb: Directive1[B])(implicit tupler: Tupler[A, B]): Directive1[tupler.Out] = joinDirectives(fa, fb)
+    override def product[A, B](fa: Directive1[A], fb: Directive1[B])(implicit tupler: Tupler[A, B]): Directive1[tupler.Out] = joinDirectives(fa, fb)
   }
 
   /* ************************
       RESPONSES
   ************************* */
 
-  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
+  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((StatusCodes.OK, HttpEntity.Empty))
 
   def textResponse(docs: Documentation): Response[String] = x => Directives.complete((StatusCodes.OK, x))
 

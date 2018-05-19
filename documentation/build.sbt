@@ -19,7 +19,6 @@ val `xhr-client-faithful` = LocalProject("xhr-client-faithful")
 val `scalaj-client` = LocalProject("scalaj-client")
 
 val `openapi-jvm` = LocalProject("openapiJVM")
-val `openapi-circe-jvm` = LocalProject("openapi-circeJVM")
 
 val `json-schema-jvm` = LocalProject("json-schemaJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
@@ -44,7 +43,7 @@ val apiDoc =
         `play-server`, `play-server-circe`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
         `scalaj-client`,
-        `openapi-jvm`, `openapi-circe-jvm`, `json-schema-jvm`, `json-schema-circe-jvm`, `json-schema-generic-jvm`
+        `openapi-jvm`, `json-schema-jvm`, `json-schema-circe-jvm`, `json-schema-generic-jvm`
       )
     )
 
@@ -146,7 +145,7 @@ val `example-basic-shared` = {
       unmanagedResourceDirectories in Compile += assetsDirectory(baseDirectory.value.getParentFile)
     )
     .enablePlugins(ScalaJSPlugin)
-    .dependsOnLocalCrossProjects("algebra", "algebra-circe", "openapi-circe")
+    .dependsOnLocalCrossProjects("algebra", "algebra-circe", "openapi")
 }
 
 val `example-basic-shared-jvm` = `example-basic-shared`.jvm
@@ -196,7 +195,7 @@ val `example-cqrs-public-endpoints` =
     .settings(
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
-    .dependsOnLocalCrossProjects("openapi-circe", "example-cqrs-circe-instant", "json-schema-generic")
+    .dependsOnLocalCrossProjects("example-cqrs-circe-instant", "json-schema-generic", "algebra-circe")
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 
@@ -237,7 +236,7 @@ val `example-cqrs-public-server` =
         )
       }.dependsOn(fastOptJS in Compile in `example-cqrs-web-client`).taskValue
     )
-    .dependsOn(`play-server-circe`, `play-client`)
+    .dependsOn(`play-server-circe`, `play-client`, `openapi-jvm`)
     .dependsOn(`example-cqrs-public-endpoints-jvm`, `example-cqrs-commands-endpoints`, `example-cqrs-queries-endpoints`)
 
 // commands endpoints definitions
@@ -333,4 +332,4 @@ val `example-documented` =
         )
       }.taskValue
     )
-    .dependsOn(`openapi-circe-jvm`, `play-server-circe`, `json-schema-generic-jvm`)
+    .dependsOn(`play-server-circe`, `json-schema-generic-jvm`, `openapi-jvm`)

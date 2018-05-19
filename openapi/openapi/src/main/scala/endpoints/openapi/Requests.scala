@@ -70,7 +70,7 @@ trait Requests
     def xmap[From, To](x: RequestHeaders[From], map: From => To, contramap: To => From): RequestHeaders[To] = x
   }
   implicit lazy val reqHeadersSemigroupal: endpoints.Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    def add[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
+    def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
       DocumentedHeaders(fa.value ++ fb.value)
   }
 

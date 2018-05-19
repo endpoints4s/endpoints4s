@@ -39,7 +39,7 @@ trait OpenapiModule extends Module {
 
   object jsonSchemaCirce extends EndpointsGroupingModule {
     trait Module extends EndpointsModule {
-      override def artifactName = s"endpoints-openapi-json-schema-circe"
+      override def artifactName = s"endpoints-json-schema-circe"
       override def millSourcePath = super.millSourcePath / up / "json-schema-circe"
 
       override def crossModuleDeps = Seq(algebra, algebraCirce)

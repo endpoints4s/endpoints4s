@@ -34,7 +34,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders]{
-    override def add[A, B](fa: js.Function2[A, XMLHttpRequest, Unit], fb: js.Function2[B, XMLHttpRequest, Unit])(implicit tupler: Tupler[A, B]): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
+    override def product[A, B](fa: js.Function2[A, XMLHttpRequest, Unit], fb: js.Function2[B, XMLHttpRequest, Unit])(implicit tupler: Tupler[A, B]): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
       (out, xhr) => {
         val (a, b) = tupler.unapply(out)
         fa(a, xhr)
