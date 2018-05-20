@@ -36,7 +36,8 @@ import endpoints.{algebra, generic}
 
 trait CounterEndpoints
   extends algebra.Endpoints
-    with algebra.JsonSchemaEntities {
+    with algebra.JsonSchemaEntities
+    with generic.JsonSchemas {
 
   // HTTP endpoint for querying the current value of the counter. Uses the HTTP
   // verb ''GET'' and the path ''/counter''. Returns the current value of the counter
@@ -58,16 +59,16 @@ trait CounterEndpoints
   lazy val counterJson =
     jsonResponse[Counter](docs = Some("The counter current value"))
 
-  // We require json schema for `Counter` from interpreters. This schema
+  // We generically derive a data type schema. This schema
   // describes that the case class `Counter` has one field
   // of type `Int` named “value”
-  implicit def jsonSchemaCounter: JsonSchema[Counter]
+  implicit lazy val jsonSchemaCounter: JsonSchema[Counter] = genericJsonSchema
 
-  // Again, we require a schema for the `Operation`
+  // Again, we generically derive a schema for the `Operation`
   // data type. This schema describes that `Operation` can be
   // either `Set` or `Add`, and that `Set` has one `Int` field
   // name `value`, and `Add` has one `Int` field named `delta`
-  implicit def jsonSchemaOperation: JsonSchema[Operation]
+  implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = genericJsonSchema
 
 }
 
@@ -78,19 +79,9 @@ trait CounterEndpoints
 import endpoints.openapi
 import endpoints.openapi.model.{Info, OpenApi}
 
-//TODO document, generic derivation doesnt work once openapi interpretation is mixed in
-trait CounterEndpointsWithSchema
-  extends CounterEndpoints with generic.JsonSchemas {
-    // We generically derive a data type schema.
-    implicit lazy val jsonSchemaCounter: JsonSchema[Counter] = genericJsonSchema
-
-    // Again, we generically derive a schema for the `Operation`
-    // data type.
-    implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = genericJsonSchema
-}
 
 object CounterDocumentation
-  extends CounterEndpointsWithSchema
+  extends CounterEndpoints
     with openapi.Endpoints
     with openapi.JsonSchemaEntities {
 
@@ -103,8 +94,6 @@ object CounterDocumentation
 //#openapi
 
 // Implementation of the HTTP API and its business logic
-//TODO no more delegation
-//#delegation
 import endpoints.play
 
 class CounterServer(protected val playComponents: PlayComponents)
@@ -112,7 +101,6 @@ class CounterServer(protected val playComponents: PlayComponents)
     with play.server.Endpoints
     with play.server.circe.JsonSchemaEntities { parent =>
 
-  //#delegation
   //#business-logic
   // Internal state of our counter
   private val value = new AtomicInteger(0)
@@ -138,13 +126,7 @@ class CounterServer(protected val playComponents: PlayComponents)
     }
 
   )
-
-
-  implicit lazy val jsonSchemaCounter: JsonSchema[Counter] = implicitly[JsonSchema[Counter]]
-
-
-  implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = implicitly[JsonSchema[Operation]]
-  //#business-logic
+//#business-logic
 }
 
 object Main {
