@@ -77,7 +77,7 @@ trait Endpoints
         response.map(r => r.status -> Response(r.documentation, r.content)).toMap
       )
     val item = PathItem(Map(method -> operation))
-    val path = correctPathSegments.collect {
+    val path = correctPathSegments.map {
       case Left(str) => str
       case Right(param) => s"{${param.name}}"
     }.mkString("/")
