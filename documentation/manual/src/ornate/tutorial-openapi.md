@@ -151,10 +151,6 @@ Finally, we start a `NettyServer` and give it both the `CounterServer` and
 
 ## Summary
 
-To generate an OpenAPI definition from your service description this one
-must be written using the same set of algebra interfaces, but with additional
-parameters supplied.
-
-You can then derive an OpenAPI definition from your documented endpoints
-by applying the interpreters defined in the `endpoints.openapi`
-package.
+To generate an OpenAPI definition from your service description it's enough to use
+interpreters defined in `endpoints.openapi` package. Generated documentation can be enriched
+by supplying additional information when creating the service description.
