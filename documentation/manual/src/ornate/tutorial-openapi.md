@@ -112,20 +112,8 @@ can eventually be serialized to JSON.
 
 ## Deriving an HTTP server from a documented service description
 
-Since our documented endpoints are not defined by the algebra interfaces provided in the
-`endpoints.algebra` package, we can not directly apply the interpreters introduced in the
-other [tutorial](tutorial.md). But we can use *delegation* to apply them.
-
-For instance, here is the beginning of our `CounterServer` class definition, which applies
-interpreters of the `endpoints.play.server` package to the `CounterEndpoints`:
-
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#delegation
-~~~
-
-We first mix interpreters provided in the `delegate` package to our `CounterEndpoints`
-trait, and then we define a value named `delegate`, which contains the interpreter
-that matches algebra interfaces provided in the `endpoints.algebra` package. In our
-case we use an interpreter based on Play framework.
+Since our documented endpoints are defined by the standard algebra interfaces,
+we can apply the interpreters introduced in the other [tutorial](tutorial.md).
 
 ## Business logic and JVM entry point
 
