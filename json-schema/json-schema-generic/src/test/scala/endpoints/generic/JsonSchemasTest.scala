@@ -1,8 +1,6 @@
 package endpoints
 package generic
 
-import endpoints.openapi
-
 import org.scalatest.FreeSpec
 
 class JsonSchemasTest extends FreeSpec {

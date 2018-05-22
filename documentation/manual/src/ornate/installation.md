@@ -56,7 +56,7 @@ libraryDependencies ++= Seq(
   // (optional) JSON serialization using circe.io
   "org.julienrf" %% "endpoints-algebra-circe" % "{{version}}",
   // (optional) generic derivation of JSON schemas
-  "org.julienrf" %% "endpoints-openapi-json-schema-generic" % "{{version}}"
+  "org.julienrf" %% "endpoints-json-schema-generic" % "{{version}}"
 )
 ~~~
 

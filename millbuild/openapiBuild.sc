@@ -67,7 +67,7 @@ trait OpenapiModule extends Module {
 
   object jsonSchemaGeneric extends EndpointsGroupingModule {
     trait Module extends EndpointsModule {
-      override def artifactName = s"endpoints-openapi-json-schema-generic"
+      override def artifactName = s"endpoints-json-schema-generic"
       override def millSourcePath = super.millSourcePath / up / "json-schema-generic"
 
       override def crossModuleDeps = Seq(jsonSchema)
