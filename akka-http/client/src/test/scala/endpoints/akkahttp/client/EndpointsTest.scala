@@ -2,27 +2,28 @@ package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
-import endpoints.testsuite.{BasicAuthTestApi, JsonFromCirceCodecTestApi, OptionalResponsesTestApi, SimpleTestApi}
-import endpoints.testsuite.client.{BasicAuthTestSuite, JsonFromCodecTestSuite, OptionalResponsesTestSuite, SimpleTestSuite}
+import endpoints.algebra._
+import endpoints.algebra.client._
+import endpoints.algebra.circe
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestClient(settings: EndpointsSettings)
-                (implicit EC: ExecutionContext, M: Materializer)
+  (implicit EC: ExecutionContext, M: Materializer)
   extends Endpoints(settings)
-  with OptionalResponses
-  with BasicAuthentication
-  with JsonEntitiesFromCodec
-  with SimpleTestApi
-  with OptionalResponsesTestApi
-  with BasicAuthTestApi
-  with JsonFromCirceCodecTestApi
+    with BasicAuthentication
+    with EndpointsTestApi
+    with BasicAuthTestApi
+    with JsonFromCodecTestApi
+    with circe.JsonFromCirceCodecTestApi
+    with JsonEntitiesFromCodec
+    with circe.JsonEntitiesFromCodec
 
 class EndpointsTest
-  extends SimpleTestSuite[TestClient]
+  extends EndpointsTestSuite[TestClient]
     with BasicAuthTestSuite[TestClient]
-    with OptionalResponsesTestSuite[TestClient]
-    with JsonFromCodecTestSuite[TestClient] {
+    with JsonFromCodecTestSuite[TestClient]
+{
 
   implicit val system = ActorSystem()
   implicit val materializer = ActorMaterializer()
@@ -34,6 +35,5 @@ class EndpointsTest
 
   clientTestSuite()
   basicAuthSuite()
-  optionalResponsesSuite()
   jsonFromCodecTestSuite()
 }

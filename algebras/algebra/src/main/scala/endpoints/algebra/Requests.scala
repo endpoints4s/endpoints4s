@@ -1,10 +1,12 @@
 package endpoints.algebra
 
-import endpoints.Tupler
+import java.nio.charset.{Charset, StandardCharsets}
+
+import endpoints._
 
 import scala.language.higherKinds
 
-trait Requests extends Urls with Methods {
+trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupalSyntax {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]
@@ -17,6 +19,13 @@ trait Requests extends Urls with Methods {
     */
   def emptyHeaders: RequestHeaders[Unit]
 
+  def header(name: String, docs: Documentation = None): RequestHeaders[String]
+
+  def optHeader(name: String, docs: Documentation = None): RequestHeaders[Option[String]]
+
+  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
+  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
+
 
   /** Information carried by a whole request (headers and entity) */
   type Request[A]
@@ -24,11 +33,18 @@ trait Requests extends Urls with Methods {
   /** Information carried by request entity */
   type RequestEntity[A]
 
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
+
   /**
     * Empty request.
     */
+  //TODO rename to emptyBody and maybe make uniform with all other by adding ()
   def emptyRequest: RequestEntity[Unit]
 
+  /**
+    * Request with string body.
+    */
+  def textRequest(docs: Documentation = None): RequestEntity[String]
 
   /**
     * Request for given parameters

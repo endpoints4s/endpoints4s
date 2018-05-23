@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 import endpoints.Tupler
 import endpoints.algebra
+import endpoints.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
 import play.api.libs.functional.syntax._
 import play.api.mvc.RequestHeader
@@ -105,13 +106,13 @@ trait Urls extends algebra.Urls {
       }
     }
 
-  def qs[A](name: String)(implicit value: QueryStringParam[A]) =
+  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]) =
     new QueryString[A] {
       def decode(qs: Map[String, Seq[String]]) = value.decode(name, qs)
       def encode(a: A) = value.encode(name, a)
     }
 
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]) =
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]) =
     new QueryString[Option[A]] {
       def decode(qs: Map[String, Seq[String]]): Option[Option[A]] =
         Some(value.decode(name, qs))
@@ -166,7 +167,7 @@ trait Urls extends algebra.Urls {
       def encode(unit: Unit): String = segment
     }
 
-  def segment[A](implicit A: Segment[A]): Path[A] =
+  def segment[A](name: String, docs: Documentation)(implicit A: Segment[A]): Path[A] =
     new Path[A] {
       def decode(segments: List[String]) = {
         def uncons[B](bs: List[B]): Option[(B, List[B])] =
@@ -198,6 +199,14 @@ trait Urls extends algebra.Urls {
   trait Url[A] {
     def decodeUrl: RequestExtractor[A]
     def encodeUrl(a: A): String
+  }
+
+  implicit lazy val urlInvFunctor: endpoints.InvariantFunctor[Url] = new endpoints.InvariantFunctor[Url] {
+    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] = new Url[To] {
+      override def decodeUrl: RequestExtractor[To] = f.decodeUrl.map(map)
+
+      override def encodeUrl(a: To): String = f.encodeUrl(contramap(a))
+    }
   }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =

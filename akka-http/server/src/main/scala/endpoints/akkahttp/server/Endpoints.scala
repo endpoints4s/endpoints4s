@@ -1,8 +1,10 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
-import endpoints.{Tupler, algebra}
+import akka.http.scaladsl.unmarshalling.{FromRequestUnmarshaller, Unmarshaller}
+import endpoints.algebra.Documentation
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -35,13 +37,47 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   }
 
+  /* ************************
+      REQUESTS
+  ************************* */
+
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
+
+  def textRequest(docs: Documentation): RequestEntity[String] = {
+    val um: FromRequestUnmarshaller[String] = implicitly
+    Directives.entity[String](um)
+  }
+
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = directive1InvFunctor
+
+  /* ************************
+      HEADERS
+  ************************* */
 
   def emptyHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
 
-  def emptyResponse: Response[Unit] = x => Directives.complete((StatusCodes.OK, ""))
+  def header(name: String, docs: Documentation): RequestHeaders[String] = Directives.headerValueByName(name)
 
-  def textResponse: Response[String] = x => Directives.complete((StatusCodes.OK, x))
+  def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
+
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
+    override def product[A, B](fa: Directive1[A], fb: Directive1[B])(implicit tupler: Tupler[A, B]): Directive1[tupler.Out] = joinDirectives(fa, fb)
+  }
+
+  /* ************************
+      RESPONSES
+  ************************* */
+
+  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((StatusCodes.OK, HttpEntity.Empty))
+
+  def textResponse(docs: Documentation): Response[String] = x => Directives.complete((StatusCodes.OK, x))
+
+  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
+    case Some(a) => response(a)
+    case None => Directives.complete(HttpResponse(StatusCodes.NotFound))
+  }
+
 
   def request[A, B, C, AB](
     method: Method,
@@ -61,6 +97,15 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       headers)
   }
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] = Endpoint(request, response)
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Documentation = None,
+    description: Documentation = None
+  ): Endpoint[A, B] = Endpoint(request, response)
+
+  lazy val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {
+    override def xmap[From, To](f: Directive1[From], map: From => To, contramap: To => From): Directive1[To] = f.map(map)
+  }
 
 }

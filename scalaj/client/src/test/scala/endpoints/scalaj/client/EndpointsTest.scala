@@ -1,22 +1,20 @@
 package endpoints.scalaj.client
 
-import endpoints.testsuite.client.{BasicAuthTestSuite, OptionalResponsesTestSuite, SimpleTestSuite}
-import endpoints.testsuite.{BasicAuthTestApi, OptionalResponsesTestApi, SimpleTestApi}
+import endpoints.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite}
+import endpoints.algebra.{BasicAuthTestApi, EndpointsTestApi}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TestClient(val address: String) extends SimpleTestApi
+class TestClient(val address: String)
+  extends EndpointsTestApi
   with BasicAuthTestApi
-  with OptionalResponsesTestApi
   with Endpoints
   with BasicAuthentication
-  with OptionalResponses
 
 class EndpointsTest
-  extends SimpleTestSuite[TestClient]
-    with BasicAuthTestSuite[TestClient]
-    with OptionalResponsesTestSuite[TestClient] {
+  extends EndpointsTestSuite[TestClient]
+    with BasicAuthTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
@@ -28,6 +26,5 @@ class EndpointsTest
 
   basicAuthSuite()
 
-  optionalResponsesSuite()
 
 }

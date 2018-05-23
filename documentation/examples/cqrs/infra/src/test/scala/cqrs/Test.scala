@@ -11,7 +11,7 @@ import cqrs.infra.PlayService
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.publicserver.{PublicEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints, OptionalResponses}
+import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
 import endpoints.play.server.HttpServer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
@@ -57,7 +57,6 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
   object api
     extends Endpoints(baseUrl(publicServer.port), wsClient)
       with JsonEntitiesFromCodec
-      with OptionalResponses
       with PublicEndpoints {
 
     def uuidSegment: Segment[UUID] =

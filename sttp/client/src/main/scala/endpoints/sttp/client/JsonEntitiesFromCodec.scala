@@ -1,6 +1,6 @@
 package endpoints.sttp.client
 
-import endpoints.algebra.Codec
+import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
 
 import scala.language.higherKinds
@@ -10,11 +10,11 @@ import scala.language.higherKinds
   */
 trait JsonEntitiesFromCodec[R[_]] extends endpoints.algebra.JsonEntitiesFromCodec { self: Endpoints[R] =>
 
-  def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] = { (a, req) =>
+  def jsonRequest[A](docs: Documentation)(implicit codec: Codec[String, A]): RequestEntity[A] = { (a, req) =>
     req.body(codec.encode(a)).contentType("application/json")
   }
 
-  def jsonResponse[A](implicit codec: Codec[String, A]): Response[A] = new SttpResponse[A] {
+  def jsonResponse[A](docs: Documentation)(implicit codec: Codec[String, A]): Response[A] = new SttpResponse[A] {
     override type ReceivedBody = Either[Exception, A]
     override def responseAs = sttp.asString.map(str => codec.decode(str))
     override def validateResponse(response: sttp.Response[ReceivedBody]): R[A] = {

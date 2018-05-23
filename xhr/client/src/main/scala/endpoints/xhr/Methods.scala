@@ -13,6 +13,7 @@ trait Methods extends algebra.Methods {
 
   def Delete: String = "DELETE"
 
-  def Patch: String = "PATCH"
+  def Options: String = "OPTIONS"
 
+  def Patch: String = "PATCH"
 }

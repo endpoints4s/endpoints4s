@@ -1,6 +1,6 @@
 package endpoints.akkahttp.client
 
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
+import akka.http.scaladsl.model.{HttpMethod, HttpMethods, HttpRequest}
 import endpoints.algebra
 
 trait Methods extends algebra.Methods {
@@ -14,6 +14,7 @@ trait Methods extends algebra.Methods {
 
   def Delete = _.copy(method = HttpMethods.DELETE)
 
-  def Patch = _.copy(method = HttpMethods.PATCH)
+  def Options = _.copy(method = HttpMethods.OPTIONS)
 
+  def Patch = _.copy(method = HttpMethods.PATCH)
 }

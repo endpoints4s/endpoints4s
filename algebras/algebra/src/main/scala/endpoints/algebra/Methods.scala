@@ -14,4 +14,6 @@ trait Methods {
 
   def Patch: Method
 
+  def Options: Method
+
 }

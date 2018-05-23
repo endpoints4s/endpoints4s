@@ -4,6 +4,7 @@ import java.util.Base64
 
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra
+import endpoints.algebra.Documentation
 import play.api.http.HeaderNames
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.mvc.Results
@@ -14,7 +15,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     * Extracts the credentials from the request headers.
     * In case of absence of credentials, returns an `Unauthorized` result.
     */
-  private[endpoints] lazy val basicAuthentication: RequestHeaders[Credentials] =
+  private[endpoints] lazy val basicAuthenticationHeader: RequestHeaders[Credentials] =
     headers =>
       headers.get(AUTHORIZATION)
         .filter(h => h.startsWith("Basic ")) // FIXME case sensitivity?
@@ -34,7 +35,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     * Authorization failures can be signaled by returning `None` in the endpoint implementation.
     * In such a case, a `Forbidden` result is returned.
     */
-  private[endpoints] def authenticated[A](response: Response[A]): Response[Option[A]] = {
+  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
     case None => Results.Forbidden
   }

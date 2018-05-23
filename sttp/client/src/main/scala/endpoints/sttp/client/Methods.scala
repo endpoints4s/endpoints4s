@@ -22,4 +22,6 @@ trait Methods extends algebra.Methods {
 
   def Patch = setMethod(sttp.Method.PATCH)
 
+  def Options = setMethod(sttp.Method.OPTIONS)
+
 }

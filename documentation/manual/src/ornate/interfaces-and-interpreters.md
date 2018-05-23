@@ -28,18 +28,9 @@ navigate through the algebra interfaces hierarchy.
 |[`BasicAuthentication`](api:endpoints.algebra.BasicAuthentication)|HTTP Basic authentication|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
 |[`Endpoints`](api:endpoints.algebra.Endpoints)|HTTP endpoints (main algebra interface)|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
 |[`JsonEntities`](api:endpoints.algebra.JsonEntities)|JSON request and response entities|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
-|[`OptionalResponses`](api:endpoints.algebra.OptionalResponses)|Optional response entities|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
 |[`circe.JsonEntitiesFromCodec`](api:endpoints.algebra.circe.JsonEntitiesFromCodec)|JSON request and response entities using Circe codecs|[endpoints-algebra-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-circe)|
 |[`playjson.JsonEntitiesFromCodec`](api:endpoints.algebra.playjson.JsonEntitiesFromCodec)|JSON request and response entities using Play JSON codecs|[endpoints-algebra-playjson](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-playjson)|
 
-**Note**: A similar but slightly different set of algebra interfaces can be used to define endpoint
-descriptions containing documentation. These algebra interfaces have the same names as those
-described in above table, but live in the
-[endpoints.documented.algebra](api:endpoints.documented.algebra.package) package and are provided
-by the [endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)
-artifact. This artifact also provides its interpreters (in the
-[endpoints.documented.openapi](api:endpoints.documented.openapi.package) and
-[endpoints.documented.delegate](api:endpoints.documented.delegate.package) packages).
 
 ## Interpreters
 
@@ -54,3 +45,7 @@ artifact. This artifact also provides its interpreters (in the
 |[endpoints-xhr-client-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-circe)|Interpreter for `JsonEntities` that uses Circe to encode requests and decode responses, and which is compatible with `endpoints-xhr-client`|
 |[endpoints-xhr-client-faithful](https://index.scala-lang.org/julienrf/endpoints/endpoints-xhr-client-faithful)|Scala.js client returning responses [faithful](https://github.com/julienrf/faithful)’s `Future` values|
 |[endpoints-scalaj-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-scalaj-client)|JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)|
+|[endpoints-sttp-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-sttp-client)|JVM client backed by [sttp](https://github.com/softwaremill/sttp)|
+|[endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)|Interpreter that creates OpenAPI json from endpoints description |
+|[endpoints-json-schema-generic](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-generic)|Interpreter that allows generic derivation of json-schema|
+|[endpoints-json-schema-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-circe)|Interpreter that produces circe codec based on schema definition|

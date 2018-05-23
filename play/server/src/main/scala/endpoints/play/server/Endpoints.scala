@@ -1,6 +1,7 @@
 package endpoints.play.server
 
-import endpoints.{Tupler, algebra}
+import endpoints.algebra.Documentation
+import endpoints.{Semigroupal, Tupler, algebra}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
@@ -57,6 +58,29 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** Always succeeds in extracting no information from the headers */
   lazy val emptyHeaders: RequestHeaders[Unit] = _ => Right(())
 
+  def header(name: String,docs: Option[String]): Headers => Either[Result,String] =
+    headers => headers.get(name) match {
+      case Some(value) => Right(value)
+      case None => Left(Results.BadRequest) // TODO bad request or throw an exception ?
+    }
+
+  def optHeader(name: String,docs: Option[String]): Headers => Either[Result,Option[String]] =
+    headers => Right(headers.get(name))
+
+  implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new endpoints.InvariantFunctor[RequestHeaders] {
+    override def xmap[From, To](f: Headers => Either[Result, From], map: From => To, contramap: To => From): Headers => Either[Result, To] =
+      headers => f(headers).right.map(map)
+  }
+
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
+    override def product[A, B](fa: Headers => Either[Result, A], fb: Headers => Either[Result, B])(implicit tupler: Tupler[A, B]): Headers => Either[Result, tupler.Out] =
+      headers => {
+        val a = fa(headers)
+        val b = fb(headers)
+        a.right.flatMap(aV => b.right.map(bV => tupler.apply(aV, bV)))
+      }
+  }
+
   /**
     * An HTTP request.
     *
@@ -76,6 +100,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       */
     def encode(a: A): Call
   }
+
+
 
   implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
     new InvariantFunctor[Request] {
@@ -132,6 +158,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
+  def textRequest(docs: Documentation): BodyParser[String] = BodyParsers.parse.text
+
+  implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new endpoints.InvariantFunctor[RequestEntity] {
+    override def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
+      f.map(map)
+  }
+
 
   private def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
     new UrlAndHeaders[(A, B)] {
@@ -168,13 +201,21 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   type Response[A] = A => Result
 
   /** A successful HTTP response (status code 200) with no entity */
-  lazy val emptyResponse: Response[Unit] = _ => Results.Ok
+  def emptyResponse(docs: Documentation): Response[Unit] = _ => Results.Ok
 
   /** A successful HTTP response (status code 200) with string entity */
-  lazy val textResponse: Response[String] = x => Results.Ok(x)
+  def textResponse(docs: Documentation): Response[String] = x => Results.Ok(x)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: Response[Html] = html => Results.Ok(html)
+
+  /**
+    * A response encoder that maps `None` to an empty HTTP result with status 404
+    */
+  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
+    case Some(a) => response(a)
+    case None => Results.NotFound
+  }
 
   /**
     * @return An HTTP response redirecting to another endpoint (using 303 code status).
@@ -229,7 +270,12 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
         }
   }
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Documentation,
+    description: Documentation
+  ): Endpoint[A, B] =
     Endpoint(request, response)
 
   /**

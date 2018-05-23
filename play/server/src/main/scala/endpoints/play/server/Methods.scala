@@ -23,7 +23,8 @@ trait Methods extends algebra.Methods {
 
   def Delete = Method("DELETE")
 
-  def Patch = Method("PATCH")
+  def Options = Method("OPTIONS")
 
+  def Patch = Method("PATCH")
 }
 

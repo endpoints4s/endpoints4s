@@ -3,14 +3,29 @@ package endpoints.akkahttp.server
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import org.scalatest.{Matchers, WordSpec}
-import scala.language.reflectiveCalls
 
+import scala.language.reflectiveCalls
+import endpoints.algebra
+import endpoints.algebra.JsonFromCodecTestApi
+import endpoints.algebra.circe
+
+class EndpointsTestApi extends Endpoints
+  with BasicAuthentication
+  with algebra.BasicAuthTestApi
+  with algebra.EndpointsTestApi
+  with JsonFromCodecTestApi
+  with circe.JsonFromCirceCodecTestApi
+  with JsonEntitiesFromCodec
+  with circe.JsonEntitiesFromCodec
+
+
+//TODO use EndpointsApi from algebra tests
 class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new Endpoints {
     val singleStaticGetSegment = endpoint[Unit, Unit](
       get[Unit, Unit](path / "segment1"),
-      _ => complete("Ok")
+      (_: Unit) => complete("Ok")
     ).implementedBy(_ => ())
   }
 

@@ -18,19 +18,18 @@ The application is defined in a single sbt project with the following dependenci
 
 ~~~ mermaid
 graph BT
-  counter -.-> endpoints-openapi-circe
-  counter -.-> endpoints-openapi-json-schema-generic
+  counter -.-> endpoints-algebra-circe
+  counter -.-> endpoints-json-schema-generic
   counter -.-> endpoints-play-server-circe
-  style endpoints-openapi-circe fill:#eee;
+  style endpoints-circe fill:#eee;
   style endpoints-play-server-circe fill:#eee;
-  style endpoints-openapi-json-schema-generic fill:#eee;
+  style endpoints-json-schema-generic fill:#eee;
 ~~~
 
-The `endpoints-openapi-circe` dependency provides an algebra interface to describe
-HTTP endpoints that can produce an OpenAPI documentation as well as JSON encoders
-and decoders for circe.
+The `endpoints-algebra-circe` dependency provides an algebra interface to describe
+HTTP endpoints that can produce JSON encoders and decoders for circe as well as OpenAPI documentation.
 
-The `endpoints-openapi-json-schema-generic` dependency provides generic JSON schema
+The `endpoints-json-schema-generic` dependency provides generic JSON schema
 descriptions for algebraic data types.
 
 The `endpoints-play-server-circe` dependency provides a server interpreter that
@@ -40,9 +39,7 @@ We break down the application into the following components:
 
 ~~~ mermaid
 graph BT
-  CounterEndpoints-.->endpoints-openapi-json-schema-generic
-  CounterEndpoints-.->endpoints-openapi-circe
-  CounterDocumentation-.->endpoints-openapi-circe
+  CounterEndpoints-.->endpoints-json-schema-generic
   CounterServer-.->endpoints-play-server-circe
   DocumentationServer-.->endpoints-play-server-circe
   subgraph counter
@@ -50,9 +47,8 @@ graph BT
     CounterServer-->CounterEndpoints
     DocumentationServer-.->CounterDocumentation
   end
-  style endpoints-openapi-circe fill:#eee;
   style endpoints-play-server-circe fill:#eee;
-  style endpoints-openapi-json-schema-generic fill:#eee;
+  style endpoints-json-schema-generic fill:#eee;
 ~~~
 
 `CounterEndpoints` contains the description of the HTTP endpoints of the application,
@@ -75,18 +71,16 @@ modifying it.
 ~~~
 
 Note that we first import
-[endpoints.documented.algebra](api:endpoints.documented.algebra.package). The algebra
-interfaces available in this package allow us to supply documentation information such as
-human readable descriptions of request and response entities.
+[endpoints.algebra](api:endpoints.algebra.package). We use the same algebra for defining documentation
+as we would use for definig protocols for client/server imterpreatation.
 
 For instance, the `counterJson` value describes an HTTP response whose JSON entity contains
 “The counter current value”.
 
-In summary, the `endpoints.documented.algebra` package contains algebra interface definitions
-that have the same name and same methods as those that are in the `endpoints.algebra` package,
-but their methods sometimes take additional parameters carrying documentation information.
+In summary, the `endpoints.algebra` package contains algebra interface definitions
+with methods that sometimes take additional parameters carrying documentation information.
 Thus, if you want to turn a service description into a _documented_ service description, all
-you have to do is to change one import and supply the missing parameters here and there.
+you have to do is to supply the missing parameters here and there.
 
 The two last definitions of the above code snippet define the JSON schema of our `Counter`
 and `Operation` data types. A “schema” describes the structure of a data type: in case
@@ -106,32 +100,20 @@ to repeat it.
 
 To derive an OpenAPI file definition from our endpoint descriptions we use
 the interpreters defined in the
-[endpoints.documented.openapi](api:endpoints.documented.openapi.package) package:
+[endpoints.openapi](api:endpoints.openapi.package) package:
 
 ~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#openapi
 ~~~
 
 Here, the
-[openApi](api:endpoints.documented.openapi.Endpoints@openApi(info:endpoints.documented.openapi.Info)(endpoints:Endpoints.this.DocumentedEndpoint*):endpoints.documented.openapi.OpenApi)
-method generates an abstract [OpenApi](api:endpoints.documented.openapi.OpenApi) model, which
-can eventually be serialized in JSON.
+[openApi](api:endpoints.openapi.Endpoints@openApi(info:endpoints.openapi.Info)(endpoints:Endpoints.this.DocumentedEndpoint*):endpoints.openapi.OpenApi)
+method generates an abstract [OpenApi](api:endpoints.openapi.OpenApi) model, which
+can eventually be serialized to JSON.
 
 ## Deriving an HTTP server from a documented service description
 
-Since our documented endpoints are not defined by the algebra interfaces provided in the
-`endpoints.algebra` package, we can not directly apply the interpreters introduced in the
-other [tutorial](tutorial.md). But we can use *delegation* to apply them.
-
-For instance, here is the beginning of our `CounterServer` class definition, which applies
-interpreters of the `endpoints.play.server` package to the `CounterEndpoints`:
-
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#delegation
-~~~
-
-We first mix interpreters provided in the `delegate` package to our `CounterEndpoints`
-trait, and then we define a value named `delegate`, which contains the interpreter
-that matches algebra interfaces provided in the `endpoints.algebra` package. In our
-case we use an interpreter based on Play framework.
+Since our documented endpoints are defined by the standard algebra interfaces,
+we can apply the interpreters introduced in the other [tutorial](tutorial.md).
 
 ## Business logic and JVM entry point
 
@@ -157,14 +139,6 @@ Finally, we start a `NettyServer` and give it both the `CounterServer` and
 
 ## Summary
 
-To generate an OpenAPI definition from your service description this one
-must be written using a different set of algebra interfaces, which live
-in the `endpoints.documented.algebra` package.
-
-You can then derive an OpenAPI definition from your documented endpoints
-by applying the interpreters defined in the `endpoints.documented.openapi`
-package.
-
-None of the “documented” and “non-documented” algebra interfaces is a
-subtype of each other, but “documented” interpreters can delegate to
-“non-documented” ones.
+To generate an OpenAPI definition from your service description it's enough to use
+interpreters defined in `endpoints.openapi` package. Generated documentation can be enriched
+by supplying additional information when creating the service description.

@@ -1,7 +1,7 @@
 package endpoints.play.client
 
-import endpoints.algebra
-import endpoints.Tupler
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.algebra.Documentation
 import endpoints.play.client.Endpoints.futureFromEither
 import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
@@ -25,6 +25,27 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   /** Does not modify the request */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, wsRequest) => wsRequest
 
+  def header(name: String, docs: Documentation): (String, WSRequest) => WSRequest =
+    (value, req) => req.addHttpHeaders(name -> value)
+
+  def optHeader(name: String, docs: Documentation): (Option[String], WSRequest) => WSRequest = {
+    case (Some(value), req) => req.addHttpHeaders(name -> value)
+    case (None, req) => req
+  }
+
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+    override def xmap[From, To](f: (From, WSRequest) => WSRequest, map: From => To, contramap: To => From): (To, WSRequest) => WSRequest =
+      (to, req) => f(contramap(to), req)
+  }
+
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
+    override def product[A, B](fa: (A, WSRequest) => WSRequest, fb: (B, WSRequest) => WSRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, WSRequest) => WSRequest =
+      (out, req) => {
+        val (a, b) = tupler.unapply(out)
+        fb(b, fa(a, req))
+      }
+  }
+
   /**
     * A function that takes an `A` information and eventually returns a `WSResponse`
     */
@@ -35,7 +56,17 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) => req }
+  lazy val emptyRequest: RequestEntity[Unit] = {
+    case (_, req) => req
+  }
+
+  def textRequest(docs: Documentation): (String, WSRequest) => WSRequest =
+    (body, req) => req.withBody(body)
+
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
+    override def xmap[From, To](f: (From, WSRequest) => WSRequest, map: From => To, contramap: To => From): (To, WSRequest) => WSRequest =
+      (to, req) => f(contramap(to), req)
+  }
 
   def request[A, B, C, AB](
     method: Method, url: Url[A],
@@ -54,16 +85,21 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   type Response[A] = WSResponse => Either[Throwable, A]
 
   /** Successfully decodes no information from a response */
-  val emptyResponse: Response[Unit] = {
+  def emptyResponse(docs: Documentation): Response[Unit] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(())
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
   /** Successfully decodes string information from a response */
-  val textResponse: Response[String] = {
+  def textResponse(docs: Documentation): Response[String] = {
     case resp if resp.status >= 200 && resp.status < 300 => Right(resp.body)
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
+
+  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+    wsResponse =>
+      if (wsResponse.status == 404) Right(None)
+      else response(wsResponse).right.map(Some(_))
 
   //#concrete-carrier-type
   /**
@@ -74,7 +110,11 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   type Endpoint[A, B] = A => Future[B]
   //#concrete-carrier-type
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Documentation,
+    description: Documentation): Endpoint[A, B] =
     a => request(a).flatMap(response andThen futureFromEither)
 
 }
@@ -83,6 +123,6 @@ object Endpoints {
   def futureFromEither[A](errorOrA: Either[Throwable, A]): Future[A] =
     errorOrA match {
       case Left(error) => Future.failed(error)
-      case Right(a)    => Future.successful(a)
+      case Right(a) => Future.successful(a)
     }
 }

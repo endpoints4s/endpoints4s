@@ -17,28 +17,41 @@ trait BasicAuthentication extends Endpoints {
     * In routing interpreters if header is not present it should match the route and return 401 Unauthorized.
     * @return
     */
-  private[endpoints] def basicAuthentication: RequestHeaders[Credentials]
+  //TODO we could implement this in algebra via header("Authorization).xmap() but how to enforce 401?
+  private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials]
 
-  private[endpoints] def authenticated[A](response: Response[A]): Response[Option[A]] // FIXME Use an extensible type to model authentication failure
+  /**
+    * @param response Inner response (in case the authentication succeeds)
+    * @param docs Description of the authentication error
+    */
+  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation = None): Response[Option[A]] // FIXME Use an extensible type to model authentication failure
 
-  // TODO Allow users to supply additional `RequestHeaders`
   /**
     * Describes an endpoint protected by Basic HTTP authentication
     */
-  def authenticatedEndpoint[A, B, C, AB](
+  def authenticatedEndpoint[U, E, R, H, UE, DCred](
     method: Method,
-    url: Url[A],
-    requestEntity: RequestEntity[B] = emptyRequest,
-    response: Response[C]
+    url: Url[U],
+    response: Response[R],
+    requestEntity: RequestEntity[E] = emptyRequest,
+    requestHeaders: RequestHeaders[H] = emptyHeaders,
+    unauthenticatedDocs: Documentation = None,
+    summary: Documentation = None,
+    description: Documentation = None
   )(implicit
-    tuplerAB: Tupler.Aux[A, B, AB],
-    tuplerABC: Tupler[AB, Credentials]
-  ): Endpoint[tuplerABC.Out, Option[C]] =
-    endpoint(request(method, url, requestEntity, basicAuthentication), authenticated(response))
+    tuplerAB: Tupler.Aux[U, E, UE],
+    tuplerDCred: Tupler.Aux[H, Credentials, DCred],
+    tuplerABDCred: Tupler[UE, DCred]
+  ): Endpoint[tuplerABDCred.Out, Option[R]] =
+    endpoint(
+      request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader),
+      authenticated(response, unauthenticatedDocs),
+      summary,
+      description
+    )
 
 }
 
 object BasicAuthentication {
   case class Credentials(username: String, password: String)
 }
-

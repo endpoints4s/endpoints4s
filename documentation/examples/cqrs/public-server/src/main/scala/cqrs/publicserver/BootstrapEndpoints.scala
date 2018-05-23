@@ -1,6 +1,6 @@
 package cqrs.publicserver
 
-import endpoints.documented.openapi.model.OpenApi
+import endpoints.openapi.model.OpenApi
 import endpoints.play.server.circe.JsonEntities
 import endpoints.play.server.{Assets, Endpoints, PlayComponents}
 import play.api.routing.{Router => PlayRouter}
@@ -15,10 +15,10 @@ class BootstrapEndpoints(protected val playComponents: PlayComponents) extends E
     endpoint(get(path), htmlResponse)
 
   val assets: Endpoint[AssetRequest, AssetResponse] =
-    assetsEndpoint(path / "assets" / assetSegments)
+    assetsEndpoint(path / "assets" / assetSegments())
 
   val documentation: Endpoint[Unit, OpenApi] =
-    endpoint(get(path / "documentation"), jsonResponse[OpenApi])
+    endpoint(get(path / "documentation"), jsonResponse[OpenApi]())
 
   val routes: PlayRouter.Routes =
     routesFromEndpoints(

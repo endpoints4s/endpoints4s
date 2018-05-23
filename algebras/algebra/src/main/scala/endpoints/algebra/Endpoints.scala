@@ -21,6 +21,7 @@ trait Endpoints extends Requests with Responses {
 
   /**
     * Information carried by an HTTP endpoint
+    *
     * @tparam A Information carried by the request
     * @tparam B Information carried by the response
     */
@@ -29,9 +30,16 @@ trait Endpoints extends Requests with Responses {
   /**
     * HTTP endpoint.
     *
-    * @param request Request
+    * @param request  Request
     * @param response Response
+    * @param summary optional summary documentation
+    * @param description optional description documentation
     */
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B]
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    summary: Documentation = None,
+    description: Documentation = None
+  ): Endpoint[A, B]
 
 }

@@ -13,7 +13,7 @@ val `xhr-client` =
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
-    .dependsOn(LocalProject("algebraJS"))
+    .dependsOn(LocalProject("algebraJS") )
 
 val `xhr-client-faithful` =
   project.in(file("client-faithful"))

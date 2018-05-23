@@ -1,7 +1,7 @@
 package endpoints.xhr
 
-import endpoints.algebra
-import endpoints.Tupler
+import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.language.higherKinds
@@ -22,6 +22,26 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** Sets up no headers on the given XMLHttpRequest */
   lazy val emptyHeaders: RequestHeaders[Unit] = (_, _) => ()
 
+  def header(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[String] =
+    (value, xhr) => xhr.setRequestHeader(name, value)
+
+  def optHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[Option[String]] =
+    (valueOpt, xhr) => valueOpt.foreach(value => xhr.setRequestHeader(name, value))
+
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
+    override def xmap[From, To](f: js.Function2[From, XMLHttpRequest, Unit], map: From => To, contramap: To => From): js.Function2[To, XMLHttpRequest, Unit] =
+      (to, xhr) => f(contramap(to), xhr)
+  }
+
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders]{
+    override def product[A, B](fa: js.Function2[A, XMLHttpRequest, Unit], fb: js.Function2[B, XMLHttpRequest, Unit])(implicit tupler: Tupler[A, B]): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
+      (out, xhr) => {
+        val (a, b) = tupler.unapply(out)
+        fa(a, xhr)
+        fb(b, xhr)
+      }
+  }
+
   /**
     * A function that takes the information `A` and returns an XMLHttpRequest
     * with an optional request entity. If provided, the request entity must be
@@ -30,6 +50,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   // FIXME Use a representation that makes it easier to set the request Content-Type header according to its entity type
   trait Request[A] {
     def apply(a: A): (XMLHttpRequest, Option[js.Any])
+
     def href(a: A): String
   }
 
@@ -41,7 +62,17 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     */
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
-  lazy val emptyRequest: RequestEntity[Unit] = (_,_) => null
+  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => null
+
+  def textRequest(docs: endpoints.algebra.Documentation): RequestEntity[String] = (body, xhr) => {
+    xhr.setRequestHeader("Content-type", "text/plain; charset=utf8")
+    body
+  }
+
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
+    override def xmap[From, To](f: js.Function2[From, XMLHttpRequest, js.Any], map: From => To, contramap: To => From): js.Function2[To, XMLHttpRequest, js.Any] =
+      (to, xhr) => f(contramap(to), xhr)
+  }
 
   def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
     new Request[tuplerABC.Out] {
@@ -51,6 +82,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
         val xhr = makeXhr(method, url, a, headers, c)
         (xhr, Some(entity(b, xhr)))
       }
+
       def href(abc: tuplerABC.Out) = {
         val (ab, _) = tuplerABC.unapply(abc)
         val (a, _) = tuplerAB.unapply(ab)
@@ -73,12 +105,23 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /**
     * Successfully decodes no information from a response
     */
-  lazy val emptyResponse: Response[Unit] = _ => Right(())
+  def emptyResponse(docs: Documentation): Response[Unit] = _ => Right(())
 
   /**
     * Successfully decodes string information from a response
     */
-  lazy val textResponse: Response[String] = x => Right(x.responseText)
+  def textResponse(docs: Documentation): Response[String] = x => Right(x.responseText)
+
+  /**
+    * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.
+    */
+  def option[A](
+    response: js.Function1[XMLHttpRequest, Either[Exception, A]],
+    notFoundDocs: Documentation
+  ): js.Function1[XMLHttpRequest, Either[Exception, Option[A]]] =
+    xhr =>
+      if (xhr.status == 404) Right(None)
+      else response(xhr).right.map(Some(_))
 
   /**
     * A function that takes the information needed to build a request and returns
@@ -86,6 +129,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     */
   abstract class Endpoint[A, B](request: Request[A]) {
     def apply(a: A): Result[B]
+
     def href(a: A): String = request.href(a)
   }
 

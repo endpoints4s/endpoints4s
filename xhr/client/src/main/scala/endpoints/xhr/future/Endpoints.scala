@@ -1,5 +1,6 @@
 package endpoints.xhr.future
 
+import endpoints.algebra.Documentation
 import endpoints.xhr
 
 import scala.concurrent.{Future, Promise}
@@ -12,7 +13,7 @@ trait Endpoints extends xhr.Endpoints {
   /** Maps `Result` to [[Future]] */
   type Result[A] = Future[A]
 
-  def endpoint[A, B](request: Request[A], response: Response[B]): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {
         val promise = Promise[B]()

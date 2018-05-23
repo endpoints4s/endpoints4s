@@ -1,28 +1,30 @@
 package endpoints.play.client
 
-import endpoints.testsuite._
-import endpoints.testsuite.client.{BasicAuthTestSuite, JsonFromCodecTestSuite, OptionalResponsesTestSuite, SimpleTestSuite}
+import endpoints.algebra.client
+import endpoints.algebra
+import endpoints.algebra.circe
 import play.api.libs.ws.WSClient
 import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
+
 class TestClient(address: String, wsClient: WSClient)
   (implicit EC: ExecutionContext)
   extends Endpoints(address, wsClient)
     with BasicAuthentication
-    with OptionalResponses
     with JsonEntitiesFromCodec
-    with BasicAuthTestApi
-    with SimpleTestApi
-    with OptionalResponsesTestApi
-    with JsonFromPlayJsonCodecTestApi
+    with algebra.BasicAuthTestApi
+    with algebra.EndpointsTestApi
+    with algebra.JsonFromCodecTestApi
+    with circe.JsonFromCirceCodecTestApi
+    with circe.JsonEntitiesFromCodec
 
 class EndpointsTest
-  extends SimpleTestSuite[TestClient]
-    with BasicAuthTestSuite[TestClient]
-    with OptionalResponsesTestSuite[TestClient]
-    with JsonFromCodecTestSuite[TestClient] {
+  extends client.EndpointsTestSuite[TestClient]
+    with client.BasicAuthTestSuite[TestClient]
+    with client.JsonFromCodecTestSuite[TestClient]
+{
 
   import ExecutionContext.Implicits.global
 
@@ -34,7 +36,6 @@ class EndpointsTest
 
   clientTestSuite()
   basicAuthSuite()
-  optionalResponsesSuite()
   jsonFromCodecTestSuite()
 }
 

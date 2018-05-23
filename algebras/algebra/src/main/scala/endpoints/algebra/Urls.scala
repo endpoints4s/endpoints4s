@@ -1,8 +1,8 @@
 package endpoints.algebra
 
-import endpoints.Tupler
+import endpoints.{InvariantFunctor, Tupler}
 
-import scala.language.higherKinds
+import scala.language.{higherKinds, implicitConversions}
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -57,14 +57,14 @@ trait Urls {
     * @param name Parameter’s name
     * @tparam A Type of the value carried by the parameter
     */
-  def qs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[A]
+  def qs[A](name: String, docs: Documentation = None)(implicit value: QueryStringParam[A]): QueryString[A]
 
   /**
     * Builds a `QueryString` with one optional parameter of type `A`.
     *
     * @param name Parameter’s name
     */
-  def optQs[A](name: String)(implicit value: QueryStringParam[A]): QueryString[Option[A]]
+  def optQs[A](name: String, docs: Documentation = None)(implicit value: QueryStringParam[A]): QueryString[Option[A]]
 
   /**
     * A single query string parameter carrying an `A` information.
@@ -97,6 +97,9 @@ trait Urls {
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]
 
+  /** Implicit conversion to get rid of intellij errors when defining paths. Effectively should not be called.*/
+  implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
+
   /** Convenient methods for [[Path]]s. */
   implicit class PathOps[A](first: Path[A]) {
     /** Chains this path with the `second` constant path segment */
@@ -108,10 +111,10 @@ trait Urls {
   }
 
   /** Builds a static path segment */
-  def staticPathSegment(segment: String): Path[Unit]
+  def  staticPathSegment(segment: String): Path[Unit]
 
   /** Builds a path segment carrying an `A` information */
-  def segment[A](implicit s: Segment[A]): Path[A]
+  def segment[A](name: String = "", docs: Documentation = None)(implicit s: Segment[A]): Path[A]
 
   /** Chains the two paths */
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]
@@ -132,6 +135,9 @@ trait Urls {
     * An URL carrying an `A` information
     */
   type Url[A]
+
+  implicit def urlInvFunctor: InvariantFunctor[Url]
+
 
   /** Builds an URL from the given path and query string */
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]
