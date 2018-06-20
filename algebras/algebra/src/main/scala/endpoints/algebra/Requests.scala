@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import java.nio.charset.{Charset, StandardCharsets}
-
 import endpoints._
 
 import scala.language.higherKinds

@@ -1,7 +1,7 @@
 package endpoints.play.server.circe
 
 import endpoints.algebra
-import endpoints.algebra.{Documentation, JsonSchemaEntities}
+import endpoints.algebra.Documentation
 import endpoints.play.server.Endpoints
 import endpoints.play.server.circe.Util.circeJsonWriteable
 import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}

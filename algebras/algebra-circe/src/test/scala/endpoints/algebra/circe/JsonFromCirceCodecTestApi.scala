@@ -1,6 +1,5 @@
 package endpoints.algebra.circe
 
-import endpoints.algebra
 import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
 trait JsonFromCirceCodecTestApi

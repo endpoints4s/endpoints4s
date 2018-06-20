@@ -158,7 +158,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
-  def textRequest(docs: Documentation): BodyParser[String] = BodyParsers.parse.text
+  def textRequest(docs: Documentation): BodyParser[String] = playComponents.playBodyParsers.text
 
   implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new endpoints.InvariantFunctor[RequestEntity] {
     override def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
