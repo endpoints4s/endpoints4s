@@ -2,7 +2,6 @@ package endpoints
 package openapi
 
 import endpoints.openapi.model._
-import endpoints.algebra
 import endpoints.algebra.Documentation
 
 /**

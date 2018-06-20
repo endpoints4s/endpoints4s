@@ -17,17 +17,12 @@ case class Counter(value: Int)
 
 // The operations that we can apply to our counter
 sealed trait Operation
-
 object Operation {
-
   // Reset the counter value to the given `value`
   case class Set(value: Int) extends Operation
-
   // Add `delta` to the counter value
   case class Add(delta: Int) extends Operation
-
 }
-
 //#domain
 
 // Description of the HTTP API
@@ -78,7 +73,6 @@ trait CounterEndpoints
 //#openapi
 import endpoints.openapi
 import endpoints.openapi.model.{Info, OpenApi}
-
 
 object CounterDocumentation
   extends CounterEndpoints
