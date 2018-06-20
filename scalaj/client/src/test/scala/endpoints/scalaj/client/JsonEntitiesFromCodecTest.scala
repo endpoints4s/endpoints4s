@@ -1,7 +1,6 @@
 package endpoints.scalaj.client
 
 import endpoints.algebra
-import endpoints.algebra.{Address, Codec, JsonTestApi, User}
 import endpoints.algebra.circe
 import endpoints.algebra.client.JsonFromCodecTestSuite
 

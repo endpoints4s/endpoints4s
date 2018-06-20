@@ -4,6 +4,7 @@ import endpoints.algebra.client
 import endpoints.algebra
 import endpoints.algebra.circe
 import play.api.libs.ws.WSClient
+import play.api.test
 import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -28,14 +29,19 @@ class EndpointsTest
 
   import ExecutionContext.Implicits.global
 
-  val client: TestClient = WsTestClient.withClient(c => {
-    new TestClient(s"http://localhost:$wiremockPort", c)
-  })
+  val wsClient = new WsTestClient.InternalWSClient("http", wiremockPort)
+  val client: TestClient = new TestClient(s"http://localhost:$wiremockPort", wsClient)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp] = endpoint(args)
 
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+
+  override def afterAll(): Unit = {
+    wsClient.close()
+    super.afterAll()
+  }
+
 }
 
