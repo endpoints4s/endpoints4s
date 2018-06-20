@@ -6,7 +6,7 @@ Combinations of these use cases multiply the value brought by *endpoints*!
 
 ## Microservices
 
-Describe the HTTP APIs between the services, and let *endpoints* implement
+Describe the HTTP APIs between the services, and let *endpoints* implements
 the clients and servers for these APIs:
 
 ~~~ scala src=../../../examples/cqrs/commands-endpoints/src/main/scala/cqrs/commands/CommandsEndpoints.scala#microservice-endpoint-description
@@ -18,7 +18,7 @@ Invoking a service from another is as simple as a method call:
 ~~~
 
 *endpoints* takes care of correctly constructing the request and
-decoding the response according to the HTTP API description.
+decoding the response according to the HTTP endpoint description.
 
 Maintenance effort is reduced: you only maintain the description of
 the HTTP API, not it’s client and server implementations.
@@ -26,7 +26,7 @@ the HTTP API, not it’s client and server implementations.
 ## Web Applications
 
 Thanks to Scala.js it is possible to write the client-side part of a
-web application in Scala. Then, *endpoints* simplify client-server
+web application in Scala. Then, *endpoints* simplifies client-server
 communication by turning method calls into remote invocations.
 
 Endpoint definition:

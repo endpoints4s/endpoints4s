@@ -18,16 +18,16 @@ The application is defined in a single sbt project with the following dependenci
 
 ~~~ mermaid
 graph BT
-  counter -.-> endpoints-algebra-circe
   counter -.-> endpoints-json-schema-generic
+  counter -.-> endpoints-openapi
   counter -.-> endpoints-play-server-circe
-  style endpoints-circe fill:#eee;
+  style endpoints-openapi fill:#eee;
   style endpoints-play-server-circe fill:#eee;
   style endpoints-json-schema-generic fill:#eee;
 ~~~
 
-The `endpoints-algebra-circe` dependency provides an algebra interface to describe
-HTTP endpoints that can produce JSON encoders and decoders for circe as well as OpenAPI documentation.
+The `endpoints-openapi` dependency provides an interpreter that produces OpenApi
+documents out of endpoint descriptions.
 
 The `endpoints-json-schema-generic` dependency provides generic JSON schema
 descriptions for algebraic data types.
@@ -41,12 +41,14 @@ We break down the application into the following components:
 graph BT
   CounterEndpoints-.->endpoints-json-schema-generic
   CounterServer-.->endpoints-play-server-circe
+  CounterDocumentation-.->endpoints-openapi
   DocumentationServer-.->endpoints-play-server-circe
   subgraph counter
     CounterDocumentation-->CounterEndpoints
     CounterServer-->CounterEndpoints
     DocumentationServer-.->CounterDocumentation
   end
+  style endpoints-openapi fill:#eee;
   style endpoints-play-server-circe fill:#eee;
   style endpoints-json-schema-generic fill:#eee;
 ~~~
@@ -72,7 +74,7 @@ modifying it.
 
 Note that we first import
 [endpoints.algebra](api:endpoints.algebra.package). We use the same algebra for defining documentation
-as we would use for definig protocols for client/server imterpreatation.
+as we would use for defining protocols for client/server interpretation.
 
 For instance, the `counterJson` value describes an HTTP response whose JSON entity contains
 “The counter current value”.
