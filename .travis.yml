@@ -38,6 +38,6 @@ jobs:
         - find $HOME/.sbt -name "*.lock" | xargs rm
         - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
     - stage: coverage
-      script: sbt coverage test coverageReport coverageAggregate
+      script: sbt "wow 2.11.11" coverage test coverageReport coverageAggregate
       after_success:
         - codecov
