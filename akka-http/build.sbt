@@ -33,22 +33,10 @@ val `akka-http-server` =
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+        "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion % Provided,
         scalaTestDependency
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
-
-val `akka-http-server-circe` =
-  project.in(file("server-circe"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-akka-http-server-circe",
-      libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
-        "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion % Provided
-      )
-    )
-    .dependsOn(`akka-http-server`)
     .dependsOn(`json-schema-circe-jvm`)
