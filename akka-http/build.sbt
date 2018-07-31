@@ -4,6 +4,7 @@ val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
+val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
 val akkaHttpVersion = "10.0.1"
 val akkaHttpJsonVersion = "1.18.1"
@@ -40,3 +41,4 @@ val `akka-http-server` =
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
     .dependsOn(`json-schema-circe-jvm`)
+    .dependsOn(`json-schema-generic-jvm` % "test->test")
