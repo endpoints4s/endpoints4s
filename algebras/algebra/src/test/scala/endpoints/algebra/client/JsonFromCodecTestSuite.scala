@@ -1,10 +1,13 @@
 package endpoints.algebra.client
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import endpoints.algebra.JsonFromCodecTestApi
 import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
-trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T] {
+trait JsonFromCodecTestSuite extends ClientTestBase {
+
+  val api: JsonFromCodecTestApi
+
+  override type Endpoint[Req, Resp] = api.entities.endpoints.Endpoint[Req, Resp]
 
   def jsonFromCodecTestSuite() = {
 
@@ -13,9 +16,9 @@ trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T
       "encode JSON requests and decode JSON responses" in {
 
         val user = User("name2", 19)
-        val userStr = client.jsonCodec(client.userCodec).encode(user)
+        val userStr = api.entities.jsonCodec(api.userCodec).encode(user)
         val address = Address("avenue1", "NY")
-        val addressStr = client.jsonCodec(client.addressCodec).encode(address)
+        val addressStr = api.entities.jsonCodec(api.addressCodec).encode(address)
 
         wireMockServer.stubFor(
           post(urlEqualTo("/user-json-codec"))
@@ -27,7 +30,7 @@ trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T
             )
         )
 
-        whenReady(call(client.jsonCodecEndpoint, user))(_ shouldEqual address)
+        whenReady(call(api.jsonCodecEndpoint, user))(_ shouldEqual address)
 
       }
 

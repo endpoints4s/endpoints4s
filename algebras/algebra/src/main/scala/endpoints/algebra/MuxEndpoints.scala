@@ -6,7 +6,9 @@ import scala.language.higherKinds
   * Algebra interface for describing endpoints such that one endpoint can
   * handle several types of requests and responses.
   */
-trait MuxEndpoints extends Endpoints {
+trait MuxEndpoints {
+
+  val endpoints: Endpoints
 
   /**
     * Information carried by a multiplexed HTTP endpoint.
@@ -28,8 +30,8 @@ trait MuxEndpoints extends Endpoints {
     * @tparam Transport The data type used to transport the requests and responses
     */
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+    request: endpoints.requests.Request[Transport],
+    response: endpoints.responses.Response[Transport]
   ): MuxEndpoint[Req, Resp, Transport]
 
 }

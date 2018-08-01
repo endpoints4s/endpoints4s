@@ -12,19 +12,19 @@ val `json-schema` =
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
 
-lazy val `json-schema-generic` =
-  crossProject.crossType(CrossType.Pure).in(file("json-schema-generic"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
-    .settings(
-      name := "endpoints-json-schema-generic",
-      libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.2",
-      addScalaTestCrossDependency
-    )
-    .dependsOnLocalCrossProjects("json-schema")
-    .dependsOnLocalCrossProjectsWithScope("openapi" -> "test")
-
-lazy val `json-schema-generic-js` = `json-schema-generic`.js
-lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
+//lazy val `json-schema-generic` =
+//  crossProject.crossType(CrossType.Pure).in(file("json-schema-generic"))
+//    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
+//    .settings(
+//      name := "endpoints-json-schema-generic",
+//      libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.2",
+//      addScalaTestCrossDependency
+//    )
+//    .dependsOnLocalCrossProjects("json-schema")
+//    .dependsOnLocalCrossProjectsWithScope("openapi" -> "test")
+//
+//lazy val `json-schema-generic-js` = `json-schema-generic`.js
+//lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
 
 lazy val `json-schema-circe` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema-circe"))

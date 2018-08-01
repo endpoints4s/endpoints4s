@@ -1,11 +1,16 @@
 package endpoints.algebra
 
-import java.time.format.DateTimeFormatter
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-import endpoints.algebra
+trait EndpointsTestApi {
 
-trait EndpointsTestApi extends algebra.Endpoints {
+  val endpoints: Endpoints
+
+  import endpoints._
+  import requests._
+  import responses._
+  import urls._
 
 
   val smokeEndpoint = endpoint(

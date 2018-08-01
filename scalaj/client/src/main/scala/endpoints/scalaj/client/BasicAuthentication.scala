@@ -6,7 +6,13 @@ import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra.Documentation
 
-trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
+trait BasicAuthentication extends algebra.BasicAuthentication {
+
+  override val endpoints: Endpoints
+
+  import endpoints._
+  import requests._
+  import responses._
 
   /**
     * Supplies the credential into the request headers

@@ -29,16 +29,18 @@ package endpoints.algebra
   *     .map(response => println(response.responseText))
   * }}}
   */
-trait LowLevelEndpoints extends Endpoints {
+trait LowLevelEndpoints {
+
+  val endpoints: Endpoints
 
   /** Low-level request entity */
   type RawRequestEntity
 
-  def rawRequestEntity: RequestEntity[RawRequestEntity]
+  def rawRequestEntity: endpoints.requests.RequestEntity[RawRequestEntity]
 
   /** Low-level request response */
   type RawResponseEntity
 
-  def rawResponseEntity: Response[RawResponseEntity]
+  def rawResponseEntity: endpoints.responses.Response[RawResponseEntity]
 
 }

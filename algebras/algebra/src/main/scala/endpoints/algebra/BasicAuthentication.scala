@@ -9,7 +9,15 @@ import endpoints.algebra.BasicAuthentication.Credentials
   * This trait works fine, but developers are likely to implement their own
   * authentication mechanism, specific to their application.
   */
-trait BasicAuthentication extends Endpoints {
+trait BasicAuthentication {
+
+  val endpoints: Endpoints
+
+  import endpoints._
+  import requests._
+  import urls._
+  import responses._
+  import methods._
 
   /**
     * Credentials encoded as HTTP Basic Auth header

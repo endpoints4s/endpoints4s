@@ -3,20 +3,17 @@ import EndpointsSettings._
 // Algebra interfaces
 val algebras = project.in(file("algebras"))
 val jsonSchema = project.in(file("json-schema"))
-val openapi = project.in(file("openapi"))
+//val openapi = project.in(file("openapi"))
 
 // Interpreters
-val xhr = project.in(file("xhr"))
-val play = project.in(file("play"))
-val `akka-http` = project.in(file("akka-http"))
+//val xhr = project.in(file("xhr"))
+//val play = project.in(file("play"))
+//val `akka-http` = project.in(file("akka-http"))
 val scalaj = project.in(file("scalaj"))
-val sttp = project.in(file("sttp"))
-
-// Test kit
-val testsuite = project.in(file("testsuite"))
+//val sttp = project.in(file("sttp"))
 
 // Documentation and examples
-val documentation = project.in(file("documentation"))
+//val documentation = project.in(file("documentation"))
 
 import ReleaseTransformations._
 

@@ -4,7 +4,11 @@ import endpoints._
 
 import scala.language.higherKinds
 
-trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupalSyntax {
+trait Requests extends InvariantFunctorSyntax with SemigroupalSyntax {
+
+  val urls: Urls
+
+  val methods: Methods
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]
@@ -57,8 +61,8 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
     */
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled](
-    method: Method,
-    url: Url[UrlP],
+    method: methods.Method,
+    url: urls.Url[UrlP],
     entity: RequestEntity[BodyP] = emptyRequest,
     headers: RequestHeaders[HeadersP] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerABC: Tupler[UrlAndBodyPTupled, HeadersP]): Request[tuplerABC.Out]
@@ -69,9 +73,9 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     * @tparam HeadersP Payload carried by headers
     */
   final def get[UrlP, HeadersP](
-    url: Url[UrlP],
+    url: urls.Url[UrlP],
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerAC: Tupler[UrlP, HeadersP]): Request[tuplerAC.Out] = request(Get, url, headers = headers)
+  )(implicit tuplerAC: Tupler[UrlP, HeadersP]): Request[tuplerAC.Out] = request(methods.Get, url, headers = headers)
 
   /**
     * Helper method to perform POST request
@@ -81,10 +85,10 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
     */
   final def post[UrlP, BodyP, HeadersP, UrlAndBodyPTupled](
-    url: Url[UrlP],
+    url: urls.Url[UrlP],
     entity: RequestEntity[BodyP],
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerABC: Tupler[UrlAndBodyPTupled, HeadersP]): Request[tuplerABC.Out] = request(Post, url, entity, headers)
+  )(implicit tuplerAB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerABC: Tupler[UrlAndBodyPTupled, HeadersP]): Request[tuplerABC.Out] = request(methods.Post, url, entity, headers)
 
 
 }

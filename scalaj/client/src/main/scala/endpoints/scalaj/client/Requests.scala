@@ -5,7 +5,13 @@ import endpoints.algebra.Documentation
 
 import scalaj.http.HttpRequest
 
-trait Requests extends algebra.Requests with Urls with Methods {
+trait Requests extends algebra.Requests {
+
+  override val urls: Urls
+  override val methods: Methods
+
+  import methods.Method
+  import urls.Url
 
 
    type RequestHeaders[A] = A => Seq[(String, String)]

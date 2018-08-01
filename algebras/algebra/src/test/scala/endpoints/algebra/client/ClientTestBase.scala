@@ -4,14 +4,14 @@ import java.net.ServerSocket
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
-import endpoints.algebra
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.language.higherKinds
 
-trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
+trait ClientTestBase extends WordSpec
   with Matchers
   with ScalaFutures
   with BeforeAndAfterAll
@@ -36,8 +36,8 @@ trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
     finally if (socket != null) socket.close()
   }
 
-  val client: T
+  type Endpoint[Req, Resp]
 
-  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp]
+  def call[Req, Resp](endpoint: Endpoint[Req, Resp], args: Req): Future[Resp]
 
 }

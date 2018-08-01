@@ -3,8 +3,9 @@ package endpoints.algebra.circe
 import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
 trait JsonFromCirceCodecTestApi
-  extends JsonFromCodecTestApi
-    with endpoints.algebra.circe.JsonEntitiesFromCodec {
+  extends JsonFromCodecTestApi {
+
+  val entities: endpoints.algebra.circe.JsonEntitiesFromCodec
 
   import io.circe._
   import io.circe.generic.semiauto._
@@ -14,7 +15,7 @@ trait JsonFromCirceCodecTestApi
   implicit lazy val addressDecoder: Decoder[Address] = deriveDecoder[Address]
   implicit lazy val addressEncoder: Encoder[Address] = deriveEncoder[Address]
 
-  def userCodec: JsonCodec[User] = implicitly
-  def addressCodec: JsonCodec[Address] = implicitly
+  def userCodec: entities.JsonCodec[User] = implicitly
+  def addressCodec: entities.JsonCodec[Address] = implicitly
 
 }

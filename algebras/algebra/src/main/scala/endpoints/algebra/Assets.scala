@@ -1,7 +1,9 @@
 package endpoints.algebra
 
 /** Describes endpoints related to static assets (e.g. medias, scripts, stylesheets, etc.) */
-trait Assets extends Endpoints {
+trait Assets {
+
+  val endpoints: Endpoints
 
   /** An HTTP request to retrieve an asset */
   type AssetRequest
@@ -11,7 +13,7 @@ trait Assets extends Endpoints {
   type AssetResponse
 
   /**
-    * A [[Path]] that extracts an [[AssetPath]] from all the path segments.
+    * A [[endpoints.requests.urls.Path]] that extracts an [[AssetPath]] from all the path segments.
     *
     * Consider the following definition:
     * {{{
@@ -22,7 +24,7 @@ trait Assets extends Endpoints {
     * - `/assets/foo` => `foo`
     * - `/assets/foo/bar` => `foo/bar`
     */
-  def assetSegments(name: String = "", docs: Documentation = None): Path[AssetPath]
+  def assetSegments(name: String = "", docs: Documentation = None): endpoints.requests.urls.Path[AssetPath]
 
   /**
     * @param url URL description
@@ -30,7 +32,7 @@ trait Assets extends Endpoints {
     * @param notFoundDocs description of a not found asset response. Required by openapi
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath], docs: Documentation = None, notFoundDocs: Documentation = None): Endpoint[AssetRequest, AssetResponse]
+  def assetsEndpoint(url: endpoints.requests.urls.Url[AssetPath], docs: Documentation = None, notFoundDocs: Documentation = None): endpoints.Endpoint[AssetRequest, AssetResponse]
 
   /** The digests of the assets */
   def digests: Map[String, String]

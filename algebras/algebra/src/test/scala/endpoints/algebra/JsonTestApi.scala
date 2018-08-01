@@ -1,8 +1,13 @@
 package endpoints.algebra
 
-import endpoints.algebra
+trait JsonTestApi {
 
-trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities {
+  val entities: JsonEntities
+
+  import entities._
+  import endpoints._
+  import requests._
+  import urls._
 
   implicit def userCodec: JsonRequest[User]
   implicit def addresCodec: JsonResponse[Address]

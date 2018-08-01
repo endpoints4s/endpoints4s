@@ -15,19 +15,21 @@ import scala.language.higherKinds
   *   val example = endpoint(get(path / "user" / segment[UUID]), jsonResponse[User])
   * }}}
   */
-trait JsonEntities extends Endpoints {
+trait JsonEntities {
+
+  val endpoints: Endpoints
 
   /** Type class defining how to represent the `A` information as a JSON request entity */
   type JsonRequest[A]
 
   /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
-  def jsonRequest[A : JsonRequest](docs: Documentation = None): RequestEntity[A]
+  def jsonRequest[A : JsonRequest](docs: Documentation = None): endpoints.requests.RequestEntity[A]
 
   /** Type class defining how to represent the `A` information as a JSON response entity */
   type JsonResponse[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]` */
-  def jsonResponse[A : JsonResponse](docs: Documentation = None): Response[A]
+  def jsonResponse[A : JsonResponse](docs: Documentation = None): endpoints.responses.Response[A]
 }
 
 /**

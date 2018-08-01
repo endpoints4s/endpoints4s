@@ -4,7 +4,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.{Address, JsonTestApi, User}
 
 
-trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
+trait JsonTestSuite extends ClientTestBase {
+
+  val api: JsonTestApi
+
+  override type Endpoint[Req, Resp] = api.entities.endpoints.Endpoint[Req, Resp]
 
   def clientTestSuite() = {
 
@@ -21,7 +25,7 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(addressStr)))
 
-        whenReady(call(client.smokeEndpoint, user))(_ shouldEqual address)
+        whenReady(call(api.smokeEndpoint, user))(_ shouldEqual address)
 
       }
 

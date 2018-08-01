@@ -17,7 +17,14 @@ import scala.language.higherKinds
   *   val example = endpoint(get(path / "foo"), emptyResponse)
   * }}}
   */
-trait Endpoints extends Requests with Responses {
+trait Endpoints {
+
+  val requests: Requests
+
+  val responses: Responses
+
+  import requests._
+  import responses._
 
   /**
     * Information carried by an HTTP endpoint

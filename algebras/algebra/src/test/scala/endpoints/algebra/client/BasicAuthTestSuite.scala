@@ -3,7 +3,10 @@ package endpoints.algebra.client
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.{BasicAuthTestApi, BasicAuthentication}
 
-trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
+trait BasicAuthTestSuite extends ClientTestBase {
+
+  val api: BasicAuthTestApi
+  override type Endpoint[Req, Resp] = api.basicAuth.endpoints.Endpoint[Req, Resp]
 
   def basicAuthSuite() = {
 
@@ -20,7 +23,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual Some(response))
+        whenReady(call(api.protectedEndpoint, credentials))(_ shouldEqual Some(response))
 
       }
 
@@ -33,7 +36,7 @@ trait BasicAuthTestSuite[T <: BasicAuthTestApi] extends ClientTestBase[T] {
             .withStatus(403)
             .withBody("")))
 
-        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual None)
+        whenReady(call(api.protectedEndpoint, credentials))(_ shouldEqual None)
 
       }
     }

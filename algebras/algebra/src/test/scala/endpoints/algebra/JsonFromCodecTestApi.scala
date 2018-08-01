@@ -1,15 +1,18 @@
 package endpoints.algebra
 
-import endpoints.algebra
+trait JsonFromCodecTestApi {
 
-trait JsonFromCodecTestApi
-  extends algebra.Endpoints
-    with algebra.JsonEntitiesFromCodec {
+  val entities: JsonEntitiesFromCodec
 
-  implicit def userCodec: JsonCodec[User]
-  implicit def addressCodec: JsonCodec[Address]
+  import entities._
+  import endpoints._
+  import requests._
+  import urls._
 
-  val jsonCodecEndpoint = endpoint(
+  implicit def userCodec: entities.JsonCodec[User]
+  implicit def addressCodec: entities.JsonCodec[Address]
+
+  lazy val jsonCodecEndpoint = endpoint(
     post(path / "user-json-codec", jsonRequest[User]()),
     jsonResponse[Address]()
   )

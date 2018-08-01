@@ -6,7 +6,11 @@ import java.util.UUID
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.EndpointsTestApi
 
-trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
+trait EndpointsTestSuite extends ClientTestBase {
+
+  val api: EndpointsTestApi
+
+  override type Endpoint[Req, Resp] = api.endpoints.Endpoint[Req, Resp]
 
   def clientTestSuite() = {
 
@@ -21,10 +25,10 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18))) {
+        whenReady(call(api.smokeEndpoint, ("userId", "name1", 18))) {
           _ shouldEqual response
         }
-        whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18))) {
+        whenReady(call(api.emptyResponseSmokeEndpoint, ("userId", "name1", 18))) {
           _ shouldEqual (())
         }
 
@@ -36,8 +40,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(501)
             .withBody("")))
 
-        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
-        whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
+        whenReady(call(api.smokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
+        whenReady(call(api.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
       }
 
       "properly handle joined headers" in {
@@ -49,7 +53,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.joinedHeadersEndpoint, ("a", "b")))(x => x shouldEqual (response))
+        whenReady(call(api.joinedHeadersEndpoint, ("a", "b")))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped headers" in {
@@ -60,7 +64,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.xmapHeadersEndpoint, 11))(x => x shouldEqual (response))
+        whenReady(call(api.xmapHeadersEndpoint, 11))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped url" in {
@@ -70,7 +74,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.xmapUrlEndpoint, "11"))(x => x shouldEqual (response))
+        whenReady(call(api.xmapUrlEndpoint, "11"))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped request entites" in {
@@ -83,7 +87,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(response)))
 
-        whenReady(call(client.xmapReqBodyEndpoint, date))(x => x shouldEqual (response))
+        whenReady(call(api.xmapReqBodyEndpoint, date))(x => x shouldEqual (response))
       }
 
       "in case of optional response" should {
@@ -97,7 +101,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
               .withStatus(200)
               .withBody(response)))
 
-          whenReady(call(client.optionalEndpoint, ()))(_ shouldEqual Some(response))
+          whenReady(call(api.optionalEndpoint, ()))(_ shouldEqual Some(response))
 
         }
 
@@ -108,7 +112,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
               .withStatus(404)
               .withBody("")))
 
-          whenReady(call(client.optionalEndpoint, ()))(_ shouldEqual None)
+          whenReady(call(api.optionalEndpoint, ()))(_ shouldEqual None)
 
         }
       }
