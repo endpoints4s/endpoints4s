@@ -150,7 +150,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     */
   type Endpoint[A, B] = A => R[B]
 
-  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a => {
       val req: sttp.Request[response.ReceivedBody, Nothing] = request(a).response(response.responseAs)
 

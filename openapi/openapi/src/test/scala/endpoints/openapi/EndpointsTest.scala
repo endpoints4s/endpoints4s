@@ -60,15 +60,22 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Tags documentation" should {
+    "be set according to provided tags" in {
+      Fixtures.documentation.paths("/foo").operations("get").tags shouldEqual List("foo")
+      Fixtures.documentation.paths("/foo").operations("post").tags shouldEqual List("bar", "bxx")
+      Fixtures.documentation.paths.find(_._1.startsWith("/baz")).get._2.operations("get").tags shouldEqual List("baz", "bxx")
+    }
+  }
 }
 
 trait Fixtures extends algebra.Endpoints {
 
-  val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")))
+  val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")), tags = List("foo"))
 
-  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse(Some("Bar response")))
+  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse(Some("Bar response")), tags = List("bar", "bxx"))
 
-  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")))
+  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")), tags = List("baz", "bxx"))
 
   val textRequestEndp = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
 

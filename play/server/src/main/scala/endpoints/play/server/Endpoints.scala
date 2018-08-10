@@ -274,7 +274,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     request: Request[A],
     response: Response[B],
     summary: Documentation,
-    description: Documentation
+    description: Documentation,
+    tags: List[String]
   ): Endpoint[A, B] =
     Endpoint(request, response)
 

@@ -39,7 +39,8 @@ trait Endpoints extends Requests with Responses {
     request: Request[A],
     response: Response[B],
     summary: Documentation = None,
-    description: Documentation = None
+    description: Documentation = None,
+    tags: List[String] = Nil
   ): Endpoint[A, B]
 
 }

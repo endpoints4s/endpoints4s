@@ -12,9 +12,13 @@ trait Endpoints extends xhr.Endpoints {
   /** Maps `Result` to [[Future]] */
   type Result[A] = Future[A]
 
-  def endpoint[A, B](request: Request[A], response: Response[B],
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
     summary: Documentation,
-    description: Documentation): Endpoint[A, B] =
+    description: Documentation,
+    tags: List[String]
+  ): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {
         val promise = new Promise[B]()

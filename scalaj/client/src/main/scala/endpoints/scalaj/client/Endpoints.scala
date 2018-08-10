@@ -13,7 +13,8 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
     request: Request[A],
     response: Response[B],
     summary: Documentation,
-    description: Documentation
+    description: Documentation,
+    tags: List[String]
   ): Endpoint[A, B] = {
     Endpoint(request, response)
   }
