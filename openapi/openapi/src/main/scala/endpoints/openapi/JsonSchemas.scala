@@ -33,6 +33,9 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   }
 
+  def emptyRecord: DocumentedRecord =
+    DocumentedRecord(Nil)
+
   def field[A](name: String, docs: Documentation)(implicit tpe: DocumentedJsonSchema): DocumentedRecord =
     DocumentedRecord(Field(name, tpe, isOptional = false, docs) :: Nil)
 
