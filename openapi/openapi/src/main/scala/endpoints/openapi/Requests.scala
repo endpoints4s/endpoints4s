@@ -1,8 +1,6 @@
 package endpoints
 package openapi
 
-import java.nio.charset.Charset
-
 import endpoints.algebra.Documentation
 import endpoints.openapi.model.{MediaType, Schema}
 
