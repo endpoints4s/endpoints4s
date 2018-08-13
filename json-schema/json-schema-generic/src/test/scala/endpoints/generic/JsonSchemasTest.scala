@@ -17,6 +17,8 @@ class JsonSchemasTest extends FreeSpec {
     case class QuuxA(s: String) extends Quux
     case class QuuxB(i: Int) extends Quux
     case class QuuxC(b: Boolean) extends Quux
+    case class QuuxD() extends Quux
+    case object QuuxE extends Quux
 
     object Quux {
       implicit val schema: JsonSchema[Quux] = genericJsonSchema[Quux]
@@ -43,6 +45,8 @@ class JsonSchemasTest extends FreeSpec {
         ("QuuxA", DocumentedRecord(Field("s", DocumentedGenericSchemas.stringJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         ("QuuxB", DocumentedRecord(Field("i", DocumentedGenericSchemas.intJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         ("QuuxC", DocumentedRecord(Field("b", DocumentedGenericSchemas.booleanJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
+        ("QuuxD", DocumentedRecord(Nil)) ::
+        ("QuuxE", DocumentedRecord(Nil)) ::
         Nil
       )
     assert(DocumentedGenericSchemas.Quux.schema == expectedSchema)

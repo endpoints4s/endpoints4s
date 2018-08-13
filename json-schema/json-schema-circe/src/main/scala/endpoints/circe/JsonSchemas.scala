@@ -53,6 +53,12 @@ trait  JsonSchemas
       }
   }
 
+  def emptyRecord: Record[Unit] =
+    JsonSchema(
+      io.circe.Encoder.encodeUnit,
+      io.circe.Decoder.decodeUnit
+    )
+
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
     JsonSchema(
       io.circe.Encoder.instance[A](a => Json.obj(name -> tpe.encoder.apply(a))),

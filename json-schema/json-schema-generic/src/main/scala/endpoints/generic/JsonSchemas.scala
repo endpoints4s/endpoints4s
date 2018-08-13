@@ -1,7 +1,6 @@
 package endpoints
 package generic
 
-import endpoints.algebra
 import shapeless.labelled.{FieldType, field => shapelessField}
 import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
@@ -50,14 +49,10 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   object GenericJsonSchema extends GenericJsonSchemaLowPriority {
 
-    implicit def singletonRecord[L <: Symbol, A](implicit
-      labelSingleton: Witness.Aux[L],
-      jsonSchemaSingleton: JsonSchema[A]
-    ): GenericRecord[FieldType[L, A] :: HNil] =
-      new GenericRecord[FieldType[L, A] :: HNil] {
-        def jsonSchema: Record[FieldType[L, A] :: HNil] =
-          field(labelSingleton.value.name)(jsonSchemaSingleton)
-            .invmap[FieldType[L, A] :: HNil](a => shapelessField[L](a) :: HNil)(_.head)
+    implicit def emptyRecordCase: GenericRecord[HNil] =
+      new GenericRecord[HNil] {
+        def jsonSchema: Record[HNil] =
+          emptyRecord.invmap[HNil](_ => HNil)(_ => ())
       }
 
     implicit def singletonCoproduct[L <: Symbol, A](implicit
