@@ -16,6 +16,14 @@ trait JsonSchemasTest extends JsonSchemas {
       field[String]("name", Some("Name of the user")) zip
       field[Int]("age")
     ).invmap((User.apply _).tupled)(Function.unlift(User.unapply))
+
+    val schema2: JsonSchema[User] = (
+      emptyRecord zip
+      field[String]("name", Some("Name of the user")) zip
+      field[Int]("age")
+    )
+      .invmap[(String, Int)](p => (p._1._2, p._2))(p => (((), p._1), p._2))
+      .invmap((User.apply _).tupled)(Function.unlift(User.unapply))
   }
 
   sealed trait Foo
