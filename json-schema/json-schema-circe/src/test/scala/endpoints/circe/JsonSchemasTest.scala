@@ -22,6 +22,9 @@ class JsonSchemasTest extends FreeSpec {
 
     assert(User.schema.decoder.decodeJson(userJson).right.exists(_ == user))
     assert(User.schema.encoder.apply(user) == userJson)
+
+    assert(User.schema2.decoder.decodeJson(userJson).right.exists(_ == user))
+    assert(User.schema2.encoder.apply(user) == userJson)
   }
 
   "sealed trait" in {
