@@ -116,7 +116,7 @@ class Endpoints(val settings: EndpointsSettings)
 
   type Endpoint[A, B] = A => Future[B]
 
-  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation): Endpoint[A, B] =
+  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a =>
       for {
         resp <- request(a)

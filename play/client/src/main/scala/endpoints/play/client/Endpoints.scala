@@ -114,7 +114,8 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     request: Request[A],
     response: Response[B],
     summary: Documentation,
-    description: Documentation): Endpoint[A, B] =
+    description: Documentation,
+    tags: List[String]): Endpoint[A, B] =
     a => request(a).flatMap(response andThen futureFromEither)
 
 }

@@ -50,7 +50,8 @@ case class Operation(
   description: Option[String],
   parameters: List[Parameter],
   requestBody: Option[RequestBody],
-  responses: Map[Int, Response]
+  responses: Map[Int, Response],
+  tags: List[String]
 )
 
 object Operation {
@@ -60,7 +61,8 @@ object Operation {
       val optFields = List(
         op.summary.map(x => "summary" -> x.asJson),
         op.description.map(x => "description" -> x.asJson),
-        op.requestBody.map(x => "requestBody" -> x.asJson)
+        op.requestBody.map(x => "requestBody" -> x.asJson),
+        op.tags.headOption.map(_ => "tags" -> op.tags.asJson)
       ).flatten
       val fields =
         "parameters" -> Json.fromValues(op.parameters.map(_.asJson)) ::

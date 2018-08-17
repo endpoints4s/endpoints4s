@@ -34,12 +34,14 @@ trait Endpoints extends Requests with Responses {
     * @param response Response
     * @param summary optional summary documentation
     * @param description optional description documentation
+    * @param tags list of OpenApi tags
     */
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
     summary: Documentation = None,
-    description: Documentation = None
+    description: Documentation = None,
+    tags: List[String] = Nil
   ): Endpoint[A, B]
 
 }

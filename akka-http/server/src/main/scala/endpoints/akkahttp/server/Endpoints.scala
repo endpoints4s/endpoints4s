@@ -101,7 +101,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     request: Request[A],
     response: Response[B],
     summary: Documentation = None,
-    description: Documentation = None
+    description: Documentation = None,
+    tags: List[String] = Nil
   ): Endpoint[A, B] = Endpoint(request, response)
 
   lazy val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {

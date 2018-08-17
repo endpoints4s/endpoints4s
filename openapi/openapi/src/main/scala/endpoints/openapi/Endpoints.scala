@@ -40,7 +40,8 @@ trait Endpoints
     request: Request[A],
     response: Response[B],
     summary: Documentation = None,
-    description: Documentation = None): Endpoint[A, B] = {
+    description: Documentation = None,
+    tags: List[String] = Nil): Endpoint[A, B] = {
     val method =
       request.method match {
         case Get => "get"
@@ -73,7 +74,8 @@ trait Endpoints
         description,
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
-        response.map(r => r.status -> Response(r.documentation, r.content)).toMap
+        response.map(r => r.status -> Response(r.documentation, r.content)).toMap,
+        tags
       )
     val item = PathItem(Map(method -> operation))
     val path = correctPathSegments.map {
