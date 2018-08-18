@@ -84,6 +84,17 @@ trait JsonSchemas extends algebra.JsonSchemas {
             .invmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
       }
 
+    implicit def consOptRecord[L <: Symbol, H, T <: HList](implicit
+      labelHead: Witness.Aux[L],
+      jsonSchemaHead: JsonSchema[H],
+      jsonSchemaTail: GenericRecord[T]
+    ): GenericRecord[FieldType[L, Option[H]] :: T] =
+      new GenericRecord[FieldType[L, Option[H]] :: T] {
+        def jsonSchema: Record[FieldType[L, Option[H]] :: T] =
+          (optField(labelHead.value.name)(jsonSchemaHead) zip jsonSchemaTail.jsonSchema)
+            .invmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+      }
+
     implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
       labelHead: Witness.Aux[L],
       recordHead: GenericRecord[H],
