@@ -7,7 +7,7 @@ class JsonSchemasTest extends FreeSpec {
 
   trait GenericSchemas extends JsonSchemas {
 
-    case class Foo(bar: String, baz: Int)
+    case class Foo(bar: String, baz: Int, qux: Option[Boolean])
 
     object Foo {
       val schema: JsonSchema[Foo] = genericJsonSchema[Foo]
@@ -34,6 +34,7 @@ class JsonSchemasTest extends FreeSpec {
       DocumentedRecord(
         Field("bar", DocumentedGenericSchemas.stringJsonSchema, isOptional = false, documentation = None) ::
         Field("baz", DocumentedGenericSchemas.intJsonSchema, isOptional = false, documentation = None) ::
+        Field("qux", DocumentedGenericSchemas.booleanJsonSchema, isOptional = true, documentation = None) ::
         Nil
       )
     assert(DocumentedGenericSchemas.Foo.schema == expectedSchema)
