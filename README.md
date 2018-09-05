@@ -2,6 +2,7 @@
 
 [![Gitter](https://badges.gitter.im/.svg)](https://gitter.im/julienrf/endpoints)
 [![codecov.io](http://codecov.io/github/julienrf/endpoints/coverage.svg?branch=master)](http://codecov.io/github/julienrf/endpoints?branch=master)
+[![Build Status](https://travis-ci.org/julienrf/endpoints.svg?branch=master)](https://travis-ci.org/julienrf/endpoints)
 
 
 *endpoints* is a Scala library for defining communication protocols over HTTP between
