@@ -142,13 +142,15 @@ trait JsonSchemas extends algebra.JsonSchemas {
       ct: ClassTag[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
-        def jsonSchema: Tagged[A] = tagged.jsonSchema.invmap[A](gen.from)(gen.to)
+        def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.invmap[A](gen.from)(gen.to))
       }
 
-    private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
-      named(schema, implicitly[ClassTag[A]].runtimeClass.getName)
-    }
   }
+
+  private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
+    named(schema, implicitly[ClassTag[A]].runtimeClass.getName)
+  }
+
 
   /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
     *
@@ -156,7 +158,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
     * description of the data type (based on the `JsonSchemas` algebra interface)
     */
-  def genericJsonSchema[A](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] = genJsonSchema.jsonSchema
+  def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+    nameSchema(genJsonSchema.jsonSchema)
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
 
