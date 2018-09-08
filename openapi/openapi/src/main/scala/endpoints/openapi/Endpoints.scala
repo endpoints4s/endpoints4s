@@ -99,9 +99,9 @@ trait Endpoints
       schema <- requestBodySchema
     } yield schema
 
-    allSchemas.collect { case Schema.Reference(name, original) =>
-      name -> original
-    }.toMap
+    allSchemas
+      .collect { case Schema.Reference(name, original) => name -> original }
+      .toMap
   }
 
 }

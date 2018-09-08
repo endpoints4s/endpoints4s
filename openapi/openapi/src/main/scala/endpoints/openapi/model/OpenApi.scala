@@ -22,7 +22,8 @@ object OpenApi {
           "title" -> Json.fromString(openApi.info.title),
           "version" -> Json.fromString(openApi.info.version)
         ),
-        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) })
+        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) }),
+        "components" -> openApi.components.asJson
       ))
     }
 
@@ -47,6 +48,15 @@ object PathItem {
 }
 
 case class Components(schemas: Map[String, Schema])
+
+object Components {
+
+  implicit val jsonEncoder: ObjectEncoder[Components] = {
+    ObjectEncoder.instance { components =>
+      JsonObject.singleton("schemas", JsonObject.fromMap(components.schemas.mapValues(_.asJson)).asJson)
+    }
+  }
+}
 
 case class Operation(
   summary: Option[String],
