@@ -8,7 +8,8 @@ import io.circe.{Json, JsonObject, ObjectEncoder}
   */
 case class OpenApi(
   info: Info,
-  paths: Map[String, PathItem]
+  paths: Map[String, PathItem],
+  components: Components
 )
 
 object OpenApi {
@@ -44,6 +45,8 @@ object PathItem {
     }
 
 }
+
+case class Components(schemas: Map[String, Schema])
 
 case class Operation(
   summary: Option[String],
@@ -183,6 +186,8 @@ object Schema {
 
   case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
 
+  case class Reference(name: String, original: Schema) extends Schema
+
   val simpleString = Primitive("string")
   val simpleInteger = Primitive("integer")
 
@@ -223,6 +228,8 @@ object Schema {
         val fieldsWithDescription =
           description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
         JsonObject.fromIterable(fieldsWithDescription)
+      case Reference(name, _) =>
+        JsonObject.singleton("$ref", Json.fromString(s"#/components/schemas/$name"))
     }
 
 }

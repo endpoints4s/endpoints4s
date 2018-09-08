@@ -6,6 +6,8 @@ import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 import scala.language.implicitConversions
+import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 /**
   * Enriches [[JsonSchemas]] with two kinds of operations:
@@ -127,19 +129,25 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     implicit def recordGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
-      record: GenericRecord[R]
+      record: GenericRecord[R],
+      ct: ClassTag[A]
     ): GenericRecord[A] =
       new GenericRecord[A] {
-        def jsonSchema: Record[A] = record.jsonSchema.invmap[A](gen.from)(gen.to)
+        def jsonSchema: Record[A] = nameSchema(record.jsonSchema.invmap[A](gen.from)(gen.to))
       }
 
     implicit def taggedGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
-      tagged: GenericTagged[R]
+      tagged: GenericTagged[R],
+      ct: ClassTag[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
         def jsonSchema: Tagged[A] = tagged.jsonSchema.invmap[A](gen.from)(gen.to)
       }
+
+    private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
+      named(schema, implicitly[ClassTag[A]].runtimeClass.getName)
+    }
   }
 
   /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`

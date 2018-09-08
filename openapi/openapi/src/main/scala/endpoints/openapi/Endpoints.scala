@@ -25,7 +25,8 @@ trait Endpoints
         .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
           PathItem(item.operations ++ e2.item.operations)
         })
-    OpenApi(info, items)
+    val components = Components(schemas = captureSchemas(endpoints))
+    OpenApi(info, items, components)
   }
 
   type Endpoint[A, B] = DocumentedEndpoint
@@ -83,6 +84,24 @@ trait Endpoints
       case Right(param) => s"{${param.name}}"
     }.mkString("/")
     DocumentedEndpoint(path, item)
+  }
+
+  private def captureSchemas(endpoints: Iterable[DocumentedEndpoint]): Map[String, Schema] = {
+
+    val allSchemas = for {
+      documentedEndpoint <- endpoints
+      operation <- documentedEndpoint.item.operations.values
+      requestBodySchema = for {
+        body <- operation.requestBody.toIterable
+        mediaType <- body.content.values
+        s <- mediaType.schema.toIterable
+      } yield s
+      schema <- requestBodySchema
+    } yield schema
+
+    allSchemas.collect { case Schema.Reference(name, original) =>
+      name -> original
+    }.toMap
   }
 
 }

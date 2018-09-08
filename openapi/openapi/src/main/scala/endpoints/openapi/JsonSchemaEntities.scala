@@ -1,7 +1,6 @@
 package endpoints
 package openapi
 
-import endpoints.algebra
 import endpoints.algebra.Documentation
 import endpoints.openapi.model.{MediaType, Schema}
 
@@ -21,20 +20,34 @@ trait JsonSchemaEntities
 
   def toSchema(documentedCodec: DocumentedJsonSchema): Schema = {
     import DocumentedJsonSchema._
+
     documentedCodec match {
-      case DocumentedRecord(fields) =>
-        val fieldsSchema =
-          fields.map(f => Schema.Property(f.name, toSchema(f.tpe), !f.isOptional, f.documentation))
-        Schema.Object(fieldsSchema, None)
-      case DocumentedCoProd(alternatives) =>
-        val alternativesSchemas =
-          alternatives.map { case (tag, record) =>
-            Schema.Object(Schema.Property(tag, toSchema(record), isRequired = true, description = None) :: Nil, None)
-          }
-        Schema.OneOf(alternativesSchemas, None)
-      case Primitive(name) => Schema.Primitive(name)
-      case Array(elementType) => Schema.Array(toSchema(elementType))
+      case record @ DocumentedRecord(_, Some(name)) =>
+        Schema.Reference(name, expandRecordSchema(record))
+      case record @ DocumentedRecord(_, None) =>
+        expandRecordSchema(record)
+      case coprod @ DocumentedCoProd(_, Some(name)) =>
+        Schema.Reference(name, expandCoproductSchema(coprod))
+      case coprod @ DocumentedCoProd(_, None) =>
+        expandCoproductSchema(coprod)
+      case Primitive(name) =>
+        Schema.Primitive(name)
+      case Array(elementType) =>
+        Schema.Array(toSchema(elementType))
     }
+  }
+
+  private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord): Schema = {
+    val fieldsSchema = record.fields
+      .map(f => Schema.Property(f.name, toSchema(f.tpe), !f.isOptional, f.documentation))
+    Schema.Object(fieldsSchema, None)
+  }
+
+  private def expandCoproductSchema(coprod: DocumentedJsonSchema.DocumentedCoProd): Schema = {
+    val alternativesSchemas = coprod.alternatives.map { case (tag, record) =>
+        Schema.Object(Schema.Property(tag, toSchema(record), isRequired = true, description = None) :: Nil, None)
+      }
+    Schema.OneOf(alternativesSchemas, None)
   }
 
 }
