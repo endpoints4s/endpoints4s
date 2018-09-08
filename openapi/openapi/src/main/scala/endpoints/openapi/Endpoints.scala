@@ -88,20 +88,39 @@ trait Endpoints
 
   private def captureSchemas(endpoints: Iterable[DocumentedEndpoint]): Map[String, Schema] = {
 
-    val allSchemas = for {
+    val allReferencedSchemas = for {
       documentedEndpoint <- endpoints
       operation <- documentedEndpoint.item.operations.values
       requestBodySchema = for {
         body <- operation.requestBody.toIterable
         mediaType <- body.content.values
-        s <- mediaType.schema.toIterable
-      } yield s
-      schema <- requestBodySchema
-    } yield schema
+        schema <- mediaType.schema.toIterable
+      } yield schema
+      responseSchemas = for {
+        (_, response) <- operation.responses.toSeq
+        (_, mediaType) <- response.content.toSeq
+        schema <- mediaType.schema.toIterable
+      } yield schema
+      schema <- requestBodySchema ++ responseSchemas
+      recSchema <- captureReferencedSchemasRec(schema)
+    } yield recSchema
 
-    allSchemas
-      .collect { case Schema.Reference(name, original) => name -> original }
+    allReferencedSchemas
+      .map { ref => ref.name -> ref.original }
       .toMap
   }
 
+  private def captureReferencedSchemasRec(schema: Schema): Seq[Schema.Reference] =
+    schema match {
+      case Schema.Object(properties, _) =>
+        properties.map(_.schema).flatMap(captureReferencedSchemasRec)
+      case Schema.Array(elementType) =>
+        captureReferencedSchemasRec(elementType)
+      case Schema.Primitive(_) =>
+        Nil
+      case Schema.OneOf(alternatives, _) =>
+        alternatives.flatMap(captureReferencedSchemasRec)
+      case referenced: Schema.Reference =>
+        referenced +: captureReferencedSchemasRec(referenced.original)
+    }
 }

@@ -70,7 +70,7 @@ trait JsonSchemas {
     */
   type Tagged[A] <: JsonSchema[A]
 
-  /** Gives a name for JsonSchema **/
+  /** Annotates JSON schema with a name */
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
 
   /** The JSON schema of a record with no fields */

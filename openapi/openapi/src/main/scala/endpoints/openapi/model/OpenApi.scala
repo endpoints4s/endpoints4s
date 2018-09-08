@@ -53,7 +53,8 @@ object Components {
 
   implicit val jsonEncoder: ObjectEncoder[Components] = {
     ObjectEncoder.instance { components =>
-      JsonObject.singleton("schemas", JsonObject.fromMap(components.schemas.mapValues(_.asJson)).asJson)
+      val schemas = components.schemas.mapValues(_.asJson).toSeq.sortBy(_._1)
+      JsonObject.singleton("schemas", JsonObject.fromIterable(schemas).asJson)
     }
   }
 }
