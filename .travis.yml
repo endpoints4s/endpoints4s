@@ -5,6 +5,16 @@ cache:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot
 
+# based on https://github.com/jruby/jruby/blob/master/.travis.yml
+before_install:
+  - unset _JAVA_OPTIONS
+  - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m -XX:CompressedClassSpaceSize=96M"
+
+before_script:
+  - unset _JAVA_OPTIONS # travis/travis#8408
+  - echo $HOME
+  - echo $JAVA_OPTS
+
 jdk:
   - oraclejdk8
 
@@ -47,6 +57,6 @@ jobs:
         - find $HOME/.sbt -name "*.lock" | xargs rm
         - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
     - stage: coverage
-      script: sbt -mem 2000 "wow 2.11.11" coverage test coverageReport coverageAggregate
+      script: sbt "wow 2.11.11" coverage test coverageReport coverageAggregate
       after_success:
         - codecov
