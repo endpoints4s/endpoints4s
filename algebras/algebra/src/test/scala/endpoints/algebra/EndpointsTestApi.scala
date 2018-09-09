@@ -49,4 +49,9 @@ trait EndpointsTestApi extends algebra.Endpoints {
     textResponse()
   )
 
+  val optQsEndpoint = endpoint(
+    get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & optQs[Int]("age"))),
+    textResponse()
+  )
+
 }
