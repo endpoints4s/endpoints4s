@@ -75,7 +75,7 @@ object EndpointsSettings {
   val circeVersion = "0.9.3"
   val playVersion = "2.6.15"
 
-  val scalaTestVersion = "3.2.0-SNAP10"
+  val scalaTestVersion = "3.0.4"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
 
