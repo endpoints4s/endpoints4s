@@ -8,7 +8,7 @@ cache:
 # based on https://github.com/jruby/jruby/blob/master/.travis.yml
 before_install:
   - unset _JAVA_OPTIONS
-  - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m -XX:CompressedClassSpaceSize=96M"
+  - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
 
 before_script:
   - unset _JAVA_OPTIONS # travis/travis#8408
