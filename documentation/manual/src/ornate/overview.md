@@ -21,6 +21,14 @@ endpoints of a web service.
 ~~~ scala src=../../../examples/overview/endpoints/src/main/scala/overview/CounterEndpoints.scala#relevant-code
 ~~~
 
+Note that the example above uses Circe's `@JsonCodec` macro annotation, so you’ll also need to include the Macro Paradise compiler plugin in your `build.sbt` file.
+
+```
+addCompilerPlugin(
+  "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
+)
+```
+
 ## JavaScript (Scala.js) client
 
 The following code, located in the `client` sub-project, defines a Scala.js
