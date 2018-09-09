@@ -5,7 +5,6 @@ import akka.stream.{ActorMaterializer, Materializer}
 import endpoints.algebra._
 import endpoints.algebra.client._
 import endpoints.algebra.circe
-
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestClient(settings: EndpointsSettings)
@@ -18,11 +17,13 @@ class TestClient(settings: EndpointsSettings)
     with circe.JsonFromCirceCodecTestApi
     with JsonEntitiesFromCodec
     with circe.JsonEntitiesFromCodec
+    with circe.CrudEndpointsJsonFromCirceTestApi
 
 class EndpointsTest
   extends EndpointsTestSuite[TestClient]
     with BasicAuthTestSuite[TestClient]
     with JsonFromCodecTestSuite[TestClient]
+    with CrudEndpointsTestSuite[TestClient]
 {
 
   implicit val system = ActorSystem()
@@ -36,4 +37,5 @@ class EndpointsTest
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  crudEndpointTestSuite()
 }

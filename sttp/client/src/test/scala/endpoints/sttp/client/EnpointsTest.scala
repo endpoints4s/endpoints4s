@@ -3,10 +3,9 @@ package endpoints.sttp.client
 import com.softwaremill.sttp
 import com.softwaremill.sttp.TryHttpURLConnectionBackend
 import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
-import endpoints.algebra.client.{BasicAuthTestSuite, JsonFromCodecTestSuite, EndpointsTestSuite}
+import endpoints.algebra.client.{BasicAuthTestSuite, CrudEndpointsTestSuite, EndpointsTestSuite, JsonFromCodecTestSuite}
 import endpoints.algebra.{BasicAuthTestApi, EndpointsTestApi}
-import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
-
+import endpoints.algebra.playjson.{CrudJsonFromPlayJsonCodecTestApi, JsonFromPlayJsonCodecTestApi}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 import scala.util.Try
@@ -18,11 +17,13 @@ class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
     with BasicAuthTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
+    with CrudJsonFromPlayJsonCodecTestApi
 
 class EndpointsTestSync
   extends EndpointsTestSuite[TestClient[Try]]
     with BasicAuthTestSuite[TestClient[Try]]
-    with JsonFromCodecTestSuite[TestClient[Try]] {
+    with JsonFromCodecTestSuite[TestClient[Try]]
+    with CrudEndpointsTestSuite[TestClient[Try]]{
 
   val backend = TryHttpURLConnectionBackend()
 
@@ -35,12 +36,14 @@ class EndpointsTestSync
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  crudEndpointTestSuite()
 }
 
 class EndpointsTestAkka
   extends EndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
-    with JsonFromCodecTestSuite[TestClient[Future]] {
+    with JsonFromCodecTestSuite[TestClient[Future]]
+    with CrudEndpointsTestSuite[TestClient[Future]]{
 
   import ExecutionContext.Implicits.global
 
@@ -53,5 +56,6 @@ class EndpointsTestAkka
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  crudEndpointTestSuite()
 }
 

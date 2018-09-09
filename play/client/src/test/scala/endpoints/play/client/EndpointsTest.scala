@@ -4,7 +4,6 @@ import endpoints.algebra.client
 import endpoints.algebra
 import endpoints.algebra.circe
 import play.api.libs.ws.WSClient
-import play.api.test
 import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -20,11 +19,13 @@ class TestClient(address: String, wsClient: WSClient)
     with algebra.JsonFromCodecTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodec
+    with circe.CrudEndpointsJsonFromCirceTestApi
 
 class EndpointsTest
   extends client.EndpointsTestSuite[TestClient]
     with client.BasicAuthTestSuite[TestClient]
     with client.JsonFromCodecTestSuite[TestClient]
+    with client.CrudEndpointsTestSuite[TestClient]
 {
 
   import ExecutionContext.Implicits.global
@@ -37,6 +38,7 @@ class EndpointsTest
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  crudEndpointTestSuite()
 
   override def afterAll(): Unit = {
     wsClient.close()
