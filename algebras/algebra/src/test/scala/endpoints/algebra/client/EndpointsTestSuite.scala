@@ -30,6 +30,30 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
       }
 
+
+      "return correct url with optional parameter" in {
+
+        val response = "wiremockeResponse"
+
+        wireMockServer.stubFor(get(urlEqualTo("/user/userId/whatever?name=name1"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)))
+
+        wireMockServer.stubFor(get(urlEqualTo("/user/userId/whatever?name=name1&age=18"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)))
+
+        whenReady(call(client.optQsEndpoint, ("userId", "name1", None))) {
+          _ shouldEqual response
+        }
+        whenReady(call(client.optQsEndpoint, ("userId", "name1", Some(18)))) {
+          _ shouldEqual response
+        }
+
+      }
+
       "throw exception when 5xx is returned from server" in {
         wireMockServer.stubFor(get(urlEqualTo("/user/userId/description?name=name1&age=18"))
           .willReturn(aResponse()

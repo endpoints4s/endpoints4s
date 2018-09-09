@@ -4,7 +4,6 @@ import endpoints.algebra.client
 import endpoints.algebra
 import endpoints.algebra.circe
 import play.api.libs.ws.WSClient
-import play.api.test
 import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
