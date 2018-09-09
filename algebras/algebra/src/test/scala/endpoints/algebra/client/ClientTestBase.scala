@@ -40,11 +40,4 @@ trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp]
 
-
-  trait Server {
-
-    def stop(): Unit
-  }
-  def serveEndpoint[Resp](endpoint: client.Endpoint[_, Resp], response: Resp): Server
-
 }

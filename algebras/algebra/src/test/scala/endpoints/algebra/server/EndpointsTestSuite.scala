@@ -1,9 +1,5 @@
 package endpoints.algebra.server
-
-import java.time.LocalDate
-import java.util.UUID
-
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.softwaremill.sttp.quick._
 import endpoints.algebra.EndpointsTestApi
 
 trait EndpointsTestSuite[T <: EndpointsTestApi] extends ServerTestBase[T] {
@@ -14,15 +10,14 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ServerTestBase[T] {
 
       "return server response" in {
 
-        val mockedResponse = "wiremockeResponse"
+        val mockedResponse = "interpretedServerResponse"
 
-        val server = serveEndpoint(serverApi.smokeEndpoint, mockedResponse)
-
-        val response  = sttp.get("/user/userId/description?name=name1&age=18")
-        assert(response.body == mockedResponse)
-        assert(response.code == ok)
-        server.stop()
-
+        serveEndpoint(serverApi.smokeEndpoint, mockedResponse) { port =>
+          val response  = sttp.get(uri"http://localhost:$port/user/userId/description?name=name1&age=18").send()
+          assert(response.body.isRight)
+          assert(response.body.right.get == mockedResponse)
+          assert(response.code == 200)
+        }
       }
     }
   }
