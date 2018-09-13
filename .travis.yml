@@ -40,4 +40,4 @@ jobs:
     - stage: coverage
       script: sbt "wow 2.11.11" coverage test coverageReport coverageAggregate
       after_success:
-        - codecov
+        - bash <(curl -s https://codecov.io/bash)
