@@ -218,7 +218,6 @@ object Schema {
         JsonObject.fromIterable(fieldsWithRequired)
       case OneOf(alternatives, description) =>
         val fields =
-          "type" -> Json.fromString("object") ::
             "oneOf" -> Json.fromValues(alternatives.map(jsonEncoder.apply)) ::
             Nil
         val fieldsWithDescription =
