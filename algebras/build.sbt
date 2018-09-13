@@ -3,7 +3,7 @@ import LocalCrossProject._
 
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
-    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(publishSettings ++ `scala 2.10 to latest`: _*)
     .settings(
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(

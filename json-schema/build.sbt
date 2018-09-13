@@ -3,7 +3,7 @@ import LocalCrossProject._
 
 val `json-schema` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema"))
-    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(publishSettings ++ `scala 2.10 to latest`: _*)
     .settings(
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency

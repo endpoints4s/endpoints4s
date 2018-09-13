@@ -5,6 +5,16 @@ cache:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot
 
+# based on https://github.com/jruby/jruby/blob/master/.travis.yml
+before_install:
+  - unset _JAVA_OPTIONS
+  - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
+
+before_script:
+  - unset _JAVA_OPTIONS # travis/travis#8408
+  - echo $HOME
+  - echo $JAVA_OPTS
+
 jdk:
   - oraclejdk8
 
@@ -30,6 +40,15 @@ jobs:
         - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
     - stage: test
       scala: 2.12.4
+      script:
+        # +++ instead of ++ to use sbt-doge strict aggregation
+        - sbt "+++$TRAVIS_SCALA_VERSION test"
+        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+        # Tricks to avoid unnecessary cache updates
+        - find $HOME/.sbt -name "*.lock" | xargs rm
+        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+    - stage: test
+      scala: 2.13.0-M2
       script:
         # +++ instead of ++ to use sbt-doge strict aggregation
         - sbt "+++$TRAVIS_SCALA_VERSION test"
