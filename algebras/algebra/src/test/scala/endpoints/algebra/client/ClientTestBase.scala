@@ -17,7 +17,7 @@ trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
   with BeforeAndAfterAll
   with BeforeAndAfter {
 
-  override implicit def patienceConfig: PatienceConfig = PatienceConfig(10.seconds, 10.millisecond)
+  override implicit def patienceConfig: PatienceConfig = PatienceConfig(15.seconds, 10.millisecond)
 
   val wiremockPort = findOpenPort
   val wireMockServer = new WireMockServer(options().port(wiremockPort))
