@@ -49,3 +49,4 @@ navigate through the algebra interfaces hierarchy.
 |[endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)|Interpreter that creates OpenAPI json from endpoints description |
 |[endpoints-json-schema-generic](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-generic)|Interpreter that allows generic derivation of json-schema|
 |[endpoints-json-schema-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-circe)|Interpreter that produces circe codec based on schema definition|
+|[endpoints-json-schema-playjson](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-playjson)|Interpreter that produces Play JSON Reads and Writes based on schema definition|

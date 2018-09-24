@@ -39,3 +39,16 @@ lazy val `json-schema-circe` =
 
 lazy val `json-schema-circe-js` = `json-schema-circe`.js
 lazy val `json-schema-circe-jvm` = `json-schema-circe`.jvm
+
+lazy val `json-schema-playjson` =
+  crossProject.crossType(CrossType.Pure).in(file("json-schema-playjson"))
+    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(
+      name := "endpoints-json-schema-playjson",
+      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
+    )
+    .jsConfigure(_.dependsOn(`json-schema-js` % "test->test;compile->compile"))
+    .jvmConfigure(_.dependsOn(`json-schema-jvm` % "test->test;compile->compile"))
+
+lazy val `json-schema-playjson-js` = `json-schema-playjson`.js
+lazy val `json-schema-playjson-jvm` = `json-schema-playjson`.jvm
