@@ -1,11 +1,11 @@
 package endpoints.playjson
 
 import endpoints.algebra
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
-import scala.util.Try
 
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces Play JSON [[play.api.libs.json.Reads]]
@@ -74,15 +74,9 @@ trait JsonSchemas
           case JsArray(values) =>
             val builder = cbf()
             builder.sizeHint(values)
-
-            Try {
-              values.foldLeft(builder) { case (acc, value) =>
-                acc += value.as[A](jsonSchema.reads)
-              }
-            }.transform(
-              builder => Try(JsSuccess(builder.result())),
-              error => Try(JsError(error.getMessage))
-            ).get
+            values.foldLeft[JsResult[collection.mutable.Builder[A, C[A]]]](JsSuccess(builder)) {
+              case (acc, value) => (acc and jsonSchema.reads.reads(value))((b, a) => b += a)
+            }.map(_.result())
           case other => JsError("expected JsArray, but was: " + other)
         }
       },
@@ -90,10 +84,7 @@ trait JsonSchemas
     )
 
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
-    val reads = {
-      import play.api.libs.functional.syntax._
-      (recordA.reads and recordB.reads).tupled
-    }
+    val reads = (recordA.reads and recordB.reads).tupled
     val writes = new Writes[(A, B)] {
       override def writes(o: (A, B)): JsValue = o match {
         case (a, b) => recordA.writes.writes(a).asInstanceOf[JsObject] deepMerge recordB.writes.writes(b).asInstanceOf[JsObject]
