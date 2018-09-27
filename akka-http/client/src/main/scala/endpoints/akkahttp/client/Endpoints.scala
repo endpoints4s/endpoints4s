@@ -1,7 +1,5 @@
 package endpoints.akkahttp.client
 
-import java.nio.charset.Charset
-
 import akka.http.scaladsl.model.HttpHeader.ParsingResult
 import akka.http.scaladsl.model._
 import akka.stream.Materializer
