@@ -72,7 +72,7 @@ object EndpointsSettings {
 
   // --- Common dependencies
 
-  val circeVersion = "0.9.3"
+  val circeVersion = "0.10.0"
   val playjsonVersion = "2.6.9"
   val playVersion = "2.6.15"
 
