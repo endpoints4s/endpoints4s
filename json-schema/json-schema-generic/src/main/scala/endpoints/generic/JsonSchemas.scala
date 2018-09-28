@@ -148,7 +148,10 @@ trait JsonSchemas extends algebra.JsonSchemas {
   }
 
   private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
-    named(schema, implicitly[ClassTag[A]].runtimeClass.getName)
+    val jvmName = implicitly[ClassTag[A]].runtimeClass.getName
+    // name fix for case objects
+    val name = if(jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
+    named(schema, name.replace('$','.'))
   }
 
 
