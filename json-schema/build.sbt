@@ -21,7 +21,6 @@ lazy val `json-schema-generic` =
       addScalaTestCrossDependency
     )
     .dependsOnLocalCrossProjects("json-schema")
-    .dependsOnLocalCrossProjectsWithScope("openapi" -> "test")
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
@@ -33,9 +32,8 @@ lazy val `json-schema-circe` =
       name := "endpoints-json-schema-circe",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
-    .jsConfigure(_.dependsOn(`json-schema-js` % "test->test;compile->compile"))
-    .jvmConfigure(_.dependsOn(`json-schema-jvm` % "test->test;compile->compile"))
     .dependsOnLocalCrossProjects("algebra-circe") // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
+    .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
 
 lazy val `json-schema-circe-js` = `json-schema-circe`.js
 lazy val `json-schema-circe-jvm` = `json-schema-circe`.jvm
@@ -47,8 +45,7 @@ lazy val `json-schema-playjson` =
       name := "endpoints-json-schema-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
     )
-    .jsConfigure(_.dependsOn(`json-schema-js` % "test->test;compile->compile"))
-    .jvmConfigure(_.dependsOn(`json-schema-jvm` % "test->test;compile->compile"))
+    .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
 
 lazy val `json-schema-playjson-js` = `json-schema-playjson`.js
 lazy val `json-schema-playjson-jvm` = `json-schema-playjson`.jvm
