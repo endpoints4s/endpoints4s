@@ -3,7 +3,7 @@ import LocalCrossProject._
 
 val algebra =
   crossProject.crossType(CrossType.Pure).in(file("algebra"))
-    .settings(publishSettings ++ `scala 2.10 to latest`: _*)
+    .settings(publishSettings ++ `scala 2.11 to latest`: _*)
     .settings(
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
@@ -19,7 +19,7 @@ val `algebra-jvm` = algebra.jvm
 
 val `algebra-circe` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
-    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-circe",
       libraryDependencies ++= Seq(
@@ -36,7 +36,7 @@ val `algebra-circe-jvm` = `algebra-circe`.jvm
 
 val `algebra-playjson` =
   crossProject.crossType(CrossType.Pure).in(file("algebra-playjson"))
-    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.6.9"

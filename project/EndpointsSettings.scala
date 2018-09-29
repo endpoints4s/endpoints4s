@@ -29,14 +29,9 @@ object EndpointsSettings {
     crossScalaVersions := Seq("2.11.12", "2.12.6")
   )
 
-  val `scala 2.10 to 2.12` = Seq(
+  val `scala 2.11 to latest` = Seq(
     scalaVersion := "2.12.6",
-    crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6")
-  )
-
-  val `scala 2.10 to latest` = Seq(
-    scalaVersion := "2.12.6",
-    crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.6", "2.13.0-M2")
+    crossScalaVersions := Seq("2.11.12", "2.12.6", "2.13.0-M2")
   )
 
   val publishSettings = commonSettings ++ Seq(

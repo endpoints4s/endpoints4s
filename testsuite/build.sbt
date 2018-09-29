@@ -3,7 +3,7 @@ import LocalCrossProject._
 
 val testsuite =
   crossProject.crossType(CrossType.Pure).in(file("testsuite"))
-    .settings(publishSettings ++ `scala 2.10 to 2.12`: _*)
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       // testsuite project, so we don't need coverage here.
       coverageEnabled := false,
