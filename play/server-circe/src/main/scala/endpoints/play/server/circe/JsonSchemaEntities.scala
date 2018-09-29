@@ -4,7 +4,7 @@ import endpoints.algebra
 import endpoints.algebra.Documentation
 import endpoints.play.server.Endpoints
 import endpoints.play.server.circe.Util.circeJsonWriteable
-import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
+import io.circe.parser
 import play.api.mvc.Results
 
 /**

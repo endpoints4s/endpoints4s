@@ -8,7 +8,8 @@ import io.circe.{Json, JsonObject, ObjectEncoder}
   */
 case class OpenApi(
   info: Info,
-  paths: Map[String, PathItem]
+  paths: Map[String, PathItem],
+  components: Components
 )
 
 object OpenApi {
@@ -21,7 +22,8 @@ object OpenApi {
           "title" -> Json.fromString(openApi.info.title),
           "version" -> Json.fromString(openApi.info.version)
         ),
-        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) })
+        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) }),
+        "components" -> openApi.components.asJson
       ))
     }
 
@@ -43,6 +45,18 @@ object PathItem {
       JsonObject.fromIterable(item.operations.to[List].map { case (verb, op) => (verb, op.asJson) })
     }
 
+}
+
+case class Components(schemas: Map[String, Schema])
+
+object Components {
+
+  implicit val jsonEncoder: ObjectEncoder[Components] = {
+    ObjectEncoder.instance { components =>
+      val schemas = components.schemas.mapValues(_.asJson).toSeq.sortBy(_._1)
+      JsonObject.singleton("schemas", JsonObject.fromIterable(schemas).asJson)
+    }
+  }
 }
 
 case class Operation(
@@ -183,6 +197,8 @@ object Schema {
 
   case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
 
+  case class Reference(name: String, original: Schema) extends Schema
+
   val simpleString = Primitive("string")
   val simpleInteger = Primitive("integer")
 
@@ -223,6 +239,8 @@ object Schema {
         val fieldsWithDescription =
           description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
         JsonObject.fromIterable(fieldsWithDescription)
+      case Reference(name, _) =>
+        JsonObject.singleton("$ref", Json.fromString(s"#/components/schemas/$name"))
     }
 
 }

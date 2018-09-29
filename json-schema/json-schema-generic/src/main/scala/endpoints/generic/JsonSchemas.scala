@@ -6,6 +6,8 @@ import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 import scala.language.implicitConversions
+import scala.language.higherKinds
+import scala.reflect.ClassTag
 
 /**
   * Enriches [[JsonSchemas]] with two kinds of operations:
@@ -127,20 +129,31 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     implicit def recordGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
-      record: GenericRecord[R]
+      record: GenericRecord[R],
+      ct: ClassTag[A]
     ): GenericRecord[A] =
       new GenericRecord[A] {
-        def jsonSchema: Record[A] = record.jsonSchema.invmap[A](gen.from)(gen.to)
+        def jsonSchema: Record[A] = nameSchema(record.jsonSchema.invmap[A](gen.from)(gen.to))
       }
 
     implicit def taggedGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
-      tagged: GenericTagged[R]
+      tagged: GenericTagged[R],
+      ct: ClassTag[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
-        def jsonSchema: Tagged[A] = tagged.jsonSchema.invmap[A](gen.from)(gen.to)
+        def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.invmap[A](gen.from)(gen.to))
       }
+
   }
+
+  private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
+    val jvmName = implicitly[ClassTag[A]].runtimeClass.getName
+    // name fix for case objects
+    val name = if(jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
+    named(schema, name.replace('$','.'))
+  }
+
 
   /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
     *
@@ -148,7 +161,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
     * description of the data type (based on the `JsonSchemas` algebra interface)
     */
-  def genericJsonSchema[A](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] = genJsonSchema.jsonSchema
+  def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+    nameSchema(genJsonSchema.jsonSchema)
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
 

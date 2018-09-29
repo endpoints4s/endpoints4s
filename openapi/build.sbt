@@ -1,9 +1,6 @@
 import EndpointsSettings._
 import LocalCrossProject._
 
-lazy val `json-schemaJS` = LocalProject("json-schemaJS")
-lazy val `json-schemaJVM` = LocalProject("json-schemaJVM")
-
 lazy val openapi =
   crossProject.crossType(CrossType.Pure).in(file("openapi"))
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
@@ -11,9 +8,8 @@ lazy val openapi =
       name := "endpoints-openapi",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
-    .jsConfigure(_.dependsOn(LocalProject("json-schemaJS") % "test->test;compile->compile"))
-    .jvmConfigure(_.dependsOn(LocalProject("json-schemaJVM") % "test->test;compile->compile"))
-    .dependsOnLocalCrossProjects("algebra")
+    .dependsOnLocalCrossProjects("algebra", "json-schema-generic")
+    .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
 
 lazy val `openapi-js` = openapi.js
 lazy val `openapi-jvm` = openapi.jvm

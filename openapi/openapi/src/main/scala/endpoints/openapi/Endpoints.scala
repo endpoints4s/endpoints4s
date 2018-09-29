@@ -25,7 +25,8 @@ trait Endpoints
         .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
           PathItem(item.operations ++ e2.item.operations)
         })
-    OpenApi(info, items)
+    val components = Components(schemas = captureSchemas(endpoints))
+    OpenApi(info, items, components)
   }
 
   type Endpoint[A, B] = DocumentedEndpoint
@@ -85,4 +86,41 @@ trait Endpoints
     DocumentedEndpoint(path, item)
   }
 
+  private def captureSchemas(endpoints: Iterable[DocumentedEndpoint]): Map[String, Schema] = {
+
+    val allReferencedSchemas = for {
+      documentedEndpoint <- endpoints
+      operation <- documentedEndpoint.item.operations.values
+      requestBodySchema = for {
+        body <- operation.requestBody.toIterable
+        mediaType <- body.content.values
+        schema <- mediaType.schema.toIterable
+      } yield schema
+      responseSchemas = for {
+        (_, response) <- operation.responses.toSeq
+        (_, mediaType) <- response.content.toSeq
+        schema <- mediaType.schema.toIterable
+      } yield schema
+      schema <- requestBodySchema ++ responseSchemas
+      recSchema <- captureReferencedSchemasRec(schema)
+    } yield recSchema
+
+    allReferencedSchemas
+      .map { ref => ref.name -> ref.original }
+      .toMap
+  }
+
+  private def captureReferencedSchemasRec(schema: Schema): Seq[Schema.Reference] =
+    schema match {
+      case Schema.Object(properties, _) =>
+        properties.map(_.schema).flatMap(captureReferencedSchemasRec)
+      case Schema.Array(elementType) =>
+        captureReferencedSchemasRec(elementType)
+      case Schema.Primitive(_) =>
+        Nil
+      case Schema.OneOf(alternatives, _) =>
+        alternatives.flatMap(captureReferencedSchemasRec)
+      case referenced: Schema.Reference =>
+        referenced +: captureReferencedSchemasRec(referenced.original)
+    }
 }

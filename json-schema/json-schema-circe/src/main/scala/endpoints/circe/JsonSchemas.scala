@@ -53,6 +53,8 @@ trait  JsonSchemas
       }
   }
 
+  def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
+
   def emptyRecord: Record[Unit] =
     JsonSchema(
       io.circe.Encoder.encodeUnit,

@@ -30,6 +30,8 @@ trait JsonSchemas
 
   type Record[A] = JsonSchema[A]
 
+  def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
+
   def emptyRecord: Record[Unit] =
     JsonSchema(
       new Reads[Unit] {

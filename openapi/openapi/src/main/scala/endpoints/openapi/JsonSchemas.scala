@@ -22,15 +22,27 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   object DocumentedJsonSchema {
 
-    case class DocumentedRecord(fields: List[Field]) extends DocumentedJsonSchema
+    case class DocumentedRecord(fields: List[Field], name: Option[String] = None) extends DocumentedJsonSchema
     case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
-    case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)]) extends DocumentedJsonSchema
+    case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)],
+                                name: Option[String] = None) extends DocumentedJsonSchema
 
     case class Primitive(name: String) extends DocumentedJsonSchema
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
+  }
 
+  override def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
+    import DocumentedJsonSchema._
+    schema match {
+      case record: DocumentedRecord =>
+        record.copy(name = Some(name)).asInstanceOf[S[A]]
+      case coprod: DocumentedCoProd =>
+        coprod.copy(name = Some(name)).asInstanceOf[S[A]]
+      case other =>
+        other
+    }
   }
 
   def emptyRecord: DocumentedRecord =
