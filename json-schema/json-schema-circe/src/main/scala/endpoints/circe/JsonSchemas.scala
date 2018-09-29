@@ -126,7 +126,7 @@ trait  JsonSchemas
   implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =
     JsonSchema(
       io.circe.Encoder.encodeIterable[A, C](jsonSchema.encoder, implicitly),
-      io.circe.Decoder.decodeTraversable[A, C](jsonSchema.decoder, cbf)
+      io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, cbf)
     )
 
 }

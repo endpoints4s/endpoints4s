@@ -10,8 +10,6 @@ import mill.scalajslib._
 // THIS FILE HAS TO BE ON THE SAME LEVEL AS FILES USING IT BECAUSE OF A BUG IN AMMONITE
 
 
-//val `scala 2.10 to 2.12` = Seq("2.12.4")
-val `scala 2.10 to 2.12` = Seq("2.10.7", "2.11.12", "2.12.4")
 //val `scala 2.11 to 2.12` = Seq("2.12.4")
 val `scala 2.11 to 2.12` = Seq("2.11.12", "2.12.4")
 
@@ -99,7 +97,7 @@ trait EndpointsJvmModule extends EndpointsModule {
 trait EndpointsGroupingModule extends Module {
   override def millSourcePath = super.millSourcePath / up
 
-  def crossVersions: Seq[String] = `scala 2.10 to 2.12`
+  def crossVersions: Seq[String] = `scala 2.11 to 2.12`
 
   type Js <: EndpointsJsModule
   type Jvm <: EndpointsJvmModule
