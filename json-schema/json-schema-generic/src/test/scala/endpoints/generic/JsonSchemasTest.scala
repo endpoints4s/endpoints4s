@@ -117,7 +117,7 @@ class JsonSchemasTest extends FreeSpec {
       List(
         s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
         s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
-        s"'$ns.DocC'!(%)@DocC",
+        s"'$ns.DocC'!(%)@DocC"
       ).mkString("|")
     }))"
     println(expectedSchema)

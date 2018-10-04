@@ -79,7 +79,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def consRecord[L <: Symbol, H, T <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: GenericRecord[T],
+      jsonSchemaTail: GenericRecord[T]
     ): GenericRecord[FieldType[L, H] :: T] =
       new GenericRecord[FieldType[L, H] :: T] {
         def jsonSchema(docs: List[Option[documentation]]): Record[FieldType[L, H] :: T] =
@@ -90,7 +90,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def consOptRecord[L <: Symbol, H, T <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: GenericRecord[T],
+      jsonSchemaTail: GenericRecord[T]
     ): GenericRecord[FieldType[L, Option[H]] :: T] =
       new GenericRecord[FieldType[L, Option[H]] :: T] {
         def jsonSchema(docs: List[Option[documentation]]): Record[FieldType[L, Option[H]] :: T] =
