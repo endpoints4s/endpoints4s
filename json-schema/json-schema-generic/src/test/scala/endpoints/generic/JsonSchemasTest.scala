@@ -26,6 +26,19 @@ class JsonSchemasTest extends FreeSpec {
     object Quux {
       implicit val schema: JsonSchema[Quux] = genericJsonSchema[Quux]
     }
+
+    sealed trait Doc
+    case class DocA(@documentation("fieldDocI") i: Int) extends Doc
+    case class DocB(
+      a: String,
+      @documentation("fieldDocB") b: Boolean,
+      @documentation("fieldDocSS") ss: List[String]
+    ) extends Doc
+    case object DocC extends Doc
+
+    object Doc {
+      val schema: JsonSchema[Doc] = genericJsonSchema[Doc]
+    }
   }
 
   object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas {
@@ -41,10 +54,10 @@ class JsonSchemasTest extends FreeSpec {
         "%"
 
       def field[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe"
+        s"$name:$tpe${docs.fold("")(doc => s"{$doc}")}"
 
       def optField[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe?"
+        s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
 
       def taggedRecord[A](recordA: String, tag: String): String =
         s"$recordA@$tag"
@@ -97,6 +110,19 @@ class JsonSchemasTest extends FreeSpec {
       ).mkString("|")
     }))"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
+  }
+
+  "documentations" in {
+    val expectedSchema = s"'$ns.Doc'!('$ns.Doc'!(${
+      List(
+        s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
+        s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
+        s"'$ns.DocC'!(%)@DocC",
+      ).mkString("|")
+    }))"
+    println(expectedSchema)
+    println(FakeAlgebraJsonSchemas.Doc.schema)
+    assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 
 }

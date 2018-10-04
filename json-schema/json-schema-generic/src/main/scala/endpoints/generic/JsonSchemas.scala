@@ -2,8 +2,8 @@ package endpoints
 package generic
 
 import shapeless.labelled.{FieldType, field => shapelessField}
-import shapeless.ops.hlist.Tupler
-import shapeless.{:+:, ::, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
+import shapeless.ops.hlist.{ToList, Tupler}
+import shapeless.{:+:, ::, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 import scala.language.implicitConversions
 import scala.language.higherKinds
@@ -46,14 +46,15 @@ import scala.reflect.ClassTag
 trait JsonSchemas extends algebra.JsonSchemas {
 
   trait GenericJsonSchema[A] {
-    def jsonSchema: JsonSchema[A]
+    def jsonSchema(docs: List[Option[documentation]]): JsonSchema[A]
   }
 
   object GenericJsonSchema extends GenericJsonSchemaLowPriority {
 
     implicit def emptyRecordCase: GenericRecord[HNil] =
       new GenericRecord[HNil] {
-        def jsonSchema: Record[HNil] =
+        type D = HNil
+        def jsonSchema(docs: List[Option[documentation]]): Record[HNil] =
           emptyRecord.invmap[HNil](_ => HNil)(_ => ())
       }
 
@@ -62,8 +63,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
       recordA: GenericRecord[A]
     ): GenericTagged[FieldType[L, A] :+: CNil] =
       new GenericTagged[FieldType[L, A] :+: CNil] {
-        def jsonSchema: Tagged[FieldType[L, A] :+: CNil] =
-          recordA.jsonSchema.tagged(labelSingleton.value.name).invmap[FieldType[L, A] :+: CNil] {
+        def jsonSchema(docs: List[Option[documentation]]): Tagged[FieldType[L, A] :+: CNil] =
+          recordA.jsonSchema(Nil).tagged(labelSingleton.value.name).invmap[FieldType[L, A] :+: CNil] {
             a => Inl(shapelessField[L](a))
           } {
             case Inl(a) => a
@@ -78,22 +79,22 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def consRecord[L <: Symbol, H, T <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: GenericRecord[T]
+      jsonSchemaTail: GenericRecord[T],
     ): GenericRecord[FieldType[L, H] :: T] =
       new GenericRecord[FieldType[L, H] :: T] {
-        def jsonSchema: Record[FieldType[L, H] :: T] =
-          (field(labelHead.value.name)(jsonSchemaHead) zip jsonSchemaTail.jsonSchema)
+        def jsonSchema(docs: List[Option[documentation]]): Record[FieldType[L, H] :: T] =
+          (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.jsonSchema(docs.tail))
             .invmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
       }
 
     implicit def consOptRecord[L <: Symbol, H, T <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: GenericRecord[T]
+      jsonSchemaTail: GenericRecord[T],
     ): GenericRecord[FieldType[L, Option[H]] :: T] =
       new GenericRecord[FieldType[L, Option[H]] :: T] {
-        def jsonSchema: Record[FieldType[L, Option[H]] :: T] =
-          (optField(labelHead.value.name)(jsonSchemaHead) zip jsonSchemaTail.jsonSchema)
+        def jsonSchema(docs: List[Option[documentation]]): Record[FieldType[L, Option[H]] :: T] =
+          (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.jsonSchema(docs.tail))
             .invmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
       }
 
@@ -103,9 +104,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
       taggedTail: GenericTagged[T]
     ): GenericTagged[FieldType[L, H] :+: T] =
       new GenericTagged[FieldType[L, H] :+: T] {
-        def jsonSchema: Tagged[FieldType[L, H] :+: T] = {
-          val taggedHead = recordHead.jsonSchema.tagged(labelHead.value.name)
-          taggedHead.orElse(taggedTail.jsonSchema).invmap[FieldType[L, H] :+: T] {
+        def jsonSchema(docs: List[Option[documentation]]): Tagged[FieldType[L, H] :+: T] = {
+          val taggedHead = recordHead.jsonSchema(Nil).tagged(labelHead.value.name)
+          taggedHead.orElse(taggedTail.jsonSchema(docs.tail)).invmap[FieldType[L, H] :+: T] {
             case Left(h)  => Inl(shapelessField[L](h))
             case Right(t) => Inr(t)
           } {
@@ -120,29 +121,35 @@ trait JsonSchemas extends algebra.JsonSchemas {
   trait GenericJsonSchemaLowLowPriority {
 
     trait GenericRecord[A] extends GenericJsonSchema[A] {
-      def jsonSchema: Record[A]
+      def jsonSchema(docs: List[Option[documentation]]): Record[A]
     }
 
     trait GenericTagged[A] extends GenericJsonSchema[A] {
-      def jsonSchema: Tagged[A]
+      def jsonSchema(docs: List[Option[documentation]]): Tagged[A]
     }
 
-    implicit def recordGeneric[A, R](implicit
+    implicit def recordGeneric[A, R, D <: HList](implicit
       gen: LabelledGeneric.Aux[A, R],
       record: GenericRecord[R],
+      docAnns: Annotations.Aux[documentation, A, D],
+      docsToList: ToList[D, Option[documentation]],
       ct: ClassTag[A]
     ): GenericRecord[A] =
       new GenericRecord[A] {
-        def jsonSchema: Record[A] = nameSchema(record.jsonSchema.invmap[A](gen.from)(gen.to))
+        def jsonSchema(docs: List[Option[documentation]]): Record[A] =
+          nameSchema(record.jsonSchema(docsToList(docAnns.apply)).invmap[A](gen.from)(gen.to))
       }
 
-    implicit def taggedGeneric[A, R](implicit
+    implicit def taggedGeneric[A, R, D <: HList](implicit
       gen: LabelledGeneric.Aux[A, R],
       tagged: GenericTagged[R],
+      docAnns: Annotations.Aux[documentation, A, D],
+      docsToList: ToList[D, Option[documentation]],
       ct: ClassTag[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
-        def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.invmap[A](gen.from)(gen.to))
+        def jsonSchema(docs: List[Option[documentation]]): Tagged[A] =
+          nameSchema(tagged.jsonSchema(docsToList(docAnns.apply)).invmap[A](gen.from)(gen.to))
       }
 
   }
@@ -162,7 +169,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * description of the data type (based on the `JsonSchemas` algebra interface)
     */
   def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
-    nameSchema(genJsonSchema.jsonSchema)
+    nameSchema(genJsonSchema.jsonSchema(Nil))
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
 
