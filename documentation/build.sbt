@@ -119,6 +119,11 @@ val `example-overview-play-client` =
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .dependsOn(`example-overview-endpoints-jvm`, `play-client`)
 
+val `example-overview-documentation` =
+  project.in(file("examples/overview/documentation"))
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .dependsOn(`example-overview-endpoints-jvm`, `openapi-jvm`)
+
 // Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
