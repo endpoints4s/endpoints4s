@@ -32,59 +32,6 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
       Fixtures.openApi.asJson.spaces2 shouldBe
         """{
-          |  "openapi" : "3.0.0",
-          |  "info" : {
-          |    "title" : "TestFixturesOpenApi",
-          |    "version" : "0.0.0"
-          |  },
-          |  "paths" : {
-          |    "/books" : {
-          |      "get" : {
-          |        "parameters" : [
-          |        ],
-          |        "responses" : {
-          |          "200" : {
-          |            "description" : "Books list",
-          |            "content" : {
-          |              "application/json" : {
-          |                "schema" : {
-          |                  "type" : "array",
-          |                  "items" : {
-          |                    "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Book"
-          |                  }
-          |                }
-          |              }
-          |            }
-          |          }
-          |        },
-          |        "tags" : [
-          |          "Books"
-          |        ]
-          |      },
-          |      "post" : {
-          |        "parameters" : [
-          |        ],
-          |        "responses" : {
-          |          "200" : {
-          |            "description" : ""
-          |          }
-          |        },
-          |        "requestBody" : {
-          |          "description" : "Books list",
-          |          "content" : {
-          |            "application/json" : {
-          |              "schema" : {
-          |                "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Book"
-          |              }
-          |            }
-          |          }
-          |        },
-          |        "tags" : [
-          |          "Books"
-          |        ]
-          |      }
-          |    }
-          |  },
           |  "components" : {
           |    "schemas" : {
           |      "endpoints.openapi.ReferencedSchemaTest.Book" : {
@@ -112,6 +59,55 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |            }
           |          }
           |        }
+          |      }
+          |    }
+          |  },
+          |  "openapi" : "3.0.0",
+          |  "info" : {
+          |    "title" : "TestFixturesOpenApi",
+          |    "version" : "0.0.0"
+          |  },
+          |  "paths" : {
+          |    "/books" : {
+          |      "get" : {
+          |        "responses" : {
+          |          "200" : {
+          |            "description" : "Books list",
+          |            "content" : {
+          |              "application/json" : {
+          |                "schema" : {
+          |                  "type" : "array",
+          |                  "items" : {
+          |                    "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Book"
+          |                  }
+          |                }
+          |              }
+          |            }
+          |          }
+          |        },
+          |        "tags" : [
+          |          "Books"
+          |        ]
+          |      },
+          |      "post" : {
+          |        "responses" : {
+          |          "200" : {
+          |            "description" : ""
+          |          }
+          |        },
+          |        "requestBody" : {
+          |          "description" : "Books list",
+          |          "content" : {
+          |            "application/json" : {
+          |              "schema" : {
+          |                "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Book"
+          |              }
+          |            }
+          |          }
+          |        },
+          |        "tags" : [
+          |          "Books"
+          |        ]
           |      }
           |    }
           |  }
