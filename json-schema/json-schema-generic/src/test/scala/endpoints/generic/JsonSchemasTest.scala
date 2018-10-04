@@ -38,7 +38,7 @@ class JsonSchemasTest extends FreeSpec {
         s"'$name'!($schema)".asInstanceOf[S[A]]
 
       def emptyRecord: String =
-        "$"
+        "%"
 
       def field[A](name: String, docs: Option[String])(implicit tpe: String): String =
         s"$name:$tpe"
@@ -79,13 +79,23 @@ class JsonSchemasTest extends FreeSpec {
                                             ): String = s"[$jsonSchema]"
   }
 
+  val ns = "endpoints.generic.JsonSchemasTest.GenericSchemas"
+
   "case class" in {
-    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!(bar:string,baz:integer,qux:boolean?,$))"
+    val expectedSchema = s"'$ns.Foo'!('$ns.Foo'!(bar:string,baz:integer,qux:boolean?,%))"
     assert(FakeAlgebraJsonSchemas.Foo.schema == expectedSchema)
   }
 
   "sealed trait" in {
-    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxA'!(ss:[string],$)@QuuxA|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxB'!(i:integer,$)@QuuxB|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxC'!(b:boolean,$)@QuuxC|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxD'!($)@QuuxD|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxE'!($)@QuuxE))"
+    val expectedSchema = s"'$ns.Quux'!('$ns.Quux'!(${
+      List(
+        s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
+        s"'$ns.QuuxB'!(i:integer,%)@QuuxB",
+        s"'$ns.QuuxC'!(b:boolean,%)@QuuxC",
+        s"'$ns.QuuxD'!(%)@QuuxD",
+        s"'$ns.QuuxE'!(%)@QuuxE"
+      ).mkString("|")
+    }))"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
   }
 
