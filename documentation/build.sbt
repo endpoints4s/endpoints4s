@@ -329,3 +329,15 @@ val `example-documented` =
       }.taskValue
     )
     .dependsOn(`play-server-circe`, `json-schema-generic-jvm`, `openapi-jvm`)
+
+val `example-authentication` =
+  project.in(file("examples/authentication"))
+    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
+    .settings(
+      libraryDependencies ++= Seq(
+        "com.pauldijou" %% "jwt-play" % "0.18.0",
+        "com.lihaoyi"   %% "utest"    % "0.6.5"   % Test
+      ),
+      testFrameworks += new TestFramework("utest.runner.Framework")
+    )
+    .dependsOn(`play-server`, `play-client`, `algebra-playjson-jvm`)
