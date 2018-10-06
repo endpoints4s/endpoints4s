@@ -16,15 +16,18 @@ object OpenApi {
 
   implicit val jsonEncoder: ObjectEncoder[OpenApi] =
     ObjectEncoder.instance { openApi =>
-      JsonObject.fromMap(Map(
-        "openapi" -> Json.fromString("3.0.0"),
+      val mandatoryFields =
+        "openapi" -> Json.fromString("3.0.0") ::
         "info" -> Json.obj(
           "title" -> Json.fromString(openApi.info.title),
           "version" -> Json.fromString(openApi.info.version)
-        ),
-        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) }),
-        "components" -> openApi.components.asJson
-      ))
+        ) ::
+        "paths" -> Json.fromFields(openApi.paths.to[List].map { case (path, item) => (path, item.asJson) }) ::
+        Nil
+      val fields =
+        if (openApi.components.schemas.isEmpty) mandatoryFields
+        else ("components" -> openApi.components.asJson) :: mandatoryFields
+      JsonObject.fromIterable(fields)
     }
 
 }
@@ -42,7 +45,7 @@ object PathItem {
 
   implicit val jsonEncoder: ObjectEncoder[PathItem] =
     ObjectEncoder.instance { item =>
-      JsonObject.fromIterable(item.operations.to[List].map { case (verb, op) => (verb, op.asJson) })
+      JsonObject.fromIterable(item.operations.map { case (verb, op) => (verb, op.asJson) })
     }
 
 }
@@ -76,24 +79,25 @@ object Operation {
         op.summary.map(x => "summary" -> x.asJson),
         op.description.map(x => "description" -> x.asJson),
         op.requestBody.map(x => "requestBody" -> x.asJson),
-        op.tags.headOption.map(_ => "tags" -> op.tags.asJson)
+        op.tags.headOption.map(_ => "tags" -> op.tags.asJson),
+        if (op.parameters.isEmpty) None
+        else Some("parameters" -> Json.fromValues(op.parameters.map(_.asJson)))
       ).flatten
       val fields =
-        "parameters" -> Json.fromValues(op.parameters.map(_.asJson)) ::
-          (
-            "responses" -> Json.fromFields(
-              op.responses.to[List].map { case (status, resp) =>
-                status.toString -> Json.fromFields(
-                  "description" -> Json.fromString(resp.description) ::
-                    (if (resp.content.nonEmpty) {
-                      "content" -> MediaType.jsonMediaTypes(resp.content) ::
-                        Nil
-                    } else Nil)
-                )
-              }
-            )
-            ) ::
-          optFields
+        (
+          "responses" -> Json.fromJsonObject(JsonObject.fromIterable(
+            op.responses.map { case (status, resp) =>
+              status.toString -> Json.fromFields(
+                "description" -> Json.fromString(resp.description) ::
+                  (if (resp.content.nonEmpty) {
+                    "content" -> MediaType.jsonMediaTypes(resp.content) ::
+                      Nil
+                  } else Nil)
+              )
+            }
+          ))
+        ) ::
+        optFields
 
       JsonObject.fromIterable(fields)
     }
@@ -178,7 +182,7 @@ object MediaType {
 
   def jsonMediaTypes(mediaTypes: Map[String, MediaType]): Json =
     Json.fromFields(mediaTypes.map { case (tpe, mediaType) =>
-      tpe -> Json.obj("schema" -> mediaType.schema.fold[Json](Json.obj())(_.asJson))
+      tpe -> mediaType.schema.fold(Json.obj())(schema => Json.obj("schema" -> schema.asJson))
     })
 
 }
