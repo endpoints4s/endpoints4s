@@ -2,27 +2,29 @@
 
 ## Project layout
 
-Typically, your project will be broken down into several sub-projects:
+The typical installation consists in having a multi-project build, with
+a `client` project and a `server` project, both depending on a `shared`
+project:
 
 ~~~ mermaid
 graph BT
-  endpoints
-  server -.-> endpoints
-  client -.-> endpoints
+  shared
+  server -.-> shared
+  client -.-> shared
 ~~~
 
-The `endpoints` sub-project contains the *description* of the communication
-protocol. The `server` sub-project *implements* this communication protocol.
-The `client` sub-project *uses* the protocol to communicate with the `server`.
+The `shared` project contains the *description* of the communication
+protocol. The `server` project *implements* this communication protocol.
+The `client` project *uses* the protocol to communicate with the `server`.
 
 This translates to the following `build.sbt` configuration:
 
 ~~~ scala
-val endpoints = project
+val shared = project
 
-val client = project.dependsOn(endpoints)
+val client = project.dependsOn(shared)
 
-val server = project.dependsOn(endpoints)
+val server = project.dependsOn(shared)
 ~~~
 
 ## Dependencies
@@ -32,7 +34,7 @@ name `org.julienrf`.
 
 ### Endpoint descriptions
 
-Add the following dependencies to your `endpoints` sub-project:
+Add the following dependencies to your `shared` sub-project:
 
 ~~~ scala expandVars=true
 libraryDependencies ++= Seq(
@@ -46,7 +48,7 @@ libraryDependencies ++= Seq(
 #### Documented endpoint descriptions
 
 If you want to generate an [OpenAPI](https://www.openapis.org/) definition file
-for your endpoint descriptions, add the following dependency to the `endpoints`
+for your endpoint descriptions, add the following dependency to the `shared`
 sub-project:
 
 ~~~ scala expandVars=true
