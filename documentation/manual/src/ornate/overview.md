@@ -10,7 +10,7 @@ and then the library provides you:
 ## Description of the HTTP endpoints
 
 As an example, here is a `CounterEndpoints` trait describing two endpoints, one for getting a counter value and one for
-incrementing :
+incrementing it:
 
 ~~~ scala src=../../../examples/overview/endpoints/src/main/scala/overview/CounterEndpoints.scala#relevant-code
 ~~~
