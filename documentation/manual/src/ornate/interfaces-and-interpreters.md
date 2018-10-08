@@ -1,7 +1,7 @@
 # Algebra interfaces and their interpreters
 
 Because of the modular design of _endpoints_ it might be difficult to find which
-modules are relevant for a given use case. This page aims to make it easier to
+modules are needed for a given use case. This page aims to make it easier to
 navigate through the algebra interfaces hierarchy.
 
 ## Naming conventions
@@ -30,6 +30,7 @@ navigate through the algebra interfaces hierarchy.
 |[`JsonEntities`](api:endpoints.algebra.JsonEntities)|JSON request and response entities|[endpoints-algebra](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra)|
 |[`circe.JsonEntitiesFromCodec`](api:endpoints.algebra.circe.JsonEntitiesFromCodec)|JSON request and response entities using Circe codecs|[endpoints-algebra-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-circe)|
 |[`playjson.JsonEntitiesFromCodec`](api:endpoints.algebra.playjson.JsonEntitiesFromCodec)|JSON request and response entities using Play JSON codecs|[endpoints-algebra-playjson](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-playjson)|
+|[`JsonSchemas`](api:endpoints.algebra.JsonSchemas)|JSON schemas of data types|[endpoints-algebra-json-schema](https://index.scala-lang.org/julienrf/endpoints/endpoints-algebra-json-schema)|
 
 
 ## Interpreters
@@ -47,6 +48,6 @@ navigate through the algebra interfaces hierarchy.
 |[endpoints-scalaj-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-scalaj-client)|JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)|
 |[endpoints-sttp-client](https://index.scala-lang.org/julienrf/endpoints/endpoints-sttp-client)|JVM client backed by [sttp](https://github.com/softwaremill/sttp)|
 |[endpoints-openapi](https://index.scala-lang.org/julienrf/endpoints/endpoints-openapi)|Interpreter that creates OpenAPI json from endpoints description |
-|[endpoints-json-schema-generic](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-generic)|Interpreter that allows generic derivation of json-schema|
+|[endpoints-json-schema-generic](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-generic)|Interpreter that provides generic derivation of json-schema|
 |[endpoints-json-schema-circe](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-circe)|Interpreter that produces circe codec based on schema definition|
 |[endpoints-json-schema-playjson](https://index.scala-lang.org/julienrf/endpoints/endpoints-json-schema-playjson)|Interpreter that produces Play JSON Reads and Writes based on schema definition|
