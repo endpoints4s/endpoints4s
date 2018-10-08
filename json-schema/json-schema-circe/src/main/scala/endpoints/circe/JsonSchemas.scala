@@ -36,18 +36,19 @@ trait  JsonSchemas
     def encoder: Encoder[A] =
       Encoder.instance { a =>
         val (tag, json) = taggedEncoded(a)
-        Json.obj(tag -> json)
+        json.deepMerge(Json.obj(discriminatorName -> Json.fromString(tag)))
       }
     def decoder: Decoder[A] =
       Decoder.instance { cursor =>
         cursor.as[JsonObject].right.flatMap { jsonObject =>
-          jsonObject.toList.headOption match {
-            case Some((tag, json)) =>
+          jsonObject(discriminatorName).flatMap(_.asString) match {
+            case Some(tag) =>
               taggedDecoder(tag) match {
-                case Some(dec) => dec.decodeJson(json)
-                case None => Left(DecodingFailure(s"No decoder for type tag $tag", Nil))
+                case Some(dec) => dec.decodeJson(cursor.value)
+                case None => Left(DecodingFailure(s"No decoder for discriminator '$tag'!", Nil))
               }
-            case None => Left(DecodingFailure("Missing type tag field", Nil))
+            case None =>
+              Left(DecodingFailure(s"Missing type discriminator field '$discriminatorName'!", Nil))
           }
         }
       }

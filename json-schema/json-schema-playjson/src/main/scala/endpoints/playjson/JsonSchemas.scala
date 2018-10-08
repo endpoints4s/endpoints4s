@@ -19,40 +19,46 @@ trait JsonSchemas
     def writes: Writes[A]
   }
 
+  trait Record[A] extends JsonSchema[A] {
+    override def writes: OWrites[A]
+  }
+
   object JsonSchema {
     def apply[A](_reads: Reads[A], _writes: Writes[A]): JsonSchema[A] = new JsonSchema[A] {
       def reads: Reads[A] = _reads
       def writes: Writes[A] = _writes
     }
+    def record[A](_reads: Reads[A], _writes: OWrites[A]): Record[A] = new Record[A] {
+      def reads: Reads[A] = _reads
+      def writes: OWrites[A] = _writes
+    }
     implicit def toPlayJsonFormat[A](implicit jsonSchema: JsonSchema[A]): Format[A] =
       Format(jsonSchema.reads, jsonSchema.writes)
   }
 
-  type Record[A] = JsonSchema[A]
-
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
 
   def emptyRecord: Record[Unit] =
-    JsonSchema(
+    JsonSchema.record(
       new Reads[Unit] {
         override def reads(json: JsValue): JsResult[Unit] = json match {
           case JsObject(_) => JsSuccess(())
           case _ => JsError("expected JSON object, but found: " + json)
         }
       },
-      new Writes[Unit] {
-        override def writes(o: Unit): JsValue = Json.obj()
+      new OWrites[Unit] {
+        override def writes(o: Unit): JsObject = Json.obj()
       }
     )
 
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
-    JsonSchema(
+    JsonSchema.record(
       (__ \ name).read(tpe.reads),
       (__ \ name).write(tpe.writes)
     )
 
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
-    JsonSchema(
+    JsonSchema.record(
       (__ \ name).readNullable(tpe.reads),
       (__ \ name).writeNullable(tpe.writes)
     )
@@ -89,58 +95,55 @@ trait JsonSchemas
 
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
     val reads = (recordA.reads and recordB.reads).tupled
-    val writes = new Writes[(A, B)] {
-      override def writes(o: (A, B)): JsValue = o match {
-        case (a, b) => recordA.writes.writes(a).asInstanceOf[JsObject] deepMerge recordB.writes.writes(b).asInstanceOf[JsObject]
+    val writes = new OWrites[(A, B)] {
+      override def writes(o: (A, B)): JsObject = o match {
+        case (a, b) => recordA.writes.writes(a) deepMerge recordB.writes.writes(b)
       }
     }
-    JsonSchema(reads, writes)
+    JsonSchema.record(reads, writes)
   }
 
-  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] = invmapJsonSchema(record, f, g)
+  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
+    JsonSchema.record(record.reads.map(f), record.writes.contramap(g))
 
   def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
-    JsonSchema(
-      new Reads[B] {
-        override def reads(json: JsValue): JsResult[B] = jsonSchema.reads.reads(json).map(f)
-      },
-      new Writes[B] {
-        override def writes(b: B): JsValue = jsonSchema.writes.writes(g(b))
-      }
-    )
+    JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
 
   trait Tagged[A] extends Record[A] {
-    def tagAndJson(a: A): (String, JsValue)
+    def tagAndJson(a: A): (String, JsObject)
     def findReads(tagName: String): Option[Reads[A]]
 
     def reads: Reads[A] = new Reads[A] {
       override def reads(json: JsValue): JsResult[A] = json match {
-        case JsObject(kvs) => if (kvs.size == 1) {
-          val (key, value) = kvs.toList.head
-          findReads(key) match {
-            case Some(reads) => reads.reads(value)
-            case None => JsError(s"no Reads for tag '$key': $json")
+        case jsObject@JsObject(kvs) =>
+          kvs.get(discriminatorName) match {
+            case Some(JsString(tag)) =>
+              findReads(tag) match {
+                case Some(reads) => reads.reads(jsObject)
+                case None => JsError(s"no Reads for tag '$tag': $json")
+              }
+            case _ =>
+              JsError(s"expected discriminator field '$discriminatorName', but not found in: $json")
           }
-        } else JsError(s"expected exactly one tag, but found ${kvs.size}: $json")
         case _ => JsError(s"expected JSON object for tagged type, but found: $json")
       }
     }
 
-    def writes: Writes[A] = new Writes[A] {
-      override def writes(a: A): JsValue = {
+    def writes: OWrites[A] = new OWrites[A] {
+      override def writes(a: A): JsObject = {
         val (tag, json) = tagAndJson(a)
-        Json.obj(tag -> json)
+        Json.obj(discriminatorName -> tag).deepMerge(json)
       }
     }
   }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] = new Tagged[A] {
-    def tagAndJson(a: A): (String, JsValue) = (tag, recordA.writes.writes(a))
+    def tagAndJson(a: A): (String, JsObject) = (tag, recordA.writes.writes(a))
     def findReads(tagName: String): Option[Reads[A]] = if (tag == tagName) Some(recordA.reads) else None
   }
 
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] = new Tagged[Either[A, B]] {
-    def tagAndJson(aOrB: Either[A, B]): (String, JsValue) = aOrB match {
+    def tagAndJson(aOrB: Either[A, B]): (String, JsObject) = aOrB match {
       case Left(a) => taggedA.tagAndJson(a)
       case Right(b) => taggedB.tagAndJson(b)
     }
@@ -151,8 +154,7 @@ trait JsonSchemas
   }
 
   def invmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] = new Tagged[B] {
-    def tagAndJson(b: B): (String, JsValue) = tagged.tagAndJson(g(b))
+    def tagAndJson(b: B): (String, JsObject) = tagged.tagAndJson(g(b))
     def findReads(tag: String): Option[Reads[B]] = tagged.findReads(tag).map(_.map(f))
   }
-
 }

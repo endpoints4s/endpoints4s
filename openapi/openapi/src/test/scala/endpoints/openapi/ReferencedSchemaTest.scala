@@ -6,7 +6,14 @@ import org.scalatest.{Matchers, WordSpec}
 
 class ReferencedSchemaTest extends WordSpec with Matchers {
 
-  case class Book(id: Int, title: String, author: String, isbnCodes: List[String])
+  sealed trait Storage
+
+  object Storage {
+    case class Library(room: String, shelf: Int) extends Storage
+    case class Online(link: String) extends Storage
+  }
+
+  case class Book(id: Int, title: String, author: String, isbnCodes: List[String], storage: Storage)
 
   object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonSchemaEntities {
 
@@ -16,6 +23,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
   }
 
   trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas {
+
+    implicit private val schemaStorage: JsonSchema[Storage] = genericJsonSchema[Storage]
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 
@@ -39,7 +48,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |          "id",
           |          "title",
           |          "author",
-          |          "isbnCodes"
+          |          "isbnCodes",
+          |          "storage"
           |        ],
           |        "type" : "object",
           |        "properties" : {
@@ -58,8 +68,76 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |            "items" : {
           |              "type" : "string"
           |            }
+          |          },
+          |          "storage" : {
+          |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
           |          }
           |        }
+          |      },
+          |      "endpoints.openapi.ReferencedSchemaTest.Storage" : {
+          |        "oneOf" : [
+          |          {
+          |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Library"
+          |          },
+          |          {
+          |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Online"
+          |          }
+          |        ],
+          |        "discriminator" : {
+          |          "propertyName" : "type",
+          |          "mapping" : {
+          |            "Library" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Library",
+          |            "Online" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Online"
+          |          }
+          |        }
+          |      },
+          |      "endpoints.openapi.ReferencedSchemaTest.Storage.Library" : {
+          |        "allOf" : [
+          |          {
+          |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
+          |          },
+          |          {
+          |            "required" : [
+          |              "type",
+          |              "room",
+          |              "shelf"
+          |            ],
+          |            "type" : "object",
+          |            "properties" : {
+          |              "type" : {
+          |                "type" : "string"
+          |              },
+          |              "room" : {
+          |                "type" : "string"
+          |              },
+          |              "shelf" : {
+          |                "type" : "integer"
+          |              }
+          |            }
+          |          }
+          |        ]
+          |      },
+          |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
+          |        "allOf" : [
+          |          {
+          |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
+          |          },
+          |          {
+          |            "required" : [
+          |              "type",
+          |              "link"
+          |            ],
+          |            "type" : "object",
+          |            "properties" : {
+          |              "type" : {
+          |                "type" : "string"
+          |              },
+          |              "link" : {
+          |                "type" : "string"
+          |              }
+          |            }
+          |          }
+          |        ]
           |      }
           |    }
           |  },

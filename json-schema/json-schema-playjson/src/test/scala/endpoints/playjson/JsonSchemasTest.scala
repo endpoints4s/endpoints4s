@@ -187,7 +187,7 @@ class JsonSchemasTest extends FreeSpec {
   "tagged single record" in {
     testRoundtrip(
       field[Double]("x").tagged("Rectangle"),
-      Json.obj("Rectangle" -> Json.obj("x" -> JsNumber(1.5))),
+      Json.obj("type" -> JsString("Rectangle"), "x" -> JsNumber(1.5)),
       1.5
     )
   }
@@ -198,12 +198,12 @@ class JsonSchemasTest extends FreeSpec {
 
     testRoundtrip(
       schema,
-      Json.obj("I" -> Json.obj("i" -> JsNumber(2))),
+      Json.obj("type" -> JsString("I"), "i" -> JsNumber(2)),
       Left(2)
     )
     testRoundtrip(
       schema,
-      Json.obj("S" -> Json.obj("s" -> JsString("string"))),
+      Json.obj("type" -> JsString("S"), "s" -> JsString("string")),
       Right("string")
     )
   }
@@ -215,12 +215,12 @@ class JsonSchemasTest extends FreeSpec {
 
     testRoundtrip(
       schema,
-      Json.obj("I" -> Json.obj("i" -> JsNumber(2))),
+      Json.obj("type" -> JsString("I"), "i" -> JsNumber(2)),
       Left(Left(2))
     )
     testRoundtrip(
       schema,
-      Json.obj("B" -> Json.obj("b" -> JsBoolean(true))),
+      Json.obj("type" -> JsString("B"), "b" -> JsBoolean(true)),
       Right(true)
     )
   }
@@ -230,12 +230,12 @@ class JsonSchemasTest extends FreeSpec {
 
     testRoundtrip(
       schema,
-      Json.obj("Circle" -> Json.obj("r" -> JsNumber(2.0))),
+      Json.obj("type" -> JsString("Circle"), "r" -> JsNumber(2.0)),
       Left(2.0)
     )
     testRoundtrip(
       schema,
-      Json.obj("Rect" -> Json.obj("w" -> JsNumber(3), "h" -> JsNumber(4))),
+      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
       Right((3, 4))
     )
   }
@@ -250,12 +250,12 @@ class JsonSchemasTest extends FreeSpec {
 
     testRoundtrip(
       schema,
-      Json.obj("Circle" -> Json.obj("r" -> JsNumber(2.0))),
+      Json.obj("type" -> JsString("Circle"), "r" -> JsNumber(2.0)),
       Left(Circle(2.0))
     )
     testRoundtrip(
       schema,
-      Json.obj("Rect" -> Json.obj("w" -> JsNumber(3), "h" -> JsNumber(4))),
+      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
       Right(Rect(3, 4))
     )
   }
@@ -270,12 +270,12 @@ class JsonSchemasTest extends FreeSpec {
 
     testRoundtrip(
       schema,
-      Json.obj("Circle" -> Json.obj("r" -> JsNumber(2.0))),
+      Json.obj("type" -> JsString("Circle"), "r" -> JsNumber(2.0)),
       Left(Circle(2.0))
     )
     testRoundtrip(
       schema,
-      Json.obj("Rect" -> Json.obj("w" -> JsNumber(3), "h" -> JsNumber(4))),
+      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
       Right(Rect(3, 4))
     )
   }
@@ -296,12 +296,12 @@ class JsonSchemasTest extends FreeSpec {
     assertError(
       schema,
       Json.obj("Circle" -> Json.obj(), "Rect" -> Json.obj()),
-      """expected exactly one tag, but found 2: {"Circle":{},"Rect":{}}"""
+      """expected discriminator field 'type', but not found in: {"Circle":{},"Rect":{}}"""
     )
     assertError(
       schema,
-      Json.obj("Square" -> Json.obj()),
-      """no Reads for tag 'Square': {"Square":{}}"""
+      Json.obj("type" -> JsString("Square")),
+      """no Reads for tag 'Square': {"type":"Square"}"""
     )
   }
 

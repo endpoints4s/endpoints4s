@@ -82,6 +82,9 @@ trait JsonSchemas {
   /** The JSON schema of a record with a single optional field `name` of type `A` */
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]]
 
+  /** Name of the field that acts as discriminator for sum types (coproducts) */
+  def discriminatorName: String = "type"
+
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
 
