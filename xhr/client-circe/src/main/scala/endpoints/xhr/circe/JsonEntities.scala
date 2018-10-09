@@ -4,7 +4,7 @@ import endpoints.algebra
 import endpoints.algebra.Documentation
 import endpoints.xhr.Endpoints
 import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
-import org.scalajs.dom.raw.XMLHttpRequest
+import org.scalajs.dom.XMLHttpRequest
 
 /**
   * An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON

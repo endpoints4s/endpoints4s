@@ -5,6 +5,9 @@ import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 
 import scala.concurrent.Future
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends algebra.MuxEndpoints { self: Endpoints =>
 
 

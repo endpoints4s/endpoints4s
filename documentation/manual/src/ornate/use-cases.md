@@ -7,12 +7,12 @@ This page showcases the salient features of *endpoints*.
 Describe the HTTP APIs between the services, and let *endpoints* implement
 the clients and servers for these APIs:
 
-~~~ scala src=../../../examples/cqrs/commands-endpoints/src/main/scala/cqrs/commands/CommandsEndpoints.scala#microservice-endpoint-description
+~~~ scala src=../../../../documentation/examples/cqrs/commands-endpoints/src/main/scala/cqrs/commands/CommandsEndpoints.scala#microservice-endpoint-description
 ~~~
 
 Invoking a service from another is as simple as a method call:
 
-~~~ scala src=../../../examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#microservice-endpoint-invocation
+~~~ scala src=../../../../documentation/examples/cqrs/public-server/src/main/scala/cqrs/publicserver/PublicServer.scala#microservice-endpoint-invocation
 ~~~
 
 *endpoints* takes care of correctly constructing the HTTP request and
@@ -29,12 +29,12 @@ communication by turning method calls into remote invocations.
 
 Example of endpoint definition:
 
-~~~ scala src=../../../examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#webapps-endpoint
+~~~ scala src=../../../../documentation/examples/cqrs/public-endpoints/src/main/scala/cqrs/publicserver/PublicEndpoints.scala#webapps-endpoint
 ~~~
 
 Corresponding invocation from the client-side:
 
-~~~ scala src=../../../examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#webapps-invocation
+~~~ scala src=../../../../documentation/examples/cqrs/web-client/src/main/scala/cqrs/webclient/Main.scala#webapps-invocation
 ~~~
 
 ## Documenting a Web Service
@@ -45,7 +45,7 @@ for a given HTTP API description.
 
 For instance, given the following endpoints descriptions:
 
-~~~ scala src=../../../examples/documented/src/main/scala/counter/Counter.scala#documented-endpoints
+~~~ scala src=../../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#documented-endpoints
 ~~~
 
 *endpoints* can produce the

@@ -7,6 +7,8 @@ import scala.scalajs.js
 
 /**
   * Implements [[xhr.Endpoints]] by using JavaScript promises.
+  *
+  * @group interpreters
   */
 trait Endpoints extends xhr.Endpoints {
 

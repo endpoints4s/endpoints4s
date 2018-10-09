@@ -10,6 +10,8 @@ import scala.util.{Failure, Success}
 /**
   * Extends the [[Endpoints]] interpreter with [[algebra.MuxEndpoints]]
   * support.
+  *
+  * @group interpreters
   */
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
 

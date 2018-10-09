@@ -7,6 +7,7 @@ import scala.language.higherKinds
 
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON request
+  * @group interpreters
   */
 trait JsonEntitiesFromCodec[R[_]] extends endpoints.algebra.JsonEntitiesFromCodec { self: Endpoints[R] =>
 

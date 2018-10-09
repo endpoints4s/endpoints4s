@@ -6,6 +6,9 @@ import play.api.mvc.Result
 
 import scala.concurrent.Future
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
 
   import playComponents.executionContext

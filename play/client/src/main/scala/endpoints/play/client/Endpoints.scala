@@ -13,6 +13,8 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
   * @param wsClient The underlying client to use
+  *
+  * @group interpreters
   */
 class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
 
@@ -101,12 +103,12 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
       if (wsResponse.status == 404) Right(None)
       else response(wsResponse).right.map(Some(_))
 
-  //#concrete-carrier-type
   /**
     * A function that, given an `A`, eventually attempts to decode the `B` response.
     *
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */
+  //#concrete-carrier-type
   type Endpoint[A, B] = A => Future[B]
   //#concrete-carrier-type
 

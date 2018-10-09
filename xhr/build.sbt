@@ -13,7 +13,7 @@ val `xhr-client` =
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
-    .dependsOn(LocalProject("algebraJS") )
+    .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
 
 val `xhr-client-faithful` =
   project.in(file("client-faithful"))
@@ -37,4 +37,4 @@ val `xhr-client-circe` =
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
     )
-    .dependsOn(`xhr-client`, LocalProject("algebra-circeJS"))
+    .dependsOn(`xhr-client`, LocalProject("algebra-circeJS"), LocalProject("json-schema-circeJS"))

@@ -17,6 +17,8 @@ import scala.language.higherKinds
   * @param host    Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
   * @param backend The underlying backend to use
   * @tparam R The monad wrapping the response. It is defined by the backend
+  *
+  * @group interpreters
   */
 class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods {
 
@@ -148,7 +150,9 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
   /**
     * A function that, given an `A`, eventually attempts to decode the `B` response.
     */
+  //#endpoint-type
   type Endpoint[A, B] = A => R[B]
+  //#endpoint-type
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a => {

@@ -6,6 +6,8 @@ import endpoints.openapi.model.MediaType
 
 /**
   * Interpreter for [[algebra.Responses]]
+  *
+  * @group interpreters
   */
 trait Responses
   extends algebra.Responses {

@@ -8,6 +8,8 @@ import endpoints.algebra.BasicAuthentication.Credentials
   *
   * This trait works fine, but developers are likely to implement their own
   * authentication mechanism, specific to their application.
+  *
+  * @group algebras
   */
 trait BasicAuthentication extends Endpoints {
 

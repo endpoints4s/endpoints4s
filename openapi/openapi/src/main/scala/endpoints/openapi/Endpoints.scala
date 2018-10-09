@@ -7,6 +7,8 @@ import endpoints.algebra.Documentation
 /**
   * Interpreter for [[algebra.Endpoints]] that produces
   * an [[OpenApi]] instance for endpoints.
+  *
+  * @group interpreters
   */
 trait Endpoints
   extends algebra.Endpoints

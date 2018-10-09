@@ -79,50 +79,35 @@ val manual =
 
 
 // Example for the “Overview” page of the documentation
-val `example-overview-endpoints` =
+val `example-quickstart-endpoints` =
   crossProject.crossType(CrossType.Pure)
-    .in(file("examples/overview/endpoints"))
+    .in(file("examples/quickstart/endpoints"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`: _*)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
     )
     .jvmSettings(coverageEnabled := true)
-    .settings(
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
-    )
-    .dependsOnLocalCrossProjects("algebra-circe")
+    .dependsOnLocalCrossProjects("algebra", "json-schema-generic")
 
-val `example-overview-endpoints-jvm` = `example-overview-endpoints`.jvm
+val `example-quickstart-endpoints-jvm` = `example-quickstart-endpoints`.jvm
+val `example-quickstart-endpoints-js` = `example-quickstart-endpoints`.js
 
-val `example-overview-endpoints-js` = `example-overview-endpoints`.js
-
-val `example-overview-client` =
-  project.in(file("examples/overview/client"))
+val `example-quickstart-client` =
+  project.in(file("examples/quickstart/client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       noPublishSettings ++ `scala 2.11 to 2.12`
     )
-    .dependsOn(`example-overview-endpoints-js`, `xhr-client-circe`)
+    .dependsOn(`example-quickstart-endpoints-js`, `xhr-client-circe`)
 
-val `example-overview-server` =
-  project.in(file("examples/overview/server"))
+val `example-quickstart-server` =
+  project.in(file("examples/quickstart/server"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
-    .dependsOn(`example-overview-endpoints-jvm`, `play-server-circe`)
-
-val `example-overview-play-client` =
-  project.in(file("examples/overview/play-client"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .dependsOn(`example-overview-endpoints-jvm`, `play-client`)
-
-val `example-overview-documentation` =
-  project.in(file("examples/overview/documentation"))
-    .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .dependsOn(`example-overview-endpoints-jvm`, `openapi-jvm`)
+    .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-circe`, `openapi-jvm`)
 
 // Basic example
 val `example-basic-shared` = {

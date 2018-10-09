@@ -6,6 +6,8 @@ import endpoints.openapi.model.Schema
 
 /**
   * Interpreter for [[algebra.Urls]]
+  *
+  * @group interpreters
   */
 trait Urls extends algebra.Urls {
 

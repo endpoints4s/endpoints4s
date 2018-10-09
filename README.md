@@ -18,8 +18,10 @@ $ sbt
 > <example>/reStart
 ~~~
 
-Where `<example>` can be either [`example-cqrs`](documentation/examples/cqrs)
-or [`example-documented`](documentation/examples/documented).
+Where `<example>` can be either
+[`example-cqrs`](documentation/examples/cqrs),
+[`example-documented`](documentation/examples/documented)
+or [`example-quickstart-server`](documentation/examples/quickstart).
 
 And then browse http://localhost:9000.
 

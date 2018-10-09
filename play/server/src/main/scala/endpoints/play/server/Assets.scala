@@ -10,6 +10,8 @@ import play.mvc.Http.HeaderNames
 
 /**
   * Interpreter for [[algebra.Assets]] that performs routing using Play framework
+  *
+  * @group interpreters
   */
 trait Assets extends algebra.Assets with Endpoints {
 

@@ -7,6 +7,8 @@ import endpoints.openapi.model._
 
 /**
   * Interpreter for [[algebra.Assets]]
+  *
+  * @group interpreters
   */
 trait Assets
   extends algebra.Assets

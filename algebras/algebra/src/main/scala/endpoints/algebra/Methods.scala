@@ -1,7 +1,11 @@
 package endpoints.algebra
 
+/**
+  * @group algebras
+  */
 trait Methods {
 
+  /** HTTP Method */
   type Method
 
   def Get: Method

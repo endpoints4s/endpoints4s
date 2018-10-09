@@ -7,6 +7,8 @@ import scala.scalajs.js
 
 /**
   * [[algebra.Urls]] interpreter that builds URLs (in a JavaScript runtime environment).
+  *
+  * @group interpreters
   */
 trait Urls extends algebra.Urls {
 

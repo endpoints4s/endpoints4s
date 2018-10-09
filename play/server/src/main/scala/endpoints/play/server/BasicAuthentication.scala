@@ -9,6 +9,9 @@ import play.api.http.HeaderNames
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.mvc.Results
 
+/**
+  * @group interpreters
+  */
 trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
 
   /**

@@ -3,6 +3,8 @@ package openapi
 
 /**
   * Interpreter for [[endpoints.algebra.Methods]]
+  *
+  * @group interpreters
   */
 trait Methods extends endpoints.algebra.Methods {
 

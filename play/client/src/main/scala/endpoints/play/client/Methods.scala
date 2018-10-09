@@ -5,6 +5,8 @@ import play.api.libs.ws.WSRequest
 
 /**
   * [[algebra.Methods]] interpreter that builds URLs.
+  *
+  * @group interpreters
   */
 trait Methods extends algebra.Methods {
 

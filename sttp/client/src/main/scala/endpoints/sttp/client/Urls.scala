@@ -6,6 +6,9 @@ import java.nio.charset.StandardCharsets.UTF_8
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Tupler, algebra}
 
+/**
+  * @group interpreters
+  */
 trait Urls extends algebra.Urls {
   val utf8Name = UTF_8.name()
 

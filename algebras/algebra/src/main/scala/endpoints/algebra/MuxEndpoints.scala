@@ -5,6 +5,8 @@ import scala.language.higherKinds
 /**
   * Algebra interface for describing endpoints such that one endpoint can
   * handle several types of requests and responses.
+  *
+  * @group algebras
   */
 trait MuxEndpoints extends Endpoints {
 

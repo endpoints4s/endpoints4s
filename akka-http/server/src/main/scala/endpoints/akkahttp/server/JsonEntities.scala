@@ -11,6 +11,8 @@ import endpoints._
   *
   * To use it mix in support for your favourite Json library
   * You can use one of [[https://github.com/hseeberger/akka-http-json hseeberger/akka-http-json]] modules
+  *
+  * @group interpreters
   */
 trait JsonEntities extends algebra.JsonEntities with Endpoints {
 

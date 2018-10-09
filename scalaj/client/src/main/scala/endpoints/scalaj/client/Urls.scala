@@ -5,6 +5,9 @@ import endpoints.algebra.Documentation
 
 import scalaj.http.{Http, HttpRequest}
 
+/**
+  * @group interpreters
+  */
 trait Urls extends algebra.Urls {
 
   def protocol: String = "http://"

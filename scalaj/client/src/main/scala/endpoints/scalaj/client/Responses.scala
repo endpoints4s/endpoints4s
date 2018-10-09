@@ -5,6 +5,9 @@ import endpoints.algebra
 
 import endpoints.algebra.Documentation
 
+/**
+  * @group interpreters
+  */
 trait Responses extends algebra.Responses {
 
   type Response[A] = HttpResponse[String] => Either[Throwable, A]

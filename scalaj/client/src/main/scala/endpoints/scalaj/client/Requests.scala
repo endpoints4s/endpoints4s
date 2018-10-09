@@ -5,6 +5,9 @@ import endpoints.algebra.Documentation
 
 import scalaj.http.HttpRequest
 
+/**
+  * @group interpreters
+  */
 trait Requests extends algebra.Requests with Urls with Methods {
 
 

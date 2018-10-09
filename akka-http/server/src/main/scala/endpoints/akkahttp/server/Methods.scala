@@ -5,6 +5,8 @@ import endpoints.algebra
 
 /**
   * [[algebra.Methods]] interpreter that decodes and encodes methods.
+  *
+  * @group interpreters
   */
 trait Methods extends algebra.Methods {
 

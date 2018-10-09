@@ -6,6 +6,8 @@ import faithful.{Future, Promise}
 
 /**
   * Implements [[xhr.Endpoints]] by using faithful.
+  *
+  * @group interpreters
   */
 trait Endpoints extends xhr.Endpoints {
 

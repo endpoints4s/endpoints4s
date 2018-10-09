@@ -2,6 +2,9 @@ package endpoints.algebra
 
 import scala.language.higherKinds
 
+/**
+  * @group algebras
+  */
 trait Responses {
 
   /** Information carried by a response */

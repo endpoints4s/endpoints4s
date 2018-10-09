@@ -3,6 +3,9 @@ package endpoints.openapi
 import endpoints.algebra.MuxRequest
 import endpoints.algebra
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
 
   type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint

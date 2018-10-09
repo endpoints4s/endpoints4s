@@ -11,6 +11,8 @@ import io.circe.{Decoder, Encoder}
   * Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode
   * JSON entities in HTTP requests, and circe’s [[io.circe.Encoder]] to build JSON entities
   * in HTTP responses.
+  *
+  * @group interpreters
   */
 trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with circe.JsonSchemas {
 

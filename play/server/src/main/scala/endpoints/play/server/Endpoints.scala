@@ -39,6 +39,8 @@ import scala.language.implicitConversions
   * {{{
   *   val router = play.api.routing.Router.from(MyRouter.routes)
   * }}}
+  *
+  * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
 

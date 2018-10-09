@@ -8,6 +8,9 @@ import endpoints.algebra.Documentation
 
 import scala.concurrent.Future
 
+/**
+  * @group interpreters
+  */
 trait BasicAuthentication extends algebra.BasicAuthentication { self: Endpoints =>
 
   /**
