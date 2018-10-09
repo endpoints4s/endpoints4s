@@ -85,6 +85,9 @@ trait JsonSchemas {
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
 
+  /** Default discriminator field name for sum types */
+  def defaultDiscriminatorName: String = "type"
+
   /** Allows to specify name of discriminator field for sum type */
   def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
 
@@ -147,9 +150,4 @@ trait JsonSchemas {
     cbf: CanBuildFrom[_, A, C[A]]
   ): JsonSchema[C[A]]
 
-}
-
-object JsonSchemas {
-
-  val defaultDiscriminatorName: String = "type"
 }

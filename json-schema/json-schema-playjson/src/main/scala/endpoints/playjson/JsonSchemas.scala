@@ -1,7 +1,6 @@
 package endpoints.playjson
 
 import endpoints.algebra
-import endpoints.algebra.JsonSchemas
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -111,7 +110,7 @@ trait JsonSchemas
     JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
 
   trait Tagged[A] extends Record[A] {
-    def discriminator: String = JsonSchemas.defaultDiscriminatorName
+    def discriminator: String = defaultDiscriminatorName
     def tagAndJson(a: A): (String, JsObject)
     def findReads(tagName: String): Option[Reads[A]]
 

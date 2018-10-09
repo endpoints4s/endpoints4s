@@ -1,7 +1,6 @@
 package endpoints
 package circe
 
-import endpoints.algebra.JsonSchemas
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -30,7 +29,7 @@ trait JsonSchemas
   type Record[A] = JsonSchema[A]
 
   trait Tagged[A] extends Record[A] {
-    def discriminator: String = JsonSchemas.defaultDiscriminatorName
+    def discriminator: String = defaultDiscriminatorName
     def taggedEncoded(a: A): (String, Json)
     def taggedDecoder(tag: String): Option[Decoder[A]]
     def encoder: Encoder[A] =
