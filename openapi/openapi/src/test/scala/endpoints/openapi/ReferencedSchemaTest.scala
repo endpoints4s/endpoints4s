@@ -44,7 +44,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |        "type" : "object",
           |        "properties" : {
           |          "id" : {
-          |            "type" : "integer"
+          |            "type" : "integer",
+          |            "format" : "int32"
           |          },
           |          "title" : {
           |            "type" : "string"

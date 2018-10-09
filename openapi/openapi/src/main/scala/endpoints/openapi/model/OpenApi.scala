@@ -197,18 +197,25 @@ object Schema {
 
   case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
 
-  case class Primitive(name: String) extends Schema
+  case class Primitive(name: String, format: Option[String]) extends Schema
 
   case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
 
   case class Reference(name: String, original: Schema) extends Schema
 
-  val simpleString = Primitive("string")
-  val simpleInteger = Primitive("integer")
+  val simpleString = Primitive("string", None)
+  val simpleInteger = Primitive("integer", None)
 
   implicit val jsonEncoder: ObjectEncoder[Schema] =
     ObjectEncoder.instance {
-      case Primitive(name) => JsonObject.singleton("type", Json.fromString(name))
+      case Primitive(name, None) =>
+        JsonObject.singleton("type", Json.fromString(name))
+      case Primitive(name, Some(format)) =>
+        JsonObject.fromIterable(
+          "type" -> Json.fromString(name) ::
+            "format" -> Json.fromString(format) ::
+            Nil
+        )
       case Array(elementType) =>
         JsonObject.fromIterable(
           "type" -> Json.fromString("array") ::

@@ -30,8 +30,8 @@ trait JsonSchemaEntities
         Schema.Reference(name, expandCoproductSchema(coprod))
       case coprod @ DocumentedCoProd(_, None) =>
         expandCoproductSchema(coprod)
-      case Primitive(name) =>
-        Schema.Primitive(name)
+      case Primitive(name, format) =>
+        Schema.Primitive(name, format)
       case Array(elementType) =>
         Schema.Array(toSchema(elementType))
     }
