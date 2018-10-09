@@ -82,11 +82,11 @@ trait JsonSchemas {
   /** The JSON schema of a record with a single optional field `name` of type `A` */
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]]
 
-  /** Name of the field that acts as discriminator for sum types (coproducts) */
-  def discriminatorName: String = "type"
-
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
+
+  /** Allows to specify name of discriminator field for sum type */
+  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
 
   /** The JSON schema of a coproduct made of the given alternative tagged records */
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]]
@@ -147,4 +147,9 @@ trait JsonSchemas {
     cbf: CanBuildFrom[_, A, C[A]]
   ): JsonSchema[C[A]]
 
+}
+
+object JsonSchemas {
+
+  val defaultDiscriminatorName: String = "type"
 }

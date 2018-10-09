@@ -1,7 +1,7 @@
 package endpoints
 package circe
 
-import endpoints.algebra
+import endpoints.algebra.JsonSchemas
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -11,7 +11,7 @@ import scala.language.higherKinds
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
   */
-trait  JsonSchemas
+trait JsonSchemas
   extends algebra.JsonSchemas {
 
   trait JsonSchema[A] {
@@ -25,30 +25,30 @@ trait  JsonSchemas
 
     implicit def toCirceCodec[A](implicit jsonSchema: JsonSchema[A]): CirceCodec[A] =
       CirceCodec.fromEncoderAndDecoder(jsonSchema.encoder, jsonSchema.decoder)
-
   }
 
   type Record[A] = JsonSchema[A]
 
   trait Tagged[A] extends Record[A] {
+    def discriminator: String = JsonSchemas.defaultDiscriminatorName
     def taggedEncoded(a: A): (String, Json)
     def taggedDecoder(tag: String): Option[Decoder[A]]
     def encoder: Encoder[A] =
       Encoder.instance { a =>
         val (tag, json) = taggedEncoded(a)
-        json.deepMerge(Json.obj(discriminatorName -> Json.fromString(tag)))
+        json.deepMerge(Json.obj(discriminator -> Json.fromString(tag)))
       }
     def decoder: Decoder[A] =
       Decoder.instance { cursor =>
         cursor.as[JsonObject].right.flatMap { jsonObject =>
-          jsonObject(discriminatorName).flatMap(_.asString) match {
+          jsonObject(discriminator).flatMap(_.asString) match {
             case Some(tag) =>
               taggedDecoder(tag) match {
                 case Some(dec) => dec.decodeJson(cursor.value)
                 case None => Left(DecodingFailure(s"No decoder for discriminator '$tag'!", Nil))
               }
             case None =>
-              Left(DecodingFailure(s"Missing type discriminator field '$discriminatorName'!", Nil))
+              Left(DecodingFailure(s"Missing type discriminator field '$discriminator'!", Nil))
           }
         }
       }
@@ -79,6 +79,13 @@ trait  JsonSchemas
     new Tagged[A] {
       def taggedEncoded(a: A) = (tag, recordA.encoder.apply(a))
       def taggedDecoder(tagName: String) = if (tag == tagName) Some(recordA.decoder) else None
+    }
+
+  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
+    new Tagged[A] {
+      override def discriminator: String = discriminatorName
+      def taggedEncoded(a: A): (String, Json) = tagged.taggedEncoded(a)
+      def taggedDecoder(tag: String): Option[Decoder[A]] = tagged.taggedDecoder(tag)
     }
 
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] =
@@ -133,5 +140,4 @@ trait  JsonSchemas
       io.circe.Encoder.encodeIterable[A, C](jsonSchema.encoder, implicitly),
       io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, cbf)
     )
-
 }

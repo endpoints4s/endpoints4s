@@ -1,6 +1,7 @@
 package endpoints.playjson
 
 import endpoints.algebra
+import endpoints.algebra.JsonSchemas
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -110,20 +111,21 @@ trait JsonSchemas
     JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
 
   trait Tagged[A] extends Record[A] {
+    def discriminator: String = JsonSchemas.defaultDiscriminatorName
     def tagAndJson(a: A): (String, JsObject)
     def findReads(tagName: String): Option[Reads[A]]
 
     def reads: Reads[A] = new Reads[A] {
       override def reads(json: JsValue): JsResult[A] = json match {
         case jsObject@JsObject(kvs) =>
-          kvs.get(discriminatorName) match {
+          kvs.get(discriminator) match {
             case Some(JsString(tag)) =>
               findReads(tag) match {
                 case Some(reads) => reads.reads(jsObject)
                 case None => JsError(s"no Reads for tag '$tag': $json")
               }
             case _ =>
-              JsError(s"expected discriminator field '$discriminatorName', but not found in: $json")
+              JsError(s"expected discriminator field '$discriminator', but not found in: $json")
           }
         case _ => JsError(s"expected JSON object for tagged type, but found: $json")
       }
@@ -132,7 +134,7 @@ trait JsonSchemas
     def writes: OWrites[A] = new OWrites[A] {
       override def writes(a: A): JsObject = {
         val (tag, json) = tagAndJson(a)
-        Json.obj(discriminatorName -> tag).deepMerge(json)
+        Json.obj(discriminator -> tag).deepMerge(json)
       }
     }
   }
@@ -141,6 +143,13 @@ trait JsonSchemas
     def tagAndJson(a: A): (String, JsObject) = (tag, recordA.writes.writes(a))
     def findReads(tagName: String): Option[Reads[A]] = if (tag == tagName) Some(recordA.reads) else None
   }
+
+  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
+    new Tagged[A] {
+      override def discriminator: String = discriminatorName
+      def tagAndJson(a: A): (String, JsObject) = tagged.tagAndJson(a)
+      def findReads(tagName: String): Option[Reads[A]] = tagged.findReads(tagName)
+    }
 
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] = new Tagged[Either[A, B]] {
     def tagAndJson(aOrB: Either[A, B]): (String, JsObject) = aOrB match {
