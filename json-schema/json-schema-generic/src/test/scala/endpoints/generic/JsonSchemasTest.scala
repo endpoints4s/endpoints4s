@@ -69,6 +69,8 @@ class JsonSchemasTest extends FreeSpec {
 
       lazy val bigdecimalJsonSchema: String = "number"
 
+      lazy val floatJsonSchema: String = "number"
+
       lazy val doubleJsonSchema: String = "number"
 
       lazy val booleanJsonSchema: String = "boolean"
