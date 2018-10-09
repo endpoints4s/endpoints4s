@@ -6,6 +6,8 @@ import endpoints.openapi.model.{MediaType, Schema}
 
 /**
   * Interpreter for [[algebra.JsonSchemaEntities]] that produces a documentation of the JSON schemas.
+  *
+  * @group interpreters
   */
 trait JsonSchemaEntities
   extends algebra.JsonSchemaEntities

@@ -5,6 +5,8 @@ import play.api.mvc.RequestHeader
 
 /**
   * [[algebra.Methods]] interpreter that decodes and encodes methods.
+  *
+  * @group interpreters
   */
 trait Methods extends algebra.Methods {
 

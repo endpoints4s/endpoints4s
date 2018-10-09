@@ -7,6 +7,8 @@ import endpoints.{InvariantFunctor, Tupler, algebra}
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
+  *
+  * @group interpreters
   */
 trait Urls extends algebra.Urls {
 

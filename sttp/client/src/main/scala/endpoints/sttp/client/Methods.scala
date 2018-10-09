@@ -5,6 +5,8 @@ import com.softwaremill.sttp
 
 /**
   * [[algebra.Methods]] interpreter that builds URLs.
+  *
+  * @group interpreters
   */
 trait Methods extends algebra.Methods {
 

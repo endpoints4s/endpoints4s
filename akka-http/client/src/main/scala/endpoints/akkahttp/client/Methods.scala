@@ -3,6 +3,9 @@ package endpoints.akkahttp.client
 import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
 import endpoints.algebra
 
+/**
+  * @group interpreters
+  */
 trait Methods extends algebra.Methods {
   type Method = HttpRequest => HttpRequest
 

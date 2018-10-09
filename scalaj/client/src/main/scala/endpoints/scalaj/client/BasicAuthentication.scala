@@ -6,6 +6,9 @@ import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra.Documentation
 
+/**
+  * @group interpreters
+  */
 trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
 
   /**

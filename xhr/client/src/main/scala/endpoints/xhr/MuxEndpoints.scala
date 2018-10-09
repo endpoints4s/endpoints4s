@@ -4,6 +4,9 @@ import endpoints.algebra
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 import org.scalajs.dom.XMLHttpRequest
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
 
   protected final def muxPerformXhr[Req <: MuxRequest, Resp, Transport](

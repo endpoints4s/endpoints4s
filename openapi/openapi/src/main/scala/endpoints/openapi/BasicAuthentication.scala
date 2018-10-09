@@ -7,6 +7,8 @@ import endpoints.algebra.Documentation
 /**
   * Interpreter for [[algebra.BasicAuthentication]] that produces
   * OpenAPI documentation.
+  *
+  * @group interpreters
   */
 trait BasicAuthentication
   extends algebra.BasicAuthentication

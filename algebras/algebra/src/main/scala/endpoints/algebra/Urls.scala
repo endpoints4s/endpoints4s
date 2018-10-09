@@ -25,6 +25,8 @@ import scala.language.{higherKinds, implicitConversions}
   *     */
   *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & optQs[Int]("page"))
   * }}}
+  *
+  * @group algebras
   */
 trait Urls {
 

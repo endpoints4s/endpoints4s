@@ -6,6 +6,9 @@ import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 
 import scala.language.higherKinds
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints[R[_]] extends algebra.Endpoints { self: Endpoints[R] =>
 
   class MuxEndpoint[Req <: algebra.MuxRequest, Resp, Transport](request: Request[Transport], response: Response[Transport]) {

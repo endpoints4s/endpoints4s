@@ -9,6 +9,8 @@ import scala.language.higherKinds
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
+  *
+  * @group interpreters
   */
 trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 

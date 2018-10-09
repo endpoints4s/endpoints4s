@@ -7,6 +7,8 @@ import play.api.libs.ws.{BodyWritable, InMemoryBody}
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON requests
   * and decodes JSON responses.
+  *
+  * @group interpreters
   */
 trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
 

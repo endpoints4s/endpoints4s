@@ -7,6 +7,9 @@ import endpoints.algebra.Documentation
 
 import scala.language.higherKinds
 
+/**
+  * @group interpreters
+  */
 trait BasicAuthentication[R[_]] extends algebra.BasicAuthentication { self: Endpoints[R] =>
 
   /**

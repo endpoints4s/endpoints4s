@@ -7,6 +7,8 @@ import endpoints.algebra.Documentation
 
 /**
   * Partial interpreter for [[algebra.JsonEntities]].
+  *
+  * @group interpreters
   */
 trait JsonEntities
   extends algebra.JsonEntities

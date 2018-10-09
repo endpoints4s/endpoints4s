@@ -8,6 +8,8 @@ import endpoints.algebra.{Codec, Documentation}
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that decodes JSON requests and
   * encodes JSON responses using Akka HTTP.
+  *
+  * @group interpreters
   */
 trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
 

@@ -15,6 +15,8 @@ import scala.util.Try
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
+  *
+  * @group interpreters
   */
 trait Urls extends algebra.Urls {
 

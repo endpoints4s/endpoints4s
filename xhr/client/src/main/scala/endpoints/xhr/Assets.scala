@@ -9,6 +9,8 @@ import scala.scalajs.js.typedarray.ArrayBuffer
 
 /**
   * Client that relies on the web browser to handle gzip compression
+  *
+  * @group interpreters
   */
 trait Assets extends algebra.Assets with Endpoints {
 

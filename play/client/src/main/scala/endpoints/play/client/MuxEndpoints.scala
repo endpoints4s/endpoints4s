@@ -6,6 +6,9 @@ import endpoints.play.client.Endpoints.futureFromEither
 
 import scala.concurrent.Future
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends algebra.Endpoints { self: Endpoints =>
 
   class MuxEndpoint[Req <: algebra.MuxRequest, Resp, Transport](

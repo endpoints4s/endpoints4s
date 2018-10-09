@@ -14,6 +14,8 @@ import scala.language.higherKinds
   *     */
   *   val example = endpoint(get(path / "user" / segment[UUID]), jsonResponse[User])
   * }}}
+  *
+  * @group algebras
   */
 trait JsonEntities extends Endpoints {
 
@@ -32,6 +34,8 @@ trait JsonEntities extends Endpoints {
 
 /**
   * Fixes both the `JsonRequest` and `JsonResponse` types to be [[Codec]].
+  *
+  * @group algebras
   */
 trait JsonEntitiesFromCodec extends JsonEntities {
 

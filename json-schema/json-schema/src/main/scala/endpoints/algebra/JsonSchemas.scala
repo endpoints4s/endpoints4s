@@ -50,12 +50,14 @@ import scala.language.higherKinds
   *           case Left(circle) => circle
   *           case Right(rect)  => rect
   *         } {
-  *           c: Circle    => Left(c)
-  *           r: Rectangle => Right(r)
+  *           case c: Circle    => Left(c)
+  *           case r: Rectangle => Right(r)
   *         }
   *     }
   *   }
   * }}}
+  *
+  * @group algebras
   */
 trait JsonSchemas {
 

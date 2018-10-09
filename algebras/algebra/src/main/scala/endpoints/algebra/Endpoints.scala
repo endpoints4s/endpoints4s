@@ -16,6 +16,8 @@ import scala.language.higherKinds
   *     */
   *   val example = endpoint(get(path / "foo"), emptyResponse)
   * }}}
+  *
+  * @group algebras
   */
 trait Endpoints extends Requests with Responses {
 

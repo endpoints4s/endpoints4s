@@ -8,6 +8,9 @@ import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * @group interpreters
+  */
 class Endpoints(val settings: EndpointsSettings)
   (implicit val EC: ExecutionContext, val M: Materializer)
   extends algebra.Endpoints
@@ -112,7 +115,9 @@ class Endpoints(val settings: EndpointsSettings)
     }
   }
 
+  //#endpoint-type
   type Endpoint[A, B] = A => Future[B]
+  //#endpoint-type
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a =>

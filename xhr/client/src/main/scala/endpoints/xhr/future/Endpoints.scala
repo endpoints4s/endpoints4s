@@ -7,6 +7,8 @@ import scala.concurrent.{Future, Promise}
 
 /**
   * Implements [[xhr.Endpoints]] by using Scala’s [[Future]]s.
+  *
+  * @group interpreters
   */
 trait Endpoints extends xhr.Endpoints {
 

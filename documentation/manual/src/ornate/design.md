@@ -1,6 +1,6 @@
 # Design in a nutshell
 
-The `endpoints.algebra.Endpoints` trait used in the [overview](overview.md) provides members that
+The `endpoints.algebra.Endpoints` trait used in the [quick start](quick-start.md) provides members that
 bring **vocabulary** to describe HTTP endpoints (e.g. the `endpoint`, `get`, `post`,
 etc. methods), but these members are all abstract. Furthermore,
 **their types are also abstract**.

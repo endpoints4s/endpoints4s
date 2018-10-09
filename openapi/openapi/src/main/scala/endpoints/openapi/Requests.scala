@@ -6,6 +6,8 @@ import endpoints.openapi.model.{MediaType, Schema}
 
 /**
   * Interpreter for [[algebra.Requests]].
+  *
+  * @group interpreters
   */
 trait Requests
   extends algebra.Requests

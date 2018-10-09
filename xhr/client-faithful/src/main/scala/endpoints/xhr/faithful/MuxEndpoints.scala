@@ -4,6 +4,9 @@ import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 import endpoints.xhr
 import faithful.{Future, Promise}
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](

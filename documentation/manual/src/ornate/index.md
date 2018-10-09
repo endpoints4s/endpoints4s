@@ -12,7 +12,7 @@ Noteworthy features:
     - a **client** implementation (JVM and/or Scala.js),
     - a **server** implementation,
     - an **OpenAPI** definition file,
-    - thus, your client and documentation are always consistent with the actual
+    - thus, your client and documentation are always **consistent** with the actual
       implementation of your server,
 - **type safety**: you get a compile-time error if you invoke an endpoint but supply incorrect data
   (requests are guaranteed to be well constructed),
@@ -25,12 +25,11 @@ Noteworthy features:
 
 ## Getting started
 
-- Have a look at the [overview](overview.md) to understand in a few minutes what
-  the library does and how its usage look like ;
+- Have a look at the [quick start](quick-start.md) guide to understand
+  in a few minutes what the library does and how to setup a project ;
 - Check out the [use cases](use-cases.md) to know where *endpoints* shines ;
-- [Install](installation.md) the library and follow the
-  [tutorial](tutorial.md) to progressively learn all the features ;
-- Explore the [API documentation](api:endpoints.algebra.package) ;
+- Browse the [API documentation](api:endpoints.algebra.package) or the
+  [samples](https://github.com/julienrf/endpoints/tree/master/documentation/examples) ;
 - Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
 
 ## Contributing

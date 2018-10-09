@@ -20,9 +20,8 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodec {
     * Returns the produced event, or `None` in case of failure (aggregate
     * not found or invalid command).
     */
-  val command =
+  val command: Endpoint[Command, Option[StoredEvent]] =
     endpoint(post(path / "command", jsonRequest[Command]()), jsonResponse[Option[StoredEvent]]())
-  // command: Endpoint[Command, Option[StoredEvent]]
 //#microservice-endpoint-description
 
   /**

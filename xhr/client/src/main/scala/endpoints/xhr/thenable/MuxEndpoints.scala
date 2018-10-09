@@ -5,6 +5,9 @@ import endpoints.xhr
 
 import scala.scalajs.js
 
+/**
+  * @group interpreters
+  */
 trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](

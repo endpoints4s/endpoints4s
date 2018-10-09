@@ -4,6 +4,8 @@ import endpoints.algebra.{Codec, Documentation}
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON requests
   * and decodes JSON responses.
+  *
+  * @group interpreters
   */
 trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
 

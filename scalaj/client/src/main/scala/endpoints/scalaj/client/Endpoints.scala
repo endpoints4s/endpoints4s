@@ -5,9 +5,10 @@ import endpoints.algebra.Documentation
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * @group interpreters
+  */
 trait Endpoints extends algebra.Endpoints with Requests with Responses {
-
-  type MuxEndpoint[A, B, Transport] = Nothing
 
   def endpoint[A, B](
     request: Request[A],

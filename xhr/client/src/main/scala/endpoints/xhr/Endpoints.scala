@@ -8,8 +8,15 @@ import scala.language.higherKinds
 import scala.scalajs.js
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that builds a client issuing requests
+  * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
   * using XMLHttpRequest.
+  *
+  * The interpreter is ''partially'' implemented: it returns endpoint invocation
+  * results in an abstract `Result` type, which is yet to be defined
+  * by a more specialized interpreter. You can find such interpreters
+  * in the “known `Endpoints` subclasses” list.
+  *
+  * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
 

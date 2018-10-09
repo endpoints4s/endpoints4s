@@ -8,6 +8,8 @@ import endpoints.algebra.Documentation
 
 /**
   * [[algebra.Urls]] interpreter that builds URLs.
+  *
+  * @group interpreters
   */
 trait Urls extends algebra.Urls {
 

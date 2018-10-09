@@ -42,3 +42,5 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   pushChanges
 )
+
+ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
