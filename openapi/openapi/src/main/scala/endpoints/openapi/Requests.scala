@@ -50,7 +50,7 @@ trait Requests
   def emptyRequest = None
 
   override def textRequest(docs: Documentation): Option[DocumentedRequestEntity] = Some(
-    DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.Primitive("string")))))
+    DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.simpleString))))
   )
 
   def request[A, B, C, AB](

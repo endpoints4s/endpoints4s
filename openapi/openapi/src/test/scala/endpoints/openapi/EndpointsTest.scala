@@ -30,8 +30,8 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     "be exposed in JSON schema" in {
       val expectedSchema =
         Schema.Object(
-          Schema.Property("name", Schema.Primitive("string"), isRequired = true, description = Some("Name of the user")) ::
-          Schema.Property("age", Schema.Primitive("integer"), isRequired = true, description = None) ::
+          Schema.Property("name", Schema.Primitive("string", None), isRequired = true, description = Some("Name of the user")) ::
+          Schema.Property("age", Schema.Primitive("integer", Some("int32")), isRequired = true, description = None) ::
           Nil,
           None
         )
@@ -45,7 +45,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
       reqBody shouldBe defined
       reqBody.value.description.value shouldEqual "Text Req"
-      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string")
+      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string", None)
     }
   }
 

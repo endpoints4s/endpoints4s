@@ -116,7 +116,7 @@ trait Endpoints
         properties.map(_.schema).flatMap(captureReferencedSchemasRec)
       case Schema.Array(elementType) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_) =>
+      case Schema.Primitive(_, _) =>
         Nil
       case Schema.OneOf(alternatives, _) =>
         alternatives.flatMap(captureReferencedSchemasRec)

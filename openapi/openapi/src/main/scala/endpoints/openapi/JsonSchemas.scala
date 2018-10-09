@@ -28,7 +28,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
     case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)],
                                 name: Option[String] = None) extends DocumentedJsonSchema
 
-    case class Primitive(name: String) extends DocumentedJsonSchema
+    case class Primitive(name: String, format: Option[String] = None) extends DocumentedJsonSchema
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
   }
@@ -71,13 +71,13 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   lazy val stringJsonSchema: DocumentedJsonSchema = Primitive("string")
 
-  lazy val intJsonSchema: DocumentedJsonSchema = Primitive("integer")
+  lazy val intJsonSchema: DocumentedJsonSchema = Primitive("integer", format = Some("int32"))
 
-  lazy val longJsonSchema: DocumentedJsonSchema = Primitive("integer")
+  lazy val longJsonSchema: DocumentedJsonSchema = Primitive("integer", format = Some("int64"))
 
   lazy val bigdecimalJsonSchema: DocumentedJsonSchema = Primitive("number")
 
-  lazy val doubleJsonSchema: DocumentedJsonSchema = Primitive("number")
+  lazy val doubleJsonSchema: DocumentedJsonSchema = Primitive("number", format = Some("double"))
 
   lazy val booleanJsonSchema: DocumentedJsonSchema = Primitive("boolean")
 
