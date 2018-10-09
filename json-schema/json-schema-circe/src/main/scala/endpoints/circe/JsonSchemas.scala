@@ -121,6 +121,8 @@ trait  JsonSchemas
 
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] = JsonSchema(implicitly, implicitly)
 
+  implicit def floatJsonSchema: JsonSchema[Float] = JsonSchema(implicitly, implicitly)
+
   implicit def doubleJsonSchema: JsonSchema[Double] = JsonSchema(implicitly, implicitly)
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] = JsonSchema(implicitly, implicitly)

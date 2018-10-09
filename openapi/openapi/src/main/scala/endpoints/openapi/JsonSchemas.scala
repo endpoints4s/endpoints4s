@@ -77,6 +77,8 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   lazy val bigdecimalJsonSchema: DocumentedJsonSchema = Primitive("number")
 
+  lazy val floatJsonSchema: DocumentedJsonSchema = Primitive("number", format = Some("float"))
+
   lazy val doubleJsonSchema: DocumentedJsonSchema = Primitive("number", format = Some("double"))
 
   lazy val booleanJsonSchema: DocumentedJsonSchema = Primitive("boolean")
