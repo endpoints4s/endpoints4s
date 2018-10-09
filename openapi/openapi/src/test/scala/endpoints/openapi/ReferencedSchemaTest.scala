@@ -111,7 +111,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |                "type" : "string"
           |              },
           |              "shelf" : {
-          |                "type" : "integer"
+          |                "type" : "integer",
+          |                "format" : "int32"
           |              }
           |            }
           |          }
