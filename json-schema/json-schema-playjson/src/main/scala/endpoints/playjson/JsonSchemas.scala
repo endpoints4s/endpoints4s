@@ -19,27 +19,32 @@ trait JsonSchemas
     def writes: Writes[A]
   }
 
-  trait Record[A] extends JsonSchema[A] {
-    override def writes: OWrites[A]
-  }
-
   object JsonSchema {
     def apply[A](_reads: Reads[A], _writes: Writes[A]): JsonSchema[A] = new JsonSchema[A] {
       def reads: Reads[A] = _reads
       def writes: Writes[A] = _writes
     }
-    def record[A](_reads: Reads[A], _writes: OWrites[A]): Record[A] = new Record[A] {
+    implicit def toPlayJsonFormat[A](implicit jsonSchema: JsonSchema[A]): Format[A] =
+      Format(jsonSchema.reads, jsonSchema.writes)
+  }
+
+  trait Record[A] extends JsonSchema[A] {
+    override def writes: OWrites[A]
+  }
+
+  object Record {
+    def apply[A](_reads: Reads[A], _writes: OWrites[A]): Record[A] = new Record[A] {
       def reads: Reads[A] = _reads
       def writes: OWrites[A] = _writes
     }
-    implicit def toPlayJsonFormat[A](implicit jsonSchema: JsonSchema[A]): Format[A] =
-      Format(jsonSchema.reads, jsonSchema.writes)
+    implicit def toPlayJsonOFormat[A](implicit record: Record[A]): OFormat[A] =
+      OFormat(record.reads, record.writes)
   }
 
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
 
   def emptyRecord: Record[Unit] =
-    JsonSchema.record(
+    Record(
       new Reads[Unit] {
         override def reads(json: JsValue): JsResult[Unit] = json match {
           case JsObject(_) => JsSuccess(())
@@ -52,13 +57,13 @@ trait JsonSchemas
     )
 
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
-    JsonSchema.record(
+    Record(
       (__ \ name).read(tpe.reads),
       (__ \ name).write(tpe.writes)
     )
 
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
-    JsonSchema.record(
+    Record(
       (__ \ name).readNullable(tpe.reads),
       (__ \ name).writeNullable(tpe.writes)
     )
@@ -100,11 +105,11 @@ trait JsonSchemas
         case (a, b) => recordA.writes.writes(a) deepMerge recordB.writes.writes(b)
       }
     }
-    JsonSchema.record(reads, writes)
+    Record(reads, writes)
   }
 
   def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
-    JsonSchema.record(record.reads.map(f), record.writes.contramap(g))
+    Record(record.reads.map(f), record.writes.contramap(g))
 
   def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
     JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
