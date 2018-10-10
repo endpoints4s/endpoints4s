@@ -26,7 +26,8 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
     case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
     case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)],
-                                name: Option[String] = None) extends DocumentedJsonSchema
+                                name: Option[String] = None,
+                                discriminatorName: String = defaultDiscriminatorName) extends DocumentedJsonSchema
 
     case class Primitive(name: String, format: Option[String] = None) extends DocumentedJsonSchema
 
@@ -56,6 +57,9 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   def taggedRecord[A](recordA: DocumentedRecord, tag: String): DocumentedCoProd =
     DocumentedCoProd(List(tag -> recordA))
+
+  def withDiscriminator[A](tagged: DocumentedCoProd, discriminatorName: String): DocumentedCoProd =
+    tagged.copy(discriminatorName = discriminatorName)
 
   def choiceTagged[A, B](taggedA: DocumentedCoProd, taggedB: DocumentedCoProd): DocumentedCoProd =
     DocumentedCoProd(taggedA.alternatives ++ taggedB.alternatives)
@@ -87,5 +91,4 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
     jsonSchema: JsonSchema[A],
     cbf: CanBuildFrom[_, A, C[A]]
   ): JsonSchema[C[A]] = Array(jsonSchema)
-
 }

@@ -49,6 +49,9 @@ class JsonSchemasTest extends FreeSpec {
       def taggedRecord[A](recordA: String, tag: String): String =
         s"$recordA@$tag"
 
+      def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
+        s"$tagged#$discriminatorName"
+
       def choiceTagged[A, B](taggedA: String, taggedB: String): String =
         s"$taggedA|$taggedB"
 

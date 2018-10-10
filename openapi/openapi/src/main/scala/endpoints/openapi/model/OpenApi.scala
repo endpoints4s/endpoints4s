@@ -199,9 +199,16 @@ object Schema {
 
   case class Primitive(name: String, format: Option[String]) extends Schema
 
-  case class OneOf(alternatives: List[Schema], description: Option[String]) extends Schema
+  case class OneOf(discriminatorName: String, alternatives: List[(String, Schema)], description: Option[String]) extends Schema
 
-  case class Reference(name: String, original: Schema) extends Schema
+  case class AllOf(schemas: List[Schema]) extends Schema
+
+  case class Reference(name: String, original: Option[Schema]) extends Schema
+
+  object Reference {
+    def toRefPath(name: String): String =
+      s"#/components/schemas/$name"
+  }
 
   val simpleString = Primitive("string", None)
   val simpleInteger = Primitive("integer", None)
@@ -243,15 +250,24 @@ object Schema {
           if (requiredProperties.isEmpty) fieldsWithDescription
           else "required" -> Json.arr(requiredProperties.map(p => Json.fromString(p.name)): _*) :: fieldsWithDescription
         JsonObject.fromIterable(fieldsWithRequired)
-      case OneOf(alternatives, description) =>
+      case OneOf(discriminatorName, alternatives, description) =>
+        val mapping = alternatives.collect { case (tag, Schema.Reference(name, _)) =>
+          tag -> Json.fromString(Reference.toRefPath(name))
+        }
         val fields =
-            "oneOf" -> Json.fromValues(alternatives.map(jsonEncoder.apply)) ::
+            "oneOf" -> Json.fromValues(alternatives.map(a => jsonEncoder(a._2))) ::
+            "discriminator" -> Json.obj(
+              "propertyName" -> Json.fromString(discriminatorName),
+              "mapping" -> Json.fromFields(mapping)
+            ) ::
             Nil
         val fieldsWithDescription =
           description.fold(fields)(s => "description" -> Json.fromString(s) :: fields)
         JsonObject.fromIterable(fieldsWithDescription)
+      case AllOf(schemas) =>
+        JsonObject.singleton("allOf", Json.fromValues(schemas.map(jsonEncoder.apply)))
       case Reference(name, _) =>
-        JsonObject.singleton("$ref", Json.fromString(s"#/components/schemas/$name"))
+        JsonObject.singleton("$ref", Json.fromString(Reference.toRefPath(name)))
     }
 
 }

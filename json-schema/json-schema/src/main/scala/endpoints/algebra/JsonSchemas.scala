@@ -85,6 +85,17 @@ trait JsonSchemas {
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
 
+  /** Default discriminator field name for sum types.
+    *
+    * It defaults to "type", but you can override it twofold:
+    * - by overriding this field you can change default discriminator name algebra-wide
+    * - by using `withDiscriminator` you can specify discriminator field name for specific sum type
+    * */
+  def defaultDiscriminatorName: String = "type"
+
+  /** Allows to specify name of discriminator field for sum type */
+  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
+
   /** The JSON schema of a coproduct made of the given alternative tagged records */
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]]
 

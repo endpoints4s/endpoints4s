@@ -106,7 +106,7 @@ trait Endpoints
     } yield recSchema
 
     allReferencedSchemas
-      .map { ref => ref.name -> ref.original }
+      .collect { case Schema.Reference(name, Some(original)) => name -> original }
       .toMap
   }
 
@@ -118,9 +118,14 @@ trait Endpoints
         captureReferencedSchemasRec(elementType)
       case Schema.Primitive(_, _) =>
         Nil
-      case Schema.OneOf(alternatives, _) =>
-        alternatives.flatMap(captureReferencedSchemasRec)
+      case Schema.OneOf(_, alternatives, _) =>
+        alternatives.map(_._2).flatMap(captureReferencedSchemasRec)
+      case Schema.AllOf(schemas) =>
+        schemas.flatMap {
+          case _: Schema.Reference => Nil
+          case s => captureReferencedSchemasRec(s)
+        }
       case referenced: Schema.Reference =>
-        referenced +: captureReferencedSchemasRec(referenced.original)
+        referenced +: referenced.original.map(captureReferencedSchemasRec).getOrElse(Nil)
     }
 }
