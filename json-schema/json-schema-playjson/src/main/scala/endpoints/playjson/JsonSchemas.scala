@@ -133,7 +133,7 @@ trait JsonSchemas
     def writes: OWrites[A] = new OWrites[A] {
       override def writes(a: A): JsObject = {
         val (tag, json) = tagAndJson(a)
-        Json.obj(discriminator -> tag).deepMerge(json)
+        json + (discriminator -> JsString(tag))
       }
     }
   }
