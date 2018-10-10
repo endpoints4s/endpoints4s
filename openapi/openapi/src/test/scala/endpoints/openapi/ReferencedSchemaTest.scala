@@ -24,7 +24,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
   trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas {
 
-    implicit private val schemaStorage: JsonSchema[Storage] = genericJsonSchema[Storage]
+    implicit private val schemaStorage: JsonSchema[Storage] =
+      withDiscriminator(genericJsonSchema[Storage].asInstanceOf[Tagged[Storage]], "storageType")
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 
@@ -84,7 +85,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |          }
           |        ],
           |        "discriminator" : {
-          |          "propertyName" : "type",
+          |          "propertyName" : "storageType",
           |          "mapping" : {
           |            "Library" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Library",
           |            "Online" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Online"
@@ -98,13 +99,13 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |          },
           |          {
           |            "required" : [
-          |              "type",
+          |              "storageType",
           |              "room",
           |              "shelf"
           |            ],
           |            "type" : "object",
           |            "properties" : {
-          |              "type" : {
+          |              "storageType" : {
           |                "type" : "string"
           |              },
           |              "room" : {
@@ -125,12 +126,12 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |          },
           |          {
           |            "required" : [
-          |              "type",
+          |              "storageType",
           |              "link"
           |            ],
           |            "type" : "object",
           |            "properties" : {
-          |              "type" : {
+          |              "storageType" : {
           |                "type" : "string"
           |              },
           |              "link" : {
