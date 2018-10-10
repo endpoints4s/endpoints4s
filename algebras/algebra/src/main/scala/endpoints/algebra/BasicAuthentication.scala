@@ -29,7 +29,7 @@ trait BasicAuthentication extends Endpoints {
   /**
     * Describes an endpoint protected by Basic HTTP authentication
     */
-  def authenticatedEndpoint[U, E, R, H, UE, DCred](
+  def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](
     method: Method,
     url: Url[U],
     response: Response[R],
@@ -39,10 +39,10 @@ trait BasicAuthentication extends Endpoints {
     summary: Documentation = None,
     description: Documentation = None
   )(implicit
-    tuplerAB: Tupler.Aux[U, E, UE],
-    tuplerDCred: Tupler.Aux[H, Credentials, DCred],
-    tuplerABDCred: Tupler[UE, DCred]
-  ): Endpoint[tuplerABDCred.Out, Option[R]] =
+    tuplerUE: Tupler.Aux[U, E, UE],
+    tuplerHCred: Tupler.Aux[H, Credentials, HCred],
+    tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
+  ): Endpoint[Out, Option[R]] =
     endpoint(
       request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader),
       authenticated(response, unauthenticatedDocs),

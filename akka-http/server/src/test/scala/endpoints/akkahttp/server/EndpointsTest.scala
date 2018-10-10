@@ -24,7 +24,7 @@ class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new Endpoints {
     val singleStaticGetSegment = endpoint[Unit, Unit](
-      get[Unit, Unit](path / "segment1"),
+      get(path / "segment1"),
       (_: Unit) => complete("Ok")
     ).implementedBy(_ => ())
   }

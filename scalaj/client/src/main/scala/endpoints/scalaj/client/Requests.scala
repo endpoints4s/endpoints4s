@@ -46,11 +46,11 @@ trait Requests extends algebra.Requests with Urls with Methods {
   }
 
 
-  def request[U, E, H, UE](method: Method,
+  def request[U, E, H, UE, Out](method: Method,
     url: Url[U],
     entity: RequestEntity[E] = emptyRequest,
     headers: RequestHeaders[H] = emptyHeaders
-  )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler[UE, H]): Request[tuplerUEH.Out] =
+  )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler.Aux[UE, H, Out]): Request[Out] =
     (ueh) => {
       val (ue, h) = tuplerUEH.unapply(ueh)
       val (u, e) = tuplerUE.unapply(ue)

@@ -70,11 +70,11 @@ class Endpoints(val settings: EndpointsSettings)
     (body, request) => request.copy(entity = HttpEntity(body))
 
 
-  def request[A, B, C, AB](
+  def request[A, B, C, AB, Out](
     method: Method, url: Url[A],
     entity: RequestEntity[B], headers: RequestHeaders[C]
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
-    (abc: tuplerABC.Out) => {
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+    (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
       val uri =
