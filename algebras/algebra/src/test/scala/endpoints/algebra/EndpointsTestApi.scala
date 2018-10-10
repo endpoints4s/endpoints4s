@@ -20,7 +20,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val optionalEndpoint: Endpoint[Unit, Option[String]] = endpoint(
-    get[Unit, Unit](path / "users" / "1"),
+    get(path / "users" / "1"),
     option(textResponse())
   )
 

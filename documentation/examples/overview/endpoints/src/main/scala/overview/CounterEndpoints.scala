@@ -18,7 +18,8 @@ trait CounterEndpoints extends Endpoints with JsonEntitiesFromCodec {
     * Uses the HTTP verb “GET” and URL path “/current-value”.
     * The response entity is a JSON document representing the counter value.
     */
-  val currentValue = endpoint(get(path / "current-value"), jsonResponse[Counter]())
+  val currentValue: Endpoint[Unit, Counter] =
+    endpoint(get(path / "current-value"), jsonResponse[Counter]())
 
   /**
     * Increments the counter value.
@@ -26,7 +27,8 @@ trait CounterEndpoints extends Endpoints with JsonEntitiesFromCodec {
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.
     */
-  val increment = endpoint(post(path / "increment", jsonRequest[Increment]()), emptyResponse())
+  val increment: Endpoint[Increment, Unit] =
+    endpoint(post(path / "increment", jsonRequest[Increment]()), emptyResponse())
 
 }
 

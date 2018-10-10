@@ -53,12 +53,12 @@ trait Requests
     DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.simpleString))))
   )
 
-  def request[A, B, C, AB](
+  def request[A, B, C, AB, Out](
     method: Method,
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
     headers: RequestHeaders[C] = emptyHeaders
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     DocumentedRequest(method, url, headers, entity)
 
   implicit lazy val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {

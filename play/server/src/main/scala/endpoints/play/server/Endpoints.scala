@@ -184,7 +184,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     * @param entity Request entity
     * @param headers Request headers
     */
-  def request[A, B, C, AB](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler[AB, C]): Request[tuplerABC.Out] =
+  def request[A, B, C, AB, Out](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
         case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
