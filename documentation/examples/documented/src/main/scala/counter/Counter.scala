@@ -134,7 +134,7 @@ object Main {
   }
 
   class DocumentationServer(protected val playComponents: PlayComponents)
-    extends play.server.Endpoints with play.server.circe.JsonEntities with play.server.Assets {
+    extends play.server.Endpoints with openapi.model.OpenApiSchemas with play.server.circe.JsonSchemaEntities with play.server.Assets {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
