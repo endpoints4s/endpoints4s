@@ -157,4 +157,7 @@ trait JsonSchemas {
     cbf: CanBuildFrom[_, A, C[A]]
   ): JsonSchema[C[A]]
 
+  /** A JSON schema for maps with string keys */
+  implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]]
+
 }
