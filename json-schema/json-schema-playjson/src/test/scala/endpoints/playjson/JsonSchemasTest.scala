@@ -184,6 +184,14 @@ class JsonSchemasTest extends FreeSpec {
     assertError(jsonSchema, input, "error.expected.jsstring")
   }
 
+  "map with string key" in {
+    testRoundtrip(
+      field[Map[String, Boolean]]("relevant"),
+      Json.obj("relevant" -> Json.obj("no" -> JsBoolean(false), "yes" -> JsBoolean(true))),
+      Map("no" -> false, "yes" -> true)
+    )
+  }
+
   "tagged single record" in {
     testRoundtrip(
       field[Double]("x").tagged("Rectangle"),
