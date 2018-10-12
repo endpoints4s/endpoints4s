@@ -128,6 +128,12 @@ trait JsonSchemas
       Writes.traversableWrites(jsonSchema.writes)
     )
 
+  implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]] =
+    JsonSchema(
+      Reads.mapReads(jsonSchema.reads),
+      Writes.mapWrites(jsonSchema.writes)
+    )
+
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
     val reads = (recordA.reads and recordB.reads).tupled
     val writes = new OWrites[(A, B)] {

@@ -187,4 +187,11 @@ trait JsonSchemas
       io.circe.Encoder.encodeIterable[A, C](jsonSchema.encoder, implicitly),
       io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, cbf)
     )
+
+  implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]] =
+    JsonSchema(
+      io.circe.Encoder.encodeMap[String, A](implicitly, jsonSchema.encoder),
+      io.circe.Decoder.decodeMap[String, A](implicitly, jsonSchema.decoder)
+    )
+
 }
