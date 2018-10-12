@@ -40,7 +40,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
       import io.circe.syntax._
 
-      Fixtures.openApi.asJson.spaces2 shouldBe
+      Fixtures.openApi.asJson.spaces2 shouldBe // TODO test
         """{
           |  "components" : {
           |    "schemas" : {
