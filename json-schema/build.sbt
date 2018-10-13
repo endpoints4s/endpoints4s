@@ -29,6 +29,20 @@ lazy val `json-schema-generic` =
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
 
+
+lazy val `json-schema-macros` =
+  crossProject.crossType(CrossType.Pure).in(file("json-schema-macros"))
+    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
+    .settings(
+      name := "endpoints-json-schema-macros",
+      libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      addScalaTestCrossDependency
+    )
+    .dependsOnLocalCrossProjects("json-schema")
+
+lazy val `json-schema-macros-js` = `json-schema-macros`.js
+lazy val `json-schema-macros-jvm` = `json-schema-macros`.jvm
+
 lazy val `json-schema-circe` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema-circe"))
     .settings(

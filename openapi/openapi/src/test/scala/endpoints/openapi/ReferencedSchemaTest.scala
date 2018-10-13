@@ -1,17 +1,14 @@
 package endpoints.openapi
 
 import endpoints.openapi.model._
-import endpoints.{algebra, generic, openapi}
+import endpoints.{algebra, macros, openapi}
 import org.scalatest.{Matchers, WordSpec}
 
 class ReferencedSchemaTest extends WordSpec with Matchers {
 
   sealed trait Storage
-
-  object Storage {
-    case class Library(room: String, shelf: Int) extends Storage
-    case class Online(link: String) extends Storage
-  }
+  case class StorageLibrary(room: String, shelf: Int) extends Storage
+  case class StorageOnline(link: String) extends Storage
 
   case class Author(name: String)
 
@@ -24,7 +21,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
     )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication {
+  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with macros.JsonSchemas with algebra.BasicAuthentication {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
       withDiscriminator(genericJsonSchema[Storage].asInstanceOf[Tagged[Storage]], "storageType")
@@ -147,21 +144,21 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |      "endpoints.openapi.ReferencedSchemaTest.Storage" : {
         |        "oneOf" : [
         |          {
-        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Library"
+        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.StorageLibrary"
         |          },
         |          {
-        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Online"
+        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.StorageOnline"
         |          }
         |        ],
         |        "discriminator" : {
         |          "propertyName" : "storageType",
         |          "mapping" : {
-        |            "Library" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Library",
-        |            "Online" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage.Online"
+        |            "StorageLibrary" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.StorageLibrary",
+        |            "StorageOnline" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.StorageOnline"
         |          }
         |        }
         |      },
-        |      "endpoints.openapi.ReferencedSchemaTest.Storage.Library" : {
+        |      "endpoints.openapi.ReferencedSchemaTest.StorageLibrary" : {
         |        "allOf" : [
         |          {
         |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
@@ -188,7 +185,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |          }
         |        ]
         |      },
-        |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
+        |      "endpoints.openapi.ReferencedSchemaTest.StorageOnline" : {
         |        "allOf" : [
         |          {
         |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
