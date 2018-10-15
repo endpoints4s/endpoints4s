@@ -8,24 +8,22 @@ class Macros(val c: blackbox.Context) extends Utils {
 
   final def genericJsonSchemaImpl[A: c.WeakTypeTag]: c.Tree = {
     val A = weakTypeOf[A]
-    findJsonSchema(A).getOrElse {
+    findJsonSchema(A)
+      .map { t => println(s"JsonSchema[$A] found: $t"); t }
+      .getOrElse {
       c.abort(c.enclosingPosition, s"Can't derive JsonSchema[$A]")
     }
   }
 
   private def findJsonSchema(tpe: Type, allowImplicitSearch: Boolean = false): Option[c.Tree] = {
-    {
-      if(primitiveTypes.exists(tpe <:< _) || allowImplicitSearch)
-        findImplicit(tq"JsonSchema[$tpe]")
-      else
-        None
-    }.orElse {
-        if(tpe <:< typeOf[Seq[_]]) {
-          findSeq(tpe)
-        } else {
-          findRecord(tpe) orElse findTagged(tpe)
-        }
-      }
+    println(s"findJsonSchema($tpe)")
+    if(primitiveTypes.exists(tpe <:< _) || tpe <:< typeOf[Seq[_]]) {
+      findImplicit(tq"JsonSchema[$tpe]")
+    } else {
+      (if (allowImplicitSearch) findImplicit(tq"JsonSchema[$tpe]") else None) orElse
+        findRecord(tpe) orElse
+        findTagged(tpe)
+    }
   }
 
   private val primitiveTypes: Seq[Type] = Seq(
@@ -37,12 +35,6 @@ class Macros(val c: blackbox.Context) extends Utils {
     typeOf[Double],
     typeOf[Boolean]
   )
-
-  private def findSeq(tpe: Type): Option[c.Tree] = {
-    findJsonSchema(tpe.typeArgs.head, allowImplicitSearch = true).map { t =>
-      q"arrayJsonSchema[${tpe.typeConstructor}, ${tpe.typeArgs.head}]($t, _root_.scala.Predef.implicitly)"
-    }
-  }
 
   private def findRecord(tpe: Type): Option[c.Tree] = {
     if(tpe.typeSymbol.isModuleClass) {
@@ -177,6 +169,7 @@ class Macros(val c: blackbox.Context) extends Utils {
   }
 
   private def findImplicit(typeTree: c.Tree): Option[c.Tree] = {
+    println(s"findImplicit($typeTree)")
     val tpeTree = c.typecheck(
       typeTree,
       silent = true,
@@ -188,6 +181,7 @@ class Macros(val c: blackbox.Context) extends Utils {
     scala.util
       .Try(c.inferImplicitValue(tpeTree.tpe, silent = true, withMacrosDisabled = true))
       .toOption
+      .map { t => println(s"implicit found for $typeTree: $t"); t}
       .filterNot(_ == EmptyTree)
   }
 

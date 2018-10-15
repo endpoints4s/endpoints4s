@@ -36,6 +36,7 @@ lazy val `json-schema-macros` =
     .settings(
       name := "endpoints-json-schema-macros",
       libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      scalacOptions += "-Xlog-implicits",
       addScalaTestCrossDependency
     )
     .dependsOnLocalCrossProjects("json-schema")
