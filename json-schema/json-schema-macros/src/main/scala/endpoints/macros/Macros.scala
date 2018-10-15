@@ -14,9 +14,12 @@ class Macros(val c: blackbox.Context) extends Utils {
   }
 
   private def findJsonSchema(tpe: Type, allowImplicitSearch: Boolean = false): Option[c.Tree] = {
-    findPrimitive(tpe)
-      .orElse(if(allowImplicitSearch) findImplicit(tq"JsonSchema[$tpe]") else None)
-      .orElse {
+    {
+      if(primitiveTypes.exists(tpe <:< _) || allowImplicitSearch)
+        findImplicit(tq"JsonSchema[$tpe]")
+      else
+        None
+    }.orElse {
         if(tpe <:< typeOf[Seq[_]]) {
           findSeq(tpe)
         } else {
@@ -25,25 +28,15 @@ class Macros(val c: blackbox.Context) extends Utils {
       }
   }
 
-  private def findPrimitive(tpe: Type): Option[c.Tree] = {
-    if(tpe <:< typeOf[String]) {
-      Some(Ident(TermName("stringJsonSchema")))
-    } else if (tpe <:< typeOf[Int]) {
-      Some(Ident(TermName("intJsonSchema")))
-    } else if (tpe <:< typeOf[Long]) {
-      Some(Ident(TermName("longJsonSchema")))
-    } else if (tpe <:< typeOf[BigDecimal]) {
-      Some(Ident(TermName("bigdecimalJsonSchema")))
-    } else if (tpe <:< typeOf[Float]) {
-      Some(Ident(TermName("floatJsonSchema")))
-    } else if (tpe <:< typeOf[Double]) {
-      Some(Ident(TermName("doubleJsonSchema")))
-    } else if (tpe <:< typeOf[Boolean]) {
-      Some(Ident(TermName("booleanJsonSchema")))
-    } else {
-      None
-    }
-  }
+  private val primitiveTypes: Seq[Type] = Seq(
+    typeOf[String],
+    typeOf[Int],
+    typeOf[Long],
+    typeOf[BigDecimal],
+    typeOf[Float],
+    typeOf[Double],
+    typeOf[Boolean]
+  )
 
   private def findSeq(tpe: Type): Option[c.Tree] = {
     findJsonSchema(tpe.typeArgs.head, allowImplicitSearch = true).map { t =>
@@ -183,17 +176,17 @@ class Macros(val c: blackbox.Context) extends Utils {
     }
   }
 
-  private def findImplicit(typeTree: c.Tree, macrosDisabled: Boolean = true): Option[c.Tree] = {
+  private def findImplicit(typeTree: c.Tree): Option[c.Tree] = {
     val tpeTree = c.typecheck(
       typeTree,
       silent = true,
       mode = c.TYPEmode,
       withImplicitViewsDisabled = true,
-      withMacrosDisabled = macrosDisabled
+      withMacrosDisabled = true
     )
 
     scala.util
-      .Try(c.inferImplicitValue(tpeTree.tpe, silent = true, withMacrosDisabled = macrosDisabled))
+      .Try(c.inferImplicitValue(tpeTree.tpe, silent = true, withMacrosDisabled = true))
       .toOption
       .filterNot(_ == EmptyTree)
   }

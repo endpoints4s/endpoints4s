@@ -117,55 +117,59 @@ trait GenericSchemas extends JsonSchemas {
 
 object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas {
 
-  type JsonSchema[+A] = String
-  type Record[+A] = String
-  type Tagged[+A] = String
+  trait Tag[+A]
+  import language.implicitConversions
+  implicit def autoTag[T](s: String): String with Tag[T] = s.asInstanceOf[String with Tag[T]]
+
+  type JsonSchema[+A] = String with Tag[A]
+  type Record[+A] = String with Tag[A]
+  type Tagged[+A] = String with Tag[A]
 
   override def named[A, S[T] <: String](schema: S[A], name: String): S[A] =
     s"'$name'!($schema)".asInstanceOf[S[A]]
 
-  def emptyRecord: String =
+  def emptyRecord: Record[Unit] =
     "$"
 
-  def field[A](name: String, docs: Option[String])(implicit tpe: String): String =
+  def field[A](name: String, docs: Option[String])(implicit tpe: JsonSchema[A]): Record[A] =
     s"$name:$tpe"
 
-  def optField[A](name: String, docs: Option[String])(implicit tpe: String): String =
+  def optField[A](name: String, docs: Option[String])(implicit tpe: JsonSchema[A]): Record[Option[A]] =
     s"$name:$tpe?"
 
-  def taggedRecord[A](recordA: String, tag: String): String =
+  def taggedRecord[A](recordA: Record[A], tag: String): Record[A] =
     s"$recordA@$tag"
 
   def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
     s"$tagged#$discriminatorName"
 
-  def choiceTagged[A, B](taggedA: String, taggedB: String): String =
+  def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] =
     s"$taggedA|$taggedB"
 
-  def zipRecords[A, B](recordA: String, recordB: String): String =
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] =
     s"$recordA,$recordB"
 
-  def invmapRecord[A, B](record: String, f: A => B, g: B => A): String = record
+  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] = record
 
-  def invmapTagged[A, B](tagged: String, f: A => B, g: B => A): String = tagged
+  def invmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] = tagged
 
-  def invmapJsonSchema[A, B](jsonSchema: String, f: A => B, g: B => A): String = jsonSchema
+  def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] = jsonSchema
 
-  lazy val stringJsonSchema: String = "string"
+  lazy val stringJsonSchema: JsonSchema[String] = "string"
 
-  lazy val intJsonSchema: String = "int"
+  lazy val intJsonSchema: JsonSchema[Int] = "int"
 
-  lazy val longJsonSchema: String = "long"
+  lazy val longJsonSchema: JsonSchema[Long] = "long"
 
-  lazy val bigdecimalJsonSchema: String = "bigdecimal"
+  lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = "bigdecimal"
 
-  lazy val floatJsonSchema: String = "float"
+  lazy val floatJsonSchema: JsonSchema[Float] = "float"
 
-  lazy val doubleJsonSchema: String = "double"
+  lazy val doubleJsonSchema: JsonSchema[Double] = "double"
 
-  lazy val booleanJsonSchema: String = "boolean"
+  lazy val booleanJsonSchema: JsonSchema[Boolean] = "boolean"
 
-  def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: String,
-                                         cbf: CanBuildFrom[_, A, C[A]]): String =
+  def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A],
+                                         cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =
     s"[$jsonSchema]"
 }
