@@ -19,14 +19,16 @@ import scala.language.higherKinds
   */
 trait JsonEntities extends Endpoints {
 
+//#request-response-types
   /** Type class defining how to represent the `A` information as a JSON request entity */
   type JsonRequest[A]
 
-  /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
-  def jsonRequest[A : JsonRequest](docs: Documentation = None): RequestEntity[A]
-
   /** Type class defining how to represent the `A` information as a JSON response entity */
   type JsonResponse[A]
+//#request-response-types
+
+  /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
+  def jsonRequest[A : JsonRequest](docs: Documentation = None): RequestEntity[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]` */
   def jsonResponse[A : JsonResponse](docs: Documentation = None): Response[A]
@@ -42,8 +44,10 @@ trait JsonEntitiesFromCodec extends JsonEntities {
   type JsonRequest[A] = Codec[String, A]
   type JsonResponse[A] = Codec[String, A]
 
+//#json-codec-type
   /** A JSON codec type class */
   type JsonCodec[A]
+//#json-codec-type
 
   /** Turns a JsonCodec[A] into a Codec[String, A] */
   implicit def jsonCodec[A : JsonCodec]: Codec[String, A]
