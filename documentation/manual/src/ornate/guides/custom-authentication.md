@@ -186,7 +186,7 @@ constructor is private. If it was public, clients could build
 a fake authentication token which would then fail at runtime
 because the server would reject it when seeing that it is not
 correctly signed. By making the constructor private, we simply
-make it possible to reach such a runtime error.
+make it impossible to reach such a runtime error.
 
 The `AuthenticationToken` class contains the serialized token
 as well as the decoded `UserInfo`.

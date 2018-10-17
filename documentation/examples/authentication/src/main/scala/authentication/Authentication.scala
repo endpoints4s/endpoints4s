@@ -203,7 +203,7 @@ trait ServerAuthentication
       }
   }
 
-  // Does nothing because `userInfoRequestHeaders` already
+  // Does nothing because `authenticationTokenRequestHeaders` already
   // takes care of returning `Unauthorized` if the request
   // is not properly authenticated
   def wheneverAuthenticated[A](response: Response[A]): Response[A] = response
