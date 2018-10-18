@@ -57,7 +57,9 @@ import io.circe.{Json, parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
   */
 trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
 
+//#type-carrier
   type JsonCodec[A] = CirceCodec[A]
+//#type-carrier
 
   implicit def jsonCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
 

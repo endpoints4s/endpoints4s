@@ -10,7 +10,9 @@ trait JsonSchemaEntities
   extends endpoints.algebra.JsonEntities
     with JsonSchemas {
 
+//#type-carrier
   type JsonRequest[A] = JsonSchema[A]
   type JsonResponse[A] = JsonSchema[A]
+//#type-carrier
 
 }
