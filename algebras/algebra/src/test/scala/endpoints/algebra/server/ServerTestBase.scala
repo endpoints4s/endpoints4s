@@ -16,7 +16,11 @@ trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
 
   val serverApi: T
 
-  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp): Server
+  /**
+    * @param runTests A function that is called after the server is started and before it is stopped. It takes
+    *                 the TCP port number as parameter.
+    */
+  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit
 
 }
 

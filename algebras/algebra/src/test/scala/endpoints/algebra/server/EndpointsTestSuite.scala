@@ -12,15 +12,12 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ServerTestBase[T] {
 
         val mockedResponse = "interpretedServerResponse"
 
-        val server = serveEndpoint(serverApi.smokeEndpoint, mockedResponse)
-        server.start()
-
-        val response  = sttp.get(uri"http://localhost:${server.port}/user/userId/description?name=name1&age=18").send()
-        assert(response.body.isRight)
-        assert(response.body.right.get == mockedResponse)
-        assert(response.code == 200)
-
-        server.stop()
+        serveEndpoint(serverApi.smokeEndpoint, mockedResponse) { port =>
+          val response  = sttp.get(uri"http://localhost:$port/user/userId/description?name=name1&age=18").send()
+          assert(response.body.isRight)
+          assert(response.body.right.get == mockedResponse)
+          assert(response.code == 200)
+        }
       }
     }
   }
