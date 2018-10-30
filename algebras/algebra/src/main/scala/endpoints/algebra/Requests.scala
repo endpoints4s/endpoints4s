@@ -89,5 +89,27 @@ trait Requests extends Urls with Methods with InvariantFunctorSyntax with Semigr
     headers: RequestHeaders[HeadersP] = emptyHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] = request(Post, url, entity, headers)
 
+  /**
+    * Helper method to perform UPDATE request
+    * @tparam UrlP Payload carried by url
+    * @tparam BodyP Payload carried by body
+    * @tparam HeadersP Payload carried by headers
+    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    */
+  final def update[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
+    url: Url[UrlP],
+    entity: RequestEntity[BodyP],
+    headers: RequestHeaders[HeadersP] = emptyHeaders
+  )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] = request(Put, url, entity, headers)
+
+  /**
+    * Helper method to perform DELETE request
+    * @tparam UrlP Payload carried by url
+    * @tparam HeadersP Payload carried by headers
+    */
+  final def delete[UrlP, HeadersP, Out](
+    url: Url[UrlP],
+    headers: RequestHeaders[HeadersP] = emptyHeaders
+  )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] = request(Delete, url, headers = headers)
 
 }
