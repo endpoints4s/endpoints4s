@@ -68,7 +68,7 @@ object EndpointsSettings {
   // --- Common dependencies
 
   val circeVersion = "0.10.0"
-  val playjsonVersion = "2.6.9"
+  val playjsonVersion = "2.6.10"
   val playVersion = "2.6.15"
 
   val scalaTestVersion = "3.0.4"

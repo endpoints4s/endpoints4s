@@ -39,7 +39,7 @@ val `algebra-playjson` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-algebra-playjson",
-      libraryDependencies += "com.typesafe.play" %%% "play-json" % "2.6.9"
+      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
 
