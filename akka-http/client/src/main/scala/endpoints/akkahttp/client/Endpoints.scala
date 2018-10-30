@@ -108,7 +108,7 @@ class Endpoints(val settings: EndpointsSettings)
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
 
-  override def option[A](inner: HttpResponse => Future[Either[Throwable, A]], notFoundDocs: Documentation): HttpResponse => Future[Either[Throwable, Option[A]]] = {
+  override def wheneverFound[A](inner: HttpResponse => Future[Either[Throwable, A]], notFoundDocs: Documentation): HttpResponse => Future[Either[Throwable, Option[A]]] = {
     {
       case resp if resp.status.intValue() == 404 => Future.successful(Right(None))
       case resp => inner(resp).map(_.right.map(Some(_)))
