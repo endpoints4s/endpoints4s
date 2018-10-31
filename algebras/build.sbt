@@ -8,7 +8,6 @@ val algebra =
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.6.0" % Test,
-        "com.softwaremill.sttp" %% "core" % sttpVersion % Test,
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
