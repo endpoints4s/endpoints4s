@@ -14,7 +14,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val putEndpoint = endpoint(
-    update(path / "user" / segment[String](), emptyRequest),
+    put(path / "user" / segment[String](), emptyRequest),
     emptyResponse()
   )
 
