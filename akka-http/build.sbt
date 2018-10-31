@@ -35,6 +35,7 @@ val `akka-http-server` =
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
         "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion % Provided,
+        "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency
       )
     )
