@@ -21,7 +21,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val optionalEndpoint: Endpoint[Unit, Option[String]] = endpoint(
     get(path / "users" / "1"),
-    option(textResponse())
+    wheneverFound(textResponse())
   )
 
   val headers1 = header("A") ++ header("B")

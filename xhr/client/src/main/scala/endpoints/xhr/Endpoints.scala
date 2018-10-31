@@ -122,7 +122,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /**
     * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.
     */
-  def option[A](
+  def wheneverFound[A](
     response: js.Function1[XMLHttpRequest, Either[Exception, A]],
     notFoundDocs: Documentation
   ): js.Function1[XMLHttpRequest, Either[Exception, Option[A]]] =

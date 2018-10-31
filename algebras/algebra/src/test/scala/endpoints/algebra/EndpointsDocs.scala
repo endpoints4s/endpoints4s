@@ -57,7 +57,7 @@ trait EndpointsDocs extends Endpoints {
   //#response-combinator
   // An HTTP response with status code 404 (Not Found) and no entity,
   // or with status code 200 (Ok) and a text entity.
-  val maybeText: Response[Option[String]] = option(textResponse())
+  val maybeText: Response[Option[String]] = wheneverFound(textResponse())
   //#response-combinator
 
   // Shared definition used by the documentation of interpreters

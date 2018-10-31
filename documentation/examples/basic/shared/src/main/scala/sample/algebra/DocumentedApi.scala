@@ -19,7 +19,7 @@ trait DocumentedApi
   val item =
     endpoint(
       get(path / "item" / itemId),
-      option(jsonResponse[Item](Some("The item identified by 'id'")), Some("Item not found"))
+      wheneverFound(jsonResponse[Item](Some("The item identified by 'id'")), Some("Item not found"))
     )
 
   val admin =
