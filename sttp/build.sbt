@@ -3,8 +3,6 @@ import EndpointsSettings._
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
-val sttpVersion = "1.1.13"
-
 val `sttp-client` =
   project.in(file("client"))
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
