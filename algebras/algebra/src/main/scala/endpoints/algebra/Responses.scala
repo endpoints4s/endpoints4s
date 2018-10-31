@@ -28,5 +28,10 @@ trait Responses {
     */
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation = None): Response[Option[A]]
 
+  /** Extensions for [[Response]]. */
+  implicit class ResponseExtensions[A](response: Response[A]) {
+    /** syntax for `wheneverFound` */
+    final def orNotFound(notFoundDocs: Documentation = None): Response[Option[A]] = wheneverFound(response, notFoundDocs)
+  }
 
 }
