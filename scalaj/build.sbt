@@ -10,7 +10,7 @@ val `scalaj-client` =
     .settings(
       name := "endpoints-scalaj-client",
       libraryDependencies ++= Seq(
-        "org.scalaj" %% "scalaj-http" % "2.3.0"
+        "org.scalaj" %% "scalaj-http" % "2.4.1"
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
