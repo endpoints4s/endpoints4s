@@ -8,7 +8,7 @@ val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
 val akkaHttpVersion = "10.0.1"
 val akkaHttpJsonVersion = "1.18.1"
-val akkaHttpCirceVersion = "1.21.0"
+val akkaHttpCirceVersion = "1.21.1"
 
 val `akka-http-client` =
   project.in(file("client"))
