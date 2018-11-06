@@ -206,8 +206,8 @@ val `example-cqrs-web-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "in.nvilla" %%% "monadic-html" % "0.2.2",
-        "in.nvilla" %%% "monadic-rx-cats" % "0.2.2",
+        "in.nvilla" %%% "monadic-html" % "0.2.3",
+        "in.nvilla" %%% "monadic-rx-cats" % "0.2.3",
         "org.julienrf" %%% "faithful-cats" % "1.1.0",
         "org.scala-js" %%% "scalajs-java-time" % "0.2.5"
       ),
