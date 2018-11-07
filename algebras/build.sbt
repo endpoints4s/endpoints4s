@@ -25,7 +25,7 @@ val `algebra-circe` =
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-parser" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion % Test,
-        compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" % Test cross CrossVersion.full)
+        compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" % Test cross CrossVersion.full)
       )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
