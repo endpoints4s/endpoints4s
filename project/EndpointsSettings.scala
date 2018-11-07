@@ -72,7 +72,7 @@ object EndpointsSettings {
   val playVersion = "2.6.15"
   val sttpVersion = "1.4.2"
 
-  val scalaTestVersion = "3.0.4"
+  val scalaTestVersion = "3.0.5"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
 
