@@ -163,7 +163,7 @@ val `example-basic-play-server` =
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       unmanagedResources in Compile += (fastOptJS in(`example-basic-client`, Compile)).map(_.data).value,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.2",
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.6.6",
       libraryDependencies += "com.typesafe.play" %% "play" % playVersion
     )
     .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
