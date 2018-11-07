@@ -335,7 +335,7 @@ val `example-authentication` =
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "0.18.0",
+        "com.pauldijou" %% "jwt-play" % "0.19.0",
         "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
       ),
       testFrameworks += new TestFramework("utest.runner.Framework")
