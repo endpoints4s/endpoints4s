@@ -115,7 +115,7 @@ val `example-basic-shared` = {
   CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
