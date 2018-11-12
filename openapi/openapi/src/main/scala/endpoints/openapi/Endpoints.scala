@@ -118,6 +118,8 @@ trait Endpoints
         properties.map(_.schema).flatMap(captureReferencedSchemasRec)
       case Schema.Array(elementType) =>
         captureReferencedSchemasRec(elementType)
+      case Schema.Enum(elementType, _) =>
+        captureReferencedSchemasRec(elementType)
       case Schema.Primitive(_, _) =>
         Nil
       case Schema.OneOf(_, alternatives, _) =>

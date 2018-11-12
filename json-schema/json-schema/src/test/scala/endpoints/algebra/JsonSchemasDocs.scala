@@ -47,4 +47,17 @@ trait JsonSchemasDocs extends JsonSchemas {
     }
   }
 
+  locally {
+    //#enum-status
+    sealed trait Status
+    case object Active extends Status
+    case object Inactive extends Status
+    case object Obsolete extends Status
+    //#enum-status
+    //#enum-status-schema
+    implicit lazy val statusSchema: JsonSchema[Status] =
+      enumeration[Status](Seq(Active, Inactive, Obsolete))(_.toString)
+    //#enum-status-schema
+  }
+
 }

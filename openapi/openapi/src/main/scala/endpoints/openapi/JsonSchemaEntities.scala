@@ -37,6 +37,8 @@ trait JsonSchemaEntities
         Schema.Primitive(name, format)
       case Array(elementType) =>
         Schema.Array(toSchema(elementType))
+      case DocumentedEnum(elementType, values) =>
+        Schema.Enum(toSchema(elementType), values)
     }
   }
 

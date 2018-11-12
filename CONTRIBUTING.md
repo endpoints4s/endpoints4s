@@ -41,7 +41,7 @@ $ sbt "+++ 2.12.4 test"
 ### Preview the documentation
 
 ~~~ sh
-$ sbt +manual/previewAuto
+$ sbt +manual/previewSite
 ~~~
 
 And then go to http://localhost:4000.
