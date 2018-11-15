@@ -72,6 +72,15 @@ trait JsonSchemas {
     */
   type Tagged[A] <: JsonSchema[A]
 
+  /** A JSON schema for enumerations, i.e. types that have a restricted set of values. */
+  type Enum[A] <: JsonSchema[A]
+
+  /** Promotes a schema to an enumeration and converts between enum constants and JSON strings.
+    * Decoding fails if the input string does not match the encoded values of any of the possible values.
+    * Encoding does never fail, even if the value is not contained in the set of possible values.
+    * */
+  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A]
+
   /** Annotates JSON schema with a name */
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A]
 

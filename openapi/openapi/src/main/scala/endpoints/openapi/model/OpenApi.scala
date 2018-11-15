@@ -195,6 +195,8 @@ object Schema {
 
   case class Array(elementType: Schema) extends Schema
 
+  case class Enum(elementType: Schema, values: Seq[String]) extends Schema
+
   case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
 
   case class Primitive(name: String, format: Option[String]) extends Schema
@@ -229,6 +231,8 @@ object Schema {
             "items" -> jsonEncoder.apply(elementType) ::
             Nil
         )
+      case Enum(elementType, values) =>
+        jsonEncoder.encodeObject(elementType).add("enum", Json.fromValues(values.map(Json.fromString)))
       case Object(properties, description) =>
         val fields =
           "type" -> Json.fromString("object") ::
