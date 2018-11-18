@@ -8,51 +8,51 @@ class JsonSchemasTest extends FreeSpec {
 
   "macros derive JsonSchema for primitives" in {
 
-    assert(genericJsonSchema[String].schema == "string")
-    assert(genericJsonSchema[Int].schema == "int")
-//    assert(genericJsonSchema[Long].schema == "long")
-//    assert(genericJsonSchema[BigDecimal].schema == "bigdecimal")
-    assert(genericJsonSchema[Float].schema == "float")
-    assert(genericJsonSchema[Double].schema == "double")
-//    assert(genericJsonSchema[Boolean].schema == "boolean")
+    assert(genericJsonSchema[String] == "string")
+    assert(genericJsonSchema[Int] == "int")
+    assert(genericJsonSchema[Long] == "long")
+    assert(genericJsonSchema[BigDecimal] == "bigdecimal")
+    assert(genericJsonSchema[Float] == "float")
+    assert(genericJsonSchema[Double] == "double")
+    assert(genericJsonSchema[Boolean] == "boolean")
   }
 
   "macros derive JsonSchema for case class" in {
 
-    assert(Foo.schema.schema == "'endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)")
+    assert(fooSchema == "'endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)")
   }
 
   "macros derive JsonSchema for sequence types" in {
 
-    assert(listIntSchema.schema == "[int]")
-    assert(seqFooSchema.schema == "['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)]")
+    assert(listIntSchema == "[int]")
+    assert(seqFooSchema == "['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)]")
   }
 
   "macros derive JsonSchema for records" in {
 
-    assert(Foo.schema.schema == "'endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)")
+    assert(fooSchema == "'endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)")
 
-//    assert(QuuxA.schema.schema == "'endpoints.macros.ExampleDomain.QuuxA'!(ss:['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)])")
-//    assert(QuuxB.schema.schema == "'endpoints.macros.ExampleDomain.QuuxB'!(i:int)")
-//    assert(QuuxC.schema.schema == "'endpoints.macros.ExampleDomain.QuuxC'!(b:boolean)")
-//    assert(QuuxD.schema.schema == "'endpoints.macros.ExampleDomain.QuuxD'!($)")
-//    assert(QuuxE.schema.schema == "'endpoints.macros.ExampleDomain.QuuxE'!($)")
+    assert(QuuxA.schema == "'endpoints.macros.ExampleDomain.QuuxA'!(ss:['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)])")
+    assert(QuuxB.schema == "'endpoints.macros.ExampleDomain.QuuxB'!(i:int)")
+    assert(QuuxC.schema == "'endpoints.macros.ExampleDomain.QuuxC'!(b:boolean)")
+    assert(QuuxD.schema == "'endpoints.macros.ExampleDomain.QuuxD'!($)")
+    assert(QuuxE.schema == "'endpoints.macros.ExampleDomain.QuuxE'!($)")
   }
 
   "macros derive JsonSchema for sum types" in {
 
-//    assert(SingleCaseBase.schema.schema == "'endpoints.macros.ExampleDomain.SingleCaseBase'!('endpoints.macros.ExampleDomain.SingleCaseInst'!(foo:string)@SingleCaseInst)")
-//    assert(Quux.schema.schema == "'endpoints.macros.ExampleDomain.Quux'!('endpoints.macros.ExampleDomain.QuuxA'!(ss:['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)])@QuuxA|'endpoints.macros.ExampleDomain.QuuxB'!(i:int)@QuuxB|'endpoints.macros.ExampleDomain.QuuxC'!(b:boolean)@QuuxC|'endpoints.macros.ExampleDomain.QuuxD'!($)@QuuxD|'endpoints.macros.ExampleDomain.QuuxE'!($)@QuuxE)")
+    assert(SingleCaseBase.schema == "'endpoints.macros.ExampleDomain.SingleCaseBase'!('endpoints.macros.ExampleDomain.SingleCaseInst'!(foo:string)@SingleCaseInst)")
+    assert(Quux.schema == "'endpoints.macros.ExampleDomain.Quux'!('endpoints.macros.ExampleDomain.QuuxA'!(ss:['endpoints.macros.ExampleDomain.Foo'!(bar:string,baz:int,qux:boolean?)])@QuuxA|'endpoints.macros.ExampleDomain.QuuxB'!(i:int)@QuuxB|'endpoints.macros.ExampleDomain.QuuxC'!(b:boolean)@QuuxC|'endpoints.macros.ExampleDomain.QuuxD'!($)@QuuxD|'endpoints.macros.ExampleDomain.QuuxE'!($)@QuuxE)")
   }
 
   "macros derive JsonSchema for generic types" in {
 
-    assert(Id.schema[Int].schema == "string")
-    assert(Id.schema[Float].schema == "string")
-    assert(Id.schema[Foo].schema == "string")
+    assert(Id.schema[Int] == "string")
+    assert(Id.schema[Float] == "string")
+    assert(Id.schema[Foo] == "string")
 
-    assert(User.schema[Int].schema == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
-    assert(User.schema[Float].schema == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
-    assert(User.schema[Foo].schema == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
+    assert(User.schema[Int] == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
+    assert(User.schema[Float] == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
+    assert(User.schema[Foo] == "'endpoints.macros.ExampleDomain.User'!(id:'endpoints.macros.ExampleDomain.Id'!(id:string),name:string)")
   }
 }
