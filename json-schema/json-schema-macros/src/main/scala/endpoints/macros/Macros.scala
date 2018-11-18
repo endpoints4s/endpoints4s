@@ -169,14 +169,15 @@ class Macros(val c: blackbox.Context) extends Utils {
   }
 
   private def findImplicit(typeTree: c.Tree): Option[c.Tree] = {
-    println(s"findImplicit($typeTree)")
+    println(s"findImplicit($typeTree : ${typeTree.tpe})")
     val tpeTree = c.typecheck(
       typeTree,
-      silent = true,
       mode = c.TYPEmode,
+      silent = true,
       withImplicitViewsDisabled = true,
-      withMacrosDisabled = true
+      withMacrosDisabled = true,
     )
+    println(s"type tree: $tpeTree: ${tpeTree.tpe}")
 
     scala.util
       .Try(c.inferImplicitValue(tpeTree.tpe, silent = true, withMacrosDisabled = true))
