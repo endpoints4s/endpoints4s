@@ -126,7 +126,7 @@ class Macros(val c: blackbox.Context) extends Utils {
         None
       } else {
         val taggedRecords = (instances zip instanceJsonSchema.flatten).map { case (instance, jsonSchema) =>
-          q"taggedRecord[${instance.tpe}]($jsonSchema, ${instance.name.decodedName.toString})"
+          q"taggedRecord[${instance.tpe}]($jsonSchema.asInstanceOf[Record[${instance.tpe}]], ${instance.name.decodedName.toString})"
         }
 
         val n = taggedRecords.length

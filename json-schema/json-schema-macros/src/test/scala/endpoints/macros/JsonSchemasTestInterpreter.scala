@@ -5,7 +5,7 @@ import language.higherKinds
 import language.implicitConversions
 
 
-trait TrivialJsonSchemaInterpreter extends endpoints.algebra.JsonSchemas {
+trait JsonSchemasTestInterpreter extends endpoints.algebra.JsonSchemas {
 
   // use tagged types in tests to avoid ambiguous implicit searches on primitives
   trait Tag[+A]

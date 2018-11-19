@@ -9,7 +9,7 @@ lazy val openapi =
       `scala 2.11 to 2.12`,
       name := "endpoints-openapi"
     )
-    .dependsOnLocalCrossProjects("json-schema-macros")
+    .dependsOnLocalCrossProjects("json-schema-generic")
     .dependsOnLocalCrossProjectsWithScope(
       "algebra" -> "test->test;compile->compile",
       "json-schema" -> "test->test;compile->compile",
