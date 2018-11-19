@@ -172,7 +172,7 @@ class Macros(val c: blackbox.Context) extends Utils {
       mode = c.TYPEmode,
       silent = true,
       withImplicitViewsDisabled = true,
-      withMacrosDisabled = true,
+      withMacrosDisabled = true
     )
 
     scala.util
