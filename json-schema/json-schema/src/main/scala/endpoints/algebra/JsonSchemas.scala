@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import java.util.UUID
+
 import scala.collection.generic.CanBuildFrom
 import scala.language.higherKinds
 
@@ -138,6 +140,9 @@ trait JsonSchemas {
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
     def invmap[B](f: A => B)(g: B => A): Tagged[B] = invmapTagged(taggedA, f, g)
   }
+
+  /** A JSON schema for type `UUID` */
+  implicit def uuidJsonSchema: JsonSchema[UUID]
 
   /** A JSON schema for type `String` */
   implicit def stringJsonSchema: JsonSchema[String]

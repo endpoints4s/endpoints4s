@@ -2,6 +2,7 @@ package endpoints.play.server
 
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
+import java.util.UUID
 
 import endpoints.Tupler
 import endpoints.algebra
@@ -61,6 +62,12 @@ trait Urls extends algebra.Urls {
     def encode(a: A): String
   }
   //#segment
+
+  implicit def uuidSegment: Segment[UUID] =
+    new Segment[UUID] {
+      def decode(segment: String) = Try(UUID.fromString(segment)).toOption
+      def encode(u: UUID) = URLEncoder.encode(u.toString, utf8Name)
+    }
 
   implicit def stringSegment: Segment[String] =
     new Segment[String] {
@@ -126,6 +133,14 @@ trait Urls extends algebra.Urls {
     def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
+
+  implicit def uuidQueryString: QueryStringParam[UUID] =
+    new QueryStringParam[UUID] {
+      def decode(name: String, qs: Map[String, Seq[String]]) =
+        qs.get(name).flatMap(_.headOption).flatMap(s => Try(UUID.fromString(s)).toOption)
+      def encode(name: String, u: UUID) =
+        Map(name -> Seq(u.toString))
+    }
 
   implicit def stringQueryString: QueryStringParam[String] =
     new QueryStringParam[String] {

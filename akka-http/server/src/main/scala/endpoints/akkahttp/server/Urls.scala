@@ -1,5 +1,7 @@
 package endpoints.akkahttp.server
 
+import java.util.UUID
+
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
 import endpoints.algebra.Documentation
@@ -33,6 +35,8 @@ trait Urls extends algebra.Urls {
   // Query strings
   //***************
 
+  implicit lazy val uuidQueryString: QueryStringParam[UUID] = Unmarshaller.strict[String, UUID](UUID.fromString)
+
   implicit def intQueryString: QueryStringParam[Int] = PredefinedFromStringUnmarshallers.intFromStringUnmarshaller
 
   implicit def stringQueryString: QueryStringParam[String] = Unmarshaller.identityUnmarshaller[String]
@@ -59,6 +63,8 @@ trait Urls extends algebra.Urls {
   // ********
   // Paths
   // ********
+
+  implicit def uuidSegment: Segment[UUID] = JavaUUID
 
   implicit def intSegment: Segment[Int] = IntNumber
 

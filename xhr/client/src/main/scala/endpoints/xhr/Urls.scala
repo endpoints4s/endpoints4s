@@ -1,5 +1,7 @@
 package endpoints.xhr
 
+import java.util.UUID
+
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Tupler, algebra}
 
@@ -19,6 +21,9 @@ trait Urls extends algebra.Urls {
     def encode(a: A): String
   }
   //#segment
+
+  implicit lazy val uuidSegment: Segment[UUID] =
+    (u: UUID) => u.toString
 
   implicit lazy val stringSegment: Segment[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
@@ -56,6 +61,8 @@ trait Urls extends algebra.Urls {
     /** @return An URL encoded query string parameter value (e.g. "a%20b") */
     def encode(a: A): String
   }
+  implicit lazy val uuidQueryString: QueryStringParam[UUID] =
+    (u: UUID) => u.toString
 
   implicit lazy val stringQueryString: QueryStringParam[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)

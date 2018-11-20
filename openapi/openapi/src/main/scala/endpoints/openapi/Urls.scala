@@ -1,6 +1,8 @@
 package endpoints
 package openapi
 
+import java.util.UUID
+
 import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
 
@@ -35,6 +37,8 @@ trait Urls extends algebra.Urls {
 
   type QueryStringParam[A] = Schema
 
+  def uuidQueryString: QueryStringParam[UUID] = Schema.simpleUUID
+
   def stringQueryString: QueryStringParam[String] = Schema.simpleString
 
   def intQueryString: QueryStringParam[Int] = Schema.simpleInteger
@@ -42,6 +46,8 @@ trait Urls extends algebra.Urls {
   def longQueryString: QueryStringParam[Long] = Schema.simpleInteger
 
   type Segment[A] = Schema
+
+  def uuidSegment: Segment[UUID] = Schema.simpleUUID
 
   def stringSegment: Segment[String] = Schema.simpleString
 

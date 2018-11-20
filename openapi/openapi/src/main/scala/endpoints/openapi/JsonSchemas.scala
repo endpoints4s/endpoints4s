@@ -81,6 +81,8 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   def invmapJsonSchema[A, B](jsonSchema: DocumentedJsonSchema, f: A => B, g: B => A): DocumentedJsonSchema = jsonSchema
 
+  lazy val uuidJsonSchema: DocumentedJsonSchema = Primitive("uuid")
+
   lazy val stringJsonSchema: DocumentedJsonSchema = Primitive("string")
 
   lazy val intJsonSchema: DocumentedJsonSchema = Primitive("integer", format = Some("int32"))

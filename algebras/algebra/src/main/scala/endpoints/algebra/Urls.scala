@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import java.util.UUID
+
 import endpoints.{InvariantFunctor, Tupler}
 
 import scala.language.{higherKinds, implicitConversions}
@@ -73,6 +75,9 @@ trait Urls {
     */
   type QueryStringParam[A]
 
+  /** Ability to define `UUID` query string parameters */
+  implicit def uuidQueryString: QueryStringParam[UUID]
+
   /** Ability to define `String` query string parameters */
   implicit def stringQueryString: QueryStringParam[String]
 
@@ -86,6 +91,9 @@ trait Urls {
     * An URL path segment carrying an `A` information.
     */
   type Segment[A]
+
+  /** Ability to define `UUID` path segments */
+  implicit def uuidSegment: Segment[UUID]
 
   /** Ability to define `String` path segments */
   implicit def stringSegment: Segment[String]

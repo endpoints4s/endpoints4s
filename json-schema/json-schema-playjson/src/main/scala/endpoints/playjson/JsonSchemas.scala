@@ -1,5 +1,7 @@
 package endpoints.playjson
 
+import java.util.UUID
+
 import endpoints.algebra
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -84,6 +86,8 @@ trait JsonSchemas
       (__ \ name).readNullable(tpe.reads),
       (__ \ name).writeNullable(tpe.writes)
     )
+
+  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 
