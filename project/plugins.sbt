@@ -14,7 +14,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.0")
 
 addSbtPlugin("com.novocode" % "sbt-ornate" % "0.3")
 
-addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.3.3")
+addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
 
 resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 
