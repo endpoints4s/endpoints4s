@@ -21,9 +21,8 @@ trait BasicAuthentication
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
     DocumentedResponse(401, docs.getOrElse(""), content = Map.empty) :: response
 
-  /**
-    * Describes an endpoint protected by Basic HTTP authentication
-    */
+  def basicAuthenticationSchemeName: String = "HttpBasic"
+
   override def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](
     method: Method,
     url: Url[U],
@@ -40,6 +39,5 @@ trait BasicAuthentication
     tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Endpoint[Out, Option[R]] =
     super.authenticatedEndpoint(method, url, response, requestEntity, requestHeaders, unauthenticatedDocs, summary, description, tags)
-      .withSecurity(OperationSecurity("HttpBasic", SecurityScheme.httpBasic))
-
+      .withSecurity(OperationSecurity(basicAuthenticationSchemeName, SecurityScheme.httpBasic))
 }
