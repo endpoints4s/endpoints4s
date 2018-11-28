@@ -24,7 +24,7 @@ jobs:
       scala: 2.11.11
       script:
         # +++ instead of ++ to use sbt-doge strict aggregation
-        - sbt "+++$TRAVIS_SCALA_VERSION test"
+        - sbt "+++$TRAVIS_SCALA_VERSION test manual/makeSite"
         # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
         # Tricks to avoid unnecessary cache updates
         - find $HOME/.sbt -name "*.lock" | xargs rm
