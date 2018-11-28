@@ -29,11 +29,10 @@ val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
-import sbtunidoc.Plugin.UnidocKeys.unidoc
-
 val apiDoc =
   project.in(file("api-doc"))
-    .settings(noPublishSettings ++ `scala 2.11` ++ unidocSettings: _*)
+    .enablePlugins(ScalaUnidocPlugin)
+    .settings(noPublishSettings ++ `scala 2.11`: _*)
     .settings(
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
@@ -42,7 +41,7 @@ val apiDoc =
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath", (baseDirectory in ThisBuild).value.absolutePath
       ),
-      sbtunidoc.Plugin.UnidocKeys.unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
+      unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
         `akka-http-client`, `akka-http-server`,
         `play-client`, `play-server`, `play-server-circe`, `play-server-playjson`,
