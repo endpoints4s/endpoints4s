@@ -15,14 +15,14 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
   case class Book(id: Int, title: String, author: String, isbnCodes: List[String], storage: Storage)
 
-  object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonSchemaEntities {
+  object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonSchemaEntities with openapi.BasicAuthentication {
 
     def openApi: OpenApi = openApi(
       Info(title = "TestFixturesOpenApi", version = "0.0.0")
     )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas {
+  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
       withDiscriminator(genericJsonSchema[Storage].asInstanceOf[Tagged[Storage]], "storageType")
@@ -31,7 +31,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
     val listBooks = endpoint(get(path / "books"), jsonResponse[List[Book]](Some("Books list")), tags = List("Books"))
 
-    val postBook = endpoint(post(path / "books", jsonRequest[Book](docs = Some("Books list"))), emptyResponse(), tags = List("Books"))
+    val postBook = authenticatedEndpoint(Post, path / "books", emptyResponse(), jsonRequest[Book](docs = Some("Books list")), tags = List("Books"))
   }
 
   "OpenApi" should {
@@ -141,6 +141,13 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |          }
           |        ]
           |      }
+          |    },
+          |    "securitySchemes" : {
+          |      "HttpBasic" : {
+          |        "type" : "http",
+          |        "description" : "Http Basic Authentication",
+          |        "scheme" : "basic"
+          |      }
           |    }
           |  },
           |  "openapi" : "3.0.0",
@@ -172,6 +179,9 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |      },
           |      "post" : {
           |        "responses" : {
+          |          "401" : {
+          |            "description" : ""
+          |          },
           |          "200" : {
           |            "description" : ""
           |          }
@@ -188,6 +198,12 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
           |        },
           |        "tags" : [
           |          "Books"
+          |        ],
+          |        "security" : [
+          |          {
+          |            "HttpBasic" : [
+          |            ]
+          |          }
           |        ]
           |      }
           |    }
