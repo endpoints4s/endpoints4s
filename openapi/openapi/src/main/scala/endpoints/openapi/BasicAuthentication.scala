@@ -3,7 +3,7 @@ package openapi
 
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra.Documentation
-import endpoints.openapi.model.{OperationSecurity, SecurityScheme}
+import endpoints.openapi.model.{SecurityRequirement, SecurityScheme}
 
 /**
   * Interpreter for [[algebra.BasicAuthentication]] that produces
@@ -18,7 +18,7 @@ trait BasicAuthentication
   private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials] =
     DocumentedHeaders(Nil) // supported by OAS3 security schemes
 
-  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
+  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation = None): Response[Option[A]] =
     DocumentedResponse(401, docs.getOrElse(""), content = Map.empty) :: response
 
   def basicAuthenticationSchemeName: String = "HttpBasic"
@@ -39,5 +39,5 @@ trait BasicAuthentication
     tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Endpoint[Out, Option[R]] =
     super.authenticatedEndpoint(method, url, response, requestEntity, requestHeaders, unauthenticatedDocs, summary, description, tags)
-      .withSecurity(OperationSecurity(basicAuthenticationSchemeName, SecurityScheme.httpBasic))
+      .withSecurity(SecurityRequirement(basicAuthenticationSchemeName, SecurityScheme.httpBasic))
 }

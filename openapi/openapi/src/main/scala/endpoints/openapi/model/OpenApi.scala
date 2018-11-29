@@ -73,7 +73,7 @@ case class Operation(
   requestBody: Option[RequestBody],
   responses: Map[Int, Response],
   tags: List[String],
-  security: List[OperationSecurity]
+  security: List[SecurityRequirement]
 )
 
 object Operation {
@@ -110,13 +110,13 @@ object Operation {
 
 }
 
-case class OperationSecurity(name: String,
-                             scheme: SecurityScheme,
-                             scopes: List[String] = Nil)
+case class SecurityRequirement(name: String,
+                               scheme: SecurityScheme,
+                               scopes: List[String] = Nil)
 
-object OperationSecurity {
+object SecurityRequirement {
 
-  implicit val jsonEncoder: ObjectEncoder[OperationSecurity] = ObjectEncoder.instance { os =>
+  implicit val jsonEncoder: ObjectEncoder[SecurityRequirement] = ObjectEncoder.instance { os =>
     JsonObject.singleton(os.name, Json.fromValues(os.scopes.map(_.asJson)))
   }
 }
