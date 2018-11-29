@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
+val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 
 val `sttp-client` =
   project.in(file("client"))
@@ -14,4 +15,8 @@ val `sttp-client` =
         "com.typesafe.akka" %% "akka-stream" % "2.5.18" % Test
       )
     )
-    .dependsOn(`algebra-jvm` % "compile->compile;test->test", `algebra-playjson-jvm` % "test->test")
+    .dependsOn(
+      `algebra-jvm` % "compile->compile;test->test",
+      `algebra-playjson-jvm` % "test->test",
+      `json-schema-circe-jvm`
+    )
