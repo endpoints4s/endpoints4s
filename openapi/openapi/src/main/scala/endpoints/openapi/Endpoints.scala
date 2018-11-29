@@ -41,10 +41,11 @@ trait Endpoints
     * @param item Item documentation
     */
   case class DocumentedEndpoint(path: String, item: PathItem) {
-    def withSecurity(operationSecurities: OperationSecurity*): DocumentedEndpoint = {
+
+    def withSecurity(securityRequirements: SecurityRequirement*): DocumentedEndpoint = {
       copy(item = PathItem(item.operations.map {
         case (verb, operation) =>
-          verb -> operation.copy(security = operationSecurities.toList)
+          verb -> operation.copy(security = securityRequirements.toList)
       }))
     }
   }
