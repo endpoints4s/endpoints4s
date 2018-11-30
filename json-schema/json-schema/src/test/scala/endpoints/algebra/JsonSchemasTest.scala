@@ -63,4 +63,9 @@ trait JsonSchemasTest extends JsonSchemas {
     val colorSchema: Enum[Color] = enumeration[Color](Seq(Red, Blue))(_.toString)
   }
 
+  case class Rec(next: Option[Rec])
+  val recSchema: JsonSchema[Rec] = (
+    optField("next")(lazySchema(recSchema, "Rec"))
+  ).invmap(Rec)(_.next)
+
 }

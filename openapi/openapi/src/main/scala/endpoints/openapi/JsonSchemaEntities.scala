@@ -22,29 +22,35 @@ trait JsonSchemaEntities
   def jsonResponse[A](docs: Documentation)(implicit codec: JsonSchema[A]): List[DocumentedResponse] =
     DocumentedResponse(200, docs.getOrElse(""), Map("application/json" -> MediaType(Some(toSchema(codec))))) :: Nil
 
-  def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[DocumentedCoProd] = None): Schema = {
+  def toSchema(jsonSchema: DocumentedJsonSchema): Schema =
+    toSchema(jsonSchema, None, Set.empty)
 
+  private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
     documentedCodec match {
       case record @ DocumentedRecord(_, Some(name)) =>
-        Schema.Reference(name, Some(expandRecordSchema(record, coprodBase)))
+        if (referencedSchemas(name)) Schema.Reference(name, None)
+        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)))
       case record @ DocumentedRecord(_, None) =>
-        expandRecordSchema(record)
+        expandRecordSchema(record, None, referencedSchemas)
       case coprod @ DocumentedCoProd(_, Some(name), _) =>
-        Schema.Reference(name, Some(expandCoproductSchema(coprod)))
+        if (referencedSchemas(name)) Schema.Reference(name, None)
+        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)))
       case coprod @ DocumentedCoProd(_, None, _) =>
-        expandCoproductSchema(coprod)
+        expandCoproductSchema(coprod, referencedSchemas)
       case Primitive(name, format) =>
         Schema.Primitive(name, format)
       case Array(elementType) =>
-        Schema.Array(toSchema(elementType))
+        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas))
       case DocumentedEnum(elementType, values) =>
-        Schema.Enum(toSchema(elementType), values)
+        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values)
+      case lzy: LazySchema =>
+        toSchema(lzy.value, coprodBase, referencedSchemas)
     }
   }
 
-  private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord, coprodBase: Option[DocumentedCoProd] = None): Schema = {
+  private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
     val fieldsSchema = record.fields
-      .map(f => Schema.Property(f.name, toSchema(f.tpe), !f.isOptional, f.documentation))
+      .map(f => Schema.Property(f.name, toSchema(f.tpe, None, referencedSchemas), !f.isOptional, f.documentation))
 
     coprodBase.fold[Schema] {
       Schema.Object(fieldsSchema, None)
@@ -65,8 +71,9 @@ trait JsonSchemaEntities
     }
   }
 
-  private def expandCoproductSchema(coprod: DocumentedJsonSchema.DocumentedCoProd): Schema = {
-    val alternativesSchemas = coprod.alternatives.map { case (tag, record) => tag -> toSchema(record, Some(coprod)) }
+  private def expandCoproductSchema(coprod: DocumentedJsonSchema.DocumentedCoProd, referencedSchemas: Set[String]): Schema = {
+    val alternativesSchemas =
+      coprod.alternatives.map { case (tag, record) => tag -> toSchema(record, Some(coprod), referencedSchemas) }
     Schema.OneOf(coprod.discriminatorName, alternativesSchemas, None)
   }
 }

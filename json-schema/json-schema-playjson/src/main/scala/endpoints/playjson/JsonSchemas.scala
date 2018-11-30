@@ -60,6 +60,15 @@ trait JsonSchemas
 
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
 
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    new JsonSchema[A] {
+      def reads: Reads[A] = Reads(js => evaluatedSchema.reads.reads(js))
+      def writes: Writes[A] = Writes(a => evaluatedSchema.writes.writes(a))
+    }
+  }
+
   def emptyRecord: Record[Unit] =
     Record(
       new Reads[Unit] {

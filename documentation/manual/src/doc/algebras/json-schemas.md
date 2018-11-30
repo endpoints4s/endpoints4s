@@ -17,6 +17,8 @@ This algebra provides vocabulary to define JSON schemas of data types.
 
 The algebra introduces the concept of `JsonSchema[A]`: a JSON schema for a type `A`.
 
+### Basic types and record types
+
 The trait provides some predefined JSON schemas (for `String`, `Int`, `Boolean`, etc.)
 and ways to combine them together to build more complex schemas.
 
@@ -89,6 +91,14 @@ The resulting `JsonSchema[Status]` allows defining JSON members with string valu
 It will work similarly for other representations of enumerated values.
 Most of them provide `values` which can conveniently be passed into `enumeration`.
 However, it is still possible to explicitly pass a certain subset of allowed values.
+
+### Recursive types
+
+You can reference a currently being defined schema without causing a `StackOverflow` error
+by wrapping it in the `lazySchema` constructor:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
+~~~
 
 ## Generic derivation of JSON schemas
 

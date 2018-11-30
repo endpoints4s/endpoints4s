@@ -89,6 +89,15 @@ trait JsonSchemas
 
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
 
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+    // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
+    lazy val evaluatedSchema = schema
+    new JsonSchema[A] {
+      def encoder: Encoder[A] = Encoder.instance(a => evaluatedSchema.encoder(a))
+      def decoder: Decoder[A] = Decoder.instance(c => evaluatedSchema.decoder(c))
+    }
+  }
+
   def emptyRecord: Record[Unit] =
     Record(
       io.circe.Encoder.encodeUnit,
