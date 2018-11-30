@@ -39,6 +39,29 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Enumerations" in {
+    val expectedSchema =
+      Schema.Enum(Schema.Primitive("string", None), "Red" :: "Blue" :: Nil)
+    Fixtures.toSchema(Fixtures.Enum.colorSchema) shouldBe expectedSchema
+  }
+
+  "Recursive types" in {
+    val recSchema =
+      Schema.Reference(
+        "Rec",
+        Some(Schema.Object(
+          Schema.Property("next", Schema.Reference("Rec", None), isRequired = false, description = None) :: Nil,
+          description = None
+        ))
+      )
+    val expectedSchema =
+      Schema.Object(
+        Schema.Property("next", recSchema, isRequired = false, description = None) :: Nil,
+        description = None
+      )
+    Fixtures.toSchema(Fixtures.recSchema) shouldBe expectedSchema
+  }
+
   "Text response" should {
     "be properly encoded" in {
       val reqBody = Fixtures.documentation.paths("/textRequestEndpoint").operations("post").requestBody

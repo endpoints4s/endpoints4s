@@ -60,4 +60,12 @@ trait JsonSchemasDocs extends JsonSchemas {
     //#enum-status-schema
   }
 
+  //#recursive
+  case class Rec(next: Option[Rec])
+
+  val recSchema: JsonSchema[Rec] = (
+    optField("next")(lazySchema(recSchema, "Rec"))
+  ).invmap(Rec)(_.next)
+  //#recursive
+
 }

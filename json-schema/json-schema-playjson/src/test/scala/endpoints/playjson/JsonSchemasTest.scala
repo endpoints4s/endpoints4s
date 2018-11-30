@@ -331,6 +331,14 @@ class JsonSchemasTest extends FreeSpec {
     )
   }
 
+  "recursive type" in {
+    testRoundtrip(
+      recSchema,
+      Json.obj("next" -> Json.obj("next" -> Json.obj())),
+      Rec(Some(Rec(Some(Rec(None)))))
+    )
+  }
+
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {
     val result = jsonSchema.reads.reads(json)
     assert(result.isSuccess, result)
