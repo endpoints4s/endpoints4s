@@ -52,8 +52,6 @@ val apiDoc =
       )
     )
 
-val ornateTarget = Def.setting(target.value / "ornate")
-
 val manual =
   project.in(file("manual"))
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
@@ -61,14 +59,11 @@ val manual =
       coverageEnabled := false,
       scalaVersion := "2.11.8",
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
-      ornateSourceDir := Some(sourceDirectory.value / "ornate"),
-      ornateTargetDir := Some(ornateTarget.value),
       ornateSettings := Map("version" -> version.value),
       siteSubdirName in ornate := "",
       addMappingsToSiteDir(mappings in ornate, siteSubdirName in ornate),
       mappings in ornate := {
-        val _ = ornate.value
-        val output = ornateTarget.value
+        val output = ornate.value
         output ** AllPassFilter --- output pair relativeTo(output)
       },
       siteSubdirName in packageDoc := s"api/${version.value}",
