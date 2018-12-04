@@ -100,7 +100,7 @@ val `example-quickstart-client` =
 val `example-quickstart-server` =
   project.in(file("examples/quickstart/server"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
-    .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.8")
+    .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9")
     .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-circe`, `openapi-jvm`)
 
 // Basic example
@@ -235,7 +235,7 @@ lazy val `example-cqrs-commands-endpoints` =
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.8",
+        "org.scala-stm" %% "scala-stm" % "0.9",
         "io.circe" %% "circe-generic" % circeVersion
       )
     )
