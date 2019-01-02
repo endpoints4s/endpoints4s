@@ -9,15 +9,22 @@ import endpoints.algebra
 import endpoints.algebra.JsonFromCodecTestApi
 import endpoints.algebra.circe
 
-class EndpointsTestApi extends Endpoints
+/* defines the common api to implement */
+trait EndpointsTestApi extends Endpoints
   with BasicAuthentication
   with algebra.BasicAuthTestApi
   with algebra.EndpointsTestApi
+
+/* implements the endpoint using a codecs-based json handling */
+class EndpointsCodecsTestApi extends EndpointsTestApi
   with JsonFromCodecTestApi
   with circe.JsonFromCirceCodecTestApi
   with JsonEntitiesFromCodec
   with circe.JsonEntitiesFromCodec
 
+/* implements the endpoint using an akka-based custom json handling */
+class EndpointsEntitiesTestApi extends EndpointsTestApi
+  with JsonEntities
 
 //TODO use EndpointsApi from algebra tests
 class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
