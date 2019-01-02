@@ -7,6 +7,8 @@ import java.util.UUID
 import endpoints.{InvariantFunctor, Tupler, algebra}
 import endpoints.algebra.Documentation
 
+import scala.util.Try
+
 /**
   * [[algebra.Urls]] interpreter that builds URLs.
   *
@@ -42,7 +44,13 @@ trait Urls extends algebra.Urls {
 
   type QueryStringParam[A] = A => String
 
-  implicit lazy val uuidQueryString: QueryStringParam[UUID] = u => u.toString
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    (x: B) => pa(g(x))
+
+  // Before: implicit lazy val uuidQueryString: QueryStringParam[UUID] = u => u.toString
+  // After: this seems unnecessarily complicated.
+  implicit lazy val uuidQueryString: QueryStringParam[UUID] =
+    refineQueryStringParam[String, UUID](stringQueryString)((x: String) => Try(UUID.fromString(x)).toOption)((y: UUID) => y.toString)
 
   implicit lazy val stringQueryString: QueryStringParam[String] = s => URLEncoder.encode(s, utf8Name)
 
@@ -55,7 +63,11 @@ trait Urls extends algebra.Urls {
     def encode(a: A): String
   }
 
-  implicit lazy val uuidSegment: Segment[UUID] = (u: UUID) => u.toString
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    (b: B) => sa.encode(g(b))
+
+  implicit lazy val uuidSegment: Segment[UUID] =
+    refineSegment[String, UUID](stringSegment)((x: String) => Try(UUID.fromString(x)).toOption)((y: UUID) => y.toString)
 
   implicit lazy val stringSegment: Segment[String] = (s: String) => URLEncoder.encode(s, utf8Name)
 

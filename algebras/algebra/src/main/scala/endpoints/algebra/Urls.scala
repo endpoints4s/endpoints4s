@@ -75,6 +75,8 @@ trait Urls {
     */
   type QueryStringParam[A]
 
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B]
+
   /** Ability to define `UUID` query string parameters */
   implicit def uuidQueryString: QueryStringParam[UUID]
 
@@ -91,6 +93,8 @@ trait Urls {
     * An URL path segment carrying an `A` information.
     */
   type Segment[A]
+
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B]
 
   /** Ability to define `UUID` path segments */
   implicit def uuidSegment: Segment[UUID]

@@ -22,6 +22,9 @@ trait Urls extends algebra.Urls {
   }
   //#segment
 
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    (b: B) => sa.encode(g(b))
+
   implicit lazy val uuidSegment: Segment[UUID] =
     (u: UUID) => u.toString
 
@@ -61,6 +64,10 @@ trait Urls extends algebra.Urls {
     /** @return An URL encoded query string parameter value (e.g. "a%20b") */
     def encode(a: A): String
   }
+
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    (b: B) => pa.encode(g(b))
+
   implicit lazy val uuidQueryString: QueryStringParam[UUID] =
     (u: UUID) => u.toString
 

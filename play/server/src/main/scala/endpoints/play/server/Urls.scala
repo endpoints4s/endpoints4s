@@ -4,8 +4,7 @@ import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.UUID
 
-import endpoints.Tupler
-import endpoints.algebra
+import endpoints.{Tupler, algebra}
 import endpoints.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
 import play.api.libs.functional.syntax._
@@ -63,11 +62,14 @@ trait Urls extends algebra.Urls {
   }
   //#segment
 
-  implicit def uuidSegment: Segment[UUID] =
-    new Segment[UUID] {
-      def decode(segment: String) = Try(UUID.fromString(segment)).toOption
-      def encode(u: UUID) = URLEncoder.encode(u.toString, utf8Name)
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    new Segment[B] {
+      def decode(s: String) = sa.decode(s).flatMap(f)
+      def encode(b: B) = sa.encode(g(b))
     }
+
+  implicit def uuidSegment: Segment[UUID] =
+    refineSegment[String, UUID](stringSegment)((s: String) => Try.apply(UUID.fromString(s)).toOption)(_.toString)
 
   implicit def stringSegment: Segment[String] =
     new Segment[String] {
@@ -134,13 +136,14 @@ trait Urls extends algebra.Urls {
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
 
-  implicit def uuidQueryString: QueryStringParam[UUID] =
-    new QueryStringParam[UUID] {
-      def decode(name: String, qs: Map[String, Seq[String]]) =
-        qs.get(name).flatMap(_.headOption).flatMap(s => Try(UUID.fromString(s)).toOption)
-      def encode(name: String, u: UUID) =
-        Map(name -> Seq(u.toString))
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    new QueryStringParam[B] {
+      def decode(name: String, qs: Map[String, Seq[String]]): Option[B] = pa.decode(name, qs).flatMap(f)
+      def encode(name: String, b: B): Map[String, Seq[String]] = pa.encode(name, g(b))
     }
+
+  implicit def uuidQueryString: QueryStringParam[UUID] =
+    refineQueryStringParam[String, UUID](stringQueryString)((s: String) => Try.apply(UUID.fromString(s)).toOption)(_.toString)
 
   implicit def stringQueryString: QueryStringParam[String] =
     new QueryStringParam[String] {

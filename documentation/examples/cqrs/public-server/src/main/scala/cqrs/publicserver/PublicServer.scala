@@ -1,8 +1,5 @@
 package cqrs.publicserver
 
-import java.net.URLEncoder
-import java.util.UUID
-
 import cats.Traverse
 import cqrs.queries._
 import cqrs.commands.{AddRecord, CreateMeter, MeterCreated, StoredEvent}
@@ -13,7 +10,6 @@ import cats.instances.future._
 import endpoints.play.server.{JsonEntitiesFromCodec, Endpoints, PlayComponents}
 
 import scala.concurrent.Future
-import scala.util.Try
 
 /**
   * Implementation of the public API based on our “commands” and “queries” microservices.

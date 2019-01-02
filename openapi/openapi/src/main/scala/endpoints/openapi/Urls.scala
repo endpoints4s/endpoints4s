@@ -37,6 +37,9 @@ trait Urls extends algebra.Urls {
 
   type QueryStringParam[A] = Schema
 
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    ??? // Is there a meaningful definition possible here?
+
   def uuidQueryString: QueryStringParam[UUID] = Schema.simpleUUID
 
   def stringQueryString: QueryStringParam[String] = Schema.simpleString
@@ -46,6 +49,9 @@ trait Urls extends algebra.Urls {
   def longQueryString: QueryStringParam[Long] = Schema.simpleInteger
 
   type Segment[A] = Schema
+
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    ??? // Is there a meaningful definition possible here?
 
   def uuidSegment: Segment[UUID] = Schema.simpleUUID
 
