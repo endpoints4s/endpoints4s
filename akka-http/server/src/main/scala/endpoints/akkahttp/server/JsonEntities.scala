@@ -18,11 +18,11 @@ trait JsonEntities extends algebra.JsonEntities with Endpoints {
 
   type JsonRequest[A] = FromRequestUnmarshaller[A]
 
-  def jsonRequest[A : JsonRequest]: RequestEntity[A] = Directives.entity[A](implicitly)
+  def jsonRequest[A : JsonRequest](docs: algebra.Documentation = None): RequestEntity[A] = Directives.entity[A](implicitly)
 
 
   type JsonResponse[A] = ToResponseMarshaller[A]
 
-  def jsonResponse[A : JsonResponse]: Response[A] = entity => Directives.complete(entity)
+  def jsonResponse[A : JsonResponse](docs: algebra.Documentation = None): Response[A] = entity => Directives.complete(entity)
 
 }

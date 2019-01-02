@@ -17,7 +17,7 @@ class ServerInterpreterBaseTest extends ServerTestBase[EndpointsTestApi] {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val serverApi: EndpointsTestApi = new EndpointsTestApi
+  val serverApi: EndpointsTestApi = new EndpointsCodecsTestApi
 
   def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit = {
 
