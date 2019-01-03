@@ -6,7 +6,7 @@ val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
-val akkaHttpVersion = "10.0.14"
+val akkaHttpVersion = "10.0.15"
 val akkaHttpJsonVersion = "1.18.1"
 val akkaHttpCirceVersion = "1.22.0"
 
