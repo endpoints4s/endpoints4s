@@ -8,7 +8,6 @@ import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Tupler, algebra}
 
 import scala.concurrent.Future
-import scala.util.Try
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
@@ -35,8 +34,7 @@ trait Urls extends algebra.Urls {
   def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
     sa.tflatMap[Tuple1[B]]((a: Tuple1[A]) => f(a._1).map(Tuple1.apply))
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
     new Url(joinDirectives(path.directive, qs.directive))
   }
 
@@ -44,46 +42,34 @@ trait Urls extends algebra.Urls {
   // Query strings
   //***************
 
-  implicit lazy val uuidQueryString: QueryStringParam[UUID] =
-    refineQueryStringParam[String, UUID](stringQueryString)((s: String) => Try.apply(UUID.fromString(s)).toOption)(_.toString)
+  implicit def intQueryString: QueryStringParam[Int] = PredefinedFromStringUnmarshallers.intFromStringUnmarshaller
 
-  implicit def intQueryString: QueryStringParam[Int] =
-    PredefinedFromStringUnmarshallers.intFromStringUnmarshaller
+  implicit def stringQueryString: QueryStringParam[String] = Unmarshaller.identityUnmarshaller[String]
 
-  implicit def stringQueryString: QueryStringParam[String] =
-    Unmarshaller.identityUnmarshaller[String]
+  implicit def longQueryString: QueryStringParam[Long] = PredefinedFromStringUnmarshallers.longFromStringUnmarshaller
 
-  implicit def longQueryString: QueryStringParam[Long] =
-    PredefinedFromStringUnmarshallers.longFromStringUnmarshaller
-
-  def qs[A](name: String, docs: Documentation)(
-      implicit value: QueryStringParam[A]): QueryString[A] = {
+  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] = {
     new QueryString[A](Directives.parameter(name.as[A]))
   }
 
-  def optQs[A](name: String, docs: Documentation)(
-      implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
+  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
     new QueryString[Option[A]](Directives.parameter(name.as[A].?))
   }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
     new QueryString(joinDirectives(first.directive, second.directive))
   }
 
-  implicit lazy val urlInvFunctor: InvariantFunctor[Url] =
-    new InvariantFunctor[Url] {
-      override def xmap[From, To](f: Url[From],
-                                  map: From => To,
-                                  contramap: To => From): Url[To] =
-        new Url(f.directive.map(map))
-    }
+  implicit lazy val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
+    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] =
+      new Url(f.directive.map(map))
+  }
 
   // ********
   // Paths
   // ********
 
-  implicit def uuidSegment: Segment[UUID] = JavaUUID
+  override implicit def uuidSegment: Segment[UUID] = JavaUUID
 
   implicit def intSegment: Segment[Int] = IntNumber
 
@@ -91,38 +77,29 @@ trait Urls extends algebra.Urls {
 
   implicit def longSegment: Segment[Long] = LongNumber
 
-  def segment[A](name: String, docs: Documentation)(
-      implicit s: Segment[A]): Path[A] = {
+  def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = {
     new Path(Directives.pathPrefix(s))
   }
 
   def staticPathSegment(segment: String): Path[Unit] = {
-    val directive =
-      if (segment.isEmpty) // We cannot use Directives.pathPrefix("") because it consumes also a leading slash
-        Directives.pass
-      else
-        Directives.pathPrefix(segment)
+    val directive = if(segment.isEmpty) // We cannot use Directives.pathPrefix("") because it consumes also a leading slash
+      Directives.pass
+    else
+      Directives.pathPrefix(segment)
     new Path(convToDirective1(directive))
   }
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
     new Path(joinDirectives(first.directive, second.directive))
   }
+
 
   /**
     * Simpler alternative to [[Directive.&()]] method
     */
-  protected def joinDirectives[T1, T2](dir1: Directive1[T1],
-                                       dir2: Directive1[T2])(
-      implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
+  protected def joinDirectives[T1, T2](dir1: Directive1[T1], dir2: Directive1[T2])(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
     Directive[Tuple1[tupler.Out]] { inner =>
-      dir1.tapply {
-        case Tuple1(prefix) =>
-          dir2.tapply {
-            case Tuple1(suffix) => inner(Tuple1(tupler(prefix, suffix)))
-          }
-      }
+      dir1.tapply { case Tuple1(prefix) => dir2.tapply { case Tuple1(suffix) => inner(Tuple1(tupler(prefix, suffix))) } }
     }
   }
 

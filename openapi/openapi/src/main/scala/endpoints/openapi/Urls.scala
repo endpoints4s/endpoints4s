@@ -39,7 +39,7 @@ trait Urls extends algebra.Urls {
 
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] = pa
 
-  def uuidQueryString: QueryStringParam[UUID] = Schema.simpleUUID
+  override def uuidQueryString: QueryStringParam[UUID] = Schema.simpleUUID
 
   def stringQueryString: QueryStringParam[String] = Schema.simpleString
 
@@ -51,7 +51,7 @@ trait Urls extends algebra.Urls {
 
   def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] = sa
 
-  def uuidSegment: Segment[UUID] = Schema.simpleUUID
+  override def uuidSegment: Segment[UUID] = Schema.simpleUUID
 
   def stringSegment: Segment[String] = Schema.simpleString
 

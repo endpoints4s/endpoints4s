@@ -1,9 +1,8 @@
 package endpoints.scalaj.client
 
-import java.util.UUID
-
 import endpoints.{InvariantFunctor, Tupler, algebra}
 import endpoints.algebra.Documentation
+
 import scalaj.http.{Http, HttpRequest}
 
 /**
@@ -26,8 +25,6 @@ trait Urls extends algebra.Urls {
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
     (b: B) => pa(g(b))
 
-   implicit def uuidQueryString: QueryStringParam[UUID] = _.toString
-
    implicit def stringQueryString: QueryStringParam[String] = identity
 
    implicit def intQueryString: QueryStringParam[Int] = _.toString
@@ -43,8 +40,6 @@ trait Urls extends algebra.Urls {
 
   def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
     (b: B) => sa(g(b))
-
-   implicit def uuidSegment: Segment[UUID] = _.toString
 
    implicit def stringSegment: Segment[String] = identity
 
