@@ -13,6 +13,15 @@ trait EndpointsTestApi extends algebra.Endpoints {
     textResponse()
   )
 
+  val putEndpoint = endpoint(
+    put(path / "user" / segment[String](), emptyRequest),
+    emptyResponse()
+  )
+
+  val deleteEndpoint = endpoint(
+    delete(path / "user" / segment[String]()),
+    emptyResponse()
+  )
 
   val emptyResponseSmokeEndpoint = endpoint(
     get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
@@ -21,7 +30,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val optionalEndpoint: Endpoint[Unit, Option[String]] = endpoint(
     get(path / "users" / "1"),
-    option(textResponse())
+    wheneverFound(textResponse())
   )
 
   val headers1 = header("A") ++ header("B")

@@ -25,6 +25,6 @@ trait Responses
 
   def textResponse(docs: Documentation): Response[String] = DocumentedResponse(200, docs.getOrElse(""), Map("text/plain" -> MediaType(None))) :: Nil
 
-  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     DocumentedResponse(404, notFoundDocs.getOrElse(""), content = Map.empty) :: response
 }

@@ -19,6 +19,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   type JsonSchema[+A] = DocumentedJsonSchema
   type Record[+A] = DocumentedRecord
   type Tagged[+A] = DocumentedCoProd
+  type Enum[+A] = DocumentedEnum
 
   sealed trait DocumentedJsonSchema
 
@@ -34,9 +35,25 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
     case class Primitive(name: String, format: Option[String] = None) extends DocumentedJsonSchema
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
+
+    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: Seq[String]) extends DocumentedJsonSchema
+
+    // A documented JSON schema that is unevaluated unless its `value` is accessed
+    sealed trait LazySchema extends DocumentedJsonSchema {
+      def value: DocumentedJsonSchema
+    }
+    object LazySchema {
+      def apply(s: => DocumentedJsonSchema): LazySchema =
+        new LazySchema {
+          lazy val value: DocumentedJsonSchema = s
+        }
+    }
   }
 
-  override def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
+  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): DocumentedEnum =
+    DocumentedEnum(tpe, values.map(encode))
+
+  def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
     import DocumentedJsonSchema._
     schema match {
       case record: DocumentedRecord =>
@@ -47,6 +64,9 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
         other
     }
   }
+
+  def lazySchema[A](schema: => DocumentedJsonSchema, name: String): DocumentedJsonSchema =
+    LazySchema(named[A, ({ type l[X] = DocumentedJsonSchema })#l](schema, name))
 
   def emptyRecord: DocumentedRecord =
     DocumentedRecord(Nil)

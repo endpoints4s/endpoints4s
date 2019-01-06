@@ -50,14 +50,18 @@ object PathItem {
 
 }
 
-case class Components(schemas: Map[String, Schema])
+case class Components(schemas: Map[String, Schema],
+                      securitySchemes: Map[String, SecurityScheme])
 
 object Components {
 
   implicit val jsonEncoder: ObjectEncoder[Components] = {
     ObjectEncoder.instance { components =>
       val schemas = components.schemas.mapValues(_.asJson).toSeq.sortBy(_._1)
-      JsonObject.singleton("schemas", JsonObject.fromIterable(schemas).asJson)
+      JsonObject(
+        "schemas" -> JsonObject.fromIterable(schemas).asJson,
+        "securitySchemes" -> JsonObject.fromMap(components.securitySchemes.mapValues(_.asJson)).asJson
+      )
     }
   }
 }
@@ -68,7 +72,8 @@ case class Operation(
   parameters: List[Parameter],
   requestBody: Option[RequestBody],
   responses: Map[Int, Response],
-  tags: List[String]
+  tags: List[String],
+  security: List[SecurityRequirement]
 )
 
 object Operation {
@@ -80,6 +85,7 @@ object Operation {
         op.description.map(x => "description" -> x.asJson),
         op.requestBody.map(x => "requestBody" -> x.asJson),
         op.tags.headOption.map(_ => "tags" -> op.tags.asJson),
+        op.security.headOption.map(_ => "security" -> Json.fromValues(op.security.map(_.asJson))),
         if (op.parameters.isEmpty) None
         else Some("parameters" -> Json.fromValues(op.parameters.map(_.asJson)))
       ).flatten
@@ -102,6 +108,17 @@ object Operation {
       JsonObject.fromIterable(fields)
     }
 
+}
+
+case class SecurityRequirement(name: String,
+                               scheme: SecurityScheme,
+                               scopes: List[String] = Nil)
+
+object SecurityRequirement {
+
+  implicit val jsonEncoder: ObjectEncoder[SecurityRequirement] = ObjectEncoder.instance { os =>
+    JsonObject.singleton(os.name, Json.fromValues(os.scopes.map(_.asJson)))
+  }
 }
 
 case class RequestBody(
@@ -195,6 +212,8 @@ object Schema {
 
   case class Array(elementType: Schema) extends Schema
 
+  case class Enum(elementType: Schema, values: Seq[String]) extends Schema
+
   case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
 
   case class Primitive(name: String, format: Option[String]) extends Schema
@@ -229,6 +248,8 @@ object Schema {
             "items" -> jsonEncoder.apply(elementType) ::
             Nil
         )
+      case Enum(elementType, values) =>
+        jsonEncoder.encodeObject(elementType).add("enum", Json.fromValues(values.map(Json.fromString)))
       case Object(properties, description) =>
         val fields =
           "type" -> Json.fromString("object") ::
@@ -270,4 +291,36 @@ object Schema {
         JsonObject.singleton("$ref", Json.fromString(Reference.toRefPath(name)))
     }
 
+}
+
+
+case class SecurityScheme(`type`: String,
+                          description: Option[String],
+                          name: Option[String],
+                          in: Option[String],
+                          scheme: Option[String],
+                          bearerFormat: Option[String])
+
+object SecurityScheme {
+
+  implicit val jsonEncoder: ObjectEncoder[SecurityScheme] = ObjectEncoder.instance { ss =>
+    val optFields = List(
+      ss.description.map(x => "description" -> Json.fromString(x)),
+      ss.name.map(x => "name" -> Json.fromString(x)),
+      ss.in.map(x => "in" -> Json.fromString(x)),
+      ss.scheme.map(x => "scheme" -> Json.fromString(x)),
+      ss.bearerFormat.map(x => "bearerFormat" -> Json.fromString(x))
+    )
+    val fields = "type" -> Json.fromString(ss.`type`) :: optFields.flatten
+    JsonObject(fields : _*)
+  }
+
+  def httpBasic: SecurityScheme = SecurityScheme(
+    `type` = "http",
+    description = Some("Http Basic Authentication"),
+    name = None,
+    in = None,
+    scheme = Some("basic"),
+    bearerFormat = None
+  )
 }

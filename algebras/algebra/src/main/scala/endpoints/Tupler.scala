@@ -24,11 +24,15 @@ package endpoints
   *  - A, Unit        -> A
   *  - Unit, A        -> A
   */
+//#definition
 trait Tupler[A, B] {
   type Out
+//#definition
   def apply(a: A, b: B): Out
   def unapply(out: Out): (A, B)
+//#definition
 }
+//#definition
 
 object Tupler extends Tupler4
 

@@ -27,7 +27,10 @@ trait Endpoints
         .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
           PathItem(item.operations ++ e2.item.operations)
         })
-    val components = Components(schemas = captureSchemas(endpoints))
+    val components = Components(
+      schemas = captureSchemas(endpoints),
+      securitySchemes = captureSecuritySchemes(endpoints)
+    )
     OpenApi(info, items, components)
   }
 
@@ -37,7 +40,15 @@ trait Endpoints
     * @param path Path template (e.g. “/user/{id}”)
     * @param item Item documentation
     */
-  case class DocumentedEndpoint(path: String, item: PathItem)
+  case class DocumentedEndpoint(path: String, item: PathItem) {
+
+    def withSecurity(securityRequirements: SecurityRequirement*): DocumentedEndpoint = {
+      copy(item = PathItem(item.operations.map {
+        case (verb, operation) =>
+          verb -> operation.copy(security = securityRequirements.toList)
+      }))
+    }
+  }
 
   def endpoint[A, B](
     request: Request[A],
@@ -78,7 +89,8 @@ trait Endpoints
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
         response.map(r => r.status -> Response(r.documentation, r.content)).toMap,
-        tags
+        tags,
+        security = Nil // might be refined later by specific interpreters
       )
     val item = PathItem(Map(method -> operation))
     val path = correctPathSegments.map {
@@ -118,6 +130,8 @@ trait Endpoints
         properties.map(_.schema).flatMap(captureReferencedSchemasRec)
       case Schema.Array(elementType) =>
         captureReferencedSchemasRec(elementType)
+      case Schema.Enum(elementType, _) =>
+        captureReferencedSchemasRec(elementType)
       case Schema.Primitive(_, _) =>
         Nil
       case Schema.OneOf(_, alternatives, _) =>
@@ -130,4 +144,12 @@ trait Endpoints
       case referenced: Schema.Reference =>
         referenced +: referenced.original.map(captureReferencedSchemasRec).getOrElse(Nil)
     }
+
+  private def captureSecuritySchemes(endpoints: Iterable[DocumentedEndpoint]): Map[String, SecurityScheme] = {
+    endpoints
+      .flatMap(_.item.operations.values)
+      .flatMap(_.security)
+      .map(s => s.name -> s.scheme)
+      .toMap
+  }
 }

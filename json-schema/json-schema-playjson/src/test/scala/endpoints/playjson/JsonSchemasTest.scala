@@ -313,6 +313,40 @@ class JsonSchemasTest extends FreeSpec {
     )
   }
 
+  import Enum._
+
+  "enum decoding fails because value cannot be decoded" in {
+    assertError(
+      colorSchema,
+      JsString("yellow"),
+      "Cannot decode as enum value: yellow"
+    )
+  }
+
+  "enum decoding fails because value is not possible" in {
+    assertError(
+      colorSchema,
+      JsString("Green"),
+      "Cannot decode as enum value: Green"
+    )
+  }
+
+  "enum decoding and encoding works" in {
+    testRoundtrip(
+      colorSchema,
+      JsString("Blue"),
+      Blue
+    )
+  }
+
+  "recursive type" in {
+    testRoundtrip(
+      recSchema,
+      Json.obj("next" -> Json.obj("next" -> Json.obj())),
+      Rec(Some(Rec(Some(Rec(None)))))
+    )
+  }
+
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {
     val result = jsonSchema.reads.reads(json)
     assert(result.isSuccess, result)

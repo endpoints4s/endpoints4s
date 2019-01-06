@@ -33,4 +33,17 @@ class JsonSchemasTest extends FreeSpec {
     assert(DocumentedJsonSchemas.Foo.schema == expectedSchema)
   }
 
+  "enum" in {
+    val expectedSchema =
+      DocumentedEnum(DocumentedJsonSchemas.stringJsonSchema, Seq("Red", "Blue"))
+    assert(DocumentedJsonSchemas.Enum.colorSchema == expectedSchema)
+  }
+
+  "recursive" in {
+    DocumentedJsonSchemas.recSchema match {
+      case DocumentedRecord(List(Field("next", tpe, true, None)), _) => assert(tpe.isInstanceOf[LazySchema])
+      case _ => fail(s"Unexpected type for 'recSchema': ${DocumentedJsonSchemas.recSchema}")
+    }
+  }
+
 }

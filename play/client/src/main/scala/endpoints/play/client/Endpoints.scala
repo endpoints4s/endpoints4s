@@ -98,7 +98,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
-  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     wsResponse =>
       if (wsResponse.status == 404) Right(None)
       else response(wsResponse).right.map(Some(_))

@@ -136,7 +136,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     }
   }
 
-  def option[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new SttpResponse[Option[A]] {
+  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new SttpResponse[Option[A]] {
     override type ReceivedBody = inner.ReceivedBody
 
     override def responseAs = inner.responseAs

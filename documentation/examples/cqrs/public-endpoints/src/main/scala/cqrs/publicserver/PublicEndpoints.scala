@@ -30,7 +30,7 @@ trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodec {
   /** Find a meter by id */
 //#get-meter
   val getMeter: Endpoint[UUID, Option[Meter]] =
-    endpoint(get(metersPath / segment[UUID]()), option(jsonResponse[Meter]()))
+    endpoint(get(metersPath / segment[UUID]()), jsonResponse[Meter]().orNotFound())
 //#get-meter
 
   //#webapps-endpoint

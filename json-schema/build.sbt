@@ -17,7 +17,7 @@ lazy val `json-schema-generic` =
     .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
       name := "endpoints-json-schema-generic",
-      libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.2",
+      libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
       addScalaTestCrossDependency
     )
     .dependsOnLocalCrossProjects("json-schema")

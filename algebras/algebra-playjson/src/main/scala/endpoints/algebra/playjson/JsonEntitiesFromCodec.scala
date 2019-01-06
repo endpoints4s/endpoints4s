@@ -57,7 +57,9 @@ import scala.util.control.NonFatal
   */
 trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
 
+//#type-carrier
   type JsonCodec[A] = Format[A]
+//#type-carrier
 
   implicit def jsonCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
 

@@ -75,7 +75,28 @@ trait JsonSchemas
       }
   }
 
+  type Enum[A] = JsonSchema[A]
+
+  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
+    lazy val stringToEnum: Map[String, A] = values.map(value => (encode(value), value)).toMap
+    def decode(string: String): Either[String, A] = stringToEnum.get(string).toRight("Cannot decode as enum value: " + string)
+
+    JsonSchema(
+      tpe.encoder.contramap(encode),
+      tpe.decoder.emap(decode)
+    )
+  }
+
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
+
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+    // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
+    lazy val evaluatedSchema = schema
+    new JsonSchema[A] {
+      def encoder: Encoder[A] = Encoder.instance(a => evaluatedSchema.encoder(a))
+      def decoder: Decoder[A] = Decoder.instance(c => evaluatedSchema.decoder(c))
+    }
+  }
 
   def emptyRecord: Record[Unit] =
     Record(
