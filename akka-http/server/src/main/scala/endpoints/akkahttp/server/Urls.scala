@@ -1,7 +1,5 @@
 package endpoints.akkahttp.server
 
-import java.util.UUID
-
 import akka.http.scaladsl.server._
 import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
 import endpoints.algebra.Documentation
@@ -68,8 +66,6 @@ trait Urls extends algebra.Urls {
   // ********
   // Paths
   // ********
-
-  override implicit def uuidSegment: Segment[UUID] = JavaUUID
 
   implicit def intSegment: Segment[Int] = IntNumber
 
