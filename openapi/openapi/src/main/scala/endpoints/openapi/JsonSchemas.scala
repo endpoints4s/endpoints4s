@@ -36,7 +36,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
 
-    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: Seq[String]) extends DocumentedJsonSchema
+    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[String]) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed trait LazySchema extends DocumentedJsonSchema {
@@ -51,7 +51,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   }
 
   def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): DocumentedEnum =
-    DocumentedEnum(tpe, values.map(encode))
+    DocumentedEnum(tpe, values.map(encode).toList)
 
   def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
     import DocumentedJsonSchema._

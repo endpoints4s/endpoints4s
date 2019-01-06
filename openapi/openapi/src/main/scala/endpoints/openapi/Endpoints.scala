@@ -88,7 +88,7 @@ trait Endpoints
         description,
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
-        response.map(r => r.status -> Response(r.documentation, r.content)).toMap,
+        response.map(r => r.status.toString -> Response(r.documentation, r.content)).toMap,
         tags,
         security = Nil // might be refined later by specific interpreters
       )
@@ -120,7 +120,7 @@ trait Endpoints
     } yield recSchema
 
     allReferencedSchemas
-      .collect { case Schema.Reference(name, Some(original)) => name -> original }
+      .collect { case Schema.Reference(name, Some(original), _) => name -> original }
       .toMap
   }
 
@@ -128,15 +128,15 @@ trait Endpoints
     schema match {
       case Schema.Object(properties, _) =>
         properties.map(_.schema).flatMap(captureReferencedSchemasRec)
-      case Schema.Array(elementType) =>
+      case Schema.Array(elementType, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Enum(elementType, _) =>
+      case Schema.Enum(elementType, _, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_, _) =>
+      case Schema.Primitive(_, _, _) =>
         Nil
       case Schema.OneOf(_, alternatives, _) =>
         alternatives.map(_._2).flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas) =>
+      case Schema.AllOf(schemas, _) =>
         schemas.flatMap {
           case _: Schema.Reference => Nil
           case s => captureReferencedSchemasRec(s)

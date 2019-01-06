@@ -11,7 +11,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import endpoints.play.server.{DefaultPlayComponents, HttpServer, PlayComponents}
 import play.core.server.ServerConfig
 
-//#domain
 // Our domain model just contains a counter value
 case class Counter(value: Int)
 
@@ -23,7 +22,6 @@ object Operation {
   // Add `delta` to the counter value
   case class Add(delta: Int) extends Operation
 }
-//#domain
 
 // Description of the HTTP API
 //#documented-endpoints
@@ -66,11 +64,9 @@ trait CounterEndpoints
   implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = genericJsonSchema
 
 }
-
 //#documented-endpoints
 
 // OpenAPI documentation for the HTTP API described in `CounterEndpoints`
-//#openapi
 import endpoints.openapi
 import endpoints.openapi.model.{Info, OpenApi}
 
@@ -85,17 +81,14 @@ object CounterDocumentation
     )(currentValue, update)
 }
 
-//#openapi
-
 // Implementation of the HTTP API and its business logic
 import endpoints.play
 
 class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with play.server.Endpoints
-    with play.server.circe.JsonSchemaEntities { parent =>
+    with play.server.playjson.JsonSchemaEntities { parent =>
 
-  //#business-logic
   // Internal state of our counter
   private val value = new AtomicInteger(0)
 
@@ -120,11 +113,9 @@ class CounterServer(protected val playComponents: PlayComponents)
     }
 
   )
-//#business-logic
 }
 
 object Main {
-  //#entry-point
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
     val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
@@ -134,7 +125,10 @@ object Main {
   }
 
   class DocumentationServer(protected val playComponents: PlayComponents)
-    extends play.server.Endpoints with openapi.model.OpenApiSchemas with play.server.circe.JsonSchemaEntities with play.server.Assets {
+    extends play.server.Endpoints
+      with play.server.playjson.JsonSchemaEntities
+      with play.server.Assets
+      with openapi.model.OpenApiSchemas {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
@@ -155,5 +149,4 @@ object Main {
     lazy val digests = AssetsDigests.digests
   }
 
-  //#entry-point
 }

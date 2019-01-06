@@ -113,7 +113,7 @@ trait JsonSchemas
   // FIXME Check that this is the correct way to model optional fields with circe
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
     Record(
-      io.circe.ObjectEncoder.instance[Option[A]](a => JsonObject.singleton(name, io.circe.Encoder.encodeOption(tpe.encoder).apply(a))),
+      io.circe.ObjectEncoder.instance[Option[A]](maybeA => JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))),
       io.circe.Decoder.instance[Option[A]](cursor => io.circe.Decoder.decodeOption(tpe.decoder).tryDecode(cursor.downField(name)))
     )
 
@@ -144,7 +144,10 @@ trait JsonSchemas
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
     val encoder =
       io.circe.ObjectEncoder.instance[(A, B)] { case (a, b) =>
-        recordA.encoder.apply(a).deepMerge(recordB.encoder.apply(b)).asObject.get
+        // For some reason, `deepMerge` puts the fields of its left-hand-side *after*
+        // the fields of its right-hand-side. Hence the inversion between `recordA`
+        // and `recordB`.
+        recordB.encoder.apply(b).deepMerge(recordA.encoder.apply(a)).asObject.get
       }
     val decoder = new io.circe.Decoder[(A, B)] {
       def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c)

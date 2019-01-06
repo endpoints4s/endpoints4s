@@ -28,21 +28,21 @@ trait JsonSchemaEntities
   private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
     documentedCodec match {
       case record @ DocumentedRecord(_, Some(name)) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None)
-        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)))
+        if (referencedSchemas(name)) Schema.Reference(name, None, None)
+        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)), None)
       case record @ DocumentedRecord(_, None) =>
         expandRecordSchema(record, None, referencedSchemas)
       case coprod @ DocumentedCoProd(_, Some(name), _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None)
-        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)))
+        if (referencedSchemas(name)) Schema.Reference(name, None, None)
+        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)), None)
       case coprod @ DocumentedCoProd(_, None, _) =>
         expandCoproductSchema(coprod, referencedSchemas)
       case Primitive(name, format) =>
-        Schema.Primitive(name, format)
+        Schema.Primitive(name, format, None)
       case Array(elementType) =>
-        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas))
+        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas), None)
       case DocumentedEnum(elementType, values) =>
-        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values)
+        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None)
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)
     }
@@ -63,9 +63,10 @@ trait JsonSchemaEntities
       } { coproductName =>
         Schema.AllOf(
           schemas = List(
-            Schema.Reference(coproductName, None),
+            Schema.Reference(coproductName, None, None),
             Schema.Object(discriminatorField :: fieldsSchema, None)
-          )
+          ),
+          description = None
         )
       }
     }

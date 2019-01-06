@@ -30,8 +30,8 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     "be exposed in JSON schema" in {
       val expectedSchema =
         Schema.Object(
-          Schema.Property("name", Schema.Primitive("string", None), isRequired = true, description = Some("Name of the user")) ::
-          Schema.Property("age", Schema.Primitive("integer", Some("int32")), isRequired = true, description = None) ::
+          Schema.Property("name", Schema.Primitive("string", None, None), isRequired = true, description = Some("Name of the user")) ::
+          Schema.Property("age", Schema.Primitive("integer", Some("int32"), None), isRequired = true, description = None) ::
           Nil,
           None
         )
@@ -41,7 +41,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
   "Enumerations" in {
     val expectedSchema =
-      Schema.Enum(Schema.Primitive("string", None), "Red" :: "Blue" :: Nil)
+      Schema.Enum(Schema.Primitive("string", None, None), "Red" :: "Blue" :: Nil, None)
     Fixtures.toSchema(Fixtures.Enum.colorSchema) shouldBe expectedSchema
   }
 
@@ -50,9 +50,10 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
       Schema.Reference(
         "Rec",
         Some(Schema.Object(
-          Schema.Property("next", Schema.Reference("Rec", None), isRequired = false, description = None) :: Nil,
+          Schema.Property("next", Schema.Reference("Rec", None, None), isRequired = false, description = None) :: Nil,
           description = None
-        ))
+        )),
+        None
       )
     val expectedSchema =
       Schema.Object(
@@ -68,7 +69,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
       reqBody shouldBe defined
       reqBody.value.description.value shouldEqual "Text Req"
-      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string", None)
+      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string", None, None)
     }
   }
 
