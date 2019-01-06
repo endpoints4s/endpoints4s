@@ -21,9 +21,11 @@ trait Responses
     */
   case class DocumentedResponse(status: Int, documentation: String, content: Map[String, MediaType])
 
-  def emptyResponse(docs: Documentation): Response[Unit] = DocumentedResponse(200, docs.getOrElse(""), Map.empty) :: Nil
+  def emptyResponse(docs: Documentation): Response[Unit] =
+    DocumentedResponse(200, docs.getOrElse(""), Map.empty) :: Nil
 
-  def textResponse(docs: Documentation): Response[String] = DocumentedResponse(200, docs.getOrElse(""), Map("text/plain" -> MediaType(None))) :: Nil
+  def textResponse(docs: Documentation): Response[String] =
+    DocumentedResponse(200, docs.getOrElse(""), Map("text/plain" -> MediaType(Some(model.Schema.simpleString)))) :: Nil
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     DocumentedResponse(404, notFoundDocs.getOrElse(""), content = Map.empty) :: response

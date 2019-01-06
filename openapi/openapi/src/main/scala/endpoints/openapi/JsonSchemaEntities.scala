@@ -27,22 +27,22 @@ trait JsonSchemaEntities
 
   private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
     documentedCodec match {
-      case record @ DocumentedRecord(_, Some(name)) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None)
-        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)))
-      case record @ DocumentedRecord(_, None) =>
+      case record @ DocumentedRecord(_, _, Some(name)) =>
+        if (referencedSchemas(name)) Schema.Reference(name, None, None)
+        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)), None)
+      case record @ DocumentedRecord(_, _, None) =>
         expandRecordSchema(record, None, referencedSchemas)
       case coprod @ DocumentedCoProd(_, Some(name), _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None)
-        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)))
+        if (referencedSchemas(name)) Schema.Reference(name, None, None)
+        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)), None)
       case coprod @ DocumentedCoProd(_, None, _) =>
         expandCoproductSchema(coprod, referencedSchemas)
       case Primitive(name, format) =>
-        Schema.Primitive(name, format)
+        Schema.Primitive(name, format, None)
       case Array(elementType) =>
-        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas))
+        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas), None)
       case DocumentedEnum(elementType, values) =>
-        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values)
+        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None)
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)
     }
@@ -52,20 +52,23 @@ trait JsonSchemaEntities
     val fieldsSchema = record.fields
       .map(f => Schema.Property(f.name, toSchema(f.tpe, None, referencedSchemas), !f.isOptional, f.documentation))
 
+    val additionalProperties = record.additionalProperties.map(toSchema(_, None, referencedSchemas))
+
     coprodBase.fold[Schema] {
-      Schema.Object(fieldsSchema, None)
+      Schema.Object(fieldsSchema, additionalProperties, None)
     } { coprod =>
       val discriminatorField =
         Schema.Property(coprod.discriminatorName, Schema.simpleString, isRequired = true, description = None)
 
       coprod.name.fold[Schema] {
-        Schema.Object(discriminatorField :: fieldsSchema, None)
+        Schema.Object(discriminatorField :: fieldsSchema, additionalProperties, None)
       } { coproductName =>
         Schema.AllOf(
           schemas = List(
-            Schema.Reference(coproductName, None),
-            Schema.Object(discriminatorField :: fieldsSchema, None)
-          )
+            Schema.Reference(coproductName, None, None),
+            Schema.Object(discriminatorField :: fieldsSchema, additionalProperties, None)
+          ),
+          description = None
         )
       }
     }

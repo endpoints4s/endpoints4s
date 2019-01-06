@@ -12,7 +12,7 @@ import play.api.mvc.Results
   * JSON entities in HTTP requests, and circe’s [[io.circe.Encoder]] to build JSON entities
   * in HTTP responses.
   */
-trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with endpoints.circe.JsonSchemas { // TODO is this still needed?
+trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with endpoints.circe.JsonSchemas {
 
   import playComponents.executionContext
 

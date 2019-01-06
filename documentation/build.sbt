@@ -101,7 +101,7 @@ val `example-quickstart-server` =
   project.in(file("examples/quickstart/server"))
     .settings(noPublishSettings ++ `scala 2.11 to 2.12`)
     .settings(libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9")
-    .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-circe`, `openapi-jvm`)
+    .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-playjson`, `openapi-jvm`)
 
 // Basic example
 val `example-basic-shared` = {
@@ -135,7 +135,7 @@ val `example-basic-shared` = {
       unmanagedResourceDirectories in Compile += assetsDirectory(baseDirectory.value.getParentFile)
     )
     .enablePlugins(ScalaJSPlugin)
-    .dependsOnLocalCrossProjects("algebra", "algebra-circe", "openapi")
+    .dependsOnLocalCrossProjects("algebra", "algebra-circe")
 }
 
 val `example-basic-shared-jvm` = `example-basic-shared`.jvm
@@ -160,7 +160,7 @@ val `example-basic-play-server` =
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
       libraryDependencies += "com.typesafe.play" %% "play" % playVersion
     )
-    .dependsOn(`example-basic-shared-jvm`, `play-server-circe`)
+    .dependsOn(`example-basic-shared-jvm`, `play-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`, `openapi-jvm`)
 
 val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))
@@ -322,7 +322,7 @@ val `example-documented` =
         )
       }.taskValue
     )
-    .dependsOn(`play-server-circe`, `json-schema-generic-jvm`, `openapi-jvm`)
+    .dependsOn(`play-server-playjson`, `json-schema-generic-jvm`, `openapi-jvm`)
 
 val `example-authentication` =
   project.in(file("examples/authentication"))

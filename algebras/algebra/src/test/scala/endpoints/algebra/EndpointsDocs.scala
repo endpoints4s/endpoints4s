@@ -65,4 +65,12 @@ trait EndpointsDocs extends Endpoints {
   val someResource: Endpoint[Int, String] =
     endpoint(get(path / "some-resource" / segment[Int]()), textResponse())
   //#endpoint-definition
+
+  //#documented-endpoint-definition
+  val someDocumentedResource: Endpoint[Int, String] =
+    endpoint(
+      get(path / "some-resource" / segment[Int]("id")),
+      textResponse(docs = Some("The content of the resource"))
+    )
+  //#documented-endpoint-definition
 }

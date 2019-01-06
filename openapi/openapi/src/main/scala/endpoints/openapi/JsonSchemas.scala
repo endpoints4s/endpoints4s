@@ -25,7 +25,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   object DocumentedJsonSchema {
 
-    case class DocumentedRecord(fields: List[Field], name: Option[String] = None) extends DocumentedJsonSchema
+    case class DocumentedRecord(fields: List[Field], additionalProperties: Option[DocumentedJsonSchema] = None, name: Option[String] = None) extends DocumentedJsonSchema
     case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
     case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)],
@@ -36,7 +36,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
 
-    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: Seq[String]) extends DocumentedJsonSchema
+    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[String]) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed trait LazySchema extends DocumentedJsonSchema {
@@ -51,7 +51,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   }
 
   def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): DocumentedEnum =
-    DocumentedEnum(tpe, values.map(encode))
+    DocumentedEnum(tpe, values.map(encode).toList)
 
   def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
     import DocumentedJsonSchema._
@@ -116,6 +116,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
     cbf: CanBuildFrom[_, A, C[A]]
   ): JsonSchema[C[A]] = Array(jsonSchema)
 
-  def mapJsonSchema[A](implicit jsonSchema: DocumentedJsonSchema): DocumentedJsonSchema = ??? // TODO
+  def mapJsonSchema[A](implicit jsonSchema: DocumentedJsonSchema): DocumentedJsonSchema =
+    DocumentedRecord(fields = Nil, additionalProperties = Some(jsonSchema))
 
 }

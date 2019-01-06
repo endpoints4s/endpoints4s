@@ -28,7 +28,7 @@ trait DocumentedApi
       path / "admin",
       requestEntity = emptyRequest,
       response = emptyResponse(Some("Administration page")),
-      summary = Some("Authentication error")
+      summary = Some("Authentication endpoint")
     )
 
 }

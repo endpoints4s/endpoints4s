@@ -68,4 +68,6 @@ trait JsonSchemasTest extends JsonSchemas {
     optField("next")(lazySchema(recSchema, "Rec"))
   ).invmap(Rec)(_.next)
 
+  val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
+
 }
