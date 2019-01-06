@@ -125,7 +125,7 @@ val `example-basic-shared` = {
       coverageEnabled := false
     )
     .jvmSettings(
-      coverageEnabled := true,
+      coverageEnabled := false, // TODO Enable coverage when we add more tests
       (resourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.gzipAssets(
           baseDirectory = baseDirectory.value.getParentFile,
