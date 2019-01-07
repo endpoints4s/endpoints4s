@@ -12,6 +12,25 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
     "Client interpreter" should {
 
+      "return server response for UUID" in {
+
+        val uuid = UUID.randomUUID()
+        val response = "wiremockeResponse"
+
+        wireMockServer.stubFor(get(urlEqualTo(s"/user/$uuid/description?name=name1&age=18"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)))
+
+        whenReady(call(client.UUIDEndpoint, (uuid, "name1", 18))) {
+          _ shouldEqual response
+        }
+        whenReady(call(client.emptyResponseUUIDEndpoint, (uuid, "name1", 18))) {
+          _ shouldEqual (())
+        }
+
+      }
+
       "return server response" in {
 
         val response = "wiremockeResponse"
@@ -30,6 +49,29 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
       }
 
+      "return correct url with optional UUID parameter" in {
+
+        val uuid = UUID.randomUUID()
+        val response = "wiremockeResponse"
+
+        wireMockServer.stubFor(get(urlEqualTo(s"/user/userId/whatever?id=$uuid"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)))
+
+        wireMockServer.stubFor(get(urlEqualTo(s"/user/userId/whatever?id=$uuid&age=18"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)))
+
+        whenReady(call(client.optUUIDQsEndpoint, ("userId", uuid, None))) {
+          _ shouldEqual response
+        }
+        whenReady(call(client.optUUIDQsEndpoint, ("userId", uuid, Some(18)))) {
+          _ shouldEqual response
+        }
+
+      }
 
       "return correct url with optional parameter" in {
 

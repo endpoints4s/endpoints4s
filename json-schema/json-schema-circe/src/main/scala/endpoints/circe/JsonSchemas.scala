@@ -1,6 +1,8 @@
 package endpoints
 package circe
 
+import java.util.UUID
+
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -163,6 +165,8 @@ trait JsonSchemas
 
   def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
     JsonSchema(jsonSchema.encoder.contramap(g), jsonSchema.decoder.map(f))
+
+  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 

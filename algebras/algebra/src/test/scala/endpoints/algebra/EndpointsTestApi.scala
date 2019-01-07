@@ -2,11 +2,32 @@ package endpoints.algebra
 
 import java.time.format.DateTimeFormatter
 import java.time.LocalDate
+import java.util.UUID
 
 import endpoints.algebra
 
 trait EndpointsTestApi extends algebra.Endpoints {
 
+
+  val UUIDEndpoint = endpoint(
+    get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    textResponse()
+  )
+
+  val putUUIDEndpoint = endpoint(
+    put(path / "user" / segment[UUID](), emptyRequest),
+    emptyResponse()
+  )
+
+  val deleteUUIDEndpoint = endpoint(
+    delete(path / "user" / segment[UUID]()),
+    emptyResponse()
+  )
+
+  val emptyResponseUUIDEndpoint = endpoint(
+    get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    emptyResponse()
+  )
 
   val smokeEndpoint = endpoint(
     get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
@@ -55,6 +76,11 @@ trait EndpointsTestApi extends algebra.Endpoints {
   val reqBody1 = textRequest().xmap[LocalDate](s => LocalDate.parse(s, dateTimeFormatter), d => dateTimeFormatter.format(d))
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
+    textResponse()
+  )
+
+  val optUUIDQsEndpoint = endpoint(
+    get(path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & optQs[Int]("age"))),
     textResponse()
   )
 

@@ -62,6 +62,12 @@ trait Urls extends algebra.Urls {
   }
   //#segment
 
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    new Segment[B] {
+      def decode(s: String) = sa.decode(s).flatMap(f)
+      def encode(b: B) = sa.encode(g(b))
+    }
+
   implicit def stringSegment: Segment[String] =
     new Segment[String] {
       def decode(segment: String) = Some(segment)
@@ -126,6 +132,12 @@ trait Urls extends algebra.Urls {
     def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
+
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    new QueryStringParam[B] {
+      def decode(name: String, qs: Map[String, Seq[String]]): Option[B] = pa.decode(name, qs).flatMap(f)
+      def encode(name: String, b: B): Map[String, Seq[String]] = pa.encode(name, g(b))
+    }
 
   implicit def stringQueryString: QueryStringParam[String] =
     new QueryStringParam[String] {

@@ -1,8 +1,5 @@
 package cqrs.publicserver
 
-import java.net.URLEncoder
-import java.util.UUID
-
 import cats.Traverse
 import cqrs.queries._
 import cqrs.commands.{AddRecord, CreateMeter, MeterCreated, StoredEvent}
@@ -13,7 +10,6 @@ import cats.instances.future._
 import endpoints.play.server.{JsonEntitiesFromCodec, Endpoints, PlayComponents}
 
 import scala.concurrent.Future
-import scala.util.Try
 
 /**
   * Implementation of the public API based on our “commands” and “queries” microservices.
@@ -78,14 +74,6 @@ class PublicServer(
       }
 
     )
-
-  //#segment-uuid
-  implicit lazy val uuidSegment: Segment[UUID] =
-    new Segment[UUID] {
-      def decode(segment: String): Option[UUID] = Try(UUID.fromString(segment)).toOption
-      def encode(uuid: UUID): String = URLEncoder.encode(uuid.toString, utf8Name)
-    }
-  //#segment-uuid
 
   // These aliases are probably due to a limitation of circe
   implicit private def circeEncoderReq: io.circe.Encoder[QueryReq] = QueryReq.queryEncoder

@@ -1,8 +1,11 @@
 package endpoints.algebra
 
+import java.util.UUID
+
 import endpoints.{InvariantFunctor, Tupler}
 
 import scala.language.{higherKinds, implicitConversions}
+import scala.util.Try
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -73,6 +76,24 @@ trait Urls {
     */
   type QueryStringParam[A]
 
+  /**
+    * Ability to refine a query string parameter for a type `A`
+    * into a query string parameter for a type `B` given a pair
+    * of decoding/encoding functions between `A` and `B`.
+    *
+    * @param pa A query string parameter for a type `A`
+    * @param f Decoding function from `A` to `Option[B]`
+    * @param g Encoding function from `B` to `A`
+    * @tparam A The type of the available query string parameter.
+    * @tparam B The type of the desired query string parameter.
+    * @return A query string parameter for a type `B` built by refinement from `pa`.
+    */
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B]
+
+  /** Ability to define `UUID` query string parameters */
+  implicit def uuidQueryString: QueryStringParam[UUID] =
+    refineQueryStringParam[String, UUID](stringQueryString)((x: String) => Try(UUID.fromString(x)).toOption)((y: UUID) => y.toString)
+
   /** Ability to define `String` query string parameters */
   implicit def stringQueryString: QueryStringParam[String]
 
@@ -86,6 +107,24 @@ trait Urls {
     * An URL path segment carrying an `A` information.
     */
   type Segment[A]
+
+  /**
+    * Ability to refine a path segment for a type `A`
+    * into a path segment for a type `B` given a pair
+    * of decoding/encoding functions between `A` and `B`.
+    *
+    * @param sa A path segment for a type `A`
+    * @param f Decoding function from `A` to `Option[B]`
+    * @param g Encoding function from `B` to `A`
+    * @tparam A The type of the available path segment.
+    * @tparam B The type of the desired path segment.
+    * @return A path segment for a type `B` built by refinement from `sa`.
+    */
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B]
+
+  /** Ability to define `UUID` path segments */
+  implicit def uuidSegment: Segment[UUID] =
+    refineSegment[String, UUID](stringSegment)((s: String) => Try.apply(UUID.fromString(s)).toOption)(_.toString)
 
   /** Ability to define `String` path segments */
   implicit def stringSegment: Segment[String]

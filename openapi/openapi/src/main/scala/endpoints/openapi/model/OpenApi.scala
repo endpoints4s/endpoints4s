@@ -229,6 +229,7 @@ object Schema {
       s"#/components/schemas/$name"
   }
 
+  val simpleUUID = Primitive("string", format = Some("uuid"))
   val simpleString = Primitive("string", None)
   val simpleInteger = Primitive("integer", None)
 

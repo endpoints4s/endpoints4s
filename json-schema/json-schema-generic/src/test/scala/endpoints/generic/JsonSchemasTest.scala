@@ -71,6 +71,8 @@ class JsonSchemasTest extends FreeSpec {
 
       def invmapJsonSchema[A, B](jsonSchema: String, f: A => B, g: B => A): String = jsonSchema
 
+      lazy val uuidJsonSchema: String = "uuid"
+
       lazy val stringJsonSchema: String = "string"
 
       lazy val intJsonSchema: String = "integer"

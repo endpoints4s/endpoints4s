@@ -22,6 +22,9 @@ trait Urls extends algebra.Urls {
 
   class Url[A](val toReq: A => HttpRequest)
 
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    (b: B) => pa(g(b))
+
    implicit def stringQueryString: QueryStringParam[String] = identity
 
    implicit def intQueryString: QueryStringParam[Int] = _.toString
@@ -34,6 +37,9 @@ trait Urls extends algebra.Urls {
       first(a) ++ second(b)
     }
   }
+
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    (b: B) => sa(g(b))
 
    implicit def stringSegment: Segment[String] = identity
 

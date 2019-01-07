@@ -5,6 +5,8 @@ import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromS
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Tupler, algebra}
 
+import scala.concurrent.Future
+
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
   *
@@ -22,8 +24,13 @@ trait Urls extends algebra.Urls {
 
   type QueryStringParam[T] = FromStringUnmarshaller[T]
 
+  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
+    pa.flatMap(ec => _ => (a: A) => f(a).fold[Future[B]](Future.failed(Unmarshaller.NoContentException))((b: B) => Future.successful(b)))
+
   type Segment[T] = PathMatcher1[T]
 
+  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
+    sa.tflatMap[Tuple1[B]]((a: Tuple1[A]) => f(a._1).map(Tuple1.apply))
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
     new Url(joinDirectives(path.directive, qs.directive))

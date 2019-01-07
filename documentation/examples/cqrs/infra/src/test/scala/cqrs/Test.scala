@@ -57,12 +57,7 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
   object api
     extends Endpoints(baseUrl(publicServer.port), wsClient)
       with JsonEntitiesFromCodec
-      with PublicEndpoints {
-
-    def uuidSegment: Segment[UUID] =
-      (uuid: UUID) => URLEncoder.encode(uuid.toString, utf8Name)
-
-  }
+      with PublicEndpoints
 
   "Public server" - {
 
