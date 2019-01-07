@@ -27,7 +27,10 @@ trait Endpoints
         .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
           PathItem(item.operations ++ e2.item.operations)
         })
-    val components = Components(schemas = captureSchemas(endpoints))
+    val components = Components(
+      schemas = captureSchemas(endpoints),
+      securitySchemes = captureSecuritySchemes(endpoints)
+    )
     OpenApi(info, items, components)
   }
 
@@ -37,7 +40,15 @@ trait Endpoints
     * @param path Path template (e.g. “/user/{id}”)
     * @param item Item documentation
     */
-  case class DocumentedEndpoint(path: String, item: PathItem)
+  case class DocumentedEndpoint(path: String, item: PathItem) {
+
+    def withSecurity(securityRequirements: SecurityRequirement*): DocumentedEndpoint = {
+      copy(item = PathItem(item.operations.map {
+        case (verb, operation) =>
+          verb -> operation.copy(security = securityRequirements.toList)
+      }))
+    }
+  }
 
   def endpoint[A, B](
     request: Request[A],
@@ -77,8 +88,9 @@ trait Endpoints
         description,
         parameters,
         request.entity.map(r => RequestBody(r.documentation, r.content)),
-        response.map(r => r.status -> Response(r.documentation, r.content)).toMap,
-        tags
+        response.map(r => r.status.toString -> Response(r.documentation, r.content)).toMap,
+        tags,
+        security = Nil // might be refined later by specific interpreters
       )
     val item = PathItem(Map(method -> operation))
     val path = correctPathSegments.map {
@@ -108,7 +120,7 @@ trait Endpoints
     } yield recSchema
 
     allReferencedSchemas
-      .collect { case Schema.Reference(name, Some(original)) => name -> original }
+      .collect { case Schema.Reference(name, Some(original), _) => name -> original }
       .toMap
   }
 
@@ -116,13 +128,15 @@ trait Endpoints
     schema match {
       case Schema.Object(properties, _) =>
         properties.map(_.schema).flatMap(captureReferencedSchemasRec)
-      case Schema.Array(elementType) =>
+      case Schema.Array(elementType, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_, _) =>
+      case Schema.Enum(elementType, _, _) =>
+        captureReferencedSchemasRec(elementType)
+      case Schema.Primitive(_, _, _) =>
         Nil
       case Schema.OneOf(_, alternatives, _) =>
         alternatives.map(_._2).flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas) =>
+      case Schema.AllOf(schemas, _) =>
         schemas.flatMap {
           case _: Schema.Reference => Nil
           case s => captureReferencedSchemasRec(s)
@@ -130,4 +144,12 @@ trait Endpoints
       case referenced: Schema.Reference =>
         referenced +: referenced.original.map(captureReferencedSchemasRec).getOrElse(Nil)
     }
+
+  private def captureSecuritySchemes(endpoints: Iterable[DocumentedEndpoint]): Map[String, SecurityScheme] = {
+    endpoints
+      .flatMap(_.item.operations.values)
+      .flatMap(_.security)
+      .map(s => s.name -> s.scheme)
+      .toMap
+  }
 }

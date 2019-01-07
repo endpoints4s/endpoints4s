@@ -38,7 +38,9 @@ a JSON decoder for `A`. Similarly, server interpreters fix the
 interpreters fix these types to be JSON schemas for `A`.
 
 The remaining sections document some concrete types given by algebras
-extending `JsonEntities`.
+extending `JsonEntities`. You might also be interested in looking at
+the [JSON codecs guide](/guides/json-codecs.md), which explains which
+families of algebras and interpreters you should use together.
 
 ## `JsonSchemaEntities`
 

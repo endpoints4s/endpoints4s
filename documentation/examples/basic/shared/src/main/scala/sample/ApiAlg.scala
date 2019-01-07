@@ -16,7 +16,7 @@ trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodec with BasicAuthen
     endpoint(post(path / "actionFut", jsonRequest[ActionParameter]()), jsonResponse[ActionResult]())
 
   val maybe =
-    endpoint(get(path / "option"), option(emptyResponse()))
+    endpoint(get(path / "option"), wheneverFound(emptyResponse()))
 
   val auth: Endpoint[Credentials, Option[Unit]] =
     authenticatedEndpoint(Get, path / "auth", response = emptyResponse())

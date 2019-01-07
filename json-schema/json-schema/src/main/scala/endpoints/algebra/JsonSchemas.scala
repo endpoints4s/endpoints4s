@@ -72,8 +72,35 @@ trait JsonSchemas {
     */
   type Tagged[A] <: JsonSchema[A]
 
+  /** A JSON schema for enumerations, i.e. types that have a restricted set of values. */
+  type Enum[A] <: JsonSchema[A]
+
+  /** Promotes a schema to an enumeration and converts between enum constants and JSON strings.
+    * Decoding fails if the input string does not match the encoded values of any of the possible values.
+    * Encoding does never fail, even if the value is not contained in the set of possible values.
+    * */
+  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A]
+
   /** Annotates JSON schema with a name */
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A]
+
+  /**
+    * Captures a lazy reference to a JSON schema currently being defined:
+    *
+    * {{{
+    *   case class Rec(next: Option[Rec])
+    *   val recSchema: JsonSchema[Rec] = (
+    *     optField("next")(lazySchema(recSchema, "Rec"))
+    *   ).invmap(Rec)(_.next)
+    * }}}
+    *
+    * Interpreters should return a JsonSchema value that does not evaluate
+    * the given `schema` unless it is effectively used.
+    *
+    * @param schema The JSON schema whose evaluation should be delayed
+    * @param name A unique name identifying the schema
+    */
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A]
 
   /** The JSON schema of a record with no fields */
   def emptyRecord: Record[Unit]

@@ -20,7 +20,7 @@ trait Responses extends algebra.Responses {
 
   def textResponse(docs: Documentation): Response[String] = x => if (x.code == 200) Right(x.body) else Left(new Throwable(s"Unexpected status code: ${x.code}"))
 
-  def option[A](inner: HttpResponse[String] => Either[Throwable, A], notFoundDocs: Documentation): HttpResponse[String] => Either[Throwable, Option[A]] = {
+  def wheneverFound[A](inner: HttpResponse[String] => Either[Throwable, A], notFoundDocs: Documentation): HttpResponse[String] => Either[Throwable, Option[A]] = {
     {
       case resp if resp.code == 404 => Right(None)
       case resp => inner(resp).right.map(Some(_))

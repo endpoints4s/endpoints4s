@@ -42,4 +42,11 @@ class JsonSchemasTest extends FreeSpec {
     assert(Foo.schema.decoder.decodeJson(wrongJson).swap.right.exists(_ == DecodingFailure("No decoder for discriminator 'Unknown'!", Nil)))
   }
 
+  "recursive type" in {
+    val json = Json.obj("next" -> Json.obj("next" -> Json.obj()))
+    val rec = JsonSchemasCodec.Rec(Some(JsonSchemasCodec.Rec(Some(JsonSchemasCodec.Rec(None)))))
+    assert(JsonSchemasCodec.recSchema.decoder.decodeJson(json).right.exists(_ == rec))
+    assert(JsonSchemasCodec.recSchema.encoder(rec) == json)
+  }
+
 }

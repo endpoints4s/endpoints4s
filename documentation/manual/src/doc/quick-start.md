@@ -55,7 +55,7 @@ val client =
 val server =
   project.settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %% "endpoints-play-server-circe" % "{{version}}",
+      "org.julienrf" %% "endpoints-play-server-playjson" % "{{version}}",
       "org.julienrf" %% "endpoints-openapi" % "{{version}}",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
@@ -74,7 +74,7 @@ circe’s encoders and decoders.
 
 Finally, the `server` project uses a server interpreter backed by [Play framework](interpreters/play.md),
 which also turns the JSON schemas defined in the `shared` project into
-circe’s encoders and decoders (like the `client` project does), as well as
+Play JSON encoders and decoders, as well as
 an interpreter producing OpenAPI documents.
 It also uses the scala-stm library for implementing the business logic.
 

@@ -17,6 +17,8 @@ This algebra provides vocabulary to define JSON schemas of data types.
 
 The algebra introduces the concept of `JsonSchema[A]`: a JSON schema for a type `A`.
 
+### Basic types and record types
+
 The trait provides some predefined JSON schemas (for `String`, `Int`, `Boolean`, etc.)
 and ways to combine them together to build more complex schemas.
 
@@ -41,6 +43,8 @@ and then we combine them into a single JSON object schema by using the `zip` ope
 to turn the `Record[(Double, Double)]` value returned by the `zip` operation into
 a `Record[Rectangle]`.
 
+### Sum types
+
 It is also possible to define schemas for sum types. Consider the following type definition,
 defining a `Shape`, which can be either a `Circle` or a `Rectangle`:
 
@@ -62,6 +66,39 @@ using `invmap`.
 
 By default, the discriminator field is named `type`, but you can use another field name if
 you want to.
+
+### Enumerations
+
+There are different ways to represent enumerations in Scala:
+
+- `scala.util.Enumeration`
+- Sealed trait with case objects
+- Third-party libraries, e.g. Enumeratum
+
+For example, an enumeration with three possible values can be defined as a sealed trait with three case objects:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status
+~~~
+
+The method `enumeration` in the `JsonSchemas` algebra supports mapping the enum values to JSON strings.
+It has two parameters: the possible values, and a function to encode an enum value as a string.
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status-schema
+~~~
+
+The resulting `JsonSchema[Status]` allows defining JSON members with string values that are mapped to our case objects.
+
+It will work similarly for other representations of enumerated values.
+Most of them provide `values` which can conveniently be passed into `enumeration`.
+However, it is still possible to explicitly pass a certain subset of allowed values.
+
+### Recursive types
+
+You can reference a currently being defined schema without causing a `StackOverflow` error
+by wrapping it in the `lazySchema` constructor:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
+~~~
 
 ## Generic derivation of JSON schemas
 

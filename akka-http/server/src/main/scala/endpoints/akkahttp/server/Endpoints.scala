@@ -74,7 +74,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
   def textResponse(docs: Documentation): Response[String] = x => Directives.complete((StatusCodes.OK, x))
 
-  def option[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
+  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
     case None => Directives.complete(HttpResponse(StatusCodes.NotFound))
   }

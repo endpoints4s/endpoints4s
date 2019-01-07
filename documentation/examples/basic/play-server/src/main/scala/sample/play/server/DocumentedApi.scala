@@ -8,7 +8,7 @@ class DocumentedApi(protected val playComponents: PlayComponents)
   extends sample.algebra.DocumentedApi
     with play.server.Endpoints
     with play.server.BasicAuthentication
-    with play.server.circe.JsonEntitiesFromCodec { parent =>
+    with play.server.JsonEntitiesFromCodec { parent =>
 
   lazy val routes = routesFromEndpoints(
     item.implementedBy(id => if (id == "123abc") Some(Item("foo")) else None),

@@ -39,7 +39,8 @@ trait BasicAuthentication extends Endpoints {
     requestHeaders: RequestHeaders[H] = emptyHeaders,
     unauthenticatedDocs: Documentation = None,
     summary: Documentation = None,
-    description: Documentation = None
+    description: Documentation = None,
+    tags: List[String] = Nil
   )(implicit
     tuplerUE: Tupler.Aux[U, E, UE],
     tuplerHCred: Tupler.Aux[H, Credentials, HCred],
@@ -49,7 +50,8 @@ trait BasicAuthentication extends Endpoints {
       request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader),
       authenticated(response, unauthenticatedDocs),
       summary,
-      description
+      description,
+      tags
     )
 
 }

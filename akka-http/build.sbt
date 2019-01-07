@@ -6,9 +6,9 @@ val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
-val akkaHttpVersion = "10.0.1"
+val akkaHttpVersion = "10.0.15"
 val akkaHttpJsonVersion = "1.18.1"
-val akkaHttpCirceVersion = "1.21.0"
+val akkaHttpCirceVersion = "1.22.0"
 
 val `akka-http-client` =
   project.in(file("client"))
@@ -35,6 +35,7 @@ val `akka-http-server` =
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
         "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion % Provided,
+        "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency
       )
     )

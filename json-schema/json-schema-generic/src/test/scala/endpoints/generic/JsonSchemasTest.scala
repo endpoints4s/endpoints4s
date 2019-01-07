@@ -33,9 +33,16 @@ class JsonSchemasTest extends FreeSpec {
       type JsonSchema[+A] = String
       type Record[+A] = String
       type Tagged[+A] = String
+      type Enum[+A] = String
 
-      override def named[A, S[T] <: String](schema: S[A], name: String): S[A] =
+      def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: String): String =
+        s"$tpe"
+
+      def named[A, S[T] <: String](schema: S[A], name: String): S[A] =
         s"'$name'!($schema)".asInstanceOf[S[A]]
+
+      def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] =
+        s"=>'$name'!($schema)"
 
       def emptyRecord: String =
         "$"

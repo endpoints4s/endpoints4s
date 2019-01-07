@@ -14,7 +14,7 @@ import play.api.routing.Router
 class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with server.Endpoints
-    with server.circe.JsonSchemaEntities {
+    with server.playjson.JsonSchemaEntities {
 
   /** Simple implementation of an in-memory counter */
   val counter = Ref(0)

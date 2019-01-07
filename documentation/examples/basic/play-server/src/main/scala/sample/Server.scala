@@ -3,6 +3,7 @@ package sample
 import _root_.play.api.http.ContentTypes.HTML
 import _root_.play.api.mvc.{Handler, RequestHeader, Results}
 import _root_.play.api.routing.sird._
+import _root_.play.api.libs.json.Json
 import _root_.play.core.server.ServerConfig
 import controllers.{AssetsBuilder, AssetsConfiguration, DefaultAssetsMetadata}
 import endpoints.play.server.{DefaultPlayComponents, HttpServer}
@@ -35,9 +36,8 @@ object Server extends App with Results {
     case GET(p"/assets/sample-client-fastopt.js") =>
       assets.versioned("/", "sample-client-fastopt.js")
     case GET(p"/api/description") => action {
-      import endpoints.play.server.circe.Util.circeJsonWriteable
-      import io.circe.syntax._
-      Ok(sample.openapi.DocumentedApi.documentation.asJson)
+      import sample.openapi.OpenApiEncoder.JsonSchema._
+      Ok(Json.toJson(sample.openapi.DocumentedApi.documentation))
     }
     case GET(p"/api/ui") => action {
       val html =
