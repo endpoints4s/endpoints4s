@@ -5,9 +5,9 @@ val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 
 val `scalaj-client` =
   project.in(file("client"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-scalaj-client",
       libraryDependencies ++= Seq(
         "org.scalaj" %% "scalaj-http" % "2.4.1"

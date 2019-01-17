@@ -12,9 +12,9 @@ val akkaHttpCirceVersion = "1.22.0"
 
 val `akka-http-client` =
   project.in(file("client"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-akka-http-client",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
@@ -27,9 +27,9 @@ val `akka-http-client` =
 
 val `akka-http-server` =
   project.in(file("server"))
-    .settings(publishSettings: _*)
-    .settings(`scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-akka-http-server",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,

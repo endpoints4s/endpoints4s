@@ -1,6 +1,7 @@
 import sbt._
 import sbt.Keys._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport.toScalaJSGroupID
+import com.typesafe.sbt.pgp.PgpKeys.{pgpPassphrase, pgpPublicRing, pgpSecretRing}
 
 object EndpointsSettings {
 
@@ -28,7 +29,6 @@ object EndpointsSettings {
     scalaVersion := "2.12.6",
     crossScalaVersions := Seq("2.11.12", "2.12.6")
   )
-
   val `scala 2.11 to latest` = Seq(
     scalaVersion := "2.12.6",
     crossScalaVersions := Seq("2.11.12", "2.12.6", "2.13.0-M2")
@@ -56,7 +56,16 @@ object EndpointsSettings {
         url(s"https://github.com/julienrf/endpoints"),
         s"scm:git:git@github.com:julienrf/endpoints.git"
       )
-    )
+    ),
+    pgpPublicRing := file("pubring.asc"),
+    pgpSecretRing := file("secring.asc"),
+    pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray),
+    credentials ++= (
+      for {
+        username <- sys.env.get("SONATYPE_USER")
+        password <- sys.env.get("SONATYPE_PASSWORD")
+      } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)
+    ).toList
   )
 
   val noPublishSettings = commonSettings ++ Seq(
