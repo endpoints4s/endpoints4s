@@ -3,8 +3,9 @@ import LocalCrossProject._
 
 lazy val openapi =
   crossProject.crossType(CrossType.Pure).in(file("openapi"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-openapi"
     )
     .dependsOnLocalCrossProjects("json-schema-generic")

@@ -5,8 +5,9 @@ val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
 val `sttp-client` =
   project.in(file("client"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-sttp-client",
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp" %% "core" % sttpVersion,

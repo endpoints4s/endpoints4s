@@ -3,8 +3,9 @@ import LocalCrossProject._
 
 val `json-schema` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema"))
-    .settings(publishSettings ++ `scala 2.11 to latest`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency
     )
@@ -14,8 +15,9 @@ val `json-schema-jvm` = `json-schema`.jvm
 
 lazy val `json-schema-generic` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema-generic"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-json-schema-generic",
       libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
       addScalaTestCrossDependency
@@ -27,8 +29,9 @@ lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
 
 lazy val `json-schema-circe` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema-circe"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-json-schema-circe",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
@@ -40,8 +43,9 @@ lazy val `json-schema-circe-jvm` = `json-schema-circe`.jvm
 
 lazy val `json-schema-playjson` =
   crossProject.crossType(CrossType.Pure).in(file("json-schema-playjson"))
-    .settings(publishSettings ++ `scala 2.11 to 2.12`: _*)
     .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
       name := "endpoints-json-schema-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
     )

@@ -9,7 +9,7 @@ akka-http/                  Interpreters based on Akka-http
 play/                       Interpreters based on Play framework
 scalaj/                     Interpreters based on Scalaj
 xhr/                        Scala.js interpreters based on XMLHttpRequest
-openapi/                    Alternative algebra interfaces for generating documentation
+openapi/                    Interpreters generating OpenAPI documentation
 testsuite/                  Test kit
 documentation/              User manual and examples
 sbt-assets/                 Sbt settings to help handling assets

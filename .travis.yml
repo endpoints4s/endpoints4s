@@ -3,12 +3,20 @@ language: scala
 cache:
   - directories:
     - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot
+    - $HOME/.sbt
+
+# See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
+# Tricks to avoid unnecessary cache updates
+before_cache:
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
 
 # based on https://github.com/jruby/jruby/blob/master/.travis.yml
 before_install:
   - unset _JAVA_OPTIONS
   - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
+  - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in secring.asc.enc -out secring.asc -d
 
 before_script:
   - unset _JAVA_OPTIONS # travis/travis#8408
@@ -20,35 +28,32 @@ jdk:
 
 jobs:
   include:
+
     - stage: test
-      scala: 2.11.11
-      script:
-        # +++ instead of ++ to use sbt-doge strict aggregation
-        - sbt "+++$TRAVIS_SCALA_VERSION test"
-        - sbt "+++$TRAVIS_SCALA_VERSION manual/makeSite"
-        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
-        # Tricks to avoid unnecessary cache updates
-        - find $HOME/.sbt -name "*.lock" | xargs rm
-        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+      scala: 2.11.12
+      script: sbt "wow $TRAVIS_SCALA_VERSION" test manual/makeSite
     - stage: test
-      scala: 2.12.4
-      script:
-        # +++ instead of ++ to use sbt-doge strict aggregation
-        - sbt "+++$TRAVIS_SCALA_VERSION test"
-        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
-        # Tricks to avoid unnecessary cache updates
-        - find $HOME/.sbt -name "*.lock" | xargs rm
-        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+      scala: 2.12.6
+      script: sbt "wow $TRAVIS_SCALA_VERSION" test
     - stage: test
       scala: 2.13.0-M2
-      script:
-        # +++ instead of ++ to use sbt-doge strict aggregation
-        - sbt "+++$TRAVIS_SCALA_VERSION test"
-        # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
-        # Tricks to avoid unnecessary cache updates
-        - find $HOME/.sbt -name "*.lock" | xargs rm
-        - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
+      # requires strict aggregation because 2.13 is not supported by all the modules
+      script: sbt "+++$TRAVIS_SCALA_VERSION test"
+
     - stage: coverage
-      script: sbt "wow 2.11.11" coverage test coverageReport coverageAggregate
-      after_success:
+      script:
+        - sbt "wow 2.11.12" coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
+
+    - stage: deploy
+      if: (branch = master) AND (tag IS present)
+      script: sbt +publishSigned sonatypeRelease "wow 2.11.12" manual/makeSite manual/ghpagesPushSite
+
+env:
+  global:
+    # SONATYPE_USER
+    - secure: "jsKBFi/SpcY9OmMoOJF1uHxMdWeJ0PzjStX5NgNgtaBd/V0RQdVqrGK+wUi4YznaNGYMkzhC4pI5mXkt1WUVINJNvw/fWCLH21+7o1gZ7Q0xtpMzSYVWR7+1z+Fd2CbDNGRN33eLEw1vC39aOGiPinr0qixssQyzI8Dxnzrch9fod+oBwecQYgJEIWwl+xkLnFsBs8lBbnG2e1D6356P0Yx3Yrd54YQaYuP3EMH6ACPjbR/h+HcG9TDUwlReLyBHdrzVq5Kd+pQSOjw1zn4Pkgcu9a1vZrql+ttlFhiwJXufNCKTFL8dk0kyQQP+i7yEZvoTzza5dAoIc5rvkMTPtGBobnQOmz/VRAWKQ19vRWRrQCiszj7n8zeTPk9GzobKwRrVig6Dh7sCGwfdW/0ZuEvAh0i6ryZZXd7BFfkE5lV6/gmDnc0Il+skiinmD27nFlg+rXV4KohwyKH04aSl6q8W65Sp1hRL5s/SFOjytwQug1tRZLkyq+a5zNQlFQCmoiq7JRmvaWfyRDbTfwfXNttlTAOEui3plA/Tds+B7+dHigney7OaWVxr8gG/2iubhgCH6LiM8buloQjywHxv459umVIiBPzPG+LFVkABebI7TLGOGJwDYTR3/vXb3beVVZJ0hDDTErIoXGzxoJd/ivB2ReYpMwDfO2Fr+lu3yic="
+    # SONATYPE_PASSWORD
+    - secure: "iwQQIRHAoy91n1JIx8HvJSyaJlsERoWUI4gJWrDDxqwVXSpIykQtOc9lOvC751VuwpFVV8jT9RliMmrZ2gP1PGWQj2HGzKpG0+ZzbClG5z1bwc2Y6MN2Ua5pDofhtY4q6BthwggBE0AOd3sM+QIbY9hF/lFf0juYWmxaCR3sAA7+D/xXS3W8JX8sElqbsB+VtdbZOs6jg9C9dMzR2P1f4/LN3wJvtHqGUrmLd/5z/QF+fz95bHZS/ve7cqEzTOnf5uzA7/so3ne3iRtYXibCSpU3/UAh57rklJIITS/eLnNIxVNTHWHFTe6fdZQjHvhEb3qNzs5/3uHWYlfqQQ/MTR9q0KKQA8jB7Omtq8+1w6BZQE+gQw2fOv9iELthrAHUSWEJ8BH2oTGG65IbTXO702RnvwRHtCd+jXPIA1FVx6956loUnvvzybVvke0VxU7u3w5UmJObM6iidn0C3rAidpFxwmpY76vsQtl0F5RfCPj3tKSFQwip7259ZRrdlxvSpo6SfVZkNjBzT2cBf9AmV+5ls/aWx2AEOL/j61bQR4gbbcXv9C9+NyCrpg3Gf2RrTzO1EvgSSAEt2KMthOlcHs85zttBNyFjXlLAYPGeZuI9FAtT/3wc7WARQczhjF1tBcUiYnzqa1OER/8ZbGzegz5gej2vTOByfcYEGn3D39w="
+    # PGP_PASSPHRASE
+    - secure: "PkqB6lk8ZjsSH4gUSKxOD/OAzwA3ZI0uwsl90y9rE6amcT4+ojzQcjl05KdU/KsvjtSuwqsW3Gkkq9tY0gCYWHtc8N956lk8zTeW0Pn17q4sn/8FHwP7ll9owpvhAYGFpQOEFDSK9IgHlzaAn9EcFb5YWxzfT3ZKGmyTChjQvMws1aJdgocF15rG73Dj+g8BjfhSG/csxRZegwD4cef48bW7q0uIR3tJ84aOPGu1ibkSAYToxg7Wjr5ENf+K3SZ8JAyoh4/8RcBQw7bknxTiPcvavwufyOINQlW0KeKww13EypsOpjPYfFwdqdsc5xh+Xp06awp8X92ae4K2bHs2MdWm4pzjYDPX+LKhBNnDpbRDJ/6cMqOoFzUdBNlTNQsEfHvnlBSMMEHCkgxp9FhQGsjF0q8FmyAxJ301jRcBcoeseM1qPcFFVLXOtaeiwwK+o5FKso6IEyAxzL2aNTTiO9OYQWLWMfwNAGye+dl7Egc7galfTuVLDJWgID38eezKjsxDNpe1IGjqXD+tM7k7de2iEf9nyqY7hPg8ar0dLgobE23mcxuhMJ5LMe7DJ4MyNM9yIBYEl7TsBUqS1g2H6O4daIrYdqFzkL42OFEp/AzugsfmNs6BtiCAs52gfwgi+u6iSuiS9buAfq5gcPLrmW8oUYXEGfWiNHQHpmfbmKI="

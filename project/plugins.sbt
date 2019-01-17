@@ -2,13 +2,13 @@ addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
-addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.11")
-
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.0")
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.1")
 
 addSbtPlugin("com.eed3si9n" % "sbt-doge" % "0.1.5")
+
+addSbtPlugin("com.dwijnand" % "sbt-dynver" % "3.1.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.2")
 
