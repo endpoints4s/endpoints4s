@@ -32,9 +32,9 @@ $ sbt +test
 or for faster feedback loop:
 
 ~~~ sh
-$ sbt "+++ 2.10.6 test"
-$ sbt "+++ 2.11.11 test"
-$ sbt "+++ 2.12.4 test"
+$ sbt "+++ 2.11.12 test"
+$ sbt "+++ 2.12.8 test"
+$ sbt "+++ 2.13.0-M5 test"
 ~~~
 
 

@@ -1,6 +1,7 @@
 import EndpointsSettings._
 import LocalCrossProject._
-import org.scalajs.sbtplugin.cross.CrossProject
+import sbtcrossproject.CrossProject
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
@@ -75,7 +76,7 @@ val manual =
 
 // Example for the “Overview” page of the documentation
 val `example-quickstart-endpoints` =
-  crossProject.crossType(CrossType.Pure)
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
     .settings(noPublishSettings, `scala 2.11 to 2.12`)
     .jsSettings(
@@ -111,7 +112,7 @@ val `example-quickstart-server` =
 // Basic example
 val `example-basic-shared` = {
   val assetsDirectory = (base: File) => base / "src" / "main" / "assets"
-  CrossProject("example-basic-shared-jvm", "example-basic-shared-js", file("examples/basic/shared"), CrossType.Pure)
+  CrossProject("example-basic-shared", file("examples/basic/shared"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .settings(
       noPublishSettings,
       `scala 2.11 to 2.12`,
@@ -183,7 +184,8 @@ val `example-basic-akkahttp-server` =
 // CQRS Example
 // public endpoints definitions
 val `example-cqrs-public-endpoints` =
-  CrossProject("example-cqrs-public-endpoints-jvm", "example-cqrs-public-endpoints-js", file("examples/cqrs/public-endpoints"), CrossType.Pure)
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
+    .in(file("examples/cqrs/public-endpoints"))
     .settings(noPublishSettings, `scala 2.11 to 2.12`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
@@ -293,7 +295,7 @@ val `example-cqrs` =
     .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`/*, `circe-instant-js`*/ /*, `circe-instant-jvm`*/)
 
 lazy val `circe-instant` =
-  CrossProject("example-cqrs-circe-instantJVM", "example-cqrs-circe-instantJS", file("examples/cqrs/circe-instant"), CrossType.Pure)
+  CrossProject("example-cqrs-circe-instant", file("examples/cqrs/circe-instant"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .settings(noPublishSettings, `scala 2.11 to 2.12`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196

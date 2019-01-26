@@ -6,7 +6,7 @@ import java.util.UUID
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -185,10 +185,10 @@ trait JsonSchemas
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] = JsonSchema(implicitly, implicitly)
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], factory: Factory[A, C[A]]): JsonSchema[C[A]] =
     JsonSchema(
       io.circe.Encoder.encodeIterable[A, C](jsonSchema.encoder, implicitly),
-      io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, cbf)
+      io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, factory)
     )
 
   implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]] =

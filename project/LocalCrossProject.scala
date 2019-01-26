@@ -1,4 +1,7 @@
-import org.scalajs.sbtplugin.cross.CrossProject
+import sbtcrossproject.CrossProject
+import sbtcrossproject.CrossPlugin.autoImport._
+import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
+
 import sbt.{ClasspathDependency, LocalProject}
 
 object LocalCrossProject {

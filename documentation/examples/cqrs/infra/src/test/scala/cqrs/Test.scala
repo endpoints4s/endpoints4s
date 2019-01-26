@@ -1,8 +1,6 @@
 package cqrs
 
-import java.net.URLEncoder
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
-import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}

@@ -3,6 +3,9 @@ package endpoints.playjson
 import org.scalatest.FreeSpec
 import play.api.libs.json._
 
+// See https://github.com/scala/scala-collection-compat/pull/152
+import scala.collection.compat._
+
 class JsonSchemasTest extends FreeSpec {
 
   object JsonSchemasCodec

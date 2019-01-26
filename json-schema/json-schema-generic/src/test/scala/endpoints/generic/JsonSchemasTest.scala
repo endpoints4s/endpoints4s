@@ -3,7 +3,7 @@ package generic
 
 import org.scalatest.FreeSpec
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 class JsonSchemasTest extends FreeSpec {
@@ -89,7 +89,7 @@ class JsonSchemasTest extends FreeSpec {
 
       def arrayJsonSchema[C[X] <: Seq[X], A](implicit
                                              jsonSchema: String,
-                                             cbf: CanBuildFrom[_, A, C[A]]
+                                             factory: Factory[A, C[A]]
                                             ): String = s"[$jsonSchema]"
 
       def mapJsonSchema[A](implicit

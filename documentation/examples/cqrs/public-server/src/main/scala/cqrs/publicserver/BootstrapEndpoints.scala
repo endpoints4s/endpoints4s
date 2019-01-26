@@ -18,7 +18,6 @@ class BootstrapEndpoints(protected val playComponents: PlayComponents) extends E
     assetsEndpoint(path / "assets" / assetSegments())
 
   val documentation: Endpoint[Unit, OpenApi] = {
-    import JsonSchema._
     endpoint(get(path / "documentation"), jsonResponse[OpenApi]())
   }
 

@@ -1,8 +1,9 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import EndpointsSettings._
 import LocalCrossProject._
 
 val testsuite =
-  crossProject.crossType(CrossType.Pure).in(file("testsuite"))
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("testsuite"))
     .settings(
       publishSettings,
       `scala 2.11 to 2.12`,

@@ -1,8 +1,9 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import EndpointsSettings._
 import LocalCrossProject._
 
 lazy val openapi =
-  crossProject.crossType(CrossType.Pure).in(file("openapi"))
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("openapi"))
     .settings(
       publishSettings,
       `scala 2.11 to 2.12`,
