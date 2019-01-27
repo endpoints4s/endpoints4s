@@ -2,16 +2,16 @@ package quickstart
 
 //#relevant-code
 import endpoints.play.server
-import endpoints.play.server.PlayComponents
 
 import scala.concurrent.stm.Ref
+import play.api.BuiltInComponents
 import play.api.routing.Router
 
 /**
   * Defines a Play router (and reverse router) for the endpoints described
   * in the `CounterEndpoints` trait.
   */
-class CounterServer(protected val playComponents: PlayComponents)
+class CounterServer(protected val playComponents: BuiltInComponents)
   extends CounterEndpoints
     with server.Endpoints
     with server.playjson.JsonSchemaEntities {

@@ -78,7 +78,7 @@ val manual =
 val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -96,7 +96,7 @@ val `example-quickstart-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       noPublishSettings,
-      `scala 2.11 to 2.12`
+      `scala 2.11 to latest`
     )
     .dependsOn(`example-quickstart-endpoints-js`, `xhr-client-circe`)
 
@@ -104,7 +104,7 @@ val `example-quickstart-server` =
   project.in(file("examples/quickstart/server"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9"
     )
     .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-playjson`, `openapi-jvm`)
@@ -116,7 +116,7 @@ val `example-basic-shared` = {
     .settings(
       noPublishSettings,
       `scala 2.11 to 2.12`,
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+      macroParadiseDependency,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
@@ -146,7 +146,6 @@ val `example-basic-shared` = {
 }
 
 val `example-basic-shared-jvm` = `example-basic-shared`.jvm
-
 val `example-basic-shared-js` = `example-basic-shared`.js
 
 val `example-basic-client` =
@@ -186,7 +185,7 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -246,7 +245,7 @@ lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.9",
         "io.circe" %% "circe-generic" % circeVersion
@@ -259,7 +258,7 @@ val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
         scalaTestDependency
@@ -271,13 +270,13 @@ val `example-cqrs-commands` =
 // queries endpoints definitions
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
 
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .dependsOn(`play-server-circe`, `play-client`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
@@ -296,7 +295,7 @@ val `example-cqrs` =
 
 lazy val `circe-instant` =
   CrossProject("example-cqrs-circe-instant", file("examples/cqrs/circe-instant"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -311,7 +310,7 @@ lazy val `circe-instant-jvm` = `circe-instant`.jvm
 
 val `example-documented` =
   project.in(file("examples/documented"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .settings(
       herokuAppName in Compile := "documented-counter",
       herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
@@ -342,7 +341,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "1.0.0",
+        "com.pauldijou" %% "jwt-play" % "1.1.0",
         "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
       ),
       testFrameworks += new TestFramework("utest.runner.Framework")

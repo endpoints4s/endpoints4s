@@ -3,10 +3,9 @@ package cqrs.commands
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
-import akka.stream.Materializer
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
-import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
-import endpoints.play.server.DefaultPlayComponents
+import endpoints.play.client.{Endpoints, JsonEntitiesFromCodec}
+import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
 
@@ -15,9 +14,9 @@ import scala.math.BigDecimal
 
 class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
-  private val server = NettyServer.fromRouter()(new Commands(new DefaultPlayComponents(ServerConfig())).routes)
-
-  implicit val materializer: Materializer = server.materializer
+  private val server = NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test))(new Commands(_).routes)
+  val app = server.applicationProvider.get.get
+  import app.materializer
   private val wsClient = AhcWSClient(AhcWSClientConfig())
 
   object client

@@ -1,6 +1,7 @@
 package cqrs.queries
 
-import endpoints.play.server.{JsonEntitiesFromCodec, MuxEndpoints, PlayComponents}
+import endpoints.play.server.{JsonEntitiesFromCodec, MuxEndpoints}
+import play.api.BuiltInComponents
 import play.api.routing.Router
 
 import scala.concurrent.Future
@@ -8,7 +9,7 @@ import scala.concurrent.Future
 /**
   * Implementation of the queries service.
   */
-class Queries(service: QueriesService, protected val playComponents: PlayComponents)
+class Queries(service: QueriesService, protected val playComponents: BuiltInComponents)
   extends QueriesEndpoints
     with MuxEndpoints
     with JsonEntitiesFromCodec {

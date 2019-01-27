@@ -74,12 +74,25 @@ object EndpointsSettings {
   // --- Common dependencies
 
   val circeVersion = "0.11.1"
-  val playjsonVersion = "2.6.13"
-  val playVersion = "2.6.21"
+  val playjsonVersion = "2.7.0"
+  val playVersion = "2.7.0"
   val sttpVersion = "1.5.11"
 
   val scalaTestVersion = "3.0.7"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
-
+  val macroParadiseDependency = Seq(
+    scalacOptions in Compile ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => "-Ymacro-annotations" :: Nil
+        case _ => Nil
+      }
+    },
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => Nil
+        case _ => compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+      }
+    }
+  )
 }

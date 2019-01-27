@@ -10,6 +10,7 @@ import endpoints.play.server
 //#login-implementation
 import endpoints.play.client
 import play.api.libs.ws.WSClient
+import play.api.BuiltInComponents
 
 import scala.concurrent.ExecutionContext
 
@@ -60,7 +61,7 @@ class Client(host: String, wsClient: WSClient)(implicit ec: ExecutionContext)
   * Example of server implementing the `AuthenticationEndpoints`
   */
 //#login-implementation
-class Server(val playComponents: server.PlayComponents)
+class Server(val playComponents: BuiltInComponents)
   extends AuthenticationEndpoints
     with server.Endpoints
     with ServerAuthentication {

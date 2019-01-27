@@ -40,7 +40,7 @@ val `algebra-playjson` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra-playjson"))
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       name := "endpoints-algebra-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
     )

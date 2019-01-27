@@ -2,6 +2,7 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import endpoints.{Semigroupal, Tupler, algebra}
+import play.api.BuiltInComponents
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -43,7 +44,7 @@ import scala.language.implicitConversions
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
-  protected val playComponents: PlayComponents
+  protected val playComponents: BuiltInComponents
 
   import playComponents.executionContext
 
@@ -265,7 +266,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       endpoint.request.decode(header)
         .map { bodyParser =>
-          playComponents.actionBuilder.async(bodyParser) { request =>
+          playComponents.defaultActionBuilder.async(bodyParser) { request =>
             service(request.body).map { b =>
               endpoint.response(b)
             }
