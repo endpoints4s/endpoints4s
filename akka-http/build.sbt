@@ -14,12 +14,13 @@ val `akka-http-client` =
   project.in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       name := "endpoints-akka-http-client",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
         scalaTestDependency
       )
     )
@@ -32,13 +33,13 @@ val `akka-http-server` =
   project.in(file("server"))
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to 2.12`, // 2.13 is not supported because of akka-http-circe and sttp
       name := "endpoints-akka-http-server",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
-        "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
+        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
         "de.heikoseeberger" %% "akka-http-circe" % akkaHttpCirceVersion % Provided,
         "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency

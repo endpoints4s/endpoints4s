@@ -5,7 +5,7 @@ val `xhr-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       name := "endpoints-xhr-client",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -34,7 +34,7 @@ val `xhr-client-circe` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       name := "endpoints-xhr-client-circe",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
