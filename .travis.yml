@@ -17,8 +17,9 @@ before_install:
   - unset _JAVA_OPTIONS
   - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
 
-install:
-  - npm install jsdom@12.2.0
+# Commented out because of https://github.com/scoverage/scalac-scoverage-plugin/issues/183
+#install:
+#  - npm install jsdom@12.2.0
 
 before_script:
   - unset _JAVA_OPTIONS # travis/travis#8408
