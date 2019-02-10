@@ -4,9 +4,6 @@ import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
 import org.scalatest.{Matchers, WordSpec}
 
-// See https://github.com/scala/scala-collection-compat/pull/152
-import scala.collection.compat._
-
 class ReferencedSchemaTest extends WordSpec with Matchers {
 
   sealed trait Storage

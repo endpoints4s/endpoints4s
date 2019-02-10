@@ -2,9 +2,6 @@ package endpoints.openapi.model
 
 import endpoints.algebra.JsonSchemas
 
-// See https://github.com/scala/scala-collection-compat/pull/152
-import scala.collection.compat._
-
 /**
   * Provides an implicit instance of `JsonSchema[OpenApi]` which
   * can be interpreted by a proper JSON encoder (e.g.,
