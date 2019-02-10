@@ -121,7 +121,7 @@ class JsonSchemasTest extends FreeSpec {
 
   "case class with one field" in {
     case class IntClass(i: Int)
-    val jsonSchemaTestClass = field[Int]("i").invmap[IntClass](i => IntClass(i))(_.i)
+    val jsonSchemaTestClass = field[Int]("i").xmap[IntClass](i => IntClass(i))(_.i)
 
     testRoundtrip(
       jsonSchemaTestClass,
@@ -133,7 +133,7 @@ class JsonSchemasTest extends FreeSpec {
   "case class with two fields" in {
     case class TestClass(i: Int, s: String)
     val jsonSchemaTestClass = (field[Int]("i") zip field[String]("s"))
-      .invmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s))
+      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s))
 
     testRoundtrip(
       jsonSchemaTestClass,
@@ -253,8 +253,8 @@ class JsonSchemasTest extends FreeSpec {
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").tagged("Circle").invmap(Circle)(_.r) orElse
-      (field[Int]("w") zip field[Int]("h")).tagged("Rect").invmap(Rect.tupled)(rect => (rect.w, rect.h))
+    val schema = field[Double]("r").tagged("Circle").xmap(Circle)(_.r) orElse
+      (field[Int]("w") zip field[Int]("h")).tagged("Rect").xmap(Rect.tupled)(rect => (rect.w, rect.h))
 
     testRoundtrip(
       schema,
@@ -268,13 +268,13 @@ class JsonSchemasTest extends FreeSpec {
     )
   }
 
-  "sealed trait with invmap and tagged swapped" in {
+  "sealed trait with xmap and tagged swapped" in {
     sealed trait Shape
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").invmap(Circle)(_.r).tagged("Circle") orElse
-      (field[Int]("w") zip field[Int]("h")).invmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
+    val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
+      (field[Int]("w") zip field[Int]("h")).xmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
 
     testRoundtrip(
       schema,
@@ -293,8 +293,8 @@ class JsonSchemasTest extends FreeSpec {
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").invmap(Circle)(_.r).tagged("Circle") orElse
-      (field[Int]("w") zip field[Int]("h")).invmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
+    val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
+      (field[Int]("w") zip field[Int]("h")).xmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
 
     assertError(
       schema,

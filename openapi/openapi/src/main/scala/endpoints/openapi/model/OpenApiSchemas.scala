@@ -17,7 +17,7 @@ trait OpenApiSchemas extends JsonSchemas {
     field[Info]("info") zip
     field[Map[String, PathItem]]("paths") zip
     optField[Components]("components")
-  ).invmap[OpenApi]{
+  ).xmap[OpenApi]{
     // TODO Reject if openapi version does not match our openapiVersion
     case (((_, info), paths), components) => OpenApi(info, paths, components.getOrElse(Components(Map.empty, Map.empty)))
   } {
@@ -31,10 +31,10 @@ trait OpenApiSchemas extends JsonSchemas {
   implicit lazy val infoSchema: JsonSchema[Info] = (
       field[String]("title") zip
       field[String]("version")
-    ).invmap(Info.tupled)(info => (info.title, info.version))
+    ).xmap(Info.tupled)(info => (info.title, info.version))
 
   implicit lazy val pathItemSchema: JsonSchema[PathItem] =
-    mapJsonSchema[Operation].invmap(PathItem(_))(_.operations)
+    mapJsonSchema[Operation].xmap(PathItem(_))(_.operations)
 
   implicit lazy val operationSchema: JsonSchema[Operation] = (
     optField [String]                    ("summary")     zip
@@ -44,7 +44,7 @@ trait OpenApiSchemas extends JsonSchemas {
        field [Map[String, Response]]     ("responses")   zip
     optField [List[String]]              ("tags")        zip
     optField [List[SecurityRequirement]] ("security")
-  ).invmap[Operation] {
+  ).xmap[Operation] {
     case ((((((summary, description), parameters), requestBody), responses), tags), security) =>
       Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil))
   } {
@@ -57,7 +57,7 @@ trait OpenApiSchemas extends JsonSchemas {
        field [Schema]  ("schema")      zip
     optField [String]  ("description") zip
     optField [Boolean] ("required")
-  ).invmap[Parameter] {
+  ).xmap[Parameter] {
     case ((((name, in), schema), description), required) => Parameter(name, in, required.contains(true), description, schema)
   } {
     p => ((((p.name, p.in), p.schema), p.description), if (p.required) Some(true) else None)
@@ -74,7 +74,7 @@ trait OpenApiSchemas extends JsonSchemas {
   implicit lazy val requestBodySchema: JsonSchema[RequestBody] = (
        field [Map[String, MediaType]] ("content")     zip
     optField [String]                 ("description")
-  ).invmap[RequestBody] {
+  ).xmap[RequestBody] {
     case (content, description) => RequestBody(description, content)
   } {
     r => (r.content, r.description)
@@ -82,19 +82,19 @@ trait OpenApiSchemas extends JsonSchemas {
 
   implicit lazy val mediaTypeSchema: JsonSchema[MediaType] = (
     optField [Schema] ("schema")
-  ).invmap[MediaType](MediaType(_))(_.schema)
+  ).xmap[MediaType](MediaType(_))(_.schema)
 
   implicit lazy val responseSchema: JsonSchema[Response] = (
        field [String]                 ("description") zip
     optField [Map[String, MediaType]] ("content")
-  ).invmap[Response] {
+  ).xmap[Response] {
     case (description, content) => Response(description, content.getOrElse(Map.empty))
   } {
     r => (r.description, if (r.content.isEmpty) None else Some(r.content))
   }
 
   implicit lazy val securityRequirementSchema: JsonSchema[SecurityRequirement] =
-    mapJsonSchema[List[String]].invmap[SecurityRequirement] {
+    mapJsonSchema[List[String]].xmap[SecurityRequirement] {
       s =>
         val (name, scopes) = s.head // TODO Better failure handling
         SecurityRequirement(name, ???, scopes) // TODO We’d need the `Components` to look up for the `SecurityScheme`
@@ -105,7 +105,7 @@ trait OpenApiSchemas extends JsonSchemas {
   implicit lazy val componentsSchema: JsonSchema[Components] = (
     field [Map[String, Schema]]         ("schemas")         zip // FIXME Optional?
     field [Map[String, SecurityScheme]] ("securitySchemes") // FIXME Optional?
-  ).invmap[Components] {
+  ).xmap[Components] {
     case (schemas, securitySchemes) => Components(schemas, securitySchemes)
   } {
     components => (components.schemas, components.securitySchemes)
@@ -125,7 +125,7 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [List[String]]        ("enum")          zip
     optField [String]              ("$ref")          zip
     optField [String]              ("description")
-  ).invmap[Schema]{
+  ).xmap[Schema]{
     case (((((((((((Some("integer"), format), _), _), _), _), _), _), _), _), _), description) => Schema.Primitive("integer", format, description)
     case (((((((((((Some("string"), format), _), _), _), _), _), _), _), _), _), description)  => Schema.Primitive("string", format, description)
     case (((((((((((Some("object"), _), _), Some(props)), additionalProperties), required), _), _), _), _), _), description) =>
@@ -189,7 +189,7 @@ trait OpenApiSchemas extends JsonSchemas {
   implicit lazy val discriminatorSchema: JsonSchema[DiscriminatorFields] = (
     field [String]              ("propertyName") zip
     field [Map[String, String]] ("mapping")
-  ).invmap[DiscriminatorFields] {
+  ).xmap[DiscriminatorFields] {
     case (propertyName, mapping) => DiscriminatorFields(propertyName, mapping)
   } {
     d => (d.propertyName, d.mapping)
@@ -202,7 +202,7 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String] ("in")           zip
     optField [String] ("scheme")       zip
     optField [String] ("bearerFormat")
-  ).invmap[SecurityScheme] {
+  ).xmap[SecurityScheme] {
     case (((((tpe, description), name), in), scheme), bearerFormat) => SecurityScheme(tpe, description, name, in, scheme, bearerFormat)
   } {
     ss => (((((ss.`type`, ss.description), ss.name), ss.in), ss.scheme), ss.bearerFormat)

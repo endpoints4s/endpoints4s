@@ -38,7 +38,7 @@ import scala.reflect.ClassTag
   *     implicit val schema: JsonSchema[User] = (
   *       field[String]("name") zip
   *       field[Int]("age")
-  *     ).invmap((User.apply _).tupled)(Function.unlift(User.unapply))
+  *     ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   *   }
   * }}}
   *
@@ -54,7 +54,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def emptyRecordCase: GenericRecord[HNil] =
       new GenericRecord[HNil] {
         def jsonSchema: Record[HNil] =
-          emptyRecord.invmap[HNil](_ => HNil)(_ => ())
+          emptyRecord.xmap[HNil](_ => HNil)(_ => ())
       }
 
     implicit def singletonCoproduct[L <: Symbol, A](implicit
@@ -63,7 +63,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     ): GenericTagged[FieldType[L, A] :+: CNil] =
       new GenericTagged[FieldType[L, A] :+: CNil] {
         def jsonSchema: Tagged[FieldType[L, A] :+: CNil] =
-          recordA.jsonSchema.tagged(labelSingleton.value.name).invmap[FieldType[L, A] :+: CNil] {
+          recordA.jsonSchema.tagged(labelSingleton.value.name).xmap[FieldType[L, A] :+: CNil] {
             a => Inl(shapelessField[L](a))
           } {
             case Inl(a) => a
@@ -83,7 +83,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       new GenericRecord[FieldType[L, H] :: T] {
         def jsonSchema: Record[FieldType[L, H] :: T] =
           (field(labelHead.value.name)(jsonSchemaHead) zip jsonSchemaTail.jsonSchema)
-            .invmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+            .xmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
       }
 
     implicit def consOptRecord[L <: Symbol, H, T <: HList](implicit
@@ -94,7 +94,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       new GenericRecord[FieldType[L, Option[H]] :: T] {
         def jsonSchema: Record[FieldType[L, Option[H]] :: T] =
           (optField(labelHead.value.name)(jsonSchemaHead) zip jsonSchemaTail.jsonSchema)
-            .invmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+            .xmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
       }
 
     implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
@@ -105,7 +105,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       new GenericTagged[FieldType[L, H] :+: T] {
         def jsonSchema: Tagged[FieldType[L, H] :+: T] = {
           val taggedHead = recordHead.jsonSchema.tagged(labelHead.value.name)
-          taggedHead.orElse(taggedTail.jsonSchema).invmap[FieldType[L, H] :+: T] {
+          taggedHead.orElse(taggedTail.jsonSchema).xmap[FieldType[L, H] :+: T] {
             case Left(h)  => Inl(shapelessField[L](h))
             case Right(t) => Inr(t)
           } {
@@ -133,7 +133,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       ct: ClassTag[A]
     ): GenericRecord[A] =
       new GenericRecord[A] {
-        def jsonSchema: Record[A] = nameSchema(record.jsonSchema.invmap[A](gen.from)(gen.to))
+        def jsonSchema: Record[A] = nameSchema(record.jsonSchema.xmap[A](gen.from)(gen.to))
       }
 
     implicit def taggedGeneric[A, R](implicit
@@ -142,7 +142,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       ct: ClassTag[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
-        def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.invmap[A](gen.from)(gen.to))
+        def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.xmap[A](gen.from)(gen.to))
       }
 
   }
@@ -168,12 +168,12 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     def :*: [H](recordHead: Record[H]): RecordGenericOps[H :: L] =
       new RecordGenericOps(
-        (recordHead zip record).invmap { case (h, l) => h :: l }(hl => (hl.head, hl.tail))
+        (recordHead zip record).xmap { case (h, l) => h :: l }(hl => (hl.head, hl.tail))
       )
 
     def :×: [H](recordHead: Record[H]): RecordGenericOps[H :: L] = recordHead :*: this
 
-    def as[A](implicit gen: Generic.Aux[A, L]): Record[A] = record.invmap(gen.from)(gen.to)
+    def as[A](implicit gen: Generic.Aux[A, L]): Record[A] = record.xmap(gen.from)(gen.to)
 
     def tupled[T](implicit
       tupler: Tupler.Aux[L, T],
@@ -183,6 +183,6 @@ trait JsonSchemas extends algebra.JsonSchemas {
   }
 
   implicit def toRecordGenericOps[A](record: Record[A]): RecordGenericOps[A :: HNil] =
-    new RecordGenericOps[A :: HNil](record.invmap(_ :: HNil)(_.head))
+    new RecordGenericOps[A :: HNil](record.xmap(_ :: HNil)(_.head))
 
 }

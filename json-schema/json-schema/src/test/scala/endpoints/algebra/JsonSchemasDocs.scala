@@ -10,7 +10,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
       field[Double]("height")
-    ).invmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
+    ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
     //#record-schema
   }
 
@@ -24,19 +24,19 @@ trait JsonSchemasDocs extends JsonSchemas {
     implicit val schema: JsonSchema[Shape] = {
 
       val circleSchema =
-        field[Double]("radius").invmap(Circle)(_.radius)
+        field[Double]("radius").xmap(Circle)(_.radius)
 
       val rectangleSchema = (
         field[Double]("width") zip
         field[Double]("height")
-      ).invmap((Rectangle.apply _).tupled)(r => (r.width, r.height))
+      ).xmap((Rectangle.apply _).tupled)(r => (r.width, r.height))
 
       //#sum-type-schema
       // Given a `circleSchema: Record[Circle]` and a `rectangleSchema: Record[Rectangle]`
       (
         circleSchema.tagged("Circle") orElse
         rectangleSchema.tagged("Rectangle")
-      ).invmap[Shape] {
+      ).xmap[Shape] {
         case Left(circle) => circle
         case Right(rect)  => rect
       } {
@@ -65,7 +65,7 @@ trait JsonSchemasDocs extends JsonSchemas {
 
   val recSchema: JsonSchema[Rec] = (
     optField("next")(lazySchema(recSchema, "Rec"))
-  ).invmap(Rec)(_.next)
+  ).xmap(Rec)(_.next)
   //#recursive
 
 }
