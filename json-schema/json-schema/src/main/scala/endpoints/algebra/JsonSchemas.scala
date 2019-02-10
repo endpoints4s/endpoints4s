@@ -26,7 +26,7 @@ import scala.language.higherKinds
   *     implicit val schema: JsonSchema[User] = (
   *       field[String]("name") zip
   *       field[Int]("age")
-  *     ).invmap((User.apply _).tupled)(Function.unlift(User.unapply))
+  *     ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   *   }
   * }}}
   *
@@ -42,13 +42,13 @@ import scala.language.higherKinds
   *
   *   object Shape {
   *     implicit val schema: JsonSchema[Shape] = {
-  *       val circleSchema = field[Double]("radius").invmap(Circle)(Function.unlift(Circle.unapply))
+  *       val circleSchema = field[Double]("radius").xmap(Circle)(Function.unlift(Circle.unapply))
   *       val rectangleSchema = (
   *         field[Double]("width") zip
   *         field[Double]("height")
-  *       ).invmap((Rectangle.apply _).tupled)(Function.unlift(Rectangle.unapply))
+  *       ).xmap((Rectangle.apply _).tupled)(Function.unlift(Rectangle.unapply))
   *       (circleSchema.tagged("Circle") orElse rectangleSchema.tagged("Rectangle"))
-  *         .invmap[Shape] {
+  *         .xmap[Shape] {
   *           case Left(circle) => circle
   *           case Right(rect)  => rect
   *         } {
@@ -93,7 +93,7 @@ trait JsonSchemas {
     *   case class Rec(next: Option[Rec])
     *   val recSchema: JsonSchema[Rec] = (
     *     optField("next")(lazySchema(recSchema, "Rec"))
-    *   ).invmap(Rec)(_.next)
+    *   ).xmap(Rec)(_.next)
     * }}}
     *
     * Interpreters should return a JsonSchema value that does not evaluate
@@ -134,29 +134,29 @@ trait JsonSchemas {
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)]
 
   /** Transforms the type of the JSON schema */
-  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B]
+  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B]
 
   /** Transforms the type of the JSON schema */
-  def invmapTagged[A, B](taggedA: Tagged[A], f: A => B, g: B => A): Tagged[B]
+  def xmapTagged[A, B](taggedA: Tagged[A], f: A => B, g: B => A): Tagged[B]
 
   /** Transforms the type of the JSON schema */
-  def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B]
+  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B]
 
   /** Convenient infix operations */
   final implicit class RecordOps[A](recordA: Record[A]) {
     def zip[B](recordB: Record[B]): Record[(A, B)] = zipRecords(recordA, recordB)
-    def invmap[B](f: A => B)(g: B => A): Record[B] = invmapRecord(recordA, f, g)
+    def xmap[B](f: A => B)(g: B => A): Record[B] = xmapRecord(recordA, f, g)
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
   }
 
   /** Convenient infix operations */
   final implicit class JsonSchemaOps[A](jsonSchema: JsonSchema[A]) {
-    def invmap[B](f: A => B)(g: B => A): JsonSchema[B] = invmapJsonSchema(jsonSchema, f, g)
+    def xmap[B](f: A => B)(g: B => A): JsonSchema[B] = xmapJsonSchema(jsonSchema, f, g)
   }
 
   final implicit class TaggedOps[A](taggedA: Tagged[A]) {
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
-    def invmap[B](f: A => B)(g: B => A): Tagged[B] = invmapTagged(taggedA, f, g)
+    def xmap[B](f: A => B)(g: B => A): Tagged[B] = xmapTagged(taggedA, f, g)
   }
 
   /** A JSON schema for type `UUID` */

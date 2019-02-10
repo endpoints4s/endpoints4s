@@ -89,11 +89,11 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   def zipRecords[A, B](recordA: DocumentedRecord, recordB: DocumentedRecord): DocumentedRecord =
     DocumentedRecord(recordA.fields ++ recordB.fields)
 
-  def invmapRecord[A, B](record: DocumentedRecord, f: A => B, g: B => A): DocumentedRecord = record
+  def xmapRecord[A, B](record: DocumentedRecord, f: A => B, g: B => A): DocumentedRecord = record
 
-  def invmapTagged[A, B](tagged: DocumentedCoProd, f: A => B, g: B => A): DocumentedCoProd = tagged
+  def xmapTagged[A, B](tagged: DocumentedCoProd, f: A => B, g: B => A): DocumentedCoProd = tagged
 
-  def invmapJsonSchema[A, B](jsonSchema: DocumentedJsonSchema, f: A => B, g: B => A): DocumentedJsonSchema = jsonSchema
+  def xmapJsonSchema[A, B](jsonSchema: DocumentedJsonSchema, f: A => B, g: B => A): DocumentedJsonSchema = jsonSchema
 
   lazy val uuidJsonSchema: DocumentedJsonSchema = Primitive("string", format = Some("uuid"))
 

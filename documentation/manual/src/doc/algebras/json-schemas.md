@@ -39,7 +39,7 @@ defines an optional field in a JSON object.
 
 In the above example, we define two JSON object schemas (one for the `width` field,
 of type `Record[Double]`, and one for the `height` field, of type `Record[Double]`),
-and then we combine them into a single JSON object schema by using the `zip` operation. Finally, we call the `invmap` operation
+and then we combine them into a single JSON object schema by using the `zip` operation. Finally, we call the `xmap` operation
 to turn the `Record[(Double, Double)]` value returned by the `zip` operation into
 a `Record[Rectangle]`.
 
@@ -62,7 +62,7 @@ be defined as follows:
 
 The `orElse` operation turns the `Record[Circle]` and `Record[Rectangle]` values into
 a `Record[Either[Circle, Rectangle]]`, which is then transformed into a `Record[Shape]` by
-using `invmap`.
+using `xmap`.
 
 By default, the discriminator field is named `type`, but you can use another field name if
 you want to.
@@ -124,7 +124,7 @@ uses the case class name.
 
 The module also takes advantage shapeless to define more convenient
 operations for combining JSON schema definitions: the `zip` operation
-is replaced by a `:*:` operator, and `invmap` is replaced by `as`:
+is replaced by a `:*:` operator, and `xmap` is replaced by `as`:
 
 ~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#explicit-schema
 ~~~

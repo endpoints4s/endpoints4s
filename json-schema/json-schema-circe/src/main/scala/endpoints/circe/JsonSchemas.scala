@@ -157,16 +157,16 @@ trait JsonSchemas
     Record(encoder, decoder)
   }
 
-  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
+  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
     Record(record.encoder.contramapObject(g), record.decoder.map(f))
 
-  def invmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] =
+  def xmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] =
     new Tagged[B] {
       def taggedEncoded(b: B): (String, JsonObject) = tagged.taggedEncoded(g(b))
       def taggedDecoder(tag: String): Option[Decoder[B]] = tagged.taggedDecoder(tag).map(_.map(f))
     }
 
-  def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
+  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
     JsonSchema(jsonSchema.encoder.contramap(g), jsonSchema.decoder.map(f))
 
   implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)

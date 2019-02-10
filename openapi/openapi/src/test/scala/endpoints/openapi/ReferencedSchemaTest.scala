@@ -30,7 +30,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
       withDiscriminator(genericJsonSchema[Storage].asInstanceOf[Tagged[Storage]], "storageType")
 
     implicit val schemaAuthor: JsonSchema[Author] = (
-      field[String]("name", documentation = Some("Author name")).invmap[Author](Author)(_.name)
+      field[String]("name", documentation = Some("Author name")).xmap[Author](Author)(_.name)
     )
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]

@@ -65,11 +65,11 @@ class JsonSchemasTest extends FreeSpec {
       def zipRecords[A, B](recordA: String, recordB: String): String =
         s"$recordA,$recordB"
 
-      def invmapRecord[A, B](record: String, f: A => B, g: B => A): String = record
+      def xmapRecord[A, B](record: String, f: A => B, g: B => A): String = record
 
-      def invmapTagged[A, B](tagged: String, f: A => B, g: B => A): String = tagged
+      def xmapTagged[A, B](tagged: String, f: A => B, g: B => A): String = tagged
 
-      def invmapJsonSchema[A, B](jsonSchema: String, f: A => B, g: B => A): String = jsonSchema
+      def xmapJsonSchema[A, B](jsonSchema: String, f: A => B, g: B => A): String = jsonSchema
 
       lazy val uuidJsonSchema: String = "uuid"
 

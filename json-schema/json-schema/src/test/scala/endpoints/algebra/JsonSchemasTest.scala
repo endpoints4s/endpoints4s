@@ -15,15 +15,15 @@ trait JsonSchemasTest extends JsonSchemas {
     implicit val schema: JsonSchema[User] = (
       field[String]("name", Some("Name of the user")) zip
       field[Int]("age")
-    ).invmap((User.apply _).tupled)(Function.unlift(User.unapply))
+    ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
 
     val schema2: JsonSchema[User] = (
       emptyRecord zip
       field[String]("name", Some("Name of the user")) zip
       field[Int]("age")
     )
-      .invmap[(String, Int)](p => (p._1._2, p._2))(p => (((), p._1), p._2))
-      .invmap((User.apply _).tupled)(Function.unlift(User.unapply))
+      .xmap[(String, Int)](p => (p._1._2, p._2))(p => (((), p._1), p._2))
+      .xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   }
 
   sealed trait Foo
@@ -34,13 +34,13 @@ trait JsonSchemasTest extends JsonSchemas {
 
   object Foo {
     implicit val schema: JsonSchema[Foo] = {
-      val barSchema: Record[Bar] = field[String]("s").invmap(Bar)(_.s)
-      val bazSchema: Record[Baz] = field[Int]("i").invmap(Baz)(_.i)
-      val baxSchema: Record[Bax] = emptyRecord.invmap(_ => Bax())(_ => ())
-      val quxSchema: Record[Qux.type] = emptyRecord.invmap(_ => Qux)(_ => ())
+      val barSchema: Record[Bar] = field[String]("s").xmap(Bar)(_.s)
+      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
+      val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
+      val quxSchema: Record[Qux.type] = emptyRecord.xmap(_ => Qux)(_ => ())
 
       (barSchema.tagged("Bar") orElse bazSchema.tagged("Baz") orElse baxSchema.tagged("Bax") orElse quxSchema.tagged("Qux"))
-        .invmap[Foo] {
+        .xmap[Foo] {
           case Left(Left(Left(bar))) => bar
           case Left(Left(Right(baz))) => baz
           case Left(Right(bax)) => bax
@@ -66,7 +66,7 @@ trait JsonSchemasTest extends JsonSchemas {
   case class Rec(next: Option[Rec])
   val recSchema: JsonSchema[Rec] = (
     optField("next")(lazySchema(recSchema, "Rec"))
-  ).invmap(Rec)(_.next)
+  ).xmap(Rec)(_.next)
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 

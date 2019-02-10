@@ -144,10 +144,10 @@ trait JsonSchemas
     Record(reads, writes)
   }
 
-  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
+  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
     Record(record.reads.map(f), record.writes.contramap(g))
 
-  def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
+  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
     JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
 
   trait Tagged[A] extends Record[A] {
@@ -202,7 +202,7 @@ trait JsonSchemas
         taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
   }
 
-  def invmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] = new Tagged[B] {
+  def xmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] = new Tagged[B] {
     def tagAndJson(b: B): (String, JsObject) = tagged.tagAndJson(g(b))
     def findReads(tag: String): Option[Reads[B]] = tagged.findReads(tag).map(_.map(f))
   }
