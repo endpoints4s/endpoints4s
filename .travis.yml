@@ -18,6 +18,9 @@ before_install:
   - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
   - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in secring.asc.enc -out secring.asc -d
 
+install:
+  - npm install jsdom@12.2.0
+
 before_script:
   - unset _JAVA_OPTIONS # travis/travis#8408
   - echo $HOME
@@ -33,10 +36,10 @@ jobs:
       scala: 2.11.12
       script: sbt "wow $TRAVIS_SCALA_VERSION" test manual/makeSite
     - stage: test
-      scala: 2.12.6
+      scala: 2.12.8
       script: sbt "wow $TRAVIS_SCALA_VERSION" test
     - stage: test
-      scala: 2.13.0-M2
+      scala: 2.13.0-M5
       # requires strict aggregation because 2.13 is not supported by all the modules
       script: sbt "+++$TRAVIS_SCALA_VERSION test"
 

@@ -1,8 +1,9 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 import EndpointsSettings._
 import LocalCrossProject._
 
 val algebra =
-  crossProject.crossType(CrossType.Pure).in(file("algebra"))
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra"))
     .settings(
       publishSettings,
       `scala 2.11 to latest`,
@@ -19,7 +20,7 @@ val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
 
 val `algebra-circe` =
-  crossProject.crossType(CrossType.Pure).in(file("algebra-circe"))
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra-circe"))
     .settings(
       publishSettings,
       `scala 2.11 to 2.12`,
@@ -37,7 +38,7 @@ val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
 
 val `algebra-playjson` =
-  crossProject.crossType(CrossType.Pure).in(file("algebra-playjson"))
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra-playjson"))
     .settings(
       publishSettings,
       `scala 2.11 to 2.12`,

@@ -6,7 +6,7 @@ import endpoints.algebra
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -112,12 +112,12 @@ trait JsonSchemas
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] = JsonSchema(implicitly, implicitly)
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], factory: Factory[A, C[A]]): JsonSchema[C[A]] =
     JsonSchema(
       new Reads[C[A]] {
         override def reads(json: JsValue): JsResult[C[A]] = json match {
           case JsArray(values) =>
-            val builder = cbf()
+            val builder = factory.newBuilder
             builder.sizeHint(values)
             values.foldLeft[JsResult[collection.mutable.Builder[A, C[A]]]](JsSuccess(builder)) {
               case (acc, value) => (acc and jsonSchema.reads.reads(value))((b, a) => b += a)

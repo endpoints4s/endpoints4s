@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -186,7 +186,7 @@ trait JsonSchemas {
   /** A JSON schema for sequences */
   implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
     jsonSchema: JsonSchema[A],
-    cbf: CanBuildFrom[_, A, C[A]]
+    factory: Factory[A, C[A]]
   ): JsonSchema[C[A]]
 
   /** A JSON schema for maps with string keys */

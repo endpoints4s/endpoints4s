@@ -3,7 +3,7 @@ package openapi
 
 import endpoints.algebra.Documentation
 
-import scala.collection.generic.CanBuildFrom
+import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
@@ -113,7 +113,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
   def arrayJsonSchema[C[X] <: Seq[X], A](implicit
     jsonSchema: JsonSchema[A],
-    cbf: CanBuildFrom[_, A, C[A]]
+    factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] = Array(jsonSchema)
 
   def mapJsonSchema[A](implicit jsonSchema: DocumentedJsonSchema): DocumentedJsonSchema =

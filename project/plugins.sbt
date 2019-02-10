@@ -1,4 +1,5 @@
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.22")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.26")
+addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "0.6.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
@@ -29,3 +30,5 @@ addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 
 val build = project.in(file(".")).dependsOn(`sbt-assets`)
+
+ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet

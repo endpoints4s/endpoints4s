@@ -38,6 +38,11 @@ val `xhr-client-circe` =
       name := "endpoints-xhr-client-circe",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
-      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion
+      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
+      jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
     )
-    .dependsOn(`xhr-client`, LocalProject("algebra-circeJS"), LocalProject("json-schema-circeJS"))
+    .dependsOn(
+      `xhr-client` % "test->test;compile->compile",
+      LocalProject("algebra-circeJS"),
+      LocalProject("json-schema-circeJS")
+    )

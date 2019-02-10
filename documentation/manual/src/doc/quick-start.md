@@ -36,7 +36,7 @@ In this example you will use the following dependencies:
 
 ~~~ scala expandVars=true
 val shared =
-  crossProject.crossType(CrossType.Pure).settings(
+  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).settings(
     libraryDependencies ++= Seq(
       "org.julienrf" %%% "endpoints-algebra" % "{{version}}",
       // optional, see explanation below
