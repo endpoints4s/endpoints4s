@@ -16,7 +16,6 @@ before_cache:
 before_install:
   - unset _JAVA_OPTIONS
   - export JAVA_OPTS="$JAVA_OPTS -Xms512m -Xmx2048m"
-  - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in secring.asc.enc -out secring.asc -d
 
 install:
   - npm install jsdom@12.2.0
@@ -48,9 +47,15 @@ jobs:
         - sbt "wow 2.11.12" coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
 
-    - stage: deploy
-      if: (branch = master) AND (tag IS present)
-      script: sbt +publishSigned sonatypeRelease "wow 2.11.12" manual/makeSite manual/ghpagesPushSite
+    - stage: publish
+      if: tag =~ ^v
+      script:
+        - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in ci/secrets.tar.enc -out ci/secrets.tar -d
+        - tar xvf ci/secrets.tar
+        - chmod 600 ci/travis-key
+        - eval "$(ssh-agent) -s"
+        - ssh-add ci/travis-key
+        - sbt "wow 2.11.12" manual/makeSite +publishSigned sonatypeRelease manual/ghpagesPushSite
 
 env:
   global:

@@ -1,2 +1,6 @@
 target/
 .idea/
+ci/secring.asc
+ci/travis-key
+ci/secrets.tar
+node_modules/
