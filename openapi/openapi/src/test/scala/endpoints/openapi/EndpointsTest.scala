@@ -13,6 +13,17 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     }
   }
 
+  "Query parameters" should {
+    "Have a correct schema" in {
+      val expectedParameters =
+        Parameter("n", In.Query, required = true, description = None, schema = Schema.simpleNumber) ::
+        Parameter("lang", In.Query, required = false, description = None, schema = Schema.simpleString) ::
+        Parameter("ids", In.Query, required = false, description = None, schema = Schema.Array(Schema.simpleInteger, None)) ::
+        Nil
+      Fixtures.quux.item.operations("get").parameters shouldBe expectedParameters
+    }
+  }
+
   "Endpoints sharing the same path" should {
     "be grouped together" in {
 
@@ -108,6 +119,8 @@ trait Fixtures extends algebra.Endpoints {
 
   val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest()), emptyResponse())
 
+  val quux = endpoint(get(path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[Long]]("ids"))), emptyResponse())
+
 }
 
 object Fixtures
@@ -116,6 +129,6 @@ object Fixtures
     with Endpoints
     with JsonSchemaEntities {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp)
+  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux)
 
 }

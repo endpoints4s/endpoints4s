@@ -77,7 +77,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val wsRequest = method(entity(b, headers(c, wsClient.url(host ++ url.encode(a)))))
+      val wsRequest = method(entity(b, headers(c, wsClient.url(s"$host${url.encode(a)}"))))
       wsRequest.execute()
     }
 

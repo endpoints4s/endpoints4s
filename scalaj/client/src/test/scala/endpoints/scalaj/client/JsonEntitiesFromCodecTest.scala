@@ -25,6 +25,15 @@ class JsonEntitiesFromCodecTest extends JsonFromCodecTestSuite[TestJsonClient] {
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp] =
     endpoint.callAsync(args)
 
+  def encodeUrl[A](url: client.Url[A])(a: A): String =  {
+    val req = url.toReq(a)
+    val encodedUrl = req.urlBuilder(req)
+    val pathAndQuery =
+      encodedUrl.drop(s"http://localhost:$wiremockPort".size) // Remove scheme, host and port from URL
+    if (pathAndQuery.startsWith("/?") || pathAndQuery == "/") pathAndQuery.drop(1) // For some reason, scalaj always inserts a slash when the path is empty
+    else pathAndQuery
+  }
+
   jsonFromCodecTestSuite()
 
 }

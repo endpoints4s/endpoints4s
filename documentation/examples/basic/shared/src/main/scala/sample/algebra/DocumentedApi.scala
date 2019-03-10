@@ -10,7 +10,7 @@ trait DocumentedApi
 
   val items =
     endpoint(
-      get(path / "items" / segment[String]("category") /? optQs[Int]("page")),
+      get(path / "items" / segment[String]("category") /? qs[Option[Int]]("page")),
       jsonResponse[List[Item]](Some("List all the items of the given category"))
     )
 

@@ -7,9 +7,10 @@ import endpoints.Tupler
 import endpoints.algebra
 import endpoints.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
-import play.api.libs.functional.syntax._
-import play.api.mvc.RequestHeader
+import play.api.mvc.{RequestHeader, Result, Results}
 
+import scala.collection.compat._
+import scala.collection.mutable
 import scala.language.higherKinds
 import scala.util.Try
 
@@ -91,6 +92,7 @@ trait Urls extends algebra.Urls {
     */
   trait QueryString[A] {
     /**
+      * @return None in case of decoding failure
       * @param qs Map of identifiers and parameter values (these are already URL decoded)
       */
     def decode(qs: Map[String, Seq[String]]): Option[A]
@@ -120,26 +122,52 @@ trait Urls extends algebra.Urls {
       def encode(a: A) = value.encode(name, a)
     }
 
-  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]) =
-    new QueryString[Option[A]] {
-      def decode(qs: Map[String, Seq[String]]): Option[Option[A]] =
-        Some(value.decode(name, qs))
-      def encode(maybeA: Option[A]): Map[String, Seq[String]] =
-        maybeA.fold(Map.empty[String, Seq[String]])(value.encode(name, _))
-    }
-
   trait QueryStringParam[A] {
+    /**
+      * @return a decoded `A` value, or `None` if it was malformed
+      */
     def decode(name: String, qs: Map[String, Seq[String]]): Option[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
 
+  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] =
+    new QueryStringParam[Option[A]] {
+      def decode(name: String, qs: Map[String, Seq[String]]): Option[Option[A]] =
+        qs.get(name) match {
+          case None    => Some(None)
+          case Some(_) => param.decode(name, qs).map(Some(_))
+        }
+      def encode(name: String, maybeA: Option[A]): Map[String, Seq[String]] =
+        maybeA.fold(Map.empty[String, Seq[String]])(param.encode(name, _))
+    }
+
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+    new QueryStringParam[CC[A]] {
+      def decode(name: String, qs: Map[String, Seq[String]]): Option[CC[A]] =
+        qs.get(name) match {
+          case None     => Some(factory.newBuilder.result())
+          case Some(vs) =>
+            // ''traverse'' the list of decoded values
+            vs.foldLeft[Option[mutable.Builder[A, CC[A]]]](Some(factory.newBuilder)) {
+              case (None, _) => None
+              case (Some(b), v) =>
+                // Pretend that this was the query string and delegate to the `A` query string param
+                param.decode(name, Map(name -> (v :: Nil))).map(b += _)
+            }.map(_.result())
+        }
+      def encode(name: String, as: CC[A]): Map[String, Seq[String]] =
+        if (as.isEmpty) Map.empty
+        else Map(name -> as.map(param.encode(name, _)).iterator.flatMap(_.values).flatten.toSeq)
+    }
+
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
     new QueryStringParam[B] {
-      def decode(name: String, qs: Map[String, Seq[String]]): Option[B] = pa.decode(name, qs).flatMap(f)
+      def decode(name: String, qs: Map[String, Seq[String]]): Option[B] =
+        pa.decode(name, qs).flatMap(f)
       def encode(name: String, b: B): Map[String, Seq[String]] = pa.encode(name, g(b))
     }
 
-  implicit def stringQueryString: QueryStringParam[String] =
+  implicit lazy val stringQueryString: QueryStringParam[String] =
     new QueryStringParam[String] {
       def decode(name: String, qs: Map[String, Seq[String]]) =
         qs.get(name).flatMap(_.headOption)
@@ -147,35 +175,24 @@ trait Urls extends algebra.Urls {
         Map(name -> Seq(URLEncoder.encode(s, utf8Name)))
     }
 
-  implicit def intQueryString: QueryStringParam[Int] =
-    new QueryStringParam[Int] {
-      def decode(name: String, qs: Map[String, Seq[String]]) =
-        qs.get(name).flatMap(_.headOption).flatMap(s => Try(s.toInt).toOption)
-      def encode(name: String, i: Int) =
-        Map(name -> Seq(i.toString))
-    }
-
-  implicit def longQueryString: QueryStringParam[Long] =
-    new QueryStringParam[Long] {
-      def decode(name: String, qs: Map[String, Seq[String]]) =
-        qs.get(name).flatMap(_.headOption).flatMap(s => Try(s.toLong).toOption)
-      def encode(name: String, i: Long) =
-        Map(name -> Seq(i.toString))
-    }
-
   trait Path[A] extends Url[A] {
-    def decode(segments: List[String]): Option[(A, List[String])]
+    /**
+      * @return None in case the incoming path didn’t match, Some(Left(…))
+      *         in case it matched but decoding failed, Some(Right(…))
+      *         if it matched and decoding succeeded
+      */
+    def decode(segments: List[String]): Option[Either[Result, (A, List[String])]]
     def encode(a: A): String
 
-    final val decodeUrl = pathExtractor(this)
+    final def decodeUrl(request: RequestHeader) = pathExtractor(this, request)
     final def encodeUrl(a: A) = encode(a)
   }
 
   def staticPathSegment(segment: String): Path[Unit] =
     new Path[Unit] {
-      def decode(segments: List[String]): Option[(Unit, List[String])] =
+      def decode(segments: List[String]): Option[Either[Result, (Unit, List[String])]] =
         segments match {
-          case s :: ss if s == segment => Some(((), ss))
+          case s :: ss if s == segment => Some(Right(((), ss)))
           case _ => None
         }
       def encode(unit: Unit): String = segment
@@ -189,10 +206,12 @@ trait Urls extends algebra.Urls {
             case head :: tail => Some((head, tail))
             case Nil => None
           }
-        for {
-          (s, ss) <- uncons(segments)
-          a <- A.decode(s)
-        } yield (a, ss)
+        uncons(segments).map { case (s, ss) =>
+          A.decode(s) match {
+            case None => Left(Results.BadRequest)
+            case Some(a) => Right((a, ss))
+          }
+        }
       }
       def encode(a: A) = A.encode(a)
     }
@@ -200,10 +219,14 @@ trait Urls extends algebra.Urls {
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
     new Path[tupler.Out] {
       def decode(segments: List[String]) =
-        for {
-          (a, segments2) <- first.decode(segments)
-          (b, segments3) <- second.decode(segments2)
-        } yield (tupler(a, b), segments3)
+        first.decode(segments).flatMap {
+          case Right((a, segments2)) =>
+            second.decode(segments2).map {
+              case Right((b, segments3)) => Right((tupler(a, b), segments3))
+              case Left(error)           => Left(error)
+            }
+          case Left(error) => Some(Left(error))
+        }
       def encode(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)
         first.encode(a) ++ "/" ++ second.encode(b)
@@ -211,25 +234,32 @@ trait Urls extends algebra.Urls {
     }
 
   trait Url[A] {
-    def decodeUrl: RequestExtractor[A]
+    /**
+      * @return `None` if the request doesn’t match, `Some(Left(…))` if
+      *          it matched but decoding failed, and `Some(Right(…))`
+      *          if it matched and succeeded
+      */
+    def decodeUrl(req: RequestHeader): Option[Either[Result, A]]
     def encodeUrl(a: A): String
   }
 
   implicit lazy val urlInvFunctor: endpoints.InvariantFunctor[Url] = new endpoints.InvariantFunctor[Url] {
-    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] = new Url[To] {
-      override def decodeUrl: RequestExtractor[To] = f.decodeUrl.map(map)
-
-      override def encodeUrl(a: To): String = f.encodeUrl(contramap(a))
+    def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] = new Url[To] {
+      def decodeUrl(req: RequestHeader): Option[Either[Result, To]] = f.decodeUrl(req).map(_.right.map(map))
+      def encodeUrl(a: To): String = f.encodeUrl(contramap(a))
     }
   }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] =
     new Url[tupler.Out] {
 
-      val decodeUrl: RequestExtractor[tupler.Out] =
-        pathExtractor(path)
-          .and(queryStringExtractor(qs))
-          .apply((a, b) => tupler(a, b))
+      def decodeUrl(req: RequestHeader): Option[Either[Result, tupler.Out]] =
+        pathExtractor(path, req).map(_.right.flatMap { a =>
+          queryStringExtractor(qs)(req) match {
+            case None    => Left(Results.BadRequest)
+            case Some(b) => Right(tupler(a, b))
+          }
+        })
 
       def encodeUrl(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)
@@ -242,13 +272,16 @@ trait Urls extends algebra.Urls {
       }
     }
 
-  private def pathExtractor[A](path: Path[A]): RequestExtractor[A] =
-    request => {
+  private def pathExtractor[A](path: Path[A], request: RequestHeader): Option[Either[Result, A]] = {
       val segments =
         request.path
           .split("/").to[List]
           .map(s => URLDecoder.decode(s, utf8Name))
-      path.decode(if (segments.isEmpty) List("") else segments).collect { case (a, Nil) => a }
+      path.decode(if (segments.isEmpty) List("") else segments).flatMap {
+        case Left(error)     => Some(Left(error))
+        case Right((a, Nil)) => Some(Right(a))
+        case Right(_)        => None
+      }
     }
 
   private def queryStringExtractor[A](qs: QueryString[A]): RequestExtractor[A] =

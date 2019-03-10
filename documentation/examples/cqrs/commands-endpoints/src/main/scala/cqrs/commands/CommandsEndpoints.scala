@@ -28,7 +28,7 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodec {
     * Read the event long (optionally from a given timestamp).
     */
   val events: Endpoint[Option[Long], Seq[StoredEvent]] =
-    endpoint(get(path / "events" /? optQs[Long]("since")), jsonResponse[Seq[StoredEvent]]())
+    endpoint(get(path / "events" /? qs[Option[Long]]("since")), jsonResponse[Seq[StoredEvent]]())
 
 }
 //#endpoints

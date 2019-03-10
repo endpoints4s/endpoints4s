@@ -6,6 +6,7 @@ import endpoints.{InvariantFunctor, Tupler}
 
 import scala.language.{higherKinds, implicitConversions}
 import scala.util.Try
+import scala.collection.compat.Factory
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -26,14 +27,24 @@ import scala.util.Try
   *     * - /articles/kitchen?lang=fr
   *     * - /articles/garden?lang=en&page=2
   *     */
-  *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & optQs[Int]("page"))
+  *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & qs[Option[Int]]("page"))
   * }}}
   *
   * @group algebras
   */
 trait Urls {
 
-  /** A query string carrying an `A` information */
+  /** A query string carrying an `A` information
+    *
+    * QueryString values can be created with the [[qs]] operation,
+    * and can be combined with the `&` operation:
+    *
+    * {{{
+    *   val queryPageAndLang: QueryString[(Int, Option[String])] =
+    *     qs[Int]("page") & qs[Option[String]]("lang")
+    * }}}
+    *
+    * */
   type QueryString[A]
 
   /** Provides convenient methods on [[QueryString]]. */
@@ -59,17 +70,44 @@ trait Urls {
   /**
     * Builds a `QueryString` with one parameter.
     *
+    * Examples:
+    *
+    * {{{
+    *   qs[Int]("page")            // mandatory `page` parameter
+    *   qs[Option[String]]("lang") // optional `lang` parameter
+    *   qs[List[Long]]("id")       // repeated `id` parameter
+    * }}}
+    *
     * @param name Parameter’s name
     * @tparam A Type of the value carried by the parameter
     */
   def qs[A](name: String, docs: Documentation = None)(implicit value: QueryStringParam[A]): QueryString[A]
 
   /**
-    * Builds a `QueryString` with one optional parameter of type `A`.
+    * Make a query string parameter optional:
     *
-    * @param name Parameter’s name
+    * {{{
+    *   path / "articles" /? qs[Option[Int]]("page")
+    * }}}
+    *
+    * Client interpreters must omit optional query string parameters that are empty.
+    * Server interpreters must accept incoming requests whose optional query string parameters are missing.
+    * Server interpreters must report a failure for incoming requests whose optional query string
+    * parameters are present, but malformed.
     */
-  def optQs[A](name: String, docs: Documentation = None)(implicit value: QueryStringParam[A]): QueryString[Option[A]]
+  implicit def optionalQueryStringParam[A: QueryStringParam]: QueryStringParam[Option[A]]
+
+  /**
+    * Support query string parameters with multiple values:
+    *
+    * {{{
+    *   path / "articles" /? qs[List[Long]]("id")
+    * }}}
+    *
+    * Server interpreters must accept incoming requests where such parameters are missing (in such a
+    * case, its value is an empty collection), and report a failure if at least one value is malformed.
+    */
+  implicit def repeatedQueryStringParam[A: QueryStringParam, CC[X] <: Iterable[X]](implicit factory: Factory[A, CC[A]]): QueryStringParam[CC[A]]
 
   /**
     * A single query string parameter carrying an `A` information.
@@ -98,10 +136,23 @@ trait Urls {
   implicit def stringQueryString: QueryStringParam[String]
 
   /** Ability to define `Int` query string parameters */
-  implicit def intQueryString: QueryStringParam[Int]
+  implicit def intQueryString: QueryStringParam[Int] =
+    refineQueryStringParam(stringQueryString)(s => Try(s.toInt).toOption)(_.toString)
 
   /** Query string parameter containing a `Long` value */
-  implicit def longQueryString: QueryStringParam[Long]
+  implicit def longQueryString: QueryStringParam[Long] =
+    refineQueryStringParam(stringQueryString)(v => Try(v.toLong).toOption)(_.toString)
+
+  /** Query string parameter containing a `Boolean` value */
+  implicit def booleanQueryString: QueryStringParam[Boolean] =
+    refineQueryStringParam(stringQueryString) {
+      case "true"  | "1" => Some(true)
+      case "false" | "0" => Some(false)
+      case _ => None
+    }(_.toString)
+
+  implicit def doubleQueryString: QueryStringParam[Double] =
+    refineQueryStringParam(stringQueryString)(v => Try(v.toDouble).toOption)(_.toString)
 
   /**
     * An URL path segment carrying an `A` information.

@@ -80,12 +80,12 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val optUUIDQsEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & optQs[Int]("age"))),
+    get(path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & qs[Option[Int]]("age"))),
     textResponse()
   )
 
   val optQsEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & optQs[Int]("age"))),
+    get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & qs[Option[Int]]("age"))),
     textResponse()
   )
 
