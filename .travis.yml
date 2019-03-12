@@ -43,7 +43,6 @@ jobs:
       script: sbt "+++$TRAVIS_SCALA_VERSION test"
 
     - stage: coverage
-      if: type = pull_request
       script:
         - sbt "wow 2.11.12" coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
