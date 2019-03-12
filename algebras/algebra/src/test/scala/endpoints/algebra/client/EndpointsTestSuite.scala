@@ -179,6 +179,43 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         }
       }
 
+      "encode query strings" should {
+        import client._
+
+        "primitives" in {
+          encodeUrl(path / "foo" /? qs[Int]("n"))(42) shouldEqual "/foo?n=42"
+          encodeUrl(path / "foo" /? qs[Long]("n"))(42L) shouldEqual "/foo?n=42"
+          encodeUrl(path / "foo" /? qs[String]("s"))("bar") shouldEqual "/foo?s=bar"
+          encodeUrl(path / "foo" /? qs[Boolean]("b"))(true) shouldEqual "/foo?b=true"
+          encodeUrl(path / "foo" /? qs[Double]("x"))(1.0) shouldEqual "/foo?x=1.0"
+          encodeUrl(path / "foo" /? qs[UUID]("id"))(UUID.fromString("f4b9defa-1ad8-453f-9a06-2683b8564b8d")) shouldEqual "/foo?id=f4b9defa-1ad8-453f-9a06-2683b8564b8d"
+        }
+
+        "escaping" in {
+          encodeUrl(path /? qs[String]("q"))("foo bar/baz") shouldEqual "?q=foo+bar%2Fbaz"
+        }
+
+        "multiple parameters" in {
+          encodeUrl(path /? (qs[Int]("x") & qs[Int]("y")))((0, 1)) shouldEqual "?x=0&y=1"
+        }
+
+        "optional parameters" in {
+          encodeUrl(path /? qs[Option[Int]]("n"))(Some(42)) shouldEqual "?n=42"
+          encodeUrl(path /? qs[Option[Int]]("n"))(None) shouldEqual ""
+          encodeUrl(path /? (qs[Option[Int]]("n") & qs[Int]("v")))((None, 42)) shouldEqual "?v=42"
+          encodeUrl(path /? (qs[Option[Int]]("n") & qs[Int]("v")))((Some(0), 42)) shouldEqual "?n=0&v=42"
+        }
+
+        "list parameters" in {
+          encodeUrl(path /? qs[List[Int]]("ids"))(1 :: 2 :: Nil) shouldEqual "?ids=1&ids=2"
+          encodeUrl(path /? qs[List[Int]]("ids"))(Nil) shouldEqual ""
+          encodeUrl(path /? (qs[List[Int]]("ids") & qs[Option[Int]]("x")))((Nil, None)) shouldEqual ""
+          encodeUrl(path /? (qs[List[Int]]("ids") & qs[Option[Int]]("x")))((Nil, Some(0))) shouldEqual "?x=0"
+          encodeUrl(path /? (qs[List[Int]]("ids") & qs[Option[Int]]("x")))((1 :: Nil, None)) shouldEqual "?ids=1"
+        }
+
+      }
+
     }
 
 

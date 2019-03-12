@@ -3,7 +3,6 @@ package endpoints.play.server
 import endpoints.algebra.Documentation
 import endpoints.{Semigroupal, Tupler, algebra}
 import play.api.libs.functional.InvariantFunctor
-import play.api.libs.functional.syntax._
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
@@ -171,12 +170,14 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   private def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
     new UrlAndHeaders[(A, B)] {
       val decode: RequestExtractor[Either[Result, (A, B)]] =
-        request =>
-          (method.extract: RequestExtractor[Unit])
-            .andKeep(url.decodeUrl)
-            .apply(request)
-            .map { a => headers(request.headers).right.map((a, _))
+        request => method.extract(request).flatMap { _ =>
+          url.decodeUrl(request).map { maybeA =>
+            for {
+              a <- maybeA.right
+              b <- headers(request.headers).right
+            } yield (a, b)
           }
+        }
       def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
     }
 

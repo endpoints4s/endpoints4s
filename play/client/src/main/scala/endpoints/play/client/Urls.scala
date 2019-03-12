@@ -5,6 +5,9 @@ import java.nio.charset.StandardCharsets.UTF_8
 
 import endpoints.{InvariantFunctor, Tupler, algebra}
 import endpoints.algebra.Documentation
+import scala.collection.compat.Factory
+
+import scala.language.higherKinds
 
 /**
   * [[algebra.Urls]] interpreter that builds URLs.
@@ -31,25 +34,28 @@ trait Urls extends algebra.Urls {
       }
     }
 
-  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
-    a => Some(s"$name=${value.apply(a)}")
+  def qs[A](name: String, docs: Documentation)(implicit param: QueryStringParam[A]): QueryString[A] =
+    a => {
+      val params = param(a)
+      if (params.isEmpty) None
+      else Some(param(a).map(v => s"$name=$v").mkString("&"))
+    }
 
-  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
-    case Some(a) => qs[A](name, docs).encodeQueryString(a)
-    case None => None
+  /** a query string parameter can have zero or several values */
+  type QueryStringParam[A] = A => List[String]
+
+  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] = {
+    case Some(a) => param(a)
+    case None    => Nil
   }
 
-  type QueryStringParam[A] = A => String
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+    as => as.iterator.flatMap(param).toList
 
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
     (b: B) => pa(g(b))
 
-  implicit lazy val stringQueryString: QueryStringParam[String] = s => URLEncoder.encode(s, utf8Name)
-
-  implicit lazy val intQueryString: QueryStringParam[Int] = i => i.toString
-
-  implicit lazy val longQueryString: QueryStringParam[Long] = i => i.toString
-
+  implicit lazy val stringQueryString: QueryStringParam[String] = s => URLEncoder.encode(s, utf8Name) :: Nil
 
   trait Segment[A] {
     def encode(a: A): String
@@ -74,7 +80,7 @@ trait Urls extends algebra.Urls {
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
     (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)
-      first.encode(a) ++ "/" ++ second.encode(b)
+      s"${first.encode(a)}/${second.encode(b)}"
     }
 
 

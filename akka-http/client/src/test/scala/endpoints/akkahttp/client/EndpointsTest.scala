@@ -33,6 +33,8 @@ class EndpointsTest
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp] = endpoint(args)
 
+  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
+
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()

@@ -1,12 +1,19 @@
-package endpoints.algebra.server
+package endpoints.akkahttp.server
+
 import java.util.UUID
 
 import com.softwaremill.sttp._
-import endpoints.algebra.EndpointsTestApi
 
-trait EndpointsTestSuite[T <: EndpointsTestApi] extends ServerTestBase[T] {
+trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoints.algebra.server.EndpointsTestSuite[T] {
+
+  /**
+    * @param runTests A function that is called after the server is started and before it is stopped. It takes
+    *                 the TCP port number as parameter.
+    */
+  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit
 
   def serverTestSuite() = {
+    urlsTestSuite()
 
     "Server interpreter" should {
 

@@ -100,8 +100,8 @@ trait Assets extends algebra.Assets with Endpoints {
             val i = s.lastIndexOf('-')
             if (i > 0) {
               val (name, digest) = s.splitAt(i)
-              Some((AssetPath(p.reverse, digest.drop(1), name), Nil))
-            } else None
+              Some(Right((AssetPath(p.reverse, digest.drop(1), name), Nil)))
+            } else Some(Left(Results.BadRequest))
           case Nil => None
         }
       def encode(s: AssetPath) =

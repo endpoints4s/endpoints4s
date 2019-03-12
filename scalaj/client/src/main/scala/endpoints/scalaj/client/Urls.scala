@@ -1,5 +1,8 @@
 package endpoints.scalaj.client
 
+import scala.collection.compat.Factory
+import scala.language.higherKinds
+
 import endpoints.{InvariantFunctor, Tupler, algebra}
 import endpoints.algebra.Documentation
 
@@ -15,7 +18,7 @@ trait Urls extends algebra.Urls {
   def address: String
 
   type QueryString[A] = A => Seq[(String, String)]
-  type QueryStringParam[A] = A => String
+  type QueryStringParam[A] = A => List[String]
   type Segment[A] = A => String
 
   case class Path[A](toStr: A => String) extends Url(toStr.andThen(url => Http(protocol + address + "/" + url)))
@@ -25,11 +28,7 @@ trait Urls extends algebra.Urls {
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
     (b: B) => pa(g(b))
 
-   implicit def stringQueryString: QueryStringParam[String] = identity
-
-   implicit def intQueryString: QueryStringParam[Int] = _.toString
-
-   implicit def longQueryString: QueryStringParam[Long] = _.toString
+   implicit def stringQueryString: QueryStringParam[String] = _ :: Nil
 
    def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
     ab => {
@@ -49,10 +48,15 @@ trait Urls extends algebra.Urls {
 
 
    def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
-    a => Seq((name, value(a)))
+    a => value(a).map(name -> _)
 
-  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
-    a => a.map(x => Seq((name, value(x)))).getOrElse(Seq())
+  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] = {
+    case Some(a) => param(a)
+    case None    => Nil
+  }
+
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+    as => as.iterator.flatMap(param).toList
 
    def staticPathSegment(segment: String): Path[Unit] = Path(_ => segment)
 
@@ -69,7 +73,7 @@ trait Urls extends algebra.Urls {
   }
 
   /** Builds an URL from the given path and query string */
-   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
     new Url(ab => {
       val (a, b) = tupler.unapply(ab)
       path.toReq(a)

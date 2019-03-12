@@ -5,6 +5,9 @@ import java.util.UUID
 
 import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
+import scala.collection.compat.Factory
+
+import scala.language.higherKinds
 
 /**
   * Interpreter for [[algebra.Urls]]
@@ -30,22 +33,30 @@ trait Urls extends algebra.Urls {
     DocumentedQueryString(first.parameters ++ second.parameters)
 
   def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = true, docs, value)))
+    DocumentedQueryString(List(DocumentedParameter(name, required = value.isRequired, docs, value.schema)))
 
-  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] =
-    DocumentedQueryString(List(DocumentedParameter(name, required = false, docs, value)))
+  case class DocumentedQueryStringParam(schema: Schema, isRequired: Boolean)
+  type QueryStringParam[A] = DocumentedQueryStringParam
 
-  type QueryStringParam[A] = Schema
+  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] =
+    param.copy(isRequired = false)
+
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+    DocumentedQueryStringParam(Schema.Array(param.schema, description = None), isRequired = false)
 
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] = pa
 
-  override def uuidQueryString: QueryStringParam[UUID] = Schema.simpleUUID
+  override def uuidQueryString: QueryStringParam[UUID] = DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true)
 
-  def stringQueryString: QueryStringParam[String] = Schema.simpleString
+  def stringQueryString: QueryStringParam[String] = DocumentedQueryStringParam(Schema.simpleString, isRequired = true)
 
-  def intQueryString: QueryStringParam[Int] = Schema.simpleInteger
+  override def intQueryString: QueryStringParam[Int] = DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
 
-  def longQueryString: QueryStringParam[Long] = Schema.simpleInteger
+  override def longQueryString: QueryStringParam[Long] = DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
+
+  override def booleanQueryString: QueryStringParam[Boolean] = DocumentedQueryStringParam(Schema.simpleBoolean, isRequired = true)
+
+  override def doubleQueryString: QueryStringParam[Double] = DocumentedQueryStringParam(Schema.simpleNumber, isRequired = true)
 
   type Segment[A] = Schema
 

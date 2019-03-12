@@ -32,6 +32,8 @@ class EndpointsTestSync
     Future.fromTry(endpoint(args))
   }
 
+  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
+
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
@@ -49,6 +51,8 @@ class EndpointsTestAkka
   val client: TestClient[Future] = new TestClient(s"http://localhost:$wiremockPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = endpoint(args)
+
+  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
   basicAuthSuite()

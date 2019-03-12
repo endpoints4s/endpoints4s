@@ -113,6 +113,8 @@ object Schema {
   val simpleUUID = Primitive("string", format = Some("uuid"), None)
   val simpleString = Primitive("string", None, None)
   val simpleInteger = Primitive("integer", None, None)
+  val simpleBoolean = Primitive("boolean", None, None)
+  val simpleNumber = Primitive("number", None, None)
 
 }
 

@@ -1,11 +1,14 @@
 package endpoints.akkahttp.server
 
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+
+import scala.collection.compat._
+import scala.language.higherKinds
 import akka.http.scaladsl.server._
-import akka.http.scaladsl.unmarshalling.{FromStringUnmarshaller, PredefinedFromStringUnmarshallers, Unmarshaller}
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Tupler, algebra}
 
-import scala.concurrent.Future
+import scala.collection.mutable
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
@@ -16,16 +19,25 @@ trait Urls extends algebra.Urls {
 
   import akka.http.scaladsl.server.Directives._
 
-  class Path[T](override val directive: Directive1[T]) extends Url[T](directive)
+  class Path[T](val pathPrefix: Directive1[T]) extends Url[T](
+    // Make sure that `this` path is an URL that has no remaining path segments
+    joinDirectives(pathPrefix, Directives.pathEndOrSingleSlash.tmap(Tuple1(_)))
+  )
 
   class Url[T](val directive: Directive1[T])
 
   class QueryString[T](val directive: Directive1[T])
 
-  type QueryStringParam[T] = FromStringUnmarshaller[T]
+  /**
+    * @inheritdoc
+    *
+    * Given a parameter name and a query string content, returns a decoded parameter
+    * value of type `T`, or `None` if decoding failed
+    */
+  type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Option[T]
 
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
-    pa.flatMap(ec => _ => (a: A) => f(a).fold[Future[B]](Future.failed(Unmarshaller.NoContentException))((b: B) => Future.successful(b)))
+    (name, map) => pa(name, map).flatMap(f)
 
   type Segment[T] = PathMatcher1[T]
 
@@ -40,19 +52,36 @@ trait Urls extends algebra.Urls {
   // Query strings
   //***************
 
-  implicit def intQueryString: QueryStringParam[Int] = PredefinedFromStringUnmarshallers.intFromStringUnmarshaller
+  implicit lazy val stringQueryString: QueryStringParam[String] =
+    (name, map) => map.get(name).flatMap(vs => vs.headOption)
 
-  implicit def stringQueryString: QueryStringParam[String] = Unmarshaller.identityUnmarshaller[String]
+  def qs[A](name: String, docs: Documentation)(implicit param: QueryStringParam[A]): QueryString[A] =
+    new QueryString[A](Directives.parameterMultiMap.flatMap { kvs =>
+      param(name, kvs) match {
+        case Some(a) => Directives.pass.tmap(_ => a)
+        case None    => malformedRequest
+      }
+    })
 
-  implicit def longQueryString: QueryStringParam[Long] = PredefinedFromStringUnmarshallers.longFromStringUnmarshaller
+  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] =
+    (name, qs) =>
+      qs.get(name) match {
+        case None    => Some(None)
+        case Some(_) => param(name, qs).map(Some(_))
+      }
 
-  def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] = {
-    new QueryString[A](Directives.parameter(name.as[A]))
-  }
-
-  def optQs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[Option[A]] = {
-    new QueryString[Option[A]](Directives.parameter(name.as[A].?))
-  }
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+    (name, qs) =>
+      qs.get(name) match {
+        case None     => Some(factory.newBuilder.result())
+        case Some(vs) =>
+          vs.foldLeft[Option[mutable.Builder[A, CC[A]]]](Some(factory.newBuilder)) {
+            case (None, _) => None
+            case (Some(b), v) =>
+              // Pretend that this was the query string and delegate to the `A` query string param
+              param(name, Map(name -> (v :: Nil))).map(b += _)
+          }.map(_.result())
+      }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
     new QueryString(joinDirectives(first.directive, second.directive))
@@ -74,7 +103,18 @@ trait Urls extends algebra.Urls {
   implicit def longSegment: Segment[Long] = LongNumber
 
   def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = {
-    new Path(Directives.pathPrefix(s))
+    // If there is no segment, the path does not match
+    // for instance, given the `path / foo / segment[Int]` definition,
+    // an incoming request `"/foo"` or `"/foo/"` does not match,
+    // whereas `"/foo/42"` matches and succeeds, and `"/foo/bar"` matches and fails.
+    val directive: Directive1[A] =
+      Directives.extract { ctx =>
+        (Slash.? ~ PathEnd).apply(ctx.unmatchedPath)
+      }.flatMap {
+        case _: PathMatcher.Matched[_] => Directives.reject
+        case PathMatcher.Unmatched => Directives.pathPrefix(s) | malformedRequest
+      }
+    new Path(directive)
   }
 
   def staticPathSegment(segment: String): Path[Unit] = {
@@ -86,7 +126,7 @@ trait Urls extends algebra.Urls {
   }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
-    new Path(joinDirectives(first.directive, second.directive))
+    new Path(joinDirectives(first.pathPrefix, second.pathPrefix))
   }
 
 
@@ -106,5 +146,9 @@ trait Urls extends algebra.Urls {
   implicit class Directive0Ops(val dir0: Directive0) {
     def dir1: Directive1[Unit] = convToDirective1(dir0)
   }
+
+  // TODO Improve error reporting
+  private def malformedRequest: StandardRoute =
+    Directives.complete(HttpResponse(StatusCodes.BadRequest))
 
 }

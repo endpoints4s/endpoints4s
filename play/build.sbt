@@ -13,7 +13,8 @@ val `play-server` =
       `scala 2.11 to 2.12`,
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-netty-server" % playVersion
+        "com.typesafe.play" %% "play-netty-server" % playVersion,
+        "com.typesafe.play" %% "play-test" % playVersion % Test
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")

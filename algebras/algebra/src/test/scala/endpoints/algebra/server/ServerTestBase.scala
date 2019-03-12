@@ -17,11 +17,25 @@ trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
   val serverApi: T
 
   /**
-    * @param runTests A function that is called after the server is started and before it is stopped. It takes
-    *                 the TCP port number as parameter.
+    * @param url An URL definition (e.g., `path / "foo"`)
+    * @param urlCandidate An URL candidate (e.g., "/foo", "/bar")
+    * @return Whether the URL candidate matched the URL definition, or not, or if
+    *         decoding failed.
     */
-  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit
+  def decodeUrl[A](url: serverApi.Url[A])(urlCandidate: String): DecodedUrl[A]
 
 }
 
-
+/**
+  * @tparam A The result of decoding an URL candidate
+  */
+@SerialVersionUID(1L)
+sealed trait DecodedUrl[+A] extends Serializable
+object DecodedUrl {
+  /** The URL candidate matched the given URL definition, and a `A` value was extracted from it */
+  case class  Matched[+A](value: A) extends DecodedUrl[A]
+  /** The URL candidate didn’t match the given URL definition */
+  case object NotMatched            extends DecodedUrl[Nothing]
+  /** The URL candidate matched the given URL definition, but the decoding process failed */
+  case object Malformed             extends DecodedUrl[Nothing]
+}

@@ -40,4 +40,6 @@ trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp]
 
+  def encodeUrl[A](url: client.Url[A])(a: A): String
+
 }
