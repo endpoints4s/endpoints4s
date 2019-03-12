@@ -10,6 +10,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
   "Path parameters" should {
     "Appear as patterns between braces in the documentation" in {
       Fixtures.baz.path shouldBe "/baz/{quux}"
+      Fixtures.multipleSegmentsPath.path shouldBe "/assets/{file}"
     }
   }
 
@@ -120,6 +121,9 @@ trait Fixtures extends algebra.Endpoints {
   val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest()), emptyResponse())
 
   val quux = endpoint(get(path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[Long]]("ids"))), emptyResponse())
+
+  val multipleSegmentsPath =
+    endpoint(get(path / "assets" / remainingSegments("file")), textResponse())
 
 }
 

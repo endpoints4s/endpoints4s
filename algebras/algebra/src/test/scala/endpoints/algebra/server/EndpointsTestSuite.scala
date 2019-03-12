@@ -19,6 +19,8 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 
       "decode segments" in {
         decodeUrl(path / s[Int]())         ("/42")        shouldEqual Matched(42)
+        decodeUrl(path / s[Long]())        ("/42")        shouldEqual Matched(42L)
+        decodeUrl(path / s[Double]())      ("/42.0")      shouldEqual Matched(42.0)
         decodeUrl(path / s[Int]())         ("/")          shouldEqual NotMatched
         decodeUrl(path / s[Int]())         ("/42/bar")    shouldEqual NotMatched
         decodeUrl(path / s[Int]())         ("/foo")       shouldEqual Malformed
@@ -28,6 +30,23 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
         decodeUrl(path / s[Int]() / "baz") ("/foo/baz")   shouldEqual Malformed
         decodeUrl(path / s[Int]() / "baz") ("/42")        shouldEqual NotMatched
 //        decodeUrl(path / s[Int]() / "baz") ("/foo")       shouldEqual NotMatched
+        decodeUrl(path / "foo" / remainingSegments()) ("/foo/bar%2Fbaz/quux") shouldEqual Matched("bar%2Fbaz/quux")
+        decodeUrl(path / "foo" / remainingSegments()) ("/foo")                shouldEqual NotMatched
+      }
+
+      "transformed" in {
+        val itemId = s[String]("itemId").xmapPartial { rawId =>
+          val sep = rawId.indexOf("-")
+          if (sep == -1) None else {
+            val (id, name) = rawId.splitAt(sep)
+            Some(Item(name.drop(1), id))
+          }
+        }(item => s"${item.id}-${item.name}")
+        decodeUrl(path / itemId)("/42-programming-in-scala") shouldEqual Matched(Item("programming-in-scala", "42"))
+        decodeUrl(path / itemId)("/foo")                     shouldEqual Malformed
+
+        val file = s[String]("file").xmap[java.io.File](new java.io.File(_), _.getPath)
+        decodeUrl(path / "assets" / file)("/assets/favicon.png") shouldEqual Matched(new java.io.File("favicon.png"))
       }
 
     }
@@ -58,8 +77,32 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
         decodeUrl(url)("/?xs=1&xs=two") shouldEqual Malformed
       }
 
+      "transformed" in {
+        implicit val pageQueryString: QueryStringParam[Page] =
+          intQueryString.xmap[Page](Page, _.number)
+        val url = path /? qs[Page]("page")
+        decodeUrl(url)("/?page=42")  shouldEqual Matched(Page(42))
+        decodeUrl(url)("/?page=foo") shouldEqual Malformed
+      }
+
+    }
+
+    "urls" should {
+
+      "transformed" in {
+        val paginatedUrl =
+          (path /? (qs[Int]("from") & qs[Int]("limit")))
+            .xmap[Page2](Page2.tupled, p => (p.from, p.limit))
+        decodeUrl(paginatedUrl)("/?from=1&limit=10")   shouldEqual Matched(Page2(1, 10))
+        decodeUrl(paginatedUrl)("/?from=one&limit=10") shouldEqual Malformed
+      }
+
     }
 
   }
 
 }
+
+case class Item(name: String, id: String)
+case class Page(number: Int)
+case class Page2(from: Int, limit: Int)
