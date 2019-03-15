@@ -63,10 +63,7 @@ object EndpointsSettings {
         url(s"https://github.com/julienrf/endpoints"),
         s"scm:git:git@github.com:julienrf/endpoints.git"
       )
-    ),
-    pgpPublicRing := file("ci/pubring.asc"),
-    pgpSecretRing := file("ci/secring.asc"),
-    pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray)
+    )
   )
 
   val noPublishSettings = commonSettings ++ Seq(
