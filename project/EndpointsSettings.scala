@@ -41,8 +41,7 @@ object EndpointsSettings {
   )
 
   val publishSettings = commonSettings ++ Seq(
-    publishTo := sonatypePublishTo.value,
-      pomExtra :=
+    pomExtra :=
       <developers>
         <developer>
           <id>julienrf</id>

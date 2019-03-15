@@ -29,3 +29,5 @@ inThisBuild(Seq(
   pgpSecretRing := file("ci/secring.asc"),
   pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray)
 ))
+
+publishTo in ThisBuild := sonatypePublishTo.value
