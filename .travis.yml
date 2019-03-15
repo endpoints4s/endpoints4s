@@ -55,7 +55,7 @@ jobs:
         - chmod 600 ci/travis-key
         - eval "$(ssh-agent -s)"
         - ssh-add ci/travis-key
-        - sbt "wow 2.11.12" manual/makeSite +publishSigned sonatypeRelease manual/ghpagesPushSite
+        - sbt "wow 2.11.12" manual/makeSite +publishSigned sonatypeReleaseAll manual/ghpagesPushSite
 
 env:
   global:
