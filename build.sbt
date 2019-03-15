@@ -23,13 +23,3 @@ noPublishSettings
 enablePlugins(CrossPerProjectPlugin)
 
 ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
-
-import xerial.sbt.Sonatype._
-
-inThisBuild(Seq(
-  pgpPublicRing := file("ci/pubring.asc"),
-  pgpSecretRing := file("ci/secring.asc"),
-  pgpPassphrase := sys.env.get("PGP_PASSPHRASE").map(_.toArray)
-))
-
-publishTo in ThisBuild := sonatypePublishTo.value
