@@ -1,8 +1,9 @@
 package endpoints.macros
 
-import scala.collection.generic.CanBuildFrom
-import language.higherKinds
-import language.implicitConversions
+import java.util.UUID
+
+import scala.collection.compat.Factory
+import scala.language.{higherKinds, implicitConversions}
 
 
 trait JsonSchemasTestInterpreter extends endpoints.algebra.JsonSchemas {
@@ -22,6 +23,9 @@ trait JsonSchemasTestInterpreter extends endpoints.algebra.JsonSchemas {
 
   def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] =
     s"'$name'!($schema)".asInstanceOf[S[A]]
+
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] =
+    s"{$name}-> $schema"
 
   def emptyRecord: Record[Unit] =
     "$"
@@ -44,14 +48,16 @@ trait JsonSchemasTestInterpreter extends endpoints.algebra.JsonSchemas {
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] =
     s"$recordA,$recordB"
 
-  def invmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
+  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
     record.asInstanceOf[Record[B]]
 
-  def invmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] =
+  def xmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] =
     tagged.asInstanceOf[Tagged[B]]
 
-  def invmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
+  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
     jsonSchema.asInstanceOf[JsonSchema[B]]
+
+  implicit def uuidJsonSchema: JsonSchema[UUID] = "uuid"
 
   implicit def stringJsonSchema: JsonSchema[String] = "string"
 
@@ -68,6 +74,9 @@ trait JsonSchemasTestInterpreter extends endpoints.algebra.JsonSchemas {
   implicit def booleanJsonSchema: JsonSchema[Boolean] = "boolean"
 
   implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A],
-                                                  cbf: CanBuildFrom[_, A, C[A]]): JsonSchema[C[A]] =
+                                                  factory: Factory[A, C[A]]): JsonSchema[C[A]] =
     s"[$jsonSchema]"
+
+  implicit def mapJsonSchema[A](implicit jsonSchema: String with Tag[A]): JsonSchema[Map[String, A]] =
+    s"map[$jsonSchema]"
 }

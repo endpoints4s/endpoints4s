@@ -35,7 +35,7 @@ trait ExampleDomain extends JsonSchemas {
     implicit val singleCaseBaseSchema: JsonSchema[SingleCaseBase] = genericJsonSchema[SingleCaseBase]
 
     implicit def idSchema[T]: JsonSchema[Id[T]] =
-      stringJsonSchema.invmap(Id.apply[T])(_.id)
+      stringJsonSchema.xmap(Id.apply[T])(_.id)
 
     implicit def userSchema[T]: JsonSchema[User[T]] =
       genericJsonSchema[User[T]]

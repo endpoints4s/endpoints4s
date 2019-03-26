@@ -1,5 +1,7 @@
 package endpoints.macros
 
+import java.util.UUID
+
 import scala.reflect.macros.blackbox
 
 class Macros(val c: blackbox.Context) extends Utils {
@@ -25,6 +27,7 @@ class Macros(val c: blackbox.Context) extends Utils {
   }
 
   private val primitiveTypes: Seq[Type] = Seq(
+    typeOf[UUID],
     typeOf[String],
     typeOf[Int],
     typeOf[Long],
@@ -37,14 +40,14 @@ class Macros(val c: blackbox.Context) extends Utils {
   private def findRecord(tpe: Type): Option[c.Tree] = {
     if(tpe.typeSymbol.isModuleClass) {
 
-      val t = q"invmapRecord[_root_.scala.Unit, $tpe](emptyRecord, _ => ${tpe.typeSymbol.asClass.companionSymbol}, _ => ())"
+      val t = q"xmapRecord[_root_.scala.Unit, $tpe](emptyRecord, _ => ${tpe.typeSymbol.asClass.companionSymbol}, _ => ())"
       Some(namedJsonSchemaTree(tpe, t))
 
     } else if(tpe.typeSymbol.isCaseClass) {
       val paramsSeq = tpe.caseClassParams
       if (paramsSeq.isEmpty) {
 
-        val t = q"invmapRecord[_root_.scala.Unit, $tpe](emptyRecord, _ => new $tpe(), _ => ())"
+        val t = q"xmapRecord[_root_.scala.Unit, $tpe](emptyRecord, _ => new $tpe(), _ => ())"
         Some(namedJsonSchemaTree(tpe, t))
 
       } else {
@@ -88,7 +91,7 @@ class Macros(val c: blackbox.Context) extends Utils {
           val tupledTpe = paramsSeq.map(p => tq"${p.returnTypeIn(tpe)}").reduce[Tree] { (t1, t2) => tq"($t1, $t2)" }
           val recordSchemaTree =
             q"""
-              invmapRecord[$tupledTpe, $tpe](
+              xmapRecord[$tupledTpe, $tpe](
                 $tupledRecordSchema,
                 { case $fPattern => new $tpe(..${paramNames.map(Ident(_))}) },
                 ($cc: $tpe) => $tp
@@ -132,7 +135,7 @@ class Macros(val c: blackbox.Context) extends Utils {
         val n = taggedRecords.length
 
         val t = if(n == 1) {
-          q"invmapTagged[${instances.head.tpe}, $tpe](${taggedRecords.head}, _root_.scala.Predef.identity, { case x: ${instances.head.tpe} => x})"
+          q"xmapTagged[${instances.head.tpe}, $tpe](${taggedRecords.head}, _root_.scala.Predef.identity, { case x: ${instances.head.tpe} => x})"
         } else {
           val allTagged = taggedRecords.reduce { (tagged1, tagged2) =>
             q"choiceTagged($tagged1, $tagged2)"
@@ -156,7 +159,7 @@ class Macros(val c: blackbox.Context) extends Utils {
             tq"_root_.scala.Either[$t1, $t2]"
           }
 
-          q"invmapTagged[$et, $tpe]($allTagged, { case ..$fClauses }, { case ..$gClauses })"
+          q"xmapTagged[$et, $tpe]($allTagged, { case ..$fClauses }, { case ..$gClauses })"
         }
 
         Some(namedJsonSchemaTree(tpe, t))
