@@ -24,6 +24,8 @@ val `akka-http-client` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
+    .dependsOn(`json-schema-circe-jvm`)
+    .dependsOn(`json-schema-generic-jvm` % "test->test")
 
 val `akka-http-server` =
   project.in(file("server"))
