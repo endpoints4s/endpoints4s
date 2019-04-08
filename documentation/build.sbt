@@ -343,7 +343,7 @@ val `example-authentication` =
     .settings(
       libraryDependencies ++= Seq(
         "com.pauldijou" %% "jwt-play" % "1.0.0",
-        "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
+        "com.lihaoyi"   %% "utest"    % "0.6.7"   % Test
       ),
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
