@@ -123,8 +123,7 @@ class Endpoints(val settings: EndpointsSettings)
     a =>
       for {
         resp <- request(a)
-        result <- response(resp).flatMap(futureFromEither)
-        _ = resp.discardEntityBytes() //Fix for https://github.com/akka/akka-http/issues/1495
+        result <- response(resp).flatMap(futureFromEither).andThen { case _ => resp.discardEntityBytes() /* See https://github.com/akka/akka-http/issues/1495 */ }
       } yield result
 
 
