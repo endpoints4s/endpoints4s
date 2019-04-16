@@ -216,6 +216,23 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
       }
 
+      "encode path segments" in {
+        import client._
+        encodeUrl(path / "foo" / segment[String]())   ("bar/baz")        shouldEqual "/foo/bar%2Fbaz"
+        encodeUrl(path / segment[String]())           ("bar/baz")        shouldEqual "/bar%2Fbaz"
+        encodeUrl(path / segment[String]() / "baz")   ("bar")            shouldEqual "/bar/baz"
+        encodeUrl(path / segment[Int]())              (42)               shouldEqual "/42"
+        encodeUrl(path / segment[Long]())             (42L)              shouldEqual "/42"
+        encodeUrl(path / segment[Double]())           (42.0)             shouldEqual "/42.0"
+        encodeUrl(path / "foo" / remainingSegments()) ("bar%2Fbaz/quux") shouldEqual "/foo/bar%2Fbaz/quux"
+
+        val evenNumber = segment[Int]().xmapPartial {
+          case x if x % 2 == 0 => Some(x)
+          case _ => None
+        }(identity)
+        encodeUrl(path / evenNumber) (42) shouldEqual "/42"
+      }
+
     }
 
 

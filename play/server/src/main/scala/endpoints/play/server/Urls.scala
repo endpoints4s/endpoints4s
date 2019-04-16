@@ -3,8 +3,7 @@ package endpoints.play.server
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
 
-import endpoints.Tupler
-import endpoints.algebra
+import endpoints.{PartialInvariantFunctor, Tupler, algebra}
 import endpoints.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
 import play.api.mvc.{RequestHeader, Result, Results}
@@ -12,7 +11,6 @@ import play.api.mvc.{RequestHeader, Result, Results}
 import scala.collection.compat._
 import scala.collection.mutable
 import scala.language.higherKinds
-import scala.util.Try
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.
@@ -63,28 +61,23 @@ trait Urls extends algebra.Urls {
   }
   //#segment
 
-  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
-    new Segment[B] {
-      def decode(s: String) = sa.decode(s).flatMap(f)
-      def encode(b: B) = sa.encode(g(b))
-    }
+  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
+    def xmapPartial[A, B](fa: Segment[A], f: A => Option[B], g: B => A): Segment[B] =
+      new Segment[B] {
+        def decode(s: String) = fa.decode(s).flatMap(f)
+        def encode(b: B) = fa.encode(g(b))
+      }
+    override def xmap[A, B](fa: Segment[A], f: A => B, g: B => A): Segment[B] =
+      new Segment[B] {
+        def decode(s: String) = fa.decode(s).map(f)
+        def encode(b: B) = fa.encode(g(b))
+      }
+  }
 
   implicit def stringSegment: Segment[String] =
     new Segment[String] {
       def decode(segment: String) = Some(segment)
       def encode(s: String) = URLEncoder.encode(s, utf8Name)
-    }
-
-  implicit def intSegment: Segment[Int] =
-    new Segment[Int] {
-      def decode(segment: String) = Try(segment.toInt).toOption
-      def encode(a: Int) = a.toString
-    }
-
-  implicit def longSegment: Segment[Long] =
-    new Segment[Long] {
-      def decode(segment: String) = Try(segment.toLong).toOption
-      def encode(a: Long) = a.toString
     }
 
   /**
@@ -130,6 +123,19 @@ trait Urls extends algebra.Urls {
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
 
+  implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
+    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Option[B], g: B => A): QueryStringParam[B] =
+      new QueryStringParam[B] {
+        def decode(name: String, qs: Map[String, Seq[String]]): Option[B] = fa.decode(name, qs).flatMap(f)
+        def encode(name: String, b: B): Map[String, Seq[String]] = fa.encode(name, g(b))
+      }
+    override def xmap[A, B](fa: QueryStringParam[A], f: A => B, g: B => A): QueryStringParam[B] =
+      new QueryStringParam[B] {
+        def decode(name: String, qs: Map[String, Seq[String]]): Option[B] = fa.decode(name, qs).map(f)
+        def encode(name: String, b: B): Map[String, Seq[String]] = fa.encode(name, g(b))
+      }
+  }
+
   implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] =
     new QueryStringParam[Option[A]] {
       def decode(name: String, qs: Map[String, Seq[String]]): Option[Option[A]] =
@@ -160,13 +166,6 @@ trait Urls extends algebra.Urls {
         else Map(name -> as.map(param.encode(name, _)).iterator.flatMap(_.values).flatten.toSeq)
     }
 
-  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
-    new QueryStringParam[B] {
-      def decode(name: String, qs: Map[String, Seq[String]]): Option[B] =
-        pa.decode(name, qs).flatMap(f)
-      def encode(name: String, b: B): Map[String, Seq[String]] = pa.encode(name, g(b))
-    }
-
   implicit lazy val stringQueryString: QueryStringParam[String] =
     new QueryStringParam[String] {
       def decode(name: String, qs: Map[String, Seq[String]]) =
@@ -186,6 +185,21 @@ trait Urls extends algebra.Urls {
 
     final def decodeUrl(request: RequestHeader) = pathExtractor(this, request)
     final def encodeUrl(a: A) = encode(a)
+  }
+
+  implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
+    def xmapPartial[A, B](fa: Path[A], f: A => Option[B], g: B => A): Path[B] =
+      new Path[B] {
+        def decode(segments: List[String]): Option[Either[Result, (B, List[String])]] =
+          fa.decode(segments).map(_.right.flatMap { case (a, rs) => f(a).toRight(Results.BadRequest).right.map((_, rs)) })
+        def encode(b: B): String = fa.encode(g(b))
+      }
+    override def xmap[A, B](fa: Path[A], f: A => B, g: B => A): Path[B] =
+      new Path[B] {
+        def decode(segments: List[String]): Option[Either[Result, (B, List[String])]] =
+          fa.decode(segments).map(_.right.map { case (a, rs) => (f(a), rs) })
+        def encode(b: B): String = fa.encode(g(b))
+      }
   }
 
   def staticPathSegment(segment: String): Path[Unit] =
@@ -216,6 +230,14 @@ trait Urls extends algebra.Urls {
       def encode(a: A) = A.encode(a)
     }
 
+  def remainingSegments(name: String, docs: Documentation): Path[String] =
+    new Path[String] {
+      def decode(segments: List[String]): Option[Either[Result, (String, List[String])]] =
+        if (segments.isEmpty) None
+        else Some(Right((segments.map(URLEncoder.encode(_, utf8Name)).mkString("/"), Nil)))
+      def encode(s: String): String = s // NO URL-encoding because the segments must already be URL-encoded
+    }
+
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] =
     new Path[tupler.Out] {
       def decode(segments: List[String]) =
@@ -243,10 +265,15 @@ trait Urls extends algebra.Urls {
     def encodeUrl(a: A): String
   }
 
-  implicit lazy val urlInvFunctor: endpoints.InvariantFunctor[Url] = new endpoints.InvariantFunctor[Url] {
-    def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] = new Url[To] {
-      def decodeUrl(req: RequestHeader): Option[Either[Result, To]] = f.decodeUrl(req).map(_.right.map(map))
-      def encodeUrl(a: To): String = f.encodeUrl(contramap(a))
+  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
+    def xmapPartial[A, B](fa: Url[A], f: A => Option[B], g: B => A): Url[B] = new Url[B] {
+      def decodeUrl(req: RequestHeader): Option[Either[Result, B]] =
+        fa.decodeUrl(req).map(_.right.flatMap(a => f(a).toRight(Results.BadRequest)))
+      def encodeUrl(b: B): String = fa.encodeUrl(g(b))
+    }
+    override def xmap[A, B](fa: Url[A], f: A => B, g: B => A): Url[B] = new Url[B] {
+      def decodeUrl(req: RequestHeader): Option[Either[Result, B]] = fa.decodeUrl(req).map(_.right.map(f))
+      def encodeUrl(b: B): String = fa.encodeUrl(g(b))
     }
   }
 

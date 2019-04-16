@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{InvariantFunctor, Tupler}
+import endpoints.{PartialInvariantFunctor, Tupler}
 
 import scala.language.{higherKinds, implicitConversions}
 import scala.util.Try
@@ -114,80 +114,66 @@ trait Urls {
     */
   type QueryStringParam[A]
 
-  /**
-    * Ability to refine a query string parameter for a type `A`
-    * into a query string parameter for a type `B` given a pair
-    * of decoding/encoding functions between `A` and `B`.
-    *
-    * @param pa A query string parameter for a type `A`
-    * @param f Decoding function from `A` to `Option[B]`
-    * @param g Encoding function from `B` to `A`
-    * @tparam A The type of the available query string parameter.
-    * @tparam B The type of the desired query string parameter.
-    * @return A query string parameter for a type `B` built by refinement from `pa`.
-    */
-  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B]
-
-  /** Ability to define `UUID` query string parameters */
-  implicit def uuidQueryString: QueryStringParam[UUID] =
-    refineQueryStringParam[String, UUID](stringQueryString)((x: String) => Try(UUID.fromString(x)).toOption)((y: UUID) => y.toString)
+  implicit def queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam]
 
   /** Ability to define `String` query string parameters */
   implicit def stringQueryString: QueryStringParam[String]
 
+  /** Ability to define `UUID` query string parameters */
+  implicit def uuidQueryString: QueryStringParam[UUID] =
+    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (x: String) => Try(UUID.fromString(x)).toOption, _.toString)
+
   /** Ability to define `Int` query string parameters */
   implicit def intQueryString: QueryStringParam[Int] =
-    refineQueryStringParam(stringQueryString)(s => Try(s.toInt).toOption)(_.toString)
+    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (s: String) => Try(s.toInt).toOption, _.toString)
 
   /** Query string parameter containing a `Long` value */
   implicit def longQueryString: QueryStringParam[Long] =
-    refineQueryStringParam(stringQueryString)(v => Try(v.toLong).toOption)(_.toString)
+    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (v: String) => Try(v.toLong).toOption, _.toString)
 
   /** Query string parameter containing a `Boolean` value */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
-    refineQueryStringParam(stringQueryString) {
+    queryStringParamPartialInvFunctor.xmapPartial[String, Boolean](stringQueryString, {
       case "true"  | "1" => Some(true)
       case "false" | "0" => Some(false)
       case _ => None
-    }(_.toString)
+    }, _.toString)
 
   implicit def doubleQueryString: QueryStringParam[Double] =
-    refineQueryStringParam(stringQueryString)(v => Try(v.toDouble).toOption)(_.toString)
+    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (v: String) => Try(v.toDouble).toOption, _.toString)
 
   /**
     * An URL path segment carrying an `A` information.
     */
   type Segment[A]
 
-  /**
-    * Ability to refine a path segment for a type `A`
-    * into a path segment for a type `B` given a pair
-    * of decoding/encoding functions between `A` and `B`.
-    *
-    * @param sa A path segment for a type `A`
-    * @param f Decoding function from `A` to `Option[B]`
-    * @param g Encoding function from `B` to `A`
-    * @tparam A The type of the available path segment.
-    * @tparam B The type of the desired path segment.
-    * @return A path segment for a type `B` built by refinement from `sa`.
+  implicit def segmentPartialInvFunctor: PartialInvariantFunctor[Segment]
+
+  /** Ability to define `String` path segments
+    * Servers should return an URL-decoded string value,
+    * and clients should take an URL-decoded string value.
     */
-  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B]
+  implicit def stringSegment: Segment[String]
 
   /** Ability to define `UUID` path segments */
   implicit def uuidSegment: Segment[UUID] =
-    refineSegment[String, UUID](stringSegment)((s: String) => Try.apply(UUID.fromString(s)).toOption)(_.toString)
-
-  /** Ability to define `String` path segments */
-  implicit def stringSegment: Segment[String]
+    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(UUID.fromString(s)).toOption, _.toString)
 
   /** Ability to define `Int` path segments */
-  implicit def intSegment: Segment[Int]
+  implicit def intSegment: Segment[Int] =
+    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toInt).toOption, _.toString)
 
   /** Segment containing a `Long` value */
-  implicit def longSegment: Segment[Long]
+  implicit def longSegment: Segment[Long] =
+    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toLong).toOption, _.toString)
+
+  implicit def doubleSegment: Segment[Double] =
+    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toDouble).toOption, _.toString)
 
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]
+
+  implicit def pathPartialInvariantFunctor: PartialInvariantFunctor[Path]
 
   /** Implicit conversion to get rid of intellij errors when defining paths. Effectively should not be called.*/
   implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
@@ -202,11 +188,14 @@ trait Urls {
     final def /? [B](qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = urlWithQueryString(first, qs)
   }
 
-  /** Builds a static path segment */
-  def  staticPathSegment(segment: String): Path[Unit]
+  /** A path segment whose value is the given `segment` */
+  def staticPathSegment(segment: String): Path[Unit]
 
-  /** Builds a path segment carrying an `A` information */
+  /** A path segment carrying an `A` information */
   def segment[A](name: String = "", docs: Documentation = None)(implicit s: Segment[A]): Path[A]
+
+  /** The remaining segments of the path. The `String` value carried by this `Path` is still URL-encoded. */
+  def remainingSegments(name: String = "", docs: Documentation = None): Path[String] // TODO Make it impossible to chain it with another path (ie, `path / remainingSegments() / "foo"` should not compile)
 
   /** Chains the two paths */
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]
@@ -228,8 +217,7 @@ trait Urls {
     */
   type Url[A]
 
-  implicit def urlInvFunctor: InvariantFunctor[Url]
-
+  implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url]
 
   /** Builds an URL from the given path and query string */
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]

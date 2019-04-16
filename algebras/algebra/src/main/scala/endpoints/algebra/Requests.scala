@@ -7,7 +7,7 @@ import scala.language.higherKinds
 /**
   * @group algebras
   */
-trait Requests extends Urls with Methods with InvariantFunctorSyntax with SemigroupalSyntax {
+trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with SemigroupalSyntax {
 
   /** Information carried by requests’ headers */
   type RequestHeaders[A]

@@ -6,7 +6,7 @@ import scala.collection.compat._
 import scala.language.higherKinds
 import akka.http.scaladsl.server._
 import endpoints.algebra.Documentation
-import endpoints.{InvariantFunctor, Tupler, algebra}
+import endpoints.{PartialInvariantFunctor, Tupler, algebra}
 
 import scala.collection.mutable
 
@@ -24,6 +24,18 @@ trait Urls extends algebra.Urls {
     joinDirectives(pathPrefix, Directives.pathEndOrSingleSlash.tmap(Tuple1(_)))
   )
 
+  implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
+    def xmapPartial[A, B](fa: Path[A], f: A => Option[B], g: B => A): Path[B] =
+      new Path(fa.pathPrefix.flatMap { a =>
+        f(a) match {
+          case Some(b) => Directives.provide(b)
+          case None    => malformedRequest
+        }
+      })
+    override def xmap[A, B](fa: Path[A], f: A => B, g: B => A): Path[B] =
+      new Path(fa.directive.map(f))
+  }
+
   class Url[T](val directive: Directive1[T])
 
   class QueryString[T](val directive: Directive1[T])
@@ -36,13 +48,23 @@ trait Urls extends algebra.Urls {
     */
   type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Option[T]
 
+  implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
+    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Option[B], g: B => A): QueryStringParam[B] =
+      (name, qs) => fa(name, qs).flatMap(f)
+    override def xmap[A, B](fa: QueryStringParam[A], f: A => B, g: B => A): QueryStringParam[B] =
+      (name, qs) => fa(name, qs).map(f)
+  }
   def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] =
     (name, map) => pa(name, map).flatMap(f)
 
   type Segment[T] = PathMatcher1[T]
 
-  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] =
-    sa.tflatMap[Tuple1[B]]((a: Tuple1[A]) => f(a._1).map(Tuple1.apply))
+  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
+    def xmapPartial[A, B](fa: Segment[A], f: A => Option[B], g: B => A): Segment[B] =
+      fa.tflatMap[Tuple1[B]]((a: Tuple1[A]) => f(a._1).map(Tuple1.apply))
+    override def xmap[A, B](fa: Segment[A], f: A => B, g: B => A): Segment[B] =
+      fa.map(f)
+  }
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
     new Url(joinDirectives(path.directive, qs.directive))
@@ -58,7 +80,7 @@ trait Urls extends algebra.Urls {
   def qs[A](name: String, docs: Documentation)(implicit param: QueryStringParam[A]): QueryString[A] =
     new QueryString[A](Directives.parameterMultiMap.flatMap { kvs =>
       param(name, kvs) match {
-        case Some(a) => Directives.pass.tmap(_ => a)
+        case Some(a) => Directives.provide(a)
         case None    => malformedRequest
       }
     })
@@ -87,23 +109,26 @@ trait Urls extends algebra.Urls {
     new QueryString(joinDirectives(first.directive, second.directive))
   }
 
-  implicit lazy val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
-    override def xmap[From, To](f: Url[From], map: From => To, contramap: To => From): Url[To] =
-      new Url(f.directive.map(map))
+  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
+    def xmapPartial[A, B](fa: Url[A], f: A => Option[B], g: B => A): Url[B] =
+      new Url(fa.directive.flatMap { a =>
+        f(a) match {
+          case Some(b) => Directives.provide(b)
+          case None    => malformedRequest
+        }
+      })
+    override def xmap[A, B](fa: Url[A], f: A => B, g: B => A): Url[B] =
+      new Url(fa.directive.map(f))
   }
 
   // ********
   // Paths
   // ********
 
-  implicit def intSegment: Segment[Int] = IntNumber
-
   implicit def stringSegment: Segment[String] = Segment
 
-  implicit def longSegment: Segment[Long] = LongNumber
-
   def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = {
-    // If there is no segment, the path does not match
+    // If there is no segment, the path must not match
     // for instance, given the `path / foo / segment[Int]` definition,
     // an incoming request `"/foo"` or `"/foo/"` does not match,
     // whereas `"/foo/42"` matches and succeeds, and `"/foo/bar"` matches and fails.
@@ -116,6 +141,9 @@ trait Urls extends algebra.Urls {
       }
     new Path(directive)
   }
+
+  def remainingSegments(name: String, docs: Documentation): Path[String] =
+    new Path(Directives.path(PathMatchers.Remaining))
 
   def staticPathSegment(segment: String): Path[Unit] = {
     val directive = if(segment.isEmpty) // We cannot use Directives.pathPrefix("") because it consumes also a leading slash

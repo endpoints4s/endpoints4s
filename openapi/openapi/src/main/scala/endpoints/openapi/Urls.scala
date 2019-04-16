@@ -44,11 +44,13 @@ trait Urls extends algebra.Urls {
   implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
     DocumentedQueryStringParam(Schema.Array(param.schema, description = None), isRequired = false)
 
-  def refineQueryStringParam[A, B](pa: QueryStringParam[A])(f: A => Option[B])(g: B => A): QueryStringParam[B] = pa
-
-  override def uuidQueryString: QueryStringParam[UUID] = DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true)
+  implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
+    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Option[B], g: B => A): QueryStringParam[B] = fa
+  }
 
   def stringQueryString: QueryStringParam[String] = DocumentedQueryStringParam(Schema.simpleString, isRequired = true)
+
+  override def uuidQueryString: QueryStringParam[UUID] = DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true)
 
   override def intQueryString: QueryStringParam[Int] = DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
 
@@ -60,17 +62,25 @@ trait Urls extends algebra.Urls {
 
   type Segment[A] = Schema
 
-  def refineSegment[A, B](sa: Segment[A])(f: A => Option[B])(g: B => A): Segment[B] = sa
-
-  override def uuidSegment: Segment[UUID] = Schema.simpleUUID
+  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
+    def xmapPartial[A, B](fa: Segment[A], f: A => Option[B], g: B => A): Segment[B] = fa
+  }
 
   def stringSegment: Segment[String] = Schema.simpleString
 
-  def intSegment: Segment[Int] = Schema.simpleInteger
+  override def uuidSegment: Segment[UUID] = Schema.simpleUUID
 
-  def longSegment: Segment[Long] = Schema.simpleInteger
+  override def intSegment: Segment[Int] = Schema.simpleInteger
+
+  override def longSegment: Segment[Long] = Schema.simpleInteger
+
+  override def doubleSegment: Segment[Double] = Schema.simpleNumber
 
   type Path[A] = DocumentedUrl
+
+  implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
+    def xmapPartial[A, B](fa: Path[A], f: A => Option[B], g: B => A): Path[B] = fa
+  }
 
   def staticPathSegment(segment: String): Path[Unit] = DocumentedUrl(Left(segment) :: Nil, Nil)
 
@@ -84,15 +94,25 @@ trait Urls extends algebra.Urls {
     DocumentedUrl(Right(DocumentedParameter(name, required = true, docs, A)):: Nil, Nil)
   }
 
+  def remainingSegments(name: String, docs: Documentation): Path[String] = {
+    // The OpenAPI specification does not support path parameters containing slashes
+    // See https://github.com/OAI/OpenAPI-Specification/issues/1459
+    // Consequently, we *incorrectly* document it as a *single* string segment
+    // TODO We should at least show a warning, but the error can only be detected
+    // at runtime (when one uses the `remainingSegments` method *and* the openapi
+    // interpreter). So, the best we could do is to log a warning.
+    segment(name, docs)(stringSegment)
+  }
+
   type Url[A] = DocumentedUrl
 
-  implicit lazy val urlInvFunctor: InvariantFunctor[Url] = new InvariantFunctor[Url] {
-    def xmap[From, To](url: Url[From], map: From => To, contramap: To => From): Url[To] = url
+  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
+    def xmapPartial[A, B](fa: Url[A], f: A => Option[B], g: B => A): Url[B] = fa
   }
 
 
   /**
-    * @param path List of path segments. Left is a static segment, right i path parameter
+    * @param path List of path segments. Left is a static segment, right is a path parameter
     * @param queryParameters Query string parameters
     */
   case class DocumentedUrl(path: List[Either[String, DocumentedParameter]], queryParameters: List[DocumentedParameter])
