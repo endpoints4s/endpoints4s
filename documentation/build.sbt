@@ -155,7 +155,8 @@ val `example-basic-client` =
       noPublishSettings,
       `scala 2.11 to 2.12`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
+      coverageEnabled := false,
+      scalaJSUseMainModuleInitializer := true
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -341,7 +342,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.11 to 2.12`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "1.1.0",
+        "com.pauldijou" %% "jwt-play" % "2.1.0",
         "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
       ),
       testFrameworks += new TestFramework("utest.runner.Framework")

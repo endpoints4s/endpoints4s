@@ -5,6 +5,7 @@ import java.util.UUID
 
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
 import endpoints.play.client.{Endpoints, JsonEntitiesFromCodec}
+import endpoints.play.server.PlayComponents
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
@@ -14,7 +15,9 @@ import scala.math.BigDecimal
 
 class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
-  private val server = NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test))(new Commands(_).routes)
+  private val server = NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test)) { components =>
+    new Commands(PlayComponents.fromBuiltInComponents(components)).routes
+  }
   val app = server.applicationProvider.get.get
   import app.materializer
   private val wsClient = AhcWSClient(AhcWSClientConfig())

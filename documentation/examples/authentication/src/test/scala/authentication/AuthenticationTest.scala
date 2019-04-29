@@ -1,7 +1,8 @@
 package authentication
 
+import endpoints.play.server.PlayComponents
 import pdi.jwt.JwtSession
-import play.api.Mode
+import play.api.{Configuration, Mode}
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
@@ -12,17 +13,20 @@ object AuthenticationTest extends TestSuite {
   val host = "0.0.0.0"
   val port = 8765
   val playConfig = ServerConfig(port = Some(port), mode = Mode.Test, address = host)
-  val server = NettyServer.fromRouterWithComponents(playConfig)(new Server(_).routes).asInstanceOf[NettyServer]
+  val server = NettyServer.fromRouterWithComponents(playConfig) { components =>
+    new Server(PlayComponents.fromBuiltInComponents(components), components.configuration).routes
+  }.asInstanceOf[NettyServer]
   import server.materializer
   import server.actorSystem.dispatcher
+  implicit val playConfiguration: Configuration = Configuration.reference
   val wsClient = AhcWSClient(AhcWSClientConfig())
-  val client = new Client(s"http://$host:$port", wsClient)
+  val client = new Client(s"http://$host:$port", wsClient, playConfiguration)
 
   def uri(path: String): String = s"http://$host:$port$path"
 
   override def utestAfterAll(): Unit = {
-    server.stop()
     wsClient.close()
+    server.stop()
     super.utestAfterAll()
   }
 

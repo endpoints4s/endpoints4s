@@ -7,12 +7,13 @@ import akka.stream.{ActorMaterializer, Materializer}
 import cqrs.commands.Commands
 import cqrs.infra.PlayService
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
-import cqrs.publicserver.{PublicEndpoints, PublicServer}
+import cqrs.publicserver.{BootstrapEndpoints, PublicEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
-import endpoints.play.server.HttpServer
+import endpoints.play.client.{Endpoints, JsonEntitiesFromCodec}
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
+import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
+import play.api.routing.Router
 
 import scala.collection.immutable.SortedMap
 import scala.math.BigDecimal
@@ -25,31 +26,35 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
   val materializer: Materializer = ActorMaterializer()(actorSystem)
   val wsClient = AhcWSClient(AhcWSClientConfig())(materializer)
 
-  object commandsServer extends PlayService(9000) {
-    val commands = new Commands(playComponents)
-    val httpServer = HttpServer(config, playComponents, commands.routes)
+  object commandsServer extends PlayService(9000, Mode.Test) {
+    lazy val commands = new Commands(playComponents)
+    lazy val router = Router.from(commands.routes)
   }
 
-  object queriesServer extends PlayService (9001) {
-    val service = new QueriesService(baseUrl(commandsServer.port), wsClient, actorSystem.scheduler)
-    val queries = new Queries(service, playComponents)
-    val httpServer = HttpServer(config, playComponents, queries.routes)
+  object queriesServer extends PlayService(9001, Mode.Test) {
+    lazy val service = new QueriesService(baseUrl(commandsServer.port), wsClient, actorSystem.scheduler)
+    lazy val queries = new Queries(service, playComponents)
+    lazy val router = Router.from(queries.routes)
   }
 
-  object publicServer extends PlayService(9002) {
-    val server = new PublicServer(baseUrl(commandsServer.port), baseUrl(queriesServer.port), wsClient, playComponents)
-    val httpServer = HttpServer(config, playComponents, server.routes)
+  object publicServer extends PlayService(9002, Mode.Test) {
+    lazy val routes =
+      new cqrs.publicserver.Router(
+        new PublicServer(baseUrl(commandsServer.port), baseUrl(queriesServer.port), wsClient, playComponents),
+        new BootstrapEndpoints(playComponents)
+      ).routes
+    lazy val router = Router.from(routes)
   }
 
-  commandsServer
-  queriesServer
-  publicServer
+  commandsServer.server
+  queriesServer.server
+  publicServer.server
 
   override def afterAll(): Unit = {
-    publicServer.httpServer.stop()
+    publicServer.server.stop()
+    queriesServer.server.stop()
     wsClient.close()
-    queriesServer.httpServer.stop()
-    commandsServer.httpServer.stop()
+    commandsServer.server.stop()
   }
 
   object api

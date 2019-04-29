@@ -2,7 +2,6 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import endpoints.{Semigroupal, Tupler, algebra}
-import play.api.BuiltInComponents
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -44,7 +43,7 @@ import scala.language.implicitConversions
   */
 trait Endpoints extends algebra.Endpoints with Urls with Methods {
 
-  protected val playComponents: BuiltInComponents
+  protected val playComponents: PlayComponents
 
   import playComponents.executionContext
 

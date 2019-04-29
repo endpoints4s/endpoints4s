@@ -14,7 +14,7 @@ See the [documentation](http://julienrf.github.io/endpoints) to learn more.
 
 ~~~
 $ sbt
-> wow 2.12.4
+> wow 2.12.8
 > <example>/reStart
 ~~~
 

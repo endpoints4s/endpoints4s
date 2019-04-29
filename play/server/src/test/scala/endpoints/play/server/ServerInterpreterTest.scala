@@ -2,13 +2,16 @@ package endpoints.play.server
 
 import endpoints.algebra.server.{DecodedUrl, EndpointsTestSuite}
 import play.api.Mode
+import play.api.routing.Router
 import play.api.test.FakeRequest
-import play.core.server.ServerConfig
+import play.core.server.{DefaultNettyServerComponents, ServerConfig}
 
-class ServerInterpreterTest extends EndpointsTestSuite[Endpoints] {
+class ServerInterpreterTest extends EndpointsTestSuite[Endpoints] with DefaultNettyServerComponents {
 
-  val config = ServerConfig(mode = Mode.Test)
-  val serverApi: Endpoints = new EndpointsTestApi(new DefaultPlayComponents(config), Map.empty)
+  override lazy val serverConfig = ServerConfig(mode = Mode.Test)
+  lazy val router = Router.empty // We don’t use the server, we just want the BuiltInComponents to be wired for us
+  lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
+  lazy val serverApi: Endpoints = new EndpointsTestApi(playComponents, Map.empty)
 
   def decodeUrl[A](url: serverApi.Url[A])(rawValue: String): DecodedUrl[A] = {
     val request = FakeRequest("GET", rawValue)

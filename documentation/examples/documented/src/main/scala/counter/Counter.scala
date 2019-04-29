@@ -8,7 +8,7 @@ package counter
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import play.api.BuiltInComponents
+import endpoints.play.server.PlayComponents
 import play.core.server.{NettyServer, ServerConfig}
 
 // Our domain model just contains a counter value
@@ -84,7 +84,7 @@ object CounterDocumentation
 // Implementation of the HTTP API and its business logic
 import endpoints.play
 
-class CounterServer(protected val playComponents: BuiltInComponents)
+class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with play.server.Endpoints
     with play.server.playjson.JsonSchemaEntities { parent =>
@@ -119,10 +119,13 @@ object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
     val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
-    NettyServer.fromRouterWithComponents(playConfig)(components => new CounterServer(components).routes orElse new DocumentationServer(components).routes)
+    NettyServer.fromRouterWithComponents(playConfig) { components =>
+      val playComponents = PlayComponents.fromBuiltInComponents(components)
+      new CounterServer(playComponents).routes orElse new DocumentationServer(playComponents).routes
+    }
   }
 
-  class DocumentationServer(protected val playComponents: BuiltInComponents)
+  class DocumentationServer(protected val playComponents: PlayComponents)
     extends play.server.Endpoints
       with play.server.playjson.JsonSchemaEntities
       with play.server.Assets
