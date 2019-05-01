@@ -343,8 +343,7 @@ val `example-authentication` =
     .settings(
       libraryDependencies ++= Seq(
         "com.pauldijou" %% "jwt-play" % "2.1.0",
-        "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
-      ),
-      testFrameworks += new TestFramework("utest.runner.Framework")
+        scalaTestDependency
+      )
     )
     .dependsOn(`play-server`, `play-client`, `algebra-playjson-jvm`)

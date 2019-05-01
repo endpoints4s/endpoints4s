@@ -1,14 +1,14 @@
 package authentication
 
 import endpoints.play.server.PlayComponents
+import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
 import pdi.jwt.JwtSession
 import play.api.{Configuration, Mode}
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
-import utest.{TestSuite, TestableSymbol, Tests, assert}
 
-object AuthenticationTest extends TestSuite {
+class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   val host = "0.0.0.0"
   val port = 8765
@@ -24,26 +24,26 @@ object AuthenticationTest extends TestSuite {
 
   def uri(path: String): String = s"http://$host:$port$path"
 
-  override def utestAfterAll(): Unit = {
+  override def afterAll(): Unit = {
     wsClient.close()
     server.stop()
-    super.utestAfterAll()
+    super.afterAll()
   }
 
-  val tests = Tests {
-    'unauthenticatedRequestGetsRejected - {
+  "authentication" - {
+    "unauthenticated request gets rejected" in {
       for {
         response <- wsClient.url(uri("/some-resource")).get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
-    'invalidAuthenticatedRequestGetsRejected - {
+    "invalid authenticated request gets rejected" in {
       for {
         response <- wsClient.url(uri("/some-resource"))
           .withHttpHeaders(HeaderNames.AUTHORIZATION -> "lol")
           .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
-    'invalidJsonTokenGetsRejected - {
+    "invalid json token gets rejected" in {
       val token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"""
       for {
         response <- wsClient.url(uri("/some-resource"))
@@ -51,12 +51,12 @@ object AuthenticationTest extends TestSuite {
           .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
-    'wrongLoginIsRejected - {
+    "wrong login is rejected" in {
       for {
         loginResponse <- wsClient.url(uri("/login")).withQueryStringParameters("apiKey" -> "unknown").get()
       } yield assert(loginResponse.status == Status.BAD_REQUEST)
     }
-    'loginGivesAValidJsonToken - {
+    "login gives a valid json token" in {
       for {
         loginResponse <- wsClient.url(uri("/login")).withQueryStringParameters("apiKey" -> "foobar").get()
         token = loginResponse.headers(HeaderNames.AUTHORIZATION).head.drop("Bearer ".length)
@@ -72,19 +72,19 @@ object AuthenticationTest extends TestSuite {
       } yield assert(response.status == Status.OK)
     }
     //#login-test-client
-    'wrongLoginUsingClient - {
+    "wrong login using client" in {
       for {
         loginResult <- client.login("unknown")
       } yield assert(loginResult.isEmpty)
     }
-    'validLoginUsingClient - {
+    "valid login using client" in {
       for {
         loginResult <- client.login("foobar")
       } yield assert(loginResult.nonEmpty)
     }
     //#login-test-client
     //#protected-endpoint-test
-    'loginAndAccessProtectedResource - {
+    "login and access protected resource" in {
       for {
         maybeToken <- client.login("foobar")
         token = maybeToken.get
