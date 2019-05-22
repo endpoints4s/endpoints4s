@@ -70,13 +70,13 @@ class Endpoints(val settings: EndpointsSettings)
 
   lazy val emptyRequest: RequestEntity[Unit] = (_, req) => req
 
-  def textRequest(docs: Option[String]): (String, HttpRequest) => HttpRequest =
+  lazy val textRequest: (String, HttpRequest) => HttpRequest =
     (body, request) => request.copy(entity = HttpEntity(body))
 
 
   def request[A, B, C, AB, Out](
     method: Method, url: Url[A],
-    entity: RequestEntity[B], headers: RequestHeaders[C]
+    entity: RequestEntity[B], docs: Documentation, headers: RequestHeaders[C]
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
@@ -91,30 +91,35 @@ class Endpoints(val settings: EndpointsSettings)
       settings.requestExecutor(request)
     }
 
-  type Response[A] = HttpResponse => Future[Either[Throwable, A]]
+  // Defines how to decode the entity according to the status code value and response headers
+  type Response[A] = (StatusCode, scala.collection.immutable.Seq[HttpHeader]) => ResponseEntity[A]
 
-  def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = x =>
-    if (x.status == OK) {
-      Future.successful(Right(()))
-    } else {
-      Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
+  type ResponseEntity[A] = HttpEntity => Future[Either[Throwable, A]]
+
+  private[client] def discardingEntity[A](result: Future[Either[Throwable, A]]): ResponseEntity[A] =
+    entity => {
+      entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
+      result
     }
 
-  def textResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, String]] = x =>
-    if (x.status == OK) {
-      x.entity.toStrict(settings.toStrictTimeout)
+  def emptyResponse: ResponseEntity[Unit] =
+    discardingEntity(Future.successful(Right(())))
+
+  def textResponse: ResponseEntity[String] =
+    entity =>
+      entity.toStrict(settings.toStrictTimeout)
         .map(settings.stringContentExtractor)
         .map(Right.apply)
-    } else {
-      Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
-    }
 
-  override def wheneverFound[A](inner: HttpResponse => Future[Either[Throwable, A]], notFoundDocs: Documentation): HttpResponse => Future[Either[Throwable, Option[A]]] = {
-    {
-      case resp if resp.status.intValue() == 404 => Future.successful(Right(None))
-      case resp => inner(resp).map(_.right.map(Some(_)))
-    }
-  }
+  def response[A](statusCode: StatusCode, responseEntity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    (status, _) =>
+      if (status == statusCode) responseEntity
+      else discardingEntity(Future.failed(new Throwable(s"Unexpected status code: ${status.intValue()}")))
+
+  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+    (status, headers) =>
+      if (status == NotFound) discardingEntity(Future.successful(Right(None)))
+      else entity => inner(status, headers)(entity).map(_.right.map(Some(_)))
 
   //#endpoint-type
   type Endpoint[A, B] = A => Future[B]
@@ -124,7 +129,7 @@ class Endpoints(val settings: EndpointsSettings)
     a =>
       for {
         resp <- request(a)
-        result <- response(resp).flatMap(futureFromEither).andThen { case _ => resp.discardEntityBytes() /* See https://github.com/akka/akka-http/issues/1495 */ }
+        result <- response(resp.status, resp.headers)(resp.entity).flatMap(futureFromEither)
       } yield result
 
 

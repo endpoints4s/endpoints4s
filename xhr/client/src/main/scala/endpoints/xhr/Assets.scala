@@ -79,14 +79,12 @@ trait Assets extends algebra.Assets with Endpoints {
     }
 
   private def arrayBufferResponse: Response[ArrayBuffer] =
-    (xhr: XMLHttpRequest) => {
-      if (xhr.status < 300) {
-        try {
-          Right(xhr.response.asInstanceOf[ArrayBuffer])
-        } catch {
-          case exn: Exception => Left(exn)
-        }
-      } else Left(new Exception("Resource not found"))
+    ok { xhr =>
+      try {
+        Right(xhr.response.asInstanceOf[ArrayBuffer])
+      } catch {
+        case exn: Exception => Left(exn)
+      }
     }
 
 }

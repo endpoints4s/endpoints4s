@@ -110,20 +110,20 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
 trait Fixtures extends algebra.Endpoints {
 
-  val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")), tags = List("foo"))
+  val foo = endpoint(get(path / "foo"), ok(emptyResponse, Some("Foo response")), tags = List("foo"))
 
-  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse(Some("Bar response")), tags = List("bar", "bxx"))
+  val bar = endpoint(post(path / "foo", emptyRequest), ok(emptyResponse, Some("Bar response")), tags = List("bar", "bxx"))
 
-  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")), tags = List("baz", "bxx"))
+  val baz = endpoint(get(path / "baz" / segment[Int]("quux")), ok(emptyResponse, Some("Baz response")), tags = List("baz", "bxx"))
 
-  val textRequestEndp = endpoint(post(path / "textRequestEndpoint", textRequest(docs = Some("Text Req"))), emptyResponse())
+  val textRequestEndp = endpoint(post(path / "textRequestEndpoint", textRequest, docs = Some("Text Req")), ok(emptyResponse))
 
-  val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest()), emptyResponse())
+  val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest), ok(emptyResponse))
 
-  val quux = endpoint(get(path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[Long]]("ids"))), emptyResponse())
+  val quux = endpoint(get(path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[Long]]("ids"))), ok(emptyResponse))
 
   val multipleSegmentsPath =
-    endpoint(get(path / "assets" / remainingSegments("file")), textResponse())
+    endpoint(get(path / "assets" / remainingSegments("file")), ok(textResponse))
 
 }
 

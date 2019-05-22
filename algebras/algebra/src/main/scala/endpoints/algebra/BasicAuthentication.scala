@@ -38,6 +38,7 @@ trait BasicAuthentication extends Endpoints {
     requestEntity: RequestEntity[E] = emptyRequest,
     requestHeaders: RequestHeaders[H] = emptyHeaders,
     unauthenticatedDocs: Documentation = None,
+    requestDocs: Documentation = None,
     summary: Documentation = None,
     description: Documentation = None,
     tags: List[String] = Nil
@@ -47,7 +48,7 @@ trait BasicAuthentication extends Endpoints {
     tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Endpoint[Out, Option[R]] =
     endpoint(
-      request(method, url, requestEntity, requestHeaders ++ basicAuthenticationHeader),
+      request(method, url, requestEntity, requestDocs, requestHeaders ++ basicAuthenticationHeader),
       authenticated(response, unauthenticatedDocs),
       summary,
       description,

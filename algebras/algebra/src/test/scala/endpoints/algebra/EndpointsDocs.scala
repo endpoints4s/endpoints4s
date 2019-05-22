@@ -10,22 +10,22 @@ trait EndpointsDocs extends Endpoints {
     // path “/some-resource”, and whose responses have an entity of
     // type “text/plain”
     val someResource: Endpoint[Unit, String] =
-      endpoint(get(path / "some-resource"), textResponse())
+      endpoint(get(path / "some-resource"), ok(textResponse))
     //#construction
   }
 
   //#with-docs
   endpoint(
     get(path / "some-resource"),
-    textResponse(),
+    ok(textResponse),
     description = Some("The contents of some resource")
   )
   //#with-docs
 
   //#request-construction
   // A request that uses the verb “GET”, the URL path “/foo”,
-  // no entity and no headers
-  request(Get, path / "foo", emptyRequest, emptyHeaders)
+  // no entity, no documentation, and no headers
+  request(Get, path / "foo", emptyRequest, None, emptyHeaders)
   //#request-construction
 
   //#convenient-get
@@ -58,26 +58,31 @@ trait EndpointsDocs extends Endpoints {
 
   //#response
   // An HTTP response with status code 200 (Ok) and no entity
-  val nothing: Response[Unit] = emptyResponse()
+  val nothing: Response[Unit] = ok(emptyResponse)
   //#response
+
+  //#general-response
+  // An HTTP response with status code 200 (Ok) and a text entity
+  val aTextResponse: Response[String] = response(OK, textResponse)
+  //#general-response
 
   //#response-combinator
   // An HTTP response with status code 404 (Not Found) and no entity,
   // or with status code 200 (Ok) and a text entity.
-  val maybeText: Response[Option[String]] = wheneverFound(textResponse())
+  val maybeText: Response[Option[String]] = wheneverFound(aTextResponse)
   //#response-combinator
 
   // Shared definition used by the documentation of interpreters
   //#endpoint-definition
   val someResource: Endpoint[Int, String] =
-    endpoint(get(path / "some-resource" / segment[Int]()), textResponse())
+    endpoint(get(path / "some-resource" / segment[Int]()), ok(textResponse))
   //#endpoint-definition
 
   //#documented-endpoint-definition
   val someDocumentedResource: Endpoint[Int, String] =
     endpoint(
       get(path / "some-resource" / segment[Int]("id")),
-      textResponse(docs = Some("The content of the resource"))
+      ok(textResponse, docs = Some("The content of the resource"))
     )
   //#documented-endpoint-definition
 

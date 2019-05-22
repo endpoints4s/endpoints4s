@@ -1,8 +1,9 @@
 package endpoints.akkahttp.server
 
+import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
-import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
+import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
@@ -22,6 +23,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   type RequestEntity[A] = Directive1[A]
 
+  type ResponseEntity[A] = ToEntityMarshaller[A]
+
   type Response[A] = A => Route
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
@@ -35,7 +38,6 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
         case Failure(ex) => Directives.complete(ex)
       }
     }
-
   }
 
   /* ************************
@@ -44,7 +46,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
-  def textRequest(docs: Documentation): RequestEntity[String] = {
+  def textRequest: RequestEntity[String] = {
     val um: FromRequestUnmarshaller[String] = implicitly
     Directives.entity[String](um)
   }
@@ -70,20 +72,27 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       RESPONSES
   ************************* */
 
-  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((OK, HttpEntity.Empty))
+  def emptyResponse: ResponseEntity[Unit] = Marshaller.opaque(_ => HttpEntity.Empty)
 
-  def textResponse(docs: Documentation): Response[String] = x => Directives.complete((OK, x))
+  def textResponse: ResponseEntity[String] = implicitly
+
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    a => {
+      implicit val marshaller: ToResponseMarshaller[A] =
+        Marshaller.fromToEntityMarshaller(statusCode)(entity)
+      Directives.complete(a)
+    }
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
     case None => Directives.complete(HttpResponse(NotFound))
   }
 
-
   def request[A, B, C, AB, Out](
     method: Method,
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
+    docs: Documentation = None,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))

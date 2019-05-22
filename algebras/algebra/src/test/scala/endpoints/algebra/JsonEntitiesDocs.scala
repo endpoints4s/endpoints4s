@@ -10,8 +10,8 @@ trait JsonEntitiesDocs extends JsonEntities {
 
   //#json-entities
   endpoint(
-    post(path / "user", jsonRequest[CreateUser]()),
-    jsonResponse[User]()
+    post(path / "user", jsonRequest[CreateUser]),
+    ok(jsonResponse[User])
   )
   //#json-entities
 

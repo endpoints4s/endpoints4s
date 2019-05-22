@@ -21,7 +21,7 @@ class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRoute
     implicit val userJsonSchema: JsonSchema[User] = genericJsonSchema[User]
 
     val singleStaticGetSegment = endpoint[Unit, User](
-      get(path / "user"), jsonResponse[User]()
+      get(path / "user"), ok(jsonResponse[User])
     ).implementedBy(_ => User("Bob", 30))
   }
 

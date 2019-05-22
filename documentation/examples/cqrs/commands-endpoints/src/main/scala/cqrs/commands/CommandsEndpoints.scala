@@ -21,14 +21,20 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodec {
     * not found or invalid command).
     */
   val command: Endpoint[Command, Option[StoredEvent]] =
-    endpoint(post(path / "command", jsonRequest[Command]()), jsonResponse[Option[StoredEvent]]())
+    endpoint(
+      post(path / "command", jsonRequest[Command]),
+      ok(jsonResponse[Option[StoredEvent]])
+    )
 //#microservice-endpoint-description
 
   /**
     * Read the event long (optionally from a given timestamp).
     */
   val events: Endpoint[Option[Long], Seq[StoredEvent]] =
-    endpoint(get(path / "events" /? qs[Option[Long]]("since")), jsonResponse[Seq[StoredEvent]]())
+    endpoint(
+      get(path / "events" /? qs[Option[Long]]("since")),
+      ok(jsonResponse[Seq[StoredEvent]])
+    )
 
 }
 //#endpoints

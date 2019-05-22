@@ -87,7 +87,7 @@ trait Endpoints
         summary,
         description,
         parameters,
-        request.entity.map(r => RequestBody(r.documentation, r.content)),
+        if (request.entity.isEmpty) None else Some(RequestBody(request.documentation, request.entity)),
         response.map(r => r.status.toString -> Response(r.documentation, r.content)).toMap,
         tags,
         security = Nil // might be refined later by specific interpreters

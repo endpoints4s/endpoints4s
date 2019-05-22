@@ -24,7 +24,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     */
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
     resp =>
-      if (resp.code == 403) Right(None)
-      else response(resp).right.map(Some(_))
+      if (resp.code == 403) _ => Right(None)
+      else entity => response(resp)(entity).right.map(Some(_))
 
 }

@@ -39,7 +39,7 @@ trait AuthenticationEndpoints
     Get,
     path / "some-resource",
     emptyRequest,
-    textResponse()
+    ok(textResponse)
   )
 //#protected-endpoint
 //#login-endpoint

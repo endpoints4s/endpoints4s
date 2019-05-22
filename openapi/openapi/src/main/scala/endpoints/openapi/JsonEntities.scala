@@ -2,11 +2,13 @@ package endpoints
 package openapi
 
 import endpoints.openapi.model.MediaType
-import endpoints.algebra
-import endpoints.algebra.Documentation
 
 /**
   * Partial interpreter for [[algebra.JsonEntities]].
+  *
+  * This interpreter documents that entities have a JSON content type, but
+  * it can not document the schemas of these entities. See [[algebra.JsonSchemaEntities]]
+  * for this purpose.
   *
   * @group interpreters
   */
@@ -14,10 +16,10 @@ trait JsonEntities
   extends algebra.JsonEntities
     with Endpoints {
 
-  def jsonRequest[A : JsonRequest](docs: Documentation): RequestEntity[A] =
-    Some(DocumentedRequestEntity(docs, Map("application/json" -> MediaType(None))))
+  def jsonRequest[A : JsonRequest]: RequestEntity[A] =
+    Map("application/json" -> MediaType(None))
 
-  def jsonResponse[A : JsonResponse](docs: Documentation): Response[A] =
-    DocumentedResponse(OK, docs.getOrElse(""), Map("application/json" -> MediaType(None))) :: Nil
+  def jsonResponse[A : JsonResponse]: ResponseEntity[A] =
+    Map("application/json" -> MediaType(None))
 
 }

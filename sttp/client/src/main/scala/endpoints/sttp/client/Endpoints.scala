@@ -5,6 +5,7 @@ import java.net.URI
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.Documentation
 import com.softwaremill.sttp
+import com.softwaremill.sttp.ResponseAs
 
 import scala.language.higherKinds
 
@@ -68,7 +69,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     case (_, req) => req
   }
 
-  def textRequest(docs: Option[String]): RequestEntity[String] = {
+  lazy val textRequest: RequestEntity[String] = {
     case (bodyValue, request) => request.body(bodyValue)
   }
 
@@ -79,7 +80,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   def request[A, B, C, AB, Out](
     method: Method, url: Url[A],
-    entity: RequestEntity[B], headers: RequestHeaders[C]
+    entity: RequestEntity[B], docs: Documentation, headers: RequestHeaders[C]
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
@@ -104,46 +105,57 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
       */
     def responseAs: sttp.ResponseAs[ReceivedBody, Nothing]
 
-    /**
-      * Function to validate the response (headers, code). This can also modify the type of the received body
-      */
-    def validateResponse(response: sttp.Response[ReceivedBody]): R[A]
+    def decodeEntity(response: sttp.Response[ReceivedBody]): R[A]
   }
 
-  type Response[A] = SttpResponse[A]
+  trait Response[A] {
+    val entity: ResponseEntity[A]
+    /**
+      * Function to validate the response (headers, code).
+      */
+    def decodeResponse(response: sttp.Response[entity.ReceivedBody]): R[A]
+  }
+
+  type ResponseEntity[A] = SttpResponse[A]
+
+  private[sttp] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] { type ReceivedBody = entity.ReceivedBody } =
+    new ResponseEntity[B] {
+      type ReceivedBody = entity.ReceivedBody
+      def responseAs: ResponseAs[ReceivedBody, Nothing] = entity.responseAs
+      def decodeEntity(response: sttp.Response[ReceivedBody]): R[B] =
+        backend.responseMonad.map(entity.decodeEntity(response))(f)
+    }
 
   /** Successfully decodes no information from a response */
-  def emptyResponse(docs: Documentation): SttpResponse[Unit] = new SttpResponse[Unit] {
-    override type ReceivedBody = Unit
-
-    override def responseAs = sttp.ignore
-
-    override def validateResponse(response: sttp.Response[Unit]) = {
-      if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
-      else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
-    }
+  def emptyResponse: ResponseEntity[Unit] = new SttpResponse[Unit] {
+    type ReceivedBody = Unit
+    def responseAs = sttp.ignore
+    def decodeEntity(response: sttp.Response[Unit]) = backend.responseMonad.unit(response.unsafeBody)
   }
 
   /** Successfully decodes string information from a response */
-  def textResponse(docs: Documentation): SttpResponse[String] = new SttpResponse[String] {
-    override type ReceivedBody = String
+  def textResponse: ResponseEntity[String] = new SttpResponse[String] {
+    type ReceivedBody = String
+    def responseAs = sttp.asString
+    def decodeEntity(response: sttp.Response[String]): R[String] = backend.responseMonad.unit(response.unsafeBody)
+  }
 
-    override def responseAs = sttp.asString
-
-    override def validateResponse(response: sttp.Response[String]) = {
-      if (response.isSuccess) backend.responseMonad.unit(response.unsafeBody)
-      else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] = {
+    val _entity = entity
+    new Response[A] {
+      val entity: _entity.type = _entity
+      def decodeResponse(response: sttp.Response[entity.ReceivedBody]) = {
+        if (response.code == statusCode) entity.decodeEntity(response)
+        else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
+      }
     }
   }
 
-  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new SttpResponse[Option[A]] {
-    override type ReceivedBody = inner.ReceivedBody
-
-    override def responseAs = inner.responseAs
-
-    override def validateResponse(response: sttp.Response[inner.ReceivedBody]): R[Option[A]] = {
+  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new Response[Option[A]] {
+    val entity = mapResponseEntity[A, Option[A]](inner.entity)(Some(_))
+    def decodeResponse(response: sttp.Response[entity.ReceivedBody]): R[Option[A]] = {
       if (response.code == NotFound) backend.responseMonad.unit(None)
-      else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
+      else entity.decodeEntity(response)
     }
   }
 
@@ -156,10 +168,9 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a => {
-      val req: sttp.Request[response.ReceivedBody, Nothing] = request(a).response(response.responseAs)
-
+      val req: sttp.Request[response.entity.ReceivedBody, Nothing] = request(a).response(response.entity.responseAs)
       val result = backend.send(req)
-      backend.responseMonad.flatMap(result)(response.validateResponse)
+      backend.responseMonad.flatMap(result)(response.decodeResponse)
     }
 
 }

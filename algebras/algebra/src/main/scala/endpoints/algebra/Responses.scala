@@ -7,18 +7,37 @@ import scala.language.higherKinds
   */
 trait Responses extends StatusCodes {
 
-  /** Information carried by a response */
+  /** An HTTP response (status, headers, and entity) carrying an information of type A */
   type Response[A]
 
-  /**
-    * Empty response.
-    */
-  def emptyResponse(docs: Documentation = None): Response[Unit]
+  /** An HTTP response entity carrying an information of type A */
+  type ResponseEntity[A]
 
   /**
-    * Text response.
+    * Empty response entity
     */
-  def textResponse(docs: Documentation = None): Response[String]
+  def emptyResponse: ResponseEntity[Unit]
+
+  /**
+    * Text response entity
+    */
+  def textResponse: ResponseEntity[String]
+
+  /**
+    * @param statusCode Response status code
+    * @param entity     Response entity
+    * @param docs       Response documentation
+    *
+    * Server interpreters should construct a response with the given status and entity.
+    * Client interpreters should accept a response only if it has a corresponding status code.
+    */
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A]
+
+  /**
+    * OK Response with the given entity
+    */
+  final def ok[A](entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    response(OK, entity, docs)
 
   /**
     * Turns a `Response[A]` into a `Response[Option[A]]`.

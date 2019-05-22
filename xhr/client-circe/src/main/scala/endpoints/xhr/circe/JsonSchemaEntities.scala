@@ -1,6 +1,5 @@
 package endpoints.xhr.circe
 
-import endpoints.algebra.Documentation
 import endpoints.{algebra, circe, xhr}
 import io.circe.parser
 import org.scalajs.dom.XMLHttpRequest
@@ -13,13 +12,13 @@ trait JsonSchemaEntities
     with algebra.JsonSchemaEntities
     with circe.JsonSchemas {
 
-  def jsonRequest[A](docs: Documentation)(implicit codec: JsonSchema[A]): RequestEntity[A] =
+  def jsonRequest[A](implicit codec: JsonSchema[A]): RequestEntity[A] =
     { (a: A, xhr: XMLHttpRequest) =>
       xhr.setRequestHeader("Content-Type", "application/json")
       codec.encoder.apply(a).noSpaces
     }
 
-  def jsonResponse[A](docs: Documentation)(implicit codec: JsonSchema[A]): Response[A] =
+  def jsonResponse[A](implicit codec: JsonSchema[A]): ResponseEntity[A] =
     xhr => parser.parse(xhr.responseText).right.flatMap(codec.decoder.decodeJson)
 
 }

@@ -10,8 +10,8 @@ trait MuxEndpointsDocs extends MuxEndpoints with JsonEntities {
   //#mux-endpoint
   val users: MuxEndpoint[Command, Event, Json] =
     muxEndpoint[Command, Event, Json](
-      post(path / "users", jsonRequest[Json]()),
-      jsonResponse[Json]()
+      post(path / "users", jsonRequest[Json]),
+      ok(jsonResponse[Json])
     )
 
   // Types of commands

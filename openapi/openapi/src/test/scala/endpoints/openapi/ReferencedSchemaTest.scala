@@ -35,9 +35,10 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 
-    val listBooks = endpoint(get(path / "books"), jsonResponse[List[Book]](Some("Books list")), tags = List("Books"))
+    val listBooks = endpoint(get(path / "books"), ok(jsonResponse[List[Book]], Some("Books list")), tags = List("Books"))
 
-    val postBook = authenticatedEndpoint(Post, path / "books", emptyResponse(), jsonRequest[Book](docs = Some("Books list")), tags = List("Books"))
+    val postBook =
+      authenticatedEndpoint(Post, path / "books", ok(emptyResponse), jsonRequest[Book], requestDocs = Some("Books list"), tags = List("Books"))
   }
 
   "OpenApi" should {

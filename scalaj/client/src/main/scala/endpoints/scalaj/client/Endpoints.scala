@@ -32,12 +32,16 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
         }
       }
 
-    def callUnsafe(args: Req): Resp = response(request(args).asString) match {
-      case Left(ex) => throw ex
-      case Right(x) => x
-    }
+    def callUnsafe(args: Req): Resp =
+      call(args) match {
+        case Left(ex) => throw ex
+        case Right(x) => x
+      }
 
-    def call(args: Req): Either[Throwable, Resp] = response(request(args).asString)
+    def call(args: Req): Either[Throwable, Resp] = {
+      val resp = request(args).asString
+      response(resp)(resp.body)
+    }
   }
 
 }

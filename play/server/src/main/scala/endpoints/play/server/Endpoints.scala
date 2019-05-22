@@ -2,6 +2,7 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import endpoints.{Semigroupal, Tupler, algebra}
+import play.api.http.Writeable
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -41,7 +42,7 @@ import scala.language.implicitConversions
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes{
+trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes {
 
   protected val playComponents: PlayComponents
 
@@ -159,7 +160,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
-  def textRequest(docs: Documentation): BodyParser[String] = playComponents.playBodyParsers.text
+  lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
 
   implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new endpoints.InvariantFunctor[RequestEntity] {
     override def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
@@ -182,12 +183,19 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     }
 
   /**
-    * Decodes a request that uses the POST HTTP verb.
+    * Decodes a request.
     * @param url Request URL
     * @param entity Request entity
+    * @param docs Request documentation
     * @param headers Request headers
     */
-  def request[A, B, C, AB, Out](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+  def request[A, B, C, AB, Out](
+    method: Method,
+    url: Url[A],
+    entity: RequestEntity[B],
+    docs: Documentation,
+    headers: RequestHeaders[C]
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
         case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
@@ -203,14 +211,19 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     */
   type Response[A] = A => Result
 
-  /** A successful HTTP response (status code 200) with no entity */
-  def emptyResponse(docs: Documentation): Response[Unit] = _ => OK
+  type ResponseEntity[A] = Writeable[A]
 
-  /** A successful HTTP response (status code 200) with string entity */
-  def textResponse(docs: Documentation): Response[String] = x => OK(x)
+  /** An empty response entity */
+  def emptyResponse: ResponseEntity[Unit] = Writeable.writeableOf_EmptyContent.map(_ => Results.EmptyContent())
+
+  /** A text entity */
+  def textResponse: ResponseEntity[String] = implicitly
 
   /** A successful HTTP response (status code 200) with an HTML entity */
-  lazy val htmlResponse: Response[Html] = html => OK(html)
+  lazy val htmlResponse: ResponseEntity[Html] = implicitly
+
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): A => Result =
+    a => statusCode.sendEntity(entity.toEntity(a))
 
   /**
     * A response encoder that maps `None` to an empty HTTP result with status 404

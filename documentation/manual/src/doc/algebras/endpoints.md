@@ -103,12 +103,18 @@ that there is no representation of the source type in the target type.
 The `Response[A]` type models an HTTP response carrying some information of type `A`.
 For instance, a `Response[User]` value is an HTTP response containing a user.
 
-A response can be defined by using a constructor:
+A response is defined in terms of a status and an entity. Here is an example
+of a simple OK response with no entity:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#response
 ~~~
 
-Or by using a combinator:
+There is a more general response constructor taking the status as parameter:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#general-response
+~~~
+
+You can also define a response by transforming another one:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#response-combinator
 ~~~

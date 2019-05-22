@@ -13,11 +13,15 @@ trait StatusCodes extends algebra.StatusCodes {
   type StatusCode = AkkaStatusCode
 
   def OK = AkkaStatusCodes.OK
+  def Created = AkkaStatusCodes.Created
+  def Accepted = AkkaStatusCodes.Accepted
+  def NoContent = AkkaStatusCodes.NoContent
 
   def BadRequest= AkkaStatusCodes.BadRequest
-
   def Unauthorized = AkkaStatusCodes.Unauthorized
-
+  def Forbidden = AkkaStatusCodes.Forbidden
   def NotFound = AkkaStatusCodes.NotFound
+
+  def InternalServerError = AkkaStatusCodes.InternalServerError
 
 }

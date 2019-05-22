@@ -9,8 +9,8 @@ trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities {
 
 
   val smokeEndpoint = endpoint(
-    post(path / "user", jsonRequest[User]()),
-    jsonResponse[Address]()
+    post(path / "user", jsonRequest[User]),
+    ok(jsonResponse[Address])
   )
 
 }

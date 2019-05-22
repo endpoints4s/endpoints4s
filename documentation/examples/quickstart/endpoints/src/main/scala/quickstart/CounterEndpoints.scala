@@ -19,7 +19,7 @@ trait CounterEndpoints
     * The response entity is a JSON document representing the counter value.
     */
   val currentValue: Endpoint[Unit, Counter] =
-    endpoint(get(path / "current-value"), jsonResponse[Counter]())
+    endpoint(get(path / "current-value"), ok(jsonResponse[Counter]))
 
   /**
     * Increments the counter value.
@@ -29,7 +29,7 @@ trait CounterEndpoints
     */
 //#endpoint-definition
   val increment: Endpoint[Increment, Unit] =
-    endpoint(post(path / "increment", jsonRequest[Increment]()), emptyResponse())
+    endpoint(post(path / "increment", jsonRequest[Increment]), ok(emptyResponse))
 //#endpoint-definition
 
   // Generically derive the JSON schema of our `Counter`

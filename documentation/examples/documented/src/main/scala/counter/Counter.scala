@@ -35,22 +35,22 @@ trait CounterEndpoints
   // HTTP endpoint for querying the current value of the counter. Uses the HTTP
   // verb ''GET'' and the path ''/counter''. Returns the current value of the counter
   // in a JSON object. (see below for the `counterJson` definition)
-  val currentValue = endpoint(get(path / "counter"), counterJson)
+  val currentValue = endpoint(get(path / "counter"), counterJsonResponse)
 
   // HTTP endpoint for updating the value of the counter. Uses the HTTP verb ''POST''
   // and the path ''/counter''. The request entity contains an `Operation` object encoded
   // in JSON. The endpoint returns the current value of the counter in a JSON object.
   val update = endpoint(
-    post(path / "counter", jsonRequest[Operation](docs = Some("The operation to apply to the counter"))),
-    counterJson
+    post(path / "counter", jsonRequest[Operation], docs = Some("The operation to apply to the counter")),
+    counterJsonResponse
   )
 
   // Since both the `currentValue` and `update` endpoints return the same
   // information, we define it once and just reuse it. Here, we say
   // that they return an HTTP response whose entity contains a JSON document
   // with the counter value
-  lazy val counterJson =
-    jsonResponse[Counter](docs = Some("The counter current value"))
+  lazy val counterJsonResponse =
+    ok(jsonResponse[Counter], docs = Some("The counter current value"))
 
   // We generically derive a data type schema. This schema
   // describes that the case class `Counter` has one field
@@ -132,7 +132,7 @@ object Main {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
-    val documentation = endpoint(get(path / "documentation.json"), jsonResponse[OpenApi]())
+    val documentation = endpoint[Unit, OpenApi](get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
 
     // We “render” the OpenAPI document using the swagger-ui, provided as static assets
     val assets = assetsEndpoint(path / "assets" / assetSegments())

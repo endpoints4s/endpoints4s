@@ -47,7 +47,7 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
   /**
     * Request with a [[String]] body.
     */
-  def textRequest(docs: Documentation = None): RequestEntity[String]
+  def textRequest: RequestEntity[String]
 
   /**
     * Request for given parameters
@@ -55,6 +55,7 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
     * @param method Request method
     * @param url Request URL
     * @param entity Request entity
+    * @param docs Request documentation
     * @param headers Request headers
     * @tparam UrlP Payload carried by url
     * @tparam BodyP Payload carried by body
@@ -65,6 +66,7 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
     method: Method,
     url: Url[UrlP],
     entity: RequestEntity[BodyP] = emptyRequest,
+    docs: Documentation = None,
     headers: RequestHeaders[HeadersP] = emptyHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out]
 
@@ -75,11 +77,14 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
     */
   final def get[UrlP, HeadersP, Out](
     url: Url[UrlP],
+    docs: Documentation = None,
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] = request(Get, url, headers = headers)
+  )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
+    request(Get, url, docs = docs, headers = headers)
 
   /**
     * Helper method to perform POST request
+    * @param docs Request documentation
     * @tparam UrlP Payload carried by url
     * @tparam BodyP Payload carried by body
     * @tparam HeadersP Payload carried by headers
@@ -88,8 +93,10 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
   final def post[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
     url: Url[UrlP],
     entity: RequestEntity[BodyP],
+    docs: Documentation = None,
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] = request(Post, url, entity, headers)
+  )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] =
+    request(Post, url, entity, docs, headers)
 
   /**
     * Helper method to perform PUT request
@@ -101,8 +108,10 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
   final def put[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
     url: Url[UrlP],
     entity: RequestEntity[BodyP],
+    docs: Documentation = None,
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] = request(Put, url, entity, headers)
+  )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] =
+    request(Put, url, entity, docs, headers)
 
   /**
     * Helper method to perform DELETE request
@@ -111,7 +120,9 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
     */
   final def delete[UrlP, HeadersP, Out](
     url: Url[UrlP],
+    docs: Documentation = None,
     headers: RequestHeaders[HeadersP] = emptyHeaders
-  )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] = request(Delete, url, headers = headers)
+  )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
+    request(Delete, url, docs = docs, headers = headers)
 
 }

@@ -71,7 +71,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   lazy val emptyRequest: RequestEntity[Unit] = (_, _) => null
 
-  def textRequest(docs: endpoints.algebra.Documentation): RequestEntity[String] = (body, xhr) => {
+  lazy val textRequest: RequestEntity[String] = (body, xhr) => {
     xhr.setRequestHeader("Content-type", "text/plain; charset=utf8")
     body
   }
@@ -81,7 +81,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       (to, xhr) => f(contramap(to), xhr)
   }
 
-  def request[A, B, C, AB, Out](method: Method, url: Url[A], entity: RequestEntity[B], headers: RequestHeaders[C])(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+  def request[A, B, C, AB, Out](
+    method: Method,
+    url: Url[A],
+    entity: RequestEntity[B],
+    docs: Documentation,
+    headers: RequestHeaders[C]
+  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     new Request[Out] {
       def apply(abc: Out) = {
         val (ab, c) = tuplerABC.unapply(abc)
@@ -107,30 +113,35 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   /**
     * Attempts to decode an `A` from an XMLHttpRequest’s response
     */
-  type Response[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
+  type Response[A] = js.Function1[XMLHttpRequest, ResponseEntity[A]]
+
+  type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
 
   /**
-    * Successfully decodes no information from a response
+    * Discards response entity
     */
-  def emptyResponse(docs: Documentation): Response[Unit] =
-    xhr => if (xhr.status == 200) Right(()) else Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
+  def emptyResponse: ResponseEntity[Unit] = _ => Right(())
 
   /**
-    * Successfully decodes string information from a response
+    * Decodes a text entity
     */
-  def textResponse(docs: Documentation): Response[String] =
-    xhr => if (xhr.status == 200) Right(xhr.responseText) else Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
+  def textResponse: ResponseEntity[String] = xhr => Right(xhr.responseText)
+
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    xhr =>
+      if (xhr.status == statusCode) entity
+      else _ => Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
 
   /**
     * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.
     */
   def wheneverFound[A](
-    response: js.Function1[XMLHttpRequest, Either[Exception, A]],
+    response: Response[A],
     notFoundDocs: Documentation
-  ): js.Function1[XMLHttpRequest, Either[Exception, Option[A]]] =
+  ): Response[Option[A]] =
     xhr =>
-      if (xhr.status == 404) Right(None)
-      else response(xhr).right.map(Some(_))
+      if (xhr.status == NotFound) _ => Right(None)
+      else _ => response(xhr)(xhr).right.map(Some(_))
 
   /**
     * A function that takes the information needed to build a request and returns
@@ -156,7 +167,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     a: A
   )(onload: Either[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
     val (xhr, maybeEntity) = request(a)
-    xhr.onload = _ => onload(response(xhr))
+    xhr.onload = _ => onload(response(xhr)(xhr))
     xhr.onerror = _ => onerror(xhr)
     xhr.send(maybeEntity.orNull)
   }

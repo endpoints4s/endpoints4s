@@ -25,7 +25,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
   private[endpoints] def authenticated[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     xhr =>
       // We don’t care of 401 because we always set the Authorization header. We only care about 403.
-      if (xhr.status == 403) Right(None) // We use `Right` to make handling of authentication failures explicit
-      else response(xhr).right.map(Some(_))
+      if (xhr.status == 403) _ => Right(None) // We use `Right` to make handling of authentication failures explicit
+      else _ => response(xhr)(xhr).right.map(Some(_))
 
 }

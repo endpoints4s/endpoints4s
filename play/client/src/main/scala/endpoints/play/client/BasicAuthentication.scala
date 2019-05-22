@@ -22,8 +22,8 @@ trait BasicAuthentication extends algebra.BasicAuthentication { self: Endpoints 
     * Checks that the result is not `Forbidden`
     */
   private[endpoints] def authenticated[A](inner: Response[A], docs: Documentation): Response[Option[A]] =
-    resp =>
-      if (resp.status == 403) Right(None)
-      else inner(resp).right.map(Some(_))
+    (status, headers) =>
+      if (status == 403) _ => Right(None)
+      else wsResp => inner(status, headers)(wsResp).right.map(Some(_))
 
 }
