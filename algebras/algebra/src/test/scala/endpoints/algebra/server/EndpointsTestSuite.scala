@@ -108,7 +108,11 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 
         val locationQueryString =
           (qs[Double]("lon") & qs[Double]("lat"))
-            .xmap[Location]({ case (lon, lat) => Location(lon, lat) })(location => (location.longitude, location.latitude))
+            .xmap[Location] {
+              case (lon, lat) => Location(lon, lat)
+            } {
+              location => (location.longitude, location.latitude)
+            }
         val locationUrl = path /? locationQueryString
         
         decodeUrl(locationUrl)("/?lon=12.0&lat=32.9") shouldEqual Matched(Location(12.0, 32.9))
@@ -134,15 +138,15 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
               case BlogSlug(slug) => (None, Some(slug))
             }
         
-        val testUUID: String = "f4b9defa-1ad8-453f-9a06-2683b8564b8d"
+        val testUUID: UUID = UUID.randomUUID()
         val testMalformedUUID1: String = "f4b9defa-1ad8-453f-9a06268d"
         val testMalformedUUID2: String = "f4b9defa-1ad8-453f-9o06-2683b8564b8d"
         val testSlug: String = "test-slug"
 
-        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID") shouldEqual Matched(BlogUuid(UUID.fromString(testUUID)))
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID") shouldEqual Matched(BlogUuid(testUUID))
         decodeUrl(path /? blogIdQueryString)(s"/?slug=$testSlug") shouldEqual Matched(BlogSlug(testSlug))
-        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID&slug=$testSlug") shouldEqual Matched(BlogUuid(UUID.fromString(testUUID)))
-        decodeUrl(path /? blogIdQueryString)(s"/?slug=$testSlug&uuid=$testUUID") shouldEqual Matched(BlogUuid(UUID.fromString(testUUID)))
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID&slug=$testSlug") shouldEqual Matched(BlogUuid(testUUID))
+        decodeUrl(path /? blogIdQueryString)(s"/?slug=$testSlug&uuid=$testUUID") shouldEqual Matched(BlogUuid(testUUID))
         decodeUrl(path /? blogIdQueryString)(s"/?slug=") shouldEqual Matched(BlogSlug(""))
 
         decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testMalformedUUID1") shouldEqual Malformed

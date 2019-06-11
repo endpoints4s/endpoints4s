@@ -241,7 +241,11 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
           val locationQueryString: QueryString[Location] =
             (qs[Double]("lon") & qs[Double]("lat"))
-              .xmap({ case (lon, lat) => Location(lon, lat) })(location => (location.longitude, location.latitude))
+              .xmap { 
+                case (lon, lat) => Location(lon, lat) 
+              } {
+                location => (location.longitude, location.latitude)
+              }
           
           encodeUrl(path /? locationQueryString) (Location(12.0, 32.9)) shouldEqual "?lon=12.0&lat=32.9"
           encodeUrl(path /? locationQueryString) (Location(-12.0, 32.9)) shouldEqual "?lon=-12.0&lat=32.9"
@@ -263,10 +267,10 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
                 case BlogSlug(slug) => (None, Some(slug))
               }
           
-          val testUUID: String = "f4b9defa-1ad8-453f-9a06-2683b8564b8d"
+          val testUUID: UUID = UUID.randomUUID()
           val testSlug: String = "test-slug"
 
-          encodeUrl(path /? blogIdQueryString) (BlogUuid(UUID.fromString(testUUID))) shouldEqual s"?uuid=$testUUID"
+          encodeUrl(path /? blogIdQueryString) (BlogUuid(testUUID)) shouldEqual s"?uuid=$testUUID"
           encodeUrl(path /? blogIdQueryString) (BlogSlug(testSlug)) shouldEqual s"?slug=$testSlug"
         }
 
