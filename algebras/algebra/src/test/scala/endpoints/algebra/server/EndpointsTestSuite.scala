@@ -45,7 +45,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
         decodeUrl(path / itemId)("/42-programming-in-scala") shouldEqual Matched(Item("programming-in-scala", "42"))
         decodeUrl(path / itemId)("/foo")                     shouldEqual Malformed
 
-        val file = s[String]("file").xmap[java.io.File](new java.io.File(_), _.getPath)
+        val file = s[String]("file").xmap[java.io.File](new java.io.File(_))(_.getPath)
         decodeUrl(path / "assets" / file)("/assets/favicon.png") shouldEqual Matched(new java.io.File("favicon.png"))
       }
 
@@ -79,7 +79,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 
       "transformed" in {
         implicit val pageQueryString: QueryStringParam[Page] =
-          intQueryString.xmap[Page](Page, _.number)
+          intQueryString.xmap[Page](Page)(_.number)
         val url = path /? qs[Page]("page")
         decodeUrl(url)("/?page=42")  shouldEqual Matched(Page(42))
         decodeUrl(url)("/?page=foo") shouldEqual Malformed
@@ -92,7 +92,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
       "transformed" in {
         val paginatedUrl =
           (path /? (qs[Int]("from") & qs[Int]("limit")))
-            .xmap[Page2](Page2.tupled, p => (p.from, p.limit))
+            .xmap[Page2](Page2.tupled)(p => (p.from, p.limit))
         decodeUrl(paginatedUrl)("/?from=1&limit=10")   shouldEqual Matched(Page2(1, 10))
         decodeUrl(paginatedUrl)("/?from=one&limit=10") shouldEqual Malformed
       }
