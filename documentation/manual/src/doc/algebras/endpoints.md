@@ -68,7 +68,7 @@ Path segments and query string parameters can take additional parameters contain
 The `Response[A]` type models an HTTP response carrying some information of type `A`.
 For instance, a `Response[User]` value is an HTTP response containing a user.
 
-A responses can be defined by using a constructor:
+A response can be defined by using a constructor:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#response
 ~~~
