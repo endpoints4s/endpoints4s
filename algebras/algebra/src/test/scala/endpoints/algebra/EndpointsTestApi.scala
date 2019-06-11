@@ -15,7 +15,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val putUUIDEndpoint = endpoint(
-    put(path / "user" / segment[UUID](), emptyRequest),
+    put(path / "user" / segment[UUID](), emptyBody),
     emptyResponse()
   )
 
@@ -35,7 +35,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val putEndpoint = endpoint(
-    put(path / "user" / segment[String](), emptyRequest),
+    put(path / "user" / segment[String](), emptyBody),
     emptyResponse()
   )
 

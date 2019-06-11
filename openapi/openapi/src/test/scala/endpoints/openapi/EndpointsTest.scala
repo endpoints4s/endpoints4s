@@ -112,7 +112,7 @@ trait Fixtures extends algebra.Endpoints {
 
   val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")), tags = List("foo"))
 
-  val bar = endpoint(post(path / "foo", emptyRequest), emptyResponse(Some("Bar response")), tags = List("bar", "bxx"))
+  val bar = endpoint(post(path / "foo", emptyBody), emptyResponse(Some("Bar response")), tags = List("bar", "bxx"))
 
   val baz = endpoint(get(path / "baz" / segment[Int]("quux")), emptyResponse(Some("Baz response")), tags = List("baz", "bxx"))
 
@@ -122,8 +122,7 @@ trait Fixtures extends algebra.Endpoints {
 
   val quux = endpoint(get(path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[Long]]("ids"))), emptyResponse())
 
-  val multipleSegmentsPath =
-    endpoint(get(path / "assets" / remainingSegments("file")), textResponse())
+  val multipleSegmentsPath = endpoint(get(path / "assets" / remainingSegments("file")), textResponse())
 
 }
 

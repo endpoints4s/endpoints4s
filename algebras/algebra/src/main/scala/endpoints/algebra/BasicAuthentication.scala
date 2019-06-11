@@ -35,7 +35,7 @@ trait BasicAuthentication extends Endpoints {
     method: Method,
     url: Url[U],
     response: Response[R],
-    requestEntity: RequestEntity[E] = emptyRequest,
+    requestEntity: RequestEntity[E] = emptyBody,
     requestHeaders: RequestHeaders[H] = emptyHeaders,
     unauthenticatedDocs: Documentation = None,
     summary: Documentation = None,

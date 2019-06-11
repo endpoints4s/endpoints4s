@@ -58,7 +58,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = {
+  lazy val emptyBody: RequestEntity[Unit] = {
     case (_, req) => req
   }
 

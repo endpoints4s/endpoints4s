@@ -38,7 +38,7 @@ trait AuthenticationEndpoints
   val someResource: Endpoint[AuthenticationToken, String] = authenticatedEndpoint(
     Get,
     path / "some-resource",
-    emptyRequest,
+    emptyBody,
     textResponse()
   )
 //#protected-endpoint

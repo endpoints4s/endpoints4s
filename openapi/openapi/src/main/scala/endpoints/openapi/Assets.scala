@@ -23,7 +23,7 @@ trait Assets
 
   def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
-      DocumentedRequest(Get, url, emptyHeaders, emptyRequest),
+      DocumentedRequest(Get, url, emptyHeaders, emptyBody),
       DocumentedResponse(200, docs.getOrElse(""), Map.empty) ::
         DocumentedResponse(404, notFoundDocs.getOrElse(""), Map.empty) ::
         Nil

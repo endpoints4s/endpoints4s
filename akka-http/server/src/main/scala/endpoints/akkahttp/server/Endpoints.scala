@@ -42,7 +42,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       REQUESTS
   ************************* */
 
-  def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
+  def emptyBody: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
   def textRequest(docs: Documentation): RequestEntity[String] = {
     val um: FromRequestUnmarshaller[String] = implicitly
@@ -83,7 +83,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   def request[A, B, C, AB, Out](
     method: Method,
     url: Url[A],
-    entity: RequestEntity[B] = emptyRequest,
+    entity: RequestEntity[B] = emptyBody,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))

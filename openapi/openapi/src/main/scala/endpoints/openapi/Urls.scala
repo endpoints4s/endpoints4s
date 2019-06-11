@@ -27,7 +27,7 @@ trait Urls extends algebra.Urls {
     * @param name Name of the parameter
     * @param required Whether this parameter is required or not (MUST be true for path parameters)
     */
-  case class DocumentedParameter(name: String, required: Boolean, description: Option[String], schema: Schema)
+  case class DocumentedParameter(name: String, required: Boolean, description: Documentation, schema: Schema)
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)

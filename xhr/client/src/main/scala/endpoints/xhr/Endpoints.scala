@@ -69,7 +69,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
     */
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
-  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => null
+  lazy val emptyBody: RequestEntity[Unit] = (_, _) => null
 
   def textRequest(docs: endpoints.algebra.Documentation): RequestEntity[String] = (body, xhr) => {
     xhr.setRequestHeader("Content-type", "text/plain; charset=utf8")

@@ -38,7 +38,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
   }
 
 
-  def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
+  def emptyBody: RequestEntity[Unit] = (_: Unit, req: HttpRequest) => req
 
   def textRequest(docs: Option[String]): (String, HttpRequest) => scalaj.http.HttpRequest =
     (body, req) => req.postData(body)
@@ -51,10 +51,10 @@ trait Requests extends algebra.Requests with Urls with Methods {
 
   def request[U, E, H, UE, Out](method: Method,
     url: Url[U],
-    entity: RequestEntity[E] = emptyRequest,
+    entity: RequestEntity[E] = emptyBody,
     headers: RequestHeaders[H] = emptyHeaders
   )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler.Aux[UE, H, Out]): Request[Out] =
-    (ueh) => {
+    ueh => {
       val (ue, h) = tuplerUEH.unapply(ueh)
       val (u, e) = tuplerUE.unapply(ue)
       val req = url.toReq(u)

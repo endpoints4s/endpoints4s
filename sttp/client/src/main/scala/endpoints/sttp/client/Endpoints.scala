@@ -64,7 +64,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = {
+  lazy val emptyBody: RequestEntity[Unit] = {
     case (_, req) => req
   }
 

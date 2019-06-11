@@ -49,7 +49,7 @@ trait Requests
     */
   case class DocumentedRequestEntity(documentation: Option[String], content: Map[String, MediaType])
 
-  def emptyRequest = None
+  def emptyBody = None
 
   override def textRequest(docs: Documentation): Option[DocumentedRequestEntity] = Some(
     DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.simpleString))))
@@ -58,7 +58,7 @@ trait Requests
   def request[A, B, C, AB, Out](
     method: Method,
     url: Url[A],
-    entity: RequestEntity[B] = emptyRequest,
+    entity: RequestEntity[B] = emptyBody,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     DocumentedRequest(method, url, headers, entity)

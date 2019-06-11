@@ -26,7 +26,7 @@ trait DocumentedApi
     authenticatedEndpoint(
       Get,
       path / "admin",
-      requestEntity = emptyRequest,
+      requestEntity = emptyBody,
       response = emptyResponse(Some("Administration page")),
       summary = Some("Authentication endpoint")
     )

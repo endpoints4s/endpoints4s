@@ -157,7 +157,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   /** Decodes a request entity */
   type RequestEntity[A] = BodyParser[A]
 
-  lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
+  lazy val emptyBody: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
 
   def textRequest(docs: Documentation): BodyParser[String] = playComponents.playBodyParsers.text
 

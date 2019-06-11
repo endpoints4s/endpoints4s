@@ -23,7 +23,7 @@ trait EndpointsDocs extends Endpoints {
   //#request-construction
   // A request that uses the verb “GET”, the URL path “/foo”,
   // no entity and no headers
-  request(Get, path / "foo", emptyRequest, emptyHeaders)
+  request(Get, path / "foo", emptyBody, emptyHeaders)
   //#request-construction
 
   //#convenient-get

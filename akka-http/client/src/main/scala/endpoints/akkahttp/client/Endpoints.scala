@@ -67,7 +67,7 @@ class Endpoints(val settings: EndpointsSettings)
     }
   }
 
-  lazy val emptyRequest: RequestEntity[Unit] = (_, req) => req
+  lazy val emptyBody: RequestEntity[Unit] = (_, req) => req
 
   def textRequest(docs: Option[String]): (String, HttpRequest) => HttpRequest =
     (body, request) => request.copy(entity = HttpEntity(body))
