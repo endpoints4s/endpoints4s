@@ -37,7 +37,7 @@ object EndpointsSettings {
   )
   val `scala 2.11 to latest` = Seq(
     scalaVersion := "2.12.8",
-    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0-M5")
+    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -78,7 +78,7 @@ object EndpointsSettings {
   val playVersion = "2.7.2"
   val sttpVersion = "1.5.11"
 
-  val scalaTestVersion = "3.0.7"
+  val scalaTestVersion = "3.0.8"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(

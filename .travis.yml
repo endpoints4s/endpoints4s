@@ -2,8 +2,8 @@ language: scala
 
 cache:
   - directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt
+      - $HOME/.ivy2/cache
+      - $HOME/.sbt
 
 # See http://www.scala-sbt.org/0.13/docs/Travis-CI-with-sbt.html
 # Tricks to avoid unnecessary cache updates
@@ -30,7 +30,6 @@ jdk:
 
 jobs:
   include:
-
     - stage: test
       scala: 2.11.12
       script: sbt "wow $TRAVIS_SCALA_VERSION" test manual/makeSite
@@ -38,7 +37,7 @@ jobs:
       scala: 2.12.8
       script: sbt "wow $TRAVIS_SCALA_VERSION" test
     - stage: test
-      scala: 2.13.0-M5
+      scala: 2.13.0
       # requires strict aggregation because 2.13 is not supported by all the modules
       script: sbt "+++$TRAVIS_SCALA_VERSION test"
 

@@ -9,7 +9,7 @@ val `json-schema` =
       `scala 2.11 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency,
-      libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "0.3.0"
+      libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.0.0"
     )
 
 val `json-schema-js` = `json-schema`.js
