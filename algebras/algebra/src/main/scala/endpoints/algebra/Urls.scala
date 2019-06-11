@@ -47,6 +47,8 @@ trait Urls {
     * */
   type QueryString[A]
 
+  implicit def queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString]
+
   /** Provides convenient methods on [[QueryString]]. */
   implicit class QueryStringOps[A](first: QueryString[A]) {
     /**

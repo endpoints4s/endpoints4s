@@ -37,6 +37,10 @@ trait Urls extends algebra.Urls {
     def encode(a: A): Option[String]
   }
 
+  implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
+    def xmapPartial[A, B](fa: QueryString[A], f: A => Option[B], g: B => A): QueryString[B] = (b: B) => fa.encode(g(b))
+  }
+
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     (ab: tupler.Out) => {
       val (a, b) = tupler.unapply(ab)

@@ -96,6 +96,19 @@ trait Urls extends algebra.Urls {
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
 
+  implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
+    def xmapPartial[A, B](fa: QueryString[A], f: A => Option[B], g: B => A): QueryString[B] =
+      new QueryString[B] {
+        def decode(qs: Map[String, Seq[String]]): Option[B] = fa.decode(qs).flatMap(f)
+        def encode(b: B): Map[String, Seq[String]] = fa.encode(g(b))
+      }
+    override def xmap[A, B](fa: QueryString[A], f: A => B, g: B => A): QueryString[B] =
+      new QueryString[B] {
+        def decode(qs: Map[String, Seq[String]]): Option[B] = fa.decode(qs).map(f)
+        def encode(b: B): Map[String, Seq[String]] = fa.encode(g(b))
+      }
+  }
+
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     new QueryString[tupler.Out] {
       def decode(qs: Map[String, Seq[String]]) =
