@@ -26,7 +26,7 @@ import scala.language.higherKinds
   *     implicit val schema: JsonSchema[User] = (
   *       field[String]("name") zip
   *       field[Int]("age")
-*     ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
+  *     ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   *   }
   * }}}
   *

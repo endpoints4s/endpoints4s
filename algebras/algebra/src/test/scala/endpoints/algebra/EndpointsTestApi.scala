@@ -60,20 +60,20 @@ trait EndpointsTestApi extends algebra.Endpoints {
     textResponse()
   )
 
-  val headers2 = header("C").xmap[Int](_.toInt)(_.toString)
+  val headers2 = header("C").xmap(_.toInt)(_.toString)
   val xmapHeadersEndpoint = endpoint(
     get(path / "xmapHeadersEndpoint", headers2),
     textResponse()
   )
 
-  val url1 = (path / "xmapUrlEndpoint" / segment[Long]() : Url[Long]).xmap[String](_.toString)( _.toLong)
+  val url1 = (path / "xmapUrlEndpoint" / segment[Long]() : Url[Long]).xmap(_.toString)( _.toLong)
   val xmapUrlEndpoint = endpoint(
     get(url1),
     textResponse()
   )
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
-  val reqBody1 = textRequest().xmap[LocalDate](s => LocalDate.parse(s, dateTimeFormatter))( d => dateTimeFormatter.format(d))
+  val reqBody1 = textRequest().xmap(s => LocalDate.parse(s, dateTimeFormatter))( d => dateTimeFormatter.format(d))
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
     textResponse()
