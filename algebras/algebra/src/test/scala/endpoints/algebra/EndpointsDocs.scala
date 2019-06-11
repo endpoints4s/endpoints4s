@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import scala.util.Try
+
 trait EndpointsDocs extends Endpoints {
 
   locally {
@@ -78,4 +80,10 @@ trait EndpointsDocs extends Endpoints {
       textResponse(docs = Some("The content of the resource"))
     )
   //#documented-endpoint-definition
+
+  //#xmap-partial
+  import java.time.LocalDate
+  implicit def localDateSegment(implicit string: Segment[String]): Segment[LocalDate] =
+    string.xmapPartial(s => Try(LocalDate.parse(s)).toOption)(_.toString)
+  //#xmap-partial
 }
