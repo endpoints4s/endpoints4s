@@ -108,9 +108,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 
         val locationQueryString =
           (qs[Double]("lon") & qs[Double]("lat"))
-            .xmap[Location](
-              { case (lon, lat) => Location(lon, lat) },
-              location => (location.longitude, location.latitude))
+            .xmap[Location]({ case (lon, lat) => Location(lon, lat) })(location => (location.longitude, location.latitude))
         val locationUrl = path /? locationQueryString
         
         decodeUrl(locationUrl)("/?lon=12.0&lat=32.9") shouldEqual Matched(Location(12.0, 32.9))

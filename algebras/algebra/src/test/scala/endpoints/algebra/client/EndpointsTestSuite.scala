@@ -241,9 +241,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
           val locationQueryString: QueryString[Location] =
             (qs[Double]("lon") & qs[Double]("lat"))
-              .xmap(
-                { case (lon, lat) => Location(lon, lat) },
-                location => (location.longitude, location.latitude))
+              .xmap({ case (lon, lat) => Location(lon, lat) })(location => (location.longitude, location.latitude))
           
           encodeUrl(path /? locationQueryString) (Location(12.0, 32.9)) shouldEqual "?lon=12.0&lat=32.9"
           encodeUrl(path /? locationQueryString) (Location(-12.0, 32.9)) shouldEqual "?lon=-12.0&lat=32.9"
