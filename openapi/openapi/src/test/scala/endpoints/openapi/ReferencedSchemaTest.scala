@@ -227,7 +227,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
       import OpenApiEncoder.JsonSchema._
       import io.circe.syntax._
 
-      Fixtures.openApiDocument.asJson.spaces2 shouldBe expectedSchema // TODO test
+      Fixtures.openApiDocument.asJson.spaces2 shouldBe expectedSchema
     }
 
     "produce referenced schema with playjson" in {
