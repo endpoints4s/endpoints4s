@@ -1,5 +1,12 @@
 package endpoints.algebra.server
 
+import java.nio.charset.StandardCharsets
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.headers.`Content-Type`
+import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.util.ByteString
 import endpoints.algebra
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
@@ -7,6 +14,8 @@ import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
   with Matchers
@@ -31,6 +40,33 @@ trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
     *                 the TCP port number as parameter.
     */
   def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: => Resp)(runTests: Int => Unit): Unit
+
+  private[server] implicit val actorSystem: ActorSystem = ActorSystem()
+  implicit val executionContext: ExecutionContext = actorSystem.dispatcher
+
+  val httpClient = Http()
+
+  def sendAndDecodeEntityAsText(request: HttpRequest): Future[(HttpResponse, String)] = {
+    send(request).map { case (response, entity) =>
+      (response, decodeEntityAsText(response, entity))
+    }
+  }
+
+  def send(request: HttpRequest): Future[(HttpResponse, ByteString)] = {
+    httpClient.singleRequest(request).flatMap { response =>
+      response.entity.toStrict(patienceConfig.timeout).map { entity =>
+        (response, entity.data)
+      }
+    }
+  }
+
+  def decodeEntityAsText(response: HttpResponse, entity: ByteString): String = {
+    val charset =
+      response.header[`Content-Type`]
+        .flatMap(_.contentType.charsetOption.map(_.nioCharset()))
+        .getOrElse(StandardCharsets.UTF_8)
+    entity.decodeString(charset)
+  }
 
 }
 

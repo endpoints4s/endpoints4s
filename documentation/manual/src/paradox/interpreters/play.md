@@ -81,13 +81,11 @@ errors in the usual Play way: by using a custom `play.api.http.HttpErrorHandler`
 
 In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
-@scaladoc[handleClientErrors](endpoints.play.server.Urls#handleClientErrors(invalid:endpoints.Invalid):play.api.mvc.Result)
-method.
+@scaladoc[handleClientErrors](endpoints.play.server.Urls) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
 encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
-@scaladoc[handleServerError](endpoints.play.server.Endpoints.html#handleServerError(throwable:Throwable):play.api.mvc.Result)
-method.
+@scaladoc[handleServerError](endpoints.play.server.Endpoints) method.

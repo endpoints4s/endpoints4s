@@ -42,7 +42,7 @@ which can be reused, combined, and abstracted over.
 The library currently supports the following backends:
 
 - clients: Akka-Http, Play-WS, sttp, scalaj, and XMLHttpRequest (Scala.js) ;
-- servers: Akka-Http and Play ;
+- servers: Akka-Http, Play, and http4s ;
 - documentation: OpenAPI document ;
 - JSON is supported via Circe or Play-Json ;
 
