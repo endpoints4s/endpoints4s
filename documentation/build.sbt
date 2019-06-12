@@ -15,6 +15,8 @@ val `play-server-playjson` = LocalProject("play-server-playjson")
 val `akka-http-server` = LocalProject("akka-http-server")
 val `akka-http-client` = LocalProject("akka-http-client")
 
+val `http4s-server` = LocalProject("http4s-server")
+
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
 val `xhr-client-faithful` = LocalProject("xhr-client-faithful")
@@ -227,7 +229,7 @@ val `example-cqrs-public-server` =
     .settings(
       noPublishSettings,
       `scala 2.11 to 2.12`,
-      unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
+      unmanagedResources in Compile += (fastOptJS in(`example-cqrs-web-client`, Compile)).map(_.data).value,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
@@ -292,7 +294,8 @@ val `example-cqrs` =
         scalaTestDependency
       )
     )
-    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`/*, `circe-instant-js`*/ /*, `circe-instant-jvm`*/)
+    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client` /*, `circe-instant-js`*/
+      /*, `circe-instant-jvm`*/)
 
 lazy val `circe-instant` =
   CrossProject("example-cqrs-circe-instant", file("examples/cqrs/circe-instant"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
@@ -343,8 +346,21 @@ val `example-authentication` =
     .settings(
       libraryDependencies ++= Seq(
         "com.pauldijou" %% "jwt-play" % "1.0.0",
-        "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
+        "com.lihaoyi" %% "utest" % "0.6.6" % Test
       ),
       testFrameworks += new TestFramework("utest.runner.Framework")
     )
     .dependsOn(`play-server`, `play-client`, `algebra-playjson-jvm`)
+
+val `example-basic-http4s-server` =
+  project.in(file("examples/basic/http4s-server"))
+    .settings(
+      commonSettings,
+      `scala 2.11 to 2.12`,
+      publishArtifact := false,
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
+      libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
+      libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion
+
+    )
+    .dependsOn(`example-basic-shared-jvm`, `http4s-server`)

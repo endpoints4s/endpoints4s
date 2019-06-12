@@ -77,6 +77,7 @@ object EndpointsSettings {
   val playjsonVersion = "2.6.13"
   val playVersion = "2.6.21"
   val sttpVersion = "1.5.15"
+  val http4sVersion = "0.20.1"
 
   val scalaTestVersion = "3.0.7"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test

@@ -11,6 +11,7 @@ val play = project.in(file("play"))
 val `akka-http` = project.in(file("akka-http"))
 val scalaj = project.in(file("scalaj"))
 val sttp = project.in(file("sttp"))
+val http4s = project.in(file("http4s"))
 
 // Test kit
 val testsuite = project.in(file("testsuite"))
