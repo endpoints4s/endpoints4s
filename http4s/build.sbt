@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 
 val `http4s-server` =
   project
@@ -12,8 +13,10 @@ val `http4s-server` =
       name := "endpoints-http4s-server",
       libraryDependencies ++= Seq(
         "org.http4s" %%% "http4s-core" % http4sVersion,
-        "org.http4s" %% "http4s-dsl" % http4sVersion
+        "org.http4s" %% "http4s-dsl" % http4sVersion,
+        "org.http4s" %% "http4s-circe" % http4sVersion
       )
     )
+    .dependsOn(`json-schema-circe-jvm`)
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")

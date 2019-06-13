@@ -6,15 +6,18 @@ import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import fs2._
 import org.http4s
-import org.http4s.{Charset, EntityBody, Headers, MediaType}
+import org.http4s.{Charset, Headers, MediaType}
 
-abstract class Endpoints[F[_]](implicit F: Sync[F]) extends algebra.Endpoints with Methods with Urls {
+abstract class Endpoints[F[_]](implicit F: Sync[F])
+    extends algebra.Endpoints
+    with Methods
+    with Urls {
 
   type RequestHeaders[A] = http4s.Headers => Option[A]
 
   type Request[A] = PartialFunction[http4s.Request[F], F[A]]
 
-  type RequestEntity[A] = http4s.EntityBody[F] => F[A]
+  type RequestEntity[A] = http4s.Request[F] => F[A]
 
   type Response[A] = A => F[http4s.Response[F]]
 
@@ -32,7 +35,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F]) extends algebra.Endpoints wi
   def emptyRequest: RequestEntity[Unit] = _ => F.pure(())
 
   def textRequest(docs: Documentation): RequestEntity[String] =
-    req => req.through(text.utf8Decode).compile.toList.map(_.mkString)
+    req => req.body.through(text.utf8Decode).compile.toList.map(_.mkString)
 
   /**
     * HEADERS
@@ -74,7 +77,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F]) extends algebra.Endpoints wi
   def wheneverFound[A](response: Response[A],
                        notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None    => F.pure(http4s.Response[F](status = http4s.Status.NoContent))
+    case None    => F.pure(http4s.Response.notFound)
   }
 
   def endpoint[A, B](request: Request[A],
@@ -97,7 +100,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F]) extends algebra.Endpoints wi
         h <- headers(req.headers)
         _ <- if (req.method == method) Some(()) else None
       } yield
-        entity(req.body).map { body =>
+        entity(req).map { body =>
           tuplerUBH(tuplerUB(u, body), h)
         }
     })
@@ -105,9 +108,9 @@ abstract class Endpoints[F[_]](implicit F: Sync[F]) extends algebra.Endpoints wi
   implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] =
     new InvariantFunctor[RequestEntity] {
       override def xmap[From, To](
-          f: EntityBody[F] => F[From],
+          f: http4s.Request[F] => F[From],
           map: From => To,
-          contramap: To => From): EntityBody[F] => F[To] =
+          contramap: To => From): http4s.Request[F]  => F[To] =
         body => f(body).map(map)
     }
 

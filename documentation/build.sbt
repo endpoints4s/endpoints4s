@@ -360,7 +360,6 @@ val `example-basic-http4s-server` =
       publishArtifact := false,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
-      libraryDependencies += "org.http4s" %% "http4s-dsl" % http4sVersion
-
+      libraryDependencies += "org.http4s" %% "http4s-circe" % http4sVersion
     )
-    .dependsOn(`example-basic-shared-jvm`, `http4s-server`)
+    .dependsOn(`example-basic-shared-jvm`, `http4s-server`, `json-schema-generic-jvm`)

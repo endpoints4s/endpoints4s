@@ -27,7 +27,7 @@ trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodec with BasicAuthen
 case class User(name: String, age: Int)
 
 @JsonCodec
-case class ActionParameter()
+case class ActionParameter(param: String)
 
 @JsonCodec
 case class ActionResult(s: String)
