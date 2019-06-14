@@ -18,26 +18,26 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls[F] {
 
   type RequestEntity[A] = http4s.Request[F] => F[A]
 
-  type Response[A] = A => F[http4s.Response[F]]
+  type Response[A] = A => http4s.Response[F]
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def implementedBy(implementation: A => B)
       : PartialFunction[http4s.Request[F], F[http4s.Response[F]]] = {
       case req: http4s.Request[F] if request.isDefinedAt(req) =>
         request(req) match {
-          case Right(a)            => a.map(implementation).flatMap(response)
+          case Right(a)            => a.map(implementation).map(response)
+          case Left(errorResponse) => errorResponse.pure[F]
+        }
+    }
+
+    def implementedByEffect(implementation: A => F[B]): PartialFunction[http4s.Request[F], F[http4s.Response[F]]] = {
+      case req: http4s.Request[F] if request.isDefinedAt(req) =>
+        request(req) match {
+          case Right(a)            => a.flatMap(implementation).map(response)
           case Left(errorResponse) => errorResponse.pure[F]
         }
     }
   }
-
-  /**
-    * REQUESTS
-    */
-  def emptyRequest: RequestEntity[Unit] = _ => ().pure[F]
-
-  def textRequest(docs: Documentation): RequestEntity[String] =
-    req => req.body.through(text.utf8Decode).compile.toList.map(_.mkString)
 
   /**
     * HEADERS
@@ -67,7 +67,7 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls[F] {
     * RESPONSES
     */
   def emptyResponse(docs: Documentation): Response[Unit] =
-    _ => http4s.Response[F](status = http4s.Status.NoContent).pure[F]
+    _ => http4s.Response[F](status = http4s.Status.NoContent)
 
   def textResponse(docs: Documentation): Response[String] =
     str =>
@@ -80,12 +80,11 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls[F] {
               .`Content-Type`(MediaType.text.plain, Charset.`UTF-8`)
               .pure[List])
         )
-        .pure[F]
 
   def wheneverFound[A](response: Response[A],
                        notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None    => http4s.Response.notFound[F].pure[F]
+    case None    => http4s.Response.notFound[F]
   }
 
   def endpoint[A, B](request: Request[A],
@@ -94,6 +93,14 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls[F] {
                      description: Documentation,
                      tags: List[String]): Endpoint[A, B] =
     Endpoint(request, response)
+
+  /**
+    * REQUESTS
+    */
+  def emptyRequest: RequestEntity[Unit] = _ => ().pure[F]
+
+  def textRequest(docs: Documentation): RequestEntity[String] =
+    req => req.body.through(text.utf8Decode).compile.toList.map(_.mkString)
 
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
       method: Method,

@@ -1,6 +1,5 @@
 package endpoints.http4s.server
 
-import cats.implicits._
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra.Documentation
 import org.http4s
@@ -30,6 +29,6 @@ trait BasicAuthentication[F[_]]
       docs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
     case None =>
-      http4s.Response[F](status = Status.Forbidden).pure[F]
+      http4s.Response[F](status = Status.Forbidden)
   }
 }

@@ -17,6 +17,9 @@ object Api extends JsonEntitiesFromCodec[IO] with BasicAuthentication[IO] with A
         if (util.Random.nextBoolean()) Some(()) else None) orElse
       action.implementedBy { _ =>
         ActionResult("Action")
+      } orElse
+      actionFut.implementedByEffect { _ =>
+        IO.pure(ActionResult("Action"))
       }
   ) <+> HttpRoutes.of(auth.implementedBy { credentials =>
     println(s"Authenticated request: ${credentials.username}")

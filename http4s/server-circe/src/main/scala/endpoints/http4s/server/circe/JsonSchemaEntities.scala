@@ -15,18 +15,18 @@ trait JsonSchemaEntities[F[_]]
 
   def jsonRequest[A: JsonSchema](docs: Documentation): RequestEntity[A] = {
     entity =>
-      implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
+      implicit val decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
       implicit val jsonDecoder: http4s.EntityDecoder[F, A] = jsonOf[F, A]
 
       jsonDecoder.decode(entity, true).value.flatMap(F.fromEither)
   }
 
   def jsonResponse[A: JsonSchema](
-      docs: Documentation): A => F[http4s.Response[F]] = { a =>
-    implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
+      docs: Documentation): A => http4s.Response[F] = { a =>
+    implicit val encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
     implicit val jsonEncoder: http4s.EntityEncoder[F, A] = jsonEncoderOf[F, A]
 
-    http4s.Response[F]().withEntity(a).pure[F]
+    http4s.Response[F]().withEntity(a)
   }
 
 }

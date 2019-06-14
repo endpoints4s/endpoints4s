@@ -39,6 +39,6 @@ trait JsonEntitiesFromCodec[F[_]]
           a =>
             // it should be safe call get here: A => Json => String => Either[Error, Json] => Json
             parse(codec.encode(a)).right.get)
-      http4s.Response[F]().withEntity(a).pure[F]
+      http4s.Response[F]().withEntity(a)
     }
 }
