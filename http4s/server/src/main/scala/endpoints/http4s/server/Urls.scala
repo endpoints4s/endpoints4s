@@ -11,23 +11,26 @@ import org.http4s.Uri
 import scala.collection.compat._
 import scala.collection.mutable
 
-trait Urls extends algebra.Urls {
+
+trait Urls[F[_]] extends algebra.Urls {
   val utf8Name = UTF_8.name()
 
   type Params = Map[String, Seq[String]]
+  type ErrorResponse = http4s.Response[F]
+  protected val badRequestResponse = http4s.Response[F](http4s.Status.BadRequest)
 
   type QueryString[A] = Params => Option[A]
   type QueryStringParam[A] = (String, Params) => Option[A]
 
   trait Url[A] {
-    def decodeUrl(uri: http4s.Uri): Option[A]
+    def decodeUrl(uri: http4s.Uri): Option[Either[ErrorResponse, A]]
   }
 
   trait Path[A] extends Url[A] {
-    def decode(paths: List[String]): Option[(A, List[String])]
+    def decode(paths: List[String]): Option[Either[ErrorResponse, (A, List[String])]]
 
-    final def decodeUrl(uri: http4s.Uri): Option[A] = {
-      decode(uri.path.split("/").to[List]).filter(_._2.isEmpty).map(_._1)
+    final def decodeUrl(uri: http4s.Uri): Option[Either[ErrorResponse,A]] = {
+      pathExtractor(this, uri)
     }
   }
 
@@ -103,27 +106,27 @@ trait Urls extends algebra.Urls {
   implicit def pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = ???
 
   def staticPathSegment(segment: String): Path[Unit] = new Path[Unit] {
-    def decode(paths: List[String]): Option[(Unit, List[String])] =
+    def decode(paths: List[String]): Option[Either[ErrorResponse, (Unit, List[String])]] =
       paths match {
-        case head :: tail if head == segment => Some(((), tail))
+        case head :: tail if head == segment => Some(Right(((), tail)))
         case _                               => None
       }
   }
 
   def segment[A](name: String = "", docs: Documentation = None)(
       implicit A: Segment[A]): Path[A] = new Path[A] {
-    def decode(segments: List[String]): Option[(A, List[String])] = {
+    def decode(segments: List[String]): Option[Either[ErrorResponse, (A, List[String])]] = {
       def uncons[B](bs: List[B]): Option[(B, List[B])] =
         bs match {
           case head :: tail => Some((head, tail))
           case Nil          => None
         }
 
-      uncons(segments).flatMap {
+      uncons(segments).map {
         case (s, ss) =>
           A(s) match {
-            case None    => None
-            case Some(a) => Option((a, ss))
+            case None    => Left(badRequestResponse)
+            case Some(a) => Right((a, ss))
           }
       }
     }
@@ -134,20 +137,23 @@ trait Urls extends algebra.Urls {
   def remainingSegments(name: String = "",
                         docs: Documentation = None): Path[String] =
     new Path[String] {
-      def decode(segments: List[String]): Option[(String, List[String])] =
+      def decode(segments: List[String]): Option[Either[ErrorResponse, (String, List[String])]] =
         if (segments.isEmpty) None
-        else Some((segments.map(URLEncoder.encode(_, utf8Name)).mkString("/"), Nil))
+        else Some(Right((segments.map(URLEncoder.encode(_, utf8Name)).mkString("/"), Nil)))
     }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(
       implicit tupler: Tupler[A, B]): Path[tupler.Out] = new Path[tupler.Out] {
     override def decode(
-        paths: List[String]): Option[(tupler.Out, List[String])] =
-      for {
-        (firsValue, firstRemainingPaths) <- first.decode(paths)
-        (secondValue, secondRemainingPaths) <- second.decode(
-          firstRemainingPaths)
-      } yield (tupler(firsValue, secondValue), secondRemainingPaths)
+        segments: List[String]): Option[Either[ErrorResponse, (tupler.Out, List[String])]] =
+      first.decode(segments).flatMap {
+        case Right((a, segments2)) =>
+          second.decode(segments2).map {
+            case Right((b, segments3)) => Right((tupler(a, b), segments3))
+            case Left(error)           => Left(error)
+          }
+        case Left(error) => Some(Left(error))
+      }
   }
 
   implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url] =
@@ -155,32 +161,36 @@ trait Urls extends algebra.Urls {
       override def xmapPartial[A, B](fa: Url[A],
                                      f: A => Option[B],
                                      g: B => A): Url[B] = new Url[B] {
-        override def decodeUrl(uri: Uri): Option[B] =
-          for {
-            a <- fa.decodeUrl(uri)
-            b <- f(a)
-          } yield b
+        override def decodeUrl(uri: Uri): Option[Either[ErrorResponse, B]] =
+          fa.decodeUrl(uri).map(_.right.flatMap(a => f(a).toRight(badRequestResponse)))
       }
     }
 
   /** Builds an URL from the given path and query string */
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
       implicit tupler: Tupler[A, B]): Url[tupler.Out] = new Url[tupler.Out] {
-    override def decodeUrl(uri: Uri): Option[tupler.Out] = {
-      for {
-        a <- pathExtractor(path, uri)
-        b <- qs(uri.multiParams)
-      } yield tupler(a, b)
+    override def decodeUrl(uri: Uri): Option[Either[ErrorResponse, tupler.Out]] = {
+      pathExtractor(path, uri).map(_.right.flatMap { a =>
+        qs(uri.multiParams) match {
+          case None    => Left(badRequestResponse)
+          case Some(b) => Right(tupler(a, b))
+        }
+      })
     }
   }
 
-  private def pathExtractor[A](path: Path[A], uri: http4s.Uri): Option[A] = {
+  private def pathExtractor[A](path: Path[A], uri: http4s.Uri): Option[Either[ErrorResponse, A]] = {
     val segments =
       uri.path
         .split("/")
       .map(URLDecoder.decode(_, utf8Name))
         .to[List]
 
-    path.decode(if (segments.isEmpty) List("") else segments).map(_._1)
+
+    path.decode(if (segments.isEmpty) List("") else segments).flatMap {
+      case Left(error)     => Some(Left(error))
+      case Right((a, Nil)) => Some(Right(a))
+      case Right(_)        => None
+    }
   }
 }

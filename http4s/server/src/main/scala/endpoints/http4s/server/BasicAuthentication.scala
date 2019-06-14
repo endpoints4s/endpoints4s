@@ -12,15 +12,18 @@ trait BasicAuthentication[F[_]]
     with endpoints.algebra.BasicAuthentication {
 
   private[endpoints] def basicAuthenticationHeader
-    : RequestHeaders[Credentials] = { headers =>
-    headers.get(Authorization).flatMap { authHeader =>
-      authHeader.credentials match {
-        case BasicCredentials(username, password) =>
-          Some(Credentials(username, password))
-        case _ => None
-      }
-    }
-  }
+    : RequestHeaders[Credentials] =
+    headers =>
+      headers
+        .get(Authorization)
+        .map { authHeader =>
+          authHeader.credentials match {
+            case BasicCredentials(username, password) =>
+              Right(Credentials(username, password))
+            case _ => Left(badRequestResponse)
+          }
+        }
+        .getOrElse(Left(badRequestResponse))
 
   private[endpoints] def authenticated[A](
       response: Response[A],

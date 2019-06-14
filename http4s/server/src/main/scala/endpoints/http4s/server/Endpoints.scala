@@ -8,12 +8,13 @@ import fs2._
 import org.http4s
 import org.http4s.{Charset, Headers, MediaType}
 
-trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
+trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls[F] {
   implicit def F: Sync[F]
 
-  type RequestHeaders[A] = http4s.Headers => Option[A]
+  type RequestHeaders[A] = http4s.Headers => Either[ErrorResponse, A]
 
-  type Request[A] = PartialFunction[http4s.Request[F], F[A]]
+  type Request[A] =
+    PartialFunction[http4s.Request[F], Either[ErrorResponse, F[A]]]
 
   type RequestEntity[A] = http4s.Request[F] => F[A]
 
@@ -23,7 +24,10 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
     def implementedBy(implementation: A => B)
       : PartialFunction[http4s.Request[F], F[http4s.Response[F]]] = {
       case req: http4s.Request[F] if request.isDefinedAt(req) =>
-        request(req).map(implementation).flatMap(response)
+        request(req) match {
+          case Right(a)            => a.map(implementation).flatMap(response)
+          case Left(errorResponse) => errorResponse.pure[F]
+        }
     }
   }
 
@@ -38,12 +42,15 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
   /**
     * HEADERS
     */
-  def emptyHeaders: RequestHeaders[Unit] = _ => Some(())
+  def emptyHeaders: RequestHeaders[Unit] = _ => Right(())
 
   def header(name: String, docs: Documentation): RequestHeaders[String] =
     headers =>
       headers.filter(_.name.value == name).collectFirst {
         case h => h.name.value
+      } match {
+        case Some(value) => Right(value)
+        case None        => Left(badRequestResponse)
     }
 
   def optHeader(name: String,
@@ -51,6 +58,9 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
     headers =>
       headers.filter(_.name.value == name).collectFirst {
         case h => Some(h.name.value)
+      } match {
+        case Some(value) => Right(value)
+        case None        => Left(badRequestResponse)
     }
 
   /**
@@ -92,16 +102,16 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
       headers: RequestHeaders[HeadersP] = emptyHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
     tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] =
-    Function.unlift({ req =>
-      for {
-        u <- url.decodeUrl(req.uri)
-        h <- headers(req.headers)
-        _ <- if (req.method == method) Some(()) else None
-      } yield
-        entity(req).map { body =>
-          tuplerUBH(tuplerUB(u, body), h)
-        }
-    })
+    Function.unlift(
+      req =>
+        if (req.method == method) {
+          url
+            .decodeUrl(req.uri)
+            .map(_.flatMap(u =>
+              headers(req.headers).map(h =>
+                entity(req).map(body => tuplerUBH(tuplerUB(u, body), h)))))
+        } else
+        None)
 
   implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] =
     new InvariantFunctor[RequestEntity] {
@@ -116,21 +126,20 @@ trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
     : endpoints.InvariantFunctor[RequestHeaders] =
     new InvariantFunctor[RequestHeaders] {
       override def xmap[From, To](
-          f: Headers => Option[From],
+          f: Headers => Either[ErrorResponse, From],
           map: From => To,
-          contramap: To => From): Headers => Option[To] =
+          contramap: To => From): Headers => Either[ErrorResponse, To] =
         headers => f(headers).map(map)
     }
 
   implicit def reqHeadersSemigroupal: endpoints.Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-      override def product[A, B](fa: Headers => Option[A],
-                                 fb: Headers => Option[B])(
-          implicit tupler: Tupler[A, B]): Headers => Option[tupler.Out] =
+      override def product[A, B](fa: Headers => Either[ErrorResponse, A],
+                                 fb: Headers => Either[ErrorResponse, B])(
+          implicit tupler: Tupler[A, B])
+        : Headers => Either[ErrorResponse, tupler.Out] =
         headers =>
-          for {
-            a <- fa(headers)
-            b <- fb(headers)
-          } yield tupler(a, b)
+          fa(headers)
+            .flatMap(a => fb(headers).map(b => tupler(a, b)))
     }
 }
