@@ -8,10 +8,8 @@ import fs2._
 import org.http4s
 import org.http4s.{Charset, Headers, MediaType}
 
-abstract class Endpoints[F[_]](implicit F: Sync[F])
-    extends algebra.Endpoints
-    with Methods
-    with Urls {
+trait Endpoints[F[_]] extends algebra.Endpoints with Methods with Urls {
+  implicit def F: Sync[F]
 
   type RequestHeaders[A] = http4s.Headers => Option[A]
 
@@ -32,7 +30,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
   /**
     * REQUESTS
     */
-  def emptyRequest: RequestEntity[Unit] = _ => F.pure(())
+  def emptyRequest: RequestEntity[Unit] = _ => ().pure[F]
 
   def textRequest(docs: Documentation): RequestEntity[String] =
     req => req.body.through(text.utf8Decode).compile.toList.map(_.mkString)
@@ -59,12 +57,12 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
     * RESPONSES
     */
   def emptyResponse(docs: Documentation): Response[Unit] =
-    _ => F.pure(http4s.Response[F](status = http4s.Status.NoContent))
+    _ => http4s.Response[F](status = http4s.Status.NoContent).pure[F]
 
   def textResponse(docs: Documentation): Response[String] =
     str =>
-      F.pure(
-        http4s.Response(
+      http4s
+        .Response[F](
           status = http4s.Status.Ok,
           body = fs2.Stream(str).through(text.utf8Encode),
           headers = Headers(
@@ -72,12 +70,12 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
               .`Content-Type`(MediaType.text.plain, Charset.`UTF-8`)
               .pure[List])
         )
-    )
+        .pure[F]
 
   def wheneverFound[A](response: Response[A],
                        notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None    => F.pure(http4s.Response.notFound)
+    case None    => http4s.Response.notFound[F].pure[F]
   }
 
   def endpoint[A, B](request: Request[A],
@@ -110,7 +108,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
       override def xmap[From, To](
           f: http4s.Request[F] => F[From],
           map: From => To,
-          contramap: To => From): http4s.Request[F]  => F[To] =
+          contramap: To => From): http4s.Request[F] => F[To] =
         body => f(body).map(map)
     }
 

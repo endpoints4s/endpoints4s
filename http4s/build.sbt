@@ -20,3 +20,13 @@ val `http4s-server` =
     .dependsOn(`json-schema-circe-jvm`)
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
+
+val `http4s-server-circe` =
+    project.in(file("server-circe"))
+      .settings(
+        publishSettings,
+        `scala 2.11 to 2.12`,
+        name := "endpoints-http4s-server-circe",
+        libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
+      )
+      .dependsOn(`http4s-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)

@@ -1,15 +1,15 @@
-package endpoints.http4s.server
+package endpoints.http4s.server.circe
 
 import cats.implicits._
-import cats.effect.Sync
 import endpoints.algebra
 import endpoints.algebra.Documentation
+import endpoints.http4s.server.Endpoints
 import io.circe.{Decoder, Encoder}
 import org.http4s
 import org.http4s.circe._
 
-abstract class JsonSchemaEntities[F[_]](implicit F: Sync[F])
-    extends Endpoints
+trait JsonSchemaEntities[F[_]]
+    extends Endpoints[F]
     with algebra.JsonSchemaEntities
     with endpoints.circe.JsonSchemas {
 
@@ -26,7 +26,7 @@ abstract class JsonSchemaEntities[F[_]](implicit F: Sync[F])
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
     implicit val jsonEncoder: http4s.EntityEncoder[F, A] = jsonEncoderOf[F, A]
 
-    F.pure(http4s.Response().withEntity(a))
+    http4s.Response[F]().withEntity(a).pure[F]
   }
 
 }

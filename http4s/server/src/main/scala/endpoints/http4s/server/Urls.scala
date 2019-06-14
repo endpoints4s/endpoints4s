@@ -1,5 +1,8 @@
 package endpoints.http4s.server
 
+import java.net.{URLDecoder, URLEncoder}
+import java.nio.charset.StandardCharsets.UTF_8
+
 import endpoints.algebra.Documentation
 import endpoints.{PartialInvariantFunctor, Tupler, algebra}
 import org.http4s
@@ -9,6 +12,8 @@ import scala.collection.compat._
 import scala.collection.mutable
 
 trait Urls extends algebra.Urls {
+  val utf8Name = UTF_8.name()
+
   type Params = Map[String, Seq[String]]
 
   type QueryString[A] = Params => Option[A]
@@ -131,7 +136,7 @@ trait Urls extends algebra.Urls {
     new Path[String] {
       def decode(segments: List[String]): Option[(String, List[String])] =
         if (segments.isEmpty) None
-        else Some((segments.mkString("/"), Nil))
+        else Some((segments.map(URLEncoder.encode(_, utf8Name)).mkString("/"), Nil))
     }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(
@@ -173,6 +178,7 @@ trait Urls extends algebra.Urls {
     val segments =
       uri.path
         .split("/")
+      .map(URLDecoder.decode(_, utf8Name))
         .to[List]
 
     path.decode(if (segments.isEmpty) List("") else segments).map(_._1)
