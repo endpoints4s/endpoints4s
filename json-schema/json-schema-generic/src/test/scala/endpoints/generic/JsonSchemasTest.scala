@@ -26,6 +26,15 @@ class JsonSchemasTest extends FreeSpec {
     object Quux {
       implicit val schema: JsonSchema[Quux] = genericJsonSchema[Quux]
     }
+
+    case class GenericFoo[T](value : T)
+
+    object GenericFoo{
+      implicit def schemaPrimitive: JsonSchema[GenericFoo[Int]] = genericJsonSchema[GenericFoo[Int]]
+
+      implicit val fooSchema =  Foo.schema
+      implicit def schemaFoo: JsonSchema[GenericFoo[Foo]] = genericJsonSchema[GenericFoo[Foo]]
+    }
   }
 
   object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas {
@@ -105,6 +114,16 @@ class JsonSchemasTest extends FreeSpec {
   "sealed trait" in {
     val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxA'!(ss:[string],$)@QuuxA|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxB'!(i:integer,$)@QuuxB|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxC'!(b:boolean,$)@QuuxC|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxD'!($)@QuuxD|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxE'!($)@QuuxE))"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
+  }
+
+  "generic primitive parameters" in {
+    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.GenericFoo-int'!('endpoints.generic.JsonSchemasTest.GenericSchemas.GenericFoo-int'!(value:integer,$))"
+    assert(FakeAlgebraJsonSchemas.GenericFoo.schemaPrimitive == expectedSchema)
+  }
+
+  "generic type parameters" in {
+    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.GenericFoo-endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!('endpoints.generic.JsonSchemasTest.GenericSchemas.GenericFoo-endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!(value:'endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!(bar:string,baz:integer,qux:boolean?,$)),$))"
+    assert(FakeAlgebraJsonSchemas.GenericFoo.schemaFoo == expectedSchema)
   }
 
 }

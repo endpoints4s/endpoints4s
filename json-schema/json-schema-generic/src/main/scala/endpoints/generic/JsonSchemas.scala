@@ -130,7 +130,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def recordGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       record: GenericRecord[R],
-      ct: ClassTag[A]
+      ct: Manifest[A]
     ): GenericRecord[A] =
       new GenericRecord[A] {
         def jsonSchema: Record[A] = nameSchema(record.jsonSchema.xmap[A](gen.from)(gen.to))
@@ -139,7 +139,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def taggedGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       tagged: GenericTagged[R],
-      ct: ClassTag[A]
+      ct: Manifest[A]
     ): GenericTagged[A] =
       new GenericTagged[A] {
         def jsonSchema: Tagged[A] = nameSchema(tagged.jsonSchema.xmap[A](gen.from)(gen.to))
@@ -147,8 +147,12 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
-  private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
-    val jvmName = implicitly[ClassTag[A]].runtimeClass.getName
+  private def nameSchema[A : Manifest, S[T] <: JsonSchema[T]](schema: S[A]) : S[A] = {
+    val manifest = implicitly[Manifest[A]]
+
+    val typeParametersName = Option(manifest.typeArguments.map(_.runtimeClass.getName).mkString("_")).filter(_.nonEmpty)
+      val jvmName = manifest.runtimeClass.getName + typeParametersName.map(v => "-" + v).getOrElse("")
+
     // name fix for case objects
     val name = if(jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
     named(schema, name.replace('$','.'))
@@ -161,7 +165,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
     * description of the data type (based on the `JsonSchemas` algebra interface)
     */
-  def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+  def genericJsonSchema[A: Manifest](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
     nameSchema(genJsonSchema.jsonSchema)
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
