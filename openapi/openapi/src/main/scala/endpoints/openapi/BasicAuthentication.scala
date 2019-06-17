@@ -13,13 +13,14 @@ import endpoints.openapi.model.{SecurityRequirement, SecurityScheme}
   */
 trait BasicAuthentication
   extends algebra.BasicAuthentication
-    with Endpoints {
+    with Endpoints
+    with StatusCodes {
 
   private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials] =
     DocumentedHeaders(Nil) // supported by OAS3 security schemes
 
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation = None): Response[Option[A]] =
-    DocumentedResponse(401, docs.getOrElse(""), content = Map.empty) :: response
+    DocumentedResponse(Unauthorized, docs.getOrElse(""), content = Map.empty) :: response
 
   def basicAuthenticationSchemeName: String = "HttpBasic"
 

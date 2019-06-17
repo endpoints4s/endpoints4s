@@ -18,6 +18,6 @@ trait JsonEntities
     Some(DocumentedRequestEntity(docs, Map("application/json" -> MediaType(None))))
 
   def jsonResponse[A : JsonResponse](docs: Documentation): Response[A] =
-    DocumentedResponse(200, docs.getOrElse(""), Map("application/json" -> MediaType(None))) :: Nil
+    DocumentedResponse(OK, docs.getOrElse(""), Map("application/json" -> MediaType(None))) :: Nil
 
 }

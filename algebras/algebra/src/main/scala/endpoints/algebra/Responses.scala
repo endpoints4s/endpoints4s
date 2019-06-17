@@ -5,7 +5,7 @@ import scala.language.higherKinds
 /**
   * @group algebras
   */
-trait Responses {
+trait Responses extends StatusCodes {
 
   /** Information carried by a response */
   type Response[A]
