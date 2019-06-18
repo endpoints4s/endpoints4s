@@ -70,11 +70,11 @@ trait Assets extends algebra.Assets with Endpoints {
   }
 
   /**
-    * An [[AssetResponse]] is either [[NotFound]] (if the asset has not been found on
+    * An [[AssetResponse]] is either [[AssetNotFound]] (if the asset has not been found on
     * the server) or [[Found]] otherwise.
     */
   sealed trait AssetResponse
-  case object NotFound extends AssetResponse
+  case object AssetNotFound extends AssetResponse
   /**
     * @param data Asset content
     * @param contentLength Size, if known
@@ -142,7 +142,7 @@ trait Assets extends algebra.Assets with Endpoints {
               HeaderNames.CACHE_CONTROL -> "public, max-age=31536000"
             )
         if (isGzipped) result.withHeaders(HeaderNames.CONTENT_ENCODING -> "gzip") else result
-      case NotFound => Results.NotFound
+      case AssetNotFound => NotFound
     }
 
   /**
@@ -175,8 +175,8 @@ trait Assets extends algebra.Assets with Endpoints {
               playComponents.fileMimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY)),
               isGzipped
             )
-          }.getOrElse(NotFound)
-      } else NotFound
+          }.getOrElse(AssetNotFound)
+      } else AssetNotFound
     }
 
 }

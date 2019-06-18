@@ -20,7 +20,7 @@ import scala.language.higherKinds
   *
   * @group interpreters
   */
-class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods {
+class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods with StatusCodes {
 
   type SttpRequest = sttp.Request[_, Nothing]
 
@@ -142,7 +142,7 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
     override def responseAs = inner.responseAs
 
     override def validateResponse(response: sttp.Response[inner.ReceivedBody]): R[Option[A]] = {
-      if (response.code == 404) backend.responseMonad.unit(None)
+      if (response.code == NotFound) backend.responseMonad.unit(None)
       else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
     }
   }

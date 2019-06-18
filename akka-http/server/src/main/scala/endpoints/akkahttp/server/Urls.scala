@@ -1,6 +1,6 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.HttpResponse
 
 import scala.collection.compat._
 import scala.language.higherKinds
@@ -15,7 +15,7 @@ import scala.collection.mutable
   *
   * @group interpreters
   */
-trait Urls extends algebra.Urls {
+trait Urls extends algebra.Urls with StatusCodes {
 
   import akka.http.scaladsl.server.Directives._
 
@@ -189,6 +189,6 @@ trait Urls extends algebra.Urls {
 
   // TODO Improve error reporting
   private def malformedRequest: StandardRoute =
-    Directives.complete(HttpResponse(StatusCodes.BadRequest))
+    Directives.complete(HttpResponse(BadRequest))
 
 }

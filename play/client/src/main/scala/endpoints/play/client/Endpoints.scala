@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @group interpreters
   */
-class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
+class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods with StatusCodes {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -88,19 +88,19 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
 
   /** Successfully decodes no information from a response */
   def emptyResponse(docs: Documentation): Response[Unit] = {
-    case resp if resp.status >= 200 && resp.status < 300 => Right(())
+    case resp if resp.status >= OK && resp.status < 300 => Right(())
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
   /** Successfully decodes string information from a response */
   def textResponse(docs: Documentation): Response[String] = {
-    case resp if resp.status >= 200 && resp.status < 300 => Right(resp.body)
+    case resp if resp.status >= OK && resp.status < 300 => Right(resp.body)
     case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
   }
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     wsResponse =>
-      if (wsResponse.status == 404) Right(None)
+      if (wsResponse.status == NotFound) Right(None)
       else response(wsResponse).right.map(Some(_))
 
   /**

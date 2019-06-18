@@ -1,6 +1,6 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.{HttpEntity, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
 import endpoints.algebra.Documentation
@@ -14,7 +14,7 @@ import scala.util.{Failure, Success}
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods {
+trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes {
 
   type RequestHeaders[A] = Directive1[A]
 
@@ -70,13 +70,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
       RESPONSES
   ************************* */
 
-  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((StatusCodes.OK, HttpEntity.Empty))
+  def emptyResponse(docs: Documentation): Response[Unit] = x => Directives.complete((OK, HttpEntity.Empty))
 
-  def textResponse(docs: Documentation): Response[String] = x => Directives.complete((StatusCodes.OK, x))
+  def textResponse(docs: Documentation): Response[String] = x => Directives.complete((OK, x))
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None => Directives.complete(HttpResponse(StatusCodes.NotFound))
+    case None => Directives.complete(HttpResponse(NotFound))
   }
 
 

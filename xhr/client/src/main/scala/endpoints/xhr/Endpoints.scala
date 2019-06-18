@@ -18,7 +18,7 @@ import scala.scalajs.js
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods {
+trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes{
 
   /**
     * A function that takes the information `A` and the XMLHttpRequest
