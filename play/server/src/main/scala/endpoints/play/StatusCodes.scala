@@ -10,10 +10,10 @@ trait StatusCodes extends algebra.StatusCodes {
 
   def OK = Results.Ok
 
-  def NotFound = Results.NotFound
+  def BadRequest = Results.BadRequest
 
   def Unauthorized = Results.Unauthorized
 
-  def BadRequest = Results.BadRequest
+  def NotFound = Results.NotFound
 
 }

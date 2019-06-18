@@ -8,24 +8,14 @@ package openapi
   */
 trait StatusCodes extends endpoints.algebra.StatusCodes {
 
-  sealed trait StatusCode {
-    def value: Int
-    override def toString = value.toString
-  }
+  type StatusCode = Int
 
-  case object OK extends StatusCode {
-    val value: Int = 200
-  }
+  def OK = 200
 
-  case object BadRequest extends StatusCode {
-    val value: Int = 400
-  }
+  def BadRequest = 400
 
-  case object NotFound extends StatusCode {
-    val value: Int = 404
-  }
+  def Unauthorized = 401
 
-  case object Unauthorized extends StatusCode {
-    val value: Int = 401
-  }
+  def NotFound = 404
+
 }

@@ -8,10 +8,10 @@ trait StatusCodes extends algebra.StatusCodes {
 
   def OK = 200
 
-  def NotFound = 404
+  def BadRequest = 400
 
   def Unauthorized = 401
 
-  def BadRequest = 404
+  def NotFound = 404
 
 }
