@@ -1,5 +1,6 @@
-package endpoints.akkahttp.server
+package endpoints.akkahttp.server.circe
 
+import endpoints.akkahttp.server.EndpointsTestSuite
 import org.scalatest.{Matchers, WordSpecLike}
 
 class ServerInterpreterTest extends ServerInterpreterBaseTest

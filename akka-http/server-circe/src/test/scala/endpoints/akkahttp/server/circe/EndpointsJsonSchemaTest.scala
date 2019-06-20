@@ -1,6 +1,7 @@
-package endpoints.akkahttp.server
+package endpoints.akkahttp.server.circe
 
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import endpoints.akkahttp.server.Endpoints
 import endpoints.algebra.User
 import endpoints.generic
 import org.scalatest.{Matchers, WordSpec}

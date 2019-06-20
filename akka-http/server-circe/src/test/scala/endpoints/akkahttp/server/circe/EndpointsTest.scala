@@ -1,13 +1,13 @@
-package endpoints.akkahttp.server
+package endpoints.akkahttp.server.circe
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import endpoints.akkahttp.server.{BasicAuthentication, Endpoints, JsonEntities, JsonEntitiesFromCodec}
+import endpoints.algebra
+import endpoints.algebra.{JsonFromCodecTestApi, circe}
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.language.reflectiveCalls
-import endpoints.algebra
-import endpoints.algebra.JsonFromCodecTestApi
-import endpoints.algebra.circe
 
 /* defines the common api to implement */
 trait EndpointsTestApi extends Endpoints

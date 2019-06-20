@@ -1,4 +1,4 @@
-package endpoints.akkahttp.server
+package endpoints.akkahttp.server.circe
 
 import java.net.ServerSocket
 

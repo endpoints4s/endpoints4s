@@ -12,8 +12,9 @@ val `play-server` = LocalProject("play-server")
 val `play-server-circe` = LocalProject("play-server-circe")
 val `play-server-playjson` = LocalProject("play-server-playjson")
 
-val `akka-http-server` = LocalProject("akka-http-server")
 val `akka-http-client` = LocalProject("akka-http-client")
+val `akka-http-server` = LocalProject("akka-http-server")
+val `akka-http-server-circe` = LocalProject("akka-http-server-circe")
 
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
@@ -45,7 +46,7 @@ val apiDoc =
       ),
       unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
-        `akka-http-client`, `akka-http-server`,
+        `akka-http-client`, `akka-http-server`, `akka-http-server-circe`, 
         `play-client`, `play-server`, `play-server-circe`, `play-server-playjson`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
         `scalaj-client`,
@@ -178,7 +179,7 @@ val `example-basic-akkahttp-server` =
       `scala 2.11 to 2.12`,
       publishArtifact := false
     )
-    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)
+    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`, `akka-http-server-circe`)
 
 
 // CQRS Example
