@@ -160,9 +160,24 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * In a sense, this operation asks shapeless to compute a ''type level'' description
     * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
     * description of the data type (based on the `JsonSchemas` algebra interface)
+    *
+    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
+    * This could result in non unique values and mess with documentation
     */
   def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
     nameSchema(genJsonSchema.jsonSchema)
+
+  /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
+    *
+    * In a sense, this operation asks shapeless to compute a ''type level'' description
+    * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
+    * description of the data type (based on the `JsonSchemas` algebra interface)
+    *
+    * This operation is using the name provided
+    * Please be aware that this name should be unique or documentation will not work properly
+    */
+  def namedGenericJsonSchema[A](name : String)(implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+    named(genJsonSchema.jsonSchema, name)
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
 
