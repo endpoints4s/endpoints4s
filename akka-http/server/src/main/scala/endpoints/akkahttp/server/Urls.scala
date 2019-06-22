@@ -1,6 +1,6 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.HttpResponse
 
 import scala.collection.compat._
 import scala.language.higherKinds
@@ -15,7 +15,7 @@ import scala.collection.mutable
   *
   * @group interpreters
   */
-trait Urls extends algebra.Urls {
+trait Urls extends algebra.Urls with StatusCodes {
 
   import akka.http.scaladsl.server.Directives._
 
@@ -39,6 +39,18 @@ trait Urls extends algebra.Urls {
   class Url[T](val directive: Directive1[T])
 
   class QueryString[T](val directive: Directive1[T])
+
+  implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
+    def xmapPartial[A, B](fa: QueryString[A], f: A => Option[B], g: B => A): QueryString[B] =
+      new QueryString(fa.directive.flatMap { a =>
+        f(a) match {
+          case Some(b) => Directives.provide(b)
+          case None    => malformedRequest
+        }
+      })
+    override def xmap[A, B](fa: QueryString[A], f: A => B, g: B => A): QueryString[B] =
+      new QueryString(fa.directive.map(f))
+  }
 
   /**
     * @inheritdoc
@@ -177,6 +189,6 @@ trait Urls extends algebra.Urls {
 
   // TODO Improve error reporting
   private def malformedRequest: StandardRoute =
-    Directives.complete(HttpResponse(StatusCodes.BadRequest))
+    Directives.complete(HttpResponse(BadRequest))
 
 }

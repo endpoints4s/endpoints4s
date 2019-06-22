@@ -1,7 +1,7 @@
 package endpoints.akkahttp.server
 
 import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, HttpChallenges}
-import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes=>AkkaStatusCodes}
 import akka.http.scaladsl.server.{Directive, Directives}
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
@@ -22,7 +22,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     case None => Directive[Tuple1[Credentials]] { _ => //inner is ignored
       import akka.http.scaladsl.model.headers
       Directives.complete(HttpResponse(
-        StatusCodes.Unauthorized,
+        AkkaStatusCodes.Unauthorized,
         scala.collection.immutable.Seq[HttpHeader](headers.`WWW-Authenticate`(HttpChallenges.basic("Realm")))
       ))
     }
@@ -35,7 +35,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
     */
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None => Directives.complete(HttpResponse(StatusCodes.Forbidden))
+    case None => Directives.complete(HttpResponse(AkkaStatusCodes.Forbidden))
   }
 
 

@@ -233,6 +233,49 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         encodeUrl(path / evenNumber) (42) shouldEqual "/42"
       }
 
+      "xmap query string" should {
+        import client._
+
+        "xmap locations" in {
+          case class Location(longitude: Double, latitude: Double)
+
+          val locationQueryString: QueryString[Location] =
+            (qs[Double]("lon") & qs[Double]("lat"))
+              .xmap { 
+                case (lon, lat) => Location(lon, lat) 
+              } {
+                location => (location.longitude, location.latitude)
+              }
+          
+          encodeUrl(path /? locationQueryString) (Location(12.0, 32.9)) shouldEqual "?lon=12.0&lat=32.9"
+          encodeUrl(path /? locationQueryString) (Location(-12.0, 32.9)) shouldEqual "?lon=-12.0&lat=32.9"
+          encodeUrl(path /? locationQueryString) (Location(Math.PI, -32.9)) shouldEqual s"?lon=${Math.PI}&lat=-32.9"
+        }
+
+        "xmapPartial blogids" in {
+          sealed trait BlogId
+          case class BlogUuid(uuid: UUID) extends BlogId
+          case class BlogSlug(slug: String) extends BlogId
+
+          val blogIdQueryString: QueryString[BlogId] =
+            (qs[Option[UUID]]("uuid") & qs[Option[String]]("slug"))
+              .xmapPartial {
+                case (maybeUuid, maybeSlug) =>
+                  maybeUuid.map[BlogId](BlogUuid).orElse(maybeSlug.map[BlogId](BlogSlug))
+              } {
+                case BlogUuid(uuid) => (Some(uuid), None)
+                case BlogSlug(slug) => (None, Some(slug))
+              }
+          
+          val testUUID: UUID = UUID.randomUUID()
+          val testSlug: String = "test-slug"
+
+          encodeUrl(path /? blogIdQueryString) (BlogUuid(testUUID)) shouldEqual s"?uuid=$testUUID"
+          encodeUrl(path /? blogIdQueryString) (BlogSlug(testSlug)) shouldEqual s"?slug=$testSlug"
+        }
+
+      }
+
     }
 
 

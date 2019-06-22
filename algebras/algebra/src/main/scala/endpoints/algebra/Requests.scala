@@ -17,6 +17,8 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
     * be empty. Just that, from a server point of view no information will
     * be extracted from them, and from a client point of view no particular
     * headers will be built in the request.
+    *
+    * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document empty headers.
     */
   def emptyHeaders: RequestHeaders[Unit]
 
@@ -37,13 +39,13 @@ trait Requests extends Urls with Methods with PartialInvariantFunctorSyntax with
   implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
 
   /**
-    * Empty request.
+    * Empty request -- request without a body.
+    * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document an empty body.
     */
-  //TODO rename to emptyBody and maybe make uniform with all other by adding ()
   def emptyRequest: RequestEntity[Unit]
 
   /**
-    * Request with string body.
+    * Request with a [[String]] body.
     */
   def textRequest(docs: Documentation = None): RequestEntity[String]
 

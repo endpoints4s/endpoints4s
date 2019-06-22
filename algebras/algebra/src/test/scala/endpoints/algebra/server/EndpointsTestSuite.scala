@@ -1,5 +1,7 @@
 package endpoints.algebra.server
 
+import java.util.UUID
+
 trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBase[T] {
 
   def urlsTestSuite() = {
@@ -45,7 +47,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
         decodeUrl(path / itemId)("/42-programming-in-scala") shouldEqual Matched(Item("programming-in-scala", "42"))
         decodeUrl(path / itemId)("/foo")                     shouldEqual Malformed
 
-        val file = s[String]("file").xmap[java.io.File](new java.io.File(_), _.getPath)
+        val file = s[String]("file").xmap(new java.io.File(_))(_.getPath)
         decodeUrl(path / "assets" / file)("/assets/favicon.png") shouldEqual Matched(new java.io.File("favicon.png"))
       }
 
@@ -79,7 +81,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 
       "transformed" in {
         implicit val pageQueryString: QueryStringParam[Page] =
-          intQueryString.xmap[Page](Page, _.number)
+          intQueryString.xmap(Page)(_.number)
         val url = path /? qs[Page]("page")
         decodeUrl(url)("/?page=42")  shouldEqual Matched(Page(42))
         decodeUrl(url)("/?page=foo") shouldEqual Malformed
@@ -92,9 +94,63 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
       "transformed" in {
         val paginatedUrl =
           (path /? (qs[Int]("from") & qs[Int]("limit")))
-            .xmap[Page2](Page2.tupled, p => (p.from, p.limit))
+            .xmap(Page2.tupled)(p => (p.from, p.limit))
         decodeUrl(paginatedUrl)("/?from=1&limit=10")   shouldEqual Matched(Page2(1, 10))
         decodeUrl(paginatedUrl)("/?from=one&limit=10") shouldEqual Malformed
+      }
+
+    }
+
+    "xmap query strings" should {
+
+      "xmap urls of locations" in {
+        
+
+        val locationQueryString =
+          (qs[Double]("lon") & qs[Double]("lat"))
+            .xmap[Location] {
+              case (lon, lat) => Location(lon, lat)
+            } {
+              location => (location.longitude, location.latitude)
+            }
+        val locationUrl = path /? locationQueryString
+        
+        decodeUrl(locationUrl)("/?lon=12.0&lat=32.9") shouldEqual Matched(Location(12.0, 32.9))
+        decodeUrl(locationUrl)("/?lon=-12.0&lat=32.9") shouldEqual Matched(Location(-12.0, 32.9))
+        decodeUrl(locationUrl)(s"/?lon=${Math.PI}&lat=-32.9") shouldEqual Matched(Location(Math.PI, -32.9))
+        decodeUrl(locationUrl)("/?lon=12&lat=32") shouldEqual Matched(Location(12, 32))
+        decodeUrl(locationUrl)("/?lat=32.0&lon=12.0") shouldEqual Matched(Location(12.0, 32.0))
+
+        decodeUrl(locationUrl)("/?lon=12,0&lat=32.0") shouldEqual Malformed
+        decodeUrl(locationUrl)("/?lon=a&lat=32") shouldEqual Malformed
+        decodeUrl(locationUrl)("/?let=12.0&lat=32.0") shouldEqual Malformed
+        decodeUrl(locationUrl)("/?lon=12.0") shouldEqual Malformed
+      }
+
+      "xmapPartial urls of blogids" in {
+        val blogIdQueryString: QueryString[BlogId] =
+          (qs[Option[UUID]]("uuid") & qs[Option[String]]("slug"))
+            .xmapPartial {
+              case (maybeUuid, maybeSlug) =>
+                maybeUuid.map[BlogId](BlogUuid).orElse(maybeSlug.map[BlogId](BlogSlug))
+            } {
+              case BlogUuid(uuid) => (Some(uuid), None)
+              case BlogSlug(slug) => (None, Some(slug))
+            }
+        
+        val testUUID: UUID = UUID.randomUUID()
+        val testMalformedUUID1: String = "f4b9defa-1ad8-453f-9a06268d"
+        val testMalformedUUID2: String = "f4b9defa-1ad8-453f-9o06-2683b8564b8d"
+        val testSlug: String = "test-slug"
+
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID") shouldEqual Matched(BlogUuid(testUUID))
+        decodeUrl(path /? blogIdQueryString)(s"/?slug=$testSlug") shouldEqual Matched(BlogSlug(testSlug))
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testUUID&slug=$testSlug") shouldEqual Matched(BlogUuid(testUUID))
+        decodeUrl(path /? blogIdQueryString)(s"/?slug=$testSlug&uuid=$testUUID") shouldEqual Matched(BlogUuid(testUUID))
+        decodeUrl(path /? blogIdQueryString)(s"/?slug=") shouldEqual Matched(BlogSlug(""))
+
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testMalformedUUID1") shouldEqual Malformed
+        decodeUrl(path /? blogIdQueryString)(s"/?uuid=$testMalformedUUID2") shouldEqual Malformed
       }
 
     }
@@ -106,3 +162,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.Endpoints] extends ServerTestBas
 case class Item(name: String, id: String)
 case class Page(number: Int)
 case class Page2(from: Int, limit: Int)
+case class Location(longitude: Double, latitude: Double)
+sealed trait BlogId
+case class BlogUuid(uuid: UUID) extends BlogId
+case class BlogSlug(slug: String) extends BlogId

@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.http.scaladsl.model.HttpHeader.ParsingResult
-import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.{ HttpHeader, HttpRequest, HttpResponse, HttpEntity, Uri }
 import akka.stream.Materializer
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
@@ -15,7 +15,8 @@ class Endpoints(val settings: EndpointsSettings)
   (implicit val EC: ExecutionContext, val M: Materializer)
   extends algebra.Endpoints
     with Urls
-    with Methods {
+    with Methods
+    with StatusCodes {
 
 
   type RequestHeaders[A] = (A, List[HttpHeader]) => List[HttpHeader]
@@ -93,14 +94,14 @@ class Endpoints(val settings: EndpointsSettings)
   type Response[A] = HttpResponse => Future[Either[Throwable, A]]
 
   def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = x =>
-    if (x.status == StatusCodes.OK) {
+    if (x.status == OK) {
       Future.successful(Right(()))
     } else {
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
 
   def textResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, String]] = x =>
-    if (x.status == StatusCodes.OK) {
+    if (x.status == OK) {
       x.entity.toStrict(settings.toStrictTimeout)
         .map(settings.stringContentExtractor)
         .map(Right.apply)

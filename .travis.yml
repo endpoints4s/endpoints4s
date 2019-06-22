@@ -26,7 +26,7 @@ before_script:
   - echo $JAVA_OPTS
 
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 jobs:
   include:

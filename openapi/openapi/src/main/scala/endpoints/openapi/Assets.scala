@@ -12,7 +12,8 @@ import endpoints.openapi.model._
   */
 trait Assets
   extends algebra.Assets
-    with Endpoints {
+    with Endpoints
+    with StatusCodes {
 
   type AssetRequest = Nothing
   type AssetPath = Nothing
@@ -24,8 +25,8 @@ trait Assets
   def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyHeaders, emptyRequest),
-      DocumentedResponse(200, docs.getOrElse(""), Map.empty) ::
-        DocumentedResponse(404, notFoundDocs.getOrElse(""), Map.empty) ::
+      DocumentedResponse(OK, docs.getOrElse(""), Map.empty) ::
+        DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), Map.empty) ::
         Nil
     )
 

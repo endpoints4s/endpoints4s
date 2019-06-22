@@ -55,5 +55,5 @@ and `endpoints.play.server.Endpoints` are *object algebras*. Note that we use an
 *carrier types* with type members rather than type parameters.
 
 - [1] B. C. d. S. Oliveira et. al. Extensibility for the Masses, Practical Extensibility with Object Algebras, ECOOP,
-2012 ([pdf](http://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf))
-- [2] C. Hofer at. al. Polymorphic Embedding of DSLs, GPCE, 2008 ([pdf](http://www.daimi.au.dk/~ko/papers/gpce50_hofer.pdf))
+2012 ([pdf](https://www.cs.utexas.edu/~wcook/Drafts/2012/ecoop2012.pdf))
+- [2] C. Hofer et al. Polymorphic Embedding of DSLs, GPCE, 2008 ([pdf](https://www.informatik.uni-marburg.de/~rendel/hofer08polymorphic.pdf))

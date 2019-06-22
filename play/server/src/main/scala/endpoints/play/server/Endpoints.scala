@@ -41,7 +41,7 @@ import scala.language.implicitConversions
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods {
+trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes{
 
   protected val playComponents: PlayComponents
 
@@ -204,20 +204,20 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods {
   type Response[A] = A => Result
 
   /** A successful HTTP response (status code 200) with no entity */
-  def emptyResponse(docs: Documentation): Response[Unit] = _ => Results.Ok
+  def emptyResponse(docs: Documentation): Response[Unit] = _ => OK
 
   /** A successful HTTP response (status code 200) with string entity */
-  def textResponse(docs: Documentation): Response[String] = x => Results.Ok(x)
+  def textResponse(docs: Documentation): Response[String] = x => OK(x)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
-  lazy val htmlResponse: Response[Html] = html => Results.Ok(html)
+  lazy val htmlResponse: Response[Html] = html => OK(html)
 
   /**
     * A response encoder that maps `None` to an empty HTTP result with status 404
     */
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
     case Some(a) => response(a)
-    case None => Results.NotFound
+    case None => NotFound
   }
 
   /**

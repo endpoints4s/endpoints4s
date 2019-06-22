@@ -11,7 +11,7 @@ trait InvariantFunctor[F[_]] {
 
 trait InvariantFunctorSyntax {
   implicit class InvariantFunctorSyntax[A, F[_]](val f: F[A])(implicit ev: InvariantFunctor[F]) {
-    def xmap[To](map: A => To, contramap: To => A): F[To] = ev.xmap(f, map, contramap)
+    def xmap[To](map: A => To)(contramap: To => A): F[To] = ev.xmap(f, map, contramap)
 
     //TODO add as[CaseClass] macro
   }
