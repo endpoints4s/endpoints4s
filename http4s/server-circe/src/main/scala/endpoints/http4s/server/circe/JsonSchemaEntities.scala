@@ -8,25 +8,25 @@ import io.circe.{Decoder, Encoder}
 import org.http4s
 import org.http4s.circe._
 
-trait JsonSchemaEntities[F[_]]
-    extends Endpoints[F]
+trait JsonSchemaEntities
+    extends Endpoints
     with algebra.JsonSchemaEntities
     with endpoints.circe.JsonSchemas {
 
   def jsonRequest[A: JsonSchema](docs: Documentation): RequestEntity[A] = {
     entity =>
       implicit val decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
-      implicit val jsonDecoder: http4s.EntityDecoder[F, A] = jsonOf[F, A]
+      implicit val jsonDecoder: http4s.EntityDecoder[Effect, A] = jsonOf[Effect, A]
 
-      jsonDecoder.decode(entity, true).value.flatMap(F.fromEither)
+      jsonDecoder.decode(entity, true).value.flatMap(Effect.fromEither)
   }
 
   def jsonResponse[A: JsonSchema](
-      docs: Documentation): A => http4s.Response[F] = { a =>
+      docs: Documentation): A => http4s.Response[Effect] = { a =>
     implicit val encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
-    implicit val jsonEncoder: http4s.EntityEncoder[F, A] = jsonEncoderOf[F, A]
+    implicit val jsonEncoder: http4s.EntityEncoder[Effect, A] = jsonEncoderOf[Effect, A]
 
-    http4s.Response[F]().withEntity(a)
+    http4s.Response[Effect]().withEntity(a)
   }
 
 }
