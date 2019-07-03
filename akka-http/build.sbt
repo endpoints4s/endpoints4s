@@ -79,11 +79,13 @@ val `akka-http-server-playjson` =
         "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
         "de.heikoseeberger" %% "akka-http-play-json" % akkaHttpJsonVersion,
         "com.typesafe.play" %% "play-json" % playjsonVersion,
+        "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`algebra-playjson-jvm` % "test->test")
     .dependsOn(`json-schema-playjson-jvm`)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
-    .dependsOn(`akka-http-server`)
+    .dependsOn(`akka-http-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`)
 
