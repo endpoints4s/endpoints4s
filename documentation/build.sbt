@@ -15,6 +15,7 @@ val `play-server-playjson` = LocalProject("play-server-playjson")
 val `akka-http-client` = LocalProject("akka-http-client")
 val `akka-http-server` = LocalProject("akka-http-server")
 val `akka-http-server-circe` = LocalProject("akka-http-server-circe")
+val `akka-http-server-playjson` = LocalProject("akka-http-server-playjson")
 
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
@@ -46,7 +47,7 @@ val apiDoc =
       ),
       unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
-        `akka-http-client`, `akka-http-server`, `akka-http-server-circe`, 
+        `akka-http-client`, `akka-http-server`, `akka-http-server-circe`, `akka-http-server-playjson`,
         `play-client`, `play-server`, `play-server-circe`, `play-server-playjson`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
         `scalaj-client`,
