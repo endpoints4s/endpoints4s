@@ -39,10 +39,14 @@ val `akka-http-server` =
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+        "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
+        "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`json-schema-generic-jvm` % "test->test")
 
 val `akka-http-server-circe` =
   project.in(file("server-circe"))
@@ -62,6 +66,7 @@ val `akka-http-server-circe` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
+    .dependsOn(`akka-http-server` % "test->test")
     .dependsOn(`json-schema-circe-jvm`)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
     .dependsOn(`akka-http-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
@@ -85,6 +90,7 @@ val `akka-http-server-playjson` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-playjson-jvm` % "test->test")
+    .dependsOn(`akka-http-server` % "test->test")
     .dependsOn(`json-schema-playjson-jvm`)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
     .dependsOn(`akka-http-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`)
