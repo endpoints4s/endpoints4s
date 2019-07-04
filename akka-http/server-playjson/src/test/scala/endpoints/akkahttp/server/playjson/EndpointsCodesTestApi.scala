@@ -1,13 +1,7 @@
 package endpoints.akkahttp.server.playjson
 
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import endpoints.akkahttp.server.{BasicAuthentication, Endpoints, JsonEntities, JsonEntitiesFromCodec}
-import endpoints.algebra
+import endpoints.akkahttp.server.JsonEntitiesFromCodec
 import endpoints.algebra.{JsonFromCodecTestApi, playjson}
-import org.scalatest.{Matchers, WordSpec}
-
-import scala.language.reflectiveCalls
 import endpoints.akkahttp.server.EndpointsTestApi 
 
 /* implements the endpoint using a codecs-based json handling */

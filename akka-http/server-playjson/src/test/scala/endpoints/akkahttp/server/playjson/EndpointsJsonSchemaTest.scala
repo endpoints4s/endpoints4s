@@ -7,7 +7,6 @@ import endpoints.generic
 import org.scalatest.{Matchers, WordSpec}
 
 import scala.language.reflectiveCalls
-import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
 
 class EndpointsJsonSchemaTestApi
   extends Endpoints
@@ -15,7 +14,7 @@ class EndpointsJsonSchemaTestApi
   with JsonSchemaEntities
 
 
-class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest with PlayJsonSupport{
+class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest with de.heikoseeberger.akkahttpplayjson.PlayJsonSupport{
 
   val testRoutes = new EndpointsJsonSchemaTestApi {
 
@@ -28,14 +27,7 @@ class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRoute
 
   "Single segment route" should {
 
-    //import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
-    import de.heikoseeberger.akkahttpplayjson.PlayJsonSupport
-    
-    //import io.circe.generic.auto._
     import play.api.libs.json.{OFormat, Json}
-
-    //implicit val userJsonSchema: JsonSchema[User] = genericJsonSchema[User]
-
     implicit val userJson: OFormat[User] = Json.format[User]
 
     "match single segment request" in {
