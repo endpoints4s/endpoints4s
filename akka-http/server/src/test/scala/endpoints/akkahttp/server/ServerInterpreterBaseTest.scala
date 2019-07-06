@@ -1,4 +1,4 @@
-package endpoints.akkahttp.server//.circe
+package endpoints.akkahttp.server
 
 import java.net.ServerSocket
 
@@ -15,8 +15,6 @@ import endpoints.akkahttp.server.EndpointsTestApi
 class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
   extends ServerTestBase[EndpointsTestApi]
     with ScalatestRouteTest {
-
-  //val serverApi: EndpointsTestApi = new EndpointsCodecsTestApi
 
   def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit = {
 

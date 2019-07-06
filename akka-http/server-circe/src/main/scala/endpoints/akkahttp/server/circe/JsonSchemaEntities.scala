@@ -5,7 +5,6 @@ import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import endpoints._
 import endpoints.akkahttp.server
 import endpoints.algebra.Documentation
-
 import io.circe.{Decoder, Encoder}
 
 /**
