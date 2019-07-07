@@ -82,7 +82,7 @@ val `akka-http-server-playjson` =
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
         "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
-        "de.heikoseeberger" %% "akka-http-play-json" % akkaHttpJsonVersion,
+        "de.heikoseeberger" %% "akka-http-play-json" % akkaHttpPlayJsonVersion,
         "com.typesafe.play" %% "play-json" % playjsonVersion,
         "com.softwaremill.sttp" %% "core" % sttpVersion % Test, // Temporary
         scalaTestDependency
