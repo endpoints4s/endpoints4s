@@ -6,3 +6,5 @@ ci/secrets.tar
 node_modules/
 *.iml
 .metals/
+.bloop/
+.vscode/

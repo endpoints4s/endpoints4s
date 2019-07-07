@@ -10,12 +10,11 @@ import endpoints.algebra.server.{DecodedUrl, ServerTestBase}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import endpoints.akkahttp.server.EndpointsTestApi 
 
-class ServerInterpreterBaseTest
+class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
   extends ServerTestBase[EndpointsTestApi]
     with ScalatestRouteTest {
-
-  val serverApi: EndpointsTestApi = new EndpointsCodecsTestApi
 
   def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit = {
 

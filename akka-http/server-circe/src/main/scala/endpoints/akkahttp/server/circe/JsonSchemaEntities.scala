@@ -1,4 +1,4 @@
-package endpoints.akkahttp.server
+package endpoints.akkahttp.server.circe
 
 import akka.http.scaladsl.server.Directives
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
