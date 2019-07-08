@@ -11,7 +11,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-doge" % "0.1.5")
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "3.3.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.2")
+addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.3")
 
 addSbtPlugin("com.novocode" % "sbt-ornate" % "0.5")
 
