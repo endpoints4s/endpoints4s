@@ -38,6 +38,13 @@ object Main {
     Api.auth(Credentials("foo", "bar")).`then`[Unit]({ maybeResponse =>
       println(s"Access granted: ${maybeResponse.isDefined}")
     }, js.undefined)
+
+    val chunkedResponse = JsonStreamingExampleClient.ticks(())
+    chunkedResponse.onChunk(_ => println("tick!"))
+    chunkedResponse.onError(e => println(s"Error: $e"))
+    chunkedResponse.onComplete(() => println("Completed"))
+    org.scalajs.dom.window.setTimeout(() => chunkedResponse.abort(), 5 * 1000)
+
     ()
   }
 

@@ -6,8 +6,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 import scala.language.reflectiveCalls
 import endpoints.algebra
-import endpoints.algebra.JsonFromCodecTestApi
-import endpoints.algebra.circe
+import endpoints.algebra.{JsonFromCodecTestApi, Http1JsonStreamingTestApi, circe}
 
 /* defines the common api to implement */
 trait EndpointsTestApi extends Endpoints
@@ -16,11 +15,14 @@ trait EndpointsTestApi extends Endpoints
   with algebra.EndpointsTestApi
 
 /* implements the endpoint using a codecs-based json handling */
-class EndpointsCodecsTestApi extends EndpointsTestApi
+class EndpointsCodecsTestApi(val settings: Http1Streaming.Settings) extends EndpointsTestApi
   with JsonFromCodecTestApi
   with circe.JsonFromCirceCodecTestApi
   with JsonEntitiesFromCodec
   with circe.JsonEntitiesFromCodec
+  with Http1JsonStreamingTestApi
+  with circe.Http1JsonStreamingTestApi
+  with Http1JsonStreaming
 
 /* implements the endpoint using an akka-based custom json handling */
 class EndpointsEntitiesTestApi extends EndpointsTestApi

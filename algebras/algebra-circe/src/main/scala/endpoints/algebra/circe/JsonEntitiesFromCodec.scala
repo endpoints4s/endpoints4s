@@ -61,15 +61,7 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
   type JsonCodec[A] = CirceCodec[A]
 //#type-carrier
 
-  implicit def jsonCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
-
-    def decode(from: String): Either[Exception, A] =
-      parser.parse(from).right.flatMap(codec.decoder.decodeJson)
-
-    def encode(from: A): String =
-      codec.encoder.apply(from).noSpaces
-
-  }
+  def jsonCodecToCodec[A : CirceCodec]: Codec[String, A] = CirceCodecToEndpointsCodec[A]
 
   implicit def circeDecoderToDecoder[A](implicit decoder: CirceDecoder[A]): Decoder[Json, A] =
     new Decoder[Json, A] {
@@ -80,5 +72,19 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
     new Encoder[A, Json] {
       def encode(from: A): Json = encoder(from)
     }
+
+}
+
+object CirceCodecToEndpointsCodec {
+
+  def apply[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
+
+    def decode(from: String): Either[Exception, A] =
+      parser.parse(from).right.flatMap(codec.decoder.decodeJson)
+
+    def encode(from: A): String =
+      codec.encoder.apply(from).noSpaces
+
+  }
 
 }

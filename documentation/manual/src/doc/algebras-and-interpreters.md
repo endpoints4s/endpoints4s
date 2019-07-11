@@ -45,6 +45,7 @@ The following table lists the available algebras and points to their documentati
 |[Endpoints](algebras/endpoints.md)|HTTP endpoints (main algebra)|
 |[JsonEntities](algebras/json-entities.md)|JSON request and response entities|
 |[JsonSchemas](algebras/json-schemas.md)|JSON schemas of data types|
+|[Http1Streaming](algebras/http1-streaming.md)|Streamed responses and WebSocket|
 |[MuxEndpoints](algebras/mux-endpoints.md)|Multiplexed HTTP endpoints|
 
 ## Interpreters

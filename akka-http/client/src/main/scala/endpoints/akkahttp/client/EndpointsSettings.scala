@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import akka.http.scaladsl.{Http, HttpExt}
 import akka.http.scaladsl.model.{HttpEntity, HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
 import akka.stream.scaladsl.{Flow, Sink, Source}
@@ -11,6 +11,9 @@ import scala.concurrent.duration._
 import scala.util.Try
 
 final case class EndpointsSettings(
+  httpExt: HttpExt,
+  host: String,
+  port: Int,
   requestExecutor: AkkaHttpRequestExecutor,
   baseUri: Uri = Uri("/"),
   toStrictTimeout: FiniteDuration = 2.seconds,
@@ -27,7 +30,7 @@ object AkkaHttpRequestExecutor {
 
   def default(poolClientFlow: Flow[(HttpRequest, Int), (Try[HttpResponse], Int), Http.HostConnectionPool])(implicit materializer: Materializer): AkkaHttpRequestExecutor =
     new AkkaHttpRequestExecutor {
-      override def apply(request: HttpRequest): Future[HttpResponse] =
+      def apply(request: HttpRequest): Future[HttpResponse] =
         Source.single(request -> 1)
           .via(poolClientFlow)
           .map(_._1.get)

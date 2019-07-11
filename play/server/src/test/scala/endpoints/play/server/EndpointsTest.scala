@@ -9,8 +9,10 @@ class EndpointsTestApi(val playComponents: PlayComponents, val digests: Map[Stri
     with JsonEntitiesFromCodec
     with BasicAuthentication
     with Assets
+    with Http1JsonStreaming
     with algebra.BasicAuthTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.Assets
     with JsonFromCirceCodecTestApi
+    with algebra.circe.Http1JsonStreamingTestApi

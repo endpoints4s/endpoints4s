@@ -77,7 +77,10 @@ object EndpointsSettings {
   val playjsonVersion = "2.6.13"
   val playVersion = "2.6.21"
   val sttpVersion = "1.5.11"
-
+  val akkaActorVersion = "2.5.22"
+  val akkaHttpVersion = "10.1.8"
+  val akkaHttpCirceVersion = "1.25.2"
+  
   val scalaTestVersion = "3.0.7"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test

@@ -155,6 +155,7 @@ val `example-basic-client` =
     .settings(
       noPublishSettings,
       `scala 2.11 to 2.12`,
+      scalaJSUseMainModuleInitializer := true,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
     )
@@ -169,7 +170,7 @@ val `example-basic-play-server` =
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
       libraryDependencies += "com.typesafe.play" %% "play" % playVersion
     )
-    .dependsOn(`example-basic-shared-jvm`, `play-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`, `openapi-jvm`)
+    .dependsOn(`example-basic-shared-jvm`, `play-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`, `openapi-jvm`, `play-server-playjson`)
 
 val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))

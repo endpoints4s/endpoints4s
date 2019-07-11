@@ -4,7 +4,8 @@ import akka.http.scaladsl.server.Directives
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import endpoints._
 import endpoints.akkahttp.server
-import endpoints.algebra.Documentation
+import endpoints.algebra.circe.{CirceCodec, CirceCodecToEndpointsCodec}
+import endpoints.algebra.{Codec, Documentation}
 import io.circe.{Decoder, Encoder}
 
 /**
@@ -14,7 +15,11 @@ import io.circe.{Decoder, Encoder}
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with circe.JsonSchemas {
+trait JsonSchemaEntities
+  extends server.Endpoints
+    with algebra.JsonSchemaEntities
+    with algebra.JsonEntitiesFromCodec
+    with circe.JsonSchemas {
 
   def jsonRequest[A : JsonSchema](docs: Documentation): RequestEntity[A] = {
     implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
@@ -25,4 +30,8 @@ trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntitie
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
     Directives.complete(a)
   }
+
+  def jsonCodecToCodec[A](implicit schema: JsonCodec[A]): Codec[String, A] =
+    CirceCodecToEndpointsCodec(CirceCodec.fromEncoderAndDecoder(schema.encoder, schema.decoder))
+
 }

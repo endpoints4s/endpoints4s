@@ -108,7 +108,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
   }
 }
 
-trait Fixtures extends algebra.Endpoints {
+trait Fixtures extends algebra.Endpoints with algebra.Http1Streaming {
 
   val foo = endpoint(get(path / "foo"), emptyResponse(Some("Foo response")), tags = List("foo"))
 
@@ -125,14 +125,21 @@ trait Fixtures extends algebra.Endpoints {
   val multipleSegmentsPath =
     endpoint(get(path / "assets" / remainingSegments("file")), textResponse())
 
+  val assets =
+    chunkedEndpoint(get(path / "assets2" / remainingSegments("file")), bytesChunks())
+
+  val echo =
+    webSocketEndpoint(path / "ping-pong", textChunks(), textChunks())
+
 }
 
 object Fixtures
   extends Fixtures
     with algebra.JsonSchemasTest
     with Endpoints
-    with JsonSchemaEntities {
+    with JsonSchemaEntities
+    with Http1Streaming {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux)
+  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux, assets, echo)
 
 }

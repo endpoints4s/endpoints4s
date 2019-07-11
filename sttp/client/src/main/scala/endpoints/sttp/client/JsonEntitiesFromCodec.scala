@@ -1,7 +1,7 @@
 package endpoints.sttp.client
 
-import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
+import endpoints.algebra.Documentation
 
 import scala.language.higherKinds
 
@@ -11,13 +11,13 @@ import scala.language.higherKinds
   */
 trait JsonEntitiesFromCodec[R[_]] extends endpoints.algebra.JsonEntitiesFromCodec { self: Endpoints[R] =>
 
-  def jsonRequest[A](docs: Documentation)(implicit codec: Codec[String, A]): RequestEntity[A] = { (a, req) =>
-    req.body(codec.encode(a)).contentType("application/json")
+  def jsonRequest[A](docs: Documentation)(implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, req) =>
+    req.body(jsonCodecToCodec(codec).encode(a)).contentType("application/json")
   }
 
-  def jsonResponse[A](docs: Documentation)(implicit codec: Codec[String, A]): Response[A] = new SttpResponse[A] {
+  def jsonResponse[A](docs: Documentation)(implicit codec: JsonCodec[A]): Response[A] = new SttpResponse[A] {
     override type ReceivedBody = Either[Exception, A]
-    override def responseAs = sttp.asString.map(str => codec.decode(str))
+    override def responseAs = sttp.asString.map(str => jsonCodecToCodec(codec).decode(str))
     override def validateResponse(response: sttp.Response[ReceivedBody]): R[A] = {
       response.unsafeBody match {
         case Right(a) => backend.responseMonad.unit(a)

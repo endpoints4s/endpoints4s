@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `testsuite-jvm` = LocalProject("testsuiteJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
@@ -37,7 +38,7 @@ val `play-server-playjson` =
       name := "endpoints-play-server-playjson",
       libraryDependencies += "com.typesafe.play" %% "play-json" % playjsonVersion
     )
-    .dependsOn(`play-server`, `json-schema-playjson-jvm`)
+    .dependsOn(`play-server`, `algebra-playjson-jvm`, `json-schema-playjson-jvm`)
 
 val `play-client` =
   project.in(file("client"))

@@ -176,7 +176,7 @@ trait Urls extends algebra.Urls {
   }
 
   // TODO Improve error reporting
-  private def malformedRequest: StandardRoute =
+  private[akkahttp] def malformedRequest: StandardRoute =
     Directives.complete(HttpResponse(StatusCodes.BadRequest))
 
 }

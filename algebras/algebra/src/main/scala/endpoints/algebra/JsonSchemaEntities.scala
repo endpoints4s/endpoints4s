@@ -8,11 +8,11 @@ package endpoints.algebra
   */
 trait JsonSchemaEntities
   extends endpoints.algebra.JsonEntities
-    with JsonSchemas {
+    with JsonSchemas
+    with JsonCodecs {
 
 //#type-carrier
-  type JsonRequest[A] = JsonSchema[A]
-  type JsonResponse[A] = JsonSchema[A]
+  type JsonCodec[A] = JsonSchema[A]
 //#type-carrier
 
 }

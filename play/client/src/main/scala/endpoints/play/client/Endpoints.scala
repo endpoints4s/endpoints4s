@@ -16,7 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @group interpreters
   */
-class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
+class Endpoints(val host: String, val wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods {
 
   /**
     * A function that, given an `A` and a request model, returns an updated request

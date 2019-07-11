@@ -61,7 +61,15 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
   type JsonCodec[A] = Format[A]
 //#type-carrier
 
-  implicit def jsonCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
+  def jsonCodecToCodec[A : Format]: Codec[String, A] = PlayCodecToEndpointsCodec[A]
+
+  // TODO Reads[A] to Decoder[Json, A] and Writes[A] to Encoder[A, Json]
+
+}
+
+object PlayCodecToEndpointsCodec {
+
+  def apply[A](implicit format: Format[A]): Codec[String, A] = new Codec[String, A] {
 
     def decode(from: String): Either[Exception, A] =
       for {
@@ -72,7 +80,5 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
     def encode(from: A): String = Json.stringify(Json.toJson(from))
 
   }
-
-  // TODO Reads[A] to Decoder[Json, A] and Writes[A] to Encoder[A, Json]
 
 }

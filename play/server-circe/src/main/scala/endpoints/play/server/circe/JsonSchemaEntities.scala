@@ -1,7 +1,8 @@
 package endpoints.play.server.circe
 
 import endpoints.algebra
-import endpoints.algebra.Documentation
+import endpoints.algebra.{Codec, Documentation}
+import endpoints.algebra.circe.{CirceCodec, CirceCodecToEndpointsCodec}
 import endpoints.play.server.Endpoints
 import endpoints.play.server.circe.Util.circeJsonWriteable
 import io.circe.parser
@@ -12,10 +13,13 @@ import play.api.mvc.Results
   * JSON entities in HTTP requests, and circe’s [[io.circe.Encoder]] to build JSON entities
   * in HTTP responses.
   */
-trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with endpoints.circe.JsonSchemas {
+trait JsonSchemaEntities
+  extends Endpoints
+    with algebra.JsonSchemaEntities
+    with algebra.JsonEntitiesFromCodec
+    with endpoints.circe.JsonSchemas {
 
   import playComponents.executionContext
-
 
   def jsonRequest[A : JsonSchema](docs: Documentation): RequestEntity[A] =
     playComponents.playBodyParsers.tolerantText.validate { text =>
@@ -25,5 +29,8 @@ trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with 
     }
 
   def jsonResponse[A : JsonSchema](docs: Documentation): Response[A] = a => Results.Ok(implicitly[JsonSchema[A]].encoder.apply(a))
+
+  def jsonCodecToCodec[A](implicit schema: JsonCodec[A]): Codec[String, A] =
+    CirceCodecToEndpointsCodec(CirceCodec.fromEncoderAndDecoder(schema.encoder, schema.decoder))
 
 }

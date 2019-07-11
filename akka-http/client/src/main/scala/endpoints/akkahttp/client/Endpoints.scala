@@ -92,12 +92,14 @@ class Endpoints(val settings: EndpointsSettings)
 
   type Response[A] = HttpResponse => Future[Either[Throwable, A]]
 
-  def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = x =>
+  def emptyResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, Unit]] = x => {
+    x.discardEntityBytes()
     if (x.status == StatusCodes.OK) {
       Future.successful(Right(()))
     } else {
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
+  }
 
   def textResponse(docs: Documentation): HttpResponse => Future[Either[Throwable, String]] = x =>
     if (x.status == StatusCodes.OK) {
@@ -105,12 +107,15 @@ class Endpoints(val settings: EndpointsSettings)
         .map(settings.stringContentExtractor)
         .map(Right.apply)
     } else {
+      x.discardEntityBytes()
       Future.failed(new Throwable(s"Unexpected status code: ${x.status.intValue()}"))
     }
 
   override def wheneverFound[A](inner: HttpResponse => Future[Either[Throwable, A]], notFoundDocs: Documentation): HttpResponse => Future[Either[Throwable, Option[A]]] = {
     {
-      case resp if resp.status.intValue() == 404 => Future.successful(Right(None))
+      case resp if resp.status.intValue() == 404 =>
+        resp.discardEntityBytes()
+        Future.successful(Right(None))
       case resp => inner(resp).map(_.right.map(Some(_)))
     }
   }

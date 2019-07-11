@@ -26,15 +26,14 @@ object Server extends App with Results {
           |  <head>
           |  </head>
           |  <body>
-          |    <script src="/assets/sample-client-fastopt.js"></script>
-          |    <script>sample.Main().main();</script>
+          |    <script src="/assets/app.js"></script>
           |  </body>
           |</html>
         """.stripMargin
       Ok(html).as(HTML)
     }
-    case GET(p"/assets/sample-client-fastopt.js") =>
-      assets.versioned("/", "sample-client-fastopt.js")
+    case GET(p"/assets/app.js") =>
+      assets.versioned("/", "example-basic-client-fastopt.js")
     case GET(p"/api/description") => action {
       import sample.openapi.OpenApiEncoder.JsonSchema._
       Ok(Json.toJson(sample.openapi.DocumentedApi.documentation))
@@ -70,9 +69,10 @@ object Server extends App with Results {
     }
   }
 
+  val jsonStreamingExample = new JsonStreamingExampleServer(playComponents)
   val api = new Api(playComponents)
   val documentedApi = new DocumentedApi(playComponents)
 
-  HttpServer(config, playComponents, bootstrap orElse api.routes orElse documentedApi.routes)
+  HttpServer(config, playComponents, bootstrap orElse api.routes orElse jsonStreamingExample.routes orElse documentedApi.routes)
 
 }

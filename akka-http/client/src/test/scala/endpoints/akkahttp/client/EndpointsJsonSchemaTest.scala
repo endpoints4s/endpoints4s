@@ -1,6 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
 import akka.stream.{ActorMaterializer, Materializer}
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
 import endpoints.algebra.{Address, BasicAuthTestApi, JsonTestApi, User}
@@ -30,8 +31,12 @@ class EndpointsJsonSchemaTest
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(
-      AkkaHttpRequestExecutor.cachedHostConnectionPool("localhost",
-                                                       wiremockPort)))
+      Http(),
+      "localhost",
+      wiremockPort,
+      AkkaHttpRequestExecutor.cachedHostConnectionPool("localhost", wiremockPort)
+    )
+  )
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp],
                       args: Req): Future[Resp] = endpoint(args)

@@ -30,7 +30,7 @@ trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
     wireMockServer.resetAll()
   }
 
-  private def findOpenPort: Int = {
+  def findOpenPort: Int = {
     val socket = new ServerSocket(0)
     try socket.getLocalPort
     finally if (socket != null) socket.close()

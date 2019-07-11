@@ -6,7 +6,7 @@ import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
 
 import scala.concurrent.duration._
 
-trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
+trait ServerTestBase[+T <: algebra.Endpoints] extends WordSpec
   with Matchers
   with ScalaFutures
   with BeforeAndAfterAll
@@ -23,6 +23,12 @@ trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
     *         decoding failed.
     */
   def decodeUrl[A](url: serverApi.Url[A])(urlCandidate: String): DecodedUrl[A]
+
+  /**
+    * @param runTests A function that is called after the server is started and before it is stopped. It takes
+    *                 the TCP port number as parameter.
+    */
+  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: Resp)(runTests: Int => Unit): Unit
 
 }
 

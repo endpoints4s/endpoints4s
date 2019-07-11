@@ -2,7 +2,9 @@ package endpoints.akkahttp.client
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints._
-import io.circe.{Encoder, Decoder}
+import endpoints.algebra.Codec
+import endpoints.algebra.circe.{CirceCodec, CirceCodecToEndpointsCodec}
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import io.circe.parser.decode
 
@@ -13,7 +15,10 @@ import io.circe.parser.decode
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchemas { this: Endpoints =>
+trait JsonSchemaEntities
+  extends algebra.JsonSchemaEntities
+    with algebra.JsonEntitiesFromCodec
+    with circe.JsonSchemas { this: Endpoints =>
 
   def jsonRequest[A: JsonSchema](docs: algebra.Documentation): RequestEntity[A] = { (a, req) =>
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
@@ -26,5 +31,9 @@ trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchem
       strictEntity <- a.entity.toStrict(settings.toStrictTimeout)
     } yield decode[A](settings.stringContentExtractor(strictEntity))
   }
+
+  def jsonCodecToCodec[A](implicit schema: JsonCodec[A]): Codec[String, A] =
+    CirceCodecToEndpointsCodec(CirceCodec.fromEncoderAndDecoder(schema.encoder, schema.decoder))
+
 }
 

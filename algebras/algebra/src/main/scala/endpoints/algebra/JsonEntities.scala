@@ -35,21 +35,28 @@ trait JsonEntities extends Endpoints {
 }
 
 /**
-  * Fixes both the `JsonRequest` and `JsonResponse` types to be [[Codec]].
+  * Fixes both the `JsonRequest` and `JsonResponse` types to be a same `JsonCodec` type.
   *
   * @group algebras
   */
-trait JsonEntitiesFromCodec extends JsonEntities {
+trait JsonCodecs extends JsonEntities {
 
-  type JsonRequest[A] = Codec[String, A]
-  type JsonResponse[A] = Codec[String, A]
+  type JsonRequest[A] = JsonCodec[A]
+  type JsonResponse[A] = JsonCodec[A]
 
 //#json-codec-type
   /** A JSON codec type class */
   type JsonCodec[A]
 //#json-codec-type
 
+}
+
+/**
+  * Turns a `JsonCodec` into a [[Codec]].
+  */
+trait JsonEntitiesFromCodec extends JsonEntities with JsonCodecs {
+
   /** Turns a JsonCodec[A] into a Codec[String, A] */
-  implicit def jsonCodec[A : JsonCodec]: Codec[String, A]
+  def jsonCodecToCodec[A : JsonCodec]: Codec[String, A]
 
 }
