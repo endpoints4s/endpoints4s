@@ -27,8 +27,18 @@ val `akka-http-client` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`algebra-circe-jvm` % "test->test")
-    .dependsOn(`json-schema-circe-jvm`)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
+
+val `akka-http-client-circe` =
+  project.in(file("client-circe"))
+    .settings(
+      publishSettings,
+      `scala 2.11 to 2.12`,
+      name := "endpoints-akka-http-client-circe"
+    ).dependsOn(
+      `akka-http-client` % "test->test;compile->compile",
+      `json-schema-circe-jvm`
+    )
 
 val `akka-http-server` =
   project.in(file("server"))

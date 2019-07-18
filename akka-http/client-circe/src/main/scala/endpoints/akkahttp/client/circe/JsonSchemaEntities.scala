@@ -1,7 +1,8 @@
-package endpoints.akkahttp.client
+package endpoints.akkahttp.client.circe
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints._
+import endpoints.akkahttp.client.Endpoints
 import io.circe.{Encoder, Decoder}
 import io.circe.syntax._
 import io.circe.parser.decode
@@ -27,4 +28,3 @@ trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchem
     } yield decode[A](settings.stringContentExtractor(strictEntity))
   }
 }
-
