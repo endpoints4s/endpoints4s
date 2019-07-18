@@ -28,6 +28,7 @@ class JsonSchemasTest extends FreeSpec {
         ("Baz", DocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         ("Bax", DocumentedRecord(Nil)) ::
         ("Qux", DocumentedRecord(Nil)) ::
+        ("Quux", DocumentedRecord(Field("b", DocumentedJsonSchemas.byteJsonSchema, isOptional = false, documentation = None) :: Nil)) ::
         Nil
       )
     assert(DocumentedJsonSchemas.Foo.schema == expectedSchema)
