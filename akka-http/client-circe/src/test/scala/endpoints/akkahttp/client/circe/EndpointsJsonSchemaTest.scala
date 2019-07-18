@@ -1,7 +1,8 @@
-package endpoints.akkahttp.client
+package endpoints.akkahttp.client.circe
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
+import endpoints.akkahttp.client.{AkkaHttpRequestExecutor, BasicAuthentication, Endpoints, EndpointsSettings}
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
 import endpoints.algebra.{Address, BasicAuthTestApi, JsonTestApi, User}
 import endpoints.generic
