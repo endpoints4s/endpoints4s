@@ -31,6 +31,7 @@ trait JsonSchemasTest extends JsonSchemas {
   case class Baz(i: Int) extends Foo
   case class Bax() extends Foo
   case object Qux extends Foo
+  case class Quux(b: Byte) extends Foo
 
   object Foo {
     implicit val schema: JsonSchema[Foo] = {
@@ -38,18 +39,21 @@ trait JsonSchemasTest extends JsonSchemas {
       val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
       val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
       val quxSchema: Record[Qux.type] = emptyRecord.xmap(_ => Qux)(_ => ())
+      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux)(_.b)
 
-      (barSchema.tagged("Bar") orElse bazSchema.tagged("Baz") orElse baxSchema.tagged("Bax") orElse quxSchema.tagged("Qux"))
+      (barSchema.tagged("Bar") orElse bazSchema.tagged("Baz") orElse baxSchema.tagged("Bax") orElse quxSchema.tagged("Qux") orElse quuxSchema.tagged("Quux"))
         .xmap[Foo] {
-          case Left(Left(Left(bar))) => bar
-          case Left(Left(Right(baz))) => baz
-          case Left(Right(bax)) => bax
-          case Right(qux) => qux
+          case Left(Left(Left(Left(bar)))) => bar
+          case Left(Left(Left(Right(baz)))) => baz
+          case Left(Left(Right(bax))) => bax
+          case Left(Right(qux)) => qux
+          case Right(quux) => quux
         } {
-          case bar: Bar => Left(Left(Left(bar)))
-          case baz: Baz => Left(Left(Right(baz)))
-          case bax: Bax => Left(Right(bax))
-          case qux: Qux.type => Right(qux)
+          case bar: Bar => Left(Left(Left(Left(bar))))
+          case baz: Baz => Left(Left(Left(Right(baz))))
+          case bax: Bax => Left(Left(Right(bax)))
+          case qux: Qux.type => Left(Right(qux))
+          case quux: Quux => Right(quux)
         }
     }
   }

@@ -87,6 +87,8 @@ class JsonSchemasTest extends FreeSpec {
 
       lazy val booleanJsonSchema: String = "boolean"
 
+      lazy val byteJsonSchema: String = "byte"
+
       def arrayJsonSchema[C[X] <: Seq[X], A](implicit
                                              jsonSchema: String,
                                              factory: Factory[A, C[A]]
