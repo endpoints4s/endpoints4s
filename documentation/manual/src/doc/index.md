@@ -1,33 +1,42 @@
 endpoints
 =========
 
-*endpoints* is a Scala library for defining communication protocols over HTTP between
-applications.
+*endpoints* is a Scala library for remote communication. It improves the developers productivity by ensuring
+that HTTP servers, HTTP clients, and documentation always agree on the same protocol.
 
-Noteworthy features:
+- **maintenance is simplified**: the API documentation is automatically updated when an endpoint is modified ;
+- errors are raised at **compile-time** if endpoints are invoked with incompatible parameters.
 
-- endpoints descriptions are **first-class Scala values**, which can be reused,
-  combined and abstracted over ;
-- a *same* endpoint description can be interpreted in *multiple* ways:
-    - a **client** implementation (JVM and/or Scala.js),
-    - a **server** implementation,
-    - an **OpenAPI** definition file,
-    - thus, your client and documentation are always **consistent** with the actual
-      implementation of your server,
-- **type safety**: you get a compile-time error if you invoke an endpoint but supply incorrect data
-  (requests are guaranteed to be well constructed),
-- **extensibility**: you can introduce both
-  - new *descriptions* that are specific to your application (e.g. the usage
-    of a particular HTTP header),
-  - new *interpreters* for endpoint descriptions (e.g. generation of a RAML documentation),
-- **vanilla Scala**: being written in pure Scala (no macros), the implementation is easy to
-  reason about and IDE friendly.
+Servers, clients and documentation are *all* derived from a *single* source of truth describing the underlying
+protocol details (e.g., which verb, path, query parameters, headers, authentication strategy, etc. to
+use). From the client perspective, calling an HTTP endpoint is as simple as
+[calling a function](/quick-start.md#client-implementation). Conversely, from the server perspective
+implementing an HTTP endpoint is as simple as [implementing a function](/quick-start.md#server-implementation).
+The *endpoints* library takes care of constructing the HTTP requests and responses and decoding the server
+responses or client requests according to the endpoint descriptions.
+
+In contrast with [most other approaches](/comparison.md), *endpoints* is a pure, “*vanilla*”, Scala library.
+**No code generation**. **No macros**. **IDE friendly**. Endpoint descriptions are **first-class Scala values**,
+which can be reused, combined, and abstracted over.
+
+The library currently supports the following backends:
+- clients: Akka-Http, Play-WS, sttp, scalaj, and XMLHttpRequest (Scala.js) ;
+- servers: Akka-Http and Play ;
+- documentation: OpenAPI document ;
+- JSON is supported via Circe or Play-Json ;
+
+… but the library is designed to be **extensible**, anyone can:
+
+- implement a new interpreter for the existing endpoint descriptions (e.g. generation of RAML
+  documentation, http4s client and server backend, etc.) ;
+- add new descriptions to the existing ones (e.g. to define an application-specific authentication
+  strategy).
 
 ## Getting started
 
 - Have a look at the [quick start](quick-start.md) guide to understand
   in a few minutes what the library does and how to setup a project ;
-- Check out the [use cases](use-cases.md) to know where *endpoints* shines ;
+- Check out the [use cases](use-cases.md) to know the typical problems that *endpoints* addresses ;
 - Browse the [API documentation](api:endpoints.algebra.package) or the
   [samples](https://github.com/julienrf/endpoints/tree/master/documentation/examples) ;
 - Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
