@@ -1,6 +1,6 @@
 package endpoints.akkahttp.client
 
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{StatusCodes => AkkaStatusCodes}
 import akka.http.scaladsl.model.headers._
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
@@ -26,7 +26,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication { self: Endpoints 
     */
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
     resp =>
-      if (resp.status == StatusCodes.Forbidden) Future.successful(Right(None))
+      if (resp.status == AkkaStatusCodes.Forbidden) Future.successful(Right(None))
       else response(resp).map(_.right.map(Some.apply))
 
 }
