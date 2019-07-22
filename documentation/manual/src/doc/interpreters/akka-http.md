@@ -8,7 +8,7 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 "org.julienrf" %% "endpoints-akka-http-client" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.akkahttp.client.package)
+[API documentation](unchecked:/api/endpoints/akkahttp/client/index.html)
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function
 from `A` to `Future[B]`:
@@ -32,7 +32,7 @@ It can be invoked as follows:
 "org.julienrf" %% "endpoints-akka-http-server" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.akkahttp.server.package)
+[API documentation](unchecked:/api/endpoints/akkahttp/server/index.html)
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to something that,
 given an implementation function `A => B`, returns an `akka.http.scaladsl.server.Route`

@@ -4,7 +4,7 @@
 "org.julienrf" %% "endpoints-openapi" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.openapi.package)
+[API documentation](unchecked:/api/endpoints/openapi/index.html)
 
 ## Endpoints
 

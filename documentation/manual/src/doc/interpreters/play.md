@@ -8,7 +8,7 @@ Client and server backed by [Play framework](https://www.playframework.com/).
 "org.julienrf" %% "endpoints-play-client" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.play.client.package)
+[API documentation](unchecked:/api/endpoints/play/client/index.html)
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function from
 `A` to `Future[B]`:
@@ -32,7 +32,7 @@ It can be invoked as follows:
 "org.julienrf" %% "endpoints-play-server" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.play.server.package)
+[API documentation](unchecked:/api/endpoints/play/server/index.html)
 
 The `Endpoints` interpreter provides a `routesFromEndpoints` operation that turns
 a sequence of endpoints with their implementation into a `play.api.routing.Router.Routes`

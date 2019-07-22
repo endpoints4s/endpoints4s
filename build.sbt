@@ -20,8 +20,6 @@ val documentation = project.in(file("documentation"))
 
 noPublishSettings
 
-enablePlugins(CrossPerProjectPlugin)
-
 ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
 
 inThisBuild(Seq(

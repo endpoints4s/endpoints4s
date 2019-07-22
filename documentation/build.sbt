@@ -38,7 +38,7 @@ val apiDoc =
     .enablePlugins(ScalaUnidocPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.11`,
+      scalaVersion := "2.12.8",
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
         "-diagrams",
@@ -61,7 +61,7 @@ val manual =
   project.in(file("manual"))
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
-      `scala 2.11`,
+      scalaVersion := "2.12.8",
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
       ornateSettings := Map("version" -> version.value),
@@ -69,9 +69,9 @@ val manual =
       addMappingsToSiteDir(mappings in ornate, siteSubdirName in ornate),
       mappings in ornate := {
         val output = ornate.value
-        output ** AllPassFilter --- output pair relativeTo(output)
+        output ** AllPassFilter --- output pair sbt.io.Path.relativeTo(output)
       },
-      siteSubdirName in packageDoc := s"api/${version.value}",
+      siteSubdirName in packageDoc := "api",
       addMappingsToSiteDir(mappings in ScalaUnidoc in packageDoc in apiDoc, siteSubdirName in packageDoc),
       previewLaunchBrowser := false
     )

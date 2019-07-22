@@ -6,7 +6,7 @@ Client interpreter backed by [scalaj-http](https://github.com/scalaj/scalaj-http
 "org.julienrf" %% "endpoints-scalaj-client" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.scalaj.client.package)
+[API documentation](unchecked:/api/endpoints/scalaj/client/index.html)
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type
 to a type that provide methods to invoke the endpoint synchronously

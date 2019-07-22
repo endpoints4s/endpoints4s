@@ -50,7 +50,7 @@ The library currently supports the following backends:
 - Have a look at the [quick start](quick-start.md) guide to understand
   in a few minutes what the library does and how to setup a project ;
 - Check out the [use cases](use-cases.md) to know the typical problems that *endpoints* addresses ;
-- Browse the [API documentation](api:endpoints.algebra.package) or the
+- Browse the [API documentation](unchecked:/api/endpoints/index.html) or the
   [samples](https://github.com/julienrf/endpoints/tree/master/documentation/examples) ;
 - Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
 
