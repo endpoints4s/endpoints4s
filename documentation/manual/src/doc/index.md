@@ -9,13 +9,26 @@ that HTTP servers, HTTP clients, and documentation always agree on the same prot
 
 Servers, clients and documentation are *all* derived from a *single* source of truth describing the underlying
 protocol details (e.g., which verb, path, query parameters, headers, authentication strategy, etc. to
-use). From the client perspective, calling an HTTP endpoint is as simple as
-[calling a function](/quick-start.md#client-implementation). Conversely, from the server perspective
-implementing an HTTP endpoint is as simple as [implementing a function](/quick-start.md#server-implementation).
-The *endpoints* library takes care of constructing the HTTP requests and responses and decoding the server
-responses or client requests according to the endpoint descriptions.
+use). For instance, here is an endpoint for incrementing a counter. It uses the HTTP verb `POST`, the URL path
+`/increment`, a JSON request entity containing an `Increment` value, and it returns an empty response.
 
-In contrast with [most other approaches](/comparison.md), *endpoints* is a pure, “*vanilla*”, Scala library.
+~~~ scala src=../../../../documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala#endpoint-definition
+~~~
+
+From the client perspective, calling an HTTP endpoint is as simple as calling a function:
+
+~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClientFuture.scala#endpoint-invocation
+~~~
+
+Conversely, from the server perspective implementing an HTTP endpoint is as simple as implementing a function:
+
+~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala#endpoint-implementation
+~~~
+
+The *endpoints* library takes care of constructing the HTTP requests and responses and decoding the server
+responses or client requests into high-level data types according to the endpoint descriptions.
+
+In contrast with [most other approaches](comparison.md), *endpoints* is a pure, “*vanilla*”, Scala library.
 **No code generation**. **No macros**. **IDE friendly**. Endpoint descriptions are **first-class Scala values**,
 which can be reused, combined, and abstracted over.
 

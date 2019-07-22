@@ -25,7 +25,9 @@ class CounterServer(protected val playComponents: PlayComponents)
     currentValue.implementedBy(_ => Counter(counter.single.get)),
 
     /** Implements the `increment` endpoint */
+    //#endpoint-implementation
     increment.implementedBy(inc => counter.single += inc.step)
+    //#endpoint-implementation
 
   )
 

@@ -27,8 +27,10 @@ trait CounterEndpoints
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.
     */
+//#endpoint-definition
   val increment: Endpoint[Increment, Unit] =
     endpoint(post(path / "increment", jsonRequest[Increment]()), emptyResponse())
+//#endpoint-definition
 
   // Generically derive the JSON schema of our `Counter`
   // and `Increment` case classes defined thereafter
