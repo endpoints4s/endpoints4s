@@ -9,7 +9,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.1.2-1")
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.0.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.3")
+addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.0")
 
 addSbtPlugin("com.novocode" % "sbt-ornate" % "0.6")
 
