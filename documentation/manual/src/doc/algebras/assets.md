@@ -6,7 +6,7 @@ This algebra provides vocabulary to define endpoints serving static assets.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.Assets)
+[API documentation](unchecked:/api/endpoints/algebra/Assets.html)
 
 The module enriches the `Endpoints` algebra with new constructors for endpoints and
 path segments. It also introduces the concepts of `AssetRequest`, `AssetResponse`

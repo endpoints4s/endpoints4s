@@ -6,7 +6,7 @@ Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes 
 "org.julienrf" %% "endpoints-json-schema-playjson" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.playjson.JsonSchemas)
+[API documentation](unchecked:/api/endpoints/playjson/JsonSchemas.html)
 
 The `JsonSchemas` interpreter fixed the `JsonSchema[A]` type to a type
 that provides both a `Reads[A]` and a `Writes[A]`.

@@ -6,7 +6,7 @@ Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definiti
 "org.julienrf" %% "endpoints-json-schema-circe" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.circe.JsonSchemas)
+[API documentation](unchecked:/api/endpoints/circe/JsonSchemas.html)
 
 The `JsonSchemas` interpreter fixed the `JsonSchema[A]` to a type
 that provides both an `io.circe.Encoder[A]` and an `io.circe.Decoder[A]`.

@@ -7,7 +7,7 @@ requests and responses.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.MuxEndpoints)
+[API documentation](unchecked:/api/endpoints/algebra/MuxEndpoints.html)
 
 In general, each possible resource or action supported by a service
 is exposed through a specific endpoint, taking a specific request type

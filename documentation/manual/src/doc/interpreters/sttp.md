@@ -6,7 +6,7 @@ Client backed by [sttp](https://github.com/softwaremill/sttp).
 "org.julienrf" %% "endpoints-sttp-client" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.sttp.client.package)
+[API documentation](unchecked:/api/endpoints/sttp/client/index.html)
 
 The `Endpoints` interpreter is parameterized by an sttp backend
 of type `SttpBackend[R, Nothing]`, for some type constructor `R[_]`.

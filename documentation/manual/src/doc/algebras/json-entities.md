@@ -9,7 +9,7 @@ containing JSON documents.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.JsonEntities)
+[API documentation](unchecked:/api/endpoints/algebra/JsonEntities.html)
 
 The module enriches the `Endpoints` algebra with new constructors
 for request and response entities. For instance, here is how to
@@ -48,7 +48,7 @@ families of algebras and interpreters you should use together.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.JsonSchemaEntities)
+[API documentation](unchecked:/api/endpoints/algebra/JsonSchemaEntities.html)
 
 This algebra merges the `JsonEntities` algebra and the
 [`JsonSchemas` algebra](json-schemas.md) and aligns both the
@@ -62,7 +62,7 @@ responses entities.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.JsonEntitiesFromCodec)
+[API documentation](unchecked:/api/endpoints/algebra/JsonEntitiesFromCodec.html)
 
 This algebra fixes both the `JsonRequest[A]` and `JsonResponse[A]` types to the same
 codec type able to both encode and decode `A` values into and from JSON documents. By
@@ -71,8 +71,8 @@ are consistent.
 
 This trait introduces an abstract `JsonCodec[A]` type, which is fixed by more concrete
 interpreters such as
-[playjson.JsonEntitiesFromCodec](api:endpoints.algebra.playjson.JsonEntitiesFromCodec)
-or [circe.JsonEntitiesFromCodec](api:endpoints.algebra.circe.JsonEntitiesFromCodec).
+[playjson.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/playjson/JsonEntitiesFromCodec.html)
+or [circe.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/circe/JsonEntitiesFromCodec.html).
 There interpreters are provided by the following dependencies:
 
 ~~~ scala expandVars=true

@@ -10,7 +10,7 @@ import scala.language.higherKinds
 
 /**
   * An interpreter for [[endpoints.algebra.Endpoints]] that builds a client issuing requests using
-  * a sttp’s [[com.softwaremill.sttp.SttpBackend]].
+  * a sttp’s `com.softwaremill.sttp.SttpBackend`.
   *
   * Doest not support streaming responses for now
   *

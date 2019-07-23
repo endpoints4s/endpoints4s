@@ -33,18 +33,17 @@ jobs:
 
     - stage: test
       scala: 2.11.12
-      script: sbt "wow $TRAVIS_SCALA_VERSION" test manual/makeSite
+      script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
       scala: 2.12.8
-      script: sbt "wow $TRAVIS_SCALA_VERSION" test
+      script: sbt ++$TRAVIS_SCALA_VERSION test
     - stage: test
       scala: 2.13.0-M5
-      # requires strict aggregation because 2.13 is not supported by all the modules
-      script: sbt "+++$TRAVIS_SCALA_VERSION test"
+      script: sbt "++ $TRAVIS_SCALA_VERSION test"
 
     - stage: coverage
       script:
-        - sbt "wow 2.11.12" coverage test coverageReport coverageAggregate
+        - sbt ++2.11.12 coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
 
     - stage: publish
@@ -55,7 +54,7 @@ jobs:
         - chmod 600 ci/travis-key
         - eval "$(ssh-agent -s)"
         - ssh-add ci/travis-key
-        - sbt "wow 2.11.12" manual/makeSite +publishSigned sonatypeReleaseAll manual/ghpagesPushSite
+        - sbt ++2.11.12 manual/makeSite +publishSigned sonatypeReleaseAll manual/ghpagesPushSite
 
 env:
   global:

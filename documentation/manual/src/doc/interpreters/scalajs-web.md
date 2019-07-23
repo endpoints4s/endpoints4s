@@ -6,7 +6,7 @@ Web client using `XMLHttpRequest`.
 "org.julienrf" %%% "endpoints-xhr-client" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.xhr.package)
+[API documentation](unchecked:/api/endpoints/xhr/index.html)
 
 The `Endpoints` interpreter fixes the type `Endpoint[A, B]` to a function
 from `A` to `Result[B]`, where `Result` is abstract and is intended

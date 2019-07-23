@@ -1,6 +1,6 @@
 # `Tupler`
 
-This guide explains why we use implicit [`Tupler`](api:endpoints.Tupler) parameters
+This guide explains why we use implicit [`Tupler`](unchecked:/api/endpoints/Tupler.html) parameters
 in the signature of some algebra operations and how it works.
 
 ## Motivation

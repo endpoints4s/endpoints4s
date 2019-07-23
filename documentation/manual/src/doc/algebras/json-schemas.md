@@ -8,7 +8,7 @@ This algebra provides vocabulary to define JSON schemas of data types.
 "org.julienrf" %% "endpoints-algebra-json-schema" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.JsonSchemas)
+[API documentation](unchecked:/api/endpoints/algebra/JsonSchemas.html)
 
 > {.note}
 > This module is dependency-free, it can be used independently of *endpoints*
@@ -109,7 +109,7 @@ for algebraic data types.
 "org.julienrf" %% "endpoints-json-schema-generic" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.generic.JsonSchemas)
+[API documentation](unchecked:/api/endpoints/generic/JsonSchemas.html)
 
 With this module, defining the JSON schema of the `Shape` data type is
 reduced to the following:

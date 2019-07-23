@@ -32,16 +32,16 @@ $ sbt +test
 or for faster feedback loop:
 
 ~~~ sh
-$ sbt "+++ 2.11.12 test"
-$ sbt "+++ 2.12.8 test"
-$ sbt "+++ 2.13.0-M5 test"
+$ sbt "++ 2.11.12 test"
+$ sbt "++ 2.12.8 test"
+$ sbt "++ 2.13.0-M5 test"
 ~~~
 
 
 ### Preview the documentation
 
 ~~~ sh
-$ sbt +manual/previewSite
+$ sbt manual/previewSite
 ~~~
 
 And then go to http://localhost:4000.
@@ -49,13 +49,13 @@ And then go to http://localhost:4000.
 ### Publish the documentation
 
 ~~~ sh
-$ sbt +manual/ghpagesPushSite
+$ sbt manual/ghpagesPushSite
 ~~~
 
 ### Run the examples 
 
 ~~~ sh
-+++ 2.12.4 example-basic-play-server/run
+++ 2.12.4 example-basic-play-server/run
 ~~~
 
 ## Working with mill

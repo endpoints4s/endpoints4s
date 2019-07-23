@@ -7,7 +7,7 @@ describe HTTP endpoints, requests and responses.
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](api:endpoints.algebra.Endpoints)
+[API documentation](unchecked:/api/endpoints/algebra/Endpoints.html)
 
 ## Endpoint
 
