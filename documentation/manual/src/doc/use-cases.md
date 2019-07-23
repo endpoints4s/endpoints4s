@@ -1,6 +1,6 @@
 # Use Cases
 
-This page showcases the salient features of *endpoints*.
+This page shows typical use cases where *endpoints* can provide value.
 
 ## Microservices
 
