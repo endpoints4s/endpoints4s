@@ -42,6 +42,7 @@ jobs:
       script: sbt "++ $TRAVIS_SCALA_VERSION test"
 
     - stage: coverage
+      if: tag is blank
       script:
         - sbt ++2.12.8 coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
