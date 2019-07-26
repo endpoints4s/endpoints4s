@@ -18,13 +18,11 @@ object EndpointsSettings {
       "-unchecked",
       "-Xlint",
       "-Ywarn-dead-code",
-      "-Ywarn-numeric-widen",
-      "-Ywarn-value-discard",
-      "-Xfuture"
+      "-Ywarn-numeric-widen"
     ) ++
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) if n >= 13 => Seq("-Xsource:2.14")
-      case _ => Seq("-Yno-adapted-args", "-Ywarn-unused-import", "-Xexperimental")
+      case _ => Seq("-Yno-adapted-args", "-Ywarn-unused-import", "-Xexperimental", "-Xfuture", "-Ywarn-value-discard")
     })
   )
   val `scala 2.11` = Seq(
@@ -37,7 +35,7 @@ object EndpointsSettings {
   )
   val `scala 2.11 to latest` = Seq(
     scalaVersion := "2.12.8",
-    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0-M5")
+    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -67,7 +65,7 @@ object EndpointsSettings {
 
   val noPublishSettings = commonSettings ++ Seq(
     publishArtifact := false,
-    publish := ()
+    publish := { () }
     //  publishLocal := ()
   )
 
@@ -78,7 +76,7 @@ object EndpointsSettings {
   val playVersion = "2.6.21"
   val sttpVersion = "1.5.15"
 
-  val scalaTestVersion = "3.0.7"
+  val scalaTestVersion = "3.0.8"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
 

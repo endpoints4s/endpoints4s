@@ -38,7 +38,7 @@ jobs:
       scala: 2.12.8
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
-      scala: 2.13.0-M5
+      scala: 2.13.0
       script: sbt "++ $TRAVIS_SCALA_VERSION test"
 
     - stage: coverage
