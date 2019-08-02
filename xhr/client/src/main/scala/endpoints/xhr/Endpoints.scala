@@ -112,12 +112,14 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   /**
     * Successfully decodes no information from a response
     */
-  def emptyResponse(docs: Documentation): Response[Unit] = _ => Right(())
+  def emptyResponse(docs: Documentation): Response[Unit] =
+    xhr => if (xhr.status == 200) Right(()) else Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
 
   /**
     * Successfully decodes string information from a response
     */
-  def textResponse(docs: Documentation): Response[String] = x => Right(x.responseText)
+  def textResponse(docs: Documentation): Response[String] =
+    xhr => if (xhr.status == 200) Right(xhr.responseText) else Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
 
   /**
     * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.
