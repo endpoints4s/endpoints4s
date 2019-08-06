@@ -9,7 +9,7 @@ val algebra =
       `scala 2.11 to latest`,
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
-        "com.github.tomakehurst" % "wiremock" % "2.22.0" % Test,
+        "com.github.tomakehurst" % "wiremock" % "2.24.1" % Test,
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
