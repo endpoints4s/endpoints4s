@@ -1,9 +1,10 @@
 # Comparison with similar tools
 
-## Autowire / Remotely / Lagom
+## Autowire / Remotely / Lagom / Mu
 
-[Autowire](https://github.com/lihaoyi/autowire) and
-[Remotely](http://verizon.github.io/remotely) are Scala libraries automating
+[Autowire](https://github.com/lihaoyi/autowire), and
+[Remotely](http://verizon.github.io/remotely), and
+[Mu](https://github.com/higherkindness/mu) are Scala libraries automating
 remote proceduce calls between a server and a client.
 [Lagom](https://www.lagomframework.com/) is
 a framework for implementing microservices. One difference with *endpoints* is
@@ -22,12 +23,12 @@ of the HTTP protocol (content negotiation, authorization, semantic verbs and sta
 etc.), so, in general, one HTTP endpoint is used for one remote call (though the library also
 supports multiplexing in case users don’t care about the underlying HTTP protocol).
 
-Last, Autowire, Remotely and Lagom can not generate documentation of the commmunication protocol.
+Last, Autowire, Remotely, Mu, and Lagom can not generate documentation of the communication protocol.
 
-## Swagger / Thrift / Protobuf
+## Swagger / Thrift / gRPC
 
-Solutions such as Swagger, Thrift and Google Protocol Buffers generate
-the client and server code based on a protocol definition.
+Solutions such as Swagger, Thrift, and gRPC generate the client and server code
+based on a protocol definition written in a custom language.
 We believe that generated code is hard to reason about and to integrate and keep
 in sync with code written by developers.
 Also, the protocol is defined in a dedicated language (JSON dialect or custom language) which
@@ -37,23 +38,40 @@ You can find a more elaborated article about the limitations of approaches based
 code generation in
 [this blog post](http://julien.richard-foy.fr/blog/2016/01/24/my-problem-with-code-generation/).
 
-## Rho / Fintrospect
+## Rho / Fintrospect / tapir
 
-[Fintrospect](http://fintrospect.io/) and
-[Rho](https://github.com/http4s/rho) are the libraries closest to *endpoints*.
+[Fintrospect](http://fintrospect.io/),
+[Rho](https://github.com/http4s/rho), and
+[tapir](https://github.com/softwaremill/tapir) projects are comparable alternatives to *endpoints*.
 Their features and usage are similar: users describe their communication protocol in plain
-Scala and the library generates client (Fintrospect only), server and documentation.
-The key difference is that the communication protocol is described by a sealed AST,
-which is not extensible: users can not extend descriptions with application-specific concerns
-and interpreters can not be partial.
+Scala and the library generates client (Fintrospect and tapir only), server and documentation.
 
-## Servant
+A key difference is that in these projects the endpoints description language is defined as a sealed AST,
+which is not extensible: users can not extend descriptions with application-specific concerns
+and interpreters can not be partial. We can illustrate that point with Web Sockets, a feature that is
+not be supported by all clients and servers. For instance, Play-WS does not support Web Sockets. This
+means that a Web Socket endpoint description can not be interpreted by a Play-WS based client.
+There are two ways to inform the user about such an incompatibility: either by showing a compilation error,
+or by throwing a runtime exception. In *endpoints*, interpreters can partially support the description
+language, resulting in a compilation error if one tries to apply an interpreter that is not powerful
+enough to interpret a given endpoint. By contrast, if the description language is a sealed AST then all
+interpreters have to be total, otherwise a `MatchError` will be thrown at runtime.
+
+That being said, a drawback of having an extensible description language is that users have to “build”
+their language by combining different modules together (eg, `Endpoints with JsonSchemaEntities`), and
+then build matching interpreters. These steps are not needed with projects where the description language
+is based on a sealed AST.
+
+## Servant / typedapi / typed-schema
 
 [Servant](https://haskell-servant.github.io/) is a Haskell library that uses generic
 programming to
-derive client, server and documentation from endpoint descriptions. The descriptions and
-interpreters are extensible. The difference with *endpoints* is that in
-Servant descriptions are **types**, whereas in *endpoints* they are **values**.
+derive client, server and documentation from endpoint descriptions.
+[typedapi](https://github.com/pheymann/typedapi) and
+[typed-schema](https://github.com/TinkoffCreditSystems/typed-schema)
+are similar projects written in Scala. In these projects, both descriptions and
+interpreters are extensible. The difference with *endpoints* is that
+descriptions are **types**, whereas in *endpoints* they are **values**.
 
 Using types as descriptions has some benefits: they can directly be used to type instances of
 data (in contrast, in *endpoints* descriptions of data types have to mirror a
