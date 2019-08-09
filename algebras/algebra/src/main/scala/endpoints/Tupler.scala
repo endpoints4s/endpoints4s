@@ -17,12 +17,16 @@ package endpoints
   * }}}
   *
   * The following rules are implemented (by increasing priority):
-  *  - A, B           -> (A, B)
-  *  - A, (B, C)      -> (A, B, C)
-  *  - (A, B), C      -> (A, B, C)
-  *  - (A, B), (C, D) -> (A, B, C, D)
-  *  - A, Unit        -> A
-  *  - Unit, A        -> A
+  *  - A, B              -> (A, B)
+  *  - A, (B, C)         -> (A, B, C)
+  *  - (A, B), C         -> (A, B, C)
+  *  - (A, B), (C, D)    -> (A, B, C, D)
+  *  - A, (B, C, D, E)   -> (A, B, C, D, E)
+  *  - (A, B), (C, D, E) -> (A, B, C, D, E)
+  *  - (A, B, C), D      -> (A, B, C, D)
+  *  - (A, B, C, D), E   -> (A, B, C, D, E)
+  *  - A, Unit           -> A
+  *  - Unit, A           -> A
   */
 //#definition
 trait Tupler[A, B] {
@@ -49,7 +53,7 @@ trait Tupler1 {
 
 trait Tupler2 extends Tupler1 {
 
-  implicit def left[A, B, C]: Aux[A, (B, C), (A, B, C)] =
+  implicit def tupler1And2[A, B, C]: Aux[A, (B, C), (A, B, C)] =
     new Tupler[A, (B, C)] {
       type Out = (A, B, C)
       def apply(a: A, bc: (B, C)): (A, B, C) = (a, bc._1, bc._2)
@@ -59,7 +63,7 @@ trait Tupler2 extends Tupler1 {
       }
     }
 
-  implicit def right[A, B, C]: Aux[(A, B), C, (A, B, C)] =
+  implicit def tupler2And1[A, B, C]: Aux[(A, B), C, (A, B, C)] =
     new Tupler[(A, B), C] {
       type Out = (A, B, C)
       def apply(ab: (A, B), c: C): (A, B, C) = (ab._1, ab._2, c)
@@ -73,13 +77,53 @@ trait Tupler2 extends Tupler1 {
 
 trait Tupler3 extends Tupler2 {
 
-  implicit def leftRight[A, B, C, D]: Aux[(A, B), (C, D), (A, B, C, D)] =
+  implicit def tupler2And2[A, B, C, D]: Aux[(A, B), (C, D), (A, B, C, D)] =
     new Tupler[(A, B), (C, D)] {
       type Out = (A, B, C, D)
       def apply(ab: (A, B), cd: (C, D)): (A, B, C, D) = (ab._1, ab._2, cd._1, cd._2)
       def unapply(out: (A, B, C, D)): ((A, B), (C, D)) = {
         val (a, b, c, d) = out
         ((a, b), (c, d))
+      }
+    }
+
+  implicit def tupler1And4[A, B, C, D, E]: Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
+    new Tupler[A, (B, C, D, E)] {
+      type Out = (A, B, C, D, E)
+      def apply(a: A, bcde: (B, C, D, E)): (A, B, C, D, E) = (a, bcde._1, bcde._2, bcde._3, bcde._4)
+      def unapply(out: (A, B, C, D, E)): (A, (B, C, D, E)) = {
+        val (a, b, c, d, e) = out
+        (a, (b, c, d, e))
+      }
+    }
+
+  implicit def tupler2And3[A, B, C, D, E]: Tupler[(A, B), (C, D, E)] { type Out = (A, B, C, D, E) } =
+    new Tupler[(A, B), (C, D, E)] {
+      type Out = (A, B, C, D, E)
+      def apply(ab: (A, B), cde: (C, D, E)): (A, B, C, D, E) = (ab._1, ab._2, cde._1, cde._2, cde._3)
+      def unapply(out: (A, B, C, D, E)): ((A, B), (C, D, E)) = {
+        val (a, b, c, d, e) = out
+        ((a, b), (c, d, e))
+      }
+    }
+
+  implicit def tupler3And1[A, B, C, D]: Tupler[(A, B, C), D] { type Out = (A, B, C, D) } =
+    new Tupler[(A, B, C), D] {
+      type Out = (A, B, C, D)
+      def apply(abc: (A, B, C), d: D): (A, B, C, D) = (abc._1, abc._2, abc._3, d)
+      def unapply(out: (A, B, C, D)): ((A, B, C), D) = {
+        val (a, b, c, d) = out
+        ((a, b, c), d)
+      }
+    }
+
+  implicit def tupler4And1[A, B, C, D, E]: Tupler[(A, B, C, D), E] { type Out = (A, B, C, D, E) } =
+    new Tupler[(A, B, C, D), E] {
+      type Out = (A, B, C, D, E)
+      def apply(abcd: (A, B, C, D), e: E): (A, B, C, D, E) = (abcd._1, abcd._2, abcd._3, abcd._4, e)
+      def unapply(out: (A, B, C, D, E)): ((A, B, C, D), E) = {
+        val (a, b, c, d, e) = out
+        ((a, b, c, d), e)
       }
     }
 
