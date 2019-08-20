@@ -100,10 +100,10 @@ by wrapping it in the `lazySchema` constructor:
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
 ~~~
 
-## Generic derivation of JSON schemas
+## Generic derivation of JSON schemas (based on Shapeless) {#generic-derivation-of-json-schemas}
 
 The module presented in this section uses Shapeless to generically derive JSON schemas
-for algebraic data types.
+for algebraic data type definitions.
 
 ~~~ scala expandVars=true
 "org.julienrf" %% "endpoints-json-schema-generic" % "{{version}}"
@@ -120,7 +120,7 @@ reduced to the following:
 The `genericJsonSchema` operation builds a JSON schema for the given
 type, mapping each case class field to a JSON object field of the same name,
 and each leaf of a sealed trait to a tagged JSON object whose type discriminator
-uses the case class name.
+uses the case class fully qualified name.
 
 The module also takes advantage shapeless to define more convenient
 operations for combining JSON schema definitions: the `zip` operation
@@ -128,3 +128,12 @@ is replaced by a `:*:` operator, and `xmap` is replaced by `as`:
 
 ~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#explicit-schema
 ~~~
+
+## Generic derivation of JSON schemas (based on macros)
+
+An alternative to the module presented in the preceding section is provided
+as a third-party module:
+[endpoints-json-schemas-macros](https://github.com/scalalandio/endpoints-json-schemas-macros).
+
+Please see the README of that project for more information on how to use it
+and its differences with the module provided by *endpoints*.
