@@ -57,3 +57,7 @@ The library currently supports the following backends:
 ## Contributing
 
 See the [Github repository](https://github.com/julienrf/endpoints).
+
+## Sponsors
+
+[Bestmile](https://bestmile.com) supports engineering work on the project.
