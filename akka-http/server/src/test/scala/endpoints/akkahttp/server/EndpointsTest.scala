@@ -2,7 +2,6 @@ package endpoints.akkahttp.server
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import endpoints.akkahttp.server.{BasicAuthentication, Endpoints, JsonEntities}
 import endpoints.algebra
 import org.scalatest.{Matchers, WordSpec}
 

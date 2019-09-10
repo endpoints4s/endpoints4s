@@ -16,13 +16,14 @@ import io.circe.{Decoder, Encoder}
   */
 trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with circe.JsonSchemas {
 
-  def jsonRequest[A : JsonSchema](docs: Documentation): RequestEntity[A] = {
+  def jsonRequest[A : JsonSchema]: RequestEntity[A] = {
     implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
     Directives.entity[A](implicitly)
   }
 
-  def jsonResponse[A : JsonSchema](docs: Documentation): Response[A] = { a =>
+  def jsonResponse[A : JsonSchema]: ResponseEntity[A] = {
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
-    Directives.complete(a)
+    implicitly
   }
+
 }

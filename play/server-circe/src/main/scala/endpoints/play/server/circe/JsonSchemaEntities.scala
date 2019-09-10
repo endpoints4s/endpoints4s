@@ -1,10 +1,10 @@
 package endpoints.play.server.circe
 
 import endpoints.algebra
-import endpoints.algebra.Documentation
 import endpoints.play.server.Endpoints
 import endpoints.play.server.circe.Util.circeJsonWriteable
-import io.circe.parser
+import io.circe.{Json, parser}
+import play.api.http.Writeable
 import play.api.mvc.Results
 
 /**
@@ -17,13 +17,14 @@ trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with 
   import playComponents.executionContext
 
 
-  def jsonRequest[A : JsonSchema](docs: Documentation): RequestEntity[A] =
+  def jsonRequest[A : JsonSchema]: RequestEntity[A] =
     playComponents.playBodyParsers.tolerantText.validate { text =>
       parser.parse(text)
         .right.flatMap(implicitly[JsonSchema[A]].decoder.decodeJson)
         .left.map(ignoredError => Results.BadRequest)
     }
 
-  def jsonResponse[A : JsonSchema](docs: Documentation): Response[A] = a => Results.Ok(implicitly[JsonSchema[A]].encoder.apply(a))
+  def jsonResponse[A : JsonSchema]: ResponseEntity[A] =
+    implicitly[Writeable[Json]].map(a => implicitly[JsonSchema[A]].encoder(a))
 
 }

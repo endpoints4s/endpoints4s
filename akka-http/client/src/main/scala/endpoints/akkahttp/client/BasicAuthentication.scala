@@ -25,8 +25,8 @@ trait BasicAuthentication extends algebra.BasicAuthentication { self: Endpoints 
     * Checks that the result is not `Forbidden`
     */
   private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] =
-    resp =>
-      if (resp.status == AkkaStatusCodes.Forbidden) Future.successful(Right(None))
-      else response(resp).map(_.right.map(Some.apply))
+    (status, headers) =>
+      if (status == AkkaStatusCodes.Forbidden) discardingEntity(Future.successful(Right(None)))
+      else entity => response(status, headers)(entity).map(_.right.map(Some.apply))
 
 }

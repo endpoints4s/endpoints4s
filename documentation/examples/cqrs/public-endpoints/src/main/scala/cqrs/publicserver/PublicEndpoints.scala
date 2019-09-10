@@ -25,23 +25,32 @@ trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodec {
 
   /** Lists all the registered meters */
   val listMeters: Endpoint[Unit, List[Meter]] =
-    endpoint(get(metersPath), jsonResponse[List[Meter]]())
+    endpoint(get(metersPath), ok(jsonResponse[List[Meter]]))
 
   /** Find a meter by id */
 //#get-meter
   val getMeter: Endpoint[UUID, Option[Meter]] =
-    endpoint(get(metersPath / segment[UUID]()), jsonResponse[Meter]().orNotFound())
+    endpoint(
+      get(metersPath / segment[UUID]()),
+      ok(jsonResponse[Meter]).orNotFound()
+    )
 //#get-meter
 
   //#webapps-endpoint
   /** Registers a new meter */
   val createMeter: Endpoint[CreateMeter, Meter] =
-    endpoint(post(metersPath, jsonRequest[CreateMeter]()), jsonResponse[Meter]())
+    endpoint(
+      post(metersPath, jsonRequest[CreateMeter]),
+      ok(jsonResponse[Meter])
+    )
   //#webapps-endpoint
 
   /** Add a record to an existing meter */
   val addRecord: Endpoint[(UUID, AddRecord), Meter] =
-    endpoint(post(metersPath / segment[UUID]() / "records", jsonRequest[AddRecord]()), jsonResponse[Meter]())
+    endpoint(
+      post(metersPath / segment[UUID]() / "records", jsonRequest[AddRecord]),
+      ok(jsonResponse[Meter])
+    )
 
 }
 //#public-endpoints

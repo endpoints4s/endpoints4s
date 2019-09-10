@@ -11,7 +11,7 @@ trait DocumentedApi
   val items =
     endpoint(
       get(path / "items" / segment[String]("category") /? qs[Option[Int]]("page")),
-      jsonResponse[List[Item]](Some("List all the items of the given category"))
+      ok(jsonResponse[List[Item]], Some("List all the items of the given category"))
     )
 
   val itemId = segment[String]("id")
@@ -19,7 +19,10 @@ trait DocumentedApi
   val item =
     endpoint(
       get(path / "item" / itemId),
-      wheneverFound(jsonResponse[Item](Some("The item identified by 'id'")), Some("Item not found"))
+      wheneverFound(
+        ok(jsonResponse[Item], Some("The item identified by 'id'")),
+        Some("Item not found")
+      )
     )
 
   val admin =
@@ -27,7 +30,7 @@ trait DocumentedApi
       Get,
       path / "admin",
       requestEntity = emptyRequest,
-      response = emptyResponse(Some("Administration page")),
+      response = ok(emptyResponse, Some("Administration page")),
       summary = Some("Authentication endpoint")
     )
 

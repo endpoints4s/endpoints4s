@@ -1,9 +1,9 @@
 package endpoints.play.server.playjson
 
 import endpoints.algebra
-import endpoints.algebra.Documentation
 import endpoints.play.server.Endpoints
-import play.api.libs.json.Json
+import play.api.http.Writeable
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results
 
 /**
@@ -14,13 +14,13 @@ trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with 
 
   import playComponents.executionContext
 
-  def jsonRequest[A: JsonSchema](docs: Documentation): RequestEntity[A] =
+  def jsonRequest[A: JsonSchema]: RequestEntity[A] =
     playComponents.playBodyParsers.tolerantText.validate { text =>
       Json.parse(text).validate(implicitly[JsonSchema[A]].reads).asEither
         .left.map(ignoredError => Results.BadRequest)
     }
 
-  def jsonResponse[A: JsonSchema](docs: Documentation): Response[A] =
-    a => Results.Ok(implicitly[JsonSchema[A]].writes.writes(a))
+  def jsonResponse[A: JsonSchema]: ResponseEntity[A] =
+    implicitly[Writeable[JsValue]].map(a => implicitly[JsonSchema[A]].writes.writes(a))
 
 }

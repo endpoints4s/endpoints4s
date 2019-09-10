@@ -1,6 +1,6 @@
 package endpoints.play.server
 
-import endpoints.algebra.{Codec, Documentation}
+import endpoints.algebra.Codec
 import play.api.http.{ContentTypes, Writeable}
 import play.api.mvc.Results
 
@@ -14,14 +14,14 @@ trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitie
 
   import playComponents.executionContext
 
-  def jsonRequest[A](docs: Documentation)(implicit codec: Codec[String, A]): RequestEntity[A] =
+  def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] =
     playComponents.playBodyParsers.tolerantText.validate { body =>
       codec.decode(body).left.map(ignoredError => Results.BadRequest)
     }
 
-  def jsonResponse[A](docs: Documentation)(implicit codec: Codec[String, A]): Response[A] = { a =>
+  def jsonResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = {
     val playCodec = implicitly[play.api.mvc.Codec]
-    Results.Ok(playCodec.encode(codec.encode(a)))(Writeable(s => s, Some(ContentTypes.JSON)))
+    Writeable((a: A) => playCodec.encode(codec.encode(a)), Some(ContentTypes.JSON))
   }
 
 }

@@ -10,8 +10,8 @@ trait JsonFromCodecTestApi
   implicit def addressCodec: JsonCodec[Address]
 
   val jsonCodecEndpoint = endpoint(
-    post(path / "user-json-codec", jsonRequest[User]()),
-    jsonResponse[Address]()
+    post(path / "user-json-codec", jsonRequest[User]),
+    ok(jsonResponse[Address])
   )
 
 }

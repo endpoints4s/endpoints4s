@@ -13,6 +13,8 @@ trait Responses
   extends algebra.Responses
   with StatusCodes {
 
+  type ResponseEntity[A] = Map[String, MediaType]
+
   type Response[A] = List[DocumentedResponse]
 
   /**
@@ -22,11 +24,12 @@ trait Responses
     */
   case class DocumentedResponse(status: StatusCode, documentation: String, content: Map[String, MediaType])
 
-  def emptyResponse(docs: Documentation): Response[Unit] =
-    DocumentedResponse(OK, docs.getOrElse(""), Map.empty) :: Nil
+  def emptyResponse: ResponseEntity[Unit] = Map.empty
 
-  def textResponse(docs: Documentation): Response[String] =
-    DocumentedResponse(OK, docs.getOrElse(""), Map("text/plain" -> MediaType(Some(model.Schema.simpleString)))) :: Nil
+  def textResponse: ResponseEntity[String] = Map("text/plain" -> MediaType(Some(model.Schema.simpleString)))
+
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    DocumentedResponse(statusCode, docs.getOrElse(""), entity) :: Nil
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
     DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), content = Map.empty) :: response

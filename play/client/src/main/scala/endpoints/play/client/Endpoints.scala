@@ -62,7 +62,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     case (_, req) => req
   }
 
-  def textRequest(docs: Documentation): (String, WSRequest) => WSRequest =
+  lazy val textRequest: (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
   implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
@@ -72,7 +72,7 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
 
   def request[A, B, C, AB, Out](
     method: Method, url: Url[A],
-    entity: RequestEntity[B], headers: RequestHeaders[C]
+    entity: RequestEntity[B], docs: Documentation, headers: RequestHeaders[C]
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
@@ -84,24 +84,27 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   /**
     * Attempts to decode an `A` from a `WSResponse`.
     */
-  type Response[A] = WSResponse => Either[Throwable, A]
+  type Response[A] = (StatusCode, Map[String, scala.collection.Seq[String]]) => ResponseEntity[A]
 
-  /** Successfully decodes no information from a response */
-  def emptyResponse(docs: Documentation): Response[Unit] = {
-    case resp if resp.status >= OK && resp.status < 300 => Right(())
-    case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
-  }
+  type ResponseEntity[A] = WSResponse => Either[Throwable, A]
 
-  /** Successfully decodes string information from a response */
-  def textResponse(docs: Documentation): Response[String] = {
-    case resp if resp.status >= OK && resp.status < 300 => Right(resp.body)
-    case resp => Left(new Throwable(s"Unexpected status code: ${resp.status}"))
-  }
+  /** Discards response entity */
+  def emptyResponse: ResponseEntity[Unit] =
+    _ => Right(())
+
+  /** Decodes a string entity from a response */
+  def textResponse: ResponseEntity[String] =
+    wsResp => Right(wsResp.body)
+
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    (status, _) =>
+      if (status == statusCode) entity
+      else _ => Left(new Throwable(s"Unexpected status code: ${status}"))
 
   def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
-    wsResponse =>
-      if (wsResponse.status == NotFound) Right(None)
-      else response(wsResponse).right.map(Some(_))
+    (status, headers) =>
+      if (status == NotFound) _ => Right(None)
+      else wsResp => response(status, headers)(wsResp).right.map(Some(_))
 
   /**
     * A function that, given an `A`, eventually attempts to decode the `B` response.
@@ -117,8 +120,9 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     response: Response[B],
     summary: Documentation,
     description: Documentation,
-    tags: List[String]): Endpoint[A, B] =
-    a => request(a).flatMap(response andThen futureFromEither)
+    tags: List[String]
+  ): Endpoint[A, B] =
+    a => request(a).flatMap(wsResp => futureFromEither(response(wsResp.status, wsResp.headers)(wsResp)))
 
 }
 

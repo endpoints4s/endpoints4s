@@ -18,8 +18,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 trait QueriesEndpoints extends MuxEndpoints with circe.JsonEntitiesFromCodec {
 
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
-    val request = post(path / "query", jsonRequest[Json]())
-    muxEndpoint[QueryReq, QueryResp, Json](request, jsonResponse())
+    val request = post(path / "query", jsonRequest[Json])
+    muxEndpoint[QueryReq, QueryResp, Json](request, ok(jsonResponse))
   }
 
 }

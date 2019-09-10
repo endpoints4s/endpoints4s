@@ -22,7 +22,7 @@ class DocumentationServer(val playComponents: PlayComponents)
     with OpenApiSchemas with server.playjson.JsonSchemaEntities {
 
   val routes = routesFromEndpoints(
-    endpoint(get(path / "documentation.json"), jsonResponse[OpenApi]())
+    endpoint[Unit, OpenApi](get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
       .implementedBy(_ => CounterDocumentation.api)
   )
 

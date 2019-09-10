@@ -1,9 +1,8 @@
 package endpoints.akkahttp.server
 
-import akka.http.scaladsl.marshalling.ToResponseMarshaller
+import akka.http.scaladsl.marshalling.ToEntityMarshaller
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.FromRequestUnmarshaller
-
 import endpoints._
 
 /**
@@ -18,11 +17,12 @@ trait JsonEntities extends algebra.JsonEntities with Endpoints {
 
   type JsonRequest[A] = FromRequestUnmarshaller[A]
 
-  def jsonRequest[A : JsonRequest](docs: algebra.Documentation = None): RequestEntity[A] = Directives.entity[A](implicitly)
+  def jsonRequest[A : JsonRequest]: RequestEntity[A] = Directives.entity[A](implicitly)
 
 
-  type JsonResponse[A] = ToResponseMarshaller[A]
+  type JsonResponse[A] = ToEntityMarshaller[A]
 
-  def jsonResponse[A : JsonResponse](docs: algebra.Documentation = None): Response[A] = entity => Directives.complete(entity)
+  def jsonResponse[A : JsonResponse]: ResponseEntity[A] =
+    implicitly
 
 }

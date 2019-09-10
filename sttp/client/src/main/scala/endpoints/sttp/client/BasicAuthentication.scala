@@ -24,12 +24,11 @@ trait BasicAuthentication[R[_]] extends algebra.BasicAuthentication { self: Endp
     * Checks that the result is not `Forbidden`
     */
   private[endpoints] def authenticated[A](inner: Response[A], docs: Documentation): Response[Option[A]] = {
-    new SttpResponse[Option[A]] {
-      override type ReceivedBody = inner.ReceivedBody
-      override def responseAs = inner.responseAs
-      override def validateResponse(response: sttp.Response[inner.ReceivedBody]): R[Option[A]] = {
+    new Response[Option[A]] {
+      val entity = mapResponseEntity[A, Option[A]](inner.entity)(Some(_))
+      def decodeResponse(response: sttp.Response[inner.entity.ReceivedBody]): R[Option[A]] = {
         if (response.code == 403) backend.responseMonad.unit(None)
-        else backend.responseMonad.map(inner.validateResponse(response))(Some(_))
+        else entity.decodeEntity(response)
       }
     }
   }

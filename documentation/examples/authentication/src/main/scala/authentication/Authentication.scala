@@ -85,7 +85,7 @@ trait Authentication extends algebra.Endpoints {
     tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Endpoint[UET, R] =
     endpoint(
-      request(method, url, requestEntity, authenticationTokenRequestHeaders),
+      request(method, url, requestEntity, None, authenticationTokenRequestHeaders),
       wheneverAuthenticated(response)
     )
 //#protected-endpoints-algebra
@@ -126,27 +126,27 @@ trait ClientAuthentication
   )
 
   // Decodes the user info from a response
-  def authenticationToken: Response[AuthenticationToken] = { httpResponse =>
-    httpResponse.headers.get(HeaderNames.AUTHORIZATION) match {
+  def authenticationToken: Response[AuthenticationToken] = { (_, headers) =>
+    headers.get(HeaderNames.AUTHORIZATION) match {
       case Some(Seq(headerValue)) =>
         val token = headerValue.stripPrefix("Bearer ")
         // Note: the default implementation of `JwtSession.deserialize`
         // returns an “empty” JwtSession object when it is invalid.
         // You might want to tweak the logic to return an error in such a case.
         UserInfo.decodeToken(token) match {
-          case Some(user) => Right(new AuthenticationToken(token,user))
-          case None       => Left(new Exception("Invalid JWT session"))
+          case Some(user) => _ => Right(new AuthenticationToken(token,user))
+          case None       => _ => Left(new Exception("Invalid JWT session"))
         }
-      case _ => Left(new Exception("Missing JWT session"))
+      case _ => _ => Left(new Exception("Missing JWT session"))
     }
   }
 
   // Checks that the response is not `BadRequest` before continuing
-  def wheneverValid[A](response: Response[A]): Response[Option[A]] = { httpResponse =>
-    if (httpResponse.status == Status.BAD_REQUEST) {
-      Right(None)
+  def wheneverValid[A](response: Response[A]): Response[Option[A]] = { (status, headers) =>
+    if (status == Status.BAD_REQUEST) {
+      _ => Right(None)
     } else {
-      response(httpResponse).right.map(Some(_))
+      entity => response(status, headers)(entity).right.map(Some(_))
     }
   }
 //#client-interpreter
@@ -157,11 +157,11 @@ trait ClientAuthentication
   }
 
   // Checks that the response is not `Unauthorized` before continuing
-  def wheneverAuthenticated[A](response: Response[A]): Response[A] = { httpResponse =>
-    if (httpResponse.status == Status.UNAUTHORIZED) {
-      Left(new Exception("Unauthorized"))
+  def wheneverAuthenticated[A](response: Response[A]): Response[A] = { (status, headers) =>
+    if (status == Status.UNAUTHORIZED) {
+      _ => Left(new Exception("Unauthorized"))
     } else {
-      response(httpResponse)
+      response(status, headers)
     }
   }
 //#protected-endpoints-client

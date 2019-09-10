@@ -38,30 +38,24 @@ trait Requests
     method: Method,
     url: DocumentedUrl,
     headers: DocumentedHeaders,
-    entity: Option[DocumentedRequestEntity]
+    documentation: Documentation,
+    entity: Map[String, MediaType]
   )
 
-  type RequestEntity[A] = Option[DocumentedRequestEntity]
+  type RequestEntity[A] = Map[String, MediaType]
 
-  /**
-    * @param documentation Human readable documentation of the request entity
-    * @param content       Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
-    */
-  case class DocumentedRequestEntity(documentation: Option[String], content: Map[String, MediaType])
+  lazy val emptyRequest = Map.empty[String, MediaType]
 
-  def emptyRequest = None
-
-  override def textRequest(docs: Documentation): Option[DocumentedRequestEntity] = Some(
-    DocumentedRequestEntity(docs, Map("text/plain" -> MediaType(Some(Schema.simpleString))))
-  )
+  lazy val textRequest = Map("text/plain" -> MediaType(Some(Schema.simpleString)))
 
   def request[A, B, C, AB, Out](
     method: Method,
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
+    docs: Documentation = None,
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
-    DocumentedRequest(method, url, headers, entity)
+    DocumentedRequest(method, url, headers, docs, entity)
 
   implicit lazy val reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
     def xmap[From, To](x: RequestEntity[From], map: From => To, contramap: To => From): RequestEntity[To] = x

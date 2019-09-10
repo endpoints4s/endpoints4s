@@ -11,82 +11,82 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val UUIDEndpoint = endpoint(
     get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
-    textResponse()
+    ok(textResponse)
   )
 
   val putUUIDEndpoint = endpoint(
     put(path / "user" / segment[UUID](), emptyRequest),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val deleteUUIDEndpoint = endpoint(
     delete(path / "user" / segment[UUID]()),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val emptyResponseUUIDEndpoint = endpoint(
     get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val smokeEndpoint = endpoint(
     get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
-    textResponse()
+    ok(textResponse)
   )
 
   val putEndpoint = endpoint(
     put(path / "user" / segment[String](), emptyRequest),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val deleteEndpoint = endpoint(
     delete(path / "user" / segment[String]()),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val emptyResponseSmokeEndpoint = endpoint(
     get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
-    emptyResponse()
+    ok(emptyResponse)
   )
 
   val optionalEndpoint: Endpoint[Unit, Option[String]] = endpoint(
     get(path / "users" / "1"),
-    wheneverFound(textResponse())
+    wheneverFound(ok(textResponse))
   )
 
   val headers1 = header("A") ++ header("B")
   val joinedHeadersEndpoint = endpoint(
-    get(path / "joinedHeadersEndpoint", headers1),
-    textResponse()
+    get(path / "joinedHeadersEndpoint", headers = headers1),
+    ok(textResponse)
   )
 
   val headers2 = header("C").xmap(_.toInt)(_.toString)
   val xmapHeadersEndpoint = endpoint(
-    get(path / "xmapHeadersEndpoint", headers2),
-    textResponse()
+    get(path / "xmapHeadersEndpoint", headers = headers2),
+    ok(textResponse)
   )
 
   val url1 = (path / "xmapUrlEndpoint" / segment[Long]() : Url[Long]).xmap(_.toString)( _.toLong)
   val xmapUrlEndpoint = endpoint(
     get(url1),
-    textResponse()
+    ok(textResponse)
   )
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
-  val reqBody1 = textRequest().xmap(s => LocalDate.parse(s, dateTimeFormatter))( d => dateTimeFormatter.format(d))
+  val reqBody1 = textRequest.xmap(s => LocalDate.parse(s, dateTimeFormatter))( d => dateTimeFormatter.format(d))
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
-    textResponse()
+    ok(textResponse)
   )
 
   val optUUIDQsEndpoint = endpoint(
     get(path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & qs[Option[Int]]("age"))),
-    textResponse()
+    ok(textResponse)
   )
 
   val optQsEndpoint = endpoint(
     get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & qs[Option[Int]]("age"))),
-    textResponse()
+    ok(textResponse)
   )
 
 }

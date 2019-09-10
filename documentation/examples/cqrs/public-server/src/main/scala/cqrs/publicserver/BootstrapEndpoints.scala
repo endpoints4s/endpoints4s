@@ -12,13 +12,13 @@ import play.twirl.api.{Html, StringInterpolation}
 class BootstrapEndpoints(protected val playComponents: PlayComponents) extends Endpoints with Assets with JsonSchemaEntities with OpenApiSchemas {
 
   val index: Endpoint[Unit, Html] =
-    endpoint(get(path), htmlResponse)
+    endpoint(get(path), ok(htmlResponse))
 
   val assets: Endpoint[AssetRequest, AssetResponse] =
     assetsEndpoint(path / "assets" / assetSegments())
 
   val documentation: Endpoint[Unit, OpenApi] = {
-    endpoint(get(path / "documentation"), jsonResponse[OpenApi]())
+    endpoint(get(path / "documentation"), ok(jsonResponse[OpenApi]))
   }
 
   val routes: PlayRouter.Routes =

@@ -16,15 +16,15 @@ import io.circe.parser.decode
   */
 trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchemas { this: Endpoints =>
 
-  def jsonRequest[A: JsonSchema](docs: algebra.Documentation): RequestEntity[A] = { (a, req) =>
+  def jsonRequest[A: JsonSchema]: RequestEntity[A] = { (a, req) =>
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder
     req.copy(entity = HttpEntity(ContentTypes.`application/json`, a.asJson.spaces2))
   }
 
-  def jsonResponse[A: JsonSchema](docs: algebra.Documentation): Response[A] = { a =>
+  def jsonResponse[A: JsonSchema]: ResponseEntity[A] = { entity =>
     implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
     for {
-      strictEntity <- a.entity.toStrict(settings.toStrictTimeout)
+      strictEntity <- entity.toStrict(settings.toStrictTimeout)
     } yield decode[A](settings.stringContentExtractor(strictEntity))
   }
 }

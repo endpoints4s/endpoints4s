@@ -10,21 +10,25 @@ import endpoints.algebra.Documentation
   */
 trait Responses extends algebra.Responses with StatusCodes {
 
-  type Response[A] = HttpResponse[String] => Either[Throwable, A]
+  type Response[A] = HttpResponse[String] => ResponseEntity[A]
+
+  type ResponseEntity[A] = String => Either[Throwable, A]
 
 
-  def emptyResponse(docs: Documentation): Response[Unit] = {
-    case response if response.code >= OK && response.code < 300 => Right(())
-    case response => Left(new Throwable(s"Unexpected status code: ${response.code}"))
-  }
+  def emptyResponse: ResponseEntity[Unit] =
+    _ => Right(())
 
-  def textResponse(docs: Documentation): Response[String] = x => if (x.code == OK) Right(x.body) else Left(new Throwable(s"Unexpected status code: ${x.code}"))
+  def textResponse: ResponseEntity[String] =
+    s => Right(s)
 
-  def wheneverFound[A](inner: HttpResponse[String] => Either[Throwable, A], notFoundDocs: Documentation): HttpResponse[String] => Either[Throwable, Option[A]] = {
-    {
-      case resp if resp.code == NotFound => Right(None)
-      case resp => inner(resp).right.map(Some(_))
-    }
+  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+    response =>
+      if (response.code == statusCode) entity
+      else _ => Left(new Throwable(s"Unexpected status code: ${response.code}"))
+
+  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
+    case resp if resp.code == NotFound => _ => Right(None)
+    case resp => entity => inner(resp)(entity).right.map(Some(_))
   }
 
 }
