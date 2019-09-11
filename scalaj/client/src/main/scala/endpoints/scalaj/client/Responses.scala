@@ -1,8 +1,7 @@
 package endpoints.scalaj.client
 
 import scalaj.http.HttpResponse
-import endpoints.algebra
-
+import endpoints.{InvariantFunctor, algebra}
 import endpoints.algebra.Documentation
 
 /**
@@ -10,10 +9,15 @@ import endpoints.algebra.Documentation
   */
 trait Responses extends algebra.Responses with StatusCodes {
 
-  type Response[A] = HttpResponse[String] => ResponseEntity[A]
+  type Response[A] = HttpResponse[String] => Option[ResponseEntity[A]]
+
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        resp => fa(resp).map(entity => s => entity(s).right.map(f))
+    }
 
   type ResponseEntity[A] = String => Either[Throwable, A]
-
 
   def emptyResponse: ResponseEntity[Unit] =
     _ => Right(())
@@ -23,12 +27,12 @@ trait Responses extends algebra.Responses with StatusCodes {
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     response =>
-      if (response.code == statusCode) entity
-      else _ => Left(new Throwable(s"Unexpected status code: ${response.code}"))
+      if (response.code == statusCode) Some(entity)
+      else None
 
-  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
-    case resp if resp.code == NotFound => _ => Right(None)
-    case resp => entity => inner(resp)(entity).right.map(Some(_))
-  }
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
+    resp =>
+      responseA(resp).map(entity => (s: String) => entity(s).right.map(Left(_)))
+        .orElse(responseB(resp).map(entity => (s: String) => entity(s).right.map(Right(_))))
 
 }

@@ -101,7 +101,12 @@ that there is no representation of the source type in the target type.
 ## Response
 
 The `Response[A]` type models an HTTP response carrying some information of type `A`.
-For instance, a `Response[User]` value is an HTTP response containing a user.
+For instance, a `Response[User]` value describes an HTTP response containing a user:
+client interpreters decode a `User` from the response entity, server interpreters
+encode a `User` as a response entity, and documentation interpreters render the
+serialization schema of a `User`.
+
+### Constructing Responses
 
 A response is defined in terms of a status and an entity. Here is an example
 of a simple OK response with no entity:
@@ -114,7 +119,46 @@ There is a more general response constructor taking the status as parameter:
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#general-response
 ~~~
 
-You can also define a response by transforming another one:
+Additional documentation about the response can be passed as an extra parameter:
 
-~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#response-combinator
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#documented-response
 ~~~
+
+### Transforming Responses
+
+Responses have methods provided by the
+[`ResponseSyntax`](unchecked:/api/endpoints/algebra/Responses$ResponseSyntax.html)
+and the
+[`InvariantFunctorSyntax`](unchecked:/api/endpoints/InvariantFunctorSyntax$InvariantFunctorSyntax.html)
+implicit classes, whose usage is illustrated in the remaining of this section.
+
+The `orNotFound` operation is useful to handle resources that may not be found: 
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-or-not-found
+~~~
+
+In this example, servers can produce a Not Found (404) response by
+returning `None`, and an OK (200) response containing a user by returning
+a `Some[User]` value. Conversely, clients interpret a Not Found response as a `None`
+value, and an OK response (with a valid user entity) as a `Some[User]` value.
+
+More generally, you can describe an alternative between two possible responses
+by using the `orElse` operation:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-or-else
+~~~
+
+In this example, servers can produce a Bad Request (400) response by returning
+`Left(validationErrors)`, and an OK (200) response containing a user
+by returning `Right(user)`. Conversely, clients interpret a Bad Request response
+(with a valid `ValidationErrors` entity) as a `Left(validationErrors)` value,
+and an OK response (with a valid user entity) as a `Right(user)` value.
+
+You can also transform the type produced by the alternative responses into
+a more convenient type to work with, by using the `xmap` operation. For instance,
+here is how to transform a `Response[Either[Seq[Error], User]]` into a
+`Response[Validated[User]]`:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-xmap
+~~~
+

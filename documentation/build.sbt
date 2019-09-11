@@ -41,6 +41,7 @@ val apiDoc =
       scalaVersion := "2.12.8",
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
+        "-implicits",
         "-diagrams",
         "-groups",
         "-doc-source-url", s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",

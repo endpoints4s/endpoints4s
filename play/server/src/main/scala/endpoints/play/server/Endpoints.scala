@@ -103,8 +103,6 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     def encode(a: A): Call
   }
 
-
-
   implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
     new InvariantFunctor[Request] {
       def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] =
@@ -211,6 +209,11 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     */
   type Response[A] = A => Result
 
+  implicit lazy val responseInvFunctor: endpoints.InvariantFunctor[Response] =
+    new endpoints.InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
+    }
+
   type ResponseEntity[A] = Writeable[A]
 
   /** An empty response entity */
@@ -225,12 +228,9 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): A => Result =
     a => statusCode.sendEntity(entity.toEntity(a))
 
-  /**
-    * A response encoder that maps `None` to an empty HTTP result with status 404
-    */
-  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
-    case Some(a) => response(a)
-    case None => NotFound
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
+    case Left(a)  => responseA(a)
+    case Right(b) => responseB(b)
   }
 
   /**

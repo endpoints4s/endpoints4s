@@ -5,7 +5,6 @@ import java.net.URI
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.Documentation
 import com.softwaremill.sttp
-import com.softwaremill.sttp.ResponseAs
 
 import scala.language.higherKinds
 
@@ -91,71 +90,59 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
       entity(b, headers(c, sttpRequest))
     }
 
-  /**
-    * Trait that indicates how a response should be interpreted
-    */
-  trait SttpResponse[A] {
-    /**
-      * The type of the received body from the server
-      */
-    type ReceivedBody
-
-    /**
-      * To read the response body
-      */
-    def responseAs: sttp.ResponseAs[ReceivedBody, Nothing]
-
-    def decodeEntity(response: sttp.Response[ReceivedBody]): R[A]
-  }
-
   trait Response[A] {
-    val entity: ResponseEntity[A]
     /**
       * Function to validate the response (headers, code).
       */
-    def decodeResponse(response: sttp.Response[entity.ReceivedBody]): R[A]
+    def decodeResponse(response: sttp.Response[String]): Option[R[A]]
   }
 
-  type ResponseEntity[A] = SttpResponse[A]
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        new Response[B] {
+          def decodeResponse(response: sttp.Response[String]): Option[R[B]] =
+            fa.decodeResponse(response).map(ra => backend.responseMonad.map(ra)(f))
+        }
+    }
 
-  private[sttp] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] { type ReceivedBody = entity.ReceivedBody } =
+  /**
+    * Trait that indicates how a response should be interpreted
+    */
+  trait ResponseEntity[A] {
+    def decodeEntity(response: sttp.Response[String]): R[A]
+  }
+
+  private[sttp] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
     new ResponseEntity[B] {
-      type ReceivedBody = entity.ReceivedBody
-      def responseAs: ResponseAs[ReceivedBody, Nothing] = entity.responseAs
-      def decodeEntity(response: sttp.Response[ReceivedBody]): R[B] =
+      def decodeEntity(response: sttp.Response[String]): R[B] =
         backend.responseMonad.map(entity.decodeEntity(response))(f)
     }
 
   /** Successfully decodes no information from a response */
-  def emptyResponse: ResponseEntity[Unit] = new SttpResponse[Unit] {
-    type ReceivedBody = Unit
-    def responseAs = sttp.ignore
-    def decodeEntity(response: sttp.Response[Unit]) = backend.responseMonad.unit(response.unsafeBody)
+  def emptyResponse: ResponseEntity[Unit] = new ResponseEntity[Unit] {
+    def decodeEntity(response: sttp.Response[String]) = backend.responseMonad.unit(())
   }
 
   /** Successfully decodes string information from a response */
-  def textResponse: ResponseEntity[String] = new SttpResponse[String] {
-    type ReceivedBody = String
-    def responseAs = sttp.asString
+  def textResponse: ResponseEntity[String] = new ResponseEntity[String] {
     def decodeEntity(response: sttp.Response[String]): R[String] = backend.responseMonad.unit(response.unsafeBody)
   }
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] = {
-    val _entity = entity
     new Response[A] {
-      val entity: _entity.type = _entity
-      def decodeResponse(response: sttp.Response[entity.ReceivedBody]) = {
-        if (response.code == statusCode) entity.decodeEntity(response)
-        else backend.responseMonad.error(new Throwable(s"Unexpected status code: ${response.code}"))
+      def decodeResponse(response: sttp.Response[String]) = {
+        if (response.code == statusCode) Some(entity.decodeEntity(response))
+        else None
       }
     }
   }
 
-  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] = new Response[Option[A]] {
-    val entity = mapResponseEntity[A, Option[A]](inner.entity)(Some(_))
-    def decodeResponse(response: sttp.Response[entity.ReceivedBody]): R[Option[A]] = {
-      if (response.code == NotFound) backend.responseMonad.unit(None)
-      else entity.decodeEntity(response)
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
+    new Response[Either[A, B]] {
+      def decodeResponse(response: sttp.Response[String]): Option[R[Either[A, B]]] =
+        responseA.decodeResponse(response).map(backend.responseMonad.map(_)(Left(_): Either[A, B]))
+          .orElse(responseB.decodeResponse(response).map(backend.responseMonad.map(_)(Right(_))))
     }
   }
 
@@ -168,9 +155,12 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a => {
-      val req: sttp.Request[response.entity.ReceivedBody, Nothing] = request(a).response(response.entity.responseAs)
+      val req: sttp.Request[String, Nothing] = request(a).response(sttp.asString)
       val result = backend.send(req)
-      backend.responseMonad.flatMap(result)(response.decodeResponse)
+      backend.responseMonad.flatMap(result) { sttpResponse =>
+        response.decodeResponse(sttpResponse)
+          .getOrElse(backend.responseMonad.error(new Throwable(s"Unexpected response status: ${sttpResponse.code}")))
+      }
     }
 
 }

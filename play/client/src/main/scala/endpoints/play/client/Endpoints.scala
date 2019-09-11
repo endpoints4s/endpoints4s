@@ -82,11 +82,20 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     }
 
   /**
-    * Attempts to decode an `A` from a `WSResponse`.
+    * Function returning the entity decoder from the response status and headers
     */
-  type Response[A] = (StatusCode, Map[String, scala.collection.Seq[String]]) => ResponseEntity[A]
+  type Response[A] = (StatusCode, Map[String, scala.collection.Seq[String]]) => Option[ResponseEntity[A]]
+
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        (status, headers) => fa(status, headers).map(mapResponseEntity(_)(f))
+    }
 
   type ResponseEntity[A] = WSResponse => Either[Throwable, A]
+
+  private[client] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
+    wsResp => entity(wsResp).right.map(f)
 
   /** Discards response entity */
   def emptyResponse: ResponseEntity[Unit] =
@@ -98,13 +107,13 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     (status, _) =>
-      if (status == statusCode) entity
-      else _ => Left(new Throwable(s"Unexpected status code: ${status}"))
+      if (status == statusCode) Some(entity)
+      else None
 
-  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     (status, headers) =>
-      if (status == NotFound) _ => Right(None)
-      else wsResp => response(status, headers)(wsResp).right.map(Some(_))
+      responseA(status, headers).map(mapResponseEntity(_)(Left(_)))
+        .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
   /**
     * A function that, given an `A`, eventually attempts to decode the `B` response.
@@ -122,7 +131,14 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     description: Documentation,
     tags: List[String]
   ): Endpoint[A, B] =
-    a => request(a).flatMap(wsResp => futureFromEither(response(wsResp.status, wsResp.headers)(wsResp)))
+    a =>
+      request(a).flatMap { wsResp =>
+        futureFromEither(
+          response(wsResp.status, wsResp.headers)
+            .toRight(new Throwable(s"Unexpected response status: ${wsResp.status}"))
+            .right.flatMap(entity => entity(wsResp))
+        )
+      }
 
 }
 

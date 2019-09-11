@@ -113,9 +113,18 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   /**
     * Attempts to decode an `A` from an XMLHttpRequest’s response
     */
-  type Response[A] = js.Function1[XMLHttpRequest, ResponseEntity[A]]
+  type Response[A] = js.Function1[XMLHttpRequest, Option[ResponseEntity[A]]]
+
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        xhr => fa(xhr).map(mapResponseEntity(_)(f))
+    }
 
   type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
+
+  private[xhr] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
+    xhr => entity(xhr).right.map(f)
 
   /**
     * Discards response entity
@@ -129,19 +138,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     xhr =>
-      if (xhr.status == statusCode) entity
-      else _ => Left(new Exception(s"Unexpected response status ${xhr.statusText}"))
+      if (xhr.status == statusCode) Some(entity)
+      else None
 
-  /**
-    * A response decoder that maps HTTP responses having status code 404 to `None`, or delegates to the given `response`.
-    */
-  def wheneverFound[A](
-    response: Response[A],
-    notFoundDocs: Documentation
-  ): Response[Option[A]] =
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     xhr =>
-      if (xhr.status == NotFound) _ => Right(None)
-      else _ => response(xhr)(xhr).right.map(Some(_))
+      responseA(xhr).map(mapResponseEntity(_)(Left(_)))
+        .orElse(responseB(xhr).map(mapResponseEntity(_)(Right(_))))
 
   /**
     * A function that takes the information needed to build a request and returns
@@ -167,7 +170,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     a: A
   )(onload: Either[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
     val (xhr, maybeEntity) = request(a)
-    xhr.onload = _ => onload(response(xhr)(xhr))
+    xhr.onload = _ => onload(response(xhr).toRight(new Exception(s"Unexpected response status: ${xhr.status}")).right.flatMap(_(xhr)))
     xhr.onerror = _ => onerror(xhr)
     xhr.send(maybeEntity.orNull)
   }

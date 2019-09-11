@@ -102,8 +102,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             .withStatus(501)
             .withBody("")))
 
-        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
-        whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected status code: 501")
+        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected response status: 501")
+        whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected response status: 501")
       }
 
       "properly handle joined headers" in {

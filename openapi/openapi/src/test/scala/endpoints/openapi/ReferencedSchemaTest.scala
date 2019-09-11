@@ -84,10 +84,10 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |          "description" : "Books list"
         |        },
         |        "responses" : {
-        |          "401" : {
+        |          "200" : {
         |            "description" : ""
         |          },
-        |          "200" : {
+        |          "403" : {
         |            "description" : ""
         |          }
         |        },

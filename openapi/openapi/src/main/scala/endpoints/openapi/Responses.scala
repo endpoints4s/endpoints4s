@@ -24,6 +24,11 @@ trait Responses
     */
   case class DocumentedResponse(status: StatusCode, documentation: String, content: Map[String, MediaType])
 
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa
+    }
+
   def emptyResponse: ResponseEntity[Unit] = Map.empty
 
   def textResponse: ResponseEntity[String] = Map("text/plain" -> MediaType(Some(model.Schema.simpleString)))
@@ -31,6 +36,7 @@ trait Responses
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     DocumentedResponse(statusCode, docs.getOrElse(""), entity) :: Nil
 
-  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
-    DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), content = Map.empty) :: response
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
+    responseA ++ responseB
+
 }
