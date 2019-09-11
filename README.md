@@ -29,6 +29,10 @@ And then browse http://localhost:9000.
 
 See the [open issues](https://github.com/julienrf/endpoints/issues).
 
+## Sponsors
+
+[Bestmile](https://bestmile.com) supports engineering work on the project.
+
 ## License
 
 This content is released under the [MIT License](http://opensource.org/licenses/mit-license.php).
