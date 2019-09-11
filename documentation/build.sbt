@@ -217,7 +217,7 @@ val `example-cqrs-web-client` =
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.2.3",
         "in.nvilla" %%% "monadic-rx-cats" % "0.2.3",
-        "org.julienrf" %%% "faithful-cats" % "1.1.0",
+        "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "org.scala-js" %%% "scalajs-java-time" % "0.2.5"
       ),
       scalaJSUseMainModuleInitializer := true
