@@ -40,7 +40,8 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
 
     def call(args: Req): Either[Throwable, Resp] = {
       val resp = request(args).asString
-      response(resp)(resp.body)
+      response(resp).toRight(new Throwable(s"Unexpected response status: ${resp.code}"))
+        .right.flatMap(_(resp.body))
     }
   }
 

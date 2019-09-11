@@ -1,7 +1,7 @@
 package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
-import akka.http.scaladsl.model.{HttpEntity, HttpResponse}
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.{Directive1, Directives, Route}
 import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
@@ -26,6 +26,11 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   type ResponseEntity[A] = ToEntityMarshaller[A]
 
   type Response[A] = A => Route
+
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
+    }
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def implementedBy(implementation: A => B): Route = request { arguments =>
@@ -83,9 +88,9 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       Directives.complete(a)
     }
 
-  def wheneverFound[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] = {
-    case Some(a) => response(a)
-    case None => Directives.complete(HttpResponse(NotFound))
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
+    case Left(a)  => responseA(a)
+    case Right(b) => responseB(b)
   }
 
   def request[A, B, C, AB, Out](

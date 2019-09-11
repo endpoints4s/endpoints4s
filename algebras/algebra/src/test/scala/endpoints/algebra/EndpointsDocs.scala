@@ -66,11 +66,9 @@ trait EndpointsDocs extends Endpoints {
   val aTextResponse: Response[String] = response(OK, textResponse)
   //#general-response
 
-  //#response-combinator
-  // An HTTP response with status code 404 (Not Found) and no entity,
-  // or with status code 200 (Ok) and a text entity.
-  val maybeText: Response[Option[String]] = wheneverFound(aTextResponse)
-  //#response-combinator
+  //#documented-response
+  ok(emptyResponse, docs = Some("A response with an OK status code and no entity"))
+  //#documented-response
 
   // Shared definition used by the documentation of interpreters
   //#endpoint-definition

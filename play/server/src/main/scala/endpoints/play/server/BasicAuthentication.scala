@@ -4,7 +4,6 @@ import java.util.Base64
 
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra
-import endpoints.algebra.Documentation
 import play.api.http.HeaderNames
 import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.mvc.Results
@@ -33,14 +32,5 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
           }
         }
         .toRight(Results.Unauthorized.withHeaders(HeaderNames.WWW_AUTHENTICATE -> "Basic realm=\"Some custom name\"")) // TODO Make the realm extensible
-
-  /**
-    * Authorization failures can be signaled by returning `None` in the endpoint implementation.
-    * In such a case, a `Forbidden` result is returned.
-    */
-  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] = {
-    case Some(a) => response(a)
-    case None => Results.Forbidden
-  }
 
 }

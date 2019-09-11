@@ -41,10 +41,10 @@ The following table lists the available algebras and points to their documentati
 
 | Name | Description |
 |---|---|
-|[Assets](algebras/assets.md)|Asset segments, endpoints serving fingerprinted assets|
 |[Endpoints](algebras/endpoints.md)|HTTP endpoints (main algebra)|
-|[JsonEntities](algebras/json-entities.md)|JSON request and response entities|
 |[JsonSchemas](algebras/json-schemas.md)|JSON schemas of data types|
+|[JsonEntities](algebras/json-entities.md)|JSON request and response entities|
+|[Assets](algebras/assets.md)|Asset segments, endpoints serving fingerprinted assets|
 |[MuxEndpoints](algebras/mux-endpoints.md)|Multiplexed HTTP endpoints|
 
 ## Interpreters

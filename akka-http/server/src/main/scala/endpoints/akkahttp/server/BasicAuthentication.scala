@@ -5,7 +5,6 @@ import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes=>AkkaStat
 import akka.http.scaladsl.server.{Directive, Directives}
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
-import endpoints.algebra.Documentation
 
 /**
   * @group interpreters
@@ -27,17 +26,6 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
       ))
     }
   }
-
-
-  /**
-    * Authorization failures can be signaled by returning `None` in the endpoint implementation.
-    * In such a case, a `Forbidden` result is returned.
-    */
-  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation): Response[Option[A]] = {
-    case Some(a) => response(a)
-    case None => Directives.complete(HttpResponse(AkkaStatusCodes.Forbidden))
-  }
-
 
   private def extractCredentials: HttpHeader => Option[Credentials] = {
     case Authorization(BasicHttpCredentials(username, password)) => Some(Credentials(username, password))

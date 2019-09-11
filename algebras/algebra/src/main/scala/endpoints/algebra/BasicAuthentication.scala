@@ -23,10 +23,12 @@ trait BasicAuthentication extends Endpoints {
   private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials]
 
   /**
-    * @param response Inner response (in case the authentication succeeds)
+    * @param responseA Inner response (in case the authentication succeeds)
     * @param docs Description of the authentication error
     */
-  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation = None): Response[Option[A]] // FIXME Use an extensible type to model authentication failure
+  private[endpoints] final def authenticated[A](responseA: Response[A], docs: Documentation = None): Response[Option[A]] = // FIXME Use an extensible type to model authentication failure
+    responseA.orElse(response(Forbidden, emptyResponse, docs))
+      .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 
   /**
     * Describes an endpoint protected by Basic HTTP authentication

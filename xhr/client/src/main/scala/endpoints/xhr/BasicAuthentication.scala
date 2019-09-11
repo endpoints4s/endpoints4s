@@ -2,7 +2,6 @@ package endpoints.xhr
 
 import endpoints.algebra
 import endpoints.algebra.BasicAuthentication.Credentials
-import endpoints.algebra.Documentation
 import org.scalajs.dom.window.btoa
 
 /**
@@ -18,14 +17,5 @@ trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
       xhr.setRequestHeader("Authorization", "Basic " + btoa(credentials.username + ":" + credentials.password))
       ()
     }
-
-  /**
-    * Checks that the result is not `Forbidden`
-    */
-  private[endpoints] def authenticated[A](response: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
-    xhr =>
-      // We don’t care of 401 because we always set the Authorization header. We only care about 403.
-      if (xhr.status == 403) _ => Right(None) // We use `Right` to make handling of authentication failures explicit
-      else _ => response(xhr)(xhr).right.map(Some(_))
 
 }

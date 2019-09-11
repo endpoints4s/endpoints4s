@@ -19,9 +19,6 @@ trait BasicAuthentication
   private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials] =
     DocumentedHeaders(Nil) // supported by OAS3 security schemes
 
-  private[endpoints] def authenticated[A](response: Response[A], docs: Documentation = None): Response[Option[A]] =
-    DocumentedResponse(Unauthorized, docs.getOrElse(""), content = Map.empty) :: response
-
   def basicAuthenticationSchemeName: String = "HttpBasic"
 
   override def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](

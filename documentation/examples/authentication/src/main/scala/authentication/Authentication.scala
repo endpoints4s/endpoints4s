@@ -42,7 +42,9 @@ trait Authentication extends algebra.Endpoints {
     * Clients map `BadRequest` statuses to `None`, and the underlying `response` into `Some`.
     * Conversely, servers build a `BadRequest` response on `None`, or the underlying `response` otherwise.
     */
-  def wheneverValid[A](response: Response[A]): Response[Option[A]]
+  final def wheneverValid[A](responseA: Response[A]): Response[Option[A]] =
+    responseA.orElse(response(BadRequest, emptyResponse))
+      .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 //#enriched-algebra
 
   // The following two methods are internally used by interpreters to implement the authentication logic
@@ -125,29 +127,22 @@ trait ClientAuthentication
     val decoded: UserInfo
   )
 
-  // Decodes the user info from a response
-  def authenticationToken: Response[AuthenticationToken] = { (_, headers) =>
-    headers.get(HeaderNames.AUTHORIZATION) match {
-      case Some(Seq(headerValue)) =>
-        val token = headerValue.stripPrefix("Bearer ")
-        // Note: the default implementation of `JwtSession.deserialize`
-        // returns an “empty” JwtSession object when it is invalid.
-        // You might want to tweak the logic to return an error in such a case.
-        UserInfo.decodeToken(token) match {
-          case Some(user) => _ => Right(new AuthenticationToken(token,user))
-          case None       => _ => Left(new Exception("Invalid JWT session"))
-        }
-      case _ => _ => Left(new Exception("Missing JWT session"))
-    }
-  }
-
-  // Checks that the response is not `BadRequest` before continuing
-  def wheneverValid[A](response: Response[A]): Response[Option[A]] = { (status, headers) =>
-    if (status == Status.BAD_REQUEST) {
-      _ => Right(None)
-    } else {
-      entity => response(status, headers)(entity).right.map(Some(_))
-    }
+  // Decodes the user info from an OK response
+  def authenticationToken: Response[AuthenticationToken] = { (status, headers) =>
+    if (status == OK) {
+      headers.get(HeaderNames.AUTHORIZATION) match {
+        case Some(Seq(headerValue)) =>
+          val token = headerValue.stripPrefix("Bearer ")
+          // Note: the default implementation of `JwtSession.deserialize`
+          // returns an “empty” JwtSession object when it is invalid.
+          // You might want to tweak the logic to return an error in such a case.
+          UserInfo.decodeToken(token) match {
+            case Some(user) => Some(_ => Right(new AuthenticationToken(token,user)))
+            case None       => Some(_ => Left(new Exception("Invalid JWT session")))
+          }
+        case _ => Some(_ => Left(new Exception("Missing JWT session")))
+      }
+    } else None
   }
 //#client-interpreter
 //#protected-endpoints-client
@@ -159,7 +154,7 @@ trait ClientAuthentication
   // Checks that the response is not `Unauthorized` before continuing
   def wheneverAuthenticated[A](response: Response[A]): Response[A] = { (status, headers) =>
     if (status == Status.UNAUTHORIZED) {
-      _ => Left(new Exception("Unauthorized"))
+      Some(_ => Left(new Exception("Unauthorized")))
     } else {
       response(status, headers)
     }
@@ -185,12 +180,6 @@ trait ServerAuthentication
   // Encodes the user info in the JWT session
   def authenticationToken: Response[UserInfo] =
     userInfo => Results.Ok.withJwtSession(JwtSession().+("user", userInfo))
-
-  // Returns `BadRequest` in case of `None`
-  def wheneverValid[A](response: Response[A]): Response[Option[A]] = {
-    case None    => Results.BadRequest
-    case Some(a) => response(a)
-  }
 //#server-interpreter
 
 //#protected-endpoints-server

@@ -21,6 +21,6 @@ trait LowLevelEndpoints extends algebra.LowLevelEndpoints with Endpoints {
   type RawResponseEntity = XMLHttpRequest
 
   /** Successfully returns the underlying XMLHttpRequest, whatever its status code is */
-  lazy val rawResponseEntity: Response[RawResponseEntity] = xhr => _ => Right(xhr)
+  lazy val rawResponseEntity: Response[RawResponseEntity] = xhr => Some(_ => Right(xhr))
 
 }

@@ -1,6 +1,6 @@
 package endpoints.xhr
 
-import endpoints.algebra.{Codec, Documentation}
+import endpoints.algebra.Codec
 import org.scalajs.dom.XMLHttpRequest
 
 /**

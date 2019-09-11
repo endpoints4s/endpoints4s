@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, Tupler}
+import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
 import scala.language.{higherKinds, implicitConversions}
 import scala.util.Try
@@ -27,12 +27,12 @@ import scala.collection.compat.Factory
   *     * - /articles/kitchen?lang=fr
   *     * - /articles/garden?lang=en&page=2
   *     */
-  *   val example = path / "articles" / segment[String] /? (qs[Lang]("lang") & qs[Option[Int]]("page"))
+  *   val example = path / "articles" / segment[String]() /? (qs[Lang]("lang") & qs[Option[Int]]("page"))
   * }}}
   *
   * @group algebras
   */
-trait Urls {
+trait Urls extends PartialInvariantFunctorSyntax {
 
   /** A query string carrying an `A` information
     *
@@ -49,8 +49,8 @@ trait Urls {
 
   implicit def queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString]
 
-  /** Provides convenient methods on [[QueryString]]. */
-  implicit class QueryStringOps[A](first: QueryString[A]) {
+  /** Extension methods on [[QueryString]]. */
+  implicit class QueryStringSyntax[A](first: QueryString[A]) {
     /**
       * Convenient method to concatenate two [[QueryString]]s.
       *
@@ -123,26 +123,26 @@ trait Urls {
 
   /** Ability to define `UUID` query string parameters */
   implicit def uuidQueryString: QueryStringParam[UUID] =
-    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (x: String) => Try(UUID.fromString(x)).toOption, _.toString)
+    stringQueryString.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString)
 
   /** Ability to define `Int` query string parameters */
   implicit def intQueryString: QueryStringParam[Int] =
-    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (s: String) => Try(s.toInt).toOption, _.toString)
+    stringQueryString.xmapPartial(s => Try(s.toInt).toOption)(_.toString)
 
   /** Query string parameter containing a `Long` value */
   implicit def longQueryString: QueryStringParam[Long] =
-    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (v: String) => Try(v.toLong).toOption, _.toString)
+    stringQueryString.xmapPartial(s => Try(s.toLong).toOption)(_.toString)
 
   /** Query string parameter containing a `Boolean` value */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
-    queryStringParamPartialInvFunctor.xmapPartial[String, Boolean](stringQueryString, {
+    stringQueryString.xmapPartial[Boolean] {
       case "true"  | "1" => Some(true)
       case "false" | "0" => Some(false)
       case _ => None
-    }, _.toString)
+    }(_.toString)
 
   implicit def doubleQueryString: QueryStringParam[Double] =
-    queryStringParamPartialInvFunctor.xmapPartial(stringQueryString, (v: String) => Try(v.toDouble).toOption, _.toString)
+    stringQueryString.xmapPartial(s => Try(s.toDouble).toOption)(_.toString)
 
   /**
     * An URL path segment carrying an `A` information.
@@ -159,18 +159,18 @@ trait Urls {
 
   /** Ability to define `UUID` path segments */
   implicit def uuidSegment: Segment[UUID] =
-    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(UUID.fromString(s)).toOption, _.toString)
+    stringSegment.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString)
 
   /** Ability to define `Int` path segments */
   implicit def intSegment: Segment[Int] =
-    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toInt).toOption, _.toString)
+    stringSegment.xmapPartial(s => Try(s.toInt).toOption)(_.toString)
 
   /** Segment containing a `Long` value */
   implicit def longSegment: Segment[Long] =
-    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toLong).toOption, _.toString)
+    stringSegment.xmapPartial(s => Try(s.toLong).toOption)(_.toString)
 
   implicit def doubleSegment: Segment[Double] =
-    segmentPartialInvFunctor.xmapPartial(stringSegment, (s: String) => Try(s.toDouble).toOption, _.toString)
+    stringSegment.xmapPartial(s => Try(s.toDouble).toOption)(_.toString)
 
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]

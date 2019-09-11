@@ -22,9 +22,14 @@ trait MuxEndpoints extends algebra.Endpoints { self: Endpoints =>
       decoder: Decoder[Transport, Resp]
     ): Future[req.Response] =
       request(encoder.encode(req)).flatMap { wsResponse =>
-        futureFromEither(response(wsResponse.status, wsResponse.headers)(wsResponse).right.flatMap { t =>
-          decoder.decode(t).asInstanceOf[Either[Throwable, req.Response]]
-        })
+        futureFromEither(
+          response(wsResponse.status, wsResponse.headers)
+            .toRight(new Throwable(s"Unexpected response status: ${wsResponse.status}")).right.flatMap { entity =>
+              entity(wsResponse).right.flatMap { t =>
+                decoder.decode(t).asInstanceOf[Either[Throwable, req.Response]]
+              }
+            }
+        )
       }
   }
 

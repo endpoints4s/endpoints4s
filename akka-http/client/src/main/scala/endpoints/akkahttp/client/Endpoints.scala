@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.http.scaladsl.model.HttpHeader.ParsingResult
-import akka.http.scaladsl.model.{ HttpHeader, HttpRequest, HttpResponse, HttpEntity, Uri }
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
@@ -92,18 +92,24 @@ class Endpoints(val settings: EndpointsSettings)
     }
 
   // Defines how to decode the entity according to the status code value and response headers
-  type Response[A] = (StatusCode, scala.collection.immutable.Seq[HttpHeader]) => ResponseEntity[A]
+  type Response[A] = (StatusCode, scala.collection.immutable.Seq[HttpHeader]) => Option[ResponseEntity[A]]
+
+  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+    new InvariantFunctor[Response] {
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        (status, headers) => fa(status, headers).map(mapResponseEntity(_)(f))
+    }
 
   type ResponseEntity[A] = HttpEntity => Future[Either[Throwable, A]]
 
-  private[client] def discardingEntity[A](result: Future[Either[Throwable, A]]): ResponseEntity[A] =
-    entity => {
-      entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
-      result
-    }
+  private[client] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
+    httpEntity => entity(httpEntity).map(_.right.map(f))
 
   def emptyResponse: ResponseEntity[Unit] =
-    discardingEntity(Future.successful(Right(())))
+    entity => {
+      entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
+      Future.successful(Right(()))
+    }
 
   def textResponse: ResponseEntity[String] =
     entity =>
@@ -113,13 +119,13 @@ class Endpoints(val settings: EndpointsSettings)
 
   def response[A](statusCode: StatusCode, responseEntity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     (status, _) =>
-      if (status == statusCode) responseEntity
-      else discardingEntity(Future.failed(new Throwable(s"Unexpected status code: ${status.intValue()}")))
+      if (status == statusCode) Some(responseEntity)
+      else None
 
-  def wheneverFound[A](inner: Response[A], notFoundDocs: Documentation): Response[Option[A]] =
+  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     (status, headers) =>
-      if (status == NotFound) discardingEntity(Future.successful(Right(None)))
-      else entity => inner(status, headers)(entity).map(_.right.map(Some(_)))
+      responseA(status, headers).map(mapResponseEntity(_)(Left(_)))
+        .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
   //#endpoint-type
   type Endpoint[A, B] = A => Future[B]
@@ -129,9 +135,14 @@ class Endpoints(val settings: EndpointsSettings)
     a =>
       for {
         resp <- request(a)
-        result <- response(resp.status, resp.headers)(resp.entity).flatMap(futureFromEither)
+        result <- response(resp.status, resp.headers) match {
+          case Some(entity) =>
+            entity(resp.entity).flatMap(futureFromEither)
+          case None =>
+            resp.entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
+            Future.failed(new Throwable(s"Unexpected response status: ${resp.status.intValue()}"))
+        }
       } yield result
-
 
   private[client] def futureFromEither[A](errorOrA: Either[Throwable, A]): Future[A] =
     errorOrA match {
