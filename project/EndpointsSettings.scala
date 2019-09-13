@@ -65,8 +65,8 @@ object EndpointsSettings {
 
   val noPublishSettings = commonSettings ++ Seq(
     publishArtifact := false,
-    publish := { () }
-    //  publishLocal := ()
+    publish := { () },
+    publishLocal := { () }
   )
 
   // --- Common dependencies
