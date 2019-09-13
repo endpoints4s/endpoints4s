@@ -17,16 +17,17 @@ package endpoints
   * }}}
   *
   * The following rules are implemented (by increasing priority):
-  *  - A, B              -> (A, B)
-  *  - A, (B, C)         -> (A, B, C)
-  *  - (A, B), C         -> (A, B, C)
-  *  - (A, B), (C, D)    -> (A, B, C, D)
-  *  - A, (B, C, D, E)   -> (A, B, C, D, E)
-  *  - (A, B), (C, D, E) -> (A, B, C, D, E)
-  *  - (A, B, C), D      -> (A, B, C, D)
-  *  - (A, B, C, D), E   -> (A, B, C, D, E)
-  *  - A, Unit           -> A
-  *  - Unit, A           -> A
+  *  - A, B               -> (A, B)
+  *  - A, (B, C)          -> (A, B, C)
+  *  - (A, B), C          -> (A, B, C)
+  *  - (A, B), (C, D)     -> (A, B, C, D)
+  *  - A, (B, C, D, E)    -> (A, B, C, D, E)
+  *  - (A, B), (C, D, E)  -> (A, B, C, D, E)
+  *  - (A, B, C), D       -> (A, B, C, D)
+  *  - (A, B, C, D), E    -> (A, B, C, D, E)
+  *  - (A, B, C, D, E), F -> (A, B, C, D, E, F)
+  *  - A, Unit            -> A
+  *  - Unit, A            -> A
   */
 //#definition
 trait Tupler[A, B] {
@@ -124,6 +125,17 @@ trait Tupler3 extends Tupler2 {
       def unapply(out: (A, B, C, D, E)): ((A, B, C, D), E) = {
         val (a, b, c, d, e) = out
         ((a, b, c, d), e)
+      }
+    }
+
+  implicit def tupler5And1[A, B, C, D, E, F]: Tupler[(A, B, C, D, E), F] { type Out = (A, B, C, D, E, F) } =
+    new Tupler[(A, B, C, D, E), F] {
+      type Out = (A, B, C, D, E, F)
+      def apply(abcde: (A, B, C, D, E), f: F): (A, B, C, D, E, F) =
+        (abcde._1, abcde._2, abcde._3, abcde._4, abcde._5, f)
+      def unapply(out: (A, B, C, D, E, F)): ((A, B, C, D, E), F) = {
+        val (a, b, c, d, e, f) = out
+        ((a, b, c, d, e), f)
       }
     }
 
