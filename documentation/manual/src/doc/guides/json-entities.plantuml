@@ -1,0 +1,23 @@
+@startuml
+interface Endpoints
+interface JsonEntities {
+  type JsonRequest[A]
+  type JsonResponse[A]
+}
+interface JsonSchemas {
+  type JsonSchema[A]
+}
+interface JsonEntitiesFromCodec {
+  type JsonCodec[A]
+  type JsonRequest[A] = JsonCodec[A]
+  type JsonResponse[A] = JsonCodec[A]
+}
+interface JsonSchemaEntities {
+  type JsonRequest[A] = JsonSchema[A]
+  type JsonResponse[A] = JsonSchema[A]
+}
+Endpoints <|-- JsonEntities
+JsonEntities <|-- JsonSchemaEntities
+JsonSchemas <|-- JsonSchemaEntities
+JsonEntities <|-- JsonEntitiesFromCodec
+@enduml
