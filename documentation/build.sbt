@@ -265,7 +265,7 @@ val `example-cqrs-commands` =
       noPublishSettings,
       `scala 2.11 to 2.12`,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
         scalaTestDependency
       )
     )
@@ -292,7 +292,7 @@ val `example-cqrs` =
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
         scalaTestDependency
       )
     )
