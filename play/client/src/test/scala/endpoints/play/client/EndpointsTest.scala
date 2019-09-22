@@ -41,8 +41,8 @@ class EndpointsTest
 
   override def afterAll(): Unit = {
     wsClient.close()
+    Thread.sleep(6000) // Unfortunate hack to let WSTestClient terminate its ActorSystem. See https://github.com/playframework/playframework/blob/8b0d5afb8c353dd8cd8d9e8057136e1858ad0173/transport/client/play-ahc-ws/src/main/scala/play/api/test/WSTestClient.scala#L142
     super.afterAll()
   }
 
 }
-

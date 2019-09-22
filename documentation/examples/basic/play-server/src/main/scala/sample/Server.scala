@@ -3,21 +3,21 @@ package sample
 import _root_.play.api.http.ContentTypes.HTML
 import _root_.play.api.mvc.{Handler, RequestHeader, Results}
 import _root_.play.api.routing.sird._
+import _root_.play.api.routing.Router
 import _root_.play.api.libs.json.Json
-import _root_.play.core.server.ServerConfig
+import _root_.play.core.server.DefaultNettyServerComponents
 import controllers.{AssetsBuilder, AssetsConfiguration, DefaultAssetsMetadata}
-import endpoints.play.server.{DefaultPlayComponents, HttpServer}
+import endpoints.play.server.PlayComponents
 import sample.play.server.DocumentedApi
 
-object Server extends App with Results {
+object Server extends App with Results with DefaultNettyServerComponents {
 
-  val config = ServerConfig()
-  val playComponents = new DefaultPlayComponents(config)
-  val assetsMetadata = new DefaultAssetsMetadata(playComponents.environment, AssetsConfiguration.fromConfiguration(playComponents.configuration), playComponents.fileMimeTypes)
-  val assets = new AssetsBuilder(playComponents.httpErrorHandler, assetsMetadata)
-  val action = playComponents.actionBuilder
+  lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
+  lazy val assetsMetadata = new DefaultAssetsMetadata(environment, AssetsConfiguration.fromConfiguration(configuration), fileMimeTypes)
+  lazy val assets = new AssetsBuilder(httpErrorHandler, assetsMetadata)
+  lazy val action = defaultActionBuilder
 
-  val bootstrap: PartialFunction[RequestHeader, Handler] = {
+  lazy val bootstrap: PartialFunction[RequestHeader, Handler] = {
     case GET(p"/") => action {
       val html =
         """
@@ -34,7 +34,7 @@ object Server extends App with Results {
       Ok(html).as(HTML)
     }
     case GET(p"/assets/sample-client-fastopt.js") =>
-      assets.versioned("/", "sample-client-fastopt.js")
+      assets.versioned("/", "example-basic-client-fastopt.js")
     case GET(p"/api/description") => action {
       import sample.openapi.OpenApiEncoder.JsonSchema._
       Ok(Json.toJson(sample.openapi.DocumentedApi.documentation))
@@ -70,9 +70,10 @@ object Server extends App with Results {
     }
   }
 
-  val api = new Api(playComponents)
-  val documentedApi = new DocumentedApi(playComponents)
+  lazy val api = new Api(playComponents)
+  lazy val documentedApi = new DocumentedApi(playComponents)
 
-  HttpServer(config, playComponents, bootstrap orElse api.routes orElse documentedApi.routes)
+  lazy val router = Router.from(bootstrap orElse api.routes orElse documentedApi.routes)
 
+  server
 }

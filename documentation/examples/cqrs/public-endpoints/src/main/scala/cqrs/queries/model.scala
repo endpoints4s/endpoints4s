@@ -5,7 +5,6 @@ import java.util.UUID
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.java8.time._
 
 import scala.collection.immutable.SortedMap
 
@@ -21,7 +20,7 @@ object Meter {
     Decoder[Seq[(A, B)]].map(entries => (SortedMap.newBuilder[A, B] ++= entries).result())
 
   implicit def encodeSortedMap[A : Encoder, B : Encoder]: Encoder[SortedMap[A, B]] =
-    Encoder.encodeList[(A, B)].contramap[SortedMap[A, B]](_.to[List])
+    Encoder.encodeList[(A, B)].contramap[SortedMap[A, B]](_.toList)
 
   implicit val decoder: Decoder[Meter] = deriveDecoder
   implicit val encoder: Encoder[Meter] = deriveEncoder

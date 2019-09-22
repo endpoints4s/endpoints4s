@@ -7,7 +7,6 @@ import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.queries.Meter
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.java8.time._
 
 /**
   * Definition of the public HTTP API of our application.

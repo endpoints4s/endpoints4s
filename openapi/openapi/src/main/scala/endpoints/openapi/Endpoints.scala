@@ -26,7 +26,7 @@ trait Endpoints
         .groupBy(_.path)
         .mapValues(es => es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
           PathItem(item.operations ++ e2.item.operations)
-        })
+        }).toMap
     val components = Components(
       schemas = captureSchemas(endpoints),
       securitySchemes = captureSecuritySchemes(endpoints)

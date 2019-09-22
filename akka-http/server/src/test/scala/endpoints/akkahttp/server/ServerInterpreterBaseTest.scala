@@ -10,7 +10,6 @@ import endpoints.algebra.server.{DecodedUrl, ServerTestBase}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
-import endpoints.akkahttp.server.EndpointsTestApi 
 
 class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
   extends ServerTestBase[EndpointsTestApi]

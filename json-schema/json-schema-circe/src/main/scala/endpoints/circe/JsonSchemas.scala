@@ -35,17 +35,17 @@ trait JsonSchemas
   }
 
   trait Record[A] extends JsonSchema[A] {
-    override def encoder: ObjectEncoder[A]
+    override def encoder: Encoder.AsObject[A]
   }
 
   object Record {
-    def apply[A](_encoder: ObjectEncoder[A], _decoder: Decoder[A]): Record[A] =
+    def apply[A](_encoder: Encoder.AsObject[A], _decoder: Decoder[A]): Record[A] =
       new Record[A] { def encoder = _encoder; def decoder = _decoder }
 
     implicit def toCirceCodec[A](implicit record: Record[A]): CirceCodec[A] =
       CirceCodec.fromEncoderAndDecoder(record.encoder, record.decoder)
 
-    implicit def toCirceObjectEncoder[A](implicit record: Record[A]): ObjectEncoder[A] =
+    implicit def toCirceObjectEncoder[A](implicit record: Record[A]): Encoder.AsObject[A] =
       record.encoder
 
     implicit def toCirceDecoder[A](implicit record: Record[A]): Decoder[A] =
@@ -56,8 +56,8 @@ trait JsonSchemas
     def discriminator: String = defaultDiscriminatorName
     def taggedEncoded(a: A): (String, JsonObject)
     def taggedDecoder(tag: String): Option[Decoder[A]]
-    def encoder: ObjectEncoder[A] =
-      ObjectEncoder.instance { a =>
+    def encoder: Encoder.AsObject[A] =
+      Encoder.AsObject.instance { a =>
         val (tag, json) = taggedEncoded(a)
         (discriminator -> Json.fromString(tag)) +: json
       }
@@ -108,14 +108,14 @@ trait JsonSchemas
 
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
     Record(
-      io.circe.ObjectEncoder.instance[A](a => JsonObject.singleton(name, tpe.encoder.apply(a))),
+      io.circe.Encoder.AsObject.instance[A](a => JsonObject.singleton(name, tpe.encoder.apply(a))),
       io.circe.Decoder.instance[A](cursor => tpe.decoder.tryDecode(cursor.downField(name)))
     )
 
   // FIXME Check that this is the correct way to model optional fields with circe
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
     Record(
-      io.circe.ObjectEncoder.instance[Option[A]](maybeA => JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))),
+      io.circe.Encoder.AsObject.instance[Option[A]](maybeA => JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))),
       io.circe.Decoder.instance[Option[A]](cursor => io.circe.Decoder.decodeOption(tpe.decoder).tryDecode(cursor.downField(name)))
     )
 
@@ -145,7 +145,7 @@ trait JsonSchemas
 
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
     val encoder =
-      io.circe.ObjectEncoder.instance[(A, B)] { case (a, b) =>
+      io.circe.Encoder.AsObject.instance[(A, B)] { case (a, b) =>
         // For some reason, `deepMerge` puts the fields of its left-hand-side *after*
         // the fields of its right-hand-side. Hence the inversion between `recordA`
         // and `recordB`.
