@@ -29,13 +29,21 @@ object EndpointsSettings {
     scalaVersion := "2.11.12",
     crossScalaVersions := Seq("2.11.12")
   )
+  val `scala 2.12` = Seq(
+    scalaVersion := "2.12.10",
+    crossScalaVersions := Seq("2.12.10")
+  )
   val `scala 2.11 to 2.12` = Seq(
     scalaVersion := "2.12.8",
-    crossScalaVersions := Seq("2.11.12", "2.12.8")
+    crossScalaVersions := Seq("2.12.10", "2.11.12")
   )
   val `scala 2.11 to latest` = Seq(
-    scalaVersion := "2.12.8",
-    crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0")
+    scalaVersion := "2.13.0",
+    crossScalaVersions := Seq("2.13.0", "2.12.10", "2.11.12")
+  )
+  val `scala 2.12 to latest` = Seq(
+    scalaVersion := "2.13.0",
+    crossScalaVersions := Seq("2.13.0", "2.12.10")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -71,13 +79,26 @@ object EndpointsSettings {
 
   // --- Common dependencies
 
-  val circeVersion = "0.11.1"
-  val playjsonVersion = "2.6.13"
-  val playVersion = "2.6.21"
-  val sttpVersion = "1.5.15"
+  val circeVersion = "0.12.1"
+  val playjsonVersion = "2.7.4"
+  val playVersion = "2.7.3"
+  val sttpVersion = "1.6.6"
 
   val scalaTestVersion = "3.0.8"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
-
+  val macroParadiseDependency = Seq(
+    scalacOptions in Compile ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => "-Ymacro-annotations" :: Nil
+        case _ => Nil
+      }
+    },
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => Nil
+        case _ => compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+      }
+    }
+  )
 }

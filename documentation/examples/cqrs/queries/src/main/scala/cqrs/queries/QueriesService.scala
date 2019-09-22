@@ -23,7 +23,7 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
     updateIfRequired(maybeAfter)(_.meters.get(id))
 
   def findAll(): Future[List[Meter]] =
-    Future.successful(stateRef.single.get.meters.values.to[List])
+    Future.successful(stateRef.single.get.meters.values.toList)
 
   // --- internals
 

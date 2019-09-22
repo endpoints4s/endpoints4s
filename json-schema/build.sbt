@@ -33,7 +33,7 @@ lazy val `json-schema-circe` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema-circe"))
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       name := "endpoints-json-schema-circe",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
     )
@@ -47,7 +47,7 @@ lazy val `json-schema-playjson` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema-playjson"))
     .settings(
       publishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.11 to latest`,
       name := "endpoints-json-schema-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
     )

@@ -123,15 +123,15 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Ability to define `UUID` query string parameters */
   implicit def uuidQueryString: QueryStringParam[UUID] =
-    stringQueryString.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString)
+    stringQueryString.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString())
 
   /** Ability to define `Int` query string parameters */
   implicit def intQueryString: QueryStringParam[Int] =
-    stringQueryString.xmapPartial(s => Try(s.toInt).toOption)(_.toString)
+    stringQueryString.xmapPartial(s => Try(s.toInt).toOption)(_.toString())
 
   /** Query string parameter containing a `Long` value */
   implicit def longQueryString: QueryStringParam[Long] =
-    stringQueryString.xmapPartial(s => Try(s.toLong).toOption)(_.toString)
+    stringQueryString.xmapPartial(s => Try(s.toLong).toOption)(_.toString())
 
   /** Query string parameter containing a `Boolean` value */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
@@ -139,10 +139,10 @@ trait Urls extends PartialInvariantFunctorSyntax {
       case "true"  | "1" => Some(true)
       case "false" | "0" => Some(false)
       case _ => None
-    }(_.toString)
+    }(_.toString())
 
   implicit def doubleQueryString: QueryStringParam[Double] =
-    stringQueryString.xmapPartial(s => Try(s.toDouble).toOption)(_.toString)
+    stringQueryString.xmapPartial(s => Try(s.toDouble).toOption)(_.toString())
 
   /**
     * An URL path segment carrying an `A` information.
@@ -159,18 +159,18 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Ability to define `UUID` path segments */
   implicit def uuidSegment: Segment[UUID] =
-    stringSegment.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString)
+    stringSegment.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString())
 
   /** Ability to define `Int` path segments */
   implicit def intSegment: Segment[Int] =
-    stringSegment.xmapPartial(s => Try(s.toInt).toOption)(_.toString)
+    stringSegment.xmapPartial(s => Try(s.toInt).toOption)(_.toString())
 
   /** Segment containing a `Long` value */
   implicit def longSegment: Segment[Long] =
-    stringSegment.xmapPartial(s => Try(s.toLong).toOption)(_.toString)
+    stringSegment.xmapPartial(s => Try(s.toLong).toOption)(_.toString())
 
   implicit def doubleSegment: Segment[Double] =
-    stringSegment.xmapPartial(s => Try(s.toDouble).toOption)(_.toString)
+    stringSegment.xmapPartial(s => Try(s.toDouble).toOption)(_.toString())
 
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]

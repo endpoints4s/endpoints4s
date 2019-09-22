@@ -41,7 +41,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
     ): ToPlayHandler =
       header =>
         request.decode(header).map { bodyParser =>
-          playComponents.actionBuilder.async(bodyParser) { request =>
+          playComponents.defaultActionBuilder.async(bodyParser) { request =>
             handler(decoder.decode(request.body).right.get /* TODO Handle failure */.asInstanceOf[Req { type Response = Resp}])
               .map(resp => response(encoder.encode(resp)))
           }

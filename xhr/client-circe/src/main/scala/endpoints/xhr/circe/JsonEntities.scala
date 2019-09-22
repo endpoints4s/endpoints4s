@@ -1,7 +1,6 @@
 package endpoints.xhr.circe
 
 import endpoints.algebra
-import endpoints.algebra.Documentation
 import endpoints.xhr.Endpoints
 import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 import org.scalajs.dom.XMLHttpRequest
