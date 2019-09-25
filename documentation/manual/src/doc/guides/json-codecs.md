@@ -2,25 +2,82 @@
 
 The [JSON entities algebras](/algebras/json-entities.md) show that several options
 are available to define endpoints having JSON entities. In this guide, we show
-which options should be used in which case, and which interpreters are compatible
+which option should be used in which case, and which interpreters are compatible
 with which algebras.
 
-## Use codecs at the algebra level
+The following diagram summarizes which algebra to use in which case:
 
-The most general algebra for defining JSON entities uses separate
-types for request and response entities:
+~~~ mermaid
+graph TB
+Doc(Do I want to publish documentation?)-->|yes| JsonSchemaEntities
+Doc -->|no| Codec(Do I want to implement both a client and a server?)
+Codec -->|yes| JsonEntitiesFromCodec
+Codec -->|no| JsonEntities
 
-~~~ scala src=../../../../../algebras/algebra/src/main/scala/endpoints/algebra/JsonEntities.scala#request-response-types
+style JsonSchemaEntities fill:#fff
+style JsonEntitiesFromCodec fill:#fff
+style JsonEntities fill:#fff
 ~~~
 
-However, in case your endpoint definitions are interpreted in multiple ways these types
-should be aligned so that requests and responses are consistently encoded, decoded and
-documented by client, server and documentation interpreters. A consequence of this is that an
-implicit instance of such codecs has to be available for your data types at the
-definition-site of your endpoints.
+The first question to ask is “do I want to publish documentation of my
+endpoints?”. In order to document the JSON entities of your requests and
+responses you need a JSON schema for them, that’s why you have to use the
+`JsonSchemaEntities` algebra. See [below](#jsonschemaentities) for more details.
 
-The next sections show how to use the two families of “codec”-based `JsonEntities` algebra
-specializations: `JsonEntitiesFromCodec` and `JsonSchemaEntities`.
+In case you don’t need to document the schema of your JSON entities, the
+second question to ask is “do I implement both a client and a server?”.
+If this is the case, then you need to be able to both encode and decode
+each JSON entity (an entity encoded by the server will be decoded by the
+client, and _vice versa_). To ensure that encoders and decoders are consistent
+together both have to be provided at the definition site of your endpoints, that’s
+why you should use the `JsonEntitiesFromCodec` algebra. See
+[below](#jsonentitiesfromcodec) for more details.
+
+Last, if you answered “no” to both questions, then you don’t need to use an algebra,
+you can directly use the `JsonEntities` interpreter for your specific client or server.
+With this approach, you will have to provide either an encoder or a decoder for each
+JSON entity on case-by-case basis: if you implement a client for an endpoint whose
+response contains a JSON entity, you will only need a decoder.
+
+The next section reminds general information about the `JsonEntities` hierarchy,
+and the remaining sections provide more details on how to use `JsonSchemaEntities`
+and `JsonEntitiesFromCodec`.
+
+## The `JsonEntities` hierarchy
+
+The following diagram shows the relations between the three aforementioned algebras,
+`JsonEntities`, `JsonEntitiesFromCodec`, and `JsonSchemaEntities`, and their relations
+with the other algebras:
+
+![](json-entities.svg)
+
+The `JsonEntities` algebra adds to the `Endpoints` algebra the capability to describe
+JSON entities in requests and responses. The `JsonEntitiesFromCodec` algebra refines
+the `JsonEntities` algebra by aligning the request and response entities to the same
+`JsonCodec` type. Finally, the `JsonSchemaEntities` algebra refines the `JsonEntities`
+algebra by aligning the request and response entities to the same `JsonSchema` type.
+
+## `JsonSchemaEntities`
+
+### Algebra
+
+The `JsonSchemaEntities` algebra allows you to define a schema for your JSON entities.
+This schema can then be used to derive a documentation (by applying the `endpoints.openapi.JsonSchemaEntities`
+interpreter), or codecs (by applying a corresponding interpreter for your JSON library, e.g.
+`endpoints.akkahttp.server.circe.JsonSchemaEntities` to use Circe in an Akka HTTP server).
+
+Both the `JsonRequest` and `JsonResponse` types are fixed to the
+`JsonSchema` type provided by the [JsonSchemas](/algebras/json-schemas.md) algebra. This means
+that you have to define such a `JsonSchema[A]` implicit value (as explained in the `JsonSchemas`
+documentation) for each type `A` that you want to carry as a JSON entity.
+
+### Interpreters
+
+To interpret endpoints defined with this algebra, pick an interpreter that matches your
+[family](/algebras-and-interpreters.md#interpreters) of interpreters and, if relevant,
+the underlying JSON library to use. For instance, the
+`endpoints.play.server.circe.JsonSchemaEntities` trait is a server interpreter based
+on Play framework that uses the circe JSON library.
 
 ## `JsonEntitiesFromCodec`
 
@@ -49,24 +106,3 @@ To interpret endpoints defined with such algebras, apply any interpreter named `
 that matches your [family](/algebras-and-interpreters.md#interpreters) of interpreters. For instance,
 if you use interpreters from the `endpoints.xhr` package (ie. the Scala.js web interpreters), you
 should use the `endpoints.xhr.JsonEntitiesFromCodec` interpreter.
-
-## `JsonSchemaEntities`
-
-### Algebra
-
-The `endpoints.algebra.JsonSchemaEntities` algebra allows you to document the JSON schema of request
-and response entities (when you apply a documentation interpreter to endpoints defined with this
-algebra). Both the `JsonRequest` and `JsonResponse` types are fixed to the
-`JsonSchema` type provided by the [JsonSchemas](/algebras/json-schemas.md) algebra:
-
-~~~ scala src=../../../../../algebras/algebra/src/main/scala/endpoints/algebra/JsonSchemaEntities.scala#type-carrier
-~~~
-
-### Interpreters
-
-To interpret endpoints defined with this algebra, pick an interpreter that matches your
-[family](/algebras-and-interpreters.md#interpreters) of interpreters and, if relevant,
-the underlying JSON library to use. For instance, the
-`endpoints.play.server.circe.JsonSchemaEntities` trait is a server interpreter based
-on Play framework that uses the circe JSON library.
-
