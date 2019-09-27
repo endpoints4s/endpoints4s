@@ -26,7 +26,8 @@ trait MuxEndpoints extends algebra.Endpoints { self: Endpoints =>
           response(wsResponse.status, wsResponse.headers)
             .toRight(new Throwable(s"Unexpected response status: ${wsResponse.status}")).right.flatMap { entity =>
               entity(wsResponse).right.flatMap { t =>
-                decoder.decode(t).asInstanceOf[Either[Throwable, req.Response]]
+                decoder.decode(t)
+                  .fold(resp => Right(resp.asInstanceOf[req.Response]), errors => Left(new Exception(errors.mkString(". "))))
               }
             }
         )

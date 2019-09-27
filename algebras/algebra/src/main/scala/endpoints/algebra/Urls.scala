@@ -2,11 +2,11 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
+import endpoints.{Invalid, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Valid, Validated}
 
 import scala.language.{higherKinds, implicitConversions}
-import scala.util.Try
 import scala.collection.compat.Factory
+import scala.util.{Failure, Success, Try}
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -118,31 +118,38 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   implicit def queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam]
 
+  def tryParseString[A](`type`: String)(parse: String => A): String => Validated[A] =
+    s =>
+      Try(parse(s)) match {
+        case Failure(_) => Invalid(s"Invalid ${`type`} value '$s'")
+        case Success(a) => Valid(a)
+      }
+
   /** Ability to define `String` query string parameters */
   implicit def stringQueryString: QueryStringParam[String]
 
   /** Ability to define `UUID` query string parameters */
   implicit def uuidQueryString: QueryStringParam[UUID] =
-    stringQueryString.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString())
+    stringQueryString.xmapPartial(tryParseString("UUID")(UUID.fromString))(_.toString())
 
   /** Ability to define `Int` query string parameters */
   implicit def intQueryString: QueryStringParam[Int] =
-    stringQueryString.xmapPartial(s => Try(s.toInt).toOption)(_.toString())
+    stringQueryString.xmapPartial(tryParseString("integer")(_.toInt))(_.toString())
 
   /** Query string parameter containing a `Long` value */
   implicit def longQueryString: QueryStringParam[Long] =
-    stringQueryString.xmapPartial(s => Try(s.toLong).toOption)(_.toString())
+    stringQueryString.xmapPartial(tryParseString("integer")(_.toLong))(_.toString())
 
   /** Query string parameter containing a `Boolean` value */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
     stringQueryString.xmapPartial[Boolean] {
-      case "true"  | "1" => Some(true)
-      case "false" | "0" => Some(false)
-      case _ => None
+      case "true"  | "1" => Valid(true)
+      case "false" | "0" => Valid(false)
+      case s             => Invalid(s"Invalid boolean value '$s'")
     }(_.toString())
 
   implicit def doubleQueryString: QueryStringParam[Double] =
-    stringQueryString.xmapPartial(s => Try(s.toDouble).toOption)(_.toString())
+    stringQueryString.xmapPartial(tryParseString("number")(_.toDouble))(_.toString())
 
   /**
     * An URL path segment carrying an `A` information.
@@ -159,18 +166,18 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Ability to define `UUID` path segments */
   implicit def uuidSegment: Segment[UUID] =
-    stringSegment.xmapPartial(s => Try(UUID.fromString(s)).toOption)(_.toString())
+    stringSegment.xmapPartial(tryParseString("UUID")(UUID.fromString))(_.toString())
 
   /** Ability to define `Int` path segments */
   implicit def intSegment: Segment[Int] =
-    stringSegment.xmapPartial(s => Try(s.toInt).toOption)(_.toString())
+    stringSegment.xmapPartial(tryParseString("integer")(_.toInt))(_.toString())
 
   /** Segment containing a `Long` value */
   implicit def longSegment: Segment[Long] =
-    stringSegment.xmapPartial(s => Try(s.toLong).toOption)(_.toString())
+    stringSegment.xmapPartial(tryParseString("integer")(_.toLong))(_.toString())
 
   implicit def doubleSegment: Segment[Double] =
-    stringSegment.xmapPartial(s => Try(s.toDouble).toOption)(_.toString())
+    stringSegment.xmapPartial(tryParseString("number")(_.toDouble))(_.toString())
 
   /** An URL path carrying an `A` information */
   type Path[A] <: Url[A]

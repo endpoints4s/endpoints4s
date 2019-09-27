@@ -26,7 +26,10 @@ trait MuxEndpoints extends algebra.MuxEndpoints { self: Endpoints =>
         ).flatMap { entity =>
             entity(resp.entity).flatMap { t =>
               futureFromEither(t).flatMap(tt =>
-                futureFromEither(decoder.decode(tt)).map(_.asInstanceOf[req.Response])
+                futureFromEither(
+                  decoder.decode(tt)
+                    .fold(resp => Right(resp.asInstanceOf[req.Response]), errors => Left(new Exception(errors.mkString(". "))))
+                )
               )
             }
           }

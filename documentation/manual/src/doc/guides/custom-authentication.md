@@ -235,7 +235,7 @@ the token is not found or is invalid.
 ### Algebra
 
 To define protected endpoints, we need to enrich the `Authentication` algebra
-with additional vocabulary. First, we need a way to define that request headers
+with additional vocabulary. First, we need a way to define that requests that must
 contain the authentication token. Second, we need a way to define that responses
 might be `Unauthorized`. Last, we need a convenient `Endpoint` constructor that
 puts all the pieces together.
@@ -243,8 +243,9 @@ puts all the pieces together.
 ~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#protected-endpoints-algebra
 ~~~
 
-The `authenticationTokenRequestHeaders` method defines request headers containing the
-authentication token. The `wheneverAuthenticated` method transforms a given `Response[A]`
+The `authenticatedRequest` method defines a request expecting an authentication token
+to be provided in the `Authorization` header. The `wheneverAuthenticated` method transforms
+a given `Response[A]`
 into another `Response[A]` that can be an `Unauthorized` HTTP response in case the
 client was not authenticated. Note that, in contrast with the previously defined
 `wheneverValid` method, we return a `Response[A]` rather than a `Response[Option[A]]`.
@@ -252,8 +253,8 @@ This is because we assume that requests will be built by using the same algebra,
 which will make them correctly authenticated by construction.
 
 The last operation we have introduced is `authenticatedEndpoint`, which takes
-a request and a response and adds the `authenticationTokenRequestHeaders` to the
-request headers, and wraps the response into the `wheneverAuthenticated` combinator.
+a request and a response and wraps the request constituents into the `authenticatedRequest`
+constructor, and wraps the response into the `wheneverAuthenticated` combinator.
 
 This `authenticatedEndpoint` operation is final, and it is the only user-facing operation
 for defining protected endpoints (the two other operations are private). It guarantees
@@ -261,11 +262,11 @@ that the request will always have the authentication token in its headers, and t
 response can always be `Unauthorized`.
 
 > {.note}
-> The `authenticatedEndpoint` operation takes several type parameters.
+> The `authenticatedRequest` operation takes several type parameters.
 > In particular, they model the type of the request URL (`U`) and entity
 > (`E`). These types must be tracked by the type system so that, eventually,
 > an `Endpoint[Req, Resp]` is built, where the `Req` type is a tuple of
-> all the information (URL, entitiy and headers) carried by the request.
+> all the information (URL and entity) carried by the request.
 > In this example we enrich the request headers with the authentication
 > token. However, instead of simply returning nested tuples (e.g.
 > `((U, E), AuthenticationToken)`), we rely on implicit `Tupler` instances to

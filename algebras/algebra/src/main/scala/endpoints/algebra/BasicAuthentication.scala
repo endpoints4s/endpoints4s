@@ -14,21 +14,39 @@ import endpoints.algebra.BasicAuthentication.Credentials
 trait BasicAuthentication extends Endpoints {
 
   /**
-    * Credentials encoded as HTTP Basic Auth header
+    * A response that can either be Forbidden (403) or the given `Response[A]`.
     *
-    * In routing interpreters if header is not present it should match the route and return 401 Unauthorized.
-    * @return
-    */
-  //TODO we could implement this in algebra via header("Authorization).xmap() but how to enforce 401?
-  private[endpoints] def basicAuthenticationHeader: RequestHeaders[Credentials]
-
-  /**
+    * The returned `Response[Option[A]]` signals “forbidden” with a `None` value.
+    *
     * @param responseA Inner response (in case the authentication succeeds)
     * @param docs Description of the authentication error
     */
   private[endpoints] final def authenticated[A](responseA: Response[A], docs: Documentation = None): Response[Option[A]] = // FIXME Use an extensible type to model authentication failure
     responseA.orElse(response(Forbidden, emptyResponse, docs))
       .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
+
+  /**
+    * A request with the given `method`, `url`, `entity` and `headers`, but
+    * which also contains the Basic Authentication credentials in its
+    * “Authorization” header.
+    *
+    * The `Out` type aggregates together the URL information `U`, the entity
+    * information `E`, the headers information `H`, and the `Credentials`.
+    *
+    * In case the authentication credentials are missing from the request,
+    * servers reject the request with an Unauthorized (401) status code.
+    */
+  private[endpoints] def authenticatedRequest[U, E, H, UE, HCred, Out](
+    method: Method,
+    url: Url[U],
+    entity: RequestEntity[E],
+    headers: RequestHeaders[H],
+    requestDocs: Documentation
+  )(implicit
+    tuplerUE: Tupler.Aux[U, E, UE],
+    tuplerHCred: Tupler.Aux[H, Credentials, HCred],
+    tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
+  ): Request[Out]
 
   /**
     * Describes an endpoint protected by Basic HTTP authentication
@@ -50,7 +68,7 @@ trait BasicAuthentication extends Endpoints {
     tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Endpoint[Out, Option[R]] =
     endpoint(
-      request(method, url, requestEntity, requestDocs, requestHeaders ++ basicAuthenticationHeader),
+      authenticatedRequest(method, url, requestEntity, requestHeaders, requestDocs),
       authenticated(response, unauthenticatedDocs),
       summary,
       description,

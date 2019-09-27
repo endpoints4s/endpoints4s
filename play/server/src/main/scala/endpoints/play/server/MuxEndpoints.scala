@@ -1,6 +1,6 @@
 package endpoints.play.server
 
-import endpoints.algebra
+import endpoints.{Invalid, Valid, algebra}
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 import play.api.mvc.Result
 
@@ -42,8 +42,11 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
       header =>
         request.decode(header).map { bodyParser =>
           playComponents.defaultActionBuilder.async(bodyParser) { request =>
-            handler(decoder.decode(request.body).right.get /* TODO Handle failure */.asInstanceOf[Req { type Response = Resp}])
-              .map(resp => response(encoder.encode(resp)))
+            decoder.decode(request.body) match {
+              case Valid(value) =>
+                handler(value.asInstanceOf[Req { type Response = Resp }]).map(resp => response(encoder.encode(resp)))
+              case inv: Invalid => Future.successful(handleClientErrors(inv))
+            }
           }
         }
   }

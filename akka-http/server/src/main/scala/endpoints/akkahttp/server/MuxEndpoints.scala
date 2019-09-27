@@ -32,9 +32,13 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
       encoder: Encoder[Resp, Transport]
     ): Route =
       request { request =>
-        Directives.onComplete(handler(decoder.decode(request).right.get /* TODO Handle failure */ .asInstanceOf[Req {type Response = Resp}])) {
-          case Success(result) => response(encoder.encode(result))
-          case Failure(ex) => Directives.complete(ex)
+        decoder.decode(request) match {
+          case inv: Invalid => handleClientErrors(inv)
+          case Valid(req)   =>
+            Directives.onComplete(handler(req.asInstanceOf[Req { type Response = Resp }])) {
+              case Success(result) => response(encoder.encode(result))
+              case Failure(ex)     => handleClientErrors(Invalid("Invalid request entity"))
+            }
         }
       }
 

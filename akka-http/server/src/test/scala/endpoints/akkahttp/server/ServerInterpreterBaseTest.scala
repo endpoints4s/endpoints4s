@@ -36,7 +36,7 @@ class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
     import java.io._
 
     val directive =
-      url.directive.map(a => DecodedUrl.Matched(a)) |[Tuple1[DecodedUrl[A]]] Directives.extract(_ => DecodedUrl.NotMatched)
+      url.directive.map(a => DecodedUrl.Matched(a)) |[Tuple1[DecodedUrl[A]]] Directives.provide(DecodedUrl.NotMatched)
     val route = directive { decodedA => req =>
       val baos = new ByteArrayOutputStream
       val oos = new ObjectOutputStream(baos)
@@ -52,7 +52,9 @@ class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
     val request = HttpRequest(uri = Uri(rawValue))
     request ~> route ~> check {
       if (status == StatusCodes.BadRequest) {
-        DecodedUrl.Malformed
+        val s = responseAs[String]
+        val errors = s.drop(2).dropRight(2).split("\",\"")
+        DecodedUrl.Malformed(errors)
       } else {
         val bs = responseAs[Array[Byte]]
         val bais = new ByteArrayInputStream(bs)
