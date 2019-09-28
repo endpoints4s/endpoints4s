@@ -12,9 +12,6 @@ val `akka-http` = project.in(file("akka-http")).settings(noPublishSettings)
 val scalaj = project.in(file("scalaj")).settings(noPublishSettings)
 val sttp = project.in(file("sttp")).settings(noPublishSettings)
 
-// Test kit
-val testsuite = project.in(file("testsuite")).settings(noPublishSettings)
-
 // Documentation and examples
 val documentation = project.in(file("documentation")).settings(noPublishSettings)
 

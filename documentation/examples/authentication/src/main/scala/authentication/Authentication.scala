@@ -1,5 +1,6 @@
 package authentication
 
+import java.time.Clock
 //#enriched-algebra
 import endpoints.algebra
 
@@ -16,6 +17,7 @@ import endpoints.play.client
 
 //#client-interpreter
 import endpoints.Tupler
+import play.api.Configuration
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.{OFormat, __}
 import play.api.libs.functional.syntax._
@@ -102,12 +104,19 @@ case class UserInfo(name: String)
 //#user-info-type
 
 object UserInfo {
+  import ClockSettings._
 
   implicit val oformat: OFormat[UserInfo] =
     (__ \ "name").format[String].inmap(UserInfo(_), (_: UserInfo).name)
 
-  def decodeToken(token: String): Option[UserInfo] =
+  def decodeToken(token: String)(implicit conf: Configuration): Option[UserInfo] =
     JwtSession.deserialize(token.trim).getAs[UserInfo]("user")
+
+}
+
+object ClockSettings {
+
+  implicit val clock: Clock = Clock.systemUTC
 
 }
 
@@ -119,6 +128,8 @@ object UserInfo {
 trait ClientAuthentication
   extends client.Endpoints
     with Authentication {
+
+  implicit protected def playConfiguration: Configuration
 
   // The constructor is private so that users can not
   // forge instances themselves
@@ -173,6 +184,10 @@ trait ClientAuthentication
 trait ServerAuthentication
   extends Authentication
     with server.Endpoints {
+
+  import ClockSettings._
+
+  protected implicit def playConfiguration: Configuration
 
   // On server side, we build the token ourselves so we only care about the user information
   type AuthenticationToken = UserInfo

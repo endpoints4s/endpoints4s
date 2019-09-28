@@ -8,8 +8,8 @@ package counter
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import endpoints.play.server.{DefaultPlayComponents, HttpServer, PlayComponents}
-import play.core.server.ServerConfig
+import endpoints.play.server.PlayComponents
+import play.core.server.{NettyServer, ServerConfig}
 
 // Our domain model just contains a counter value
 case class Counter(value: Int)
@@ -119,9 +119,10 @@ object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
     val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
-    val playComponents = new DefaultPlayComponents(playConfig)
-    val routes = new CounterServer(playComponents).routes orElse new DocumentationServer(playComponents).routes
-    val _ = HttpServer(playConfig, playComponents, routes)
+    NettyServer.fromRouterWithComponents(playConfig) { components =>
+      val playComponents = PlayComponents.fromBuiltInComponents(components)
+      new CounterServer(playComponents).routes orElse new DocumentationServer(playComponents).routes
+    }
   }
 
   class DocumentationServer(protected val playComponents: PlayComponents)

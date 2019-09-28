@@ -57,5 +57,11 @@ class EndpointsTestAkka
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+
+  override def afterAll(): Unit = {
+    backend.close()
+    Thread.sleep(1000) // See https://github.com/softwaremill/sttp/issues/269
+    super.afterAll()
+  }
 }
 

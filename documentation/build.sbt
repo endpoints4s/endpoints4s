@@ -38,7 +38,7 @@ val apiDoc =
     .enablePlugins(ScalaUnidocPlugin)
     .settings(
       noPublishSettings,
-      scalaVersion := "2.12.8",
+      `scala 2.12`,
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
         "-implicits",
@@ -62,7 +62,7 @@ val manual =
   project.in(file("manual"))
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
-      scalaVersion := "2.12.8",
+      `scala 2.12`,
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
       ornateSettings := Map("version" -> version.value),
@@ -82,7 +82,7 @@ val manual =
 val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.11 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -100,7 +100,7 @@ val `example-quickstart-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       noPublishSettings,
-      `scala 2.11 to 2.12`
+      `scala 2.12 to latest`
     )
     .dependsOn(`example-quickstart-endpoints-js`, `xhr-client-circe`)
 
@@ -108,8 +108,8 @@ val `example-quickstart-server` =
   project.in(file("examples/quickstart/server"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
-      libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9"
+      `scala 2.12 to latest`,
+      libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9.1"
     )
     .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-playjson`, `openapi-jvm`)
 
@@ -119,8 +119,8 @@ val `example-basic-shared` = {
   CrossProject("example-basic-shared", file("examples/basic/shared"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
-      addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+      `scala 2.12 to latest`,
+      macroParadiseDependency,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
@@ -150,7 +150,6 @@ val `example-basic-shared` = {
 }
 
 val `example-basic-shared-jvm` = `example-basic-shared`.jvm
-
 val `example-basic-shared-js` = `example-basic-shared`.js
 
 val `example-basic-client` =
@@ -158,9 +157,11 @@ val `example-basic-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
+      coverageEnabled := false,
+      scalaJSUseMainModuleInitializer := true,
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -168,7 +169,7 @@ val `example-basic-play-server` =
   project.in(file("examples/basic/play-server"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       unmanagedResources in Compile += (fastOptJS in(`example-basic-client`, Compile)).map(_.data).value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
       libraryDependencies += "com.typesafe.play" %% "play" % playVersion
@@ -179,7 +180,7 @@ val `example-basic-akkahttp-server` =
   project.in(file("examples/basic/akkahttp-server"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       publishArtifact := false
     )
     .dependsOn(`example-basic-shared-jvm`, `akka-http-server`, `akka-http-server-circe`)
@@ -190,19 +191,21 @@ val `example-basic-akkahttp-server` =
 val `example-cqrs-public-endpoints` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
     )
     .jvmSettings(coverageEnabled := true)
     .settings(
-      libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
+      libraryDependencies ++= Seq(
+        "io.circe" %%% "circe-generic" % circeVersion,
+        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+      )
     )
-    .dependsOnLocalCrossProjects("example-cqrs-circe-instant", "json-schema-generic", "algebra-circe")
+    .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
 
 val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
-
 val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
 
 // web-client, *uses* the public endpoints’ definitions
@@ -211,14 +214,13 @@ val `example-cqrs-web-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.2.3",
-        "in.nvilla" %%% "monadic-rx-cats" % "0.2.3",
-        "org.julienrf" %%% "faithful-cats" % "1.1.0",
-        "org.scala-js" %%% "scalajs-java-time" % "0.2.5"
+        "org.julienrf" %%% "faithful-cats" % "2.0.0",
+        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
       ),
       scalaJSUseMainModuleInitializer := true
     )
@@ -230,7 +232,7 @@ val `example-cqrs-public-server` =
   project.in(file("examples/cqrs/public-server"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12`,
       unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -250,22 +252,22 @@ lazy val `example-cqrs-commands-endpoints` =
   project.in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.9",
+        "org.scala-stm" %% "scala-stm" % "0.9.1",
         "io.circe" %% "circe-generic" % circeVersion
       )
     )
-    .dependsOn(`algebra-circe-jvm`, `circe-instant-jvm`)
+    .dependsOn(`algebra-circe-jvm`)
 
 // commands implementation
 val `example-cqrs-commands` =
   project.in(file("examples/cqrs/commands"))
     .settings(
       noPublishSettings,
-      `scala 2.11 to 2.12`,
+      `scala 2.12 to latest`,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
         scalaTestDependency
       )
     )
@@ -275,47 +277,32 @@ val `example-cqrs-commands` =
 // queries endpoints definitions
 lazy val `example-cqrs-queries-endpoints` =
   project.in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .dependsOn(`algebra-circe-jvm`, `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */)
 
 // queries implementation
 val `example-cqrs-queries` =
   project.in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .dependsOn(`play-server-circe`, `play-client`)
     .dependsOn(`example-cqrs-queries-endpoints`, `example-cqrs-commands-endpoints`)
 
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
 val `example-cqrs` =
   project.in(file("examples/cqrs/infra"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12`)
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
         scalaTestDependency
       )
     )
-    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`, `example-cqrs-web-client`/*, `circe-instant-js`*/ /*, `circe-instant-jvm`*/)
-
-lazy val `circe-instant` =
-  CrossProject("example-cqrs-circe-instant", file("examples/cqrs/circe-instant"))(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
-    .jvmSettings(coverageEnabled := true)
-    .settings(
-      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
-    )
-
-lazy val `circe-instant-js` = `circe-instant`.js
-lazy val `circe-instant-jvm` = `circe-instant`.jvm
+    .dependsOn(`example-cqrs-queries`, `example-cqrs-commands`, `example-cqrs-public-server`)
 
 val `example-documented` =
   project.in(file("examples/documented"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .settings(
       herokuAppName in Compile := "documented-counter",
       herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
@@ -343,12 +330,11 @@ val `example-documented` =
 
 val `example-authentication` =
   project.in(file("examples/authentication"))
-    .settings(noPublishSettings, `scala 2.11 to 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "1.0.0",
-        "com.lihaoyi"   %% "utest"    % "0.6.6"   % Test
-      ),
-      testFrameworks += new TestFramework("utest.runner.Framework")
+        "com.pauldijou" %% "jwt-play" % "4.0.0",
+        scalaTestDependency
+      )
     )
     .dependsOn(`play-server`, `play-client`, `algebra-playjson-jvm`)

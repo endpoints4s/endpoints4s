@@ -278,7 +278,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       endpoint.request.decode(header)
         .map { bodyParser =>
-          playComponents.actionBuilder.async(bodyParser) { request =>
+          playComponents.defaultActionBuilder.async(bodyParser) { request =>
             service(request.body).map { b =>
               endpoint.response(b)
             }
