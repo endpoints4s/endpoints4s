@@ -82,7 +82,7 @@ object EndpointsSettings {
   val circeVersion = "0.12.1"
   val playjsonVersion = "2.7.4"
   val playVersion = "2.7.3"
-  val sttpVersion = "1.6.6"
+  val sttpVersion = "1.6.7"
 
   val scalaTestVersion = "3.0.8"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
