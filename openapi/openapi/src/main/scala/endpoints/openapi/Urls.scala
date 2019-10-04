@@ -45,11 +45,11 @@ trait Urls extends algebra.Urls {
     DocumentedQueryStringParam(Schema.Array(param.schema, description = None), isRequired = false)
   
   implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
-    def xmapPartial[A, B](fa: QueryString[A], f: A => Option[B], g: B => A): QueryString[B] = fa
+    def xmapPartial[A, B](fa: QueryString[A], f: A => Validated[B], g: B => A): QueryString[B] = fa
   }
 
   implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
-    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Option[B], g: B => A): QueryStringParam[B] = fa
+    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Validated[B], g: B => A): QueryStringParam[B] = fa
   }
 
   def stringQueryString: QueryStringParam[String] = DocumentedQueryStringParam(Schema.simpleString, isRequired = true)
@@ -67,7 +67,7 @@ trait Urls extends algebra.Urls {
   type Segment[A] = Schema
 
   implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
-    def xmapPartial[A, B](fa: Segment[A], f: A => Option[B], g: B => A): Segment[B] = fa
+    def xmapPartial[A, B](fa: Segment[A], f: A => Validated[B], g: B => A): Segment[B] = fa
   }
 
   def stringSegment: Segment[String] = Schema.simpleString
@@ -83,7 +83,7 @@ trait Urls extends algebra.Urls {
   type Path[A] = DocumentedUrl
 
   implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
-    def xmapPartial[A, B](fa: Path[A], f: A => Option[B], g: B => A): Path[B] = fa
+    def xmapPartial[A, B](fa: Path[A], f: A => Validated[B], g: B => A): Path[B] = fa
   }
 
   def staticPathSegment(segment: String): Path[Unit] = DocumentedUrl(Left(segment) :: Nil, Nil)
@@ -111,7 +111,7 @@ trait Urls extends algebra.Urls {
   type Url[A] = DocumentedUrl
 
   implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
-    def xmapPartial[A, B](fa: Url[A], f: A => Option[B], g: B => A): Url[B] = fa
+    def xmapPartial[A, B](fa: Url[A], f: A => Validated[B], g: B => A): Url[B] = fa
   }
 
 

@@ -22,8 +22,8 @@ trait MuxEndpoints[R[_]] extends algebra.Endpoints { self: Endpoints[R] =>
           case Some(transportR) =>
             self.backend.responseMonad.flatMap(transportR) { transport =>
               decoder.decode(transport) match {
-                case Right(r) => self.backend.responseMonad.unit(r.asInstanceOf[req.Response])
-                case Left(exception) => self.backend.responseMonad.error(exception)
+                case Valid(r)        => self.backend.responseMonad.unit(r.asInstanceOf[req.Response])
+                case Invalid(errors) => self.backend.responseMonad.error(new Exception(errors.mkString(". ")))
               }
             }
         }

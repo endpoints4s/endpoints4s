@@ -1,15 +1,17 @@
 package endpoints.play.server
 
 import endpoints.algebra.Documentation
-import endpoints.{Semigroupal, Tupler, algebra}
+import endpoints.{Invalid, Semigroupal, Tupler, Valid, Validated, algebra}
 import play.api.http.Writeable
 import play.api.libs.functional.InvariantFunctor
+import play.api.libs.json.Writes
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
 
 import scala.concurrent.Future
 import scala.language.implicitConversions
+import scala.util.control.NonFatal
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
@@ -55,32 +57,28 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     * to early return an HTTP response if a header is wrong (e.g. if
     * an authentication information is missing)
     */
-  type RequestHeaders[A] = Headers => Either[Result, A]
+  type RequestHeaders[A] = Headers => Validated[A]
 
   /** Always succeeds in extracting no information from the headers */
-  lazy val emptyHeaders: RequestHeaders[Unit] = _ => Right(())
+  lazy val emptyHeaders: RequestHeaders[Unit] = _ => Valid(())
 
-  def header(name: String,docs: Option[String]): Headers => Either[Result,String] =
+  def header(name: String,docs: Option[String]): Headers => Validated[String] =
     headers => headers.get(name) match {
-      case Some(value) => Right(value)
-      case None => Left(Results.BadRequest) // TODO bad request or throw an exception ?
+      case Some(value) => Valid(value)
+      case None        => Invalid(s"Missing header $name")
     }
 
-  def optHeader(name: String,docs: Option[String]): Headers => Either[Result,Option[String]] =
-    headers => Right(headers.get(name))
+  def optHeader(name: String,docs: Option[String]): Headers => Validated[Option[String]] =
+    headers => Valid(headers.get(name))
 
   implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new endpoints.InvariantFunctor[RequestHeaders] {
-    override def xmap[From, To](f: Headers => Either[Result, From], map: From => To, contramap: To => From): Headers => Either[Result, To] =
-      headers => f(headers).right.map(map)
+    def xmap[A, B](fa: RequestHeaders[A], f: A => B, g: B => A): RequestHeaders[B] =
+      headers => fa(headers).map(f)
   }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def product[A, B](fa: Headers => Either[Result, A], fb: Headers => Either[Result, B])(implicit tupler: Tupler[A, B]): Headers => Either[Result, tupler.Out] =
-      headers => {
-        val a = fa(headers)
-        val b = fb(headers)
-        a.right.flatMap(aV => b.right.map(bV => tupler.apply(aV, bV)))
-      }
+    def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
+      headers => fa(headers).tuple(fb(headers))
   }
 
   /**
@@ -120,13 +118,13 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     /**
       * Attempts to extract an `A` from an incoming request.
       *
-      * Two kinds of failures can happen:
+      * Two kinds of situations can happen:
       * 1. The incoming request URL does not match `this` definition: nothing
       *    is extracted (the `RequestExtractor` returns `None`) ;
-      * 2. The incoming request URL matches `this` definition but the headers
-      *    are erroneous: the `RequestExtractor` returns a `Left(result)`.
+      * 2. The incoming request URL matches `this` definition but the headers or parameters
+      *    are erroneous: the `RequestExtractor` returns a `Some(Invalid(...))`.
       */
-    def decode: RequestExtractor[Either[Result, A]]
+    def decode: RequestExtractor[Validated[A]]
 
     /**
       * Reverse routing.
@@ -146,8 +144,8 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
         def decode: RequestExtractor[BodyParser[B]] =
           request =>
             parent.decode(request).map {
-              case Left(result) => BodyParser(_ => Accumulator.done(Left(result)))
-              case Right(a) => toB(a)
+              case inv: Invalid => BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
+              case Valid(a) => toB(a)
             }
         def encode(b: B): Call = parent.encode(toA(b))
       }
@@ -161,20 +159,16 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
 
   implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new endpoints.InvariantFunctor[RequestEntity] {
-    override def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
+    def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
       f.map(map)
   }
 
-
-  private def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
+  protected def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
     new UrlAndHeaders[(A, B)] {
-      val decode: RequestExtractor[Either[Result, (A, B)]] =
+      val decode: RequestExtractor[Validated[(A, B)]] =
         request => method.extract(request).flatMap { _ =>
-          url.decodeUrl(request).map { maybeA =>
-            for {
-              a <- maybeA.right
-              b <- headers(request.headers).right
-            } yield (a, b)
+          url.decodeUrl(request).map { validatedA =>
+            validatedA.zip(headers(request.headers))
           }
         }
       def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
@@ -276,14 +270,28 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       * the `endpoint` definition.
       */
     def playHandler(header: RequestHeader): Option[PlayHandler] =
-      endpoint.request.decode(header)
-        .map { bodyParser =>
-          playComponents.defaultActionBuilder.async(bodyParser) { request =>
-            service(request.body).map { b =>
-              endpoint.response(b)
+      try {
+        endpoint.request.decode(header)
+          .map { bodyParser =>
+            EssentialAction { headers =>
+              try {
+                val action =
+                  playComponents.defaultActionBuilder.async(bodyParser) { request =>
+                    service(request.body).map { b =>
+                      endpoint.response(b)
+                    }
+                  }
+                action(headers).recover {
+                  case NonFatal(t) => handleServerError(t)
+                }
+              } catch {
+                case NonFatal(t) => Accumulator.done(handleServerError(t))
+              }
             }
           }
-        }
+      } catch {
+        case NonFatal(t) => Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
+      }
   }
 
   def endpoint[A, B](
@@ -316,5 +324,27 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
 
   implicit def EmptyEndpointToPlayHandler[A, B](endpoint: Endpoint[A, B])(implicit ev: Unit =:= B): ToPlayHandler =
     endpoint.implementedBy(_ => ())
+
+  /**
+    * This method is called by ''endpoints'' when an exception is thrown during
+    * request processing.
+    *
+    * The default implementation is to return an Internal Server Error (500)
+    * response containing the error messages as a JSON array of string values.
+    *
+    * This method can be overridden to customize the error reporting logic.
+    */
+  def handleServerError(throwable: Throwable): Result =
+    InternalServerError(Endpoints.invalidJsonEncoder.writes(Invalid(throwable.getMessage())))
+
+}
+
+object Endpoints {
+
+  /**
+    * Encodes `Invalid` values as a JSON array of string values.
+    */
+  implicit val invalidJsonEncoder: Writes[Invalid] =
+    Writes.seq[String].contramap[Invalid](_.errors)
 
 }

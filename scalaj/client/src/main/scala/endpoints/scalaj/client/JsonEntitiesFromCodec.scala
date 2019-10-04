@@ -15,6 +15,6 @@ trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitie
   }
 
   def jsonResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] =
-    resp => codec.decode(resp)
+    resp => codec.decode(resp).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
 }

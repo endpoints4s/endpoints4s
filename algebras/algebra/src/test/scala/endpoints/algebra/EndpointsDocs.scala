@@ -1,6 +1,6 @@
 package endpoints.algebra
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 trait EndpointsDocs extends Endpoints {
 
@@ -86,7 +86,13 @@ trait EndpointsDocs extends Endpoints {
 
   //#xmap-partial
   import java.time.LocalDate
+  import endpoints.{Invalid, Valid}
   implicit def localDateSegment(implicit string: Segment[String]): Segment[LocalDate] =
-    string.xmapPartial(s => Try(LocalDate.parse(s)).toOption)(_.toString)
+    string.xmapPartial { s =>
+      Try(LocalDate.parse(s)) match {
+        case Failure(_)    => Invalid(s"Invalid date value '$s'")
+        case Success(date) => Valid(date)
+      }
+    }(_.toString)
   //#xmap-partial
 }

@@ -2,7 +2,7 @@ package endpoints.play.server
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
-import endpoints.algebra
+import endpoints.{Invalid, Valid, algebra}
 import endpoints.algebra.Documentation
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.mvc.Results
@@ -100,8 +100,8 @@ trait Assets extends algebra.Assets with Endpoints {
             val i = s.lastIndexOf('-')
             if (i > 0) {
               val (name, digest) = s.splitAt(i)
-              Some(Right((AssetPath(p.reverse, digest.drop(1), name), Nil)))
-            } else Some(Left(Results.BadRequest))
+              Some((Valid(AssetPath(p.reverse, digest.drop(1), name)), Nil))
+            } else Some((Invalid("Invalid asset segments"), Nil))
           case Nil => None
         }
       def encode(s: AssetPath) =
@@ -110,7 +110,7 @@ trait Assets extends algebra.Assets with Endpoints {
   }
 
   private lazy val gzipSupport: RequestHeaders[Boolean] =
-    headers => Right(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
+    headers => Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
 
   /**
     * An endpoint for serving assets.

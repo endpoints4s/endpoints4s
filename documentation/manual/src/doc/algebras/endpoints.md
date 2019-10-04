@@ -95,8 +95,9 @@ the carried type. As an example, here is how you can define a `Segment[LocalDate
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#xmap-partial
 ~~~
 
-The first function passed to the `xmapPartial` operation returns an `Option[LocalDate]`. Returning `None` means
-that there is no representation of the source type in the target type.
+The first function passed to the `xmapPartial` operation returns a
+[`Validated[LocalDate]`](unchecked:/api/endpoints/Validated.html) value. Returning an
+`Invalid` value means that there is no representation of the source type in the target type.
 
 ## Response
 
@@ -156,7 +157,7 @@ and an OK response (with a valid user entity) as a `Right(user)` value.
 
 You can also transform the type produced by the alternative responses into
 a more convenient type to work with, by using the `xmap` operation. For instance,
-here is how to transform a `Response[Either[Seq[Error], User]]` into a
+here is how to transform a `Response[Either[Seq[String], User]]` into a
 `Response[Validated[User]]`:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-xmap

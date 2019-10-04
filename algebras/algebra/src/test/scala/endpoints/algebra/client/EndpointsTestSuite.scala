@@ -4,6 +4,7 @@ import java.time.LocalDate
 import java.util.UUID
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import endpoints.{Invalid, Valid}
 import endpoints.algebra.EndpointsTestApi
 
 trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
@@ -227,8 +228,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         encodeUrl(path / "foo" / remainingSegments()) ("bar%2Fbaz/quux") shouldEqual "/foo/bar%2Fbaz/quux"
 
         val evenNumber = segment[Int]().xmapPartial {
-          case x if x % 2 == 0 => Some(x)
-          case _ => None
+          case x if x % 2 == 0 => Valid(x)
+          case x               => Invalid("Invalid odd value '$x'")
         }(identity)
         encodeUrl(path / evenNumber) (42) shouldEqual "/42"
       }
@@ -262,9 +263,10 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
           val blogIdQueryString: QueryString[BlogId] =
             (qs[Option[UUID]]("uuid") & qs[Option[String]]("slug"))
-              .xmapPartial {
-                case (maybeUuid, maybeSlug) =>
-                  maybeUuid.map[BlogId](BlogUuid).orElse(maybeSlug.map[BlogId](BlogSlug))
+              .xmapPartial[BlogId] {
+                case (Some(uuid), _)    => Valid(BlogUuid(uuid))
+                case (None, Some(slug)) => Valid(BlogSlug(slug))
+                case (None, None)       => Invalid("Missing either query parameter 'uuid' or 'slug'")
               } {
                 case BlogUuid(uuid) => (Some(uuid), None)
                 case BlogSlug(slug) => (None, Some(slug))

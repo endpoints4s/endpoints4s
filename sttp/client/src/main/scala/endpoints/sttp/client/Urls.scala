@@ -6,7 +6,7 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 
 import endpoints.algebra.Documentation
-import endpoints.{PartialInvariantFunctor, Tupler, algebra}
+import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 
 /**
   * @group interpreters
@@ -19,7 +19,7 @@ trait Urls extends algebra.Urls {
   }
 
   implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
-    def xmapPartial[A, B](fa: QueryString[A], f: A => Option[B], g: B => A): QueryString[B] = 
+    def xmapPartial[A, B](fa: QueryString[A], f: A => Validated[B], g: B => A): QueryString[B] =
       (b: B) => fa.encodeQueryString(g(b))
   }
 
@@ -46,7 +46,7 @@ trait Urls extends algebra.Urls {
   type QueryStringParam[A] = A => List[String]
 
   implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
-    def xmapPartial[A, B](fa: A => List[String], f: A => Option[B], g: B => A): B => List[String] =
+    def xmapPartial[A, B](fa: A => List[String], f: A => Validated[B], g: B => A): B => List[String] =
       (b: B) => fa(g(b))
   }
 
@@ -65,7 +65,7 @@ trait Urls extends algebra.Urls {
   }
 
   implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
-    def xmapPartial[A, B](fa: Segment[A], f: A => Option[B], g: B => A): Segment[B] = (b: B) => fa.encode(g(b))
+    def xmapPartial[A, B](fa: Segment[A], f: A => Validated[B], g: B => A): Segment[B] = (b: B) => fa.encode(g(b))
   }
 
   implicit lazy val stringSegment: Segment[String] = (s: String) => URLEncoder.encode(s, utf8Name)
@@ -73,7 +73,7 @@ trait Urls extends algebra.Urls {
   trait Path[A] extends Url[A]
 
   implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
-    def xmapPartial[A, B](fa: Path[A], f: A => Option[B], g: B => A): Path[B] = (b: B) => fa.encode(g(b))
+    def xmapPartial[A, B](fa: Path[A], f: A => Validated[B], g: B => A): Path[B] = (b: B) => fa.encode(g(b))
   }
 
   def staticPathSegment(segment: String) = (_: Unit) => segment
@@ -104,7 +104,7 @@ trait Urls extends algebra.Urls {
     }
 
   implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
-    def xmapPartial[A, B](fa: Url[A], f: A => Option[B], g: B => A): Url[B] = (b: B) => fa.encode(g(b))
+    def xmapPartial[A, B](fa: Url[A], f: A => Validated[B], g: B => A): Url[B] = (b: B) => fa.encode(g(b))
   }
 
 }
