@@ -7,7 +7,7 @@ import scala.language.higherKinds
 /**
   * @group algebras
   */
-trait Responses extends StatusCodes with InvariantFunctorSyntax {
+trait Responses extends StatusCodes with InvariantFunctorSyntax { this: Errors =>
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A */
   type Response[A]
@@ -53,10 +53,18 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     response(OK, entity, docs)
 
   /**
-    * Bad Request (400) with the given entity
+    * Bad Request (400) response, with an entity of type `ClientErrors`.
+    * @see [[endpoints.algebra.Errors]] and [[endpoints.algebra.BuiltInErrors]]
     */
-  final def badRequest[A](entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
-    response(BadRequest, entity, docs)
+  final def badRequest(docs: Documentation = None): Response[ClientErrors] =
+    response(BadRequest, clientErrorsResponseEntity, docs)
+
+  /**
+    * Internal Server Error (500) response, with an entity of type `ServerError`.
+    * @see [[endpoints.algebra.Errors]] and [[endpoints.algebra.BuiltInErrors]]
+    */
+  final def internalServerError(docs: Documentation = None): Response[ServerError] =
+    response(InternalServerError, serverErrorResponseEntity, docs)
 
   /**
     * Turns a `Response[A]` into a `Response[Option[A]]`.

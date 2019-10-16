@@ -14,7 +14,7 @@ import endpoints.{Invalid, algebra}
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with endpoints.playjson.JsonSchemas {
+trait JsonSchemaEntities extends server.EndpointsWithCustomErrors with algebra.JsonSchemaEntities with endpoints.playjson.JsonSchemas {
 
   def jsonRequest[A: JsonSchema]: RequestEntity[A] = {
     Directives.entity[A](

@@ -7,7 +7,7 @@ import endpoints.algebra.Documentation
 /**
   * @group interpreters
   */
-trait Responses extends algebra.Responses with StatusCodes {
+trait Responses extends algebra.Responses with StatusCodes { this: algebra.Errors =>
 
   type Response[A] = HttpResponse[String] => Option[ResponseEntity[A]]
 

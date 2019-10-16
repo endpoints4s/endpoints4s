@@ -6,11 +6,18 @@ import endpoints.xhr
 import scala.scalajs.js
 
 /**
-  * Implements [[xhr.Endpoints]] by using JavaScript promises.
+  * Implements [[xhr.Endpoints]] by using JavaScript promises, and
+  * [[endpoints.algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
   */
-trait Endpoints extends xhr.Endpoints {
+trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
+
+/**
+  * Implements [[xhr.Endpoints]] by using JavaScript promises
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
   /** Maps a `Result` to a [[js.Thenable]] */
   type Result[A] = js.Thenable[A]

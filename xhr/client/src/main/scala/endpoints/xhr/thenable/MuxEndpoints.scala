@@ -8,7 +8,7 @@ import scala.scalajs.js
 /**
   * @group interpreters
   */
-trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
+trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](
     request: Request[Transport],

@@ -164,47 +164,44 @@ the following:
 
 ~~~ javascript
 {
-  "components": {
-    "schemas": {
-      "quickstart.Counter": {
-        "required": [
-          "value"
-        ],
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "quickstart.Increment": {
-        "required": [
-          "step"
-        ],
-        "type": "object",
-        "properties": {
-          "step": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      }
-    }
-  },
   "openapi": "3.0.0",
   "info": {
     "title": "API to manipulate a counter",
     "version": "1.0.0"
   },
+  "components": {
+    "schemas": {
+      "quickstart.Counter": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": ["value"]
+      },
+      "quickstart.Increment": {
+        "type": "object",
+        "properties": {
+          "step": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": ["step"]
+      },
+      "endpoints.Errors": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
   "paths": {
     "/increment": {
       "post": {
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
         "requestBody": {
           "content": {
             "application/json": {
@@ -213,12 +210,57 @@ the following:
               }
             }
           }
+        },
+        "responses": {
+          "400": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": ""
+          }
         }
       }
     },
     "/current-value": {
       "get": {
         "responses": {
+          "400": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
           "200": {
             "description": "",
             "content": {

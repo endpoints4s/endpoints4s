@@ -5,13 +5,20 @@ import endpoints.openapi.model._
 import endpoints.algebra.Documentation
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that produces
-  * an [[OpenApi]] instance for endpoints.
+  * Interpreter for [[algebra.Endpoints]] that produces an [[OpenApi]] instance for endpoints,
+  * and uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
   */
-trait Endpoints
-  extends algebra.Endpoints
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Interpreter for [[algebra.Endpoints]] that produces an [[OpenApi]] instance for endpoints.
+  *
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors
+  extends algebra.EndpointsWithCustomErrors
     with Requests
     with Responses {
 
@@ -82,13 +89,17 @@ trait Endpoints
       pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
         request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required, p.description, p.schema)) ++
         request.headers.value.map(h => Parameter(h.name, In.Header, required = h.required, h.description, h.schema))
+    val responses =
+      (clientErrorsResponse ++ serverErrorResponse ++ response)
+        .map(r => r.status.toString -> Response(r.documentation, r.content))
+        .toMap
     val operation =
       Operation(
         summary,
         description,
         parameters,
         if (request.entity.isEmpty) None else Some(RequestBody(request.documentation, request.entity)),
-        response.map(r => r.status.toString -> Response(r.documentation, r.content)).toMap,
+        responses,
         tags,
         security = Nil // might be refined later by specific interpreters
       )

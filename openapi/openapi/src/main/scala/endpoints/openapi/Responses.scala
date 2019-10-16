@@ -11,7 +11,7 @@ import endpoints.openapi.model.MediaType
   */
 trait Responses
   extends algebra.Responses
-  with StatusCodes {
+  with StatusCodes { this: algebra.Errors =>
 
   type ResponseEntity[A] = Map[String, MediaType]
 

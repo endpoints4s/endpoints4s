@@ -107,6 +107,16 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unexpected response status: 501")
       }
 
+      "throw exception with a detailed error message when 500 is returned from server" in {
+        wireMockServer.stubFor(get(urlEqualTo("/user/userId/description?name=name1&age=18"))
+          .willReturn(aResponse()
+            .withStatus(500)
+            .withBody("[\"Unable to process your request\"]")))
+
+        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unable to process your request")
+        whenReady(call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed)(x => x.getMessage shouldBe "Unable to process your request")
+      }
+
       "properly handle joined headers" in {
         val response = UUID.randomUUID().toString
         wireMockServer.stubFor(get(urlEqualTo("/joinedHeadersEndpoint"))

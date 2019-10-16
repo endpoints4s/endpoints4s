@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 import endpoints.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 import endpoints.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
-import play.api.mvc.{RequestHeader, Result, Results}
+import play.api.mvc.{RequestHeader, Result}
 
 import scala.collection.compat._
 import scala.collection.mutable
@@ -17,7 +17,7 @@ import scala.language.higherKinds
   *
   * @group interpreters
   */
-trait Urls extends algebra.Urls {
+trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   val utf8Name = UTF_8.name()
 
@@ -317,12 +317,12 @@ trait Urls extends algebra.Urls {
   /**
     * This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The default implementation is to return a Bad Request (400) response
-    * containing the error messages as a JSON array of string values.
+    * The provided implementation calls [[clientErrorsResponse]] to construct
+    * a response containing the errors.
     *
     * This method can be overridden to customize the error reporting logic.
     */
   def handleClientErrors(invalid: Invalid): Result =
-    Results.BadRequest(Endpoints.invalidJsonEncoder.writes(invalid))
+    clientErrorsResponse(invalidToClientErrors(invalid))
 
 }

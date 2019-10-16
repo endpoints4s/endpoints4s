@@ -17,9 +17,18 @@ import scala.language.higherKinds
   *   val example = endpoint(get(path / "foo"), emptyResponse)
   * }}}
   *
+  * This trait uses [[BuiltInErrors]] to model client and server errors.
+  *
   * @group algebras
   */
-trait Endpoints extends Requests with Responses {
+trait Endpoints extends EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Algebra interface for describing endpoints made of requests and responses.
+  *
+  * @group algebras
+  */
+trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   /**
     * Information carried by an HTTP endpoint

@@ -1,7 +1,7 @@
 package endpoints.xhr.circe
 
 import endpoints.algebra
-import endpoints.xhr.Endpoints
+import endpoints.xhr.EndpointsWithCustomErrors
 import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 import org.scalajs.dom.XMLHttpRequest
 
@@ -10,7 +10,7 @@ import org.scalajs.dom.XMLHttpRequest
   * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
   * HTTP responses.
   */
-trait JsonEntities extends Endpoints with algebra.JsonEntities {
+trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
 
   /** Encode an `A` using circe’s [[io.circe.Encoder]] */
   type JsonRequest[A] = CirceEncoder[A]

@@ -13,7 +13,7 @@ import endpoints.openapi.model.{SecurityRequirement, SecurityScheme}
   */
 trait BasicAuthentication
   extends algebra.BasicAuthentication
-    with Endpoints
+    with EndpointsWithCustomErrors
     with StatusCodes {
 
   def basicAuthenticationSchemeName: String = "HttpBasic"

@@ -45,7 +45,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   def emptyRequest: RequestEntity[Unit]
 
   /**
-    * Request with a [[String]] body.
+    * Request with a `String` body.
     */
   def textRequest: RequestEntity[String]
 
