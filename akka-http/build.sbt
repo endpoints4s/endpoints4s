@@ -8,7 +8,7 @@ val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 
 val akkaActorVersion = "2.5.25"
-val akkaHttpVersion = "10.1.9"
+val akkaHttpVersion = "10.1.10"
 val akkaHttpCirceVersion = "1.28.0"
 val akkaHttpPlayJsonVersion = "1.28.0"
 
