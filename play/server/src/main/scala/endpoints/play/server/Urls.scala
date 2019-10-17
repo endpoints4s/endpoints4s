@@ -24,7 +24,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   /**
     * Convenient type alias modeling the extraction of an `A` information from request headers.
     *
-    * This type has an instance of [[Applicative]].
+    * This type has an instance of `Applicative`.
     */
   // No Kleisli in play-functional…
   type RequestExtractor[A] = RequestHeader => Option[A]
@@ -317,7 +317,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   /**
     * This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The provided implementation calls [[clientErrorsResponse]] to construct
+    * The provided implementation calls `clientErrorsResponse` to construct
     * a response containing the errors.
     *
     * This method can be overridden to customize the error reporting logic.

@@ -19,7 +19,7 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
   */
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
-  /** Maps a `Result` to a [[js.Thenable]] */
+  /** Maps a `Result` to a `js.Thenable` */
   type Result[A] = js.Thenable[A]
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =

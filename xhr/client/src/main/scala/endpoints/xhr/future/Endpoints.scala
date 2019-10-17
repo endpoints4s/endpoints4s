@@ -19,7 +19,7 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
   */
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
-  /** Maps `Result` to [[Future]] */
+  /** Maps `Result` to `Future` */
   type Result[A] = Future[A]
 
   def endpoint[A, B](

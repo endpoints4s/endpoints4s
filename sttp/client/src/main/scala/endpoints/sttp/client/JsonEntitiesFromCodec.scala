@@ -1,7 +1,6 @@
 package endpoints.sttp.client
 
 import endpoints.algebra.Codec
-import com.softwaremill.sttp
 
 import scala.language.higherKinds
 

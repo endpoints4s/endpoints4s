@@ -5,7 +5,7 @@ import endpoints.openapi.model._
 import endpoints.algebra.Documentation
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that produces an [[OpenApi]] instance for endpoints,
+  * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints.openapi.model.OpenApi]] instance for endpoints,
   * and uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
@@ -13,7 +13,7 @@ import endpoints.algebra.Documentation
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that produces an [[OpenApi]] instance for endpoints.
+  * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints.openapi.model.OpenApi]] instance for endpoints.
   *
   * @group interpreters
   */
@@ -23,7 +23,7 @@ trait EndpointsWithCustomErrors
     with Responses {
 
   /**
-    * @return An [[OpenApi]] instance for the given endpoint descriptions
+    * @return An `OpenApi` instance for the given endpoint descriptions
     * @param info      General information about the documentation to generate
     * @param endpoints The endpoints to generate the documentation for
     */

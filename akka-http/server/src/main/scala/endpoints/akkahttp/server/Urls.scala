@@ -60,10 +60,8 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
   }
 
   /**
-    * @inheritdoc
-    *
     * Given a parameter name and a query string content, returns a decoded parameter
-    * value of type `T`, or `None` if decoding failed
+    * value of type `T`, or `Invalid` if decoding failed
     */
   type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Validated[T]
 
@@ -182,7 +180,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
     }
 
   /**
-    * Simpler alternative to [[Directive.&()]] method
+    * Simpler alternative to `Directive.&()` method
     */
   protected def joinDirectives[T1, T2](dir1: Directive1[T1], dir2: Directive1[T2])(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
     Directive[Tuple1[tupler.Out]] { inner =>
@@ -197,7 +195,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
   /**
     * This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The provided implementation calls [[clientErrorsResponse]] to complete
+    * The provided implementation calls `clientErrorsResponse` to complete
     * with a response containing the errors.
     *
     * This method can be overridden to customize the error reporting logic.

@@ -7,7 +7,7 @@ import scala.scalajs.js
 
 /**
   * Interpreter for [[algebra.LowLevelEndpoints]] that represents the response as a
-  * [[XMLHttpRequest]] value.
+  * `XMLHttpRequest` value.
   */
 trait LowLevelEndpoints extends algebra.LowLevelEndpoints with EndpointsWithCustomErrors {
 
