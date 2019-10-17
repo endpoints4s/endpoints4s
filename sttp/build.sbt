@@ -12,7 +12,7 @@ val `sttp-client` =
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp" %% "core" % sttpVersion,
         "com.softwaremill.sttp" %% "akka-http-backend" % sttpVersion % Test,
-        "com.typesafe.akka" %% "akka-stream" % "2.5.23" % Test
+        "com.typesafe.akka" %% "akka-stream" % "2.5.26" % Test
       )
     )
     .dependsOn(`algebra-jvm` % "compile->compile;test->test", `algebra-playjson-jvm` % "test->test")
