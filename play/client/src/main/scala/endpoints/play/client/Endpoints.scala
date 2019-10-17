@@ -9,14 +9,29 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
-  * Play’s [[WSClient]] HTTP client.
+  * Play’s `WSClient` HTTP client, and uses [[algebra.BuiltInErrors]] to model client and
+  * server errors.
   *
   * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
   * @param wsClient The underlying client to use
   *
   * @group interpreters
   */
-class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext: ExecutionContext) extends algebra.Endpoints with Urls with Methods with StatusCodes {
+class Endpoints(val host: String, val wsClient: WSClient)(implicit val executionContext: ExecutionContext)
+  extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
+  * * Play’s `WSClient` HTTP client.
+  *
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors
+  extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
+
+  def host: String
+  def wsClient: WSClient
+  implicit def executionContext: ExecutionContext
 
   /**
     * A function that, given an `A` and a request model, returns an updated request
@@ -95,7 +110,10 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
   type ResponseEntity[A] = WSResponse => Either[Throwable, A]
 
   private[client] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
-    wsResp => entity(wsResp).right.map(f)
+    mapPartialResponseEntity(entity)(a => Right(f(a)))
+
+  private[client] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
+    wsResp => entity(wsResp).right.flatMap(f)
 
   /** Discards response entity */
   def emptyResponse: ResponseEntity[Unit] =
@@ -134,12 +152,23 @@ class Endpoints(host: String, wsClient: WSClient)(implicit val executionContext:
     a =>
       request(a).flatMap { wsResp =>
         futureFromEither(
-          response(wsResp.status, wsResp.headers)
-            .toRight(new Throwable(s"Unexpected response status: ${wsResp.status}"))
+          decodeResponse(response, wsResp)
             .right.flatMap(entity => entity(wsResp))
         )
       }
 
+  // Make sure try decoding client error or server error responses
+  private[client] def decodeResponse[A](response: Response[A], wsResponse: WSResponse): Either[Throwable, ResponseEntity[A]] = {
+    val maybeResponse = response(wsResponse.status, wsResponse.headers)
+    def maybeClientErrors =
+      clientErrorsResponse(wsResponse.status, wsResponse.headers)
+        .map(mapPartialResponseEntity[ClientErrors, A](_)(clientErrors => Left(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+    def maybeServerError =
+      serverErrorResponse(wsResponse.status, wsResponse.headers)
+        .map(mapPartialResponseEntity[ServerError, A](_)(serverError => Left(serverErrorToThrowable(serverError))))
+    maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+      .toRight(new Throwable(s"Unexpected response status: ${wsResponse.status}"))
+  }
 }
 
 object Endpoints {

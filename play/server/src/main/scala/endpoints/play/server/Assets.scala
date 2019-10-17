@@ -13,7 +13,7 @@ import play.mvc.Http.HeaderNames
   *
   * @group interpreters
   */
-trait Assets extends algebra.Assets with Endpoints {
+trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /**
     * @param assetPath Path of the requested asset

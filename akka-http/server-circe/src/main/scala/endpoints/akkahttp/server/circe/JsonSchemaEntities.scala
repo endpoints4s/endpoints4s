@@ -14,7 +14,7 @@ import io.circe.{Decoder, DecodingFailure, Encoder}
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with circe.JsonSchemas {
+trait JsonSchemaEntities extends server.EndpointsWithCustomErrors with algebra.JsonSchemaEntities with circe.JsonSchemas {
 
   def jsonRequest[A : JsonSchema]: RequestEntity[A] = {
     implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder

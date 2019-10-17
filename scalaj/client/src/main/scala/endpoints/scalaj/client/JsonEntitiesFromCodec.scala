@@ -7,7 +7,7 @@ import endpoints.algebra.Codec
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
 
   def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] = (data, request) => {
     request.header("Content-Type", "application/json")

@@ -6,14 +6,14 @@ import endpoints.algebra.Documentation
 import endpoints.openapi.model.{SecurityRequirement, SecurityScheme}
 
 /**
-  * Interpreter for [[algebra.BasicAuthentication]] that produces
+  * Interpreter for [[endpoints.algebra.BasicAuthentication]] that produces
   * OpenAPI documentation.
   *
   * @group interpreters
   */
 trait BasicAuthentication
   extends algebra.BasicAuthentication
-    with Endpoints
+    with EndpointsWithCustomErrors
     with StatusCodes {
 
   def basicAuthenticationSchemeName: String = "HttpBasic"

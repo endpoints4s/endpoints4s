@@ -11,7 +11,7 @@ import endpoints.algebra.BasicAuthentication.Credentials
   *
   * @group algebras
   */
-trait BasicAuthentication extends Endpoints {
+trait BasicAuthentication extends EndpointsWithCustomErrors {
 
   /**
     * A response that can either be Forbidden (403) or the given `Response[A]`.

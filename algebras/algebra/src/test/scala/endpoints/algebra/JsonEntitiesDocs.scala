@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import endpoints.Validated
-
 trait JsonEntitiesDocs extends JsonEntities {
 
   type Error = String
@@ -29,15 +27,18 @@ trait JsonEntitiesDocs extends JsonEntities {
   //#response-or-not-found
 
   //#response-or-else
-  val validUserResponse: Response[Either[Seq[Error], User]] =
-    badRequest(jsonResponse[Seq[Error]]).orElse(ok(jsonResponse[User]))
+  val maybeUserResponse: Response[Either[Unit, User]] =
+    response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
   //#response-or-else
 
   locally {
     //#response-xmap
-    val validUserResponse: Response[Validated[User]] =
-      badRequest(jsonResponse[Seq[Error]]).orElse(ok(jsonResponse[User]))
-        .xmap(Validated.fromEither)(_.toEither)
+    val maybeUserResponse: Response[Option[User]] =
+      response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
+        .xmap {
+          case Left(()) => None
+          case Right(user) => Some(user)
+        }(_.toRight(()))
     //#response-xmap
   }
 

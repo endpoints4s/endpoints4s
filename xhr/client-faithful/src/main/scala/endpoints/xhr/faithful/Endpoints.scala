@@ -11,7 +11,7 @@ import faithful.{Future, Promise}
   */
 trait Endpoints extends xhr.Endpoints {
 
-  /** Maps `Result` to [[Future]] */
+  /** Maps `Result` to `Future` */
   type Result[A] = Future[A]
 
   def endpoint[A, B](

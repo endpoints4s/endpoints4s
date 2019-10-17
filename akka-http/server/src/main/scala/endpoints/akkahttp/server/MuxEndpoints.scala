@@ -13,7 +13,7 @@ import scala.util.{Failure, Success}
   *
   * @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
+trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](request: Request[Transport], response: Response[Transport]) {
 
@@ -31,14 +31,16 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
       decoder: Decoder[Transport, Req],
       encoder: Encoder[Resp, Transport]
     ): Route =
-      request { request =>
-        decoder.decode(request) match {
-          case inv: Invalid => handleClientErrors(inv)
-          case Valid(req)   =>
-            Directives.onComplete(handler(req.asInstanceOf[Req { type Response = Resp }])) {
-              case Success(result) => response(encoder.encode(result))
-              case Failure(ex)     => handleClientErrors(Invalid("Invalid request entity"))
-            }
+      Directives.handleExceptions(endpointsExceptionHandler) {
+        request { request =>
+          decoder.decode(request) match {
+            case inv: Invalid => handleClientErrors(inv)
+            case Valid(req) =>
+              Directives.onComplete(handler(req.asInstanceOf[Req {type Response = Resp}])) {
+                case Success(result) => response(encoder.encode(result))
+                case Failure(ex) => handleClientErrors(Invalid("Invalid request entity"))
+              }
+          }
         }
       }
 

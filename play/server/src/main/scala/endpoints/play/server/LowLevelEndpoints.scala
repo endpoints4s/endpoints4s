@@ -18,7 +18,7 @@ trait LowLevelEndpoints extends algebra.LowLevelEndpoints with Endpoints {
       accumulator.map(_.right.map(anyContent => Request(requestHeader, anyContent)))
     }
 
-  /** An HTTP response is a Play [[Result]] */
+  /** An HTTP response is a Play `Result` */
   type RawResponseEntity = Result
 
   lazy val rawResponseEntity: Result => Result = identity

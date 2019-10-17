@@ -8,7 +8,7 @@ import org.scalajs.dom.window.btoa
 /**
   * @group interpreters
   */
-trait BasicAuthentication extends algebra.BasicAuthentication with Endpoints {
+trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   private[endpoints] def authenticatedRequest[U, E, H, UE, HCred, Out](
     method: Method,

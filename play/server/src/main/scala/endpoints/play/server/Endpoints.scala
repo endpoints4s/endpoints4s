@@ -4,7 +4,6 @@ import endpoints.algebra.Documentation
 import endpoints.{Invalid, Semigroupal, Tupler, Valid, Validated, algebra}
 import play.api.http.Writeable
 import play.api.libs.functional.InvariantFunctor
-import play.api.libs.json.Writes
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
@@ -14,7 +13,8 @@ import scala.language.implicitConversions
 import scala.util.control.NonFatal
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework, and uses
+  * [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * Consider the following endpoints definition:
   *
@@ -44,7 +44,13 @@ import scala.util.control.NonFatal
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes {
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
 
   protected val playComponents: PlayComponents
 
@@ -329,22 +335,12 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     * This method is called by ''endpoints'' when an exception is thrown during
     * request processing.
     *
-    * The default implementation is to return an Internal Server Error (500)
-    * response containing the error messages as a JSON array of string values.
+    * The provided implementation calls [[serverErrorResponse]] to construct
+    * a response containing the error message.
     *
     * This method can be overridden to customize the error reporting logic.
     */
   def handleServerError(throwable: Throwable): Result =
-    InternalServerError(Endpoints.invalidJsonEncoder.writes(Invalid(throwable.getMessage())))
-
-}
-
-object Endpoints {
-
-  /**
-    * Encodes `Invalid` values as a JSON array of string values.
-    */
-  implicit val invalidJsonEncoder: Writes[Invalid] =
-    Writes.seq[String].contramap[Invalid](_.errors)
+    serverErrorResponse(throwableToServerError(throwable))
 
 }

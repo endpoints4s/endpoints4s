@@ -3,8 +3,6 @@ package endpoints.akkahttp.server
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
-
 import scala.collection.compat._
 import scala.language.higherKinds
 import akka.http.scaladsl.server._
@@ -18,7 +16,7 @@ import scala.collection.mutable
   *
   * @group interpreters
   */
-trait Urls extends algebra.Urls with StatusCodes {
+trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErrors =>
 
   trait Path[A] extends Url[A] {
     def validate(segments: List[String]): Option[(Validated[A], List[String])]
@@ -62,10 +60,8 @@ trait Urls extends algebra.Urls with StatusCodes {
   }
 
   /**
-    * @inheritdoc
-    *
     * Given a parameter name and a query string content, returns a decoded parameter
-    * value of type `T`, or `None` if decoding failed
+    * value of type `T`, or `Invalid` if decoding failed
     */
   type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Validated[T]
 
@@ -184,7 +180,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     }
 
   /**
-    * Simpler alternative to [[Directive.&()]] method
+    * Simpler alternative to `Directive.&()` method
     */
   protected def joinDirectives[T1, T2](dir1: Directive1[T1], dir2: Directive1[T2])(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
     Directive[Tuple1[tupler.Out]] { inner =>
@@ -199,19 +195,12 @@ trait Urls extends algebra.Urls with StatusCodes {
   /**
     * This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The default implementation is to return a route that completes with a
-    * Bad Request (400) response containing the error messages as a JSON array
-    * of string values.
+    * The provided implementation calls `clientErrorsResponse` to complete
+    * with a response containing the errors.
     *
     * This method can be overridden to customize the error reporting logic.
     */
   def handleClientErrors(invalid: Invalid): StandardRoute =
-    Directives.complete(HttpResponse(
-      BadRequest,
-      entity = HttpEntity(
-        ContentTypes.`application/json`,
-        s"[${invalid.errors.map(error => s""""${error.replaceAllLiterally("\\", "\\\\").replaceAllLiterally("\"", "\\\"")}"""").mkString(",")}]"
-      )
-    ))
+    StandardRoute(clientErrorsResponse(invalidToClientErrors(invalid)))
 
 }

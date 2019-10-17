@@ -10,7 +10,7 @@ import play.api.http.{ContentTypes, Writeable}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
 
   import playComponents.executionContext
 

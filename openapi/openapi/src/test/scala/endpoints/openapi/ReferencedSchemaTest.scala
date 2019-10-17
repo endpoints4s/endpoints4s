@@ -54,6 +54,26 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |    "/books" : {
         |      "get" : {
         |        "responses" : {
+        |          "400" : {
+        |            "description" : "Client error",
+        |            "content" : {
+        |              "application/json" : {
+        |                "schema" : {
+        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |                }
+        |              }
+        |            }
+        |          },
+        |          "500" : {
+        |            "description" : "Server error",
+        |            "content" : {
+        |              "application/json" : {
+        |                "schema" : {
+        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |                }
+        |              }
+        |            }
+        |          },
         |          "200" : {
         |            "description" : "Books list",
         |            "content" : {
@@ -84,6 +104,26 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |          "description" : "Books list"
         |        },
         |        "responses" : {
+        |          "400" : {
+        |            "description" : "Client error",
+        |            "content" : {
+        |              "application/json" : {
+        |                "schema" : {
+        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |                }
+        |              }
+        |            }
+        |          },
+        |          "500" : {
+        |            "description" : "Server error",
+        |            "content" : {
+        |              "application/json" : {
+        |                "schema" : {
+        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |                }
+        |              }
+        |            }
+        |          },
         |          "200" : {
         |            "description" : ""
         |          },
@@ -105,6 +145,28 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |  },
         |  "components" : {
         |    "schemas" : {
+        |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
+        |        "allOf" : [
+        |          {
+        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
+        |          },
+        |          {
+        |            "type" : "object",
+        |            "properties" : {
+        |              "storageType" : {
+        |                "type" : "string"
+        |              },
+        |              "link" : {
+        |                "type" : "string"
+        |              }
+        |            },
+        |            "required" : [
+        |              "storageType",
+        |              "link"
+        |            ]
+        |          }
+        |        ]
+        |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Book" : {
         |        "type" : "object",
         |        "properties" : {
@@ -162,6 +224,12 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |          }
         |        }
         |      },
+        |      "endpoints.Errors" : {
+        |        "type" : "array",
+        |        "items" : {
+        |          "type" : "string"
+        |        }
+        |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Storage.Library" : {
         |        "allOf" : [
         |          {
@@ -188,28 +256,6 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |            ]
         |          }
         |        ]
-        |      },
-        |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
-        |        "allOf" : [
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
-        |          },
-        |          {
-        |            "type" : "object",
-        |            "properties" : {
-        |              "storageType" : {
-        |                "type" : "string"
-        |              },
-        |              "link" : {
-        |                "type" : "string"
-        |              }
-        |            },
-        |            "required" : [
-        |              "storageType",
-        |              "link"
-        |            ]
-        |          }
-        |        ]
         |      }
         |    },
         |    "securitySchemes" : {
@@ -227,8 +273,9 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
       object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.circe.JsonSchemas
       import OpenApiEncoder.JsonSchema._
       import io.circe.syntax._
+      import io.circe.parser.parse
 
-      Fixtures.openApiDocument.asJson.spaces2 shouldBe expectedSchema
+      Fixtures.openApiDocument.asJson shouldBe parse(expectedSchema).right.get
     }
 
     "produce referenced schema with playjson" in {

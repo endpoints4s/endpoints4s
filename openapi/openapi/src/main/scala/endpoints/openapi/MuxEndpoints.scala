@@ -6,7 +6,7 @@ import endpoints.algebra
 /**
   * @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
+trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
   type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint
 

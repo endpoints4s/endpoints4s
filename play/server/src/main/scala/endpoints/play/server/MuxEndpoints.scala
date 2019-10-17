@@ -2,14 +2,16 @@ package endpoints.play.server
 
 import endpoints.{Invalid, Valid, algebra}
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
-import play.api.mvc.Result
+import play.api.libs.streams.Accumulator
+import play.api.mvc.{EssentialAction, Result}
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 /**
   * @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
+trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
   import playComponents.executionContext
 
@@ -40,14 +42,28 @@ trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
       encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
       header =>
-        request.decode(header).map { bodyParser =>
-          playComponents.defaultActionBuilder.async(bodyParser) { request =>
-            decoder.decode(request.body) match {
-              case Valid(value) =>
-                handler(value.asInstanceOf[Req { type Response = Resp }]).map(resp => response(encoder.encode(resp)))
-              case inv: Invalid => Future.successful(handleClientErrors(inv))
+        try {
+          request.decode(header).map { bodyParser =>
+            EssentialAction { headers =>
+              try {
+                val action =
+                  playComponents.defaultActionBuilder.async(bodyParser) { request =>
+                    decoder.decode(request.body) match {
+                      case Valid(value) =>
+                        handler(value.asInstanceOf[Req {type Response = Resp}]).map(resp => response(encoder.encode(resp)))
+                      case inv: Invalid => Future.successful(handleClientErrors(inv))
+                    }
+                  }
+                action(headers).recover {
+                  case NonFatal(t) => handleServerError(t)
+                }
+              } catch {
+                case NonFatal(t) => Accumulator.done(handleServerError(t))
+              }
             }
           }
+        } catch {
+          case NonFatal(t) => Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
         }
   }
 

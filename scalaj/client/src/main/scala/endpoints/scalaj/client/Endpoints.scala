@@ -8,7 +8,12 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Requests with Responses {
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Requests with Responses {
 
   def endpoint[A, B](
     request: Request[A],
@@ -39,8 +44,19 @@ trait Endpoints extends algebra.Endpoints with Requests with Responses {
       }
 
     def call(args: Req): Either[Throwable, Resp] = {
+      def mapPartialResponseEntity[A](entity: ResponseEntity[A])(f: A => Either[Throwable, Resp]): ResponseEntity[Resp] =
+        httpEntity => entity(httpEntity).right.flatMap(f)
+
       val resp = request(args).asString
-      response(resp).toRight(new Throwable(s"Unexpected response status: ${resp.code}"))
+      val maybeResponse = response(resp)
+      def maybeClientErrors =
+        clientErrorsResponse(resp)
+          .map(mapPartialResponseEntity(_)(clientErrors => Left(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+      def maybeServerError =
+        serverErrorResponse(resp)
+          .map(mapPartialResponseEntity(_)(serverError => Left(serverErrorToThrowable(serverError))))
+      maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+        .toRight(new Throwable(s"Unexpected response status: ${resp.code}"))
         .right.flatMap(_(resp.body))
     }
   }

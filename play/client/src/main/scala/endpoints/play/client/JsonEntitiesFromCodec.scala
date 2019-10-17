@@ -10,7 +10,7 @@ import play.api.libs.ws.{BodyWritable, InMemoryBody}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends Endpoints with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
 
   def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] = { (a, wsRequest) =>
     val playCodec: play.api.mvc.Codec = implicitly[play.api.mvc.Codec]

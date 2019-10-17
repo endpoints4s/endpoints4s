@@ -14,7 +14,7 @@ import endpoints.openapi.model.MediaType
   */
 trait JsonEntities
   extends algebra.JsonEntities
-    with Endpoints {
+    with EndpointsWithCustomErrors {
 
   def jsonRequest[A : JsonRequest]: RequestEntity[A] =
     Map("application/json" -> MediaType(None))

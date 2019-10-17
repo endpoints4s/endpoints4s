@@ -2,7 +2,7 @@ package endpoints.play.server.circe
 
 import cats.Show
 import endpoints.{Invalid, algebra}
-import endpoints.play.server.Endpoints
+import endpoints.play.server.EndpointsWithCustomErrors
 import endpoints.play.server.circe.Util.circeJsonWriteable
 import io.circe.{DecodingFailure, Json, ParsingFailure, parser}
 import play.api.http.Writeable
@@ -12,7 +12,7 @@ import play.api.http.Writeable
   * JSON entities in HTTP requests, and circe’s [[io.circe.Encoder]] to build JSON entities
   * in HTTP responses.
   */
-trait JsonSchemaEntities extends Endpoints with algebra.JsonSchemaEntities with endpoints.circe.JsonSchemas {
+trait JsonSchemaEntities extends EndpointsWithCustomErrors with algebra.JsonSchemaEntities with endpoints.circe.JsonSchemas {
 
   import playComponents.executionContext
 

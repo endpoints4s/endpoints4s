@@ -7,7 +7,7 @@ import org.scalajs.dom.XMLHttpRequest
 /**
   * @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints with Endpoints {
+trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
   protected final def muxPerformXhr[Req <: MuxRequest, Resp, Transport](
     request: Request[Transport],

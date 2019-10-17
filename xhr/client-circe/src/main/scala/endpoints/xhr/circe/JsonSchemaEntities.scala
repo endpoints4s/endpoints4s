@@ -8,7 +8,7 @@ import org.scalajs.dom.XMLHttpRequest
   * Interpreter for `JsonSchemaEntities` that uses the circe `JsonSchemas` interpreter.
   */
 trait JsonSchemaEntities
-  extends xhr.Endpoints
+  extends xhr.EndpointsWithCustomErrors
     with algebra.JsonSchemaEntities
     with circe.JsonSchemas {
 

@@ -1,7 +1,7 @@
 package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
+import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
@@ -12,11 +12,18 @@ import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using akka-http.
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
+  * to model client and server errors.
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes {
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
 
   type RequestHeaders[A] = Directive1[A]
 
@@ -33,7 +40,7 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
     }
 
-  private val endpointsExceptionHandler =
+  private[server] val endpointsExceptionHandler =
     ExceptionHandler { case NonFatal(t) => handleServerError(t) }
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
@@ -133,19 +140,12 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     * This method is called by ''endpoints'' when an exception is thrown during
     * request processing.
     *
-    * The default implementation is to return a route that completes with an
-    * Internal Server Error (500) response containing the error messages as a
-    * JSON array of string values.
+    * The provided implementation uses [[serverErrorResponse]] to complete
+    * with a response containing the error message.
     *
     * This method can be overridden to customize the error reporting logic.
     */
   def handleServerError(throwable: Throwable): StandardRoute =
-    Directives.complete(HttpResponse(
-      InternalServerError,
-      entity = HttpEntity(
-        ContentTypes.`application/json`,
-        s"""["${throwable.getMessage.toString.replaceAllLiterally("\\", "\\\\").replaceAllLiterally("\"", "\\\"")}"]"""
-      )
-    ))
+    StandardRoute(serverErrorResponse(throwableToServerError(throwable)))
 
 }

@@ -8,13 +8,13 @@ import endpoints.akkahttp.server
 import endpoints.{Invalid, algebra}
 
 /**
-  * Interpreter for [[algebra.JsonEntities]] that uses Play JSON [[play.api.libs.json.Reads]] to decode
-  * JSON entities in HTTP requests, and [[play.api.libs.json.Writes]] to build JSON entities
+  * Interpreter for [[algebra.JsonEntities]] that uses Play JSON `play.api.libs.json.Reads` to decode
+  * JSON entities in HTTP requests, and `play.api.libs.json.Writes` to build JSON entities
   * in HTTP responses.
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with endpoints.playjson.JsonSchemas {
+trait JsonSchemaEntities extends server.EndpointsWithCustomErrors with algebra.JsonSchemaEntities with endpoints.playjson.JsonSchemas {
 
   def jsonRequest[A: JsonSchema]: RequestEntity[A] = {
     Directives.entity[A](

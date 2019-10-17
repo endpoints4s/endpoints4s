@@ -3,21 +3,34 @@ package endpoints.akkahttp.client
 import akka.http.scaladsl.model.HttpHeader.ParsingResult
 import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
-import endpoints.algebra.Documentation
+import endpoints.algebra.{Codec, Documentation}
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
+  * Akka-HTTP based interpreter that uses [[algebra.BuiltInErrors]] to model client and server errors.
+  *
   * @group interpreters
   */
 class Endpoints(val settings: EndpointsSettings)
   (implicit val EC: ExecutionContext, val M: Materializer)
   extends algebra.Endpoints
+    with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Akka-HTTP based interpreter.
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors
+  extends algebra.EndpointsWithCustomErrors
     with Urls
     with Methods
     with StatusCodes {
 
+  def settings: EndpointsSettings
+  implicit def EC: ExecutionContext
+  implicit def M: Materializer
 
   type RequestHeaders[A] = (A, List[HttpHeader]) => List[HttpHeader]
 
@@ -103,7 +116,10 @@ class Endpoints(val settings: EndpointsSettings)
   type ResponseEntity[A] = HttpEntity => Future[Either[Throwable, A]]
 
   private[client] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
-    httpEntity => entity(httpEntity).map(_.right.map(f))
+    mapPartialResponseEntity(entity)(a => Right(f(a)))
+
+  private[client] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
+    httpEntity => entity(httpEntity).map(_.right.flatMap(f))
 
   def emptyResponse: ResponseEntity[Unit] =
     entity => {
@@ -116,6 +132,15 @@ class Endpoints(val settings: EndpointsSettings)
       entity.toStrict(settings.toStrictTimeout)
         .map(settings.stringContentExtractor)
         .map(Right.apply)
+
+  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = { entity =>
+    for {
+      strictEntity <- entity.toStrict(settings.toStrictTimeout)
+    } yield {
+      codec.decode(settings.stringContentExtractor(strictEntity))
+        .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
+    }
+  }
 
   def response[A](statusCode: StatusCode, responseEntity: ResponseEntity[A], docs: Documentation = None): Response[A] =
     (status, _) =>
@@ -133,16 +158,27 @@ class Endpoints(val settings: EndpointsSettings)
 
   def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
     a =>
-      for {
-        resp <- request(a)
-        result <- response(resp.status, resp.headers) match {
-          case Some(entity) =>
-            entity(resp.entity).flatMap(futureFromEither)
+      request(a).flatMap { httpResponse =>
+        decodeResponse(response, httpResponse) match {
+          case Some(entityB) =>
+            entityB(httpResponse.entity).flatMap(futureFromEither)
           case None =>
-            resp.entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
-            Future.failed(new Throwable(s"Unexpected response status: ${resp.status.intValue()}"))
+            httpResponse.entity.discardBytes() // See https://github.com/akka/akka-http/issues/1495
+            Future.failed(new Throwable(s"Unexpected response status: ${httpResponse.status.intValue()}"))
         }
-      } yield result
+      }
+
+  // Make sure to try decoding client and error responses
+  private[client] def decodeResponse[A](response: Response[A], httpResponse: HttpResponse): Option[ResponseEntity[A]] = {
+    val maybeResponse = response(httpResponse.status, httpResponse.headers)
+    def maybeClientErrors =
+      clientErrorsResponse(httpResponse.status, httpResponse.headers)
+        .map(mapPartialResponseEntity[ClientErrors, A](_)(clientErrors => Left(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+    def maybeServerError =
+      serverErrorResponse(httpResponse.status, httpResponse.headers)
+        .map(mapPartialResponseEntity[ServerError, A](_)(serverError => Left(serverErrorToThrowable(serverError))))
+    maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+  }
 
   private[client] def futureFromEither[A](errorOrA: Either[Throwable, A]): Future[A] =
     errorOrA match {

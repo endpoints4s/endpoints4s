@@ -8,7 +8,7 @@ trait StatusCodes {
   /** HTTP Status Code */
   type StatusCode
 
-  /** 2xx Success */
+  // 2xx Success
   def OK: StatusCode
 
   def Created: StatusCode
@@ -17,7 +17,12 @@ trait StatusCodes {
 
   def NoContent: StatusCode
 
-  /** 4xx Client Error */
+  // 4xx Client Error
+  /**
+    * @note You should use the `badRequest` constructor provided by the [[Responses]]
+    *       trait to ensure that errors produced by ''endponits'' are consistently
+    *       handled by interpreters.
+    */
   def BadRequest: StatusCode
 
   def Unauthorized: StatusCode
@@ -26,7 +31,14 @@ trait StatusCodes {
 
   def NotFound: StatusCode
 
-  /** 5xx Server Error */
+  // 5xx Server Error
+  /**
+    * @note You should use the `internalServerError` constructor provided by the
+    *       [[Responses]] trait to ensure that errors produced by ''endpoints''
+    *       are consistently handled by interpreters.
+    */
   def InternalServerError: StatusCode
+
+  def NotImplemented: StatusCode
 
 }
