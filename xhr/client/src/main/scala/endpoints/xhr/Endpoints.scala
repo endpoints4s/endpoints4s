@@ -1,7 +1,7 @@
 package endpoints.xhr
 
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
-import endpoints.algebra.Documentation
+import endpoints.algebra.{Codec, Documentation}
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.language.higherKinds
@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 /**
   * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
-  * using XMLHttpRequest.
+  * using XMLHttpRequest. It uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * The interpreter is ''partially'' implemented: it returns endpoint invocation
   * results in an abstract `Result` type, which is yet to be defined
@@ -18,7 +18,15 @@ import scala.scalajs.js
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes{
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
+  * using XMLHttpRequest.
+  *
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes{
 
   /**
     * A function that takes the information `A` and the XMLHttpRequest
@@ -121,10 +129,16 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
         xhr => fa(xhr).map(mapResponseEntity(_)(f))
     }
 
-  type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Exception, A]]
+  type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Throwable, A]]
 
   private[xhr] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
-    xhr => entity(xhr).right.map(f)
+    mapPartialResponseEntity(entity)(a => Right(f(a)))
+
+  private[xhr] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
+    xhr => entity(xhr).right.flatMap(f)
+
+  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] =
+    xhr => codec.decode(xhr.responseText).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
   /**
     * Discards response entity
@@ -168,9 +182,21 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     request: Request[A],
     response: Response[B],
     a: A
-  )(onload: Either[Exception, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
+  )(onload: Either[Throwable, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
     val (xhr, maybeEntity) = request(a)
-    xhr.onload = _ => onload(response(xhr).toRight(new Exception(s"Unexpected response status: ${xhr.status}")).right.flatMap(_(xhr)))
+    xhr.onload = _ => {
+      val maybeResponse = response(xhr)
+      def maybeClientErrors =
+        clientErrorsResponse(xhr)
+          .map(mapPartialResponseEntity[ClientErrors, B](_)(clientErrors => Left(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+      def maybeServerError =
+        serverErrorResponse(xhr).map(mapPartialResponseEntity[ServerError, B](_)(serverError => Left(serverErrorToThrowable(serverError))))
+      val maybeB =
+        maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+          .toRight(new Exception(s"Unexpected response status: ${xhr.status}"))
+          .right.flatMap(_(xhr))
+      onload(maybeB)
+    }
     xhr.onerror = _ => onerror(xhr)
     xhr.send(maybeEntity.orNull)
   }

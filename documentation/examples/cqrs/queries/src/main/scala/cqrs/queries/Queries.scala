@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import endpoints.play.server.{JsonEntitiesFromCodec, MuxEndpoints, PlayComponents}
+import endpoints.play.server.{BuiltInErrors, JsonEntitiesFromCodec, MuxEndpoints, PlayComponents}
 import play.api.routing.Router
 
 import scala.concurrent.Future
@@ -11,6 +11,7 @@ import scala.concurrent.Future
 class Queries(service: QueriesService, protected val playComponents: PlayComponents)
   extends QueriesEndpoints
     with MuxEndpoints
+    with BuiltInErrors
     with JsonEntitiesFromCodec {
 
   import playComponents.executionContext

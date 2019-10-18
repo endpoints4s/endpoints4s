@@ -1,7 +1,9 @@
 package endpoints.algebra.circe
 
+import cats.Show
+import endpoints.{Invalid, Valid, Validated}
 import endpoints.algebra.{Codec, Decoder, Encoder}
-import io.circe.{Json, parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
+import io.circe.{DecodingFailure, Json, ParsingFailure, parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 
 /**
   * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that only
@@ -63,8 +65,12 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
 
   implicit def jsonCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
 
-    def decode(from: String): Either[Exception, A] =
-      parser.parse(from).right.flatMap(codec.decoder.decodeJson)
+    def decode(from: String): Validated[A] =
+      parser.parse(from).left.map(Show[ParsingFailure].show)
+        .right.flatMap { json =>
+          codec.decoder.decodeJson(json).left.map(Show[DecodingFailure].show)
+        }
+        .fold(Invalid(_), Valid(_))
 
     def encode(from: A): String =
       codec.encoder.apply(from).noSpaces
@@ -73,7 +79,9 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
 
   implicit def circeDecoderToDecoder[A](implicit decoder: CirceDecoder[A]): Decoder[Json, A] =
     new Decoder[Json, A] {
-      def decode(from: Json): Either[Exception, A] = decoder.decodeJson(from)
+      def decode(from: Json): Validated[A] =
+        decoder.decodeJson(from)
+          .fold(failure => Invalid(Show[DecodingFailure].show(failure)), Valid(_))
     }
 
   implicit def circeEncoderToEncoder[A](implicit encoder: CirceEncoder[A]): Encoder[A, Json] =

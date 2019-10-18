@@ -1,9 +1,10 @@
 package endpoints.algebra.playjson
 
+import endpoints.{Invalid, Valid, Validated}
 import endpoints.algebra.Codec
-import play.api.libs.json.{Format, Json, JsResultException}
+import play.api.libs.json.{Format, JsPath, Json, JsonValidationError}
 
-import scala.util.control.NonFatal
+import scala.util.{Failure, Success, Try}
 
 /**
   * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that only
@@ -63,16 +64,25 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
 
   implicit def jsonCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
 
-    def decode(from: String): Either[Exception, A] =
-      for {
-        json <- (try { Right(Json.parse(from)) } catch { case NonFatal(e: Exception) => Left(e) }).right
-        a <- Json.fromJson[A](json).asEither.left.map(JsResultException).right
-      } yield a
+    def decode(from: String): Validated[A] =
+      (Try(Json.parse(from)) match {
+        case Failure(_) => Left(Invalid("Unable to parse entity as JSON"))
+        case Success(a) => Right(a)
+      }).right.flatMap { json =>
+          def showErrors(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]): Invalid =
+            Invalid((
+              for {
+                (path, pathErrors) <- errors.iterator
+                error <- pathErrors
+              } yield s"${error.message} for ${path.toJsonString}"
+            ).toSeq)
+          Json.fromJson[A](json).asEither
+            .left.map(showErrors)
+            .right.map(Valid(_))
+        }.merge
 
     def encode(from: A): String = Json.stringify(Json.toJson(from))
 
   }
-
-  // TODO Reads[A] to Decoder[Json, A] and Writes[A] to Encoder[A, Json]
 
 }

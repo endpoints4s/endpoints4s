@@ -2,19 +2,19 @@ package endpoints.akkahttp.client.circe
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints._
-import endpoints.akkahttp.client.Endpoints
-import io.circe.{Encoder, Decoder}
+import endpoints.akkahttp.client.EndpointsWithCustomErrors
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import io.circe.parser.decode
 
 /**
-  * Interpreter for [[endpoints.algebra.JsonSchemaEntities]] that uses circe’s [[io.circe.Encoder]] to encode
-  * JSON entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities
+  * Interpreter for [[endpoints.algebra.JsonSchemaEntities]] that uses circe’s `io.circe.Encoder` to encode
+  * JSON entities in HTTP requests, and circe’s `io.circe.Decoder` to decode JSON entities
   * in HTTP responses.
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchemas { this: Endpoints =>
+trait JsonSchemaEntities extends algebra.JsonSchemaEntities with circe.JsonSchemas { this: EndpointsWithCustomErrors =>
 
   def jsonRequest[A: JsonSchema]: RequestEntity[A] = { (a, req) =>
     implicit def encoder: Encoder[A] = implicitly[JsonSchema[A]].encoder

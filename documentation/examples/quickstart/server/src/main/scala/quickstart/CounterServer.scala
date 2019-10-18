@@ -21,10 +21,10 @@ class CounterServer(protected val playComponents: PlayComponents)
 
   val routes: Router.Routes = routesFromEndpoints(
 
-    /** Implements the `currentValue` endpoint */
+    // Implements the `currentValue` endpoint
     currentValue.implementedBy(_ => Counter(counter.single.get)),
 
-    /** Implements the `increment` endpoint */
+    // Implements the `increment` endpoint
     //#endpoint-implementation
     increment.implementedBy(inc => counter.single += inc.step)
     //#endpoint-implementation

@@ -13,7 +13,7 @@ import endpoints._
   *
   * @group interpreters
   */
-trait JsonEntities extends algebra.JsonEntities with Endpoints {
+trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
   type JsonRequest[A] = FromRequestUnmarshaller[A]
 

@@ -2,27 +2,14 @@ package endpoints.algebra
 
 trait JsonEntitiesDocs extends JsonEntities {
 
+  type Error = String
+
   case class User(id: Long, name: String)
   case class CreateUser(name: String)
-  trait Error
-  sealed trait Validated[+A] extends Product with Serializable {
-    def toEither: Either[Seq[Error], A] = this match {
-      case Invalid(errors) => Left(errors)
-      case Valid(a)        => Right(a)
-    }
-  }
-  case class Valid[+A](a: A) extends Validated[A]
-  case class Invalid(errors: Seq[Error]) extends Validated[Nothing]
-  object Validated {
-    def fromEither[A](either: Either[Seq[Error], A]): Validated[A] = either match {
-      case Left(errors) => Invalid(errors)
-      case Right(a)     => Valid(a)
-    }
-  }
 
   implicit def createUserJsonRequest: JsonRequest[CreateUser]
   implicit def userJsonResponse: JsonResponse[User]
-  implicit def errorsJsonResponse: JsonResponse[Seq[Error]]
+  implicit def errorsJsonResponse: JsonResponse[Seq[String]]
 
   //#json-entities
   endpoint(
@@ -40,15 +27,18 @@ trait JsonEntitiesDocs extends JsonEntities {
   //#response-or-not-found
 
   //#response-or-else
-  val validUserResponse: Response[Either[Seq[Error], User]] =
-    badRequest(jsonResponse[Seq[Error]]).orElse(ok(jsonResponse[User]))
+  val maybeUserResponse: Response[Either[Unit, User]] =
+    response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
   //#response-or-else
 
   locally {
     //#response-xmap
-    val validUserResponse: Response[Validated[User]] =
-      badRequest(jsonResponse[Seq[Error]]).orElse(ok(jsonResponse[User]))
-        .xmap(Validated.fromEither)(_.toEither)
+    val maybeUserResponse: Response[Option[User]] =
+      response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
+        .xmap {
+          case Left(()) => None
+          case Right(user) => Some(user)
+        }(_.toRight(()))
     //#response-xmap
   }
 

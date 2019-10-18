@@ -53,3 +53,29 @@ parameter. An HTTP server can then be started as in the following example:
 
 ~~~ scala src=../../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#main-only
 ~~~
+
+### Error handling
+
+When the server processes requests, three kinds of errors can happen: the incoming request doesn’t match
+any endpoint, the request does match an endpoint but is invalid (e.g. one parameter has a wrong type), or
+an exception is thrown.
+
+#### The incoming request doesn’t match any endpoint
+
+In that case, the router constructed by *endpoints* can’t do anything. You have to deal with such
+errors in the usual Play way: by using a custom `play.api.http.HttpErrorHandler`.
+
+#### The incoming request is invalid
+
+In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
+JSON array. You can change this behavior by overriding the
+[handleClientErrors](unchecked:/api/endpoints/play/server/Urls.html#handleClientErrors(invalid:endpoints.Invalid):play.api.mvc.Result)
+method.
+
+#### An exception is thrown
+
+If an exception is thrown during request decoding, or when running the business logic, or when
+encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
+the error in a JSON array. You can change this behavior by overriding the
+[handleServerError](unchecked:/api/endpoints/play/server/Endpoints.html#handleServerError(throwable:Throwable):play.api.mvc.Result)
+method.

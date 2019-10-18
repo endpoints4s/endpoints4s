@@ -2,15 +2,16 @@ package endpoints.sttp.client
 
 import java.net.URI
 
-import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
-import endpoints.algebra.Documentation
+import endpoints.{Invalid, InvariantFunctor, Semigroupal, Tupler, Valid, algebra}
+import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
 
 import scala.language.higherKinds
 
 /**
   * An interpreter for [[endpoints.algebra.Endpoints]] that builds a client issuing requests using
-  * a sttp’s `com.softwaremill.sttp.SttpBackend`.
+  * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client
+  * and server errors.
   *
   * Doest not support streaming responses for now
   *
@@ -20,7 +21,20 @@ import scala.language.higherKinds
   *
   * @group interpreters
   */
-class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) extends algebra.Endpoints with Urls with Methods with StatusCodes {
+class Endpoints[R[_]](val host: String, val backend: sttp.SttpBackend[R, Nothing])
+  extends algebra.Endpoints with EndpointsWithCustomErrors[R] with BuiltInErrors[R]
+
+/**
+  * An interpreter for [[endpoints.algebra.Endpoints]] that builds a client issuing requests using
+  * a sttp’s `com.softwaremill.sttp.SttpBackend`.
+  *
+  * @tparam R The monad wrapping the response. It is defined by the backend
+  */
+trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
+  with Urls with Methods with StatusCodes {
+
+  val host: String
+  val backend: sttp.SttpBackend[R, Nothing]
 
   type SttpRequest = sttp.Request[_, Nothing]
 
@@ -126,8 +140,16 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
 
   /** Successfully decodes string information from a response */
   def textResponse: ResponseEntity[String] = new ResponseEntity[String] {
-    def decodeEntity(response: sttp.Response[String]): R[String] = backend.responseMonad.unit(response.unsafeBody)
+    def decodeEntity(response: sttp.Response[String]): R[String] =
+      backend.responseMonad.unit(response.body.merge)
   }
+
+  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] =
+    sttpResponse =>
+      codec.decode(sttpResponse.body.merge) match {
+        case Valid(a) => backend.responseMonad.unit(a)
+        case Invalid(errors) => backend.responseMonad.error(new Exception(errors.mkString(". ")))
+      }
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] = {
     new Response[A] {
@@ -158,9 +180,21 @@ class Endpoints[R[_]](host: String, val backend: sttp.SttpBackend[R, Nothing]) e
       val req: sttp.Request[String, Nothing] = request(a).response(sttp.asString)
       val result = backend.send(req)
       backend.responseMonad.flatMap(result) { sttpResponse =>
-        response.decodeResponse(sttpResponse)
-          .getOrElse(backend.responseMonad.error(new Throwable(s"Unexpected response status: ${sttpResponse.code}")))
+        decodeResponse(response, sttpResponse)
       }
     }
+
+  private[client] def decodeResponse[A](response: Response[A], sttpResponse: sttp.Response[String]): R[A] = {
+    val maybeResponse =
+      response.decodeResponse(sttpResponse)
+    def maybeClientErrors =
+      clientErrorsResponse.decodeResponse(sttpResponse)
+        .map(backend.responseMonad.flatMap[ClientErrors, A](_)(clientErrors => backend.responseMonad.error(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+    def maybeServerError =
+      serverErrorResponse.decodeResponse(sttpResponse)
+        .map(backend.responseMonad.flatMap[ServerError, A](_)(serverError => backend.responseMonad.error(serverErrorToThrowable(serverError))))
+    maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+      .getOrElse(backend.responseMonad.error(new Throwable(s"Unexpected response status: ${sttpResponse.code}")))
+  }
 
 }

@@ -23,5 +23,6 @@ trait StatusCodes extends algebra.StatusCodes {
   def NotFound = AkkaStatusCodes.NotFound
 
   def InternalServerError = AkkaStatusCodes.InternalServerError
+  def NotImplemented = AkkaStatusCodes.NotImplemented
 
 }

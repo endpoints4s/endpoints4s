@@ -5,7 +5,7 @@ package endpoints.algebra
   *
   * @group algebras
   */
-trait Assets extends Endpoints {
+trait Assets extends EndpointsWithCustomErrors {
 
   /** An HTTP request to retrieve an asset */
   type AssetRequest

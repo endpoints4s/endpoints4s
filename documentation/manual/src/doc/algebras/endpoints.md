@@ -95,8 +95,9 @@ the carried type. As an example, here is how you can define a `Segment[LocalDate
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#xmap-partial
 ~~~
 
-The first function passed to the `xmapPartial` operation returns an `Option[LocalDate]`. Returning `None` means
-that there is no representation of the source type in the target type.
+The first function passed to the `xmapPartial` operation returns a
+[`Validated[LocalDate]`](unchecked:/api/endpoints/Validated.html) value. Returning an
+`Invalid` value means that there is no representation of the source type in the target type.
 
 ## Response
 
@@ -148,17 +149,41 @@ by using the `orElse` operation:
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-or-else
 ~~~
 
-In this example, servers can produce a Bad Request (400) response by returning
-`Left(validationErrors)`, and an OK (200) response containing a user
-by returning `Right(user)`. Conversely, clients interpret a Bad Request response
-(with a valid `ValidationErrors` entity) as a `Left(validationErrors)` value,
+In this example, servers can produce a Not Implemented (501) response by returning
+`Left(())`, and an OK (200) response containing a user
+by returning `Right(user)`. Conversely, clients interpret a Not Implemented response
+as a `Left(())` value,
 and an OK response (with a valid user entity) as a `Right(user)` value.
 
 You can also transform the type produced by the alternative responses into
 a more convenient type to work with, by using the `xmap` operation. For instance,
-here is how to transform a `Response[Either[Seq[Error], User]]` into a
-`Response[Validated[User]]`:
+here is how to transform a `Response[Either[Unit, User]]` into a
+`Response[Option[User]]`:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala#response-xmap
 ~~~
 
+### Error Responses
+
+_endpoints_ server interpreters handle two kinds of errors:
+
+- when the server is unable to decode an incoming request (because, for instance,
+  a query parameter is missing, or the request entity has the wrong format).
+  In this case it is a “client error” ;
+- when the provided business logic throws an exception, or the server is
+  unable to serialize the result into a proper HTTP response. In this case it is
+  a “server error”.
+
+By default, client errors are reported as an
+[Invalid](unchecked:/api/endpoints/Invalid.html) value, serialized into
+a Bad Request (400) response, as a JSON array containing string messages.
+You can change the provided serialization format by overriding the
+[clientErrorsResponseEntity](unchecked:/api/endpoints/algebra/BuiltInErrors.html#clientErrorsResponseEntity:BuiltInErrors.this.ResponseEntity[endpoints.Invalid])
+operation.
+
+Similarly, by default server errors are reported as a `Throwable` value,
+serialized into an Internal Server Error (500) response, as a JSON array
+containing string messages. You can change the provided serialization format
+by overriding the
+[serverErrorResponseEntity](unchecked:/api/endpoints/algebra/BuiltInErrors.html#serverErrorResponseEntity:BuiltInErrors.this.ResponseEntity[Throwable])
+operation.

@@ -17,7 +17,7 @@ import scala.language.higherKinds
   *
   * @group algebras
   */
-trait JsonEntities extends Endpoints {
+trait JsonEntities extends EndpointsWithCustomErrors {
 
 //#request-response-types
   /** Type class defining how to represent the `A` information as a JSON request entity */

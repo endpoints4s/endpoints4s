@@ -10,7 +10,7 @@ import endpoints.openapi.model.{MediaType, Schema}
   */
 trait JsonSchemaEntities
   extends algebra.JsonSchemaEntities
-    with Endpoints
+    with EndpointsWithCustomErrors
     with JsonSchemas {
 
   import DocumentedJsonSchema._

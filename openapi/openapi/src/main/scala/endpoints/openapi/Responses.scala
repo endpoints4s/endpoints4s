@@ -11,7 +11,7 @@ import endpoints.openapi.model.MediaType
   */
 trait Responses
   extends algebra.Responses
-  with StatusCodes {
+  with StatusCodes { this: algebra.Errors =>
 
   type ResponseEntity[A] = Map[String, MediaType]
 
@@ -20,7 +20,7 @@ trait Responses
   /**
     * @param status Response status code (e.g. OK or NotFound)
     * @param documentation Human readable documentation. Not optional because its required by openapi
-    * @param content Map that associates each possible content-type (e.g. “text/html”) with a [[MediaType]] description
+    * @param content Map that associates each possible content-type (e.g. “text/html”) with a `MediaType` description
     */
   case class DocumentedResponse(status: StatusCode, documentation: String, content: Map[String, MediaType])
 

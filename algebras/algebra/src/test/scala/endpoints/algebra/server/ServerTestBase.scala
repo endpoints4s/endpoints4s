@@ -33,9 +33,9 @@ trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
 sealed trait DecodedUrl[+A] extends Serializable
 object DecodedUrl {
   /** The URL candidate matched the given URL definition, and a `A` value was extracted from it */
-  case class  Matched[+A](value: A) extends DecodedUrl[A]
+  case class  Matched[+A](value: A)         extends DecodedUrl[A]
   /** The URL candidate didn’t match the given URL definition */
-  case object NotMatched            extends DecodedUrl[Nothing]
+  case object NotMatched                    extends DecodedUrl[Nothing]
   /** The URL candidate matched the given URL definition, but the decoding process failed */
-  case object Malformed             extends DecodedUrl[Nothing]
+  case class Malformed(errors: Seq[String]) extends DecodedUrl[Nothing]
 }

@@ -8,7 +8,7 @@ import scala.concurrent.Future
 /**
   * @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints { self: Endpoints =>
+trait MuxEndpoints extends algebra.MuxEndpoints { self: EndpointsWithCustomErrors =>
 
   class MuxEndpoint[Req <: algebra.MuxRequest, Resp, Transport](
     request: Request[Transport],
@@ -22,11 +22,14 @@ trait MuxEndpoints extends algebra.MuxEndpoints { self: Endpoints =>
     ): Future[req.Response] =
       request(encoder.encode(req)).flatMap { resp =>
         futureFromEither(
-          response(resp.status, resp.headers).toRight(new Throwable(s"Unexpected response status or headers"))
+          decodeResponse(response, resp).toRight({ resp.discardEntityBytes(); new Throwable(s"Unexpected response status or headers")})
         ).flatMap { entity =>
             entity(resp.entity).flatMap { t =>
               futureFromEither(t).flatMap(tt =>
-                futureFromEither(decoder.decode(tt)).map(_.asInstanceOf[req.Response])
+                futureFromEither(
+                  decoder.decode(tt)
+                    .fold(resp => Right(resp.asInstanceOf[req.Response]), errors => Left(new Exception(errors.mkString(". "))))
+                )
               )
             }
           }

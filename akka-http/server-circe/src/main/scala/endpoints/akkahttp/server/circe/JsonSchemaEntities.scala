@@ -1,10 +1,11 @@
 package endpoints.akkahttp.server.circe
 
-import akka.http.scaladsl.server.Directives
+import akka.http.scaladsl.server.{Directives, MalformedRequestContentRejection, Rejection}
+import cats.Show
 import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
 import endpoints._
 import endpoints.akkahttp.server
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, DecodingFailure, Encoder}
 
 /**
   * Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode
@@ -13,11 +14,20 @@ import io.circe.{Decoder, Encoder}
   *
   * @group interpreters
   */
-trait JsonSchemaEntities extends server.Endpoints with algebra.JsonSchemaEntities with circe.JsonSchemas {
+trait JsonSchemaEntities extends server.EndpointsWithCustomErrors with algebra.JsonSchemaEntities with circe.JsonSchemas {
 
   def jsonRequest[A : JsonSchema]: RequestEntity[A] = {
     implicit def decoder: Decoder[A] = implicitly[JsonSchema[A]].decoder
     Directives.entity[A](implicitly)
+      .recoverPF(Function.unlift { rejections: Seq[Rejection] =>
+        val decodingErrors =
+          rejections.collect {
+            case MalformedRequestContentRejection(_, DecodingFailures(errors)) =>
+              errors.map(Show[DecodingFailure].show).toList
+          }.flatten
+        if (decodingErrors.isEmpty) None
+        else Some(handleClientErrors(Invalid(decodingErrors)))
+      })
   }
 
   def jsonResponse[A : JsonSchema]: ResponseEntity[A] = {

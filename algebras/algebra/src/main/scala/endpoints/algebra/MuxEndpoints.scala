@@ -8,7 +8,7 @@ import scala.language.higherKinds
   *
   * @group algebras
   */
-trait MuxEndpoints extends Endpoints {
+trait MuxEndpoints extends EndpointsWithCustomErrors {
 
   /**
     * Information carried by a multiplexed HTTP endpoint.

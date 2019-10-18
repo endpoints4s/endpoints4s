@@ -12,7 +12,7 @@ import scala.scalajs.js.typedarray.ArrayBuffer
   *
   * @group interpreters
   */
-trait Assets extends algebra.Assets with Endpoints {
+trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /**
     * As a client, we just need to give the path of the asset we are interested in, the web browser will

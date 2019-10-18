@@ -10,8 +10,8 @@ import scala.collection.compat._
 import scala.language.higherKinds
 
 /**
-  * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces Play JSON [[play.api.libs.json.Reads]]
-  * and [[play.api.libs.json.Writes]].
+  * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces Play JSON `play.api.libs.json.Reads`
+  * and `play.api.libs.json.Writes`.
   */
 trait JsonSchemas
   extends algebra.JsonSchemas {

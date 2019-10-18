@@ -29,7 +29,7 @@ package endpoints.algebra
   *     .map(response => println(response.responseText))
   * }}}
   */
-trait LowLevelEndpoints extends Endpoints {
+trait LowLevelEndpoints extends EndpointsWithCustomErrors {
 
   /** Low-level request entity */
   type RawRequestEntity

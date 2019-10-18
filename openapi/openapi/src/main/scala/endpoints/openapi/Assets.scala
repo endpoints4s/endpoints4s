@@ -11,7 +11,7 @@ import endpoints.openapi.model._
   */
 trait Assets
   extends algebra.Assets
-    with Endpoints
+    with EndpointsWithCustomErrors
     with StatusCodes {
 
   type AssetRequest = Nothing

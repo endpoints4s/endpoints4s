@@ -17,5 +17,6 @@ trait StatusCodes extends algebra.StatusCodes {
   def NotFound = 404
 
   def InternalServerError = 500
+  def NotImplemented = 501
 
 }

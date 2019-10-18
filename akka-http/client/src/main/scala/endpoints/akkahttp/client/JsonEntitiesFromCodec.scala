@@ -9,16 +9,12 @@ import endpoints.algebra.Codec
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec { this: Endpoints =>
+trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec { this: EndpointsWithCustomErrors =>
 
   def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] = { (a, req) =>
     req.copy(entity = HttpEntity(ContentTypes.`application/json`, codec.encode(a)))
   }
 
-  def jsonResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = { entity =>
-    for {
-      strictEntity <- entity.toStrict(settings.toStrictTimeout)
-    } yield codec.decode(settings.stringContentExtractor(strictEntity))
-  }
+  def jsonResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = stringCodecResponse
 
 }

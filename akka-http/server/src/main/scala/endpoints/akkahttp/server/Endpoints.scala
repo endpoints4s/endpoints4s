@@ -2,20 +2,28 @@ package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.HttpEntity
-import akka.http.scaladsl.server.{Directive1, Directives, Route}
+import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
 /**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using akka-http.
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
+  * to model client and server errors.
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCodes {
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+
+/**
+  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
+  * @group interpreters
+  */
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
 
   type RequestHeaders[A] = Directive1[A]
 
@@ -32,15 +40,24 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
     }
 
-  case class Endpoint[A, B](request: Request[A], response: Response[B]) {
-    def implementedBy(implementation: A => B): Route = request { arguments =>
-      response(implementation(arguments))
-    }
+  private[server] val endpointsExceptionHandler =
+    ExceptionHandler { case NonFatal(t) => handleServerError(t) }
 
-    def implementedByAsync(implementation: A => Future[B]): Route = request { arguments =>
-      Directives.onComplete(implementation(arguments)) {
-        case Success(result) => response(result)
-        case Failure(ex) => Directives.complete(ex)
+  case class Endpoint[A, B](request: Request[A], response: Response[B]) {
+    def implementedBy(implementation: A => B): Route =
+      Directives.handleExceptions(endpointsExceptionHandler) {
+        request { arguments =>
+          response(implementation(arguments))
+        }
+      }
+
+    def implementedByAsync(implementation: A => Future[B]): Route =
+      Directives.handleExceptions(endpointsExceptionHandler) {
+        request { arguments =>
+          Directives.onComplete(implementation(arguments)) {
+            case Success(result) => response(result)
+            case Failure(ex)     => throw ex
+          }
       }
     }
   }
@@ -101,15 +118,10 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
     headers: RequestHeaders[C] = emptyHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))
-    // we use Directives.pathPrefix to construct url directives, so now we close it
-    val urlDirective = joinDirectives(url.directive, convToDirective1(Directives.pathEndOrSingleSlash))
-    joinDirectives(
-      joinDirectives(
-        joinDirectives(
-          methodDirective,
-          urlDirective),
-        entity),
-      headers)
+    val matchDirective = methodDirective & url.directive & headers
+    matchDirective.tflatMap { case (_, a, c) =>
+      entity.map(b => tuplerABC(tuplerAB(a, b), c))
+    }
   }
 
   def endpoint[A, B](
@@ -121,7 +133,19 @@ trait Endpoints extends algebra.Endpoints with Urls with Methods with StatusCode
   ): Endpoint[A, B] = Endpoint(request, response)
 
   lazy val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {
-    override def xmap[From, To](f: Directive1[From], map: From => To, contramap: To => From): Directive1[To] = f.map(map)
+    def xmap[From, To](f: Directive1[From], map: From => To, contramap: To => From): Directive1[To] = f.map(map)
   }
+
+  /**
+    * This method is called by ''endpoints'' when an exception is thrown during
+    * request processing.
+    *
+    * The provided implementation uses [[serverErrorResponse]] to complete
+    * with a response containing the error message.
+    *
+    * This method can be overridden to customize the error reporting logic.
+    */
+  def handleServerError(throwable: Throwable): StandardRoute =
+    StandardRoute(serverErrorResponse(throwableToServerError(throwable)))
 
 }

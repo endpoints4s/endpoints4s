@@ -29,11 +29,11 @@ trait InvariantFunctorSyntax {
   }
 }
 
-/** Given a type constructor `F`, a partial function `A => Option[B]`
+/** Given a type constructor `F`, a partial function `A => Validated[B]`
   * and a total function `B => A`, turns an `F[A]` into an `F[B]`.
   *
   * A partial invariant functor is an invariant functor whose covariant
-  * transformation function is total (ie, `A => Some[B]`).
+  * transformation function is total (ie, `A => Valid[B]`).
   */
 trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
   /**
@@ -44,8 +44,8 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     *
     * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
     */
-  def xmapPartial[A, B](fa: F[A], f: A => Option[B], g: B => A): F[B]
-  def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] = xmapPartial[A, B](fa, a => Some(f(a)), g)
+  def xmapPartial[A, B](fa: F[A], f: A => Validated[B], g: B => A): F[B]
+  def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] = xmapPartial[A, B](fa, a => Valid(f(a)), g)
 }
 
 trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
@@ -58,6 +58,6 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
       *
       * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
       */
-    def xmapPartial[B](f: A => Option[B])(g: B => A): F[B] = ev.xmapPartial(fa, f, g)
+    def xmapPartial[B](f: A => Validated[B])(g: B => A): F[B] = ev.xmapPartial(fa, f, g)
   }
 }
