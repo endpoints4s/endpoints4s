@@ -1,6 +1,6 @@
 import sbt._
 import sbt.Keys._
-import com.typesafe.sbt.pgp.PgpKeys.{pgpPassphrase, pgpPublicRing, pgpSecretRing}
+import com.jsuereth.sbtpgp.PgpKeys.{pgpPassphrase, pgpPublicRing, pgpSecretRing}
 import xerial.sbt.Sonatype.autoImport.sonatypePublishTo
 
 import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
