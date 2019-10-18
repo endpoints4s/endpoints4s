@@ -62,6 +62,7 @@ val manual =
   project.in(file("manual"))
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
+      noPublishSettings,
       `scala 2.12`,
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
