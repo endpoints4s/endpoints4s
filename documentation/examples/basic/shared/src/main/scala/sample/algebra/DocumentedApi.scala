@@ -31,7 +31,7 @@ trait DocumentedApi
       path / "admin",
       requestEntity = emptyRequest,
       response = ok(emptyResponse, Some("Administration page")),
-      summary = Some("Authentication endpoint")
+      endpointDocs = EndpointDocs(summary = Some("Authentication endpoint"))
     )
 
 }

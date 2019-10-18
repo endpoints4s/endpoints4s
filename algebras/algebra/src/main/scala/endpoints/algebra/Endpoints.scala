@@ -43,16 +43,43 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     *
     * @param request  Request
     * @param response Response
-    * @param summary optional summary documentation
-    * @param description optional description documentation
-    * @param tags list of OpenApi tags
+    * @param docs     Documentation (used by documentation interpreters)
     */
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
+    docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B]
+
+  /**
+    * @param summary     Short description
+    * @param description Detailed description
+    * @param tags        OpenAPI tags
+    * @param callbacks   Callbacks indexed by event name
+    */
+  case class EndpointDocs(
     summary: Documentation = None,
     description: Documentation = None,
-    tags: List[String] = Nil
-  ): Endpoint[A, B]
+    tags: List[String] = Nil,
+    callbacks: Map[String, CallbacksDocs] = Map.empty
+  )
+
+  /**
+    * Callbacks indexed by URL pattern
+    * @see [["Swagger Documentation" https://swagger.io/docs/specification/callbacks/]]
+    */
+  type CallbacksDocs = Map[String, CallbackDocs]
+
+  /**
+    * @param method   HTTP method used for the callback
+    * @param entity   Contents of the callback message
+    * @param response Expected response
+    */
+  case class CallbackDocs(
+    method: Method,
+    entity: RequestEntity[_],
+    response: Response[_],
+    requestDocs: Documentation = None
+  )
 
 }

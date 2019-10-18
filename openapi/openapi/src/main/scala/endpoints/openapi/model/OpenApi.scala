@@ -28,7 +28,8 @@ case class Operation(
   requestBody: Option[RequestBody],
   responses: Map[String, Response],
   tags: List[String],
-  security: List[SecurityRequirement]
+  security: List[SecurityRequirement],
+  callbacks: Map[String, Map[String, PathItem]]
 )
 
 case class SecurityRequirement(name: String,

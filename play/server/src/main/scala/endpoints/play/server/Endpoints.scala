@@ -303,9 +303,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Documentation,
-    description: Documentation,
-    tags: List[String]
+    docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     Endpoint(request, response)
 
