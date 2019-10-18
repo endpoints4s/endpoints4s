@@ -25,10 +25,6 @@ object EndpointsSettings {
       case _ => Seq("-Yno-adapted-args", "-Ywarn-unused-import", "-Xexperimental", "-Xfuture", "-Ywarn-value-discard")
     })
   )
-  val `scala 2.11` = Seq(
-    scalaVersion := "2.11.12",
-    crossScalaVersions := Seq("2.11.12")
-  )
   val `scala 2.12` = Seq(
     scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.12.10")
