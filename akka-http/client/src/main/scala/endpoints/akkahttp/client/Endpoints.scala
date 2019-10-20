@@ -156,7 +156,11 @@ trait EndpointsWithCustomErrors
   type Endpoint[A, B] = A => Future[B]
   //#endpoint-type
 
-  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B] =
     a =>
       request(a).flatMap { httpResponse =>
         decodeResponse(response, httpResponse) match {

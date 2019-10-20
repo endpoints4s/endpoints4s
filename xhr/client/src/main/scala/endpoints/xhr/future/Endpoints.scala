@@ -1,6 +1,5 @@
 package endpoints.xhr.future
 
-import endpoints.algebra.Documentation
 import endpoints.xhr
 
 import scala.concurrent.{Future, Promise}
@@ -25,9 +24,7 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Documentation,
-    description: Documentation,
-    tags: List[String]
+    docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {

@@ -2,7 +2,6 @@ package endpoints
 package openapi
 
 import endpoints.openapi.model._
-import endpoints.algebra.Documentation
 
 /**
   * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints.openapi.model.OpenApi]] instance for endpoints,
@@ -60,9 +59,8 @@ trait EndpointsWithCustomErrors
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Documentation = None,
-    description: Documentation = None,
-    tags: List[String] = Nil): Endpoint[A, B] = {
+    docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B] = {
     val method =
       request.method match {
         case Get => "get"
@@ -95,13 +93,28 @@ trait EndpointsWithCustomErrors
         .toMap
     val operation =
       Operation(
-        summary,
-        description,
+        docs.summary,
+        docs.description,
         parameters,
         if (request.entity.isEmpty) None else Some(RequestBody(request.documentation, request.entity)),
         responses,
-        tags,
-        security = Nil // might be refined later by specific interpreters
+        docs.tags,
+        security = Nil, // might be refined later by specific interpreters
+        docs.callbacks.map { case (event, callbacks) =>
+          val items = callbacks.map {
+            case (urlPattern, callback) =>
+              val method      = callback.method.toString.toLowerCase
+              val requestBody = RequestBody(callback.requestDocs, callback.entity)
+              val responses =
+                callback.response
+                  .map(r => r.status.toString -> Response(r.documentation, r.content))
+                  .toMap
+              val callbackOperation =
+                Operation(None, None, Nil, Some(requestBody), responses, Nil, Nil, Map.empty)
+              (urlPattern, PathItem(Map(method -> callbackOperation)))
+          }
+          (event, items)
+        }
       )
     val item = PathItem(Map(method -> operation))
     val path = correctPathSegments.map {
@@ -115,7 +128,8 @@ trait EndpointsWithCustomErrors
 
     val allReferencedSchemas = for {
       documentedEndpoint <- endpoints
-      operation <- documentedEndpoint.item.operations.values
+      operations = documentedEndpoint.item.operations.values
+      operation <- operations ++ operations.flatMap(_.callbacks.values.flatMap(_.values.flatMap(_.operations.values)))
       requestBodySchema = for {
         body <- operation.requestBody.toIterable
         mediaType <- body.content.values

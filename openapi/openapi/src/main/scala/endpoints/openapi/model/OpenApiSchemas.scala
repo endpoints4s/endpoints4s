@@ -34,21 +34,23 @@ trait OpenApiSchemas extends JsonSchemas {
     ).xmap(Info.tupled)(info => (info.title, info.version))
 
   implicit lazy val pathItemSchema: JsonSchema[PathItem] =
-    mapJsonSchema[Operation].xmap(PathItem(_))(_.operations)
+    lazySchema(mapJsonSchema[Operation], "endpoints.openapi.model.Operation")
+      .xmap(PathItem(_))(_.operations)
 
   implicit lazy val operationSchema: JsonSchema[Operation] = (
-    optField [String]                    ("summary")     zip
-    optField [String]                    ("description") zip
-    optField [List[Parameter]]           ("parameters")  zip
-    optField [RequestBody]               ("requestBody") zip
-       field [Map[String, Response]]     ("responses")   zip
-    optField [List[String]]              ("tags")        zip
-    optField [List[SecurityRequirement]] ("security")
+    optField [String]                            ("summary")     zip
+    optField [String]                            ("description") zip
+    optField [List[Parameter]]                   ("parameters")  zip
+    optField [RequestBody]                       ("requestBody") zip
+       field [Map[String, Response]]             ("responses")   zip
+    optField [List[String]]                      ("tags")        zip
+    optField [List[SecurityRequirement]]         ("security")    zip
+    optField [Map[String, Map[String, PathItem]]]("callbacks")
   ).xmap[Operation] {
-    case ((((((summary, description), parameters), requestBody), responses), tags), security) =>
-      Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil))
+    case (((((((summary, description), parameters), requestBody), responses), tags), security), callbacks) =>
+      Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil), callbacks.getOrElse(Map.empty))
   } {
-    o => ((((((o.summary, o.description), if (o.parameters.isEmpty) None else Some(o.parameters)), o.requestBody), o.responses), if (o.tags.isEmpty) None else Some(o.tags)), if (o.security.isEmpty) None else Some(o.security))
+    o => (((((((o.summary, o.description), if (o.parameters.isEmpty) None else Some(o.parameters)), o.requestBody), o.responses), if (o.tags.isEmpty) None else Some(o.tags)), if (o.security.isEmpty) None else Some(o.security)), if (o.callbacks.isEmpty) None else Some(o.callbacks))
   }
 
   implicit lazy val parameterSchema: JsonSchema[Parameter] = (

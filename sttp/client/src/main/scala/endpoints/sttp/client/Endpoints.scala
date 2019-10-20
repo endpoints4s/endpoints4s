@@ -175,7 +175,11 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
   type Endpoint[A, B] = A => R[B]
   //#endpoint-type
 
-  def endpoint[A, B](request: Request[A], response: Response[B], summary: Documentation, description: Documentation, tags: List[String]): Endpoint[A, B] =
+  def endpoint[A, B](
+    request: Request[A],
+    response: Response[B],
+    docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B] =
     a => {
       val req: sttp.Request[String, Nothing] = request(a).response(sttp.asString)
       val result = backend.send(req)

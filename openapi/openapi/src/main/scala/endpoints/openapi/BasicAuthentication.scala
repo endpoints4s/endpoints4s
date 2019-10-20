@@ -39,14 +39,12 @@ trait BasicAuthentication
     requestHeaders: RequestHeaders[H] = emptyHeaders,
     unauthenticatedDocs: Documentation = None,
     requestDocs: Documentation = None,
-    summary: Documentation = None,
-    description: Documentation = None,
-    tags: List[String] = Nil
+    endpointDocs: EndpointDocs = EndpointDocs()
   )(implicit
     tuplerUE: Tupler.Aux[U, E, UE],
     tuplerHCred: Tupler.Aux[H, Credentials, HCred],
     tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Endpoint[Out, Option[R]] =
-    super.authenticatedEndpoint(method, url, response, requestEntity, requestHeaders, unauthenticatedDocs, requestDocs, summary, description, tags)
+    super.authenticatedEndpoint(method, url, response, requestEntity, requestHeaders, unauthenticatedDocs, requestDocs, endpointDocs)
       .withSecurity(SecurityRequirement(basicAuthenticationSchemeName, SecurityScheme.httpBasic))
 }

@@ -127,9 +127,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Documentation = None,
-    description: Documentation = None,
-    tags: List[String] = Nil
+    docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] = Endpoint(request, response)
 
   lazy val directive1InvFunctor: InvariantFunctor[Directive1] = new InvariantFunctor[Directive1] {

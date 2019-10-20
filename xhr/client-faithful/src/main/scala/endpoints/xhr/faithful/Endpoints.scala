@@ -1,6 +1,5 @@
 package endpoints.xhr.faithful
 
-import endpoints.algebra.Documentation
 import endpoints.xhr
 import faithful.{Future, Promise}
 
@@ -17,9 +16,7 @@ trait Endpoints extends xhr.Endpoints {
   def endpoint[A, B](
     request: Request[A],
     response: Response[B],
-    summary: Documentation,
-    description: Documentation,
-    tags: List[String]
+    docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {

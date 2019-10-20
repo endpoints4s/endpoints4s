@@ -18,7 +18,7 @@ trait EndpointsDocs extends Endpoints {
   endpoint(
     get(path / "some-resource"),
     ok(textResponse),
-    description = Some("The contents of some resource")
+    docs = EndpointDocs(description = Some("The contents of some resource"))
   )
   //#with-docs
 
