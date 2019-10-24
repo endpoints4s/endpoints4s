@@ -26,6 +26,19 @@ class JsonSchemasTest extends FreeSpec {
     object Quux {
       implicit val schema: JsonSchema[Quux] = genericJsonSchema[Quux]
     }
+
+    sealed trait Doc
+    case class DocA(@documentation("fieldDocI") i: Int) extends Doc
+    case class DocB(
+      a: String,
+      @documentation("fieldDocB") b: Boolean,
+      @documentation("fieldDocSS") ss: List[String]
+    ) extends Doc
+    case object DocC extends Doc
+
+    object Doc {
+      val schema: JsonSchema[Doc] = genericJsonSchema[Doc]
+    }
   }
 
   object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas {
@@ -45,13 +58,13 @@ class JsonSchemasTest extends FreeSpec {
         s"=>'$name'!($schema)"
 
       def emptyRecord: String =
-        "$"
+        "%"
 
       def field[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe"
+        s"$name:$tpe${docs.fold("")(doc => s"{$doc}")}"
 
       def optField[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe?"
+        s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
 
       def taggedRecord[A](recordA: String, tag: String): String =
         s"$recordA@$tag"
@@ -99,14 +112,37 @@ class JsonSchemasTest extends FreeSpec {
                           ): String = s"{$jsonSchema}"
   }
 
+  val ns = "endpoints.generic.JsonSchemasTest.GenericSchemas"
+
   "case class" in {
-    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Foo'!(bar:string,baz:integer,qux:boolean?,$))"
+    val expectedSchema = s"'$ns.Foo'!('$ns.Foo'!(bar:string,baz:integer,qux:boolean?,%))"
     assert(FakeAlgebraJsonSchemas.Foo.schema == expectedSchema)
   }
 
   "sealed trait" in {
-    val expectedSchema = "'endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.Quux'!('endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxA'!(ss:[string],$)@QuuxA|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxB'!(i:integer,$)@QuuxB|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxC'!(b:boolean,$)@QuuxC|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxD'!($)@QuuxD|'endpoints.generic.JsonSchemasTest.GenericSchemas.QuuxE'!($)@QuuxE))"
+    val expectedSchema = s"'$ns.Quux'!('$ns.Quux'!(${
+      List(
+        s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
+        s"'$ns.QuuxB'!(i:integer,%)@QuuxB",
+        s"'$ns.QuuxC'!(b:boolean,%)@QuuxC",
+        s"'$ns.QuuxD'!(%)@QuuxD",
+        s"'$ns.QuuxE'!(%)@QuuxE"
+      ).mkString("|")
+    }))"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
+  }
+
+  "documentations" in {
+    val expectedSchema = s"'$ns.Doc'!('$ns.Doc'!(${
+      List(
+        s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
+        s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
+        s"'$ns.DocC'!(%)@DocC"
+      ).mkString("|")
+    }))"
+    println(expectedSchema)
+    println(FakeAlgebraJsonSchemas.Doc.schema)
+    assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 
 }
