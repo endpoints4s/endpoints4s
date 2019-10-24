@@ -106,6 +106,12 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
       Fixtures.documentation.paths.find(_._1.startsWith("/baz")).get._2.operations("get").tags shouldEqual List("baz", "bxx")
     }
   }
+
+  "Deprecation documentation" should {
+    "be set according to provided docs" in {
+      Fixtures.documentation.paths("/textRequestEndpoint").operations("post").deprecated shouldBe true
+    }
+  }
 }
 
 trait Fixtures extends algebra.Endpoints {
@@ -130,7 +136,8 @@ trait Fixtures extends algebra.Endpoints {
 
   val textRequestEndp = endpoint(
     post(path / "textRequestEndpoint", textRequest, docs = Some("Text Req")),
-    ok(emptyResponse)
+    ok(emptyResponse),
+    docs = EndpointDocs(deprecated = true)
   )
 
   val emptySegmentNameEndp = endpoint(post(path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](), textRequest), ok(emptyResponse))

@@ -110,11 +110,12 @@ trait EndpointsWithCustomErrors
                   .map(r => r.status.toString -> Response(r.documentation, r.content))
                   .toMap
               val callbackOperation =
-                Operation(None, None, Nil, Some(requestBody), responses, Nil, Nil, Map.empty)
+                Operation(None, None, Nil, Some(requestBody), responses, Nil, Nil, Map.empty, deprecated = false)
               (urlPattern, PathItem(Map(method -> callbackOperation)))
           }
           (event, items)
-        }
+        },
+        docs.deprecated
       )
     val item = PathItem(Map(method -> operation))
     val path = correctPathSegments.map {

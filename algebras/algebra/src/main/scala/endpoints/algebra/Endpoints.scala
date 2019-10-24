@@ -56,12 +56,14 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param description Detailed description
     * @param tags        OpenAPI tags
     * @param callbacks   Callbacks indexed by event name
+    * @param deprecated  Indicates whether this endpoint is deprecated or not
     */
   case class EndpointDocs(
     summary: Documentation = None,
     description: Documentation = None,
     tags: List[String] = Nil,
-    callbacks: Map[String, CallbacksDocs] = Map.empty
+    callbacks: Map[String, CallbacksDocs] = Map.empty,
+    deprecated: Boolean = false
   )
 
   /**
