@@ -71,25 +71,29 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority {
 
-    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[documentation], DT <: HList](implicit
+    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: DocumentedGenericRecord[T, DT],
+      jsonSchemaTail: DocumentedGenericRecord[T, DT]
     ): DocumentedGenericRecord[FieldType[L, H] :: T, DH :: DT] =
-      (docs: DH :: DT) =>
-        (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
-          .xmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+      new DocumentedGenericRecord[FieldType[L, H] :: T, DH :: DT] {
+        def record(docs: DH :: DT) =
+          (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
+            .xmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+      }
 
-    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[documentation], DT <: HList](implicit
+    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
       labelHead: Witness.Aux[L],
       jsonSchemaHead: JsonSchema[H],
       jsonSchemaTail: DocumentedGenericRecord[T, DT]
     ): DocumentedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT] =
-      (docs: DH :: DT) =>
-        (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
-          .xmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+      new DocumentedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT] {
+        def record(docs: DH :: DT) =
+          (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
+            .xmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+      }
 
-    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct, D](implicit
+    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
       labelHead: Witness.Aux[L],
       recordHead: GenericRecord[H],
       taggedTail: GenericTagged[T]
@@ -105,7 +109,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
             case Inr(t) => Right(t)
           }
         }
-    )
+      )
 
   }
 
@@ -121,7 +125,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     implicit def recordGeneric[A, R, D <: HList](implicit
       gen: LabelledGeneric.Aux[A, R],
-      docAnns: Annotations.Aux[documentation, A, D],
+      docAnns: Annotations.Aux[docs, A, D],
       record: DocumentedGenericRecord[R, D],
       ct: ClassTag[A]
     ): GenericRecord[A] =
@@ -136,6 +140,11 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
+  /**
+    * Compute a schema name (used for documentation) based on a `ClassTag`.
+    * The provided implementation uses the fully qualified name of the class.
+    * You can override this method to use a custom logic.
+    */
   def classTagToSchemaName(ct: ClassTag[_]): String = {
     val jvmName = ct.runtimeClass.getName
     // name fix for case objects

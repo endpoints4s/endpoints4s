@@ -28,11 +28,11 @@ class JsonSchemasTest extends FreeSpec {
     }
 
     sealed trait Doc
-    case class DocA(@documentation("fieldDocI") i: Int) extends Doc
+    case class DocA(@docs("fieldDocI") i: Int) extends Doc
     case class DocB(
       a: String,
-      @documentation("fieldDocB") b: Boolean,
-      @documentation("fieldDocSS") ss: List[String]
+      @docs("fieldDocB") b: Boolean,
+      @docs("fieldDocSS") ss: List[String]
     ) extends Doc
     case object DocC extends Doc
 

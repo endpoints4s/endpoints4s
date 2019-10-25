@@ -18,4 +18,13 @@ trait JsonSchemasDocs extends JsonSchemas {
     ).as[Rectangle]
     //#explicit-schema
   }
+
+  locally {
+    //#documented-generic-schema
+    case class Rectangle(
+      @docs("Rectangle width") width: Double,
+      height: Double
+    )
+    //#documented-generic-schema
+  }
 }

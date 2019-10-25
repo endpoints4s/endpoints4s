@@ -103,7 +103,7 @@ by wrapping it in the `lazySchema` constructor:
 ## Generic derivation of JSON schemas (based on Shapeless) {#generic-derivation-of-json-schemas}
 
 The module presented in this section uses Shapeless to generically derive JSON schemas
-for algebraic data type definitions.
+for algebraic data type definitions (sealed traits and case classes).
 
 ~~~ scala expandVars=true
 "org.julienrf" %% "endpoints-json-schema-generic" % "{{version}}"
@@ -118,9 +118,22 @@ reduced to the following:
 ~~~
 
 The `genericJsonSchema` operation builds a JSON schema for the given
-type, mapping each case class field to a JSON object field of the same name,
-and each leaf of a sealed trait to a tagged JSON object whose type discriminator
-uses the case class fully qualified name.
+type. The rules for deriving the schema are the following:
+
+- the schema of a case class is a JSON object,
+- the schema of a sealed trait is the alternative (`oneOf`) of its leaf case
+  class schemas, discriminated by the case class names,
+- each case class field has a corresponding required JSON object property of
+  the same name and type (for instance, the generic schema for the `Rectangle`
+  type has a `width` required property of type `integer`),
+- each case class field of type `Option[A]` for some type `A` has a corresponding
+  optional JSON object property of the same name and type.
+
+Documentation specific to case class fields can be defined by annotating the fields
+with the `@docs` annotation:
+
+~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#documented-generic-schema
+~~~
 
 The module also takes advantage shapeless to define more convenient
 operations for combining JSON schema definitions: the `zip` operation
