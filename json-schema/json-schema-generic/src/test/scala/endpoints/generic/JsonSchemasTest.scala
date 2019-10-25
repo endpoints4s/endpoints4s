@@ -140,8 +140,6 @@ class JsonSchemasTest extends FreeSpec {
         s"'$ns.DocC'!(%)@DocC"
       ).mkString("|")
     }))"
-    println(expectedSchema)
-    println(FakeAlgebraJsonSchemas.Doc.schema)
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 
