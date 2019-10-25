@@ -129,14 +129,14 @@ trait JsonSchemas extends algebra.JsonSchemas {
       record: DocumentedGenericRecord[R, D],
       ct: ClassTag[A]
     ): GenericRecord[A] =
-      new GenericRecord[A](nameSchema(record.record(docAnns()).xmap[A](gen.from)(gen.to)))
+      new GenericRecord[A](record.record(docAnns()).xmap[A](gen.from)(gen.to).named(classTagToSchemaName(ct)))
 
     implicit def taggedGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       tagged: GenericTagged[R],
       ct: ClassTag[A]
     ): GenericTagged[A] =
-      new GenericTagged[A](nameSchema(tagged.jsonSchema.xmap[A](gen.from)(gen.to)))
+      new GenericTagged[A](tagged.jsonSchema.xmap[A](gen.from)(gen.to).named(classTagToSchemaName(ct)))
 
   }
 
@@ -152,11 +152,6 @@ trait JsonSchemas extends algebra.JsonSchemas {
     name.replace('$','.')
   }
 
-  private def nameSchema[A: ClassTag, S[T] <: JsonSchema[T]](schema: S[A]): S[A] = {
-    named(schema, classTagToSchemaName(implicitly[ClassTag[A]]))
-  }
-
-
   /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
     *
     * In a sense, this operation asks shapeless to compute a ''type level'' description
@@ -166,20 +161,24 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
     * This could result in non unique values and mess with documentation
     */
-  def genericJsonSchema[A: ClassTag](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
-    nameSchema(genJsonSchema.jsonSchema)
+  def genericJsonSchema[A](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+    genJsonSchema.jsonSchema
 
-  /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
+  /** @return a `Record[A]` obtained from an implicitly derived `GenericRecord[A]`
     *
-    * In a sense, this operation asks shapeless to compute a ''type level'' description
-    * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
-    * description of the data type (based on the `JsonSchemas` algebra interface)
-    *
-    * This operation is using the name provided
-    * Please be aware that this name should be unique or documentation will not work properly
+    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
+    * This could result in non unique values and mess with documentation
     */
-  def namedGenericJsonSchema[A](name : String)(implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
-    named(genJsonSchema.jsonSchema, name)
+  def genericRecord[A](implicit genRecord: GenericJsonSchema.GenericRecord[A]): Record[A] =
+    genRecord.jsonSchema
+
+  /** @return a `Tagged[A]` obtained from an implicitly derived `GenericTagged[A]`
+    *
+    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
+    * This could result in non unique values and mess with documentation
+    */
+  def genericTagged[A](implicit genTagged: GenericJsonSchema.GenericTagged[A]): Tagged[A] =
+    genTagged.jsonSchema
 
   final class RecordGenericOps[L <: HList](record: Record[L]) {
 

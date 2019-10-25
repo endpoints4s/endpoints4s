@@ -44,9 +44,9 @@ class JsonSchemasTest extends FreeSpec {
 
   "recursive type" in {
     val json = Json.obj("next" -> Json.obj("next" -> Json.obj()))
-    val rec = JsonSchemasCodec.Rec(Some(JsonSchemasCodec.Rec(Some(JsonSchemasCodec.Rec(None)))))
-    assert(JsonSchemasCodec.recSchema.decoder.decodeJson(json).right.exists(_ == rec))
-    assert(JsonSchemasCodec.recSchema.encoder(rec) == json)
+    val rec = JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(None)))))
+    assert(JsonSchemasCodec.recursiveSchema.decoder.decodeJson(json).right.exists(_ == rec))
+    assert(JsonSchemasCodec.recursiveSchema.encoder(rec) == json)
   }
 
 }

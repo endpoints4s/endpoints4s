@@ -54,7 +54,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
   "Enumerations" in {
     val expectedSchema =
-      Schema.Enum(Schema.Primitive("string", None, None), "Red" :: "Blue" :: Nil, None)
+      Schema.Reference("Color", Some(Schema.Enum(Schema.Primitive("string", None, None), "Red" :: "Blue" :: Nil, None)), None)
     Fixtures.toSchema(Fixtures.Enum.colorSchema) shouldBe expectedSchema
   }
 
@@ -75,7 +75,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
         additionalProperties = None,
         description = None
       )
-    Fixtures.toSchema(Fixtures.recSchema) shouldBe expectedSchema
+    Fixtures.toSchema(Fixtures.recursiveSchema) shouldBe expectedSchema
   }
 
   "Text response" should {

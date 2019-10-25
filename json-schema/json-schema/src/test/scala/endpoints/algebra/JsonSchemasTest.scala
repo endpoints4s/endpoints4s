@@ -64,13 +64,13 @@ trait JsonSchemasTest extends JsonSchemas {
     case object Green extends Color
     case object Blue extends Color
 
-    val colorSchema: Enum[Color] = enumeration[Color](Seq(Red, Blue))(_.toString)
+    val colorSchema: Enum[Color] = enumeration[Color](Seq(Red, Blue))(_.toString).named("Color")
   }
 
-  case class Rec(next: Option[Rec])
-  val recSchema: JsonSchema[Rec] = (
-    optField("next")(lazySchema(recSchema, "Rec"))
-  ).xmap(Rec)(_.next)
+  case class Recursive(next: Option[Recursive])
+  val recursiveSchema: Record[Recursive] = (
+    optField("next")(lazyRecord(recursiveSchema, "Rec"))
+  ).xmap(Recursive)(_.next)
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 

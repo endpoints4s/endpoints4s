@@ -51,11 +51,12 @@ class JsonSchemasTest extends FreeSpec {
       def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: String): String =
         s"$tpe"
 
-      def named[A, S[T] <: String](schema: S[A], name: String): S[A] =
-        s"'$name'!($schema)".asInstanceOf[S[A]]
+      def namedRecord[A](schema: Record[A], name: String): Record[A] = s"'$name'!($schema)"
+      def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = s"'$name'!($schema)"
+      def namedEnum[A](schema: Enum[A], name: String): Enum[A] = s"'$name'!($schema)"
 
-      def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] =
-        s"=>'$name'!($schema)"
+      def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = s"=>'$name'!($schema)"
+      def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = s"=>'$name'!($schema)"
 
       def emptyRecord: String =
         "%"
@@ -115,12 +116,12 @@ class JsonSchemasTest extends FreeSpec {
   val ns = "endpoints.generic.JsonSchemasTest.GenericSchemas"
 
   "case class" in {
-    val expectedSchema = s"'$ns.Foo'!('$ns.Foo'!(bar:string,baz:integer,qux:boolean?,%))"
+    val expectedSchema = s"'$ns.Foo'!(bar:string,baz:integer,qux:boolean?,%)"
     assert(FakeAlgebraJsonSchemas.Foo.schema == expectedSchema)
   }
 
   "sealed trait" in {
-    val expectedSchema = s"'$ns.Quux'!('$ns.Quux'!(${
+    val expectedSchema = s"'$ns.Quux'!(${
       List(
         s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
         s"'$ns.QuuxB'!(i:integer,%)@QuuxB",
@@ -128,18 +129,18 @@ class JsonSchemasTest extends FreeSpec {
         s"'$ns.QuuxD'!(%)@QuuxD",
         s"'$ns.QuuxE'!(%)@QuuxE"
       ).mkString("|")
-    }))"
+    })"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
   }
 
   "documentations" in {
-    val expectedSchema = s"'$ns.Doc'!('$ns.Doc'!(${
+    val expectedSchema = s"'$ns.Doc'!(${
       List(
         s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
         s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
         s"'$ns.DocC'!(%)@DocC"
       ).mkString("|")
-    }))"
+    })"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 

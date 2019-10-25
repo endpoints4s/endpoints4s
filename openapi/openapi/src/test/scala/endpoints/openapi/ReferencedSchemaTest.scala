@@ -24,10 +24,10 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
     )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication {
+  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
-      withDiscriminator(genericJsonSchema[Storage].asInstanceOf[Tagged[Storage]], "storageType")
+      withDiscriminator(genericTagged[Storage], "storageType")
 
     implicit val schemaAuthor: JsonSchema[Author] = (
       field[String]("name", documentation = Some("Author name")).xmap[Author](Author)(_.name)
@@ -39,7 +39,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
     val postBook =
       authenticatedEndpoint(
-        Post, path / "books", ok(emptyResponse), jsonRequest[Book], requestDocs = Some("Books list"), endpointDocs = EndpointDocs(tags = List("Books")))
+        Post, path / "books", ok(jsonResponse(Enum.colorSchema)), jsonRequest[Book], requestDocs = Some("Books list"), endpointDocs = EndpointDocs(tags = List("Books")))
   }
 
   "OpenApi" should {
@@ -126,7 +126,12 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |            }
         |          },
         |          "200" : {
-        |            "description" : ""
+        |            "description" : "",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": { "$ref": "#/components/schemas/Color" }
+        |              }
+        |            }
         |          },
         |          "403" : {
         |            "description" : ""
@@ -146,6 +151,10 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |  },
         |  "components" : {
         |    "schemas" : {
+        |      "Color" : {
+        |        "type" : "string",
+        |        "enum" : ["Red", "Blue"]
+        |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
         |        "allOf" : [
         |          {

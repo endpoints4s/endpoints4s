@@ -341,9 +341,9 @@ class JsonSchemasTest extends FreeSpec {
 
   "recursive type" in {
     testRoundtrip(
-      recSchema,
+      recursiveSchema,
       Json.obj("next" -> Json.obj("next" -> Json.obj())),
-      Rec(Some(Rec(Some(Rec(None)))))
+      Recursive(Some(Recursive(Some(Recursive(None)))))
     )
   }
 

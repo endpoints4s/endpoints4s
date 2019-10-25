@@ -11,7 +11,8 @@ class WebhooksTest extends WordSpec with Matchers {
   trait Webhooks extends algebra.Endpoints with algebra.JsonSchemaEntities {
 
     implicit lazy val messageSchema: JsonSchema[Message] =
-      named(field[String]("message"), "webhook.Message")
+      field[String]("message")
+        .named("webhook.Message")
         .xmap(Message(_))(_.value)
 
     val subscribe: Endpoint[String, Unit] = endpoint(
