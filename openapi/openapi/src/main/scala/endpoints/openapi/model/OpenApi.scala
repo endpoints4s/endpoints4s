@@ -29,7 +29,8 @@ case class Operation(
   responses: Map[String, Response],
   tags: List[String],
   security: List[SecurityRequirement],
-  callbacks: Map[String, Map[String, PathItem]]
+  callbacks: Map[String, Map[String, PathItem]],
+  deprecated: Boolean
 )
 
 case class SecurityRequirement(name: String,

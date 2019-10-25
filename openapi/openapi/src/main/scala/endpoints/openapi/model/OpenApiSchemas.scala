@@ -45,12 +45,13 @@ trait OpenApiSchemas extends JsonSchemas {
        field [Map[String, Response]]             ("responses")   zip
     optField [List[String]]                      ("tags")        zip
     optField [List[SecurityRequirement]]         ("security")    zip
-    optField [Map[String, Map[String, PathItem]]]("callbacks")
+    optField [Map[String, Map[String, PathItem]]]("callbacks")   zip
+    optField [Boolean]                           ("deprecated")
   ).xmap[Operation] {
-    case (((((((summary, description), parameters), requestBody), responses), tags), security), callbacks) =>
-      Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil), callbacks.getOrElse(Map.empty))
+    case ((((((((summary, description), parameters), requestBody), responses), tags), security), callbacks), deprecated) =>
+      Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil), callbacks.getOrElse(Map.empty), deprecated.getOrElse(false))
   } {
-    o => (((((((o.summary, o.description), if (o.parameters.isEmpty) None else Some(o.parameters)), o.requestBody), o.responses), if (o.tags.isEmpty) None else Some(o.tags)), if (o.security.isEmpty) None else Some(o.security)), if (o.callbacks.isEmpty) None else Some(o.callbacks))
+    o => ((((((((o.summary, o.description), if (o.parameters.isEmpty) None else Some(o.parameters)), o.requestBody), o.responses), if (o.tags.isEmpty) None else Some(o.tags)), if (o.security.isEmpty) None else Some(o.security)), if (o.callbacks.isEmpty) None else Some(o.callbacks)), if (o.deprecated) Some(true) else None)
   }
 
   implicit lazy val parameterSchema: JsonSchema[Parameter] = (
