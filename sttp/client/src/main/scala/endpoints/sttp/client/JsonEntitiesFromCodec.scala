@@ -2,8 +2,6 @@ package endpoints.sttp.client
 
 import endpoints.algebra.Codec
 
-import scala.language.higherKinds
-
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON request
   * @group interpreters

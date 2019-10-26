@@ -4,7 +4,6 @@ import java.util.UUID
 
 import endpoints.{Invalid, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Valid, Validated}
 
-import scala.language.{higherKinds, implicitConversions}
 import scala.collection.compat.Factory
 import scala.util.{Failure, Success, Try}
 

@@ -4,7 +4,6 @@ import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 import endpoints.algebra.{Codec, Documentation}
 import org.scalajs.dom.XMLHttpRequest
 
-import scala.language.higherKinds
 import scala.scalajs.js
 
 /**

@@ -4,8 +4,6 @@ package sttp.client
 import com.softwaremill.sttp
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
 
-import scala.language.higherKinds
-
 /**
   * @group interpreters
   */

@@ -4,7 +4,6 @@ package openapi
 import endpoints.algebra.Documentation
 
 import scala.collection.compat._
-import scala.language.higherKinds
 
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for

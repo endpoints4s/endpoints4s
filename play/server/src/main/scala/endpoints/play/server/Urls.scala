@@ -10,7 +10,6 @@ import play.api.mvc.{RequestHeader, Result}
 
 import scala.collection.compat._
 import scala.collection.mutable
-import scala.language.higherKinds
 
 /**
   * [[algebra.Urls]] interpreter that decodes and encodes URLs.

@@ -4,8 +4,6 @@ import endpoints.{Tupler, algebra}
 import endpoints.algebra.BasicAuthentication.Credentials
 import endpoints.algebra.Documentation
 
-import scala.language.higherKinds
-
 /**
   * @group interpreters
   */

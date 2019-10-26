@@ -3,7 +3,6 @@ package endpoints.scalaj.client
 import java.net.URLEncoder
 
 import scala.collection.compat.Factory
-import scala.language.higherKinds
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.Documentation
 import scalaj.http.{Http, HttpRequest}

@@ -6,8 +6,6 @@ import endpoints.{Invalid, InvariantFunctor, Semigroupal, Tupler, Valid, algebra
 import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
 
-import scala.language.higherKinds
-
 /**
   * An interpreter for [[endpoints.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client

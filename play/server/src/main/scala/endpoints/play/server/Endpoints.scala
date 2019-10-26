@@ -9,7 +9,6 @@ import play.api.mvc.{Handler => PlayHandler, _}
 import play.twirl.api.Html
 
 import scala.concurrent.Future
-import scala.language.implicitConversions
 import scala.util.control.NonFatal
 
 /**

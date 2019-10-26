@@ -4,7 +4,6 @@ package generic
 import org.scalatest.FreeSpec
 
 import scala.collection.compat._
-import scala.language.higherKinds
 
 class JsonSchemasTest extends FreeSpec {
 

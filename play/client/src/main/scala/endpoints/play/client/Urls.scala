@@ -7,7 +7,6 @@ import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.Documentation
 
 import scala.collection.compat.Factory
-import scala.language.higherKinds
 
 /**
   * [[algebra.Urls]] interpreter that builds URLs.

@@ -4,7 +4,6 @@ import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 
 import scala.collection.compat._
-import scala.language.higherKinds
 import akka.http.scaladsl.server._
 import endpoints.algebra.Documentation
 import endpoints.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}

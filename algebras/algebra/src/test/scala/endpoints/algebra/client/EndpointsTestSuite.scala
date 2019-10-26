@@ -239,7 +239,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
         val evenNumber = segment[Int]().xmapPartial {
           case x if x % 2 == 0 => Valid(x)
-          case x               => Invalid("Invalid odd value '$x'")
+          case x               => Invalid(s"Invalid odd value '$x'")
         }(identity)
         encodeUrl(path / evenNumber) (42) shouldEqual "/42"
       }
