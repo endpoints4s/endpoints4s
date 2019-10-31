@@ -1,0 +1,14 @@
+package endpoints.generic
+
+import endpoints.algebra
+
+trait FakeTuplesSchemas extends algebra.TuplesSchemas { this: algebra.JsonSchemas =>
+
+  type JsonSchema[+A] = String
+
+  [2..#
+  implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])] =
+    s"[[#$schema1#]]"#
+  ]
+
+}

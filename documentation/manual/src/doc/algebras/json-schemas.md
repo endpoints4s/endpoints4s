@@ -19,7 +19,7 @@ The algebra introduces the concept of `JsonSchema[A]`: a JSON schema for a type 
 
 ### Basic types and record types
 
-The trait provides some predefined JSON schemas (for `String`, `Int`, `Boolean`, etc.)
+The trait provides some predefined JSON schemas (for `String`, `Int`, `Boolean`, `Seq`, etc.)
 and ways to combine them together to build more complex schemas.
 
 For instance, given the following `Rectangle` data type:
@@ -104,6 +104,18 @@ our case objects.
 It will work similarly for other representations of enumerated values.
 Most of them provide `values` which can conveniently be passed into `enumeration`.
 However, it is still possible to explicitly pass a certain subset of allowed values.
+
+### Tuples
+
+JSON schemas for tuples from 2 to 22 elements are provided out of the box. For instance, if
+there are implicit `JsonSchema` instances for types `A`, `B`, and `C`, then you can summon
+a `JsonSchema[(A, B, C)]`. Tuples are modeled in JSON with arrays, as recommended in the
+[JSON Schema documentation](https://json-schema.org/understanding-json-schema/reference/array.html#tuple-validation).
+
+Here is an example of JSON schema for a GeoJSON `Point`, where GPS coordinates are modeled with a pair (longitude, latitude):
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#tuple
+~~~
 
 ### Recursive types
 

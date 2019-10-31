@@ -18,7 +18,7 @@ class JsonSchemasTest extends FreeSpec {
 
     sealed trait Quux
     case class QuuxA(ss: List[String]) extends Quux
-    case class QuuxB(i: Int) extends Quux
+    case class QuuxB(id: (Int, Double)) extends Quux
     case class QuuxC(b: Boolean) extends Quux
     case class QuuxD() extends Quux
     case object QuuxE extends Quux
@@ -41,9 +41,8 @@ class JsonSchemasTest extends FreeSpec {
     }
   }
 
-  object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas {
+  object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas with FakeTuplesSchemas {
 
-      type JsonSchema[+A] = String
       type Record[+A] = String
       type Tagged[+A] = String
       type Enum[+A] = String
@@ -124,7 +123,7 @@ class JsonSchemasTest extends FreeSpec {
     val expectedSchema = s"'$ns.Quux'!(${
       List(
         s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
-        s"'$ns.QuuxB'!(i:integer,%)@QuuxB",
+        s"'$ns.QuuxB'!(id:[integer, number],%)@QuuxB",
         s"'$ns.QuuxC'!(b:boolean,%)@QuuxC",
         s"'$ns.QuuxD'!(%)@QuuxD",
         s"'$ns.QuuxE'!(%)@QuuxE"

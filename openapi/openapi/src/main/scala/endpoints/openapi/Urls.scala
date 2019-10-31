@@ -42,7 +42,7 @@ trait Urls extends algebra.Urls {
     param.copy(isRequired = false)
 
   implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
-    DocumentedQueryStringParam(Schema.Array(param.schema, description = None), isRequired = false)
+    DocumentedQueryStringParam(Schema.Array(Left(param.schema), description = None), isRequired = false)
   
   implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
     def xmapPartial[A, B](fa: QueryString[A], f: A => Validated[B], g: B => A): QueryString[B] = fa

@@ -7,8 +7,10 @@ lazy val openapi =
     .settings(
       publishSettings,
       `scala 2.12 to latest`, // We don’t support 2.11 because our tests have a dependency on circe
-      name := "endpoints-openapi"
+      name := "endpoints-openapi",
+      (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate"
     )
+    .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("json-schema-generic")
     .dependsOnLocalCrossProjectsWithScope(
       "algebra" -> "test->test;compile->compile",

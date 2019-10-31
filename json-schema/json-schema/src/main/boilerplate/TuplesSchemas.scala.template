@@ -1,0 +1,13 @@
+package endpoints.algebra
+
+trait TuplesSchemas { this: JsonSchemas =>
+  [2..#
+  /**
+    * A JSON schema for a tuple of 1 elements.
+    *
+    * Tuples are modeled with JSON arrays, as documented in [[https://json-schema.org/understanding-json-schema/reference/array.html\#tuple-validation]].
+    */
+  implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])]#
+]
+
+}

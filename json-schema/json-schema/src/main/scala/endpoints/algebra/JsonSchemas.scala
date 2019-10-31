@@ -61,7 +61,7 @@ import scala.language.higherKinds
   *
   * @group algebras
   */
-trait JsonSchemas {
+trait JsonSchemas extends TuplesSchemas {
 
   /** The JSON schema of a type `A` */
   type JsonSchema[A]

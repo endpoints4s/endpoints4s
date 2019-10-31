@@ -93,7 +93,7 @@ object Schema {
 
   case class Object(properties: List[Property], additionalProperties: Option[Schema], description: Option[String]) extends Schema
 
-  case class Array(elementType: Schema, description: Option[String]) extends Schema
+  case class Array(elementType: Either[Schema, List[Schema]], description: Option[String]) extends Schema
 
   case class Enum(elementType: Schema, values: List[String], description: Option[String]) extends Schema
 

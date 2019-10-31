@@ -49,4 +49,11 @@ class JsonSchemasTest extends FreeSpec {
     assert(JsonSchemasCodec.recursiveSchema.encoder(rec) == json)
   }
 
+  "tuple" in {
+    val json = Json.arr(Json.True, Json.fromInt(42), Json.fromString("foo"))
+    val value = (true, 42, "foo")
+    assert(JsonSchemasCodec.boolIntString.decoder.decodeJson(json).right.exists(_ == value))
+    assert(JsonSchemasCodec.boolIntString.encoder(value) == json)
+  }
+
 }

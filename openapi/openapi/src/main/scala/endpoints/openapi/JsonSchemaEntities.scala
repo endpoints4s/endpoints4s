@@ -36,8 +36,10 @@ trait JsonSchemaEntities
         expandCoproductSchema(coprod, referencedSchemas)
       case Primitive(name, format) =>
         Schema.Primitive(name, format, None)
-      case Array(elementType) =>
-        Schema.Array(toSchema(elementType, coprodBase, referencedSchemas), None)
+      case Array(Left(elementType)) =>
+        Schema.Array(Left(toSchema(elementType, coprodBase, referencedSchemas)), None)
+      case Array(Right(elementTypes)) =>
+        Schema.Array(Right(elementTypes.map(elementType => toSchema(elementType, coprodBase, referencedSchemas))), None)
       case DocumentedEnum(elementType, values, Some(name)) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else Schema.Reference(name, Some(Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas + name), values, None)), None)
