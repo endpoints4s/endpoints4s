@@ -22,13 +22,13 @@ trait JsonSchemaEntities
   def toSchema(jsonSchema: DocumentedJsonSchema): Schema =
     toSchema(jsonSchema, None, Set.empty)
 
-  private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
+  private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[(String, DocumentedCoProd)], referencedSchemas: Set[String]): Schema = {
     documentedCodec match {
       case record @ DocumentedRecord(_, _, Some(name)) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)), None)
       case record @ DocumentedRecord(_, _, None) =>
-        expandRecordSchema(record, None, referencedSchemas)
+        expandRecordSchema(record, coprodBase, referencedSchemas)
       case coprod @ DocumentedCoProd(_, Some(name), _) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)), None)
@@ -48,7 +48,7 @@ trait JsonSchemaEntities
     }
   }
 
-  private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord, coprodBase: Option[DocumentedCoProd], referencedSchemas: Set[String]): Schema = {
+  private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord, coprodBase: Option[(String, DocumentedCoProd)], referencedSchemas: Set[String]): Schema = {
     val fieldsSchema = record.fields
       .map(f => Schema.Property(f.name, toSchema(f.tpe, None, referencedSchemas), !f.isOptional, f.documentation))
 
@@ -56,9 +56,14 @@ trait JsonSchemaEntities
 
     coprodBase.fold[Schema] {
       Schema.Object(fieldsSchema, additionalProperties, None)
-    } { coprod =>
+    } { case (tag, coprod) =>
       val discriminatorField =
-        Schema.Property(coprod.discriminatorName, Schema.simpleString, isRequired = true, description = None)
+        Schema.Property(
+          coprod.discriminatorName,
+          Schema.Enum(Schema.simpleString, List(tag), None),
+          isRequired = true,
+          description = None
+        )
 
       coprod.name.fold[Schema] {
         Schema.Object(discriminatorField :: fieldsSchema, additionalProperties, None)
@@ -76,7 +81,7 @@ trait JsonSchemaEntities
 
   private def expandCoproductSchema(coprod: DocumentedJsonSchema.DocumentedCoProd, referencedSchemas: Set[String]): Schema = {
     val alternativesSchemas =
-      coprod.alternatives.map { case (tag, record) => tag -> toSchema(record, Some(coprod), referencedSchemas) }
+      coprod.alternatives.map { case (tag, record) => tag -> toSchema(record, Some(tag -> coprod), referencedSchemas) }
     Schema.OneOf(coprod.discriminatorName, alternativesSchemas, None)
   }
 }

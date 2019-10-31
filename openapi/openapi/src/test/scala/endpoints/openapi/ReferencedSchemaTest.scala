@@ -164,7 +164,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |            "type" : "object",
         |            "properties" : {
         |              "storageType" : {
-        |                "type" : "string"
+        |                "type" : "string",
+        |                "enum" : ["Online"]
         |              },
         |              "link" : {
         |                "type" : "string"
@@ -249,7 +250,8 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |            "type" : "object",
         |            "properties" : {
         |              "storageType" : {
-        |                "type" : "string"
+        |                "type" : "string",
+        |                "enum" : ["Library"]
         |              },
         |              "room" : {
         |                "type" : "string"
