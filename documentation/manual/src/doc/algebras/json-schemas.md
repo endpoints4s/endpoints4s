@@ -150,10 +150,16 @@ type. The rules for deriving the schema are the following:
   the same name and type (for instance, the generic schema for the `Rectangle`
   type has a `width` required property of type `integer`),
 - each case class field of type `Option[A]` for some type `A` has a corresponding
-  optional JSON object property of the same name and type.
+  optional JSON object property of the same name and type,
+- documentation specific to case class fields can be defined by annotating the fields
+  with the `@docs` annotation,
+- for sealed traits, the discriminator field name can be defined by the `@discriminator`
+  annotation, otherwise the `defaultDiscriminatorName` value is used,
+- the schema is named by the `@name` annotation, if present, or by invoking the
+  `classTagToSchemaName` operation with the `ClassTag` of the type for which the schema
+  is derived.
 
-Documentation specific to case class fields can be defined by annotating the fields
-with the `@docs` annotation:
+Here is an example that illustrates how to configure the generic schema derivation process:
 
 ~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#documented-generic-schema
 ~~~

@@ -2,7 +2,7 @@ package endpoints
 package generic
 
 import shapeless.labelled.{FieldType, field => shapelessField}
-import shapeless.{:+:, ::, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
+import shapeless.{:+:, ::, Annotation, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 import scala.language.implicitConversions
 import scala.language.higherKinds
@@ -11,15 +11,12 @@ import scala.reflect.ClassTag
 /**
   * Enriches [[JsonSchemas]] with two kinds of operations:
   *
-  * - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic
-  *   data type `A`;
-  * - `(field1 :×: field2 :×: …).as[A]` builds a tuple of `Record`s and maps
-  *   it to a case class `A`
+  *   - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic
+  *     data type `A`;
+  *   - `(field1 :×: field2 :×: …).as[A]` builds a tuple of `Record`s and maps
+  *     it to a case class `A`
   *
-  * The data type description derivation is based on the underlying
-  * field and constructor names.
-  *
-  * For instance, consider the following program that derives the description
+  * For instance, consider the following program that derives the JSON schema
   * of a case class:
   *
   * {{{
@@ -48,7 +45,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     def jsonSchema: JsonSchema[A]
   }
 
-  object GenericJsonSchema extends GenericJsonSchemaLowPriority {
+  object GenericJsonSchema extends GenericJsonSchemaLowPriority with GenericDiscriminatorNames with GenericSchemaNames {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
@@ -69,7 +66,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
-  trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority {
+  trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority { this: GenericJsonSchema.type =>
 
     implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
       labelHead: Witness.Aux[L],
@@ -113,7 +110,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
-  trait GenericJsonSchemaLowLowPriority {
+  trait GenericJsonSchemaLowLowPriority { this: GenericJsonSchema.type =>
 
     class GenericRecord[A](val jsonSchema: Record[A]) extends GenericJsonSchema[A]
 
@@ -127,22 +124,65 @@ trait JsonSchemas extends algebra.JsonSchemas {
       gen: LabelledGeneric.Aux[A, R],
       docAnns: Annotations.Aux[docs, A, D],
       record: DocumentedGenericRecord[R, D],
-      ct: ClassTag[A]
+      name: GenericSchemaName[A]
     ): GenericRecord[A] =
-      new GenericRecord[A](record.record(docAnns()).xmap[A](gen.from)(gen.to).named(classTagToSchemaName(ct)))
+      new GenericRecord[A](
+        record.record(docAnns()).xmap[A](gen.from)(gen.to).named(name.value)
+      )
 
     implicit def taggedGeneric[A, R](implicit
       gen: LabelledGeneric.Aux[A, R],
       tagged: GenericTagged[R],
-      ct: ClassTag[A]
+      name: GenericSchemaName[A],
+      discriminator: GenericDiscriminatorName[A]
     ): GenericTagged[A] =
-      new GenericTagged[A](tagged.jsonSchema.xmap[A](gen.from)(gen.to).named(classTagToSchemaName(ct)))
+      new GenericTagged[A](
+        tagged.jsonSchema.xmap[A](gen.from)(gen.to)
+          .named(name.value)
+          .withDiscriminator(discriminator.name)
+      )
+
+  }
+
+  /** Internal machinery for deriving the discriminator name of a type */
+  trait GenericDiscriminatorNames {
+
+    class GenericDiscriminatorName[A](val name: String)
+
+    object GenericDiscriminatorName extends GenericDiscriminatorNameLowPriority {
+      implicit def annotated[A](implicit ann: Annotation[discriminator, A]): GenericDiscriminatorName[A] =
+        new GenericDiscriminatorName(ann().name)
+    }
+
+    trait GenericDiscriminatorNameLowPriority {
+      implicit def default[A]: GenericDiscriminatorName[A] =
+        new GenericDiscriminatorName(defaultDiscriminatorName)
+    }
+
+  }
+
+  /** Internal machinery for deriving the schema name of a type */
+  trait GenericSchemaNames {
+
+    class GenericSchemaName[A](val value: String)
+
+    object GenericSchemaName extends GenericSchemaNameLowPriority {
+      implicit def annotated[A](implicit ann: Annotation[name, A]): GenericSchemaName[A] =
+        new GenericSchemaName(ann().value)
+    }
+
+    trait GenericSchemaNameLowPriority {
+      implicit def fromClassTag[A](implicit ct: ClassTag[A]): GenericSchemaName[A] =
+        new GenericSchemaName(classTagToSchemaName(ct))
+    }
 
   }
 
   /**
     * Compute a schema name (used for documentation) based on a `ClassTag`.
     * The provided implementation uses the fully qualified name of the class.
+    * This could result in non unique values and mess with documentation.
+    *
     * You can override this method to use a custom logic.
     */
   def classTagToSchemaName(ct: ClassTag[_]): String = {
@@ -152,30 +192,44 @@ trait JsonSchemas extends algebra.JsonSchemas {
     name.replace('$','.')
   }
 
-  /** @return a `JsonSchema[A]` obtained from an implicitly derived `GenericJsonSchema[A]`
+  /** Derives a `JsonSchema[A]` for a type `A`.
     *
     * In a sense, this operation asks shapeless to compute a ''type level'' description
     * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
     * description of the data type (based on the `JsonSchemas` algebra interface)
     *
-    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
-    * This could result in non unique values and mess with documentation
+    * @see [[genericRecord]] for details on how schemas are derived for case classes
+    * @see [[genericTagged]] for details on how schemas are derived for sealed traits
     */
   def genericJsonSchema[A](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
     genJsonSchema.jsonSchema
 
-  /** @return a `Record[A]` obtained from an implicitly derived `GenericRecord[A]`
+  /** Derives a `Record[A]` schema for a case class `A`.
     *
-    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
-    * This could result in non unique values and mess with documentation
+    * The resulting schema:
+    *
+    *   - describes a JSON object,
+    *   - has required properties of the same name and type as each case class field,
+    *   - has optional properties of the same name and type as each case class
+    *     field of type `Option[X]` for some type `X`,
+    *   - includes the description possibly attached to each case class field
+    *     via the [[docs @docs]] annotation,
+    *   - has a name, computed from a `ClassTag[A]` by the [[classTagToSchemaName]]
+    *     operation.
     */
   def genericRecord[A](implicit genRecord: GenericJsonSchema.GenericRecord[A]): Record[A] =
     genRecord.jsonSchema
 
-  /** @return a `Tagged[A]` obtained from an implicitly derived `GenericTagged[A]`
+  /** Derives a `Tagged[A]` schema for a sealed trait `A`.
     *
-    * This operation is calculating a name for the schema based on classTag.runtimeClass.getName
-    * This could result in non unique values and mess with documentation
+    * The resulting schema:
+    *
+    *   - is the alternative of the leaf case classes schemas,
+    *   - the field used for discriminating the alternatives is defined by the
+    *     [[discriminator @discriminator]] annotation, if present on the sealed
+    *     trait definition, or by the [[defaultDiscriminatorName]] method otherwise,
+    *   - each alternative is discriminated by the name (not qualified) of the
+    *     case class.
     */
   def genericTagged[A](implicit genTagged: GenericJsonSchema.GenericTagged[A]): Tagged[A] =
     genTagged.jsonSchema

@@ -142,7 +142,7 @@ trait JsonSchemas {
   def defaultDiscriminatorName: String = "type"
 
   /** Allows to specify name of discriminator field for sum type */
-  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
+  def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
 
   /** The JSON schema of a coproduct made of the given alternative tagged records */
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]]
@@ -176,6 +176,7 @@ trait JsonSchemas {
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
     def xmap[B](f: A => B)(g: B => A): Tagged[B] = xmapTagged(taggedA, f, g)
     def named(name: String): Tagged[A] = namedTagged(taggedA, name)
+    def withDiscriminator(name: String): Tagged[A] = withDiscriminatorTagged(taggedA, name)
   }
 
   final implicit class EnumOps[A](enumA: Enum[A]) {

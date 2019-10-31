@@ -1,11 +1,13 @@
 package endpoints.openapi
 
+import endpoints.generic.discriminator
 import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
 import org.scalatest.{Matchers, WordSpec}
 
 class ReferencedSchemaTest extends WordSpec with Matchers {
 
+  @discriminator("storageType")
   sealed trait Storage
 
   object Storage {
@@ -27,7 +29,7 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
   trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
-      withDiscriminator(genericTagged[Storage], "storageType")
+      genericTagged[Storage]
 
     implicit val schemaAuthor: JsonSchema[Author] = (
       field[String]("name", documentation = Some("Author name")).xmap[Author](Author)(_.name)

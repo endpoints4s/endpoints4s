@@ -130,7 +130,7 @@ trait JsonSchemas
       def taggedDecoder(tagName: String) = if (tag == tagName) Some(recordA.decoder) else None
     }
 
-  def withDiscriminator[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
+  def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
     new Tagged[A] {
       override def discriminator: String = discriminatorName
       def taggedEncoded(a: A): (String, JsonObject) = tagged.taggedEncoded(a)
