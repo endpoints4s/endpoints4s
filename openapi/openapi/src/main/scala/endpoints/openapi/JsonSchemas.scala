@@ -12,7 +12,7 @@ import scala.language.higherKinds
   *
   * @group interpreters
   */
-trait JsonSchemas extends endpoints.algebra.JsonSchemas {
+trait JsonSchemas extends endpoints.algebra.JsonSchemas with TuplesSchemas {
 
   import DocumentedJsonSchema._
 
@@ -34,7 +34,10 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
     case class Primitive(name: String, format: Option[String] = None) extends DocumentedJsonSchema
 
-    case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
+    /**
+      * @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
+      */
+    case class Array(schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]]) extends DocumentedJsonSchema
 
     case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[String], name: Option[String]) extends DocumentedJsonSchema
 
@@ -113,7 +116,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   def arrayJsonSchema[C[X] <: Seq[X], A](implicit
     jsonSchema: JsonSchema[A],
     factory: Factory[A, C[A]]
-  ): JsonSchema[C[A]] = Array(jsonSchema)
+  ): JsonSchema[C[A]] = Array(Left(jsonSchema))
 
   def mapJsonSchema[A](implicit jsonSchema: DocumentedJsonSchema): DocumentedJsonSchema =
     DocumentedRecord(fields = Nil, additionalProperties = Some(jsonSchema))

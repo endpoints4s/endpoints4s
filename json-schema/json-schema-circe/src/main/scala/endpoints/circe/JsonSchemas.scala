@@ -13,7 +13,7 @@ import scala.language.higherKinds
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
   */
 trait JsonSchemas
-  extends algebra.JsonSchemas {
+  extends algebra.JsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {
     def encoder: Encoder[A]

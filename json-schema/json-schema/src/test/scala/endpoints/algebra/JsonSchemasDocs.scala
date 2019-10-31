@@ -68,4 +68,13 @@ trait JsonSchemasDocs extends JsonSchemas {
   ).xmap(Recursive)(_.next)
   //#recursive
 
+  //#tuple
+  type Coordinates = (Double, Double) // (Longitude, Latitude)
+  case class Point(coordinates: Coordinates)
+
+  implicit val pointSchema: JsonSchema[Point] =
+    field[Coordinates]("coordinates")
+      .tagged("Point")
+      .xmap(Point(_))(_.coordinates)
+  //#tuple
 }

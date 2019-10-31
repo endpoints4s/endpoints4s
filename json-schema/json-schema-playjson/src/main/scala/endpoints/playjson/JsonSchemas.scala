@@ -14,7 +14,7 @@ import scala.language.higherKinds
   * and `play.api.libs.json.Writes`.
   */
 trait JsonSchemas
-  extends algebra.JsonSchemas {
+  extends algebra.JsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {
     def reads: Reads[A]

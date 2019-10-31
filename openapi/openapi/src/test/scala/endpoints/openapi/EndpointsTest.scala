@@ -19,7 +19,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
       val expectedParameters =
         Parameter("n", In.Query, required = true, description = None, schema = Schema.simpleNumber) ::
         Parameter("lang", In.Query, required = false, description = None, schema = Schema.simpleString) ::
-        Parameter("ids", In.Query, required = false, description = None, schema = Schema.Array(Schema.simpleInteger, None)) ::
+        Parameter("ids", In.Query, required = false, description = None, schema = Schema.Array(Left(Schema.simpleInteger), None)) ::
         Nil
       Fixtures.quux.item.operations("get").parameters shouldBe expectedParameters
     }

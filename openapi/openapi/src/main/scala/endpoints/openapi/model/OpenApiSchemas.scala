@@ -119,6 +119,7 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String]              ("type")          zip
     optField [String]              ("format")        zip
     optField [Schema]              ("items")(schemaSchemaRef) zip
+    optField [List[Schema]]        ("items")(arrayJsonSchema[List, Schema](schemaSchemaRef, implicitly)) zip
     optField [Map[String, Schema]] ("properties")(mapJsonSchema(schemaSchemaRef)) zip
     optField [Schema]              ("additionalProperties")(schemaSchemaRef) zip
     optField [List[String]]        ("required")      zip
@@ -129,9 +130,9 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String]              ("$ref")          zip
     optField [String]              ("description")
   ).xmap[Schema]{
-    case (((((((((((Some("integer"), format), _), _), _), _), _), _), _), _), _), description) => Schema.Primitive("integer", format, description)
-    case (((((((((((Some("string"), format), _), _), _), _), _), _), _), _), _), description)  => Schema.Primitive("string", format, description)
-    case (((((((((((Some("object"), _), _), Some(props)), additionalProperties), required), _), _), _), _), _), description) =>
+    case ((((((((((((Some("integer"), format), _), _), _), _), _), _), _), _), _), _), description) => Schema.Primitive("integer", format, description)
+    case ((((((((((((Some("string"), format), _), _), _), _), _), _), _), _), _), _), description)  => Schema.Primitive("string", format, description)
+    case ((((((((((((Some("object"), _), _), _), Some(props)), additionalProperties), required), _), _), _), _), _), description) =>
       // HACK We don’t decode properties descriptions
       val properties =
         props.map { case (n, s) => Schema.Property(n, s, required.forall(_.contains(n)), None) }.toList
@@ -139,12 +140,16 @@ trait OpenApiSchemas extends JsonSchemas {
     case _ => ??? // TODO Complete. This is not really important because we don’t claim that we support *decoding* OpenAPI documents
   } { schema =>
     val fields = schemaToFields(schema)
-    (((((((((((fields.`type`, fields.format), fields.items), fields.properties), fields.additionalProperties), fields.required.map(_.toList)), fields.oneOf), fields.discriminator), fields.allOf), fields.enum), fields.ref), fields.description)
+    ((((((((((((fields.`type`, fields.format), fields.arrayItems), fields.tupleItems), fields.properties), fields.additionalProperties), fields.required.map(_.toList)), fields.oneOf), fields.discriminator), fields.allOf), fields.enum), fields.ref), fields.description)
   }
 
   private def schemaToFields(schema: Schema): SchemaFields = schema match {
-    case Schema.Primitive(name, format, description) => SchemaFields(`type` = Some(name), format, description = description)
-    case Schema.Array(itemsSchema, description) => SchemaFields(`type` = Some("array"), items = Some(itemsSchema), description = description)
+    case Schema.Primitive(name, format, description) =>
+      SchemaFields(`type` = Some(name), format, description = description)
+    case Schema.Array(Left(itemsSchema), description) =>
+      SchemaFields(`type` = Some("array"), arrayItems = Some(itemsSchema), description = description)
+    case Schema.Array(Right(itemsSchemas), description) =>
+      SchemaFields(`type` = Some("array"), tupleItems = Some(itemsSchemas), description = description)
     case Schema.Object(props, additionalProperties, descr) =>
       val propsMap = props.map(p => p.name -> p.schema.withDefinedDescription(p.description)).toMap
       val required = props.filter(_.isRequired).map(_.name).toSet
@@ -176,7 +181,8 @@ trait OpenApiSchemas extends JsonSchemas {
   case class SchemaFields(
     `type`: Option[String] = None,
     format: Option[String] = None,
-    items: Option[Schema] = None,
+    arrayItems: Option[Schema] = None,
+    tupleItems: Option[List[Schema]] = None,
     properties: Option[Map[String, Schema]] = None,
     additionalProperties: Option[Schema] = None,
     required: Option[Set[String]] = None,

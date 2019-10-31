@@ -52,4 +52,9 @@ class JsonSchemasTest extends FreeSpec {
     assert(DocumentedJsonSchemas.intDictionary == expected)
   }
 
+  "tuple" in {
+    val expected = Array(Right(DocumentedJsonSchemas.booleanJsonSchema :: DocumentedJsonSchemas.intJsonSchema :: DocumentedJsonSchemas.stringJsonSchema :: Nil))
+    assert(DocumentedJsonSchemas.boolIntString == expected)
+  }
+
 }

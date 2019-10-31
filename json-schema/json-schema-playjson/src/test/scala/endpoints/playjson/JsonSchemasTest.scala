@@ -347,6 +347,14 @@ class JsonSchemasTest extends FreeSpec {
     )
   }
 
+  "tuple" in {
+    testRoundtrip(
+      boolIntString,
+      Json.arr(true, 42, "foo"),
+      (true, 42, "foo")
+    )
+  }
+
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {
     val result = jsonSchema.reads.reads(json)
     assert(result.isSuccess, result)

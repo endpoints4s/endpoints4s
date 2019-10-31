@@ -155,8 +155,10 @@ trait EndpointsWithCustomErrors
       case Schema.Object(properties, additionalProperties, _) =>
         properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
           additionalProperties.toList.flatMap(captureReferencedSchemasRec)
-      case Schema.Array(elementType, _) =>
+      case Schema.Array(Left(elementType), _) =>
         captureReferencedSchemasRec(elementType)
+      case Schema.Array(Right(elementTypes), _) =>
+        elementTypes.flatMap(captureReferencedSchemasRec)
       case Schema.Enum(elementType, _, _) =>
         captureReferencedSchemasRec(elementType)
       case Schema.Primitive(_, _, _) =>

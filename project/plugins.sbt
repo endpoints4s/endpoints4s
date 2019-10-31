@@ -22,6 +22,7 @@ addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 
+addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 
 lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 

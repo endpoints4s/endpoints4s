@@ -9,8 +9,10 @@ val `json-schema` =
       `scala 2.11 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency,
-      libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.2"
+      libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.2",
+      (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .enablePlugins(spray.boilerplate.BoilerplatePlugin)
 
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
@@ -22,8 +24,10 @@ lazy val `json-schema-generic` =
       `scala 2.11 to latest`,
       name := "endpoints-json-schema-generic",
       libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
-      addScalaTestCrossDependency
+      addScalaTestCrossDependency,
+      (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
     )
+    .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("json-schema")
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
@@ -35,8 +39,10 @@ lazy val `json-schema-circe` =
       publishSettings,
       `scala 2.12 to latest`,
       name := "endpoints-json-schema-circe",
-      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion
+      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
+      (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("algebra-circe") // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
     .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
 
@@ -49,8 +55,10 @@ lazy val `json-schema-playjson` =
       publishSettings,
       `scala 2.11 to latest`,
       name := "endpoints-json-schema-playjson",
-      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
+      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion,
+      (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
 
 lazy val `json-schema-playjson-js` = `json-schema-playjson`.js

@@ -74,4 +74,6 @@ trait JsonSchemasTest extends JsonSchemas {
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 
+  implicit val boolIntString: JsonSchema[(Boolean, Int, String)] = tuple3JsonSchema
+
 }
