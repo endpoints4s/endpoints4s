@@ -83,26 +83,43 @@ trait JsonSchemas {
     * */
   def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A]
 
-  /** Annotates JSON schema with a name */
-  def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A]
+  /** Annotates the record JSON schema with a name */
+  def namedRecord[A](schema: Record[A], name: String): Record[A]
+
+  /** Annotates the tagged JSON schema with a name */
+  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A]
+
+  /** Annotates the tagged JSON schema with a name */
+  def namedEnum[A](schema: Enum[A], name: String): Enum[A]
 
   /**
     * Captures a lazy reference to a JSON schema currently being defined:
     *
     * {{{
-    *   case class Rec(next: Option[Rec])
-    *   val recSchema: JsonSchema[Rec] = (
-    *     optField("next")(lazySchema(recSchema, "Rec"))
-    *   ).xmap(Rec)(_.next)
+    *   case class Recursive(next: Option[Recursive])
+    *   val recursiveSchema: Record[Recursive] = (
+    *     optField("next")(lazyRecord(recursiveSchema, "Rec"))
+    *   ).xmap(Recursive)(_.next)
     * }}}
     *
     * Interpreters should return a JsonSchema value that does not evaluate
     * the given `schema` unless it is effectively used.
     *
-    * @param schema The JSON schema whose evaluation should be delayed
+    * @param schema The record JSON schema whose evaluation should be delayed
     * @param name A unique name identifying the schema
     */
-  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A]
+  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
+
+  /**
+    * Captures a lazy reference to a JSON schema currently being defined.
+    *
+    * Interpreters should return a JsonSchema value that does not evaluate
+    * the given `schema` unless it is effectively used.
+    *
+    * @param schema The tagged JSON schema whose evaluation should be delayed
+    * @param name A unique name identifying the schema
+    */
+  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A]
 
   /** The JSON schema of a record with no fields */
   def emptyRecord: Record[Unit]
@@ -147,6 +164,7 @@ trait JsonSchemas {
     def zip[B](recordB: Record[B]): Record[(A, B)] = zipRecords(recordA, recordB)
     def xmap[B](f: A => B)(g: B => A): Record[B] = xmapRecord(recordA, f, g)
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
+    def named(name: String): Record[A] = namedRecord(recordA, name)
   }
 
   /** Convenient infix operations */
@@ -157,6 +175,11 @@ trait JsonSchemas {
   final implicit class TaggedOps[A](taggedA: Tagged[A]) {
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
     def xmap[B](f: A => B)(g: B => A): Tagged[B] = xmapTagged(taggedA, f, g)
+    def named(name: String): Tagged[A] = namedTagged(taggedA, name)
+  }
+
+  final implicit class EnumOps[A](enumA: Enum[A]) {
+    def named(name: String): Enum[A] = namedEnum(enumA, name)
   }
 
   /** A JSON schema for type `UUID` */

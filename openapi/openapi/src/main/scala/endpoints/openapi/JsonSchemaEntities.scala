@@ -38,7 +38,10 @@ trait JsonSchemaEntities
         Schema.Primitive(name, format, None)
       case Array(elementType) =>
         Schema.Array(toSchema(elementType, coprodBase, referencedSchemas), None)
-      case DocumentedEnum(elementType, values) =>
+      case DocumentedEnum(elementType, values, Some(name)) =>
+        if (referencedSchemas(name)) Schema.Reference(name, None, None)
+        else Schema.Reference(name, Some(Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas + name), values, None)), None)
+      case DocumentedEnum(elementType, values, None) =>
         Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None)
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)

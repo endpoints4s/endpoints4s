@@ -37,13 +37,17 @@ The `field` constructor defines a JSON object schema with one field of the given
 type and name (and an optional text documentation). A similar constructor, `optField`,
 defines an optional field in a JSON object.
 
-In the above example, we define two JSON object schemas (one for the `width` field,
+The return type of `rectangleSchema` is declared to be `JsonSchema[Rectangle]`, but we could have
+used a more specific type: `Record[Rectangle]`. This subtype of `JsonSchema[Rectangle]` provides
+additional operations such as `zip` or `tagged` (see the next section).
+
+In the above example, we actually define two JSON object schemas (one for the `width` field,
 of type `Record[Double]`, and one for the `height` field, of type `Record[Double]`),
 and then we combine them into a single JSON object schema by using the `zip` operation. Finally, we call the `xmap` operation
 to turn the `Record[(Double, Double)]` value returned by the `zip` operation into
 a `Record[Rectangle]`.
 
-### Sum types
+### Sum types (sealed traits)
 
 It is also possible to define schemas for sum types. Consider the following type definition,
 defining a `Shape`, which can be either a `Circle` or a `Rectangle`:
@@ -60,12 +64,20 @@ be defined as follows:
 
 (We have omitted the definition of `circleSchema` for the sake of conciseness)
 
-The `orElse` operation turns the `Record[Circle]` and `Record[Rectangle]` values into
-a `Record[Either[Circle, Rectangle]]`, which is then transformed into a `Record[Shape]` by
-using `xmap`.
+First, all the alternative record schemas (in this example, `circeSchema` and `rectangleSchema`) must
+be `tagged` with a unique name. Then, the `orElse` operation combines the alternative schemas into a
+single schema that accepts one of them.
 
-By default, the discriminator field is named `type`, but you can use another field name if
-you want to.
+The result of the `tagged` operation is a `Tagged[A]` schema. This subtype of `JsonSchema[A]` models a
+schema that accepts one of several alternative schemas. It provides the `orElse` operation.
+
+The `orElse` operation turns the `Tagged[Circle]` and `Tagged[Rectangle]` values into
+a `Record[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
+`Record[Shape]` by using `xmap`.
+
+By default, the discriminator field is named `type`, but you can use another field name either by
+overriding the `defaultDiscriminatorName` method of the algebra, or by wrapping the `Tagged` schema
+in a `withDiscriminator` call specifying the field name to use.
 
 ### Enumerations
 
@@ -86,7 +98,8 @@ It has two parameters: the possible values, and a function to encode an enum val
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status-schema
 ~~~
 
-The resulting `JsonSchema[Status]` allows defining JSON members with string values that are mapped to our case objects.
+The resulting `JsonSchema[Status]` allows defining JSON members with string values that are mapped to
+our case objects.
 
 It will work similarly for other representations of enumerated values.
 Most of them provide `values` which can conveniently be passed into `enumeration`.
@@ -95,10 +108,18 @@ However, it is still possible to explicitly pass a certain subset of allowed val
 ### Recursive types
 
 You can reference a currently being defined schema without causing a `StackOverflow` error
-by wrapping it in the `lazySchema` constructor:
+by wrapping it in the `lazyRecord` or `lazyTagged` constructor:
 
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
 ~~~
+
+### Named schemas
+
+It is possible to give names to the schemas. These names can be used by the schema interpreters to group
+the schema definitions at one place, and then reference each schema by its name (like the
+[Swagger `components` section](https://swagger.io/docs/specification/components/)).
+
+Use the `named` method to give a name to a `Record`, a `Tagged`, or an `Enum` schema.
 
 ## Generic derivation of JSON schemas (based on Shapeless) {#generic-derivation-of-json-schemas}
 
@@ -111,6 +132,8 @@ for algebraic data type definitions (sealed traits and case classes).
 
 [API documentation](unchecked:/api/endpoints/generic/JsonSchemas.html)
 
+### JSON schemas derivation
+
 With this module, defining the JSON schema of the `Shape` data type is
 reduced to the following:
 
@@ -121,7 +144,7 @@ The `genericJsonSchema` operation builds a JSON schema for the given
 type. The rules for deriving the schema are the following:
 
 - the schema of a case class is a JSON object,
-- the schema of a sealed trait is the alternative (`oneOf`) of its leaf case
+- the schema of a sealed trait is the alternative of its leaf case
   class schemas, discriminated by the case class names,
 - each case class field has a corresponding required JSON object property of
   the same name and type (for instance, the generic schema for the `Rectangle`
@@ -134,6 +157,13 @@ with the `@docs` annotation:
 
 ~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#documented-generic-schema
 ~~~
+
+In case you need to transform further a generically derived schema, you might want to use the
+`genericRecord` or `genericTagged` operations instead of `genericJsonSchema`. These operations
+have a more specific return type than `genericJsonSchema`: `genericRecord` returns a `Record`,
+and `genericTagged` returns a `Tagged`.
+
+### JSON schemas transformation
 
 The module also takes advantage shapeless to define more convenient
 operations for combining JSON schema definitions: the `zip` operation

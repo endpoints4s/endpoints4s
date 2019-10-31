@@ -36,7 +36,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
 
     case class Array(elementType: DocumentedJsonSchema) extends DocumentedJsonSchema
 
-    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[String]) extends DocumentedJsonSchema
+    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[String], name: Option[String]) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed trait LazySchema extends DocumentedJsonSchema {
@@ -51,22 +51,19 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas {
   }
 
   def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): DocumentedEnum =
-    DocumentedEnum(tpe, values.map(encode).toList)
+    DocumentedEnum(tpe, values.map(encode).toList, None)
 
-  def named[A, S[_] <: DocumentedJsonSchema](schema: S[A], name: String): S[A] = {
-    import DocumentedJsonSchema._
-    schema match {
-      case record: DocumentedRecord =>
-        record.copy(name = Some(name)).asInstanceOf[S[A]]
-      case coprod: DocumentedCoProd =>
-        coprod.copy(name = Some(name)).asInstanceOf[S[A]]
-      case other =>
-        other
-    }
-  }
+  def namedRecord[A](schema: Record[A], name: String): Record[A] =
+    schema.copy(name = Some(name))
+  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
+    schema.copy(name = Some(name))
+  def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
+    schema.copy(name = Some(name))
 
-  def lazySchema[A](schema: => DocumentedJsonSchema, name: String): DocumentedJsonSchema =
-    LazySchema(named[A, ({ type l[X] = DocumentedJsonSchema })#l](schema, name))
+  def lazyRecord[A](schema: => DocumentedRecord, name: String): DocumentedJsonSchema =
+    LazySchema(namedRecord(schema, name))
+  def lazyTagged[A](schema: => DocumentedCoProd, name: String): DocumentedJsonSchema =
+    LazySchema(namedTagged(schema, name))
 
   def emptyRecord: DocumentedRecord =
     DocumentedRecord(Nil)

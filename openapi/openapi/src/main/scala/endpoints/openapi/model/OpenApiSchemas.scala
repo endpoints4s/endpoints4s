@@ -34,10 +34,10 @@ trait OpenApiSchemas extends JsonSchemas {
     ).xmap(Info.tupled)(info => (info.title, info.version))
 
   implicit lazy val pathItemSchema: JsonSchema[PathItem] =
-    lazySchema(mapJsonSchema[Operation], "endpoints.openapi.model.Operation")
+    mapJsonSchema[Operation](lazyRecord(operationSchema, "Operation"))
       .xmap(PathItem(_))(_.operations)
 
-  implicit lazy val operationSchema: JsonSchema[Operation] = (
+  implicit lazy val operationSchema: Record[Operation] = (
     optField [String]                            ("summary")     zip
     optField [String]                            ("description") zip
     optField [List[Parameter]]                   ("parameters")  zip
@@ -114,8 +114,8 @@ trait OpenApiSchemas extends JsonSchemas {
     components => (components.schemas, components.securitySchemes)
   }
 
-  private def schemaSchemaRef: JsonSchema[Schema] = lazySchema(schemaSchema, "Schema")
-  implicit lazy val schemaSchema: JsonSchema[Schema] = (
+  private def schemaSchemaRef: JsonSchema[Schema] = lazyRecord(schemaSchema, "Schema")
+  implicit lazy val schemaSchema: Record[Schema] = (
     optField [String]              ("type")          zip
     optField [String]              ("format")        zip
     optField [Schema]              ("items")(schemaSchemaRef) zip

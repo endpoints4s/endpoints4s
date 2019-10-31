@@ -89,9 +89,11 @@ trait JsonSchemas
     )
   }
 
-  def named[A, S[T] <: JsonSchema[T]](schema: S[A], name: String): S[A] = schema
+  def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
+  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
+  def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
-  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+  private def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
     // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
     lazy val evaluatedSchema = schema
     new JsonSchema[A] {
@@ -99,6 +101,9 @@ trait JsonSchemas
       def decoder: Decoder[A] = Decoder.instance(c => evaluatedSchema.decoder(c))
     }
   }
+
+  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = lazySchema(schema, name)
+  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = lazySchema(schema, name)
 
   def emptyRecord: Record[Unit] =
     Record(
