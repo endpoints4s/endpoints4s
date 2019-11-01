@@ -85,7 +85,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
 
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = { (segments: List[String], query: Map[String, List[String]]) =>
     path.validate(segments).flatMap {
-      case (validA, Nil) => Some(validA.tuple(qs.validate(query)))
+      case (validA, Nil) => Some(validA.zip(qs.validate(query)))
       case (_, _)        => None
     }
   }
@@ -128,7 +128,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
       }
 
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = { (params: Map[String, List[String]]) =>
-    first.validate(params).tuple(second.validate(params))
+    first.validate(params).zip(second.validate(params))
   }
 
   implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
@@ -174,7 +174,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
     (p1: List[String]) => {
       first.validate(p1).flatMap { case (validA, p2) =>
         second.validate(p2).map { case (validB, p3) =>
-          (validA.tuple(validB), p3)
+          (validA.zip(validB), p3)
         }
       }
     }

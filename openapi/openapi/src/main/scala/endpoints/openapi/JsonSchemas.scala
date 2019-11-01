@@ -102,7 +102,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas with TuplesSchemas {
   def choiceTagged[A, B](taggedA: DocumentedCoProd, taggedB: DocumentedCoProd): DocumentedCoProd =
     DocumentedCoProd(taggedA.alternatives ++ taggedB.alternatives)
 
-  def zipRecords[A, B](recordA: DocumentedRecord, recordB: DocumentedRecord): DocumentedRecord =
+  def zipRecords[A, B](recordA: DocumentedRecord, recordB: DocumentedRecord)(implicit t: Tupler[A, B]): DocumentedRecord =
     DocumentedRecord(recordA.fields ++ recordB.fields)
 
   lazy val uuidJsonSchema: DocumentedJsonSchema = Primitive("string", format = Some("uuid"))

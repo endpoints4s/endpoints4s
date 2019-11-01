@@ -178,16 +178,17 @@ trait JsonSchemas
           .orElse(taggedB.taggedDecoder(tag).map(_.map[Either[A, B]](Right(_))))
     }
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = {
     val encoder =
-      io.circe.Encoder.AsObject.instance[(A, B)] { case (a, b) =>
+      io.circe.Encoder.AsObject.instance[t.Out] { o =>
+        val (a, b) = t.unapply(o)
         // For some reason, `deepMerge` puts the fields of its left-hand-side *after*
         // the fields of its right-hand-side. Hence the inversion between `recordA`
         // and `recordB`.
         recordB.encoder.apply(b).deepMerge(recordA.encoder.apply(a)).asObject.get
       }
-    val decoder = new io.circe.Decoder[(A, B)] {
-      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c)
+    val decoder = new io.circe.Decoder[t.Out] {
+      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c).map { case (a, b) => t(a, b) }
     }
     Record(encoder, decoder)
   }

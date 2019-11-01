@@ -42,13 +42,6 @@ sealed trait Validated[+A] {
   }
 
   /**
-    * Tuples together two validated values
-    *
-    * @see [[tuple]]
-    */
-  def zip[B](that: Validated[B]): Validated[(A, B)] = this.tuple(that)
-
-  /**
     * Tuples together two validated values and tries to return a flat tuple instead of nested tuples. Also strips
     * out `Unit` values in the tuples.
     *
@@ -57,7 +50,7 @@ sealed trait Validated[+A] {
     *
     * @see [[Tupler]]
     */
-  def tuple[A0 >: A, B](that: Validated[B])(implicit tupler: Tupler[A0, B]): Validated[tupler.Out] = (this, that) match {
+  def zip[A0 >: A, B](that: Validated[B])(implicit tupler: Tupler[A0, B]): Validated[tupler.Out] = (this, that) match {
     case (Valid(a), Valid(b))             => Valid(tupler(a, b))
     case (_: Valid[A], invalid: Invalid)  => invalid
     case (invalid: Invalid, _: Valid[B])  => invalid

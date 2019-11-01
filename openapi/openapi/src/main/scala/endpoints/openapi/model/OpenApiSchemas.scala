@@ -19,13 +19,13 @@ trait OpenApiSchemas extends JsonSchemas {
     optField[Components]("components")
   ).xmap[OpenApi]{
     // TODO Reject if openapi version does not match our openapiVersion
-    case (((_, info), paths), components) => OpenApi(info, paths, components.getOrElse(Components(Map.empty, Map.empty)))
+    case (_, info, paths, components) => OpenApi(info, paths, components.getOrElse(Components(Map.empty, Map.empty)))
   } {
     o =>
       val components =
         if (o.components.schemas.isEmpty && o.components.securitySchemes.isEmpty) None
         else Some(o.components)
-      (((openapiVersion, o.info), o.paths), components)
+      (openapiVersion, o.info, o.paths, components)
   }
 
   implicit lazy val infoSchema: JsonSchema[Info] = (
@@ -48,10 +48,10 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [Map[String, Map[String, PathItem]]]("callbacks")   zip
     optField [Boolean]                           ("deprecated")
   ).xmap[Operation] {
-    case ((((((((summary, description), parameters), requestBody), responses), tags), security), callbacks), deprecated) =>
+    case (summary, description, parameters, requestBody, responses, tags, security, callbacks, deprecated) =>
       Operation(summary, description, parameters.getOrElse(Nil), requestBody, responses, tags.getOrElse(Nil), security.getOrElse(Nil), callbacks.getOrElse(Map.empty), deprecated.getOrElse(false))
   } {
-    o => ((((((((o.summary, o.description), if (o.parameters.isEmpty) None else Some(o.parameters)), o.requestBody), o.responses), if (o.tags.isEmpty) None else Some(o.tags)), if (o.security.isEmpty) None else Some(o.security)), if (o.callbacks.isEmpty) None else Some(o.callbacks)), if (o.deprecated) Some(true) else None)
+    o => (o.summary, o.description, if (o.parameters.isEmpty) None else Some(o.parameters), o.requestBody, o.responses, if (o.tags.isEmpty) None else Some(o.tags), if (o.security.isEmpty) None else Some(o.security), if (o.callbacks.isEmpty) None else Some(o.callbacks), if (o.deprecated) Some(true) else None)
   }
 
   implicit lazy val parameterSchema: JsonSchema[Parameter] = (
@@ -61,9 +61,9 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String]  ("description") zip
     optField [Boolean] ("required")
   ).xmap[Parameter] {
-    case ((((name, in), schema), description), required) => Parameter(name, in, required.contains(true), description, schema)
+    case (name, in, schema, description, required) => Parameter(name, in, required.contains(true), description, schema)
   } {
-    p => ((((p.name, p.in), p.schema), p.description), if (p.required) Some(true) else None)
+    p => (p.name, p.in, p.schema, p.description, if (p.required) Some(true) else None)
   }
 
   implicit lazy val inSchema: JsonSchema[In] =
@@ -130,9 +130,9 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String]              ("$ref")          zip
     optField [String]              ("description")
   ).xmap[Schema]{
-    case ((((((((((((Some("integer"), format), _), _), _), _), _), _), _), _), _), _), description) => Schema.Primitive("integer", format, description)
-    case ((((((((((((Some("string"), format), _), _), _), _), _), _), _), _), _), _), description)  => Schema.Primitive("string", format, description)
-    case ((((((((((((Some("object"), _), _), _), Some(props)), additionalProperties), required), _), _), _), _), _), description) =>
+    case (Some("integer"), format, _, _, _, _, _, _, _, _, _, _, description) => Schema.Primitive("integer", format, description)
+    case (Some("string"), format, _, _, _, _, _, _, _, _, _, _, description)  => Schema.Primitive("string", format, description)
+    case (Some("object"), _, _, _, Some(props), additionalProperties, required, _, _, _, _, _, description) =>
       // HACK We don’t decode properties descriptions
       val properties =
         props.map { case (n, s) => Schema.Property(n, s, required.forall(_.contains(n)), None) }.toList
@@ -140,7 +140,7 @@ trait OpenApiSchemas extends JsonSchemas {
     case _ => ??? // TODO Complete. This is not really important because we don’t claim that we support *decoding* OpenAPI documents
   } { schema =>
     val fields = schemaToFields(schema)
-    ((((((((((((fields.`type`, fields.format), fields.arrayItems), fields.tupleItems), fields.properties), fields.additionalProperties), fields.required.map(_.toList)), fields.oneOf), fields.discriminator), fields.allOf), fields.enum), fields.ref), fields.description)
+    (fields.`type`, fields.format, fields.arrayItems, fields.tupleItems, fields.properties, fields.additionalProperties, fields.required.map(_.toList), fields.oneOf, fields.discriminator, fields.allOf, fields.enum, fields.ref, fields.description)
   }
 
   private def schemaToFields(schema: Schema): SchemaFields = schema match {
@@ -212,9 +212,9 @@ trait OpenApiSchemas extends JsonSchemas {
     optField [String] ("scheme")       zip
     optField [String] ("bearerFormat")
   ).xmap[SecurityScheme] {
-    case (((((tpe, description), name), in), scheme), bearerFormat) => SecurityScheme(tpe, description, name, in, scheme, bearerFormat)
+    case (tpe, description, name, in, scheme, bearerFormat) => SecurityScheme(tpe, description, name, in, scheme, bearerFormat)
   } {
-    ss => (((((ss.`type`, ss.description), ss.name), ss.in), ss.scheme), ss.bearerFormat)
+    ss => (ss.`type`, ss.description, ss.name, ss.in, ss.scheme, ss.bearerFormat)
   }
 
 }

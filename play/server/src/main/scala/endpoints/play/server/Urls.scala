@@ -112,7 +112,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
     new QueryString[tupler.Out] {
       def decode(qs: Map[String, Seq[String]]) =
-        first.decode(qs).tuple(second.decode(qs))
+        first.decode(qs).zip(second.decode(qs))
       def encode(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)
         first.encode(a) ++ second.encode(b)
@@ -256,7 +256,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       def decode(segments: List[String]) =
         first.decode(segments).flatMap { case (validA, segments2) =>
           second.decode(segments2).map { case (validB, segments3) =>
-            (validA.tuple(validB), segments3)
+            (validA.zip(validB), segments3)
           }
         }
       def encode(ab: tupler.Out) = {
@@ -290,7 +290,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     new Url[tupler.Out] {
 
       def decodeUrl(req: RequestHeader): Option[Validated[tupler.Out]] =
-        pathExtractor(path, req).map(_.tuple(qs.decode(req.queryString)))
+        pathExtractor(path, req).map(_.zip(qs.decode(req.queryString)))
 
       def encodeUrl(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)

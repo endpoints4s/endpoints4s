@@ -13,7 +13,7 @@ trait JsonSchemasDocs extends JsonSchemas {
   locally {
     //#explicit-schema
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
-      field[Double]("width") :*:
+      field[Double]("width") zip
       field[Double]("height")
     ).as[Rectangle]
     //#explicit-schema

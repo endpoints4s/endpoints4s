@@ -2,10 +2,9 @@ package endpoints
 package generic
 
 import shapeless.labelled.{FieldType, field => shapelessField}
+import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, Annotation, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
-import scala.language.implicitConversions
-import scala.language.higherKinds
 import scala.reflect.ClassTag
 
 /**
@@ -62,7 +61,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
             case Inl(a) => a
             case Inr(_) => sys.error("Unreachable code")
           }
-    )
+      )
 
   }
 
@@ -234,22 +233,25 @@ trait JsonSchemas extends algebra.JsonSchemas {
   def genericTagged[A](implicit genTagged: GenericJsonSchema.GenericTagged[A]): Tagged[A] =
     genTagged.jsonSchema
 
-  final class RecordGenericOps[L <: HList](record: Record[L]) {
-
-    def :*: [H](recordHead: Record[H]): RecordGenericOps[H :: L] =
-      new RecordGenericOps(
-        (recordHead zip record).xmap { case (h, l) => h :: l }(hl => (hl.head, hl.tail))
-      )
-
-    def :×: [H](recordHead: Record[H]): RecordGenericOps[H :: L] = recordHead :*: this
-
-    def as[A](implicit gen: Generic.Aux[A, L]): Record[A] = record.xmap(gen.from)(gen.to)
-
-    def tupled[T](implicit gen: Generic.Aux[T, L]): Record[T] = as[T]
-
+  implicit final class RecordGenericOps[A](record: Record[A]) {
+    def as[B](implicit gen: Generic.Aux[A, B]): Record[B] = record.xmap(gen.to)(gen.from)
   }
 
-  implicit def toRecordGenericOps[A](record: Record[A]): RecordGenericOps[A :: HNil] =
-    new RecordGenericOps[A :: HNil](record.xmap(_ :: HNil)(_.head))
+  implicit final class JsonSchemaGenericOps[A](schema: JsonSchema[A]) {
+    def as[B](implicit gen: Generic.Aux[A, B]): JsonSchema[B] = schema.xmap(gen.to)(gen.from)
+  }
+
+  // Summons a `Generic.Aux[T, A]` from a tuple type `T` to an arbitrary
+  // type `A` that has the same generic representation as the tuple type `T`
+  implicit def shapelessGenericFromTuple[A, T, L <: HList](implicit
+    tup: Tupler.Aux[L, T],
+    genT: Generic.Aux[T, L],
+    genA: Generic.Aux[A, L]
+  ): Generic.Aux[T, A] =
+    new Generic[T] {
+      type Repr = A
+      def to(t: T): A = genA.from(genT.to(t))
+      def from(a: A): T = genT.from(genA.to(a))
+    }
 
 }

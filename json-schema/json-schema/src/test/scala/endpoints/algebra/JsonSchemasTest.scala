@@ -23,9 +23,7 @@ trait JsonSchemasTest extends JsonSchemas {
       emptyRecord zip
       field[String]("name", Some("Name of the user")) zip
       field[Int]("age")
-    )
-      .xmap[(String, Int)](p => (p._1._2, p._2))(p => (((), p._1), p._2))
-      .xmap((User.apply _).tupled)(Function.unlift(User.unapply))
+    ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   }
 
   sealed trait Foo

@@ -194,9 +194,8 @@ and `genericTagged` returns a `Tagged`.
 
 ### JSON schemas transformation
 
-The module also takes advantage shapeless to define more convenient
-operations for combining JSON schema definitions: the `zip` operation
-is replaced by a `:*:` operator, and `xmap` is replaced by `as`:
+The module also takes advantage shapeless to provide a more convenient `as` operation for
+transforming JSON schema definitions, instead of `xmap`:
 
 ~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#explicit-schema
 ~~~

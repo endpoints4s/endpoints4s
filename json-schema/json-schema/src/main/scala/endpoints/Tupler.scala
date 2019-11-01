@@ -108,37 +108,6 @@ trait Tupler3 extends Tupler2 {
       }
     }
 
-  implicit def tupler3And1[A, B, C, D]: Tupler[(A, B, C), D] { type Out = (A, B, C, D) } =
-    new Tupler[(A, B, C), D] {
-      type Out = (A, B, C, D)
-      def apply(abc: (A, B, C), d: D): (A, B, C, D) = (abc._1, abc._2, abc._3, d)
-      def unapply(out: (A, B, C, D)): ((A, B, C), D) = {
-        val (a, b, c, d) = out
-        ((a, b, c), d)
-      }
-    }
-
-  implicit def tupler4And1[A, B, C, D, E]: Tupler[(A, B, C, D), E] { type Out = (A, B, C, D, E) } =
-    new Tupler[(A, B, C, D), E] {
-      type Out = (A, B, C, D, E)
-      def apply(abcd: (A, B, C, D), e: E): (A, B, C, D, E) = (abcd._1, abcd._2, abcd._3, abcd._4, e)
-      def unapply(out: (A, B, C, D, E)): ((A, B, C, D), E) = {
-        val (a, b, c, d, e) = out
-        ((a, b, c, d), e)
-      }
-    }
-
-  implicit def tupler5And1[A, B, C, D, E, F]: Tupler[(A, B, C, D, E), F] { type Out = (A, B, C, D, E, F) } =
-    new Tupler[(A, B, C, D, E), F] {
-      type Out = (A, B, C, D, E, F)
-      def apply(abcde: (A, B, C, D, E), f: F): (A, B, C, D, E, F) =
-        (abcde._1, abcde._2, abcde._3, abcde._4, abcde._5, f)
-      def unapply(out: (A, B, C, D, E, F)): ((A, B, C, D, E), F) = {
-        val (a, b, c, d, e, f) = out
-        ((a, b, c, d, e), f)
-      }
-    }
-
   implicit def leftUnit[A]: Aux[Unit, A, A] = new Tupler[Unit, A] {
     type Out = A
     def apply(a: Unit, b: A): A = b
@@ -147,7 +116,7 @@ trait Tupler3 extends Tupler2 {
 
 }
 
-trait Tupler4 extends Tupler3 {
+trait Tupler4 extends Tupler3 with TuplerAppend {
 
   implicit def rightUnit[A]: Aux[A, Unit, A] = new Tupler[A, Unit] {
     type Out = A

@@ -2,7 +2,7 @@ package endpoints.playjson
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, Validated, algebra}
+import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -156,10 +156,10 @@ trait JsonSchemas
       Writes.mapWrites(jsonSchema.writes)
     )
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)] = {
-    val reads = (recordA.reads and recordB.reads).tupled
-    val writes = new OWrites[(A, B)] {
-      override def writes(o: (A, B)): JsObject = o match {
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = {
+    val reads = (recordA.reads and recordB.reads).tupled.map { case (a, b) => t(a, b) }
+    val writes = new OWrites[t.Out] {
+      override def writes(o: t.Out): JsObject = t.unapply(o) match {
         case (a, b) => recordA.writes.writes(a) deepMerge recordB.writes.writes(b)
       }
     }

@@ -115,7 +115,7 @@ class JsonSchemasTest extends FreeSpec {
     testRoundtrip(
       field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi"),
       Json.obj("foo" -> JsNumber(BigDecimal(123.456)), "bar" -> JsBoolean(true), "pi" -> JsNumber(3.1416)),
-      ((BigDecimal(123.456), true), 3.1416)
+      (BigDecimal(123.456), true, 3.1416)
     )
   }
 

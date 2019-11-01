@@ -42,6 +42,15 @@ class JsonSchemasTest extends FreeSpec {
     object Doc {
       val schema: JsonSchema[Doc] = genericJsonSchema[Doc]
     }
+
+    val tupledSchema = field[Int]("x") zip field[Int]("y")
+    val tupledSchema2: JsonSchema[(Int, Int)] = tupledSchema
+
+    case class Point2(x: Int, y: Int)
+    val schema3: JsonSchema[Point2] = tupledSchema2.as[Point2]
+
+    case class Point3(x: Int, y: Int, z: Int)
+    val schemaPoint3 = (field[Int]("x") zip field[Int]("y") zip field[Int]("z")).as[Point3]
   }
 
   object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas with FakeTuplesSchemas {
@@ -78,7 +87,7 @@ class JsonSchemasTest extends FreeSpec {
       def choiceTagged[A, B](taggedA: String, taggedB: String): String =
         s"$taggedA|$taggedB"
 
-      def zipRecords[A, B](recordA: String, recordB: String): String =
+      def zipRecords[A, B](recordA: String, recordB: String)(implicit t: Tupler[A, B]): String =
         s"$recordA,$recordB"
 
       def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =

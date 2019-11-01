@@ -84,7 +84,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
     def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
-      headers => fa(headers).tuple(fb(headers))
+      headers => fa(headers).zip(fb(headers))
   }
 
   /**

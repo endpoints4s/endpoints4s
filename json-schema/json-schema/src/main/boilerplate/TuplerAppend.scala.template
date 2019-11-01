@@ -1,0 +1,22 @@
+package endpoints
+
+/**
+  * Generated trait that provides [[Tupler]] instances for appending to
+  * tuples from 3 to 21 elements
+  */
+trait TuplerAppend extends Tupler2 {
+  [3..21#
+  /**
+    * A [[Tupler]] that appends an element to an existing tuple of size 1.
+    */
+  implicit def tupler1Append[[#T1#], T2]: Tupler[([#T1#]), T2] { type Out = ([#T1#], T2) } =
+    new Tupler[([#T1#]), T2] {
+    type Out = ([#T1#], T2)
+    def apply(t: ([#T1#]), t2: T2): ([#T1#], T2) = ([#t._1#], t2)
+    def unapply(out: ([#T1#], T2)): (([#T1#]), T2) = {
+      val ([#t1#], t2) = out
+      (([#t1#]), t2)
+    }
+  }#
+]
+}

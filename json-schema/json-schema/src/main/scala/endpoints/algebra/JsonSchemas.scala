@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax}
+import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
 import scala.collection.compat._
 import scala.language.higherKinds
@@ -210,13 +210,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]]
 
   /** The JSON schema of a record merging the fields of the two given records */
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B]): Record[(A, B)]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out]
 
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
   final implicit class RecordOps[A](recordA: Record[A]) {
-    def zip[B](recordB: Record[B]): Record[(A, B)] = zipRecords(recordA, recordB)
+    def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = zipRecords(recordA, recordB)
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
     def named(name: String): Record[A] = namedRecord(recordA, name)
   }
