@@ -56,4 +56,33 @@ class JsonSchemasTest extends FreeSpec {
     assert(JsonSchemasCodec.boolIntString.encoder(value) == json)
   }
 
+  "refined JsonSchema" in {
+    val validJson = Json.fromInt(42)
+    val validValue = 42
+    assert(JsonSchemasCodec.evenNumberSchema.encoder(validValue) == validJson)
+    assert(JsonSchemasCodec.evenNumberSchema.decoder.decodeJson(validJson).right.exists(_ == validValue))
+
+    val invalidJson = Json.fromInt(41)
+    val invalidValue = 41
+    assert(JsonSchemasCodec.evenNumberSchema.encoder(invalidValue) == invalidJson)
+    assert(JsonSchemasCodec.evenNumberSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid even integer '41'", Nil)))
+  }
+
+  "refined Tagged" in {
+    val validJson =
+      Json.obj(
+        "type" -> Json.fromString("Baz"),
+        "i" -> Json.fromInt(42)
+      )
+    val validValue = JsonSchemasCodec.RefinedTagged(42)
+    assert(JsonSchemasCodec.refinedTaggedSchema.encoder(validValue) == validJson)
+    assert(JsonSchemasCodec.refinedTaggedSchema.decoder.decodeJson(validJson).right.exists(_ == validValue))
+
+    val invalidJson =
+      Json.obj(
+        "type" -> Json.fromString("Bar"),
+        "s" -> Json.fromString("foo")
+      )
+    assert(JsonSchemasCodec.refinedTaggedSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid tagged alternative", Nil)))
+  }
 }

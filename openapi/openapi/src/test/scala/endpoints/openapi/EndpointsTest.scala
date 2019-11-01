@@ -78,6 +78,17 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     Fixtures.toSchema(Fixtures.recursiveSchema) shouldBe expectedSchema
   }
 
+  "Refining JSON schemas preserves documentation" should {
+    "JsonSchema" in {
+      val expectedSchema = Fixtures.intJsonSchema
+      Fixtures.evenNumberSchema shouldBe expectedSchema
+    }
+    "Tagged" in {
+      val expectedSchema = Fixtures.Foo.schema
+      Fixtures.refinedTaggedSchema shouldBe expectedSchema
+    }
+  }
+
   "Text response" should {
     "be properly encoded" in {
       val reqBody = Fixtures.documentation.paths("/textRequestEndpoint").operations("post").requestBody

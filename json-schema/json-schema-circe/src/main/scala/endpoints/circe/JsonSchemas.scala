@@ -20,6 +20,14 @@ trait JsonSchemas
     def decoder: Decoder[A]
   }
 
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
+    new PartialInvariantFunctor[JsonSchema] {
+      def xmapPartial[A, B](fa: JsonSchema[A], f: A => Validated[B], g: B => A): JsonSchema[B] =
+        JsonSchema(fa.encoder.contramap(g), fa.decoder.emap(a => f(a).toEither.left.map(_.mkString(". "))))
+      override def xmap[A, B](fa: JsonSchema[A], f:  A => B, g:  B => A): JsonSchema[B] =
+        JsonSchema(fa.encoder.contramap(g), fa.decoder.map(f))
+    }
+
   object JsonSchema {
     def apply[A](_encoder: Encoder[A], _decoder: Decoder[A]): JsonSchema[A] =
       new JsonSchema[A] { def encoder = _encoder; def decoder = _decoder }
@@ -52,6 +60,14 @@ trait JsonSchemas
       record.decoder
   }
 
+  implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
+    new PartialInvariantFunctor[Record] {
+      def xmapPartial[A, B](fa: Record[A], f: A => Validated[B], g: B => A): Record[B] =
+        Record(fa.encoder.contramapObject(g), fa.decoder.emap(a => f(a).toEither.left.map(_.mkString(". "))))
+      override def xmap[A, B](fa: Record[A], f:  A => B, g:  B => A): Record[B] =
+        Record(fa.encoder.contramapObject(g), fa.decoder.map(f))
+    }
+
   trait Tagged[A] extends Record[A] {
     def discriminator: String = defaultDiscriminatorName
     def taggedEncoded(a: A): (String, JsonObject)
@@ -76,6 +92,20 @@ trait JsonSchemas
         }
       }
   }
+
+  implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
+    new PartialInvariantFunctor[Tagged] {
+      def xmapPartial[A, B](fa: Tagged[A], f: A => Validated[B], g: B => A): Tagged[B] =
+        new Tagged[B] {
+          def taggedEncoded(b: B): (String, JsonObject) = fa.taggedEncoded(g(b))
+          def taggedDecoder(tag: String): Option[Decoder[B]] = fa.taggedDecoder(tag).map(_.emap(a => f(a).toEither.left.map(_.mkString(". "))))
+        }
+      override def xmap[A, B](fa: Tagged[A], f:  A => B, g:  B => A): Tagged[B] =
+        new Tagged[B] {
+          def taggedEncoded(b: B): (String, JsonObject) = fa.taggedEncoded(g(b))
+          def taggedDecoder(tag: String): Option[Decoder[B]] = fa.taggedDecoder(tag).map(_.map(f))
+        }
+    }
 
   type Enum[A] = JsonSchema[A]
 
@@ -161,18 +191,6 @@ trait JsonSchemas
     }
     Record(encoder, decoder)
   }
-
-  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
-    Record(record.encoder.contramapObject(g), record.decoder.map(f))
-
-  def xmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] =
-    new Tagged[B] {
-      def taggedEncoded(b: B): (String, JsonObject) = tagged.taggedEncoded(g(b))
-      def taggedDecoder(tag: String): Option[Decoder[B]] = tagged.taggedDecoder(tag).map(_.map(f))
-    }
-
-  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
-    JsonSchema(jsonSchema.encoder.contramap(g), jsonSchema.decoder.map(f))
 
   implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 

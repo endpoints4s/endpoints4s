@@ -78,11 +78,21 @@ class JsonSchemasTest extends FreeSpec {
       def zipRecords[A, B](recordA: String, recordB: String): String =
         s"$recordA,$recordB"
 
-      def xmapRecord[A, B](record: String, f: A => B, g: B => A): String = record
-
-      def xmapTagged[A, B](tagged: String, f: A => B, g: B => A): String = tagged
-
-      def xmapJsonSchema[A, B](jsonSchema: String, f: A => B, g: B => A): String = jsonSchema
+      def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
+        new PartialInvariantFunctor[JsonSchema] {
+          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+        }
+      def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
+        new PartialInvariantFunctor[Record] {
+          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+        }
+      def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
+        new PartialInvariantFunctor[Tagged] {
+          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+        }
 
       lazy val uuidJsonSchema: String = "uuid"
 

@@ -53,6 +53,22 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas with TuplesSchemas {
     }
   }
 
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
+    new PartialInvariantFunctor[JsonSchema] {
+      def xmapPartial[A, B](fa: DocumentedJsonSchema, f: A => Validated[B], g: B => A): DocumentedJsonSchema = fa
+      override def xmap[A, B](fa: DocumentedJsonSchema, f: A => B, g: B => A): DocumentedJsonSchema = fa
+    }
+  implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
+    new PartialInvariantFunctor[Record] {
+      def xmapPartial[A, B](fa: DocumentedRecord, f: A => Validated[B], g: B => A): DocumentedRecord = fa
+      override def xmap[A, B](fa: DocumentedRecord, f: A => B, g: B => A): DocumentedRecord = fa
+    }
+  implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
+    new PartialInvariantFunctor[Tagged] {
+      def xmapPartial[A, B](fa: DocumentedCoProd, f: A => Validated[B], g: B => A): DocumentedCoProd = fa
+      override def xmap[A, B](fa: DocumentedCoProd, f: A => B, g: B => A): DocumentedCoProd = fa
+    }
+
   def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): DocumentedEnum =
     DocumentedEnum(tpe, values.map(encode).toList, None)
 
@@ -88,12 +104,6 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas with TuplesSchemas {
 
   def zipRecords[A, B](recordA: DocumentedRecord, recordB: DocumentedRecord): DocumentedRecord =
     DocumentedRecord(recordA.fields ++ recordB.fields)
-
-  def xmapRecord[A, B](record: DocumentedRecord, f: A => B, g: B => A): DocumentedRecord = record
-
-  def xmapTagged[A, B](tagged: DocumentedCoProd, f: A => B, g: B => A): DocumentedCoProd = tagged
-
-  def xmapJsonSchema[A, B](jsonSchema: DocumentedJsonSchema, f: A => B, g: B => A): DocumentedJsonSchema = jsonSchema
 
   lazy val uuidJsonSchema: DocumentedJsonSchema = Primitive("string", format = Some("uuid"))
 

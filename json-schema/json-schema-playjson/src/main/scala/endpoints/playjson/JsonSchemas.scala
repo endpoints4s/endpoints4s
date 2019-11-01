@@ -2,7 +2,7 @@ package endpoints.playjson
 
 import java.util.UUID
 
-import endpoints.algebra
+import endpoints.{PartialInvariantFunctor, Validated, algebra}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -30,6 +30,14 @@ trait JsonSchemas
       Format(jsonSchema.reads, jsonSchema.writes)
   }
 
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
+    new PartialInvariantFunctor[JsonSchema] {
+      def xmapPartial[A, B](fa: JsonSchema[A], f: A => Validated[B], g: B => A): JsonSchema[B] =
+        JsonSchema(fa.reads.flatMap(a => f(a).fold(Reads.pure(_), errors => Reads.failed(errors.mkString(". ")))), fa.writes.contramap(g))
+      override def xmap[A, B](fa: JsonSchema[A], f:  A => B, g:  B => A): JsonSchema[B] =
+        JsonSchema(fa.reads.map(f), fa.writes.contramap(g))
+    }
+
   trait Record[A] extends JsonSchema[A] {
     override def writes: OWrites[A]
   }
@@ -42,6 +50,14 @@ trait JsonSchemas
     implicit def toPlayJsonOFormat[A](implicit record: Record[A]): OFormat[A] =
       OFormat(record.reads, record.writes)
   }
+
+  implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
+    new PartialInvariantFunctor[Record] {
+      def xmapPartial[A, B](fa: Record[A], f: A => Validated[B], g: B => A): Record[B] =
+        Record(fa.reads.flatMap(a => f(a).fold(Reads.pure(_), errors => Reads.failed(errors.mkString(". ")))), fa.writes.contramap(g))
+      override def xmap[A, B](fa: Record[A], f:  A => B, g:  B => A): Record[B] =
+        Record(fa.reads.map(f), fa.writes.contramap(g))
+    }
 
   type Enum[A] = JsonSchema[A]
 
@@ -150,12 +166,6 @@ trait JsonSchemas
     Record(reads, writes)
   }
 
-  def xmapRecord[A, B](record: Record[A], f: A => B, g: B => A): Record[B] =
-    Record(record.reads.map(f), record.writes.contramap(g))
-
-  def xmapJsonSchema[A, B](jsonSchema: JsonSchema[A], f: A => B, g: B => A): JsonSchema[B] =
-    JsonSchema(jsonSchema.reads.map(f), jsonSchema.writes.contramap(g))
-
   trait Tagged[A] extends Record[A] {
     def discriminator: String = defaultDiscriminatorName
     def tagAndJson(a: A): (String, JsObject)
@@ -185,6 +195,20 @@ trait JsonSchemas
     }
   }
 
+  implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
+    new PartialInvariantFunctor[Tagged] {
+      def xmapPartial[A, B](fa: Tagged[A], f: A => Validated[B], g: B => A): Tagged[B] =
+        new Tagged[B] {
+          def tagAndJson(b: B): (String, JsObject) = fa.tagAndJson(g(b))
+          def findReads(tag: String): Option[Reads[B]] = fa.findReads(tag).map(_.flatMap(a => f(a).fold(Reads.pure(_), errors => Reads.failed(errors.mkString(". ")))))
+        }
+      override def xmap[A, B](fa: Tagged[A], f:  A => B, g:  B => A): Tagged[B] =
+        new Tagged[B] {
+          def tagAndJson(b: B): (String, JsObject) = fa.tagAndJson(g(b))
+          def findReads(tag: String): Option[Reads[B]] = fa.findReads(tag).map(_.map(f))
+        }
+    }
+
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] = new Tagged[A] {
     def tagAndJson(a: A): (String, JsObject) = (tag, recordA.writes.writes(a))
     def findReads(tagName: String): Option[Reads[A]] = if (tag == tagName) Some(recordA.reads) else None
@@ -208,8 +232,4 @@ trait JsonSchemas
         taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
   }
 
-  def xmapTagged[A, B](tagged: Tagged[A], f: A => B, g: B => A): Tagged[B] = new Tagged[B] {
-    def tagAndJson(b: B): (String, JsObject) = tagged.tagAndJson(g(b))
-    def findReads(tag: String): Option[Reads[B]] = tagged.findReads(tag).map(_.map(f))
-  }
 }
