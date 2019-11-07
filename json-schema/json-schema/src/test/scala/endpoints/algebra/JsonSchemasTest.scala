@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import endpoints.{Invalid, Valid}
+
 /**
   * This file doesn’t contain actual tests.
   *
@@ -34,7 +36,7 @@ trait JsonSchemasTest extends JsonSchemas {
   case class Quux(b: Byte) extends Foo
 
   object Foo {
-    implicit val schema: JsonSchema[Foo] = {
+    implicit val schema: Tagged[Foo] = {
       val barSchema: Record[Bar] = field[String]("s").xmap(Bar)(_.s)
       val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
       val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
@@ -75,5 +77,20 @@ trait JsonSchemasTest extends JsonSchemas {
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 
   implicit val boolIntString: JsonSchema[(Boolean, Int, String)] = tuple3JsonSchema
+
+  //#refined
+  val evenNumberSchema: JsonSchema[Int] =
+    intJsonSchema.xmapPartial { n =>
+      if (n % 2 == 0) Valid(n)
+      else Invalid(s"Invalid even integer '$n'")
+    }(n => n)
+  //#refined
+
+  case class RefinedTagged(x: Int)
+  val refinedTaggedSchema: Tagged[RefinedTagged] =
+    Foo.schema.xmapPartial {
+      case Baz(i) => Valid(RefinedTagged(i))
+      case _      => Invalid("Invalid tagged alternative")
+    }(rc => Baz(rc.x))
 
 }

@@ -9,7 +9,7 @@ class JsonSchemasTest extends FreeSpec {
     extends endpoints.algebra.JsonSchemasTest
       with endpoints.playjson.JsonSchemas
 
-  import JsonSchemasCodec.{JsonSchemaOps => _, _} // importing JsonSchemaOps would create ambiguity with RecordOps
+  import JsonSchemasCodec._
 
   "empty record" in {
     testRoundtrip(
@@ -353,6 +353,25 @@ class JsonSchemasTest extends FreeSpec {
       Json.arr(true, 42, "foo"),
       (true, 42, "foo")
     )
+  }
+
+  "refined JsonSchema" in {
+    testRoundtrip(
+      evenNumberSchema,
+      JsNumber(42),
+      42
+    )
+    assert(evenNumberSchema.writes.writes(41) == JsNumber(41))
+    assertError(evenNumberSchema, JsNumber(41), "Invalid even integer '41'")
+  }
+
+  "refined Tagged" in {
+    testRoundtrip(
+      refinedTaggedSchema,
+      Json.obj("type" -> "Baz", "i" -> 42),
+      RefinedTagged(42)
+    )
+    assertError(refinedTaggedSchema, Json.obj("type" -> "Bar", "s" -> "foo"), "Invalid tagged alternative")
   }
 
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {

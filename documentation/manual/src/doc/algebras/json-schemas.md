@@ -79,6 +79,17 @@ By default, the discriminator field is named `type`, but you can use another fie
 overriding the `defaultDiscriminatorName` method of the algebra, or by wrapping the `Tagged` schema
 in a `withDiscriminator` call specifying the field name to use.
 
+### Refining schemas
+
+The examples above show how to use `xmap` to transform a `JsonSchema[A]` into a `JsonSchema[B]`. In
+case the transformation function from `A` to `B` can fail (for example, if it applies additional
+validation), you can use `xmapPartial` instead of `xmap`:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala#refined
+~~~
+
+In this example, we check that the decoded integer is even. If it is not, we return an error message.
+
 ### Enumerations
 
 There are different ways to represent enumerations in Scala:
