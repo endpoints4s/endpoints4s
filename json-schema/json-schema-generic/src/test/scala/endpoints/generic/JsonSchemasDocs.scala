@@ -21,6 +21,14 @@ trait JsonSchemasDocs extends JsonSchemas {
 
   locally {
     //#documented-generic-schema
+    @discriminator("kind")
+    @name("ShapeSchema")
+    sealed trait Shape
+
+    @name("CircleSchema")
+    case class Circle(radius: Double) extends Shape
+
+    @name("RectangleSchema")
     case class Rectangle(
       @docs("Rectangle width") width: Double,
       height: Double

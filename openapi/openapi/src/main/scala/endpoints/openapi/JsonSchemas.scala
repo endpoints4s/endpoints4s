@@ -80,7 +80,7 @@ trait JsonSchemas extends endpoints.algebra.JsonSchemas with TuplesSchemas {
   def taggedRecord[A](recordA: DocumentedRecord, tag: String): DocumentedCoProd =
     DocumentedCoProd(List(tag -> recordA))
 
-  def withDiscriminator[A](tagged: DocumentedCoProd, discriminatorName: String): DocumentedCoProd =
+  def withDiscriminatorTagged[A](tagged: DocumentedCoProd, discriminatorName: String): DocumentedCoProd =
     tagged.copy(discriminatorName = discriminatorName)
 
   def choiceTagged[A, B](taggedA: DocumentedCoProd, taggedB: DocumentedCoProd): DocumentedCoProd =
