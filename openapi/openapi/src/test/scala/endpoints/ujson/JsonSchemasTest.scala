@@ -98,6 +98,10 @@ class JsonSchemasTest extends FreeSpec {
     assert(Enum.colorSchema.codec.encode(Enum.Blue) == ujson.Str("Blue"))
   }
 
+  "non-string enum" in {
+    assert(NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson.Obj("quux" -> ujson.Str("bar")))
+  }
+
   "recursive type" in {
     val expected =
       ujson.Obj("next" -> ujson.Obj("next" -> ujson.Obj()))

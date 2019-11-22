@@ -40,6 +40,18 @@ class JsonSchemasTest extends FreeSpec {
     assert(DocumentedJsonSchemas.Enum.colorSchema.docs == expectedSchema)
   }
 
+  "non-string enum" in {
+    val expectedSchema =
+      DocumentedEnum(
+        DocumentedRecord(
+          Field("quux", DocumentedJsonSchemas.stringJsonSchema.docs, isOptional = false, documentation = None) :: Nil
+        ),
+        ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj("quux" -> ujson.Str("baz")) :: Nil,
+        None
+      )
+    assert(DocumentedJsonSchemas.NonStringEnum.enumSchema.docs == expectedSchema)
+  }
+
   "recursive" in {
     DocumentedJsonSchemas.recursiveSchema.docs match {
       case DocumentedRecord(List(Field("next", tpe, true, None)), None, None) => assert(tpe.isInstanceOf[LazySchema])

@@ -61,17 +61,16 @@ trait JsonSchemas
 
   type Enum[A] = JsonSchema[A]
 
-  def enumeration[A](values: Seq[A])(encode: A => String)(implicit jsonSchema: JsonSchema[String]): Enum[A] = {
-    lazy val stringToEnum: Map[String, A] = values.map(value => (encode(value), value)).toMap
-    def decode(string: String): Either[String, A] = stringToEnum.get(string).toRight("Cannot decode as enum value: " + string)
-
+  def enumeration[A](values: Seq[A])(jsonSchema: JsonSchema[A]): Enum[A] = {
     JsonSchema(
-      new Reads[A] {
-        override def reads(json: JsValue): JsResult[A] = {
-          jsonSchema.reads.reads(json).flatMap(value => decode(value).fold(JsError(_), JsSuccess(_)))
+      jsonSchema.reads.flatMap { a =>
+        if (values.contains(a)) {
+          Reads.pure(a)
+        } else {
+          Reads.failed(s"Invalid value: ${Json.stringify(jsonSchema.writes.writes(a))}. Valid values are: ${values.map(a => Json.stringify(jsonSchema.writes.writes(a))).mkString(", ")}.")
         }
       },
-      jsonSchema.writes.contramap(encode)
+      jsonSchema.writes
     )
   }
 

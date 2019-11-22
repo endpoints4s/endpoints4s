@@ -319,7 +319,7 @@ class JsonSchemasTest extends FreeSpec {
     assertError(
       colorSchema,
       JsString("yellow"),
-      "Cannot decode as enum value: yellow"
+      "Invalid value yellow. Valid values are Red, Blue."
     )
   }
 
@@ -327,7 +327,7 @@ class JsonSchemasTest extends FreeSpec {
     assertError(
       colorSchema,
       JsString("Green"),
-      "Cannot decode as enum value: Green"
+      "Invalid value Green. Valid values are Red, Blue."
     )
   }
 
@@ -336,6 +336,20 @@ class JsonSchemasTest extends FreeSpec {
       colorSchema,
       JsString("Blue"),
       Blue
+    )
+  }
+
+  "non-string enum" in {
+    import NonStringEnum.{enumSchema, Foo}
+    testRoundtrip(
+      enumSchema,
+      Json.obj("quux" -> "bar"),
+      Foo("bar")
+    )
+    assertError(
+      enumSchema,
+      Json.obj("quux" -> "wrong"),
+      "Invalid value: {\"quux\":\"wrong\"}. Valid values are: {\"quux\":\"bar\"}, {\"quux\":\"baz\"}."
     )
   }
 

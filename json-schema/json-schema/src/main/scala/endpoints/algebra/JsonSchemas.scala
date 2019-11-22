@@ -2,7 +2,7 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
+import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
 
 import scala.collection.compat._
 import scala.language.higherKinds
@@ -128,13 +128,52 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   type Enum[A] <: JsonSchema[A]
 
-  /** Promotes a schema to an enumeration and converts between enum constants and JSON strings.
+  /** Promotes a schema to an enumeration.
     * Decoding fails if the input string does not match the encoded values of any of the possible values.
     * Encoding does never fail, even if the value is not contained in the set of possible values.
     *
     * @group operations
     */
-  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A]
+  def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A]
+
+  /**
+    * Convenient constructor for enumerations represented by string values.
+    * @group operations
+    */
+  final def stringEnumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
+    val encoded = values.map(a => (a, encode(a))).toMap
+    val decoded = encoded.map(_.swap)
+    assert(encoded.size == decoded.size, "Enumeration values must have different string representation")
+    enumeration(values)(
+      tpe.xmapPartial { str =>
+        Validated.fromOption(decoded.get(str))(s"Invalid value ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
+      } (encode)
+    )
+  }
+
+  /**
+    * A schema for a statically known value.
+    *
+    * Encoders always produce the given `value`, encoded according to `tpe`.
+    * Decoders first try to decode incoming values with the given `tpe` schema,
+    * and then check that it is equal to the given `value`.
+    *
+    * This is useful to model schemas of objects containing extra fields that
+    * are absent from their Scala representation. For example, here is a schema
+    * for a GeoJSON point:
+    *
+    * {{{
+    *   case class Point(lon: Double, lat: Double)
+    *   val pointSchema = (
+    *     field("type")(literal("Point")) zip
+    *     field[(Double, Double)]("coordinates")
+    *   ).xmap(Point.tupled)(p => (p.lon, p.lat))
+    * }}}
+    *
+    * @group operations
+    */
+  final def literal[A](value: A)(implicit tpe: JsonSchema[A]): JsonSchema[Unit] =
+    (enumeration(value :: Nil)(tpe): JsonSchema[A]).xmap(_ => ())(_ => value)
 
   /** Annotates the record JSON schema with a name */
   def namedRecord[A](schema: Record[A], name: String): Record[A]
