@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import scala.language.higherKinds
-
 /**
   * Algebra interface for describing JSON entities in requests and responses.
   *

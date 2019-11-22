@@ -1,7 +1,5 @@
 package endpoints
 
-import scala.language.higherKinds
-
 /** Defines ways to transform a given type constructor F */
 trait InvariantFunctor[F[_]] {
   /**

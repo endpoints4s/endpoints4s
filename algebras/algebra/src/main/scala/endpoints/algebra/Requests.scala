@@ -2,8 +2,6 @@ package endpoints.algebra
 
 import endpoints._
 
-import scala.language.higherKinds
-
 /**
   * @group algebras
   */

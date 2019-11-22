@@ -29,7 +29,6 @@ trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
 /**
   * @tparam A The result of decoding an URL candidate
   */
-@SerialVersionUID(1L)
 sealed trait DecodedUrl[+A] extends Serializable
 object DecodedUrl {
   /** The URL candidate matched the given URL definition, and a `A` value was extracted from it */

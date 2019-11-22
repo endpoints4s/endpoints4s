@@ -2,8 +2,6 @@ package endpoints.algebra
 
 import endpoints.{InvariantFunctor, InvariantFunctorSyntax}
 
-import scala.language.higherKinds
-
 /**
   * @group algebras
   */

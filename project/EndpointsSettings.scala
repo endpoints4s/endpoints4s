@@ -16,13 +16,22 @@ object EndpointsSettings {
       "-deprecation",
       "-encoding", "UTF-8",
       "-unchecked",
+      "-language:implicitConversions",
       "-Xlint",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
     ) ++
     (CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) if n >= 13 => Seq("-Xsource:2.14")
-      case _ => Seq("-Yno-adapted-args", "-Ywarn-unused-import", "-Xexperimental", "-Xfuture", "-Ywarn-value-discard")
+      case _ =>
+        Seq(
+          "-Yno-adapted-args",
+          "-Ywarn-unused-import",
+          "-Ywarn-value-discard",
+          "-Xexperimental",
+          "-Xfuture",
+          "-language:higherKinds"
+        )
     })
   )
   val `scala 2.12` = Seq(
@@ -34,12 +43,12 @@ object EndpointsSettings {
     crossScalaVersions := Seq("2.12.10", "2.11.12")
   )
   val `scala 2.11 to latest` = Seq(
-    scalaVersion := "2.13.0",
-    crossScalaVersions := Seq("2.13.0", "2.12.10", "2.11.12")
+    scalaVersion := "2.13.1",
+    crossScalaVersions := Seq("2.13.1", "2.12.10", "2.11.12")
   )
   val `scala 2.12 to latest` = Seq(
-    scalaVersion := "2.13.0",
-    crossScalaVersions := Seq("2.13.0", "2.12.10")
+    scalaVersion := "2.13.1",
+    crossScalaVersions := Seq("2.13.1", "2.12.10")
   )
 
   val publishSettings = commonSettings ++ Seq(

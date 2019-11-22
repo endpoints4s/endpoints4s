@@ -7,8 +7,6 @@ import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
 import scala.collection.compat.Factory
 
-import scala.language.higherKinds
-
 /**
   * Interpreter for [[algebra.Urls]]
   *

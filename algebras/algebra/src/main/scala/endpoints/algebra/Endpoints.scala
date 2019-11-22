@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import scala.language.higherKinds
-
 /**
   * Algebra interface for describing endpoints made of requests and responses.
   *
@@ -68,7 +66,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   /**
     * Callbacks indexed by URL pattern
-    * @see [["Swagger Documentation" https://swagger.io/docs/specification/callbacks/]]
+    * @see Swagger Documentation at [[https://swagger.io/docs/specification/callbacks/]]
     */
   type CallbacksDocs = Map[String, CallbackDocs]
 

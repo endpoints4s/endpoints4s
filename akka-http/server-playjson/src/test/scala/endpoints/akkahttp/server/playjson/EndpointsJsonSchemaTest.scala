@@ -9,8 +9,6 @@ import endpoints.generic
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
-import scala.language.reflectiveCalls
-
 class EndpointsJsonSchemaTestApi
   extends Endpoints
   with generic.JsonSchemas

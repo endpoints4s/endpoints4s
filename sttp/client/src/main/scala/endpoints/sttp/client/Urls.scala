@@ -1,7 +1,6 @@
 package endpoints.sttp.client
 
 import scala.collection.compat.Factory
-import scala.language.higherKinds
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 

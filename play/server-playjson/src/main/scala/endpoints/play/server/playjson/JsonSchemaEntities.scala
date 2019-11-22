@@ -8,8 +8,8 @@ import play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError}
 import scala.util.Try
 
 /**
-  * Interpreter for [[algebra.JsonSchemaEntities]] that uses Play JSON [[play.api.libs.json.Reads]] to decode
-  * JSON entities in HTTP requests, and [[play.api.libs.json.Writes]] to build JSON entities in HTTP responses.
+  * Interpreter for [[algebra.JsonSchemaEntities]] that uses Play JSON `play.api.libs.json.Reads` to decode
+  * JSON entities in HTTP requests, and `play.api.libs.json.Writes` to build JSON entities in HTTP responses.
   */
 trait JsonSchemaEntities extends EndpointsWithCustomErrors with algebra.JsonSchemaEntities with endpoints.playjson.JsonSchemas {
 

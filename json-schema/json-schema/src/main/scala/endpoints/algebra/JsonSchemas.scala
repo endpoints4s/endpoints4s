@@ -5,7 +5,6 @@ import java.util.UUID
 import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
 import scala.collection.compat._
-import scala.language.higherKinds
 
 /**
   * An algebra interface for describing algebraic data types. Such descriptions

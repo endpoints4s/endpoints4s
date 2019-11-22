@@ -1,7 +1,6 @@
 package endpoints.xhr
 
 import scala.collection.compat.Factory
-import scala.language.higherKinds
 import endpoints.algebra.Documentation
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 

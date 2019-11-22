@@ -8,7 +8,6 @@ import endpoints.algebra.{BasicAuthTestApi, EndpointsTestApi}
 import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.higherKinds
 import scala.util.Try
 
 class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
