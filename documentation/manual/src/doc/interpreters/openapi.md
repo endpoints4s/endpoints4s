@@ -6,6 +6,9 @@
 
 [API documentation](unchecked:/api/endpoints/openapi/index.html)
 
+This family of interpreters produces static documentation for endpoint definitions,
+in the form of an [OpenAPI document](https://www.openapis.org/).
+
 ## Endpoints
 
 The `Endpoints` interpreter provides an `openApi` method
@@ -23,16 +26,19 @@ It can be documented as follows:
 ~~~
 
 The value returned by the `openApi` method has type `endpoints.openapi.models.OpenApi`,
-which is an abstract model for OpenAPI documents. You can generate a JSON
-representation of it, which you can then publish to your server. For instance, using circe:
+which is an abstract model for OpenAPI documents. You can encode it into JSON by using the
+`OpenApi.stringEncoder` encoder. 
 
 ~~~ scala src=../../../../../openapi/openapi/src/test/scala/endpoints/openapi/EndpointsDocs.scala#documentation-asjson
 ~~~
 
-The `OpenApiSchemas` trait (mixed into the top-level object) provides a
-[`JsonSchema`](/algebras/json-schemas.md) instance for the `OpenApi` model, which
-is used by the circe `JsonSchemas` interpreter to turn the `api` value into a `Json`
-document.
+In case the endpoint that serves the documentation is itself defined using _endpoints_,
+you can use the `JsonEntitiesFromEncoderAndDecoder` interpreter to define an endpoint
+returning the `OpenApi` document as a JSON entity. Here is an example using Play
+framework:
+
+~~~ scala src=../../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#serving-documentation
+~~~
 
 Finally, the `apiJson` value contains the following JSON document:
 

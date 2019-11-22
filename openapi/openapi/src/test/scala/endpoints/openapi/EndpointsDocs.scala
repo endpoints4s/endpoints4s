@@ -14,15 +14,9 @@ object EndpointsDocs extends algebra.EndpointsDocs with Endpoints {
   //#documentation
 
   //#documentation-asjson
-  object OpenApiEncoder
-    extends endpoints.openapi.model.OpenApiSchemas
-      with endpoints.circe.JsonSchemas
+  import endpoints.openapi.model.OpenApi
 
-  import OpenApiEncoder.JsonSchema._
-  import io.circe.Json
-  import io.circe.syntax._
-
-  val apiJson: Json = api.asJson
+  val apiJson: String = OpenApi.stringEncoder.encode(api)
   //#documentation-asjson
 
 }

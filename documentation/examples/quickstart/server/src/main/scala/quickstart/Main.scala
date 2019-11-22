@@ -1,7 +1,7 @@
 package quickstart
 
 //#relevant-code
-import endpoints.openapi.model.{OpenApi, OpenApiSchemas}
+import endpoints.openapi.model.OpenApi
 import endpoints.play.server
 import endpoints.play.server.PlayComponents
 import play.core.server.NettyServer
@@ -20,9 +20,9 @@ object Main extends App {
 //#main-only
 
 // Additional route for serving the OpenAPI documentation
+//#serving-documentation
 class DocumentationServer(val playComponents: PlayComponents)
-  extends server.Endpoints
-    with OpenApiSchemas with server.playjson.JsonSchemaEntities {
+  extends server.Endpoints with server.JsonEntitiesFromEncoderAndDecoder {
 
   val routes = routesFromEndpoints(
     endpoint[Unit, OpenApi](get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
@@ -30,4 +30,5 @@ class DocumentationServer(val playComponents: PlayComponents)
   )
 
 }
+//#serving-documentation
 //#relevant-code

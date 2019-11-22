@@ -1,12 +1,12 @@
 package sample
 
-import _root_.play.api.http.ContentTypes.HTML
+import _root_.play.api.http.ContentTypes.{HTML, JSON}
 import _root_.play.api.mvc.{Handler, RequestHeader, Results}
 import _root_.play.api.routing.sird._
 import _root_.play.api.routing.Router
-import _root_.play.api.libs.json.Json
 import _root_.play.core.server.DefaultNettyServerComponents
 import controllers.{AssetsBuilder, AssetsConfiguration, DefaultAssetsMetadata}
+import endpoints.openapi.model.OpenApi
 import endpoints.play.server.PlayComponents
 import sample.play.server.DocumentedApi
 
@@ -36,8 +36,7 @@ object Server extends App with Results with DefaultNettyServerComponents {
     case GET(p"/assets/sample-client-fastopt.js") =>
       assets.versioned("/", "example-basic-client-fastopt.js")
     case GET(p"/api/description") => action {
-      import sample.openapi.OpenApiEncoder.JsonSchema._
-      Ok(Json.toJson(sample.openapi.DocumentedApi.documentation))
+      Ok(OpenApi.stringEncoder.encode(sample.openapi.DocumentedApi.documentation)).as(JSON)
     }
     case GET(p"/api/ui") => action {
       val html =

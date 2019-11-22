@@ -109,21 +109,8 @@ class ArraysTest extends WordSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    "be documented with circe" in {
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.circe.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import io.circe.syntax._
-      import io.circe.parser.parse
-
-      ArraysDocumentation.api.asJson shouldBe parse(expectedSchema).right.get
-    }
-
-    "be documented with playjson" in {
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.playjson.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import play.api.libs.json.Json
-
-      Json.toJson(ArraysDocumentation.api) shouldBe Json.parse(expectedSchema)
+    "be documented" in {
+      ujson.read(OpenApi.stringEncoder.encode(ArraysDocumentation.api)) shouldBe ujson.read(expectedSchema)
     }
 
   }
