@@ -1,0 +1,53 @@
+package endpoints.openapi
+
+import endpoints.openapi.model.OpenApi
+import endpoints.{algebra, openapi}
+import org.scalatest.{Matchers, WordSpec}
+
+class ExamplesTest extends WordSpec with Matchers {
+
+  "Schemas" should {
+
+    "Include examples in documentation" in new Fixtures {
+      checkExample(recordSchema)(ujson.Obj("foo" -> ujson.Str("Quux"), "bar" -> ujson.Num(42)))
+      checkExample(coprodSchema)(ujson.Obj("type" -> ujson.Str("R"), "bar" -> ujson.Num(42)))
+      checkExample(enumSchema)(ujson.Str("foo"))
+      checkExample(arraySchema)(ujson.Arr(ujson.Num(1), ujson.Num(2)))
+      checkExample(mapSchema)(ujson.Obj("foo" -> ujson.Num(1), "bar" -> ujson.Num(2)))
+      checkExample(pairSchema)(ujson.Arr(ujson.Num(42), ujson.Str("foo")))
+    }
+
+  }
+
+  trait FixturesAlg extends algebra.JsonSchemas {
+
+    val recordSchema = (
+      field[String]("foo") zip
+      field[Int]("bar")
+    ).withExample(("Quux", 42))
+
+    val coprodSchema = {
+      val left  = field[String]("foo").tagged("L")
+      val right = field[Int]("bar").tagged("R")
+      left.orElse(right).withExample(Right(42))
+    }
+
+    val enumSchema = stringEnumeration(Seq("foo", "bar"))(identity).withExample("foo")
+
+    val arraySchema = arrayJsonSchema[List, Int].withExample(1 :: 2 :: Nil)
+
+    val mapSchema = mapJsonSchema[Int].withExample(Map("foo" -> 1, "bar" -> 2))
+
+    val pairSchema = implicitly[JsonSchema[(Int, String)]].withExample((42, "foo"))
+
+  }
+
+  trait Fixtures extends FixturesAlg with openapi.Endpoints with openapi.JsonSchemaEntities {
+
+    def checkExample[A](schema: JsonSchema[A])(example: ujson.Value) = {
+      assert(OpenApi.schemaJson(toSchema(schema.docs))("example") == example)
+    }
+
+  }
+
+}

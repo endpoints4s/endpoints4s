@@ -73,8 +73,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /**
     * The JSON schema of a type `A`
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
-    *       [[InvariantFunctorSyntax]] classes.
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
+    *       [[InvariantFunctorSyntax]], and [[JsonSchemaOps]] classes.
     * @group types
     */
   type JsonSchema[A]
@@ -249,6 +249,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** The JSON schema of a record merging the fields of the two given records */
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out]
+
+  def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
+
+  final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A]) {
+    def withExample(example: A): JsonSchema[A] = withExampleJsonSchema(schemaA, example)
+  }
 
   /** Implicit methods for values of type [[Record]]
     * @group operations

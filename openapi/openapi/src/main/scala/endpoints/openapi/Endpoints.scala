@@ -148,26 +148,26 @@ trait EndpointsWithCustomErrors
     } yield recSchema
 
     allReferencedSchemas
-      .collect { case Schema.Reference(name, Some(original), _) => name -> original }
+      .collect { case Schema.Reference(name, Some(original), _, _) => name -> original }
       .toMap
   }
 
   private def captureReferencedSchemasRec(schema: Schema): Seq[Schema.Reference] =
     schema match {
-      case Schema.Object(properties, additionalProperties, _) =>
+      case Schema.Object(properties, additionalProperties, _, _) =>
         properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
           additionalProperties.toList.flatMap(captureReferencedSchemasRec)
-      case Schema.Array(Left(elementType), _) =>
+      case Schema.Array(Left(elementType), _, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Array(Right(elementTypes), _) =>
+      case Schema.Array(Right(elementTypes), _, _) =>
         elementTypes.flatMap(captureReferencedSchemasRec)
-      case Schema.Enum(elementType, _, _) =>
+      case Schema.Enum(elementType, _, _, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_, _, _) =>
+      case Schema.Primitive(_, _, _, _) =>
         Nil
-      case Schema.OneOf(_, alternatives, _) =>
+      case Schema.OneOf(_, alternatives, _, _) =>
         alternatives.map(_._2).flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas, _) =>
+      case Schema.AllOf(schemas, _, _) =>
         schemas.flatMap {
           case _: Schema.Reference => Nil
           case s => captureReferencedSchemasRec(s)

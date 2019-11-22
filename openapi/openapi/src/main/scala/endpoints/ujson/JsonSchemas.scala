@@ -108,6 +108,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       }
     }
 
+  def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
+
   implicit def uuidJsonSchema: JsonSchema[UUID] = new JsonSchema[UUID] {
     val codec = uuid => ujson.Str(uuid.toString)
   }
