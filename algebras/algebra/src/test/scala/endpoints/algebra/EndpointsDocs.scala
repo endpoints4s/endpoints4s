@@ -76,14 +76,6 @@ trait EndpointsDocs extends Endpoints {
     endpoint(get(path / "some-resource" / segment[Int]()), ok(textResponse))
   //#endpoint-definition
 
-  //#documented-endpoint-definition
-  val someDocumentedResource: Endpoint[Int, String] =
-    endpoint(
-      get(path / "some-resource" / segment[Int]("id")),
-      ok(textResponse, docs = Some("The content of the resource"))
-    )
-  //#documented-endpoint-definition
-
   //#xmap-partial
   import java.time.LocalDate
   import endpoints.{Invalid, Valid}
@@ -96,3 +88,17 @@ trait EndpointsDocs extends Endpoints {
     }(_.toString)
   //#xmap-partial
 }
+
+//#documented-endpoint-definition
+import endpoints.algebra
+
+trait DocumentedEndpoints extends algebra.Endpoints {
+
+  val someDocumentedResource: Endpoint[Int, String] =
+    endpoint(
+      get(path / "some-resource" / segment[Int]("id")),
+      ok(textResponse, docs = Some("The content of the resource"))
+    )
+
+}
+//#documented-endpoint-definition

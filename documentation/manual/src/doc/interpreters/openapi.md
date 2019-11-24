@@ -34,8 +34,8 @@ which is an abstract model for OpenAPI documents. You can encode it into JSON by
 
 In case the endpoint that serves the documentation is itself defined using _endpoints_,
 you can use the `JsonEntitiesFromEncoderAndDecoder` interpreter to define an endpoint
-returning the `OpenApi` document as a JSON entity. Here is an example using Play
-framework:
+returning the `OpenApi` document as a JSON entity. Here is an example using Akka
+HTTP:
 
 ~~~ scala src=../../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#serving-documentation
 ~~~

@@ -1,33 +1,36 @@
 package quickstart
 
 //#relevant-code
-import endpoints.openapi.model.OpenApi
-import endpoints.play.server
-import endpoints.play.server.PlayComponents
-import play.core.server.NettyServer
-//#main-only
-import play.core.server.ServerConfig
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.server.Directives._
+import akka.stream.{ActorMaterializer, Materializer}
+
+import scala.concurrent.Await
+import scala.concurrent.duration.DurationInt
 
 object Main extends App {
-  val config = ServerConfig()
-  NettyServer.fromRouterWithComponents(config) { components =>
-    val playComponents = PlayComponents.fromBuiltInComponents(components)
-    val counterServer = new CounterServer(playComponents)
-    val documentationServer = new DocumentationServer(playComponents)
-    counterServer.routes orElse documentationServer.routes
+  implicit val system: ActorSystem = ActorSystem("server-system")
+  implicit val materializer: Materializer = ActorMaterializer()
+  val routes = CounterServer.routes ~ DocumentationServer.routes
+  val binding = Http().bindAndHandle(routes, "0.0.0.0", 8000)
+  sys.addShutdownHook {
+    Await.result(Await.result(binding, 10.seconds).terminate(3.seconds), 15.seconds)
+    Await.result(system.terminate(), 5.seconds)
   }
 }
-//#main-only
 
 // Additional route for serving the OpenAPI documentation
 //#serving-documentation
-class DocumentationServer(val playComponents: PlayComponents)
+import endpoints.openapi.model.OpenApi
+import endpoints.akkahttp.server
+
+object DocumentationServer
   extends server.Endpoints with server.JsonEntitiesFromEncoderAndDecoder {
 
-  val routes = routesFromEndpoints(
-    endpoint[Unit, OpenApi](get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
+  val routes =
+    endpoint(get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
       .implementedBy(_ => CounterDocumentation.api)
-  )
 
 }
 //#serving-documentation

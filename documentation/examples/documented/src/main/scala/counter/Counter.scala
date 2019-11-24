@@ -115,6 +115,7 @@ class CounterServer(protected val playComponents: PlayComponents)
   )
 }
 
+//#main-only
 object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
@@ -125,6 +126,7 @@ object Main {
     }
   }
 
+  //#main-only
   class DocumentationServer(protected val playComponents: PlayComponents)
     extends play.server.Endpoints
       with play.server.JsonEntitiesFromEncoderAndDecoder
@@ -148,5 +150,6 @@ object Main {
 
     lazy val digests = AssetsDigests.digests
   }
-
+  //#main-only
 }
+//#main-only
