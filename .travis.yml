@@ -27,6 +27,7 @@ before_script:
 
 jdk:
   - openjdk8
+  - openjdk11
 
 jobs:
   include:
