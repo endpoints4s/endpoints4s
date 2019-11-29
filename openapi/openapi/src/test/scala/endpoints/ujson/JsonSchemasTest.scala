@@ -1,6 +1,8 @@
 package endpoints.ujson
 
-import endpoints.algebra
+import java.util.UUID
+
+import endpoints.{Invalid, Valid, algebra}
 import org.scalatest.FreeSpec
 
 class JsonSchemasTest extends FreeSpec {
@@ -9,80 +11,240 @@ class JsonSchemasTest extends FreeSpec {
   import JsonSchemasCodec._
 
   "empty record" in {
-    assert(emptyRecord.codec.encode(()) == ujson.Obj())
+    checkRoundTrip(
+      emptyRecord,
+      ujson.Obj(),
+      ()
+    )
+  }
+
+  "invalid empty record" in {
+    checkDecodingFailure(
+      emptyRecord,
+      ujson.Arr(),
+      "Invalid JSON object: []." :: Nil
+    )
   }
 
   "single record" in {
-    val schema = field[String]("field1")
-    assert(schema.codec.encode("string1") == ujson.Obj("field1" -> ujson.Str("string1")))
+    checkRoundTrip(
+      field[String]("field1"),
+      ujson.Obj("field1" -> ujson.Str("string1")),
+      "string1"
+    )
+  }
+
+  "ignore extra record fields" in {
+    val schema  = field[Int]("relevant")
+    val json    = ujson.Obj("relevant" -> ujson.Num(1), "irrelevant" -> ujson.Num(0))
+    val decoded = schema.codec.decode(json)
+    decoded match {
+      case Valid(n)        => assert(n == 1)
+      case Invalid(errors) => fail(errors.toString)
+    }
+    val encoded = schema.codec.encode(1)
+    assert(encoded == ujson.Obj("relevant" -> ujson.Num(1)))
+  }
+
+  "invalid records" in {
+    checkDecodingFailure(
+      field[Int]("foo"),
+      ujson.True,
+      "Invalid JSON object: true." :: Nil
+    )
+    checkDecodingFailure(
+      field[Int]("foo"),
+      ujson.Obj("bar" -> ujson.True),
+      "Missing property 'foo' in JSON object: {\"bar\":true}." :: Nil
+    )
+    checkDecodingFailure(
+      field[Int]("foo"),
+      ujson.Obj("foo" -> ujson.True),
+      "Invalid integer value: true." :: Nil
+    )
   }
 
   "optional field" in {
-    val schema = optField[Int]("x")
-    assert(schema.codec.encode(Some(42)) == ujson.Obj("x" -> ujson.Num(42)))
-    assert(schema.codec.encode(None) == ujson.Obj())
+    checkRoundTrip(
+      optField[Int]("x"),
+      ujson.Obj("x" -> ujson.Num(42)),
+      Some(42)
+    )
+    checkRoundTrip(
+      optField[Int]("x"),
+      ujson.Obj(),
+      None
+    )
+  }
+
+  "invalid optional field" in {
+    checkDecodingFailure(
+      optField[Int]("x"),
+      ujson.Obj("x" -> ujson.Str("foo")),
+      "Invalid integer value: \"foo\"." :: Nil
+    )
   }
 
   "nested optional field" in {
-    val schema = optField[Int]("level1")(field[Int]("level2"))
-    assert(schema.codec.encode(Some(123)) == ujson.Obj("level1" -> ujson.Obj("level2" -> ujson.Num(123))))
-    assert(schema.codec.encode(None) == ujson.Obj())
+    checkRoundTrip(
+      optField[Int]("level1")(field[Int]("level2")),
+      ujson.Obj("level1" -> ujson.Obj("level2" -> ujson.Num(123))),
+      Some(123)
+    )
+    checkRoundTrip(
+      optField[Int]("level1")(field[Int]("level2")),
+      ujson.Obj(),
+      None
+    )
+  }
+
+  "nested optional field 2" in {
+    checkRoundTrip(
+      field("level1")(optField[Int]("level2")),
+      ujson.Obj("level1" -> ujson.Obj("level2" -> ujson.Num(123))),
+      Some(123)
+    )
+    checkRoundTrip(
+      field("level1")(optField[Int]("level2")),
+      ujson.Obj("level1" -> ujson.Obj()),
+      None
+    )
   }
 
   "two records" in {
-    val schema = field[Long]("foo") zip field[Boolean]("bar")
-    assert(schema.codec.encode((123L, true)) == ujson.Obj("foo" -> ujson.Num(123L), "bar" -> ujson.True))
+    checkRoundTrip(
+      field[Long]("foo") zip field[Boolean]("bar"),
+      ujson.Obj("foo" -> ujson.Num(123L), "bar" -> ujson.True),
+      (123L, true)
+    )
   }
 
   "three records" in {
-    val schema =
-      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi")
-    val expected =
+    checkRoundTrip(
+      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi"),
       ujson.Obj(
         "foo" -> ujson.Num(123.456),
         "bar" -> ujson.True,
         "pi"  -> ujson.Num(3.1416)
-      )
-    assert(schema.codec.encode((BigDecimal(123.456), true, 3.1416)) == expected)
+      ),
+      (BigDecimal(123.456), true, 3.1416)
+    )
+  }
+
+  "several errors" in {
+    checkDecodingFailure(
+      field[Int]("foo") zip field[Boolean]("bar"),
+      ujson.Obj("foo" -> ujson.Str("quux")),
+      "Invalid integer value: \"quux\"." :: "Missing property 'bar' in JSON object: {\"foo\":\"quux\"}." :: Nil
+    )
   }
 
   "case class with one field" in {
     case class IntClass(i: Int)
-    val schema = field[Int]("i").xmap[IntClass](i => IntClass(i))(_.i)
-    assert(schema.codec.encode(IntClass(1)) == ujson.Obj("i" -> ujson.Num(1)))
+    checkRoundTrip(
+      field[Int]("i").xmap[IntClass](i => IntClass(i))(_.i),
+      ujson.Obj("i" -> ujson.Num(1)),
+      IntClass(1)
+    )
   }
 
   "case class with two fields" in {
     case class TestClass(i: Int, s: String)
-    val schema = (field[Int]("i") zip field[String]("s"))
-      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s))
-
-    val expected = ujson.Obj("i" -> ujson.Num(1), "s" -> ujson.Str("one"))
-    assert(schema.codec.encode(TestClass(1, "one")) == expected)
+    checkRoundTrip(
+      (field[Int]("i") zip field[String]("s"))
+        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s)),
+      ujson.Obj("i" -> ujson.Num(1), "s" -> ujson.Str("one")),
+      TestClass(1, "one")
+    )
   }
 
   "array" in {
-    val schema = field[List[String]]("names")
-    val expected = ujson.Obj("names" -> ujson.Arr(ujson.Str("Ernie"), ujson.Str("Bert")))
-    assert(schema.codec.encode(List("Ernie", "Bert")) == expected)
+    checkRoundTrip(
+      field[List[String]]("names"),
+      ujson.Obj("names" -> ujson.Arr(ujson.Str("Ernie"), ujson.Str("Bert"))),
+      List("Ernie", "Bert")
+    )
+    checkRoundTrip(
+      field[List[String]]("names"),
+      ujson.Obj("names" -> ujson.Arr()),
+      List()
+    )
+    checkDecodingFailure(
+      arrayJsonSchema[List, Int],
+      ujson.Obj(),
+      "Invalid JSON array: {}." :: Nil
+    )
+    checkDecodingFailure(
+      arrayJsonSchema[List, Int],
+      ujson.Arr(ujson.Num(0), ujson.Str("foo"), ujson.Num(3.14)),
+      "Invalid integer value: \"foo\"." :: "Invalid integer value: 3.14." :: Nil
+    )
   }
 
   "tuple" in {
-    assert(boolIntString.codec.encode((true, 42, "foo")) == ujson.Arr(ujson.True, ujson.Num(42), ujson.Str("foo")))
+    checkRoundTrip(
+      boolIntString,
+      ujson.Arr(ujson.True, ujson.Num(42), ujson.Str("foo")),
+      (true, 42, "foo")
+    )
+    checkDecodingFailure(
+      boolIntString,
+      ujson.Arr(ujson.True, ujson.Str("foo"), ujson.Num(42)),
+      "Invalid integer value: \"foo\"." :: "Invalid string value: 42." :: Nil
+    )
+    checkDecodingFailure(
+      boolIntString,
+      ujson.Arr(ujson.True),
+      "Invalid JSON array of 3 elements: [true]." :: Nil
+    )
   }
 
   "map with string key" in {
-    val schema = field[Map[String, Boolean]]("relevant")
-    val expected =
-      ujson.Obj("relevant" -> ujson.Obj("no" -> ujson.False, "yes" -> ujson.True))
-    assert(schema.codec.encode(Map("no" -> false, "yes" -> true)) == expected)
+    checkRoundTrip(
+      mapJsonSchema[Boolean],
+      ujson.Obj("no" -> ujson.False, "yes" -> ujson.True),
+      Map("no" -> false, "yes" -> true)
+    )
+    checkDecodingFailure(
+      mapJsonSchema[Boolean],
+      ujson.Obj("foo" -> ujson.Num(42)),
+      "Invalid boolean value: 42." :: Nil
+    )
   }
 
   "two tagged choices" in {
     val schema = field[Int]("i").tagged("I") orElse
       field[String]("s").tagged("S")
-    assert(schema.codec.encode(Left(2)) == ujson.Obj("type" -> ujson.Str("I"), "i" -> ujson.Num(2)))
-    assert(schema.codec.encode(Right("string")) == ujson.Obj("type" -> ujson.Str("S"), "s" -> ujson.Str("string")))
+    checkRoundTrip(
+      schema,
+      ujson.Obj("type" -> ujson.Str("I"), "i" -> ujson.Num(2)),
+      Left(2)
+    )
+    checkRoundTrip(
+      schema,
+      ujson.Obj("type" -> ujson.Str("S"), "s" -> ujson.Str("string")),
+      Right("string")
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Arr(),
+      "Invalid JSON object: []." :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("s" -> ujson.Str("string")),
+      "Missing type discriminator property 'type': {\"s\":\"string\"}." :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("type" -> ujson.Str("B"), "s" -> ujson.Str("string")),
+      "Invalid type discriminator: 'B'." :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("type" -> ujson.Str("I"), "s" -> ujson.Str("string")),
+      "Missing property 'i' in JSON object: {\"type\":\"I\",\"s\":\"string\"}." :: Nil
+    )
   }
 
   "two tagged choices with a custom discriminator" in {
@@ -90,12 +252,35 @@ class JsonSchemasTest extends FreeSpec {
       field[Int]("i").tagged("I")
         .orElse(field[String]("s").tagged("S"))
         .withDiscriminator("kind")
-    assert(schema.codec.encode(Left(2)) == ujson.Obj("kind" -> ujson.Str("I"), "i" -> ujson.Num(2)))
-    assert(schema.codec.encode(Right("string")) == ujson.Obj("kind" -> ujson.Str("S"), "s" -> ujson.Str("string")))
+        .xmap(identity)(identity) // Make sure that `xmap` preserves the discriminator
+    checkRoundTrip(
+      schema,
+      ujson.Obj("kind" -> ujson.Str("I"), "i" -> ujson.Num(2)),
+      Left(2)
+    )
+    checkRoundTrip(
+      schema,
+      ujson.Obj("kind" -> ujson.Str("S"), "s" -> ujson.Str("string")),
+      Right("string")
+    )
   }
 
   "enum" in {
-    assert(Enum.colorSchema.codec.encode(Enum.Blue) == ujson.Str("Blue"))
+    checkRoundTrip(
+      Enum.colorSchema,
+      ujson.Str("Blue"),
+      Enum.Blue
+    )
+    checkDecodingFailure(
+      Enum.colorSchema,
+      ujson.Num(42),
+      "Invalid string value: 42." :: Nil
+    )
+    checkDecodingFailure(
+      Enum.colorSchema,
+      ujson.Str("Orange"),
+      "Invalid value: Orange. Valid values are Red, Blue." :: Nil
+    )
   }
 
   "non-string enum" in {
@@ -103,18 +288,66 @@ class JsonSchemasTest extends FreeSpec {
   }
 
   "recursive type" in {
-    val expected =
-      ujson.Obj("next" -> ujson.Obj("next" -> ujson.Obj()))
-    assert(recursiveSchema.codec.encode(Recursive(Some(Recursive(Some(Recursive(None)))))) == expected)
+    checkRoundTrip(
+      recursiveSchema,
+      ujson.Obj("next" -> ujson.Obj("next" -> ujson.Obj())),
+      Recursive(Some(Recursive(Some(Recursive(None)))))
+    )
   }
 
   "refined JsonSchema" in {
-    assert(evenNumberSchema.codec.encode(42) == ujson.Num(42))
+    checkRoundTrip(
+      evenNumberSchema,
+      ujson.Num(42),
+      42
+    )
+    checkDecodingFailure(
+      evenNumberSchema,
+      ujson.Num(41),
+      "Invalid even integer '41'" :: Nil
+    )
   }
 
   "refined Tagged" in {
-    val expected = ujson.Obj("type" -> ujson.Str("Baz"), "i" -> ujson.Num(42))
-    assert(refinedTaggedSchema.codec.encode(RefinedTagged(42)) == expected)
+    checkRoundTrip(
+      refinedTaggedSchema,
+      ujson.Obj("type" -> ujson.Str("Baz"), "i" -> ujson.Num(42)),
+      RefinedTagged(42)
+    )
+    checkDecodingFailure(
+      refinedTaggedSchema,
+      ujson.Obj("type" -> ujson.Str("Bar"), "s" -> ujson.Str("hello")),
+      "Invalid tagged alternative" :: Nil
+    )
   }
+
+  "uuid" in {
+    val uuid = UUID.randomUUID()
+    checkRoundTrip(
+      uuidJsonSchema,
+      ujson.Str(uuid.toString),
+      uuid
+    )
+    checkDecodingFailure(
+      uuidJsonSchema,
+      ujson.Str("foo"),
+      "Invalid UUID value: 'foo'." :: Nil
+    )
+  }
+
+  def checkRoundTrip[A](schema: JsonSchema[A], json: ujson.Value, expected: A): Unit = {
+    schema.codec.decode(json) match {
+      case Valid(decoded)  => assert(decoded == expected)
+      case Invalid(errors) => fail(errors.toString)
+    }
+    val encoded = schema.codec.encode(expected)
+    assert(encoded == json)
+  }
+
+  def checkDecodingFailure[A](schema: JsonSchema[A], json: ujson.Value, expectedErrors: Seq[String]): Unit =
+    schema.codec.decode(json) match {
+      case Valid(_)        => fail("Expected decoding failure")
+      case Invalid(errors) => assert(errors == expectedErrors)
+    }
 
 }

@@ -146,7 +146,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     assert(encoded.size == decoded.size, "Enumeration values must have different string representation")
     enumeration(values)(
       tpe.xmapPartial { str =>
-        Validated.fromOption(decoded.get(str))(s"Invalid value ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
+        Validated.fromOption(decoded.get(str))(s"Invalid value: ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
       } (encode)
     )
   }
