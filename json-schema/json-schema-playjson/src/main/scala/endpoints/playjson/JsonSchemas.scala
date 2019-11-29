@@ -1,7 +1,5 @@
 package endpoints.playjson
 
-import java.util.UUID
-
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -115,8 +113,6 @@ trait JsonSchemas
     )
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
-
-  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 

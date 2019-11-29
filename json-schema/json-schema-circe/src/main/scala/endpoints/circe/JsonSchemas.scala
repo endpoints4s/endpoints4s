@@ -1,8 +1,6 @@
 package endpoints
 package circe
 
-import java.util.UUID
-
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -193,8 +191,6 @@ trait JsonSchemas
   }
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
-
-  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 

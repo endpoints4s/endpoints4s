@@ -193,7 +193,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
     )
   }
 
-  lazy val uuidJsonSchema: JsonSchema[UUID] =
+  override lazy val uuidJsonSchema: JsonSchema[UUID] =
     new JsonSchema(
       ujsonSchemas.uuidJsonSchema,
       Primitive("string", format = Some("uuid"))

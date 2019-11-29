@@ -1,7 +1,5 @@
 package endpoints.ujson
 
-import java.util.UUID
-
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.Encoder
 
@@ -109,10 +107,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     }
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
-
-  implicit def uuidJsonSchema: JsonSchema[UUID] = new JsonSchema[UUID] {
-    val codec = uuid => ujson.Str(uuid.toString)
-  }
 
   implicit def stringJsonSchema: JsonSchema[String] = new JsonSchema[String] {
     val codec = ujson.Str(_)
