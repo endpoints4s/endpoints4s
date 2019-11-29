@@ -167,23 +167,21 @@ trait JsonSchemas
     def tagAndJson(a: A): (String, JsObject)
     def findReads(tagName: String): Option[Reads[A]]
 
-    def reads: Reads[A] = new Reads[A] {
-      override def reads(json: JsValue): JsResult[A] = json match {
-        case jsObject@JsObject(kvs) =>
-          kvs.get(discriminator) match {
-            case Some(JsString(tag)) =>
-              findReads(tag) match {
-                case Some(reads) => reads.reads(jsObject)
-                case None => JsError(s"no Reads for tag '$tag': $json")
-              }
-            case _ =>
-              JsError(s"expected discriminator field '$discriminator', but not found in: $json")
-          }
-        case _ => JsError(s"expected JSON object for tagged type, but found: $json")
-      }
+    final def reads: Reads[A] = {
+      case jsObject @ JsObject(kvs) =>
+        kvs.get(discriminator) match {
+          case Some(JsString(tag)) =>
+            findReads(tag) match {
+              case Some(reads) => reads.reads(jsObject)
+              case None => JsError(s"no Reads for tag '$tag': $jsObject")
+            }
+          case _ =>
+            JsError(s"expected discriminator field '$discriminator', but not found in: $jsObject")
+        }
+      case json => JsError(s"expected JSON object for tagged type, but found: $json")
     }
 
-    def writes: OWrites[A] = new OWrites[A] {
+    final def writes: OWrites[A] = new OWrites[A] {
       override def writes(a: A): JsObject = {
         val (tag, json) = tagAndJson(a)
         json + (discriminator -> JsString(tag))
