@@ -63,7 +63,7 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
   type JsonCodec[A] = CirceCodec[A]
 //#type-carrier
 
-  implicit def jsonCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
+  def stringCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
 
     def decode(from: String): Validated[A] =
       parser.parse(from).left.map(Show[ParsingFailure].show)

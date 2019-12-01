@@ -62,7 +62,7 @@ trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
   type JsonCodec[A] = Format[A]
 //#type-carrier
 
-  implicit def jsonCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
+  def stringCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
 
     def decode(from: String): Validated[A] =
       (Try(Json.parse(from)) match {

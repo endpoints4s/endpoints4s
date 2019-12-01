@@ -1,6 +1,6 @@
 package endpoints.xhr
 
-import endpoints.algebra.Codec
+import endpoints.algebra
 import org.scalajs.dom.XMLHttpRequest
 
 /**
@@ -9,13 +9,13 @@ import org.scalajs.dom.XMLHttpRequest
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with algebra.JsonEntitiesFromCodec {
 
-  def jsonRequest[A](implicit codec: Codec[String, A]) = (a: A, xhr: XMLHttpRequest) => {
+  def jsonRequest[A](implicit codec: JsonCodec[A]) = (a: A, xhr: XMLHttpRequest) => {
     xhr.setRequestHeader("Content-Type", "application/json")
-    codec.encode(a)
+    stringCodec(codec).encode(a)
   }
 
-  def jsonResponse[A](implicit codec: Codec[String, A]) = stringCodecResponse
+  def jsonResponse[A](implicit codec: JsonCodec[A]) = stringCodecResponse(stringCodec(codec))
 
 }

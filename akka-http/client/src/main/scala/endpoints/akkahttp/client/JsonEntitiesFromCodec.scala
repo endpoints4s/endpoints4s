@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
-import endpoints.algebra.Codec
+import endpoints.algebra
 
 /**
   * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON request
@@ -9,12 +9,12 @@ import endpoints.algebra.Codec
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec { this: EndpointsWithCustomErrors =>
+trait JsonEntitiesFromCodec extends algebra.JsonEntitiesFromCodec with EndpointsWithCustomErrors {
 
-  def jsonRequest[A](implicit codec: Codec[String, A]): RequestEntity[A] = { (a, req) =>
-    req.copy(entity = HttpEntity(ContentTypes.`application/json`, codec.encode(a)))
+  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, req) =>
+    req.copy(entity = HttpEntity(ContentTypes.`application/json`, stringCodec(codec).encode(a)))
   }
 
-  def jsonResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = stringCodecResponse
+  def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] = stringCodecResponse(stringCodec(codec))
 
 }

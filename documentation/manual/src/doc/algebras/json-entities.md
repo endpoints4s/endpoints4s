@@ -73,7 +73,7 @@ This trait introduces an abstract `JsonCodec[A]` type, which is fixed by more co
 interpreters such as
 [playjson.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/playjson/JsonEntitiesFromCodec.html)
 or [circe.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/circe/JsonEntitiesFromCodec.html).
-There interpreters are provided by the following dependencies:
+These interpreters are provided by the following dependencies:
 
 ~~~ scala expandVars=true
 // Provides endpoints.algebra.circe.JsonEntitiesFromCodec

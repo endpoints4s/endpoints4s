@@ -17,13 +17,11 @@ package endpoints.algebra
   */
 trait JsonEntities extends EndpointsWithCustomErrors {
 
-//#request-response-types
   /** Type class defining how to represent the `A` information as a JSON request entity */
   type JsonRequest[A]
 
   /** Type class defining how to represent the `A` information as a JSON response entity */
   type JsonResponse[A]
-//#request-response-types
 
   /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]` */
   def jsonRequest[A : JsonRequest]: RequestEntity[A]
@@ -33,21 +31,30 @@ trait JsonEntities extends EndpointsWithCustomErrors {
 }
 
 /**
-  * Fixes both the `JsonRequest` and `JsonResponse` types to be [[Codec]].
+  * Fixes both the `JsonRequest` and `JsonResponse` types to be a same `JsonCodec` type.
   *
   * @group algebras
   */
-trait JsonEntitiesFromCodec extends JsonEntities {
+trait JsonCodecs extends JsonEntities {
 
-  type JsonRequest[A] = Codec[String, A]
-  type JsonResponse[A] = Codec[String, A]
+  type JsonRequest[A] = JsonCodec[A]
+  type JsonResponse[A] = JsonCodec[A]
 
 //#json-codec-type
   /** A JSON codec type class */
   type JsonCodec[A]
 //#json-codec-type
 
+}
+
+/**
+  * Turns a `JsonCodec` into a [[Codec]].
+  *
+  * @group algebras
+  */
+trait JsonEntitiesFromCodec extends JsonCodecs {
+
   /** Turns a JsonCodec[A] into a Codec[String, A] */
-  implicit def jsonCodec[A : JsonCodec]: Codec[String, A]
+  def stringCodec[A : JsonCodec]: Codec[String, A]
 
 }

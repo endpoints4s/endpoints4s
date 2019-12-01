@@ -63,13 +63,18 @@ algebra by aligning the request and response entities to the same `JsonSchema` t
 
 The `JsonSchemaEntities` algebra allows you to define a schema for your JSON entities.
 This schema can then be used to derive a documentation (by applying the `endpoints.openapi.JsonSchemaEntities`
-interpreter), or codecs (by applying a corresponding interpreter for your JSON library, e.g.
+interpreter), or codecs (by applying a corresponding interpreter for your client or server, e.g.
 `endpoints.akkahttp.server.JsonSchemaEntities` to use an Akka HTTP server).
 
-Both the `JsonRequest` and `JsonResponse` types are fixed to the
-`JsonSchema` type provided by the [JsonSchemas](/algebras/json-schemas.md) algebra. This means
-that you have to define such a `JsonSchema[A]` implicit value (as explained in the `JsonSchemas`
-documentation) for each type `A` that you want to carry as a JSON entity.
+Both the `JsonRequest` and `JsonResponse` types are fixed to the same
+`JsonCodec` type, which is itself fixed to the `JsonSchema` type provided
+by the [JsonSchemas](/algebras/json-schemas.md) algebra:
+
+~~~ scala src=../../../../../algebras/algebra/src/main/scala/endpoints/algebra/JsonSchemaEntities.scala#type-carrier
+~~~
+
+This means that you have to define such a `JsonSchema[A]` implicit value (as explained in
+the `JsonSchemas` documentation) for each type `A` that you want to carry as a JSON entity.
 
 ### Interpreters
 

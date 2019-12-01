@@ -25,8 +25,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
   import DocumentedJsonSchema._
 
   class JsonSchema[A](val ujsonSchema: ujsonSchemas.JsonSchema[A], val docs: DocumentedJsonSchema) {
-    final def stringCodec: Encoder[A, String] =
-      a => ujsonSchema.codec.encode(a).transform(ujson.StringRenderer()).toString
+    final def stringEncoder: Encoder[A, String] = ujsonSchema.stringCodec
   }
   class Record[A](override val ujsonSchema: ujsonSchemas.Record[A], override val docs: DocumentedRecord) extends JsonSchema[A](ujsonSchema, docs)
   class Tagged[A](override val ujsonSchema: ujsonSchemas.Tagged[A], override val docs: DocumentedCoProd) extends JsonSchema[A](ujsonSchema, docs)
