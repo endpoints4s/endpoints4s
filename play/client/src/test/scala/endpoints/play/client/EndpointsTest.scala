@@ -13,12 +13,12 @@ class TestClient(address: String, wsClient: WSClient)
   (implicit EC: ExecutionContext)
   extends Endpoints(address, wsClient)
     with BasicAuthentication
-    with JsonEntitiesFromCodec
+    with JsonEntitiesFromCodecs
     with algebra.BasicAuthTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with circe.JsonFromCirceCodecTestApi
-    with circe.JsonEntitiesFromCodec
+    with circe.JsonEntitiesFromCodecs
 
 class EndpointsTest
   extends client.EndpointsTestSuite[TestClient]

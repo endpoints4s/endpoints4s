@@ -81,7 +81,7 @@ enough to interpret a given endpoint description. By contrast, if the descriptio
 AST then all interpreters have to be total, otherwise a `MatchError` will be thrown at runtime.
 
 That being said, a drawback of having an extensible description language is that users have to “build”
-their language by combining different modules together (eg, `Endpoints with JsonSchemaEntities`), and
+their language by combining different modules together (eg, `Endpoints with JsonEntitiesFromSchemas`), and
 then build matching interpreters. These steps are not needed with projects where the description language
 is based on a sealed AST.
 

@@ -8,7 +8,7 @@ class WebhooksTest extends WordSpec with Matchers {
 
   case class Message(value: String)
 
-  trait Webhooks extends algebra.Endpoints with algebra.JsonSchemaEntities {
+  trait Webhooks extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
 
     implicit lazy val messageSchema: JsonSchema[Message] =
       field[String]("message")
@@ -33,7 +33,7 @@ class WebhooksTest extends WordSpec with Matchers {
 
   }
 
-  object WebhooksDocumentation extends Webhooks with openapi.Endpoints with openapi.JsonSchemaEntities {
+  object WebhooksDocumentation extends Webhooks with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     val api: OpenApi = openApi(
       Info(title = "Example of API using callbacks", version = "0.0.0")

@@ -14,7 +14,7 @@ import scala.concurrent.stm.Ref
 object CounterServer
   extends CounterEndpoints
     with server.Endpoints
-    with server.JsonSchemaEntities {
+    with server.JsonEntitiesFromSchemas {
 
   /** Simple implementation of an in-memory counter */
   val counter = Ref(0)

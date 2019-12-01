@@ -13,7 +13,7 @@ import scala.util.Try
 class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
   extends Endpoints(address, backend)
     with BasicAuthentication[R]
-    with JsonEntitiesFromCodec[R]
+    with JsonEntitiesFromCodecs[R]
     with BasicAuthTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi

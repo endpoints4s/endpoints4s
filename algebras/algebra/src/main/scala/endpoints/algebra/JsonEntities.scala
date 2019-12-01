@@ -33,6 +33,9 @@ trait JsonEntities extends EndpointsWithCustomErrors {
 /**
   * Fixes both the `JsonRequest` and `JsonResponse` types to be a same `JsonCodec` type.
   *
+  * This trait is used as an implementation detail (to reuse code between [[JsonEntitiesFromSchemas]]
+  * and [[JsonEntitiesFromCodecs]]) and is not useful to end-users.
+  *
   * @group algebras
   */
 trait JsonCodecs extends JsonEntities {
@@ -52,9 +55,23 @@ trait JsonCodecs extends JsonEntities {
   *
   * @group algebras
   */
-trait JsonEntitiesFromCodec extends JsonCodecs {
+trait JsonEntitiesFromCodecs extends JsonCodecs {
 
   /** Turns a JsonCodec[A] into a Codec[String, A] */
   def stringCodec[A : JsonCodec]: Codec[String, A]
+
+}
+
+/**
+  * Partially applies the [[JsonEntities]] algebra interface to fix the
+  * `JsonRequest` and `JsonResponse` types to be `JsonSchema`.
+  *
+  * @group algebras
+  */
+trait JsonEntitiesFromSchemas extends JsonCodecs with JsonSchemas {
+
+//#type-carrier
+  type JsonCodec[A] = JsonSchema[A]
+//#type-carrier
 
 }

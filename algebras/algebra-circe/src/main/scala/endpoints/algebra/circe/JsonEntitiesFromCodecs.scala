@@ -6,7 +6,7 @@ import endpoints.algebra.{Codec, Decoder, Encoder}
 import io.circe.{DecodingFailure, Json, ParsingFailure, parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 
 /**
-  * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that only
+  * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodecs]] that only
   * fixes the `JsonCodec[A]` type to a [[CirceCodec]].
   *
   * The `jsonRequest` and `jsonResponse` operations have to be implemented by
@@ -57,7 +57,7 @@ import io.circe.{DecodingFailure, Json, ParsingFailure, parser, Decoder => Circe
   * }}}
   *
   */
-trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = CirceCodec[A]

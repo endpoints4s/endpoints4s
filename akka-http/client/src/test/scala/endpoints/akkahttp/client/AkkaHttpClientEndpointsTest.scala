@@ -15,8 +15,8 @@ class TestClient(settings: EndpointsSettings)
     with algebra.BasicAuthTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
-    with JsonEntitiesFromCodec
-    with algebra.circe.JsonEntitiesFromCodec
+    with JsonEntitiesFromCodecs
+    with algebra.circe.JsonEntitiesFromCodecs
 
 class AkkaHttpClientEndpointsTest
   extends algebra.client.EndpointsTestSuite[TestClient]

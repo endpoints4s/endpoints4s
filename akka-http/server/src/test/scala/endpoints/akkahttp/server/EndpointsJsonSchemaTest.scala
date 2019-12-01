@@ -10,7 +10,7 @@ import org.scalatest.{Matchers, WordSpec}
 class EndpointsJsonSchemaTestApi
   extends Endpoints
   with generic.JsonSchemas
-  with JsonSchemaEntities
+  with JsonEntitiesFromSchemas
 
 
 class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest {

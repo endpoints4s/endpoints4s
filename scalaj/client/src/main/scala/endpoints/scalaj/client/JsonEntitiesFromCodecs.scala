@@ -1,12 +1,12 @@
 package endpoints.scalaj.client
 
 /**
-  * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON requests
+  * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
   * and decodes JSON responses.
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodecs {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = (data, request) => {
     request.header("Content-Type", "application/json")

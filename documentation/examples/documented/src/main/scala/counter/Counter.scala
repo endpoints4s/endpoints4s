@@ -29,7 +29,7 @@ import endpoints.{algebra, generic}
 
 trait CounterEndpoints
   extends algebra.Endpoints
-    with algebra.JsonSchemaEntities
+    with algebra.JsonEntitiesFromSchemas
     with generic.JsonSchemas {
 
   // HTTP endpoint for querying the current value of the counter. Uses the HTTP
@@ -73,7 +73,7 @@ import endpoints.openapi.model.{Info, OpenApi}
 object CounterDocumentation
   extends CounterEndpoints
     with openapi.Endpoints
-    with openapi.JsonSchemaEntities {
+    with openapi.JsonEntitiesFromSchemas {
 
   val api: OpenApi =
     openApi(
@@ -84,10 +84,10 @@ object CounterDocumentation
 // Implementation of the HTTP API and its business logic
 import endpoints.play
 
-class CounterServer(protected val playComponents: PlayComponents)
+class CounterServer(val playComponents: PlayComponents)
   extends CounterEndpoints
     with play.server.Endpoints
-    with play.server.JsonSchemaEntities { parent =>
+    with play.server.JsonEntitiesFromSchemas { parent =>
 
   // Internal state of our counter
   private val value = new AtomicInteger(0)
@@ -127,9 +127,9 @@ object Main {
   }
 
   //#main-only
-  class DocumentationServer(protected val playComponents: PlayComponents)
+  class DocumentationServer(val playComponents: PlayComponents)
     extends play.server.Endpoints
-      with play.server.JsonEntitiesFromEncoderAndDecoder
+      with play.server.JsonEntitiesFromEncodersAndDecoders
       with play.server.Assets {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path

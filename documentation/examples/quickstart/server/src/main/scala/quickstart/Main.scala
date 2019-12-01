@@ -26,7 +26,7 @@ import endpoints.openapi.model.OpenApi
 import endpoints.akkahttp.server
 
 object DocumentationServer
-  extends server.Endpoints with server.JsonEntitiesFromEncoderAndDecoder {
+  extends server.Endpoints with server.JsonEntitiesFromEncodersAndDecoders {
 
   val routes =
     endpoint(get(path / "documentation.json"), ok(jsonResponse[OpenApi]))

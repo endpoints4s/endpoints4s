@@ -6,4 +6,4 @@ import endpoints.algebra
 class EndpointsCodecsTestApi extends EndpointsTestApi
   with algebra.JsonFromCodecTestApi
   with algebra.circe.JsonFromCirceCodecTestApi
-  with JsonEntitiesFromCodec
+  with JsonEntitiesFromCodecs

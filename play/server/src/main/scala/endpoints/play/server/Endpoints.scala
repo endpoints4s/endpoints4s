@@ -51,7 +51,7 @@ trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with Bu
   */
 trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
 
-  protected val playComponents: PlayComponents
+  val playComponents: PlayComponents
 
   import playComponents.executionContext
 

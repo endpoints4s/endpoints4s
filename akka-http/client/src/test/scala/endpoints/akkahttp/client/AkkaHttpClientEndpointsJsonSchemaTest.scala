@@ -16,7 +16,7 @@ class TestJsonSchemaClient(settings: EndpointsSettings)(implicit EC: ExecutionCo
     with BasicAuthTestApi
     with generic.JsonSchemas
     with JsonTestApi
-    with JsonSchemaEntities {
+    with JsonEntitiesFromSchemas {
   implicit def userCodec: JsonSchema[User] = genericJsonSchema[User]
   implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
 }

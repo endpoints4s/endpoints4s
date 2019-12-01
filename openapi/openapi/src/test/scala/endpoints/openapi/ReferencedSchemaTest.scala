@@ -19,14 +19,14 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
 
   case class Book(id: Int, title: String, author: Author, isbnCodes: List[String], storage: Storage)
 
-  object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonSchemaEntities with openapi.BasicAuthentication {
+  object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonEntitiesFromSchemas with openapi.BasicAuthentication {
 
     def openApiDocument: OpenApi = openApi(
       Info(title = "TestFixturesOpenApi", version = "0.0.0")
     )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonSchemaEntities with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
+  trait Fixtures extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
       genericTagged[Storage]

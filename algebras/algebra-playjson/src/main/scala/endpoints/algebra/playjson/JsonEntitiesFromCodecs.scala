@@ -7,7 +7,7 @@ import play.api.libs.json.{Format, JsPath, Json, JsonValidationError}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that only
+  * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodecs]] that only
   * fixes the `JsonCodec[A]` type to Play’s `Format[A]`.
   *
   * The `jsonRequest` and `jsonResponse` operations have to be implemented by
@@ -56,7 +56,7 @@ import scala.util.{Failure, Success, Try}
   * }}}
   *
   */
-trait JsonEntitiesFromCodec extends endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = Format[A]

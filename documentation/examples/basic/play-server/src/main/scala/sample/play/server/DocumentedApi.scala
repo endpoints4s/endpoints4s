@@ -4,11 +4,11 @@ import endpoints.play
 import endpoints.play.server.PlayComponents
 import sample.algebra.Item
 
-class DocumentedApi(protected val playComponents: PlayComponents)
+class DocumentedApi(val playComponents: PlayComponents)
   extends sample.algebra.DocumentedApi
     with play.server.Endpoints
     with play.server.BasicAuthentication
-    with play.server.JsonEntitiesFromCodec { parent =>
+    with play.server.JsonEntitiesFromCodecs { parent =>
 
   lazy val routes = routesFromEndpoints(
     item.implementedBy(id => if (id == "123abc") Some(Item("foo")) else None),

@@ -4,12 +4,12 @@ import play.api.http.ContentTypes
 import play.api.libs.ws.{BodyWritable, InMemoryBody}
 
 /**
-  * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodec]] that encodes JSON requests
+  * Interpreter for [[endpoints.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
   * and decodes JSON responses.
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodec extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodec {
+trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodecs {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, wsRequest) =>
     val playCodec: play.api.mvc.Codec = implicitly[play.api.mvc.Codec]

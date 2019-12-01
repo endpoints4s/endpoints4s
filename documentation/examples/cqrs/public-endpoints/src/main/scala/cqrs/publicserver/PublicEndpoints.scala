@@ -17,7 +17,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 //#public-endpoints
 import endpoints.algebra.{circe, Endpoints}
 
-trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodec {
+trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodecs {
 
   /** Common path prefix for endpoints: “/meters” */
   private val metersPath = path / "meters"
