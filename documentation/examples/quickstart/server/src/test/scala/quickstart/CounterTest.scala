@@ -35,7 +35,7 @@ class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
       } yield {
         assert(response.status == StatusCodes.OK)
         assert(entity.contentType == ContentTypes.`application/json`)
-        assert(entity.data.utf8String == "{\n  \"value\" : 0\n}")
+        assert(entity.data.utf8String == "{\"value\":0}")
       }
     }
     "Increment counter value" in {

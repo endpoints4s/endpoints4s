@@ -14,13 +14,11 @@ trait Decoder[-From, +To] {
 
 object Decoder {
 
-  /** Transform the decoded type of the given `decoder` with the function `f`. */
-  def mapDecoded[From, To1, To2](decoder: Decoder[From, To1])(f: To1 => To2): Decoder[From, To2] =
-    from => decoder.decode(from).map(f)
-
-  /** Transform the decoded type of the given `decoder` with the partial function `f`. */
-  def flatMapDecoded[From, To1, To2](decoder: Decoder[From, To1])(f: To1 => Validated[To2]): Decoder[From, To2] =
-    from => decoder.decode(from).flatMap(f)
+  /** Combines two decoders, sequentially, by feeding the input of the second one with
+    * the output of the first one
+    */
+  def sequentially[A, B, C](ab: Decoder[A, B])(bc: Decoder[B, C]): Decoder[A, C] =
+    from => ab.decode(from).flatMap(bc.decode)
 
 }
 
@@ -33,9 +31,11 @@ trait Encoder[-From, +To] {
 
 object Encoder {
 
-  /** Transform the decoded type of the given `encoder` with the function `f`. */
-  def mapDecoded[From1, From2, To](encoder: Encoder[From1, To])(f: From2 => From1): Encoder[From2, To] =
-    from => encoder.encode(f(from))
+  /** Combines two encoders, sequentially, by feeding the input of the second one with
+    * the output of the first one
+    */
+  def sequentially[A, B, C](ab: Encoder[A, B])(bc: Encoder[B, C]): Encoder[A, C] =
+    from => bc.encode(ab.encode(from))
 
 }
 

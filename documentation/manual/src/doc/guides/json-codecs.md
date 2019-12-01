@@ -64,7 +64,7 @@ algebra by aligning the request and response entities to the same `JsonSchema` t
 The `JsonSchemaEntities` algebra allows you to define a schema for your JSON entities.
 This schema can then be used to derive a documentation (by applying the `endpoints.openapi.JsonSchemaEntities`
 interpreter), or codecs (by applying a corresponding interpreter for your JSON library, e.g.
-`endpoints.akkahttp.server.circe.JsonSchemaEntities` to use Circe in an Akka HTTP server).
+`endpoints.akkahttp.server.JsonSchemaEntities` to use an Akka HTTP server).
 
 Both the `JsonRequest` and `JsonResponse` types are fixed to the
 `JsonSchema` type provided by the [JsonSchemas](/algebras/json-schemas.md) algebra. This means
@@ -74,10 +74,9 @@ documentation) for each type `A` that you want to carry as a JSON entity.
 ### Interpreters
 
 To interpret endpoints defined with this algebra, pick an interpreter that matches your
-[family](/algebras-and-interpreters.md#interpreters) of interpreters and, if relevant,
-the underlying JSON library to use. For instance, the
-`endpoints.play.server.circe.JsonSchemaEntities` trait is a server interpreter based
-on Play framework that uses the circe JSON library.
+[family](/algebras-and-interpreters.md#interpreters) of interpreters. For instance, the
+`endpoints.play.server.JsonSchemaEntities` trait is a server interpreter based
+on Play framework.
 
 ## `JsonEntitiesFromCodec`
 

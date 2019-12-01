@@ -39,15 +39,15 @@ object EndpointsSettings {
     crossScalaVersions := Seq("2.12.10")
   )
   val `scala 2.11 to 2.12` = Seq(
-    scalaVersion := "2.12.8",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.12.10", "2.11.12")
   )
   val `scala 2.11 to latest` = Seq(
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.13.1", "2.12.10", "2.11.12")
   )
   val `scala 2.12 to latest` = Seq(
-    scalaVersion := "2.13.1",
+    scalaVersion := "2.12.10",
     crossScalaVersions := Seq("2.13.1", "2.12.10")
   )
 

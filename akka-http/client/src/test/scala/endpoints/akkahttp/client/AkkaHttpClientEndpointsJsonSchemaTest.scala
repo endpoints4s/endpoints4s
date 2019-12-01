@@ -1,9 +1,8 @@
-package endpoints.akkahttp.client.circe
+package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.testkit.TestKit
-import endpoints.akkahttp.client.{AkkaHttpRequestExecutor, BasicAuthentication, Endpoints, EndpointsSettings}
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
 import endpoints.algebra.{Address, BasicAuthTestApi, JsonTestApi, User}
 import endpoints.generic
@@ -22,7 +21,7 @@ class TestJsonSchemaClient(settings: EndpointsSettings)(implicit EC: ExecutionCo
   implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
 }
 
-class AkkaHttpClientCirceEndpointsJsonSchemaTest
+class AkkaHttpClientEndpointsJsonSchemaTest
     extends JsonTestSuite[TestJsonSchemaClient]
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 

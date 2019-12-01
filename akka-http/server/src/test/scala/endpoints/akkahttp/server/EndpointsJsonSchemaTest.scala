@@ -1,13 +1,11 @@
-package endpoints.akkahttp.server.playjson
+package endpoints.akkahttp.server
 
 import akka.http.scaladsl.model.ContentTypes
 import akka.http.scaladsl.model.StatusCodes.{BadRequest, OK}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import endpoints.akkahttp.server.Endpoints
 import endpoints.algebra.User
 import endpoints.generic
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsNumber, JsString, JsValue, Json}
 
 class EndpointsJsonSchemaTestApi
   extends Endpoints
@@ -15,7 +13,7 @@ class EndpointsJsonSchemaTestApi
   with JsonSchemaEntities
 
 
-class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest with de.heikoseeberger.akkahttpplayjson.PlayJsonSupport{
+class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new EndpointsJsonSchemaTestApi {
 
@@ -34,12 +32,9 @@ class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRoute
 
   "Single segment route" should {
 
-    import play.api.libs.json.{OFormat, Json}
-    implicit val userJson: OFormat[User] = Json.format[User]
-
     "match single segment request" in {
       Get("/user") ~> testRoutes.singleStaticGetSegment ~> check {
-        responseAs[User] shouldEqual User("Bob", 30)
+        ujson.read(responseAs[String]) shouldEqual ujson.Obj("name" -> ujson.Str("Bob"), "age" -> ujson.Num(30))
       }
     }
 
@@ -61,21 +56,21 @@ class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRoute
       request("/user/foo", "{\"name\":\"Alice\",\"age\":true}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe BadRequest
-        responseAs[JsValue] shouldBe Json.arr(JsString("Invalid integer value 'foo' for segment 'id'"))
+        ujson.read(responseAs[String]) shouldBe ujson.Arr(ujson.Str("Invalid integer value 'foo' for segment 'id'"))
       }
 
       // Valid URL and invalid entity
       request("/user/42", "{\"name\":\"Alice\",\"age\":true}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe BadRequest
-        responseAs[JsValue] shouldBe Json.arr(JsString("error.expected.jsnumber for obj.age"))
+        ujson.read(responseAs[String]) shouldBe ujson.Arr(ujson.Str("Invalid integer value: true."))
       }
 
       // Valid URL and entity
       request("/user/42", "{\"name\":\"Alice\",\"age\":55}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe OK
-        responseAs[JsValue] shouldBe Json.obj("name" -> JsString("Alice"), "age" -> JsNumber(55))
+        ujson.read(responseAs[String]) shouldBe ujson.Obj("name" -> ujson.Str("Alice"), "age" -> ujson.Num(55))
       }
     }
 

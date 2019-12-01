@@ -11,5 +11,5 @@ import endpoints.xhr
 object CounterClient
   extends CounterEndpoints
     with xhr.thenable.Endpoints
-    with xhr.circe.JsonSchemaEntities
+    with xhr.JsonSchemaEntities
 //#relevant-code

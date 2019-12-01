@@ -87,7 +87,7 @@ import endpoints.play
 class CounterServer(protected val playComponents: PlayComponents)
   extends CounterEndpoints
     with play.server.Endpoints
-    with play.server.playjson.JsonSchemaEntities { parent =>
+    with play.server.JsonSchemaEntities { parent =>
 
   // Internal state of our counter
   private val value = new AtomicInteger(0)

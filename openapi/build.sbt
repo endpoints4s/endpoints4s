@@ -6,7 +6,7 @@ lazy val openapi =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("openapi"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`, // We don’t support 2.11 because our tests have a dependency on circe
+      `scala 2.12 to latest`,
       name := "endpoints-openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
       libraryDependencies += "com.lihaoyi" %%% "ujson" % "0.8.0"
@@ -15,9 +15,7 @@ lazy val openapi =
     .dependsOnLocalCrossProjects("json-schema-generic")
     .dependsOnLocalCrossProjectsWithScope(
       "algebra" -> "test->test;compile->compile",
-      "json-schema" -> "test->test;compile->compile",
-      "json-schema-circe" -> "test->test",
-      "json-schema-playjson" -> "test->test"
+      "json-schema" -> "test->test;compile->compile"
     )
 
 lazy val `openapi-js` = openapi.js

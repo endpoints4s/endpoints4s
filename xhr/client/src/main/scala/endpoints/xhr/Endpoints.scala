@@ -1,7 +1,7 @@
 package endpoints.xhr
 
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
-import endpoints.algebra.{Codec, Documentation}
+import endpoints.algebra.{Decoder, Documentation}
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
@@ -136,7 +136,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   private[xhr] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
     xhr => entity(xhr).right.flatMap(f)
 
-  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] =
+  def stringCodecResponse[A](implicit codec: Decoder[String, A]): ResponseEntity[A] =
     xhr => codec.decode(xhr.responseText).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
   /**
