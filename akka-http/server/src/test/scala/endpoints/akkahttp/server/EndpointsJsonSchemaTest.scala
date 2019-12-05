@@ -60,6 +60,13 @@ class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRoute
       }
 
       // Valid URL and invalid entity
+      request("/user/42", "something that is not JSON") ~> testRoutes.updateUser ~> check {
+        handled shouldBe true
+        status shouldBe BadRequest
+        ujson.read(responseAs[String]) shouldBe ujson.Arr(ujson.Str("Invalid JSON document"))
+      }
+
+      // Valid URL and invalid entity (2)
       request("/user/42", "{\"name\":\"Alice\",\"age\":true}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe BadRequest
