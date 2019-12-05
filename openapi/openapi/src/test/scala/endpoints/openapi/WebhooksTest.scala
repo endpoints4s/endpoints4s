@@ -135,21 +135,8 @@ class WebhooksTest extends WordSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    "be documented with circe" in {
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.circe.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import io.circe.syntax._
-      import io.circe.parser.parse
-
-      WebhooksDocumentation.api.asJson shouldBe parse(expectedSchema).right.get
-    }
-
-    "be documented with playjson" in {
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.playjson.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import play.api.libs.json.Json
-
-      Json.toJson(WebhooksDocumentation.api) shouldBe Json.parse(expectedSchema)
+    "be documented" in {
+      ujson.read(OpenApi.stringEncoder.encode(WebhooksDocumentation.api)) shouldBe ujson.read(expectedSchema)
     }
 
   }

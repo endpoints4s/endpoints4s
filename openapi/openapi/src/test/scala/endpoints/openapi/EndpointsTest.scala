@@ -48,14 +48,14 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
           None,
           None
         )
-      Fixtures.toSchema(Fixtures.User.schema) shouldBe expectedSchema
+      Fixtures.toSchema(Fixtures.User.schema.docs) shouldBe expectedSchema
     }
   }
 
   "Enumerations" in {
     val expectedSchema =
-      Schema.Reference("Color", Some(Schema.Enum(Schema.Primitive("string", None, None), "Red" :: "Blue" :: Nil, None)), None)
-    Fixtures.toSchema(Fixtures.Enum.colorSchema) shouldBe expectedSchema
+      Schema.Reference("Color", Some(Schema.Enum(Schema.Primitive("string", None, None), ujson.Str("Red") :: ujson.Str("Blue") :: Nil, None)), None)
+    Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
   }
 
   "Recursive types" in {
@@ -75,17 +75,17 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
         additionalProperties = None,
         description = None
       )
-    Fixtures.toSchema(Fixtures.recursiveSchema) shouldBe expectedSchema
+    Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
   }
 
   "Refining JSON schemas preserves documentation" should {
     "JsonSchema" in {
-      val expectedSchema = Fixtures.intJsonSchema
-      Fixtures.evenNumberSchema shouldBe expectedSchema
+      val expectedSchema = Fixtures.intJsonSchema.docs
+      Fixtures.evenNumberSchema.docs shouldBe expectedSchema
     }
     "Tagged" in {
-      val expectedSchema = Fixtures.Foo.schema
-      Fixtures.refinedTaggedSchema shouldBe expectedSchema
+      val expectedSchema = Fixtures.Foo.schema.docs
+      Fixtures.refinedTaggedSchema.docs shouldBe expectedSchema
     }
   }
 

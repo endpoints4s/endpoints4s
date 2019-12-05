@@ -55,7 +55,7 @@ val client =
 val server =
   project.settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %% "endpoints-play-server-playjson" % "{{version}}",
+      "org.julienrf" %% "endpoints-akka-http-server-playjson" % "{{version}}",
       "org.julienrf" %% "endpoints-openapi" % "{{version}}",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
@@ -72,7 +72,7 @@ The `client` project uses a [Scala.js web](interpreters/scalajs-web.md) client i
 that also turns the JSON schemas defined in the `shared` project into
 circe’s encoders and decoders.
 
-Finally, the `server` project uses a server interpreter backed by [Play framework](interpreters/play.md),
+Finally, the `server` project uses a server interpreter backed by [Akka HTTP](interpreters/akka-http.md),
 which also turns the JSON schemas defined in the `shared` project into
 Play JSON encoders and decoders, as well as
 an interpreter producing OpenAPI documents.
@@ -122,14 +122,14 @@ it to the server, and eventually decodes the HTTP response (according to the end
 
 Similarly, a server implementation of the endpoints can be obtained by mixing the appropriate
 interpreters to the `CounterEndpoints` trait. In this example, you want to get a JVM server
-that uses Play framework under the hood. Create the following `CounterServer` class in the
+that uses Akka HTTP under the hood. Create the following `CounterServer` class in the
 `server` project:
 
 ~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala#relevant-code
 ~~~
 
-The `routes` value produced by the *endpoints* library is a `Routes` value directly
-usable by Play framework. The last section shows how to setup a Play server that
+The `routes` value produced by the *endpoints* library is a `Route` value directly
+usable by Akka HTTP. The last section shows how to setup an Akka HTTP server that
 uses these routes.
 
 The routes implementations provided by *endpoints* decode the incoming HTTP requests, call the corresponding logic
@@ -149,7 +149,7 @@ the `currentValue` and `increment` endpoints.
 
 ## Running the application
 
-Finally, to run your application you need to build a proper Play server serving your routes.
+Finally, to run your application you need to build a proper Akka HTTP server serving your routes.
 Define the following `Main` object:
 
 ~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#relevant-code

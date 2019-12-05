@@ -15,9 +15,9 @@ trait JsonSchemaEntities
 
   import DocumentedJsonSchema._
 
-  def jsonRequest[A](implicit codec: JsonSchema[A]) = Map("application/json" -> MediaType(Some(toSchema(codec))))
+  def jsonRequest[A](implicit codec: JsonSchema[A]) = Map("application/json" -> MediaType(Some(toSchema(codec.docs))))
 
-  def jsonResponse[A](implicit codec: JsonSchema[A]) = Map("application/json" -> MediaType(Some(toSchema(codec))))
+  def jsonResponse[A](implicit codec: JsonSchema[A]) = Map("application/json" -> MediaType(Some(toSchema(codec.docs))))
 
   def toSchema(jsonSchema: DocumentedJsonSchema): Schema =
     toSchema(jsonSchema, None, Set.empty)

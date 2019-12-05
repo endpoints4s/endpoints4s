@@ -115,6 +115,7 @@ class CounterServer(protected val playComponents: PlayComponents)
   )
 }
 
+//#main-only
 object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
@@ -125,11 +126,11 @@ object Main {
     }
   }
 
+  //#main-only
   class DocumentationServer(protected val playComponents: PlayComponents)
     extends play.server.Endpoints
-      with play.server.playjson.JsonSchemaEntities
-      with play.server.Assets
-      with openapi.model.OpenApiSchemas {
+      with play.server.JsonEntitiesFromEncoderAndDecoder
+      with play.server.Assets {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
@@ -149,5 +150,6 @@ object Main {
 
     lazy val digests = AssetsDigests.digests
   }
-
+  //#main-only
 }
+//#main-only

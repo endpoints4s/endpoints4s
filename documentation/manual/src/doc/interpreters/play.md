@@ -51,7 +51,7 @@ It can be implemented as follows:
 In practice, the routes are put in a class taking an `endpoints.play.server.PlayComponents`
 parameter. An HTTP server can then be started as in the following example:
 
-~~~ scala src=../../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#main-only
+~~~ scala src=../../../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#main-only
 ~~~
 
 ### Error handling

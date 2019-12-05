@@ -213,11 +213,11 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |          }
         |        },
         |        "required" : [
-        |          "isbnCodes",
-        |          "author",
         |          "id",
-        |          "storage",
-        |          "title"
+        |          "title",
+        |          "author",
+        |          "isbnCodes",
+        |          "storage"
         |        ]
         |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Storage" : {
@@ -282,23 +282,9 @@ class ReferencedSchemaTest extends WordSpec with Matchers {
         |  }
         |}""".stripMargin
 
-    "produce referenced schema with circe" in {
-
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.circe.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import io.circe.syntax._
-      import io.circe.parser.parse
-
-      Fixtures.openApiDocument.asJson shouldBe parse(expectedSchema).right.get
+    "be documented" in {
+      ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument)) shouldBe ujson.read(expectedSchema)
     }
 
-    "produce referenced schema with playjson" in {
-
-      object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.playjson.JsonSchemas
-      import OpenApiEncoder.JsonSchema._
-      import play.api.libs.json.Json
-
-      Json.toJson(Fixtures.openApiDocument) shouldBe Json.parse(expectedSchema)
-    }
   }
 }

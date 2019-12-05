@@ -110,9 +110,12 @@ val `example-quickstart-server` =
     .settings(
       noPublishSettings,
       `scala 2.12 to latest`,
-      libraryDependencies += "org.scala-stm" %% "scala-stm" % "0.9.1"
+      libraryDependencies ++= Seq(
+        "org.scala-stm" %% "scala-stm" % "0.9.1",
+        scalaTestDependency
+      )
     )
-    .dependsOn(`example-quickstart-endpoints-jvm`, `play-server-playjson`, `openapi-jvm`)
+    .dependsOn(`example-quickstart-endpoints-jvm`, `akka-http-server-playjson`, `openapi-jvm`)
 
 // Basic example
 val `example-basic-shared` = {

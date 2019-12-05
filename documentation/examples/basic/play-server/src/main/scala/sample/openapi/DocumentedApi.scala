@@ -20,5 +20,3 @@ object DocumentedApi
     )
 
 }
-
-object OpenApiEncoder extends openapi.model.OpenApiSchemas with endpoints.playjson.JsonSchemas
