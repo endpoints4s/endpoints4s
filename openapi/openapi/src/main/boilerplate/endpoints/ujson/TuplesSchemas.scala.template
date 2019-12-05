@@ -1,0 +1,13 @@
+package endpoints.ujson
+
+import endpoints.algebra
+
+trait TuplesSchemas extends algebra.TuplesSchemas { this: JsonSchemas =>
+  [2..#
+  implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])] =
+    new JsonSchema[([#T1#])] {
+      val codec = { case ([#t1#]) => ujson.Arr([#schema1.codec.encode(t1)#]) }
+    }#
+    ]
+
+}

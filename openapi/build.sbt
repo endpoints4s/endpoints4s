@@ -8,7 +8,8 @@ lazy val openapi =
       publishSettings,
       `scala 2.12 to latest`, // We don’t support 2.11 because our tests have a dependency on circe
       name := "endpoints-openapi",
-      (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate"
+      (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
+      libraryDependencies += "com.lihaoyi" %%% "ujson" % "0.8.0"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("json-schema-generic")
