@@ -64,7 +64,14 @@ trait JsonSchemasTest extends JsonSchemas {
     case object Green extends Color
     case object Blue extends Color
 
-    val colorSchema: Enum[Color] = enumeration[Color](Seq(Red, Blue))(_.toString).named("Color")
+    val colorSchema: Enum[Color] = stringEnumeration[Color](Seq(Red, Blue))(_.toString).named("Color")
+  }
+
+  object NonStringEnum {
+    case class Foo(quux: String)
+
+    val fooSchema: JsonSchema[Foo] = field[String]("quux").xmap(Foo(_))(_.quux)
+    val enumSchema: Enum[Foo] = enumeration(Seq(Foo("bar"), Foo("baz")))(fooSchema)
   }
 
   case class Recursive(next: Option[Recursive])

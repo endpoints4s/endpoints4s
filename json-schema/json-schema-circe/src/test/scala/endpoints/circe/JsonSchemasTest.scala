@@ -85,4 +85,14 @@ class JsonSchemasTest extends FreeSpec {
       )
     assert(JsonSchemasCodec.refinedTaggedSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid tagged alternative", Nil)))
   }
+
+  "enumeration" in {
+    import JsonSchemasCodec.NonStringEnum.{Foo, enumSchema}
+    val validValue = Foo("bar")
+    val validJson = Json.obj("quux" -> Json.fromString("bar"))
+    assert(enumSchema.encoder(validValue) == validJson)
+    assert(enumSchema.decoder.decodeJson(validJson).right.exists(_ == validValue))
+    val invalidJson = Json.obj("quux" -> Json.fromString("wrong"))
+    assert(enumSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid value: {\n  \"quux\" : \"wrong\"\n}. Valid values are: {\n  \"quux\" : \"bar\"\n}, {\n  \"quux\" : \"baz\"\n}.", Nil)))
+  }
 }

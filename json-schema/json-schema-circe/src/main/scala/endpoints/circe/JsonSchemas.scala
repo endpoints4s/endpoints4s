@@ -108,13 +108,13 @@ trait JsonSchemas
 
   type Enum[A] = JsonSchema[A]
 
-  def enumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
-    lazy val stringToEnum: Map[String, A] = values.map(value => (encode(value), value)).toMap
-    def decode(string: String): Either[String, A] = stringToEnum.get(string).toRight("Cannot decode as enum value: " + string)
-
+  def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A] = {
     JsonSchema(
-      tpe.encoder.contramap(encode),
-      tpe.decoder.emap(decode)
+      tpe.encoder,
+      tpe.decoder.emap { a =>
+        if (values.contains(a)) Right(a)
+        else Left(s"Invalid value: ${tpe.encoder(a).spaces2}. Valid values are: ${values.map(a => tpe.encoder(a).spaces2).mkString(", ")}.")
+      }
     )
   }
 

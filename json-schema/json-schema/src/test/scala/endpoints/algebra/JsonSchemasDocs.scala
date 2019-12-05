@@ -56,7 +56,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     //#enum-status
     //#enum-status-schema
     implicit lazy val statusSchema: JsonSchema[Status] =
-      enumeration[Status](Seq(Active, Inactive, Obsolete))(_.toString)
+      stringEnumeration[Status](Seq(Active, Inactive, Obsolete))(_.toString)
     //#enum-status-schema
   }
 

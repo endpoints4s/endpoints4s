@@ -81,8 +81,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         new Tagged(ujsonSchemas.taggedPartialInvFunctor.xmap(fa.ujsonSchema, f, g), fa.docs)
     }
 
-  def enumeration[A](values: Seq[A])(f: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
-    val ujsonSchema = ujsonSchemas.enumeration(values)(f)(tpe.ujsonSchema)
+  def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A] = {
+    val ujsonSchema = ujsonSchemas.enumeration(values)(tpe.ujsonSchema)
     val docs = DocumentedEnum(
       tpe.docs,
       values.map(a => ujsonSchema.codec.encode(a)).toList,

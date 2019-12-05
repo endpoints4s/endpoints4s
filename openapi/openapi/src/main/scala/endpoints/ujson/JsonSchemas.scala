@@ -44,9 +44,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         new Tagged(fa.tagAndObj compose g)
     }
 
-  def enumeration[A](values: Seq[A])(f: A => String)(implicit tpe: JsonSchema[String]): Enum[A] =
+  def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A] =
     new JsonSchema[A] {
-      val codec = value => tpe.codec.encode(f(value))
+      val codec = value => tpe.codec.encode(value)
     }
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
