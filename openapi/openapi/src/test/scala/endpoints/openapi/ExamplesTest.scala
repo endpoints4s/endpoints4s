@@ -10,7 +10,7 @@ class ExamplesTest extends WordSpec with Matchers {
 
     "Include examples in documentation" in new Fixtures {
       checkExample(recordSchema)(ujson.Obj("foo" -> ujson.Str("Quux"), "bar" -> ujson.Num(42)))
-      checkExample(coprodSchema)(ujson.Obj("type" -> ujson.Str("R"), "bar" -> ujson.Num(42)))
+      checkExample(coprodSchema)(ujson.Obj("kind" -> ujson.Str("R"), "bar" -> ujson.Num(42)))
       checkExample(enumSchema)(ujson.Str("foo"))
       checkExample(arraySchema)(ujson.Arr(ujson.Num(1), ujson.Num(2)))
       checkExample(mapSchema)(ujson.Obj("foo" -> ujson.Num(1), "bar" -> ujson.Num(2)))
@@ -20,6 +20,8 @@ class ExamplesTest extends WordSpec with Matchers {
   }
 
   trait FixturesAlg extends algebra.JsonSchemas {
+
+    override def defaultDiscriminatorName: String = "kind"
 
     val recordSchema = (
       field[String]("foo") zip

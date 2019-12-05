@@ -13,9 +13,14 @@ import scala.collection.compat._
   *
   * @group interpreters
   */
-trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
+trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSchemas =>
 
-  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas = endpoints.ujson.JsonSchemas
+  /**
+    * The JSON codecs used to produce some parts of the documentation.
+    */
+  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas = new endpoints.ujson.JsonSchemas {
+    override def defaultDiscriminatorName: String = openapiJsonSchemas.defaultDiscriminatorName
+  }
 
   import DocumentedJsonSchema._
 

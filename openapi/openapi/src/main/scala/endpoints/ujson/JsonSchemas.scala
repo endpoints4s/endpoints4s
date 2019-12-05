@@ -160,5 +160,3 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       }
     }
 }
-
-object JsonSchemas extends JsonSchemas
