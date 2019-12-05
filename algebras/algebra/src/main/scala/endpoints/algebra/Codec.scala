@@ -45,3 +45,18 @@ object Encoder {
   * @tparam D Type of decoded values
   */
 trait Codec[E, D] extends Decoder[E, D] with Encoder[D, E]
+
+object Codec {
+
+  def fromEncoderAndDecoder[E, D](encoder: Encoder[D, E])(decoder: Decoder[E, D]): Codec[E, D] = new Codec[E, D] {
+    def decode(from: E): Validated[D] = decoder.decode(from)
+    def encode(from: D): E = encoder.encode(from)
+  }
+
+  /** Combines two codecs, sequentially, by feeding the input of the second one with
+    * the output of the first one
+    */
+  def sequentially[A, B, C](ab: Codec[A, B])(bc: Codec[B, C]): Codec[A, C] =
+    Codec.fromEncoderAndDecoder(Encoder.sequentially(bc)(ab))(Decoder.sequentially(ab)(bc))
+
+}

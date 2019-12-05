@@ -1,6 +1,6 @@
 package endpoints.algebra
 
-import endpoints.{Invalid, Valid, Validated}
+import endpoints.Invalid
 
 /**
   * Uses ''endpoints'' built-in error types:
@@ -31,27 +31,5 @@ trait BuiltInErrors extends Errors { this: EndpointsWithCustomErrors =>
     * Response entity format for `Throwable` values
     */
   def serverErrorResponseEntity: ResponseEntity[Throwable]
-
-}
-
-object InvalidCodec {
-
-  implicit val invalidCodec: Codec[String, Invalid] =
-    // TODO Make JSON encoding and decoding more robust
-    new Codec[String, Invalid] {
-      def decode(from: String): Validated[Invalid] = {
-        val errors =
-          from.drop(2).dropRight(2).split("(?<!\\\\)\",\"")
-            .map(error => error.replaceAllLiterally("\\\\", "\\").replaceAllLiterally("\\\"", "\"").replaceAllLiterally("\\n", "\n"))
-            .toIndexedSeq
-        Valid(Invalid(errors))
-      }
-      def encode(invalid: Invalid): String = {
-        // Manually encode JSON because we don’t want to have a dependency on a JSON library here
-        val jsonErrors =
-          invalid.errors.map(error => s""""${error.replaceAllLiterally("\\", "\\\\").replaceAllLiterally("\"", "\\\"").replaceAllLiterally("\n", "\\n")}"""")
-        s"[${jsonErrors.mkString(",")}]"
-      }
-    }
 
 }

@@ -1,16 +1,13 @@
 package endpoints.openapi
 
-import endpoints.{Invalid, algebra}
 import endpoints.openapi.model.{MediaType, Schema}
+import endpoints.ujson.codecs.schemas
+import endpoints.{Invalid, algebra}
 
 trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
 
   private lazy val invalidJsonEntity =
-    Map(
-      "application/json" -> MediaType(
-        Some(Schema.Reference("endpoints.Errors", Some(Schema.Array(Left(Schema.simpleString), None, None)), None))
-      )
-    )
+    Map("application/json" -> MediaType(Some(Schema.Reference("endpoints.Errors", Some(schemas.toSchema(schemas.invalid.docs)), None))))
 
   lazy val clientErrorsResponseEntity: ResponseEntity[Invalid] = invalidJsonEntity
 

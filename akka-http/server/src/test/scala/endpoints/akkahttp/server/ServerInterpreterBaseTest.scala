@@ -6,7 +6,6 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import endpoints.algebra.InvalidCodec.invalidCodec
 import endpoints.algebra.server.{DecodedUrl, ServerTestBase}
 
 import scala.concurrent.duration._
@@ -55,7 +54,8 @@ class ServerInterpreterBaseTest(val serverApi: EndpointsTestApi)
       if (status == StatusCodes.BadRequest) {
         val s = responseAs[String]
         val errors =
-          invalidCodec.decode(s).fold(_.errors, errors => sys.error(s"Unable to parse server response: ${errors.mkString(". ")}"))
+          endpoints.ujson.codecs.invalidCodec.decode(s)
+            .fold(_.errors, errors => sys.error(s"Unable to parse server response: ${errors.mkString(". ")}"))
         DecodedUrl.Malformed(errors)
       } else {
         val bs = responseAs[Array[Byte]]

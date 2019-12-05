@@ -2,7 +2,6 @@ package endpoints.ujson
 
 import endpoints.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 import endpoints.algebra.{Codec, Decoder, Encoder}
-import ujson.StringRenderer
 
 import scala.collection.compat._
 import scala.collection.mutable
@@ -15,19 +14,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
     def decoder: Decoder[ujson.Value, A]
 
-    final def codec: Codec[ujson.Value, A] = new Codec[ujson.Value, A] {
-      def decode(from: ujson.Value): Validated[A] = decoder.decode(from)
-      def encode(from: A): ujson.Value = encoder.encode(from)
-    }
+    final def codec: Codec[ujson.Value, A] = Codec.fromEncoderAndDecoder(encoder)(decoder)
 
-    final def stringCodec: Codec[String, A] = new Codec[String, A] {
-      def encode(from: A): String = codec.encode(from).transform(StringRenderer()).toString
-      def decode(from: String): Validated[A] =
-        Validated.fromEither(
-          util.control.Exception.nonFatalCatch.either(ujson.read(from))
-            .left.map(_ => "Invalid JSON document" :: Nil)
-        ).flatMap(decoder.decode)
-    }
+    final def stringCodec: Codec[String, A] = Codec.sequentially(codecs.stringJson)(codec)
 
   }
 
