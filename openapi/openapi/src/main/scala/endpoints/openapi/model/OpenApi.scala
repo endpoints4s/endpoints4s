@@ -20,13 +20,13 @@ object OpenApi {
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
     new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) => (k, f(v)) }.toSeq: _*))
 
-  private def schemaJson(schema: Schema): ujson.Obj = {
+  private[openapi] def schemaJson(schema: Schema): ujson.Obj = {
     val fields = mutable.LinkedHashMap.empty[String, ujson.Value]
     schema match {
-      case Schema.Primitive(name, format, _) =>
+      case Schema.Primitive(name, format, _, _) =>
         fields += "type" -> ujson.Str(name)
         format.foreach(s => fields += "format" -> ujson.Str(s))
-      case Schema.Object(properties, additionalProperties, _) =>
+      case Schema.Object(properties, additionalProperties, _, _) =>
         fields ++= List(
           "type"       -> "object",
           "properties" -> mapJson(properties.iterator.map(p => p.name -> p.schema.withDefinedDescription(p.description)).toMap)(schemaJson)
@@ -36,7 +36,7 @@ object OpenApi {
           fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
         }
         additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
-      case Schema.Array(elementType, _) =>
+      case Schema.Array(elementType, _, _) =>
         val itemsSchema = elementType match {
           case Left(value)  => schemaJson(value)
           case Right(value) => ujson.Arr(value.map(schemaJson): _*)
@@ -45,10 +45,10 @@ object OpenApi {
           "type"  -> "array",
           "items" -> itemsSchema
         )
-      case Schema.Enum(elementType, values, description) =>
+      case Schema.Enum(elementType, values, description, _) =>
         fields ++= schemaJson(elementType.withDefinedDescription(description)).value
         fields += "enum" -> ujson.Arr(values: _*)
-      case Schema.OneOf(discriminatorName, alternatives, _) =>
+      case Schema.OneOf(discriminatorName, alternatives, _, _) =>
         val mappingJson =
           new ujson.Obj(mutable.LinkedHashMap(alternatives.collect {
             case (tag, ref: Schema.Reference) => tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
@@ -60,13 +60,16 @@ object OpenApi {
             "mapping"      -> mappingJson
           )
         )
-      case Schema.AllOf(schemas, _) =>
+      case Schema.AllOf(schemas, _, _) =>
         fields += "allOf" -> ujson.Arr(schemas.map(schemaJson): _*)
-      case Schema.Reference(name, _, _) =>
+      case Schema.Reference(name, _, _, _) =>
         fields += "$ref" -> ujson.Str(Schema.Reference.toRefPath(name))
     }
     for (description <- schema.description) {
       fields += "description" -> ujson.Str(description)
+    }
+    for (example <- schema.example) {
+      fields += "example" -> example
     }
     new ujson.Obj(fields)
   }
@@ -271,6 +274,7 @@ case class MediaType(schema: Option[Schema])
 
 sealed trait Schema {
   def description: Option[String]
+  def example: Option[ujson.Value]
 
   /**
     * @return The same schema with its description overridden by the given `description`,
@@ -289,32 +293,65 @@ sealed trait Schema {
 
 object Schema {
 
-  case class Object(properties: List[Property], additionalProperties: Option[Schema], description: Option[String]) extends Schema
+  case class Object(
+    properties: List[Property],
+    additionalProperties: Option[Schema],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
-  case class Array(elementType: Either[Schema, List[Schema]], description: Option[String]) extends Schema
+  case class Array(
+    elementType: Either[Schema, List[Schema]],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
-  case class Enum(elementType: Schema, values: List[ujson.Value], description: Option[String]) extends Schema
+  case class Enum(
+    elementType: Schema,
+    values: List[ujson.Value],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
   case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
 
-  case class Primitive(name: String, format: Option[String], description: Option[String]) extends Schema
+  case class Primitive(
+    name: String,
+    format: Option[String],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
-  case class OneOf(discriminatorName: String, alternatives: List[(String, Schema)], description: Option[String]) extends Schema
+  case class OneOf(
+    discriminatorName: String,
+    alternatives: List[(String, Schema)],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
-  case class AllOf(schemas: List[Schema], description: Option[String]) extends Schema
+  case class AllOf(
+    schemas: List[Schema],
+    description: Option[String],
+    example: Option[ujson.Value]
+  ) extends Schema
 
-  case class Reference(name: String, original: Option[Schema], description: Option[String]) extends Schema
+  case class Reference(
+    name: String,
+    original: Option[Schema],
+    description: Option[String],
+    override val example: None.type = None // Reference objects can’t have examples
+  ) extends Schema
 
   object Reference {
     def toRefPath(name: String): String =
       s"#/components/schemas/$name"
   }
 
-  val simpleUUID = Primitive("string", format = Some("uuid"), None)
-  val simpleString = Primitive("string", None, None)
-  val simpleInteger = Primitive("integer", None, None)
-  val simpleBoolean = Primitive("boolean", None, None)
-  val simpleNumber = Primitive("number", None, None)
+  val simpleUUID = Primitive("string", format = Some("uuid"), None, None)
+  val simpleString = Primitive("string", None, None, None)
+  val simpleInteger = Primitive("integer", None, None, None)
+  val simpleBoolean = Primitive("boolean", None, None, None)
+  val simpleNumber = Primitive("number", None, None, None)
 
 }
 

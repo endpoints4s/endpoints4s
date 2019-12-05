@@ -89,6 +89,9 @@ class JsonSchemasTest extends FreeSpec {
       def zipRecords[A, B](recordA: String, recordB: String)(implicit t: Tupler[A, B]): String =
         s"$recordA,$recordB"
 
+    def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] =
+      schema
+
       def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
         new PartialInvariantFunctor[JsonSchema] {
           def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa

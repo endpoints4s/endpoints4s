@@ -19,7 +19,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
       val expectedParameters =
         Parameter("n", In.Query, required = true, description = None, schema = Schema.simpleNumber) ::
         Parameter("lang", In.Query, required = false, description = None, schema = Schema.simpleString) ::
-        Parameter("ids", In.Query, required = false, description = None, schema = Schema.Array(Left(Schema.simpleInteger), None)) ::
+        Parameter("ids", In.Query, required = false, description = None, schema = Schema.Array(Left(Schema.simpleInteger), None, None)) ::
         Nil
       Fixtures.quux.item.operations("get").parameters shouldBe expectedParameters
     }
@@ -42,9 +42,10 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
     "be exposed in JSON schema" in {
       val expectedSchema =
         Schema.Object(
-          Schema.Property("name", Schema.Primitive("string", None, None), isRequired = true, description = Some("Name of the user")) ::
-          Schema.Property("age", Schema.Primitive("integer", Some("int32"), None), isRequired = true, description = None) ::
+          Schema.Property("name", Schema.Primitive("string", None, None, None), isRequired = true, description = Some("Name of the user")) ::
+          Schema.Property("age", Schema.Primitive("integer", Some("int32"), None, None), isRequired = true, description = None) ::
           Nil,
+          None,
           None,
           None
         )
@@ -54,7 +55,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
   "Enumerations" in {
     val expectedSchema =
-      Schema.Reference("Color", Some(Schema.Enum(Schema.Primitive("string", None, None), ujson.Str("Red") :: ujson.Str("Blue") :: Nil, None)), None)
+      Schema.Reference("Color", Some(Schema.Enum(Schema.Primitive("string", None, None, None), ujson.Str("Red") :: ujson.Str("Blue") :: Nil, None, None)), None)
     Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
   }
 
@@ -65,7 +66,8 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
         Some(Schema.Object(
           Schema.Property("next", Schema.Reference("Rec", None, None), isRequired = false, description = None) :: Nil,
           additionalProperties = None,
-          description = None
+          description = None,
+          example = None
         )),
         None
       )
@@ -73,7 +75,8 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
       Schema.Object(
         Schema.Property("next", recSchema, isRequired = false, description = None) :: Nil,
         additionalProperties = None,
-        description = None
+        description = None,
+        example = None
       )
     Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
   }
@@ -95,7 +98,7 @@ class EndpointsTest extends WordSpec with Matchers with OptionValues {
 
       reqBody shouldBe defined
       reqBody.value.description.value shouldEqual "Text Req"
-      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string", None, None)
+      reqBody.value.content("text/plain").schema.value shouldEqual Schema.Primitive("string", None, None, None)
     }
   }
 

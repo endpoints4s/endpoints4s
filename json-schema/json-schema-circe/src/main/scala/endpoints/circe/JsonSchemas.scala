@@ -192,6 +192,8 @@ trait JsonSchemas
     Record(encoder, decoder)
   }
 
+  def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
+
   implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)

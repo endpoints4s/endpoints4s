@@ -13,9 +13,14 @@ import scala.collection.compat._
   *
   * @group interpreters
   */
-trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
+trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSchemas =>
 
-  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas = endpoints.ujson.JsonSchemas
+  /**
+    * The JSON codecs used to produce some parts of the documentation.
+    */
+  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas = new endpoints.ujson.JsonSchemas {
+    override def defaultDiscriminatorName: String = openapiJsonSchemas.defaultDiscriminatorName
+  }
 
   import DocumentedJsonSchema._
 
@@ -27,25 +32,47 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   class Tagged[A](override val ujsonSchema: ujsonSchemas.Tagged[A], override val docs: DocumentedCoProd) extends JsonSchema[A](ujsonSchema, docs)
   class Enum[A](override val ujsonSchema: ujsonSchemas.Enum[A], override val docs: DocumentedEnum) extends JsonSchema[A](ujsonSchema, docs)
 
-  sealed trait DocumentedJsonSchema
+  sealed trait DocumentedJsonSchema {
+    def example: Option[ujson.Value]
+  }
 
   object DocumentedJsonSchema {
 
-    case class DocumentedRecord(fields: List[Field], additionalProperties: Option[DocumentedJsonSchema] = None, name: Option[String] = None) extends DocumentedJsonSchema
+    case class DocumentedRecord(
+      fields: List[Field],
+      additionalProperties: Option[DocumentedJsonSchema] = None,
+      name: Option[String] = None,
+      example: Option[ujson.Value] = None
+    ) extends DocumentedJsonSchema
     case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
-    case class DocumentedCoProd(alternatives: List[(String, DocumentedRecord)],
-                                name: Option[String] = None,
-                                discriminatorName: String = defaultDiscriminatorName) extends DocumentedJsonSchema
+    case class DocumentedCoProd(
+      alternatives: List[(String, DocumentedRecord)],
+      name: Option[String] = None,
+      discriminatorName: String = defaultDiscriminatorName,
+      example: Option[ujson.Value] = None
+    ) extends DocumentedJsonSchema
 
-    case class Primitive(name: String, format: Option[String] = None) extends DocumentedJsonSchema
+    case class Primitive(
+      name: String,
+      format: Option[String] = None,
+      example: Option[ujson.Value] = None
+    ) extends DocumentedJsonSchema
 
     /**
       * @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
       */
-    case class Array(schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]]) extends DocumentedJsonSchema
+    case class Array(
+      schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]],
+      example: Option[ujson.Value] = None
+    ) extends DocumentedJsonSchema
 
-    case class DocumentedEnum(elementType: DocumentedJsonSchema, values: List[ujson.Value], name: Option[String]) extends DocumentedJsonSchema
+    case class DocumentedEnum(
+      elementType: DocumentedJsonSchema,
+      values: List[ujson.Value],
+      name: Option[String],
+      example: Option[ujson.Value] = None
+    ) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed trait LazySchema extends DocumentedJsonSchema {
@@ -55,6 +82,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       def apply(s: => DocumentedJsonSchema): LazySchema =
         new LazySchema {
           lazy val value: DocumentedJsonSchema = s
+          def example: Option[ujson.Value] = value.example
         }
     }
   }
@@ -147,6 +175,23 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       ujsonSchemas.zipRecords(recordA.ujsonSchema, recordB.ujsonSchema),
       DocumentedRecord(recordA.docs.fields ++ recordB.docs.fields)
     )
+
+  def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = {
+    val exampleJson = schema.ujsonSchema.codec.encode(example)
+    def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
+      djs match {
+        case s: DocumentedRecord => s.copy(example = Some(exampleJson))
+        case s: DocumentedCoProd => s.copy(example = Some(exampleJson))
+        case s: Primitive        => s.copy(example = Some(exampleJson))
+        case s: Array            => s.copy(example = Some(exampleJson))
+        case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
+        case s: LazySchema       => LazySchema(updatedDocs(s.value))
+      }
+    new JsonSchema(
+      schema.ujsonSchema,
+      updatedDocs(schema.docs)
+    )
+  }
 
   lazy val uuidJsonSchema: JsonSchema[UUID] =
     new JsonSchema(
