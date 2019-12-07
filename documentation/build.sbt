@@ -10,13 +10,9 @@ val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `play-client` = LocalProject("play-client")
 val `play-server` = LocalProject("play-server")
 val `play-server-circe` = LocalProject("play-server-circe")
-val `play-server-playjson` = LocalProject("play-server-playjson")
 
 val `akka-http-client` = LocalProject("akka-http-client")
-val `akka-http-client-circe` = LocalProject("akka-http-client-circe")
 val `akka-http-server` = LocalProject("akka-http-server")
-val `akka-http-server-circe` = LocalProject("akka-http-server-circe")
-val `akka-http-server-playjson` = LocalProject("akka-http-server-playjson")
 
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
@@ -49,8 +45,8 @@ val apiDoc =
       ),
       unidocProjectFilter in(ScalaUnidoc, unidoc) := inProjects(
         `algebra-jvm`, `algebra-circe-jvm`, `algebra-playjson-jvm`,
-        `akka-http-client`, `akka-http-client-circe`, `akka-http-server`, `akka-http-server-circe`, `akka-http-server-playjson`,
-        `play-client`, `play-server`, `play-server-circe`, `play-server-playjson`,
+        `akka-http-client`, `akka-http-server`,
+        `play-client`, `play-server`, `play-server-circe`,
         `xhr-client`, `xhr-client-circe`, `xhr-client-faithful`,
         `scalaj-client`,
         `sttp-client`,
@@ -103,7 +99,7 @@ val `example-quickstart-client` =
       noPublishSettings,
       `scala 2.12 to latest`
     )
-    .dependsOn(`example-quickstart-endpoints-js`, `xhr-client-circe`)
+    .dependsOn(`example-quickstart-endpoints-js`, `xhr-client`)
 
 val `example-quickstart-server` =
   project.in(file("examples/quickstart/server"))
@@ -115,7 +111,7 @@ val `example-quickstart-server` =
         scalaTestDependency
       )
     )
-    .dependsOn(`example-quickstart-endpoints-jvm`, `akka-http-server-playjson`, `openapi-jvm`)
+    .dependsOn(`example-quickstart-endpoints-jvm`, `akka-http-server`, `openapi-jvm`)
 
 // Basic example
 val `example-basic-shared` = {
@@ -187,7 +183,7 @@ val `example-basic-akkahttp-server` =
       `scala 2.12 to latest`,
       publishArtifact := false
     )
-    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`, `akka-http-server-circe`)
+    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)
 
 
 // CQRS Example
@@ -330,7 +326,7 @@ val `example-documented` =
         )
       }.taskValue
     )
-    .dependsOn(`play-server-playjson`, `json-schema-generic-jvm`, `openapi-jvm`)
+    .dependsOn(`play-server`, `json-schema-generic-jvm`)
 
 val `example-authentication` =
   project.in(file("examples/authentication"))

@@ -9,8 +9,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class TestJsonClient(val address: String )
   extends Endpoints
-    with JsonEntitiesFromCodec
-    with circe.JsonEntitiesFromCodec
+    with JsonEntitiesFromCodecs
+    with circe.JsonEntitiesFromCodecs
     with algebra.JsonFromCodecTestApi
     with circe.JsonFromCirceCodecTestApi {
 

@@ -6,7 +6,7 @@ import org.scalatest.{Matchers, WordSpec}
 
 class ArraysTest extends WordSpec with Matchers {
 
-  trait Arrays extends algebra.Endpoints with algebra.JsonSchemaEntities {
+  trait Arrays extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
 
     val arrays: Endpoint[List[String], (Boolean, Int, String)] = endpoint(
       post(path / "foo", jsonRequest[List[String]]),
@@ -15,7 +15,7 @@ class ArraysTest extends WordSpec with Matchers {
 
   }
 
-  object ArraysDocumentation extends Arrays with openapi.Endpoints with openapi.JsonSchemaEntities {
+  object ArraysDocumentation extends Arrays with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     val api: OpenApi = openApi(
       Info(title = "Example of API using homogeneous and heterogeneous arrays", version = "0.0.0")

@@ -10,7 +10,7 @@ import endpoints.openapi.model.{Info, OpenApi}
 object CounterDocumentation
   extends CounterEndpoints
     with openapi.Endpoints
-    with openapi.JsonSchemaEntities {
+    with openapi.JsonEntitiesFromSchemas {
 
   val api: OpenApi =
     openApi(

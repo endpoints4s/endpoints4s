@@ -167,7 +167,7 @@ object Fixtures
   extends Fixtures
     with algebra.JsonSchemasTest
     with Endpoints
-    with JsonSchemaEntities {
+    with JsonEntitiesFromSchemas {
 
   val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux)
 

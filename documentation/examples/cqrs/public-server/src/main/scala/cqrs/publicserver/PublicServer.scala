@@ -7,7 +7,7 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints.play.server.{Endpoints, JsonEntitiesFromCodec, PlayComponents}
+import endpoints.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
 
 import scala.concurrent.Future
 
@@ -18,10 +18,10 @@ class PublicServer(
   commandsBaseUrl: String,
   queriesBaseUrl: String,
   wsClient: WSClient,
-  protected val playComponents: PlayComponents
+  val playComponents: PlayComponents
 ) extends PublicEndpoints
     with Endpoints
-    with JsonEntitiesFromCodec {
+    with JsonEntitiesFromCodecs {
 
   import playComponents.executionContext
 

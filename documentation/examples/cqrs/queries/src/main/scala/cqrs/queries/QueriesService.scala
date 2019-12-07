@@ -28,12 +28,12 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
   // --- internals
 
   //#event-log-client
-  import endpoints.play.client.{JsonEntitiesFromCodec, Endpoints}
+  import endpoints.play.client.{JsonEntitiesFromCodecs, Endpoints}
 
   /** Client for the event log */
   private object eventLog
     extends Endpoints(commandsBaseUrl, wsClient)
-      with JsonEntitiesFromCodec
+      with JsonEntitiesFromCodecs
       with CommandsEndpoints
   //#event-log-client
 

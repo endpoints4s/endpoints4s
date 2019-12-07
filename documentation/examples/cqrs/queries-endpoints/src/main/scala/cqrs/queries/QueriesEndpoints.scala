@@ -15,7 +15,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
   *    entity gives way more details about failures than status codes.
   */
 //#mux-endpoint
-trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEntitiesFromCodec {
+trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEntitiesFromCodecs {
 
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
     val request = post(path / "query", jsonRequest[Json])

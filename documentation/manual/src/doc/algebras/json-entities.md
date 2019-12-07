@@ -42,13 +42,13 @@ extending `JsonEntities`. You might also be interested in looking at
 the [JSON codecs guide](/guides/json-codecs.md), which explains which
 families of algebras and interpreters you should use together.
 
-## `JsonSchemaEntities`
+## `JsonEntitiesFromSchemas`
 
 ~~~ scala expandVars=true
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](unchecked:/api/endpoints/algebra/JsonSchemaEntities.html)
+[API documentation](unchecked:/api/endpoints/algebra/JsonEntitiesFromSchemas.html)
 
 This algebra merges the `JsonEntities` algebra and the
 [`JsonSchemas` algebra](json-schemas.md) and aligns both the
@@ -56,13 +56,13 @@ This algebra merges the `JsonEntities` algebra and the
 JSON schemas defined by using the `JsonSchemas` algebra can be used in request and
 responses entities.
 
-## `JsonEntitiesFromCodec`
+## `JsonEntitiesFromCodecs`
 
 ~~~ scala expandVars=true
 "org.julienrf" %% "endpoints-algebra" % "{{version}}"
 ~~~
 
-[API documentation](unchecked:/api/endpoints/algebra/JsonEntitiesFromCodec.html)
+[API documentation](unchecked:/api/endpoints/algebra/JsonEntitiesFromCodecs.html)
 
 This algebra fixes both the `JsonRequest[A]` and `JsonResponse[A]` types to the same
 codec type able to both encode and decode `A` values into and from JSON documents. By
@@ -71,13 +71,13 @@ are consistent.
 
 This trait introduces an abstract `JsonCodec[A]` type, which is fixed by more concrete
 interpreters such as
-[playjson.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/playjson/JsonEntitiesFromCodec.html)
-or [circe.JsonEntitiesFromCodec](unchecked:/api/endpoints/algebra/circe/JsonEntitiesFromCodec.html).
-There interpreters are provided by the following dependencies:
+[playjson.JsonEntitiesFromCodecs](unchecked:/api/endpoints/algebra/playjson/JsonEntitiesFromCodecs.html)
+or [circe.JsonEntitiesFromCodecs](unchecked:/api/endpoints/algebra/circe/JsonEntitiesFromCodecs.html).
+These interpreters are provided by the following dependencies:
 
 ~~~ scala expandVars=true
-// Provides endpoints.algebra.circe.JsonEntitiesFromCodec
+// Provides endpoints.algebra.circe.JsonEntitiesFromCodecs
 "org.julienrf" %% "endpoints-algebra-circe" % "{{version}}"
-// Provides endpoints.algebra.playjson.JsonEntitiesFromCodec
+// Provides endpoints.algebra.playjson.JsonEntitiesFromCodecs
 "org.julienrf" %% "endpoints-algebra-playjson" % "{{version}}"
 ~~~

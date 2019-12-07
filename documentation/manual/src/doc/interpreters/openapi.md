@@ -84,5 +84,5 @@ Finally, the `apiJson` value contains the following JSON document:
 
 To properly document the underlying JSON schema of your [JSON entities](/algebras/json-entities.md),
 you have to define these schemas by using the
-[JsonSchemaEntities](/algebras/json-entities.md#jsonschemaentities)
+[JsonEntitiesFromSchemas](/algebras/json-entities.md#jsonentitiesfromschemas)
 algebra (and its corresponding interpreter).

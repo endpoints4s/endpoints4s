@@ -49,14 +49,13 @@ val sharedJVM = shared.jvm
 
 val client =
   project.enablePlugins(ScalaJSPlugin).settings(
-    libraryDependencies += "org.julienrf" %%% "endpoints-xhr-client-circe" % "{{version}}"
+    libraryDependencies += "org.julienrf" %%% "endpoints-xhr-client" % "{{version}}"
   ).dependsOn(sharedJS)
 
 val server =
   project.settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %% "endpoints-akka-http-server-playjson" % "{{version}}",
-      "org.julienrf" %% "endpoints-openapi" % "{{version}}",
+      "org.julienrf" %% "endpoints-akka-http-server" % "{{version}}",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
   ).dependsOn(sharedJVM)
@@ -68,19 +67,10 @@ in addition to the required algebra interface [`endpoints-algebra`](algebras/end
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
 
-The `client` project uses a [Scala.js web](interpreters/scalajs-web.md) client interpreter
-that also turns the JSON schemas defined in the `shared` project into
-circe’s encoders and decoders.
+The `client` project uses a [Scala.js web](interpreters/scalajs-web.md) client interpreter.
 
-Finally, the `server` project uses a server interpreter backed by [Akka HTTP](interpreters/akka-http.md),
-which also turns the JSON schemas defined in the `shared` project into
-Play JSON encoders and decoders, as well as
-an interpreter producing OpenAPI documents.
+Finally, the `server` project uses a server interpreter backed by [Akka HTTP](interpreters/akka-http.md).
 It also uses the scala-stm library for implementing the business logic.
-
-Note that it is not required to use the `endpoints-openapi` interpreters in the
-`server` project, but it is a common practice since the OpenAPI documentation
-is often published by the server.
 
 ## Description of the HTTP endpoints
 

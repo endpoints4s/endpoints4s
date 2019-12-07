@@ -5,7 +5,7 @@ val `xhr-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-xhr-client",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -15,13 +15,14 @@ val `xhr-client` =
       )
     )
     .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
+    .dependsOn(LocalProject("openapiJS"))
 
 val `xhr-client-faithful` =
   project.in(file("client-faithful"))
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-xhr-client-faithful",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,

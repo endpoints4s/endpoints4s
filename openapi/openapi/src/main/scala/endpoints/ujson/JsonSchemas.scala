@@ -14,10 +14,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
     def decoder: Decoder[ujson.Value, A]
 
-    final def codec: Codec[ujson.Value, A] = new Codec[ujson.Value, A] {
-      def decode(from: ujson.Value): Validated[A] = decoder.decode(from)
-      def encode(from: A): ujson.Value = encoder.encode(from)
-    }
+    final def codec: Codec[ujson.Value, A] = Codec.fromEncoderAndDecoder(encoder)(decoder)
+
+    final def stringCodec: Codec[String, A] = Codec.sequentially(codecs.stringJson)(codec)
 
   }
 
@@ -55,8 +54,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](fa: JsonSchema[A], f: A => Validated[B], g: B => A): JsonSchema[B] =
         new JsonSchema[B] {
-          val decoder = Decoder.flatMapDecoded(fa.decoder)(f)
-          val encoder = Encoder.mapDecoded(fa.encoder)(g)
+          val decoder = Decoder.sequentially(fa.decoder)(a => f(a))
+          val encoder = Encoder.sequentially((b: B) => g(b))(fa.encoder)
         }
     }
 
@@ -64,8 +63,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     new PartialInvariantFunctor[Record] {
       def xmapPartial[A, B](fa: Record[A], f: A => Validated[B], g: B => A): Record[B] =
         new Record[B] {
-          val decoder = Decoder.flatMapDecoded(fa.decoder)(f)
-          val encoder = Encoder.mapDecoded(fa.encoder)(g)
+          val decoder = Decoder.sequentially(fa.decoder)(a => f(a))
+          val encoder = Encoder.sequentially((b: B) => g(b))(fa.encoder)
         }
     }
 
@@ -74,21 +73,21 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       def xmapPartial[A, B](fa: Tagged[A], f: A => Validated[B], g: B => A): Tagged[B] =
         new Tagged[B](fa.discriminator) {
           def findDecoder(tag: String): Option[Decoder[ujson.Value, B]] =
-            fa.findDecoder(tag).map(Decoder.flatMapDecoded(_)(f))
+            fa.findDecoder(tag).map(Decoder.sequentially(_)(a => f(a)))
           def tagAndObj(b: B): (String, ujson.Obj) = fa.tagAndObj(g(b))
         }
     }
 
   def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A] =
     new JsonSchema[A] {
-      val decoder = Decoder.flatMapDecoded(tpe.decoder) { a =>
+      val decoder = Decoder.sequentially(tpe.decoder) { a =>
         if (values.contains(a)) {
           Valid(a)
         } else {
           Invalid(s"Invalid value: ${tpe.encoder.encode(a)}. Valid values are ${values.map(a => tpe.encoder.encode(a)).mkString(", ")}.")
         }
       }
-      val encoder = value => tpe.codec.encode(value)
+      val encoder = tpe.encoder
     }
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
@@ -163,8 +162,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     assert(taggedA.discriminator == taggedB.discriminator)
     new Tagged[Either[A, B]](taggedB.discriminator) {
       def findDecoder(tag: String): Option[Decoder[ujson.Value, Either[A, B]]] =
-        taggedA.findDecoder(tag).map(Decoder.mapDecoded(_)(Left(_))) orElse
-        taggedB.findDecoder(tag).map(Decoder.mapDecoded(_)(Right(_)))
+        taggedA.findDecoder(tag).map(Decoder.sequentially(_)(a => Valid(Left(a)))) orElse
+        taggedB.findDecoder(tag).map(Decoder.sequentially(_)(b => Valid(Right(b))))
       def tagAndObj(value: Either[A, B]) = value match {
         case Left(a)  => taggedA.tagAndObj(a)
         case Right(b) => taggedB.tagAndObj(b)

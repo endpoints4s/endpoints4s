@@ -4,7 +4,7 @@ import endpoints.algebra
 
 trait JsonFromCodecTestApi
   extends algebra.Endpoints
-    with algebra.JsonEntitiesFromCodec {
+    with algebra.JsonEntitiesFromCodecs {
 
   implicit def userCodec: JsonCodec[User]
   implicit def addressCodec: JsonCodec[Address]

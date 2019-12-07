@@ -6,7 +6,7 @@ import io.circe.generic.JsonCodec
 trait DocumentedApi
   extends Endpoints
     with BasicAuthentication
-    with circe.JsonEntitiesFromCodec {
+    with circe.JsonEntitiesFromCodecs {
 
   val items =
     endpoint(

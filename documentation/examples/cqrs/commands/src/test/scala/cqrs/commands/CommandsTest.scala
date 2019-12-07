@@ -4,7 +4,7 @@ import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
 import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
-import endpoints.play.client.{Endpoints, JsonEntitiesFromCodec}
+import endpoints.play.client.{Endpoints, JsonEntitiesFromCodecs}
 import endpoints.play.server.PlayComponents
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
@@ -24,7 +24,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   object client
     extends Endpoints("http://localhost:9000", wsClient)
-      with JsonEntitiesFromCodec
+      with JsonEntitiesFromCodecs
       with CommandsEndpoints
 
   override def afterAll(): Unit = {

@@ -8,9 +8,9 @@ import io.circe.{Decoder, Encoder}
 
 //#endpoints
 import endpoints.algebra.Endpoints
-import endpoints.algebra.circe.JsonEntitiesFromCodec
+import endpoints.algebra.circe.JsonEntitiesFromCodecs
 
-trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodec {
+trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 
 //#microservice-endpoint-description
   /**

@@ -7,17 +7,17 @@ interface JsonEntities {
 interface JsonSchemas {
   type JsonSchema[A]
 }
-interface JsonEntitiesFromCodec {
+interface JsonEntitiesFromCodecs {
   type JsonCodec[A]
   type JsonRequest[A] = JsonCodec[A]
   type JsonResponse[A] = JsonCodec[A]
 }
-interface JsonSchemaEntities {
+interface JsonEntitiesFromSchemas {
   type JsonRequest[A] = JsonSchema[A]
   type JsonResponse[A] = JsonSchema[A]
 }
 Endpoints <|-- JsonEntities
-JsonEntities <|-- JsonSchemaEntities
-JsonSchemas <|-- JsonSchemaEntities
-JsonEntities <|-- JsonEntitiesFromCodec
+JsonEntities <|-- JsonEntitiesFromSchemas
+JsonSchemas <|-- JsonEntitiesFromSchemas
+JsonEntities <|-- JsonEntitiesFromCodecs
 @enduml

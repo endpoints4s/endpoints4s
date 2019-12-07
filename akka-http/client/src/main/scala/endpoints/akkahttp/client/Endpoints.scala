@@ -3,7 +3,7 @@ package endpoints.akkahttp.client
 import akka.http.scaladsl.model.HttpHeader.ParsingResult
 import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
-import endpoints.algebra.{Codec, Documentation}
+import endpoints.algebra.{Decoder, Documentation}
 import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -133,7 +133,7 @@ trait EndpointsWithCustomErrors
         .map(settings.stringContentExtractor)
         .map(Right.apply)
 
-  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] = { entity =>
+  def stringCodecResponse[A](implicit codec: Decoder[String, A]): ResponseEntity[A] = { entity =>
     for {
       strictEntity <- entity.toStrict(settings.toStrictTimeout)
     } yield {

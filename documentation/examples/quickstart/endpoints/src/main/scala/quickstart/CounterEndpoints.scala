@@ -10,7 +10,7 @@ import endpoints.{algebra, generic}
   */
 trait CounterEndpoints
   extends algebra.Endpoints
-    with algebra.JsonSchemaEntities
+    with algebra.JsonEntitiesFromSchemas
     with generic.JsonSchemas {
 
   /**
