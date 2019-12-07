@@ -1,7 +1,5 @@
 package endpoints.playjson
 
-import java.util.UUID
-
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -116,8 +114,6 @@ trait JsonSchemas
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
-  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
-
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 
   implicit def intJsonSchema: JsonSchema[Int] = JsonSchema(implicitly, implicitly)
@@ -171,23 +167,21 @@ trait JsonSchemas
     def tagAndJson(a: A): (String, JsObject)
     def findReads(tagName: String): Option[Reads[A]]
 
-    def reads: Reads[A] = new Reads[A] {
-      override def reads(json: JsValue): JsResult[A] = json match {
-        case jsObject@JsObject(kvs) =>
-          kvs.get(discriminator) match {
-            case Some(JsString(tag)) =>
-              findReads(tag) match {
-                case Some(reads) => reads.reads(jsObject)
-                case None => JsError(s"no Reads for tag '$tag': $json")
-              }
-            case _ =>
-              JsError(s"expected discriminator field '$discriminator', but not found in: $json")
-          }
-        case _ => JsError(s"expected JSON object for tagged type, but found: $json")
-      }
+    final def reads: Reads[A] = {
+      case jsObject @ JsObject(kvs) =>
+        kvs.get(discriminator) match {
+          case Some(JsString(tag)) =>
+            findReads(tag) match {
+              case Some(reads) => reads.reads(jsObject)
+              case None => JsError(s"no Reads for tag '$tag': $jsObject")
+            }
+          case _ =>
+            JsError(s"expected discriminator field '$discriminator', but not found in: $jsObject")
+        }
+      case json => JsError(s"expected JSON object for tagged type, but found: $json")
     }
 
-    def writes: OWrites[A] = new OWrites[A] {
+    final def writes: OWrites[A] = new OWrites[A] {
       override def writes(a: A): JsObject = {
         val (tag, json) = tagAndJson(a)
         json + (discriminator -> JsString(tag))

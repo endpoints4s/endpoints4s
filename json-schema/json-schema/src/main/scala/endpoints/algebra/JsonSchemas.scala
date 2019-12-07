@@ -5,6 +5,7 @@ import java.util.UUID
 import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
 
 import scala.collection.compat._
+import scala.util.control.Exception
 
 /**
   * An algebra interface for describing algebraic data types. Such descriptions
@@ -145,7 +146,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     assert(encoded.size == decoded.size, "Enumeration values must have different string representation")
     enumeration(values)(
       tpe.xmapPartial { str =>
-        Validated.fromOption(decoded.get(str))(s"Invalid value ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
+        Validated.fromOption(decoded.get(str))(s"Invalid value: ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
       } (encode)
     )
   }
@@ -280,7 +281,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for type `UUID`
     * @group operations
     */
-  implicit def uuidJsonSchema: JsonSchema[UUID]
+  implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
+    stringJsonSchema.xmapPartial { str =>
+      Validated.fromEither(
+        Exception.nonFatalCatch.either(UUID.fromString(str))
+          .left.map(_ => s"Invalid UUID value: '$str'." :: Nil)
+      )
+    } (_.toString)
 
   /** A JSON schema for type `String`
     * @group operations

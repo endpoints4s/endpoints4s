@@ -1,8 +1,6 @@
 package endpoints
 package circe
 
-import java.util.UUID
-
 import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
@@ -71,12 +69,12 @@ trait JsonSchemas
     def discriminator: String = defaultDiscriminatorName
     def taggedEncoded(a: A): (String, JsonObject)
     def taggedDecoder(tag: String): Option[Decoder[A]]
-    def encoder: Encoder.AsObject[A] =
+    final def encoder: Encoder.AsObject[A] =
       Encoder.AsObject.instance { a =>
         val (tag, json) = taggedEncoded(a)
         (discriminator -> Json.fromString(tag)) +: json
       }
-    def decoder: Decoder[A] =
+    final def decoder: Decoder[A] =
       Decoder.instance { cursor =>
         cursor.as[JsonObject].right.flatMap { jsonObject =>
           jsonObject(discriminator).flatMap(_.asString) match {
@@ -193,8 +191,6 @@ trait JsonSchemas
   }
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
-
-  implicit def uuidJsonSchema: JsonSchema[UUID] = JsonSchema(implicitly, implicitly)
 
   implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
 

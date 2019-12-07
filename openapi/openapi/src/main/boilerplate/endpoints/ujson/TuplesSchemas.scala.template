@@ -1,12 +1,16 @@
 package endpoints.ujson
 
-import endpoints.algebra
+import endpoints.{ algebra, Invalid }
 
 trait TuplesSchemas extends algebra.TuplesSchemas { this: JsonSchemas =>
   [2..#
   implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])] =
     new JsonSchema[([#T1#])] {
-      val codec = { case ([#t1#]) => ujson.Arr([#schema1.codec.encode(t1)#]) }
+      val decoder = {
+        case ujson.Arr(items) if items.length == 1 => [#schema1.decoder.decode(items(0))# zip ]
+        case json => Invalid(s"Invalid JSON array of 1 elements: $json.")
+      }
+      val encoder = { case ([#t1#]) => ujson.Arr([#schema1.encoder.encode(t1)#]) }
     }#
     ]
 

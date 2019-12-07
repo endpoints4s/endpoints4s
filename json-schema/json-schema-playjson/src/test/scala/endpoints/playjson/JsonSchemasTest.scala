@@ -319,7 +319,7 @@ class JsonSchemasTest extends FreeSpec {
     assertError(
       colorSchema,
       JsString("yellow"),
-      "Invalid value yellow. Valid values are Red, Blue."
+      "Invalid value: yellow. Valid values are Red, Blue."
     )
   }
 
@@ -327,7 +327,7 @@ class JsonSchemasTest extends FreeSpec {
     assertError(
       colorSchema,
       JsString("Green"),
-      "Invalid value Green. Valid values are Red, Blue."
+      "Invalid value: Green. Valid values are Red, Blue."
     )
   }
 

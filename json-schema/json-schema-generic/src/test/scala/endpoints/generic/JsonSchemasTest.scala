@@ -108,8 +108,6 @@ class JsonSchemasTest extends FreeSpec {
           override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
         }
 
-      lazy val uuidJsonSchema: String = "uuid"
-
       lazy val stringJsonSchema: String = "string"
 
       lazy val intJsonSchema: String = "integer"
