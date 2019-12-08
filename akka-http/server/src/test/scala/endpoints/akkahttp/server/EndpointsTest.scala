@@ -5,9 +5,10 @@ import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import endpoints.algebra
-import org.scalatest.{Matchers, WordSpec}
 
 import scala.concurrent.Future
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 /* defines the common api to implement */
 trait EndpointsTestApi extends Endpoints
@@ -19,7 +20,7 @@ trait EndpointsTestApi extends Endpoints
 class EndpointsEntitiesTestApi extends EndpointsTestApi
   with JsonEntities
 
-class EndpointsTest extends WordSpec with Matchers with ScalatestRouteTest {
+class EndpointsTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
 
   object TestRoutes extends EndpointsEntitiesTestApi {
 

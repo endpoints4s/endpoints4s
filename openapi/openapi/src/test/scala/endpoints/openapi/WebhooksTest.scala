@@ -2,9 +2,10 @@ package endpoints.openapi
 
 import endpoints.openapi.model.{Info, OpenApi}
 import endpoints.{algebra, openapi}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class WebhooksTest extends WordSpec with Matchers {
+class WebhooksTest extends AnyWordSpec with Matchers {
 
   case class Message(value: String)
 

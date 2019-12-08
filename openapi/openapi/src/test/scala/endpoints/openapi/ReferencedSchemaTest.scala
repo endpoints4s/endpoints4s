@@ -3,9 +3,10 @@ package endpoints.openapi
 import endpoints.generic.discriminator
 import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ReferencedSchemaTest extends WordSpec with Matchers {
+class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
   @discriminator("storageType")
   sealed trait Storage

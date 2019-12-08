@@ -7,10 +7,11 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
 import akka.stream.{ActorMaterializer, Materializer}
 import akka.http.scaladsl.server.Directives._
-import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
+import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
+import org.scalatest.freespec.AsyncFreeSpec
 
 class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
 

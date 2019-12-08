@@ -1,12 +1,13 @@
 package authentication
 
 import endpoints.play.server.PlayComponents
-import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
+import org.scalatest.BeforeAndAfterAll
 import pdi.jwt.JwtSession
 import play.api.{Configuration, Mode}
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
+import org.scalatest.freespec.AsyncFreeSpec
 
 class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
 

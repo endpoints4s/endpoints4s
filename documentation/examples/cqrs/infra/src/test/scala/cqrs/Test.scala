@@ -10,13 +10,14 @@ import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.publicserver.{BootstrapEndpoints, PublicEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
 import endpoints.play.client.{Endpoints, JsonEntitiesFromCodecs}
-import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
+import org.scalatest.BeforeAndAfterAll
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.api.routing.Router
 
 import scala.collection.immutable.SortedMap
 import scala.math.BigDecimal
+import org.scalatest.freespec.AsyncFreeSpec
 
 class Test extends AsyncFreeSpec with BeforeAndAfterAll {
 

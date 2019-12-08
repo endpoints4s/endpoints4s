@@ -1,6 +1,6 @@
 package endpoints.xhr
 
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
 // Separation of the Algebra here is important, due to implementation details
 // of the underlying representation of header in the xhr algebra.
@@ -16,7 +16,7 @@ object Fixtures extends FixturesAlgebra with thenable.Endpoints
 
 // TODO try to use traits defined in algebra tests.
 // It cannot be simply reused because dependency on wiremock which is not available for js
-class EndpointsTest extends FreeSpec {
+class EndpointsTest extends AnyFreeSpec {
 
   "href" in {
     assert("/foo/hello%20world" == Fixtures.foo.href("hello world"))

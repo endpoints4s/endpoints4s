@@ -5,7 +5,8 @@ import akka.http.scaladsl.model.StatusCodes.{BadRequest, OK}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import endpoints.algebra.User
 import endpoints.generic
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 class EndpointsJsonSchemaTestApi
   extends Endpoints
@@ -13,7 +14,7 @@ class EndpointsJsonSchemaTestApi
   with JsonEntitiesFromSchemas
 
 
-class EndpointsJsonSchemaTest extends WordSpec with Matchers with ScalatestRouteTest {
+class EndpointsJsonSchemaTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
 
   val testRoutes = new EndpointsJsonSchemaTestApi {
 
