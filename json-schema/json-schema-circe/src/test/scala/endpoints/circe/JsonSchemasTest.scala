@@ -2,9 +2,9 @@ package endpoints
 package circe
 
 import io.circe.{DecodingFailure, Json}
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class JsonSchemasTest extends FreeSpec {
+class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec
     extends algebra.JsonSchemasTest

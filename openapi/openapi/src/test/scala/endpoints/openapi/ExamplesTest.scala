@@ -2,9 +2,10 @@ package endpoints.openapi
 
 import endpoints.openapi.model.OpenApi
 import endpoints.{algebra, openapi}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ExamplesTest extends WordSpec with Matchers {
+class ExamplesTest extends AnyWordSpec with Matchers {
 
   "Schemas" should {
 

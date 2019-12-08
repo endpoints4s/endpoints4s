@@ -89,7 +89,7 @@ object EndpointsSettings {
   val playVersion = "2.7.4"
   val sttpVersion = "1.7.2"
 
-  val scalaTestVersion = "3.0.8"
+  val scalaTestVersion = "3.1.0"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(

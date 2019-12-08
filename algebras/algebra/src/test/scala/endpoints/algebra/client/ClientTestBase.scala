@@ -6,12 +6,14 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import endpoints.algebra
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-trait ClientTestBase[T <: algebra.Endpoints] extends WordSpec
+trait ClientTestBase[T <: algebra.Endpoints] extends AnyWordSpec
   with Matchers
   with ScalaFutures
   with BeforeAndAfterAll

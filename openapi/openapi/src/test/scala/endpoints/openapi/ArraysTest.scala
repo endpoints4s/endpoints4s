@@ -2,9 +2,10 @@ package endpoints.openapi
 
 import endpoints.openapi.model.{Info, OpenApi}
 import endpoints.{algebra, openapi}
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class ArraysTest extends WordSpec with Matchers {
+class ArraysTest extends AnyWordSpec with Matchers {
 
   trait Arrays extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
 

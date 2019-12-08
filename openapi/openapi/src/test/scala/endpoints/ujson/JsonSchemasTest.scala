@@ -3,9 +3,9 @@ package endpoints.ujson
 import java.util.UUID
 
 import endpoints.{Invalid, Valid, algebra}
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class JsonSchemasTest extends FreeSpec {
+class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec extends algebra.JsonSchemasTest with endpoints.ujson.JsonSchemas
   import JsonSchemasCodec._

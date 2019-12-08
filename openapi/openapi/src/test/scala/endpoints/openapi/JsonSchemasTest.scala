@@ -1,9 +1,9 @@
 package endpoints.openapi
 
 import endpoints.algebra
-import org.scalatest.FreeSpec
+import org.scalatest.freespec.AnyFreeSpec
 
-class JsonSchemasTest extends FreeSpec {
+class JsonSchemasTest extends AnyFreeSpec {
 
   object DocumentedJsonSchemas
     extends algebra.JsonSchemasTest

@@ -1,9 +1,9 @@
 package endpoints.playjson
 
-import org.scalatest.FreeSpec
 import play.api.libs.json._
+import org.scalatest.freespec.AnyFreeSpec
 
-class JsonSchemasTest extends FreeSpec {
+class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec
     extends endpoints.algebra.JsonSchemasTest

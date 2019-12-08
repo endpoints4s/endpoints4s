@@ -2,11 +2,13 @@ package endpoints.algebra.server
 
 import endpoints.algebra
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll, Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
 
 import scala.concurrent.duration._
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-trait ServerTestBase[T <: algebra.Endpoints] extends WordSpec
+trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
   with Matchers
   with ScalaFutures
   with BeforeAndAfterAll

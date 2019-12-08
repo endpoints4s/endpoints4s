@@ -1,11 +1,11 @@
 package endpoints
 package generic
 
-import org.scalatest.FreeSpec
 
 import scala.collection.compat._
+import org.scalatest.freespec.AnyFreeSpec
 
-class JsonSchemasTest extends FreeSpec {
+class JsonSchemasTest extends AnyFreeSpec {
 
   trait GenericSchemas extends JsonSchemas {
 

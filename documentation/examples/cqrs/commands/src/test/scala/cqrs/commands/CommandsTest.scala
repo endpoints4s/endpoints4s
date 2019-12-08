@@ -3,7 +3,7 @@ package cqrs.commands
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
-import org.scalatest.{AsyncFreeSpec, BeforeAndAfterAll}
+import org.scalatest.BeforeAndAfterAll
 import endpoints.play.client.{Endpoints, JsonEntitiesFromCodecs}
 import endpoints.play.server.PlayComponents
 import play.api.Mode
@@ -12,6 +12,7 @@ import play.core.server.{NettyServer, ServerConfig}
 
 import scala.concurrent.Future
 import scala.math.BigDecimal
+import org.scalatest.freespec.AsyncFreeSpec
 
 class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
