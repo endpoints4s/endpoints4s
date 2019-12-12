@@ -14,7 +14,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "case class" in {
     val expectedSchema =
       DocumentedRecord(
-        Field("name", DocumentedJsonSchemas.stringJsonSchema.docs, isOptional = false, documentation = Some("Name of the user")) ::
+        Field("name", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = Some("Name of the user")) ::
         Field("age", DocumentedJsonSchemas.intJsonSchema.docs, isOptional = false, documentation = None) ::
         Nil
       )
@@ -24,7 +24,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "sealed trait" in {
     val expectedSchema =
       DocumentedCoProd(
-        ("Bar", DocumentedRecord(Field("s", DocumentedJsonSchemas.stringJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
+        ("Bar", DocumentedRecord(Field("s", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
         ("Baz", DocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
         ("Bax", DocumentedRecord(Nil)) ::
         ("Qux", DocumentedRecord(Nil)) ::
@@ -36,7 +36,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "enum" in {
     val expectedSchema =
-      DocumentedEnum(DocumentedJsonSchemas.stringJsonSchema.docs, ujson.Str("Red") :: ujson.Str("Blue") :: Nil, Some("Color"))
+      DocumentedEnum(DocumentedJsonSchemas.defaultStringJsonSchema.docs, ujson.Str("Red") :: ujson.Str("Blue") :: Nil, Some("Color"))
     assert(DocumentedJsonSchemas.Enum.colorSchema.docs == expectedSchema)
   }
 
@@ -44,7 +44,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     val expectedSchema =
       DocumentedEnum(
         DocumentedRecord(
-          Field("quux", DocumentedJsonSchemas.stringJsonSchema.docs, isOptional = false, documentation = None) :: Nil
+          Field("quux", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = None) :: Nil
         ),
         ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj("quux" -> ujson.Str("baz")) :: Nil,
         None
@@ -65,7 +65,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "tuple" in {
-    val expected = Array(Right(DocumentedJsonSchemas.booleanJsonSchema.docs :: DocumentedJsonSchemas.intJsonSchema.docs :: DocumentedJsonSchemas.stringJsonSchema.docs :: Nil))
+    val expected = Array(Right(DocumentedJsonSchemas.booleanJsonSchema.docs :: DocumentedJsonSchemas.intJsonSchema.docs :: DocumentedJsonSchemas.defaultStringJsonSchema.docs :: Nil))
     assert(DocumentedJsonSchemas.boolIntString.docs == expected)
   }
 

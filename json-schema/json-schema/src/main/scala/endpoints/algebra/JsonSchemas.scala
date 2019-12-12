@@ -281,18 +281,27 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for type `UUID`
     * @group operations
     */
-  implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
-    stringJsonSchema.xmapPartial { str =>
+  final implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
+    stringJsonSchema(format = Some("uuid")).xmapPartial { str =>
       Validated.fromEither(
         Exception.nonFatalCatch.either(UUID.fromString(str))
           .left.map(_ => s"Invalid UUID value: '$str'." :: Nil)
       )
     } (_.toString)
 
+  /**
+    * A JSON schema for type `String`.
+    *
+    * @param format An additional semantic information about the underlying format of the string
+    * @see [[https://json-schema.org/understanding-json-schema/reference/string.html#format]]
+    * @group operations
+    */
+  def stringJsonSchema(format: Option[String]): JsonSchema[String]
+
   /** A JSON schema for type `String`
     * @group operations
     */
-  implicit def stringJsonSchema: JsonSchema[String]
+  final implicit def defaultStringJsonSchema: JsonSchema[String] = stringJsonSchema(format = None)
 
   /** A JSON schema for type `Int`
     * @group operations

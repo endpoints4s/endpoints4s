@@ -184,7 +184,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
-  implicit def stringJsonSchema: JsonSchema[String] = new JsonSchema[String] {
+  def stringJsonSchema(format: Option[String]): JsonSchema[String] = new JsonSchema[String] {
     val decoder = {
       case ujson.Str(str) => Valid(str)
       case json           => Invalid(s"Invalid string value: $json.")

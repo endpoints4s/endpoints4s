@@ -1,5 +1,7 @@
 package endpoints.openapi
 
+import java.util.UUID
+
 import endpoints.generic.discriminator
 import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
@@ -18,7 +20,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
   case class Author(name: String)
 
-  case class Book(id: Int, title: String, author: Author, isbnCodes: List[String], storage: Storage)
+  case class Book(id: UUID, title: String, author: Author, isbnCodes: List[String], storage: Storage)
 
   object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonEntitiesFromSchemas with openapi.BasicAuthentication {
 
@@ -204,8 +206,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |            ]
         |          },
         |          "id" : {
-        |            "type" : "integer",
-        |            "format" : "int32"
+        |            "type" : "string",
+        |            "format" : "uuid"
         |          },
         |          "storage" : {
         |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"

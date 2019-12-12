@@ -1,7 +1,5 @@
 package endpoints.openapi
 
-import java.util.UUID
-
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.{Documentation, Encoder}
 import endpoints.openapi.model.Schema
@@ -193,14 +191,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
     )
   }
 
-  override lazy val uuidJsonSchema: JsonSchema[UUID] =
-    new JsonSchema(
-      ujsonSchemas.uuidJsonSchema,
-      Primitive("string", format = Some("uuid"))
-    )
-
-  lazy val stringJsonSchema: JsonSchema[String] =
-    new JsonSchema(ujsonSchemas.stringJsonSchema, Primitive("string"))
+  def stringJsonSchema(format: Option[String]): JsonSchema[String] =
+    new JsonSchema(ujsonSchemas.stringJsonSchema(format), Primitive("string", format))
 
   lazy val intJsonSchema: JsonSchema[Int] =
     new JsonSchema(ujsonSchemas.intJsonSchema, Primitive("integer", format = Some("int32")))

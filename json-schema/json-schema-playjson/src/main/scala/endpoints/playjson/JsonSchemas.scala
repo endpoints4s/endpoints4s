@@ -114,7 +114,7 @@ trait JsonSchemas
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
-  implicit def stringJsonSchema: JsonSchema[String] = JsonSchema(implicitly, implicitly)
+  def stringJsonSchema(format: Option[String]): JsonSchema[String] = JsonSchema(implicitly, implicitly)
 
   implicit def intJsonSchema: JsonSchema[Int] = JsonSchema(implicitly, implicitly)
 
