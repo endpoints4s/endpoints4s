@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import akka.testkit.TestKit
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
 import endpoints.algebra.{Address, BasicAuthTestApi, JsonTestApi, User}
@@ -26,7 +26,6 @@ class AkkaHttpClientEndpointsJsonSchemaTest
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 
   implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
