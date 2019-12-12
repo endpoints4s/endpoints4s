@@ -6,6 +6,8 @@ import endpoints.openapi.model._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
+import scala.util.Random
+
 //TODO cover tests from algebra package
 class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
@@ -128,6 +130,27 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       Fixtures.documentation.paths("/textRequestEndpoint").operations("post").deprecated shouldBe true
     }
   }
+
+  "Fields order" in {
+    import Fixtures.{emptyRecord, endpoint, field, get, jsonResponse, ok, path, openApi, Record, Request}
+    for {
+      // Run the test 50 times
+      _      <- 1 to 50
+      // Create an object schema with 15 properties
+      length  = 15
+      // Property names are random
+      keys    = List.fill(length)(Random.nextString(10))
+      schema  = keys.foldLeft[Record[_]](emptyRecord)((schema, key) => schema.zip(field[Int](key))).named("Resource")
+      item    = endpoint(get(path): Request[Unit], ok(jsonResponse(schema)))
+      docs    = openApi(Info("test", "0.0.0"))(item)
+      json    = ujson.read(OpenApi.stringEncoder.encode(docs))
+    } {
+      json("components")("schemas")("Resource")("properties").obj.toList shouldBe (
+        keys.map(key => (key, ujson.Obj("type" -> ujson.Str("integer"), "format" -> ujson.Str("int32"))))
+      )
+    }
+  }
+
 }
 
 trait Fixtures extends algebra.Endpoints {
