@@ -53,7 +53,7 @@ lazy val `json-schema-playjson` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema-playjson"))
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-json-schema-playjson",
       libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"

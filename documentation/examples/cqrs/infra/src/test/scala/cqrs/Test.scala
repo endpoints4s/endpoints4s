@@ -3,7 +3,7 @@ package cqrs
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import cqrs.commands.Commands
 import cqrs.infra.PlayService
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
@@ -24,8 +24,7 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
   def baseUrl(port: Int): String = s"http://localhost:$port"
 
   val actorSystem: ActorSystem = ActorSystem()
-  val materializer: Materializer = ActorMaterializer()(actorSystem)
-  val wsClient = AhcWSClient(AhcWSClientConfig())(materializer)
+  val wsClient = AhcWSClient(AhcWSClientConfig())(Materializer.matFromSystem(actorSystem))
 
   object commandsServer extends PlayService(9000, Mode.Test) {
     lazy val commands = new Commands(playComponents)
