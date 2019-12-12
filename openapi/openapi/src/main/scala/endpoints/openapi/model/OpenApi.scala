@@ -29,7 +29,9 @@ object OpenApi {
       case Schema.Object(properties, additionalProperties, _, _) =>
         fields ++= List(
           "type"       -> "object",
-          "properties" -> mapJson(properties.iterator.map(p => p.name -> p.schema.withDefinedDescription(p.description)).toMap)(schemaJson)
+          "properties" -> new ujson.Obj(mutable.LinkedHashMap(
+            properties.map(p => p.name -> schemaJson(p.schema.withDefinedDescription(p.description))): _*
+          ))
         )
         val required = properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
