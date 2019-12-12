@@ -131,25 +131,15 @@ trait JsonSchemas
   implicit def byteJsonSchema: JsonSchema[Byte] = JsonSchema(implicitly, implicitly)
 
   implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit jsonSchema: JsonSchema[A], factory: Factory[A, C[A]]): JsonSchema[C[A]] =
-    JsonSchema(
-      new Reads[C[A]] {
-        override def reads(json: JsValue): JsResult[C[A]] = json match {
-          case JsArray(values) =>
-            val builder = factory.newBuilder
-            builder.sizeHint(values)
-            values.foldLeft[JsResult[collection.mutable.Builder[A, C[A]]]](JsSuccess(builder)) {
-              case (acc, value) => (acc and jsonSchema.reads.reads(value))((b, a) => b += a)
-            }.map(_.result())
-          case other => JsError("expected JsArray, but was: " + other)
-        }
-      },
-      Writes.traversableWrites(jsonSchema.writes)
+    JsonSchema[C[A]](
+      Reads.traversableReads(factory, jsonSchema.reads),
+      Writes.iterableWrites2[A, C[A]](implicitly, jsonSchema.writes)
     )
 
   implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]] =
     JsonSchema(
       Reads.mapReads(jsonSchema.reads),
-      Writes.mapWrites(jsonSchema.writes)
+      Writes.genericMapWrites(jsonSchema.writes)
     )
 
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = {
