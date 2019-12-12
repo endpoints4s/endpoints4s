@@ -1,7 +1,7 @@
 package endpoints.akkahttp.client
 
 import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.Materializer
 import akka.testkit.TestKit
 import endpoints.algebra
 
@@ -25,7 +25,6 @@ class AkkaHttpClientEndpointsTest
 {
 
   implicit val system = ActorSystem()
-  implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
   val client: TestClient = new TestClient(EndpointsSettings(AkkaHttpRequestExecutor.cachedHostConnectionPool("localhost", wiremockPort)))

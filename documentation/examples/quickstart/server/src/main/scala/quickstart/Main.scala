@@ -4,14 +4,12 @@ package quickstart
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
-import akka.stream.{ActorMaterializer, Materializer}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("server-system")
-  implicit val materializer: Materializer = ActorMaterializer()
   val routes = CounterServer.routes ~ DocumentationServer.routes
   val binding = Http().bindAndHandle(routes, "0.0.0.0", 8000)
   sys.addShutdownHook {

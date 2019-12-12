@@ -5,7 +5,6 @@ import java.net.ServerSocket
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
-import akka.stream.{ActorMaterializer, Materializer}
 import akka.http.scaladsl.server.Directives._
 import org.scalatest.BeforeAndAfterAll
 
@@ -16,7 +15,6 @@ import org.scalatest.freespec.AsyncFreeSpec
 class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   implicit val actorSystem: ActorSystem = ActorSystem()
-  implicit val materializer: Materializer = ActorMaterializer()
   val routes = CounterServer.routes ~ DocumentationServer.routes
   val interface = "0.0.0.0"
   val port = findOpenPort()
