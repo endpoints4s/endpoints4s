@@ -6,7 +6,7 @@ val `json-schema` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema"))
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency,
       libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.2",
@@ -21,7 +21,7 @@ lazy val `json-schema-generic` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("json-schema-generic"))
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-json-schema-generic",
       libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
       addScalaTestCrossDependency,

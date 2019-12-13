@@ -6,7 +6,7 @@ val algebra =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra"))
     .settings(
       publishSettings,
-      `scala 2.11 to latest`,
+      `scala 2.12 to latest`,
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test,

@@ -21,7 +21,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
     decoder: Decoder[Transport, Resp]
   ): Unit =
     performXhr(request, response, encoder.encode(req))(
-      errorOrResp => onload(errorOrResp.right.flatMap(decoder.decode(_).asInstanceOf[Either[Throwable, req.Response]])),
+      errorOrResp => onload(errorOrResp.flatMap(decoder.decode(_).asInstanceOf[Either[Throwable, req.Response]])),
       onError
     )
 

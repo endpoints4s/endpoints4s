@@ -42,7 +42,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with R
 
     def call(args: Req): Either[Throwable, Resp] = {
       def mapPartialResponseEntity[A](entity: ResponseEntity[A])(f: A => Either[Throwable, Resp]): ResponseEntity[Resp] =
-        httpEntity => entity(httpEntity).right.flatMap(f)
+        httpEntity => entity(httpEntity).flatMap(f)
 
       val resp = request(args).asString
       val maybeResponse = response(resp)
@@ -54,7 +54,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with R
           .map(mapPartialResponseEntity(_)(serverError => Left(serverErrorToThrowable(serverError))))
       maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
         .toRight(new Throwable(s"Unexpected response status: ${resp.code}"))
-        .right.flatMap(_(resp.body))
+        .flatMap(_(resp.body))
     }
   }
 

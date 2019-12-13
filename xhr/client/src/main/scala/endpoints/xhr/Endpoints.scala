@@ -134,7 +134,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     mapPartialResponseEntity(entity)(a => Right(f(a)))
 
   private[xhr] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
-    xhr => entity(xhr).right.flatMap(f)
+    xhr => entity(xhr).flatMap(f)
 
   def stringCodecResponse[A](implicit codec: Decoder[String, A]): ResponseEntity[A] =
     xhr => codec.decode(xhr.responseText).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
@@ -193,7 +193,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       val maybeB =
         maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
           .toRight(new Exception(s"Unexpected response status: ${xhr.status}"))
-          .right.flatMap(_(xhr))
+          .flatMap(_(xhr))
       onload(maybeB)
     }
     xhr.onerror = _ => onerror(xhr)

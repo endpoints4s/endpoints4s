@@ -10,6 +10,6 @@ trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErr
         .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
   def serverErrorResponseEntity: ResponseEntity[Throwable] =
-    resp => clientErrorsResponseEntity(resp).right.map(invalid => new Throwable(invalid.errors.mkString(". ")))
+    resp => clientErrorsResponseEntity(resp).map(invalid => new Throwable(invalid.errors.mkString(". ")))
 
 }

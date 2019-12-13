@@ -37,9 +37,6 @@ jobs:
   include:
 
     - stage: test
-      scala: 2.11.12
-      script: sbt "++ $TRAVIS_SCALA_VERSION test"
-    - stage: test
       scala: 2.12.10
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
@@ -61,7 +58,7 @@ jobs:
         - chmod 600 ci/travis-key
         - eval "$(ssh-agent -s)"
         - ssh-add ci/travis-key
-        - sbt "++ 2.11.12 publishSigned" "++ 2.12.10 publishSigned" "++ 2.13.1 publishSigned" sonatypeReleaseAll "++ 2.12.10 manual/makeSite" manual/ghpagesPushSite
+        - sbt "++ 2.12.10 publishSigned" "++ 2.13.1 publishSigned" sonatypeReleaseAll "++ 2.12.10 manual/makeSite" manual/ghpagesPushSite
 
 env:
   global:

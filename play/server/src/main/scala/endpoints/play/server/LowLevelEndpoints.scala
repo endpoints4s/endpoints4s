@@ -15,7 +15,7 @@ trait LowLevelEndpoints extends algebra.LowLevelEndpoints with Endpoints {
     BodyParser { requestHeader =>
       val accumulator =
         playComponents.playBodyParsers.anyContent.apply(requestHeader)
-      accumulator.map(_.right.map(anyContent => Request(requestHeader, anyContent)))
+      accumulator.map(_.map(anyContent => Request(requestHeader, anyContent)))
     }
 
   /** An HTTP response is a Play `Result` */

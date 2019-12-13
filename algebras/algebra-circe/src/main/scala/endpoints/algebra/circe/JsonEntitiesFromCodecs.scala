@@ -67,7 +67,7 @@ trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
 
     def decode(from: String): Validated[A] =
       parser.parse(from).left.map(Show[ParsingFailure].show)
-        .right.flatMap { json =>
+        .flatMap { json =>
           codec.decoder.decodeJson(json).left.map(Show[DecodingFailure].show)
         }
         .fold(Invalid(_), Valid(_))

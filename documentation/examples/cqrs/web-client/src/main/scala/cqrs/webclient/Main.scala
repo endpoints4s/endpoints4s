@@ -37,7 +37,7 @@ object Main {
         val eventuallyCreatedMeter: Future[Meter] = PublicEndpoints.createMeter(CreateMeter(name))
         //#webapps-invocation
         eventuallyCreatedMeter.map { createdMeter =>
-          metersVar := metersVar.value + (createdMeter.id -> createdMeter)
+          metersVar.update(_ + (createdMeter.id -> createdMeter))
           input.value = ""
         }.handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))
         ()
@@ -53,7 +53,7 @@ object Main {
           case None => dom.window.alert("Unable to parse the value as a number")
           case Some(decimal) =>
             PublicEndpoints.addRecord((meter.id, AddRecord(Instant.now(), decimal))).map { updatedMeter =>
-              metersVar := metersVar.value + (updatedMeter.id -> updatedMeter)
+              metersVar.update(_ + (updatedMeter.id -> updatedMeter))
             }.handleError(error => dom.window.alert(s"Unable to add the value (error is $error)"))
             ()
         }
@@ -74,7 +74,7 @@ object Main {
             } else {
               <div>
                 {
-                  meters.to[Seq].map { case (_, meter) =>
+                  meters.toSeq.map { case (_, meter) =>
                     <section>
                       <h2>{ meter.label }</h2>
                       <p>
@@ -84,8 +84,8 @@ object Main {
                           </thead>
                           <tbody>
                             {
-                              meter.timeSeries.to[Seq].map { case (instant, value) =>
-                                <tr><td>{ instant.toString }</td><td>{ value.toString }</td></tr>
+                              meter.timeSeries.toSeq.map { case (instant, value) =>
+                                <tr><td>{ instant.toString() }</td><td>{ value.toString() }</td></tr>
                               }
                             }
                           </tbody>

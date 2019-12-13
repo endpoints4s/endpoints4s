@@ -59,7 +59,7 @@ val manual =
     .enablePlugins(OrnatePlugin, GhpagesPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12`,
+      `scala 2.12`, // Ornate does not support Scala 2.13
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:julienrf/endpoints.git",
       ornateSettings := Map("version" -> version.value),
@@ -79,7 +79,7 @@ val manual =
 val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
-    .settings(noPublishSettings, `scala 2.11 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -214,11 +214,11 @@ val `example-cqrs-web-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12`,
+      `scala 2.12 to latest`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "in.nvilla" %%% "monadic-html" % "0.2.3",
+        "in.nvilla" %%% "monadic-html" % "0.4.0",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
       ),
@@ -232,7 +232,7 @@ val `example-cqrs-public-server` =
   project.in(file("examples/cqrs/public-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12`,
+      `scala 2.12 to latest`,
       unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile)).map(_.data).value,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -290,7 +290,7 @@ val `example-cqrs-queries` =
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
 val `example-cqrs` =
   project.in(file("examples/cqrs/infra"))
-    .settings(noPublishSettings, `scala 2.12`)
+    .settings(noPublishSettings, `scala 2.12 to latest`)
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
