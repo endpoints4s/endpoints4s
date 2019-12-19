@@ -40,7 +40,7 @@ trait JsonEntitiesFromSchemas
 
 /**
   * Interpreter for [[algebra.JsonEntities]] that decodes JSON entities with a
-  * [[Decoder]] and encodes JSON entities with an [[Encoder]].
+  * [[algebra.Decoder]] and encodes JSON entities with an [[algebra.Encoder]].
   *
   * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
   * you only need an encoder to build responses, or a decoder to decode requests.

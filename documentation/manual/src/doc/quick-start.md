@@ -1,7 +1,7 @@
 # Quick start
 
-The central idea of the *endpoints* library is that you first describe your
-communication endpoints and then the library provides you:
+The central idea of the *endpoints* library is that you first define an abstract
+description of your HTTP endpoints and then the library provides:
 
 - a server implementation decoding requests and building responses,
 - a client implementation building requests and decoding responses,
@@ -104,7 +104,7 @@ And also:
 ~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala#increment
 ~~~
 
-As you can see, invoking an endpoint is as easy as calling a method on the `CounterClient` object.
+As you can see, invoking an endpoint consists of calling a function on the `CounterClient` object.
 The *endpoints* library then builds an HTTP request (according to the endpoint description), sends
 it to the server, and eventually decodes the HTTP response (according to the endpoint description).
 
@@ -146,9 +146,9 @@ Define the following `Main` object:
 ~~~
 
 You can then browse the
-[http://localhost:9000/current-value](http://localhost:9000/current-value)
+[http://localhost:8000/current-value](http://localhost:8000/current-value)
 URL to query the counter value, or the
-[http://localhost:9000/documentation.json](http://localhost:9000/current-value)
+[http://localhost:8000/documentation.json](http://localhost:8000/current-value)
 URL to get the generated OpenAPI documentation, which should look like
 the following:
 
@@ -267,3 +267,7 @@ the following:
   }
 }
 ~~~ 
+
+## Next Step
+
+Learn about the [design principles](design.md) of the _endpoints_ library.
