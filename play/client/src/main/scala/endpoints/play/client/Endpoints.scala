@@ -113,7 +113,7 @@ trait EndpointsWithCustomErrors
     mapPartialResponseEntity(entity)(a => Right(f(a)))
 
   private[client] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
-    wsResp => entity(wsResp).right.flatMap(f)
+    wsResp => entity(wsResp).flatMap(f)
 
   /** Discards response entity */
   def emptyResponse: ResponseEntity[Unit] =
@@ -150,8 +150,7 @@ trait EndpointsWithCustomErrors
     a =>
       request(a).flatMap { wsResp =>
         futureFromEither(
-          decodeResponse(response, wsResp)
-            .right.flatMap(entity => entity(wsResp))
+          decodeResponse(response, wsResp).flatMap(entity => entity(wsResp))
         )
       }
 

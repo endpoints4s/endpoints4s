@@ -25,7 +25,7 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
   def jsonRequest[A : CirceDecoder]: RequestEntity[A] =
     playComponents.playBodyParsers.tolerantText.validate { text =>
       parser.parse(text).left.map(Show[ParsingFailure].show)
-        .right.flatMap { json =>
+        .flatMap { json =>
           CirceDecoder[A].decodeJson(json).left.map(Show[DecodingFailure].show)
         }
         .left.map(error => handleClientErrors(Invalid(error)))

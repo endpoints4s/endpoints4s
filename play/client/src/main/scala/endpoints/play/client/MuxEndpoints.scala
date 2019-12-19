@@ -23,8 +23,8 @@ trait MuxEndpoints extends algebra.Endpoints { self: EndpointsWithCustomErrors =
     ): Future[req.Response] =
       request(encoder.encode(req)).flatMap { wsResponse =>
         futureFromEither(
-          decodeResponse(response, wsResponse).right.flatMap { entity =>
-            entity(wsResponse).right.flatMap { t =>
+          decodeResponse(response, wsResponse).flatMap { entity =>
+            entity(wsResponse).flatMap { t =>
               decoder.decode(t)
                 .fold(resp => Right(resp.asInstanceOf[req.Response]), errors => Left(new Exception(errors.mkString(". "))))
             }

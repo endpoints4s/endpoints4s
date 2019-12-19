@@ -68,7 +68,7 @@ trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
       (Try(Json.parse(from)) match {
         case Failure(_) => Left(Invalid("Unable to parse entity as JSON"))
         case Success(a) => Right(a)
-      }).right.flatMap { json =>
+      }).flatMap { json =>
           def showErrors(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]): Invalid =
             Invalid((
               for {
@@ -78,7 +78,7 @@ trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
             ).toSeq)
           Json.fromJson[A](json).asEither
             .left.map(showErrors)
-            .right.map(Valid(_))
+            .map(Valid(_))
         }.merge
 
     def encode(from: A): String = Json.stringify(Json.toJson(from))

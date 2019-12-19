@@ -119,7 +119,7 @@ trait EndpointsWithCustomErrors
     mapPartialResponseEntity(entity)(a => Right(f(a)))
 
   private[client] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
-    httpEntity => entity(httpEntity).map(_.right.flatMap(f))
+    httpEntity => entity(httpEntity).map(_.flatMap(f))
 
   def emptyResponse: ResponseEntity[Unit] =
     entity => {

@@ -76,7 +76,7 @@ trait JsonSchemas
       }
     final def decoder: Decoder[A] =
       Decoder.instance { cursor =>
-        cursor.as[JsonObject].right.flatMap { jsonObject =>
+        cursor.as[JsonObject].flatMap { jsonObject =>
           jsonObject(discriminator).flatMap(_.asString) match {
             case Some(tag) =>
               taggedDecoder(tag) match {

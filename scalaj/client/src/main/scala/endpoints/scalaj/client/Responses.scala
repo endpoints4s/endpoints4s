@@ -14,7 +14,7 @@ trait Responses extends algebra.Responses with StatusCodes { this: algebra.Error
   implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
-        resp => fa(resp).map(entity => s => entity(s).right.map(f))
+        resp => fa(resp).map(entity => s => entity(s).map(f))
     }
 
   type ResponseEntity[A] = String => Either[Throwable, A]
@@ -32,7 +32,7 @@ trait Responses extends algebra.Responses with StatusCodes { this: algebra.Error
 
   def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     resp =>
-      responseA(resp).map(entity => (s: String) => entity(s).right.map(Left(_)))
-        .orElse(responseB(resp).map(entity => (s: String) => entity(s).right.map(Right(_))))
+      responseA(resp).map(entity => (s: String) => entity(s).map(Left(_)))
+        .orElse(responseB(resp).map(entity => (s: String) => entity(s).map(Right(_))))
 
 }

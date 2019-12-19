@@ -26,7 +26,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.get(uri"http://localhost:$port/user/$uuid/description?name=name1&age=18").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == mockedResponse)
+          assert(response.body.getOrElse(sys.error("")) == mockedResponse)
           assert(response.code == 200)
           ()
         }
@@ -35,7 +35,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.put(uri"http://localhost:$port/user/$uuid").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == "")
+          assert(response.body.getOrElse(sys.error("")) == "")
           assert(response.code == 200)
           ()
         }
@@ -44,7 +44,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.delete(uri"http://localhost:$port/user/$uuid").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == "")
+          assert(response.body.getOrElse(sys.error("")) == "")
           assert(response.code == 200)
           ()
         }
@@ -58,7 +58,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.get(uri"http://localhost:$port/user/userId/description?name=name1&age=18").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == mockedResponse)
+          assert(response.body.getOrElse(sys.error("")) == mockedResponse)
           assert(response.code == 200)
           ()
         }
@@ -67,7 +67,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.put(uri"http://localhost:$port/user/foo123").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == "")
+          assert(response.body.getOrElse(sys.error("")) == "")
           assert(response.code == 200)
           ()
         }
@@ -76,7 +76,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends endpoi
           implicit val backend: SttpBackend[Id, Nothing] = HttpURLConnectionBackend()
           val response  = sttp.delete(uri"http://localhost:$port/user/foo123").send()
           assert(response.body.isRight)
-          assert(response.body.right.get == "")
+          assert(response.body.getOrElse(sys.error("")) == "")
           assert(response.code == 200)
           ()
         }

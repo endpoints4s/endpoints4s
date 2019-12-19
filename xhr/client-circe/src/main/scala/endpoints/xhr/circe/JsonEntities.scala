@@ -24,6 +24,6 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
   }
 
   def jsonResponse[A](implicit decoder: CirceDecoder[A]): ResponseEntity[A] =
-    xhr => parser.parse(xhr.responseText).right.flatMap(decoder.decodeJson)
+    xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson)
 
 }
