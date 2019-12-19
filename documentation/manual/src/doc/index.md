@@ -1,7 +1,7 @@
 endpoints
 =========
 
-*endpoints* is a Scala library for remote communication. It improves the developers productivity by ensuring
+*endpoints* is a Scala library for remote communication. It ensures
 that HTTP servers, HTTP clients, and documentation always agree on the same protocol.
 
 - **maintenance is simplified**: the API documentation is automatically updated when an endpoint is modified ;

@@ -5,17 +5,10 @@ import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Directives._
 
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
-
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("server-system")
   val routes = CounterServer.routes ~ DocumentationServer.routes
-  val binding = Http().bindAndHandle(routes, "0.0.0.0", 8000)
-  sys.addShutdownHook {
-    Await.result(Await.result(binding, 10.seconds).terminate(3.seconds), 15.seconds)
-    Await.result(system.terminate(), 5.seconds)
-  }
+  Http().bindAndHandle(routes, "0.0.0.0", 8000)
 }
 
 // Additional route for serving the OpenAPI documentation

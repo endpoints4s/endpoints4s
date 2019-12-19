@@ -19,8 +19,8 @@ trait StatusCodes {
 
   // 4xx Client Error
   /**
-    * @note You should use the `badRequest` constructor provided by the [[Responses]]
-    *       trait to ensure that errors produced by ''endponits'' are consistently
+    * @note You should use the `badRequest` constructor provided by the [[endpoints.algebra.Responses]]
+    *       trait to ensure that errors produced by ''endpoints'' are consistently
     *       handled by interpreters.
     */
   def BadRequest: StatusCode
@@ -34,7 +34,7 @@ trait StatusCodes {
   // 5xx Server Error
   /**
     * @note You should use the `internalServerError` constructor provided by the
-    *       [[Responses]] trait to ensure that errors produced by ''endpoints''
+    *       [[endpoints.algebra.Responses]] trait to ensure that errors produced by ''endpoints''
     *       are consistently handled by interpreters.
     */
   def InternalServerError: StatusCode
