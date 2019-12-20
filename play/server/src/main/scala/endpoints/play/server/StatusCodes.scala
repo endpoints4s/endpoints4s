@@ -1,9 +1,11 @@
 package endpoints.play.server
 
 import endpoints.algebra
-
 import play.api.mvc.Results
 
+/**
+  * @group interpreters
+  */
 trait StatusCodes extends algebra.StatusCodes {
 
   type StatusCode = Results.Status

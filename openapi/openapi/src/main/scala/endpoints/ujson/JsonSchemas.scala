@@ -6,6 +6,9 @@ import endpoints.algebra.{Codec, Decoder, Encoder}
 import scala.collection.compat._
 import scala.collection.mutable
 
+/**
+  * @group interpreters
+  */
 trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {

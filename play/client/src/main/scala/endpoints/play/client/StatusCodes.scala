@@ -2,6 +2,9 @@ package endpoints.play.client
 
 import endpoints.algebra
 
+/**
+  * @group interpreters
+  */
 trait StatusCodes extends algebra.StatusCodes {
 
   type StatusCode = Int

@@ -56,6 +56,7 @@ import io.circe.{DecodingFailure, Json, ParsingFailure, parser, Decoder => Circe
   *   }
   * }}}
   *
+  * @group interpreters
   */
 trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
 

@@ -2,6 +2,9 @@ package endpoints.scalaj.client
 
 import endpoints.algebra
 
+/**
+  * @group interpreters
+  */
 trait StatusCodes extends algebra.StatusCodes {
 
   type StatusCode = Int

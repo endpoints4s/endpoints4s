@@ -50,6 +50,7 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
 
   /**
     * Describes an endpoint protected by Basic HTTP authentication
+    * @group operations
     */
   def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](
     method: Method,

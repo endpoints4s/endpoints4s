@@ -3,13 +3,14 @@ package endpoints.algebra
 import endpoints.Invalid
 
 /**
-  * Uses ''endpoints'' built-in error types:
+  * Interpreter for the [[Errors]] algebra that uses ''endpoints'' built-in error types:
   *
-  * - [[Invalid]] for client errors,
-  *
-  * - and `Throwable` for server error.
+  *   - [[Invalid]] for client errors,
+  *   - and `Throwable` for server error.
   *
   * Both types of errors are serialized into a JSON array containing string error values.
+  *
+  * @group interpreters
   */
 trait BuiltInErrors extends Errors { this: EndpointsWithCustomErrors =>
 

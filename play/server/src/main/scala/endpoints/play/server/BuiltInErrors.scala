@@ -3,6 +3,9 @@ package endpoints.play.server
 import endpoints.{Invalid, algebra}
 import play.api.http.{ContentTypes, Writeable}
 
+/**
+  * @group interpreters
+  */
 trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
 
   def clientErrorsResponseEntity: ResponseEntity[Invalid] = {

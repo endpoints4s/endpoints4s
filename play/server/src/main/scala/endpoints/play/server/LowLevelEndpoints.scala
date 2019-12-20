@@ -4,6 +4,9 @@ import endpoints.algebra
 import play.api.mvc
 import play.api.mvc._
 
+/**
+  * @group interpreters
+  */
 trait LowLevelEndpoints extends algebra.LowLevelEndpoints with Endpoints {
 
   import playComponents.executionContext

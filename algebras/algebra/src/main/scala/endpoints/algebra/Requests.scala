@@ -7,7 +7,10 @@ import endpoints._
   */
 trait Requests extends Urls with Methods with SemigroupalSyntax {
 
-  /** Information carried by requests’ headers */
+  /** Information carried by requests’ headers
+    * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
+    *        and [[InvariantFunctorSyntax]] classes.
+    * @group types */
   type RequestHeaders[A]
 
   /**
@@ -17,33 +20,55 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * headers will be built in the request.
     *
     * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document empty headers.
+    * @group operations
     */
   def emptyHeaders: RequestHeaders[Unit]
 
+  /**
+    * A required request header
+    * @param name Header name (e.g., “Authorization”)
+    * @group operations
+    */
   def header(name: String, docs: Documentation = None): RequestHeaders[String]
 
+  /**
+    * An optional request header
+    * @param name Header name (e.g., “Authorization”)
+    * @group operations
+    */
   def optHeader(name: String, docs: Documentation = None): RequestHeaders[Option[String]]
 
+  /** Provides `++` operation.
+    * @see [[SemigroupalSyntax]] */
   implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
+  /** Provides `xmap` operation.
+    * @see [[InvariantFunctorSyntax]] */
   implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
 
 
-  /** Information carried by a whole request (headers and entity) */
+  /** Information carried by a whole request (headers and entity)
+    * @group types */
   type Request[A]
 
-  /** Information carried by request entity */
+  /** Information carried by request entity
+    * @note  This type has implicit methods provided by the [[InvariantFunctorSyntax]] class.
+    * @group types */
   type RequestEntity[A]
 
+  /** Provides `xmap` operation.
+    * @see [[InvariantFunctorSyntax]] */
   implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
 
   /**
     * Empty request -- request without a body.
     * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document an empty body.
+    * @group operations
     */
   def emptyRequest: RequestEntity[Unit]
 
   /**
     * Request with a `String` body.
+    * @group operations
     */
   def textRequest: RequestEntity[String]
 
@@ -59,6 +84,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * @tparam BodyP Payload carried by body
     * @tparam HeadersP Payload carried by headers
     * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @group operations
     */
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
     method: Method,
@@ -72,6 +98,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * Helper method to perform GET request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
+    * @group operations
     */
   final def get[UrlP, HeadersP, Out](
     url: Url[UrlP],
@@ -87,6 +114,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * @tparam BodyP Payload carried by body
     * @tparam HeadersP Payload carried by headers
     * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @group operations
     */
   final def post[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
     url: Url[UrlP],
@@ -102,6 +130,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * @tparam BodyP Payload carried by body
     * @tparam HeadersP Payload carried by headers
     * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @group operations
     */
   final def put[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
     url: Url[UrlP],
@@ -115,6 +144,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * Helper method to perform DELETE request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
+    * @group operations
     */
   final def delete[UrlP, HeadersP, Out](
     url: Url[UrlP],

@@ -9,6 +9,8 @@ import org.scalajs.dom.XMLHttpRequest
   * An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
   * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
   * HTTP responses.
+  *
+  * @group interpreters
   */
 trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
 

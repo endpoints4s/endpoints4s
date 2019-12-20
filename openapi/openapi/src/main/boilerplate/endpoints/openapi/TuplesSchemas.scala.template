@@ -2,6 +2,9 @@ package endpoints.openapi
 
 import endpoints.algebra
 
+/**
+  * @group interpreters
+  */
 trait TuplesSchemas extends algebra.TuplesSchemas { this: JsonSchemas =>
   [2..#
   implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])] =

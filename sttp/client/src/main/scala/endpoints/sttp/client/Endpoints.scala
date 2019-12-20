@@ -27,6 +27,7 @@ class Endpoints[R[_]](val host: String, val backend: sttp.SttpBackend[R, Nothing
   * a sttp’s `com.softwaremill.sttp.SttpBackend`.
   *
   * @tparam R The monad wrapping the response. It is defined by the backend
+  * @group interpreters
   */
 trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
   with Urls with Methods with StatusCodes {

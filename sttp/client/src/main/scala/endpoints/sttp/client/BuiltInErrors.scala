@@ -2,6 +2,9 @@ package endpoints.sttp.client
 
 import endpoints.{Invalid, algebra}
 
+/**
+  * @group interpreters
+  */
 trait BuiltInErrors[R[_]] extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors[R] =>
 
   def clientErrorsResponseEntity: ResponseEntity[Invalid] =

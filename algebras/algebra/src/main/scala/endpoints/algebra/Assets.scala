@@ -7,11 +7,14 @@ package endpoints.algebra
   */
 trait Assets extends EndpointsWithCustomErrors {
 
-  /** An HTTP request to retrieve an asset */
+  /** An HTTP request to retrieve an asset
+    * @group types */
   type AssetRequest
-  /** The path of the asset */
+  /** The path of the asset
+    * @group types */
   type AssetPath
-  /** An HTTP response containing an asset */
+  /** An HTTP response containing an asset
+    * @group types */
   type AssetResponse
 
   /**
@@ -25,6 +28,7 @@ trait Assets extends EndpointsWithCustomErrors {
     * Then, here is how the following requests are decoded:
     * - `/assets/foo` => `foo`
     * - `/assets/foo/bar` => `foo/bar`
+    * @group operations
     */
   def assetSegments(name: String = "", docs: Documentation = None): Path[AssetPath]
 
@@ -33,10 +37,12 @@ trait Assets extends EndpointsWithCustomErrors {
     * @param docs description of a response when asset is found. Required by openapi
     * @param notFoundDocs description of a not found asset response. Required by openapi
     * @return An HTTP endpoint serving assets
+    * @group operations
     */
   def assetsEndpoint(url: Url[AssetPath], docs: Documentation = None, notFoundDocs: Documentation = None): Endpoint[AssetRequest, AssetResponse]
 
-  /** The digests of the assets */
+  /** The digests of the assets
+    * @group operations */
   def digests: Map[String, String]
 
 }

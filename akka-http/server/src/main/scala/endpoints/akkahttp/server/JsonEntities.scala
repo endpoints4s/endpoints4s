@@ -69,7 +69,7 @@ trait JsonEntitiesFromSchemas
   *
   * It is especially useful to encode `OpenApi` documents into JSON entities.
   *
-  * @group interpreter
+  * @group interpreters
   */
 trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
