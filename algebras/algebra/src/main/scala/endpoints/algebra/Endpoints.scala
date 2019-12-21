@@ -33,6 +33,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     *
     * @tparam A Information carried by the request
     * @tparam B Information carried by the response
+    * @group types
     */
   type Endpoint[A, B]
 
@@ -42,6 +43,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param request  Request
     * @param response Response
     * @param docs     Documentation (used by documentation interpreters)
+    * @group operations
     */
   def endpoint[A, B](
     request: Request[A],

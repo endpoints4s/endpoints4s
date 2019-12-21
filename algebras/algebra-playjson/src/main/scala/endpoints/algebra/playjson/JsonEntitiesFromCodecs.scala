@@ -55,6 +55,7 @@ import scala.util.{Failure, Success, Try}
   *   }
   * }}}
   *
+  * @group interpreters
   */
 trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
 

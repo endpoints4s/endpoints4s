@@ -4,6 +4,9 @@ import endpoints.openapi.model.{MediaType, Schema}
 import endpoints.ujson.codecs.schemas
 import endpoints.{Invalid, algebra}
 
+/**
+  * @group interpreters
+  */
 trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
 
   private lazy val invalidJsonEntity =

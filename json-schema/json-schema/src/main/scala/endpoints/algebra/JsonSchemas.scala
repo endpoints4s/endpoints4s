@@ -63,7 +63,7 @@ import scala.util.control.Exception
   *
   * @group algebras
   * @groupname types Types
-  * @groupdesc types Types introduced by the algebra interface
+  * @groupdesc types Types introduced by the algebra
   * @groupprio types 1
   * @groupname operations Operations
   * @groupdesc operations Operations creating and transforming values
@@ -253,6 +253,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
 
+  /**
+    * Implicit methods for values of type [[JsonSchema]]
+    * @group operations
+    */
   final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A]) {
     def withExample(example: A): JsonSchema[A] = withExampleJsonSchema(schemaA, example)
   }

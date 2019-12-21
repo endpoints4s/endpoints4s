@@ -10,6 +10,7 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
 
   /**
     * Information carried by a multiplexed HTTP endpoint.
+    * @group types
     */
   type MuxEndpoint[Req <: MuxRequest, Resp, Transport]
 
@@ -26,6 +27,7 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
     * @tparam Req The base type of possible requests
     * @tparam Resp The base type of possible responses
     * @tparam Transport The data type used to transport the requests and responses
+    * @group operations
     */
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
     request: Request[Transport],
@@ -38,5 +40,6 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
   * Multiplexed request type
   */
 trait MuxRequest {
+  /** Type of the response for `this` specific request */
   type Response
 }

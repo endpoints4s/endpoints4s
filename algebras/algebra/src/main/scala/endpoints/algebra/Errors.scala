@@ -19,18 +19,36 @@ import endpoints.Invalid
   * operations defined here to handle client and server errors, respectively.
   *
   * @see [[BuiltInErrors]]
+  * @group algebras
+  * @groupname types Types
+  * @groupdesc types Types introduced by the algebra
+  * @groupprio types 1
+  * @groupname operations Operations
+  * @groupdesc operations Operations creating and transforming values
+  * @groupprio operations 2
   */
 trait Errors { this: Responses =>
 
-  /** Errors in a request built by a client */
+  /** Errors in a request built by a client
+    * @group types
+    */
   type ClientErrors
-  /** Error raised by the business logic of a server */
+  /** Error raised by the business logic of a server
+    * @group types
+    */
   type ServerError
 
+  /** Convert the ''endpoints'' internal client error type into the [[ClientErrors]] type
+    * @group operations */
   def invalidToClientErrors(invalid: Invalid): ClientErrors
+  /** Convert the [[ClientErrors]] type into the ''endpoints'' internal client error type
+    * @group operations */
   def clientErrorsToInvalid(clientErrors: ClientErrors): Invalid
-
+  /** Convert the ''endpoints'' internal server error type into the [[ServerError]] type
+    * @group operations */
   def throwableToServerError(throwable: Throwable): ServerError
+  /** Convert the [[ServerError]] type into the ''endpoints'' internal server error type
+    * @group operations */
   def serverErrorToThrowable(serverError: ServerError): Throwable
 
   /**
@@ -38,11 +56,14 @@ trait Errors { this: Responses =>
     * a request fails.
     *
     * The provided implementation forwards to `badRequest`.
+    *
+    * @group operations
     */
   lazy val clientErrorsResponse: Response[ClientErrors] = badRequest(docs = Some("Client error"))
 
   /**
     * Format of the response entity carrying the client errors.
+    * @group operations
     */
   def clientErrorsResponseEntity: ResponseEntity[ClientErrors]
 
@@ -51,11 +72,13 @@ trait Errors { this: Responses =>
     * business logic of an endpoint fails.
     *
     * The provided implementation forwards to `internalServerError`
+    * @group operations
     */
   lazy val serverErrorResponse: Response[ServerError] = internalServerError(docs = Some("Server error"))
 
   /**
     * Format of the response entity carrying the server error.
+    * @group operations
     */
   def serverErrorResponseEntity: ResponseEntity[ServerError]
 

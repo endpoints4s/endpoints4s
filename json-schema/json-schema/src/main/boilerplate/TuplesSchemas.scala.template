@@ -2,6 +2,8 @@ package endpoints.algebra
 
 /**
   * Generated trait that provides `JsonSchema` constructors for tuples from 2 to 22 elements.
+  *
+  * @group algebras
   */
 trait TuplesSchemas { this: JsonSchemas =>
   [2..#

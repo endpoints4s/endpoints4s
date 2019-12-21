@@ -2,6 +2,9 @@ package endpoints.xhr
 
 import endpoints.{Invalid, algebra}
 
+/**
+  * @group interpreters
+  */
 trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
 
   def clientErrorsResponseEntity: ResponseEntity[Invalid] =

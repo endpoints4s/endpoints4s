@@ -28,6 +28,8 @@ package endpoints.algebra
   *   someEndpoint(xhr => "Foo")
   *     .map(response => println(response.responseText))
   * }}}
+  *
+  * @group algebras
   */
 trait LowLevelEndpoints extends EndpointsWithCustomErrors {
 

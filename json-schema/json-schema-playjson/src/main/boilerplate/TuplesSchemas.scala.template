@@ -3,6 +3,9 @@ package endpoints.playjson
 import endpoints.algebra
 import play.api.libs.json.{Reads, Writes}
 
+/**
+  * @group interpreters
+  */
 trait TuplesSchemas extends algebra.TuplesSchemas { this: JsonSchemas =>
   [2..#
   implicit def tuple1JsonSchema[[#T1#]](implicit [#schema1: JsonSchema[T1]#]): JsonSchema[([#T1#])] = {
