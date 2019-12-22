@@ -77,4 +77,16 @@ trait JsonSchemasDocs extends JsonSchemas {
       .tagged("Point")
       .xmap(Point(_))(_.coordinates)
   //#tuple
+
+  locally {
+    case class Rectangle(width: Double, height: Double)
+  //#with-example
+    implicit val rectangleSchema: JsonSchema[Rectangle] = (
+      field[Double]("width", Some("Rectangle width")) zip
+      field[Double]("height")
+    )
+      .xmap(Rectangle.tupled)(rect => (rect.width, rect.height))
+      .withExample(Rectangle(10, 20))
+  //#with-example
+  }
 }
