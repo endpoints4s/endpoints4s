@@ -103,7 +103,7 @@ For example, an enumeration with three possible values can be defined as a seale
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status
 ~~~
 
-The method `enumeration` in the `JsonSchemas` algebra supports mapping the enum values to JSON strings.
+The method `stringEnumeration` in the `JsonSchemas` algebra supports mapping the enum values to JSON strings.
 It has two parameters: the possible values, and a function to encode an enum value as a string.
 
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status-schema
@@ -113,7 +113,7 @@ The resulting `JsonSchema[Status]` allows defining JSON members with string valu
 our case objects.
 
 It will work similarly for other representations of enumerated values.
-Most of them provide `values` which can conveniently be passed into `enumeration`.
+Most of them provide `values` which can conveniently be passed into `stringEnumeration`.
 However, it is still possible to explicitly pass a certain subset of allowed values.
 
 ### Tuples
