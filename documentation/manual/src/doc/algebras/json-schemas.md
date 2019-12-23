@@ -136,13 +136,47 @@ by wrapping it in the `lazyRecord` or `lazyTagged` constructor:
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
 ~~~
 
-### Named schemas
+### Schemas documentation
 
-It is possible to give names to the schemas. These names can be used by the schema interpreters to group
-the schema definitions at one place, and then reference each schema by its name (like the
-[Swagger `components` section](https://swagger.io/docs/specification/components/)).
+Schema descriptions can include documentation information which is used by documentation
+interpreters such as the [OpenAPI](/interpreters/openapi.md) interpreter. We have already
+seen in the first section that object fields could be documented with a description.
+This section shows two other features related to schemas documentation.
+
+You can give names to schemas. These names are used by the OpenAPI interpreter to group
+the schema definitions at one place, and then reference each schema by its name (see the
+[Swagger “Components Section” documentation](https://swagger.io/docs/specification/components/)).
 
 Use the `named` method to give a name to a `Record`, a `Tagged`, or an `Enum` schema.
+
+You can also include examples of values for a schema (see the
+[Swagger “Adding Examples” documentation](https://swagger.io/docs/specification/adding-examples/)).
+This is done by using the `withExample` operation:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#with-example
+~~~
+
+Applying the OpenAPI interpreter to this schema definition produces the
+following JSON document:
+
+~~~ javascript
+{
+  "type": "object",
+  "properties": {
+    "width": {
+      "type": "number",
+      "format":"double",
+      "description": "Rectangle width"
+    },
+    "height":{
+      "type": "number",
+      "format": "double"
+    }
+  },
+  "required": ["width","height"],
+  "example": { "width": 10, "height": 20 }
+}
+~~~
 
 ## Generic derivation of JSON schemas (based on Shapeless) {#generic-derivation-of-json-schemas}
 

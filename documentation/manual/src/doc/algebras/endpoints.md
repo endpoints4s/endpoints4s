@@ -47,7 +47,9 @@ For convenience, `get`, `post`, `put` and `delete` methods are provided:
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#convenient-get
 ~~~
 
-## URL
+The next sections document how to describe URLs, request headers and request entities.
+
+### URL
 
 The `Url[A]` type models an URL carrying some information of type `A`. For
 instance, an `Url[Long]` value is an URL containing a `Long` value.
@@ -69,7 +71,7 @@ Path segments and query string parameters can take additional parameters contain
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#urls-with-docs
 ~~~
 
-### Transforming and Refining URL Constituents
+#### Transforming and Refining URL Constituents
 
 All the data types involved in a URL description (`Path[A]`, `Segment[A]`, `QueryString[A]`, etc.) have an
 `xmap` and an `xmapPartial` operations, for transforming or refining their carried type.
@@ -99,6 +101,25 @@ The first function passed to the `xmapPartial` operation returns a
 [`Validated[LocalDate]`](unchecked:/api/endpoints/Validated.html) value. Returning an
 `Invalid` value means that there is no representation of the source type in the target type.
 
+### Request Headers
+
+The type `RequestHeaders[A]` models request headers carrying some information of type `A`. For
+instance, a value of type `RequestHeaders[Credentials]` describes request headers containing
+credentials.
+
+Please refer to the [API documentation](unchecked:/api/endpoints/algebra/Endpoints.html#RequestHeaders[A]) for
+details about constructors and operations for the type `RequestHeaders`.
+
+### Request Entity
+
+The type`RequestEntity[A]` models a request entity carrying some information of type `A`. For
+instance, a value of type `RequestEntity[Command]` describes a request entity containing a
+command.
+
+The `Endpoints` algebra provides a few [`RequestEntity` constructors and operations](unchecked:/api/endpoints/algebra/Endpoints.html#RequestEntity[A]),
+which can be extended to support more content types. For instance, the
+[JsonEntities](json-entities.md) algebra adds support for requests with JSON entities.
+
 ## Response
 
 The `Response[A]` type models an HTTP response carrying some information of type `A`.
@@ -124,6 +145,10 @@ Additional documentation about the response can be passed as an extra parameter:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#documented-response
 ~~~
+
+The `Endpoints` algebra provides a few [`ResponseEntity` constructors and operations](unchecked:/api/endpoints/algebra/Endpoints.html#ResponseEntity[A]),
+which can be extended to support more content-types. For instance, the
+[JsonEntities](json-entities.md) algebra adds support for responses with JSON entities.
 
 ### Transforming Responses
 
@@ -187,3 +212,7 @@ containing string messages. You can change the provided serialization format
 by overriding the
 [serverErrorResponseEntity](unchecked:/api/endpoints/algebra/BuiltInErrors.html#serverErrorResponseEntity:BuiltInErrors.this.ResponseEntity[Throwable])
 operation.
+
+## Next Step
+
+See how you can describe endpoints with [JSON entities](json-entities.md).

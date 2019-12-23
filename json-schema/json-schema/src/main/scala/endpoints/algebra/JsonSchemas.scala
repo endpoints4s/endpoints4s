@@ -258,6 +258,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @group operations
     */
   final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A]) {
+    /**
+      * Include an example of value in this schema. Documentation interpreters
+      * can show this example value. Encoder and decoder interpreters ignore
+      * this value.
+      * @param example Example value to attach to the schema
+      */
     def withExample(example: A): JsonSchema[A] = withExampleJsonSchema(schemaA, example)
   }
 

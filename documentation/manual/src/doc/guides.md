@@ -2,13 +2,6 @@
 
 This part of the documentation provides in-depth guides for specific features.
 
-## JSON codecs
-
-When working with JSON entities, the large variety of algebras and interpreters
-might make it a bit hard to see which ones you should use. The
-[JSON codecs](/guides/json-codecs.md) guide helps you to choose the solution
-that fits your need.
-
 ## `Tupler`
 
 You might have seen implicit `Tupler` parameters in the type signature
