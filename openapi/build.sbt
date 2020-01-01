@@ -9,7 +9,7 @@ lazy val openapi =
       `scala 2.12 to latest`,
       name := "endpoints-openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
-      libraryDependencies += "com.lihaoyi" %%% "ujson" % "0.9.0"
+      libraryDependencies += "com.lihaoyi" %%% "ujson" % "0.9.6"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("json-schema-generic")
