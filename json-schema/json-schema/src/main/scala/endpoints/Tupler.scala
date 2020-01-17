@@ -39,7 +39,7 @@ trait Tupler[A, B] {
 }
 //#definition
 
-object Tupler extends Tupler4
+object Tupler extends Tupler5
 
 trait Tupler1 {
   type Aux[A, B, Out0] = Tupler[A, B] { type Out = Out0 }
@@ -108,6 +108,10 @@ trait Tupler3 extends Tupler2 {
       }
     }
 
+}
+
+trait Tupler4 extends Tupler3 with TuplerAppend {
+
   implicit def leftUnit[A]: Aux[Unit, A, A] = new Tupler[Unit, A] {
     type Out = A
     def apply(a: Unit, b: A): A = b
@@ -116,7 +120,7 @@ trait Tupler3 extends Tupler2 {
 
 }
 
-trait Tupler4 extends Tupler3 with TuplerAppend {
+trait Tupler5 extends Tupler4 {
 
   implicit def rightUnit[A]: Aux[A, Unit, A] = new Tupler[A, Unit] {
     type Out = A
