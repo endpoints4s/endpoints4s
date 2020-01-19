@@ -92,46 +92,49 @@ class JsonSchemasTest extends AnyFreeSpec {
     def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] =
       schema
 
-      def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
-        new PartialInvariantFunctor[JsonSchema] {
-          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
-          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
-        }
-      def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
-        new PartialInvariantFunctor[Record] {
-          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
-          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
-        }
-      def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
-        new PartialInvariantFunctor[Tagged] {
-          def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
-          override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
-        }
+    def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] =
+      s"$schemaA|$schemaB"
 
-      def stringJsonSchema(format: Option[String]): String = "string"
+    def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
+      new PartialInvariantFunctor[JsonSchema] {
+        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+      }
+    def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
+      new PartialInvariantFunctor[Record] {
+        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+      }
+    def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
+      new PartialInvariantFunctor[Tagged] {
+        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
+      }
 
-      lazy val intJsonSchema: String = "integer"
+    def stringJsonSchema(format: Option[String]): String = "string"
 
-      lazy val longJsonSchema: String = "integer"
+    lazy val intJsonSchema: String = "integer"
 
-      lazy val bigdecimalJsonSchema: String = "number"
+    lazy val longJsonSchema: String = "integer"
 
-      lazy val floatJsonSchema: String = "number"
+    lazy val bigdecimalJsonSchema: String = "number"
 
-      lazy val doubleJsonSchema: String = "number"
+    lazy val floatJsonSchema: String = "number"
 
-      lazy val booleanJsonSchema: String = "boolean"
+    lazy val doubleJsonSchema: String = "number"
 
-      lazy val byteJsonSchema: String = "byte"
+    lazy val booleanJsonSchema: String = "boolean"
 
-      def arrayJsonSchema[C[X] <: Seq[X], A](implicit
-                                             jsonSchema: String,
-                                             factory: Factory[A, C[A]]
-                                            ): String = s"[$jsonSchema]"
+    lazy val byteJsonSchema: String = "byte"
 
-      def mapJsonSchema[A](implicit
-                           jsonSchema: String
-                          ): String = s"{$jsonSchema}"
+    def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+                                           jsonSchema: String,
+                                           factory: Factory[A, C[A]]
+                                          ): String = s"[$jsonSchema]"
+
+    def mapJsonSchema[A](implicit
+                         jsonSchema: String
+                        ): String = s"{$jsonSchema}"
   }
 
   val ns = "endpoints.generic.JsonSchemasTest.GenericSchemas"

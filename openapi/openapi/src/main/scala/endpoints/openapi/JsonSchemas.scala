@@ -1,8 +1,9 @@
 package endpoints.openapi
 
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
-import endpoints.algebra.{Documentation, Encoder}
+import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
+import endpoints.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
 
 import scala.collection.compat._
 
@@ -23,9 +24,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
 
   import DocumentedJsonSchema._
 
-  class JsonSchema[A](val ujsonSchema: ujsonSchemas.JsonSchema[A], val docs: DocumentedJsonSchema) {
-    final def stringEncoder: Encoder[A, String] = ujsonSchema.stringCodec
-  }
+  class JsonSchema[A](val ujsonSchema: ujsonSchemas.JsonSchema[A], val docs: DocumentedJsonSchema)
   class Record[A](override val ujsonSchema: ujsonSchemas.Record[A], override val docs: DocumentedRecord) extends JsonSchema[A](ujsonSchema, docs)
   class Tagged[A](override val ujsonSchema: ujsonSchemas.Tagged[A], override val docs: DocumentedCoProd) extends JsonSchema[A](ujsonSchema, docs)
   class Enum[A](override val ujsonSchema: ujsonSchemas.Enum[A], override val docs: DocumentedEnum) extends JsonSchema[A](ujsonSchema, docs)
@@ -83,6 +82,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
           def example: Option[ujson.Value] = value.example
         }
     }
+
+    case class OneOf(alternatives: List[DocumentedJsonSchema], example: Option[ujson.Value] = None) extends DocumentedJsonSchema
   }
 
   implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
@@ -184,10 +185,27 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
         case s: Array            => s.copy(example = Some(exampleJson))
         case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
         case s: LazySchema       => LazySchema(updatedDocs(s.value))
+        case s: OneOf            => s.copy(example = Some(exampleJson))
       }
     new JsonSchema(
       schema.ujsonSchema,
       updatedDocs(schema.docs)
+    )
+  }
+
+  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] = {
+    new JsonSchema(
+      ujsonSchemas.orFallbackToJsonSchema(schemaA.ujsonSchema, schemaB.ujsonSchema),
+      (schemaA.docs, schemaB.docs) match {
+        case (OneOf(alternatives1, maybeExample1), OneOf(alternatives2, maybeExample2)) =>
+          OneOf(alternatives1 ++ alternatives2, maybeExample1.orElse(maybeExample2))
+        case (OneOf(alternatives, maybeExample), schema) =>
+          OneOf(alternatives :+ schema, maybeExample.orElse(schema.example))
+        case (schema, OneOf(alternatives, maybeExample)) =>
+          OneOf(schema +: alternatives, schema.example.orElse(maybeExample))
+        case (schema1, schema2) =>
+          OneOf(List(schema1, schema2), schema1.example.orElse(schema2.example))
+      }
     )
   }
 
@@ -259,6 +277,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
         Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None, example)
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)
+      case OneOf(alternatives, example) =>
+        val alternativeSchemas = alternatives.map(alternative => toSchema(alternative, coprodBase, referencedSchemas))
+        Schema.OneOf(EnumeratedAlternatives(alternativeSchemas), None, example)
     }
   }
 
@@ -297,7 +318,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
   private def expandCoproductSchema(coprod: DocumentedJsonSchema.DocumentedCoProd, referencedSchemas: Set[String]): Schema = {
     val alternativesSchemas =
       coprod.alternatives.map { case (tag, record) => tag -> toSchema(record, Some(tag -> coprod), referencedSchemas) }
-    Schema.OneOf(coprod.discriminatorName, alternativesSchemas, None, coprod.example)
+    Schema.OneOf(DiscriminatedAlternatives(coprod.discriminatorName, alternativesSchemas), None, coprod.example)
   }
 
 }

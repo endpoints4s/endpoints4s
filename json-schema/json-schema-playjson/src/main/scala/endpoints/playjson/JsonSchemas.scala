@@ -114,6 +114,16 @@ trait JsonSchemas
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
+  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] = {
+    val reads =
+      schemaA.reads.map[Either[A, B]](Left(_))
+        .orElse(schemaB.reads.map[Either[A, B]](Right(_)))
+        .orElse(Reads(json => JsError(s"Invalid value: $json.")))
+    val writes =
+      Writes[Either[A, B]] { case Left(a) => schemaA.writes.writes(a) case Right(b) => schemaB.writes.writes(b)}
+    JsonSchema(reads, writes)
+  }
+
   def stringJsonSchema(format: Option[String]): JsonSchema[String] = JsonSchema(implicitly, implicitly)
 
   implicit def intJsonSchema: JsonSchema[Int] = JsonSchema(implicitly, implicitly)

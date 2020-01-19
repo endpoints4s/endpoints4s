@@ -187,6 +187,20 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
+  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] =
+    new JsonSchema[Either[A, B]] {
+      val decoder: Decoder[ujson.Value, Either[A, B]] = json => {
+        schemaA.decoder.decode(json) match {
+          case Valid(value) => Valid(Left(value))
+          case Invalid(_)   => schemaB.decoder.decode(json).map(Right(_)).mapErrors(_ => s"Invalid value: $json." :: Nil)
+        }
+      }
+      val encoder: Encoder[Either[A, B], ujson.Value] = {
+        case Left(a)  => schemaA.encoder.encode(a)
+        case Right(b) => schemaB.encoder.encode(b)
+      }
+    }
+
   def stringJsonSchema(format: Option[String]): JsonSchema[String] = new JsonSchema[String] {
     val decoder = {
       case ujson.Str(str) => Valid(str)
