@@ -50,18 +50,26 @@ object OpenApi {
       case Schema.Enum(elementType, values, description, _) =>
         fields ++= schemaJson(elementType.withDefinedDescription(description)).value
         fields += "enum" -> ujson.Arr(values: _*)
-      case Schema.OneOf(discriminatorName, alternatives, _, _) =>
-        val mappingJson =
-          new ujson.Obj(mutable.LinkedHashMap(alternatives.collect {
-            case (tag, ref: Schema.Reference) => tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
-          }: _*))
-        fields ++= List(
-          "oneOf"         -> ujson.Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
-          "discriminator" -> ujson.Obj(
-            "propertyName" -> ujson.Str(discriminatorName),
-            "mapping"      -> mappingJson
-          )
-        )
+      case Schema.OneOf(alternatives, _, _) =>
+        fields ++=
+          (alternatives match {
+            case Schema.DiscriminatedAlternatives(discriminatorFieldName, alternatives) =>
+              val mappingJson =
+                new ujson.Obj(mutable.LinkedHashMap(alternatives.collect {
+                  case (tag, ref: Schema.Reference) => tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
+                }: _*))
+              List(
+                "oneOf"         -> ujson.Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
+                "discriminator" -> ujson.Obj(
+                  "propertyName" -> ujson.Str(discriminatorFieldName),
+                  "mapping"      -> mappingJson
+                )
+              )
+            case Schema.EnumeratedAlternatives(alternatives) =>
+              List(
+                "oneOf" -> ujson.Arr(alternatives.map(schemaJson): _*)
+              )
+          })
       case Schema.AllOf(schemas, _, _) =>
         fields += "allOf" -> ujson.Arr(schemas.map(schemaJson): _*)
       case Schema.Reference(name, _, _, _) =>
@@ -325,11 +333,14 @@ object Schema {
   ) extends Schema
 
   case class OneOf(
-    discriminatorName: String,
-    alternatives: List[(String, Schema)],
+    alternatives: Alternatives,
     description: Option[String],
     example: Option[ujson.Value]
   ) extends Schema
+
+  sealed trait Alternatives
+  case class DiscriminatedAlternatives(discriminatorFieldName: String, alternatives: List[(String, Schema)]) extends Alternatives
+  case class EnumeratedAlternatives(alternatives: List[Schema]) extends Alternatives
 
   case class AllOf(
     schemas: List[Schema],

@@ -95,4 +95,19 @@ class JsonSchemasTest extends AnyFreeSpec {
     val invalidJson = Json.obj("quux" -> Json.fromString("wrong"))
     assert(enumSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid value: {\n  \"quux\" : \"wrong\"\n}. Valid values are: {\n  \"quux\" : \"bar\"\n}, {\n  \"quux\" : \"baz\"\n}.", Nil)))
   }
+
+  "oneOf" in {
+    import JsonSchemasCodec.intOrBoolean
+    val validInt         = Left(42)
+    val validIntJson     = Json.fromInt(42)
+    val validBoolean     = Right(true)
+    val validBooleanJson = Json.True
+    val invalidJson      = Json.fromString("foo")
+    assert(intOrBoolean.encoder(validInt) == validIntJson)
+    assert(intOrBoolean.decoder.decodeJson(validIntJson).contains(validInt))
+    assert(intOrBoolean.encoder(validBoolean) == validBooleanJson)
+    assert(intOrBoolean.decoder.decodeJson(validBooleanJson).contains(validBoolean))
+    assert(intOrBoolean.decoder.decodeJson(invalidJson) == Left(DecodingFailure("Invalid value.", Nil)))
+  }
+
 }

@@ -388,6 +388,12 @@ class JsonSchemasTest extends AnyFreeSpec {
     assertError(refinedTaggedSchema, Json.obj("type" -> "Bar", "s" -> "foo"), "Invalid tagged alternative")
   }
 
+  "oneOf" in {
+    testRoundtrip(intOrBoolean, JsNumber(42), Left(42))
+    testRoundtrip(intOrBoolean, JsBoolean(true), Right(true))
+    assertError(intOrBoolean, JsString("foo"), "Invalid value: \"foo\".")
+  }
+
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {
     val result = jsonSchema.reads.reads(json)
     assert(result.isSuccess, result)

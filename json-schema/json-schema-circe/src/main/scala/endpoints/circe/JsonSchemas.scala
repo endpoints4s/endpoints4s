@@ -192,6 +192,16 @@ trait JsonSchemas
 
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] = schema
 
+  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] = {
+    val encoder: io.circe.Encoder[Either[A, B]] =
+      io.circe.Encoder.instance { case Left(a) => schemaA.encoder(a) case Right(b) => schemaB.encoder(b) }
+    val decoder =
+      schemaA.decoder.map[Either[A, B]](Left(_))
+        .or(schemaB.decoder.map[Either[A, B]](Right(_)))
+        .withErrorMessage("Invalid value.")
+    JsonSchema(encoder, decoder)
+  }
+
   def stringJsonSchema(format: Option[String]): JsonSchema[String] = JsonSchema(implicitly, implicitly)
 
   implicit def intJsonSchema: JsonSchema[Int] = JsonSchema(implicitly, implicitly)

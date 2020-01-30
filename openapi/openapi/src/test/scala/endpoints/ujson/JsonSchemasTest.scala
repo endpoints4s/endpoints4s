@@ -335,6 +335,12 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "oneOf" in {
+    checkRoundTrip(intOrBoolean, ujson.Num(42), Left(42))
+    checkRoundTrip(intOrBoolean, ujson.Bool(true), Right(true))
+    checkDecodingFailure(intOrBoolean, ujson.Str("foo"), Seq("Invalid value: \"foo\"."))
+  }
+
   def checkRoundTrip[A](schema: JsonSchema[A], json: ujson.Value, expected: A): Unit = {
     schema.codec.decode(json) match {
       case Valid(decoded)  => assert(decoded == expected)

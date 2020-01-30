@@ -136,6 +136,19 @@ by wrapping it in the `lazyRecord` or `lazyTagged` constructor:
 ~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
 ~~~
 
+### Alternatives between schemas
+
+You can define a schema as an alternative between other schemas with the operation
+`orFallbackTo`:
+
+~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala#one-of
+~~~
+
+> {.warning}
+> Because decoders derived from schemas defined with the operation `orFallbackTo` literally
+> “fallback” from one alternative to another, it makes it impossible to report good decoding
+> failure messages. You should generally prefer using `orElse` on “tagged” schemas.
+
 ### Schemas documentation
 
 Schema descriptions can include documentation information which is used by documentation

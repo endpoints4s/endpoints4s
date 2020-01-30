@@ -165,8 +165,13 @@ trait EndpointsWithCustomErrors
         captureReferencedSchemasRec(elementType)
       case Schema.Primitive(_, _, _, _) =>
         Nil
-      case Schema.OneOf(_, alternatives, _, _) =>
-        alternatives.map(_._2).flatMap(captureReferencedSchemasRec)
+      case Schema.OneOf(alternatives, _, _) =>
+        val alternativeSchemas =
+          alternatives match {
+            case Schema.DiscriminatedAlternatives(_, alternatives) => alternatives.map(_._2)
+            case Schema.EnumeratedAlternatives(alternatives)       => alternatives
+          }
+        alternativeSchemas.flatMap(captureReferencedSchemasRec)
       case Schema.AllOf(schemas, _, _) =>
         schemas.flatMap {
           case _: Schema.Reference => Nil

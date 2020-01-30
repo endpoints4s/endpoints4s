@@ -98,4 +98,9 @@ trait JsonSchemasTest extends JsonSchemas {
       case _      => Invalid("Invalid tagged alternative")
     }(rc => Baz(rc.x))
 
+  //#one-of
+  val intOrBoolean: JsonSchema[Either[Int, Boolean]] =
+    intJsonSchema.orFallbackTo(booleanJsonSchema)
+  //#one-of
+
 }

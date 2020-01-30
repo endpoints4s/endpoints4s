@@ -251,7 +251,27 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** The JSON schema of a record merging the fields of the two given records */
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out]
 
+  /** Include an example value within the given schema */
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
+
+  /**
+    * A schema that can be either `schemaA` or `schemaB`.
+    *
+    * Documentation interpreter produce a `oneOf` JSON schema.
+    * Encoder interpreters forward to either `schemaA` or `schemaB`.
+    * Decoder interpreters first try to decode with `schemaA`, and fallback to `schemaB`
+    * in case of failure.
+    *
+    * The difference between this operation and the operation `orElse` on “tagged” schemas
+    * is that this operation does not rely on a discriminator field between the alternative
+    * schemas. As a consequence, decoding is slower than with “tagged” schemas and provides
+    * less precise error messages.
+    *
+    * @note Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype
+    *       of the other), otherwise, a value of type `B` might also be successfully
+    *       decoded as a value of type `A`, and this could have surprising consequences.
+    */
+  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]]
 
   /**
     * Implicit methods for values of type [[JsonSchema]]
@@ -265,26 +285,68 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * @param example Example value to attach to the schema
       */
     def withExample(example: A): JsonSchema[A] = withExampleJsonSchema(schemaA, example)
+
+    /**
+      * A schema that can be either `schemaA` or `schemaB`.
+      *
+      * Documentation interpreter produce a `oneOf` JSON schema.
+      * Encoder interpreters forward to either `schemaA` or `schemaB`.
+      * Decoder interpreters first try to decode with `schemaA`, and fallback to `schemaB`
+      * in case of failure.
+      *
+      * The difference between this operation and the operation `orElse` on “tagged” schemas
+      * is that this operation does not rely on a discriminator field between the alternative
+      * schemas. As a consequence, decoding is slower than with “tagged” schemas and provides
+      * less precise error messages.
+      *
+      * @note Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype
+      *       of the other), otherwise, a value of type `B` might also be successfully
+      *       decoded as a value of type `A`, and this could have surprising consequences.
+      * @param schemaB fallback schema
+      */
+    def orFallbackTo[B](schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] = orFallbackToJsonSchema(schemaA, schemaB)
   }
 
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
   final implicit class RecordOps[A](recordA: Record[A]) {
+    /** Merge the fields of `recordA` with the fields of `recordB` */
     def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = zipRecords(recordA, recordB)
+
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
+
+    /**
+      * Give a name to the schema.
+      * Documentation interpreters use that name to refer to this schema.
+      * Encoder and decoder interpreters ignore the name.
+      */
     def named(name: String): Record[A] = namedRecord(recordA, name)
   }
 
   /** @group operations */
   final implicit class TaggedOps[A](taggedA: Tagged[A]) {
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
+    /**
+      * Give a name to the schema.
+      * Documentation interpreters use that name to refer to this schema.
+      * Encoder and decoder interpreters ignore the name.
+      */
     def named(name: String): Tagged[A] = namedTagged(taggedA, name)
+
+    /**
+      * Override the name of the type discriminator field of this record.
+      */
     def withDiscriminator(name: String): Tagged[A] = withDiscriminatorTagged(taggedA, name)
   }
 
   /** @group operations */
   final implicit class EnumOps[A](enumA: Enum[A]) {
+    /**
+      * Give a name to the schema.
+      * Documentation interpreters use that name to refer to this schema.
+      * Encoder and decoder interpreters ignore the name.
+      */
     def named(name: String): Enum[A] = namedEnum(enumA, name)
   }
 
