@@ -14,9 +14,9 @@ class ChunkedEntitiesTest extends AnyWordSpec {
         List(Parameter("file", In.Path, required = true, None, Schema.simpleString)),
         None,
         Map(
-          "200" -> Response("", Map("application/octet-stream" -> MediaType(None))),
-          "400" -> Response("Client error", Map("application/json" -> MediaType(Some(Reference("endpoints.Errors", Some(Array(Left(Primitive("string", None, None, None)), None, None)), None, None))))),
-          "500" -> Response("Server error", Map("application/json" -> MediaType(Some(Reference("endpoints.Errors", Some(Array(Left(Primitive("string", None, None, None)), None, None)), None, None)))))
+          "200" -> Response("", Map.empty, Map("application/octet-stream" -> MediaType(None))),
+          "400" -> Response("Client error", Map.empty, Map("application/json" -> MediaType(Some(Reference("endpoints.Errors", Some(Array(Left(Primitive("string", None, None, None)), None, None)), None, None))))),
+          "500" -> Response("Server error", Map.empty, Map("application/json" -> MediaType(Some(Reference("endpoints.Errors", Some(Array(Left(Primitive("string", None, None, None)), None, None)), None, None)))))
         ),
         Nil,
         Nil,

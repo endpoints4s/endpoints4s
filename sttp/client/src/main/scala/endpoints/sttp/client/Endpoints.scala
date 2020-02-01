@@ -2,7 +2,7 @@ package endpoints.sttp.client
 
 import java.net.URI
 
-import endpoints.{Invalid, InvariantFunctor, Semigroupal, Tupler, Valid, algebra}
+import endpoints.{Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
 
@@ -150,11 +150,48 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
         case Invalid(errors) => backend.responseMonad.error(new Exception(errors.mkString(". ")))
       }
 
-  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] = {
-    new Response[A] {
+  type ResponseHeaders[A] = Map[String, String] => Validated[A]
+
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+    new Semigroupal[ResponseHeaders] {
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+        headers => fa(headers).zip(fb(headers))
+    }
+
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+    new PartialInvariantFunctor[ResponseHeaders] {
+      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+        headers => fa(headers).flatMap(f)
+    }
+
+  def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
+
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+    headers =>
+      Validated.fromOption(
+        headers.get(name.toLowerCase)
+      )(s"Missing response header '$name'")
+
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] =
+    headers => Valid(headers.get(name.toLowerCase))
+
+  def response[A, B, Res](
+    statusCode: StatusCode,
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B]
+  )(implicit
+    tupler: Tupler.Aux[A, B, Res]
+  ): Response[Res] = {
+    new Response[Res] {
       def decodeResponse(response: sttp.Response[String]) = {
-        if (response.code == statusCode) Some(entity.decodeEntity(response))
-        else None
+        if (response.code == statusCode) {
+          val headersMap = response.headers.iterator.map { case (k, v) => (k.toLowerCase, v) }.toMap
+          headers(headersMap) match {
+            case Valid(b)        => Some(mapResponseEntity(entity)(tupler(_, b)).decodeEntity(response))
+            case Invalid(errors) => Some(backend.responseMonad.error(new Exception(errors.mkString(". "))))
+          }
+        } else None
       }
     }
   }

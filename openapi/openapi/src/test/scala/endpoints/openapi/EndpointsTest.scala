@@ -125,6 +125,14 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     }
   }
 
+  "Response headers" should {
+    "be documented" in {
+      val expectedHeader = Map("ETag" -> ResponseHeader(required = true, description = Some("version number"), Schema.simpleString))
+      val headers = Fixtures.documentation.paths("/versioned-resource").operations("get").responses("200").headers
+      headers shouldEqual expectedHeader
+    }
+  }
+
   "Deprecation documentation" should {
     "be set according to provided docs" in {
       Fixtures.documentation.paths("/textRequestEndpoint").operations("post").deprecated shouldBe true
@@ -132,7 +140,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
   }
 
   "Fields order" in {
-    import Fixtures.{emptyRecord, endpoint, field, get, jsonResponse, ok, path, openApi, Record, Request}
+    import Fixtures.{emptyRecord, endpoint, field, get, jsonResponse, ok, path, openApi, Record, Request, Response}
     for {
       // Run the test 50 times
       _      <- 1 to 50
@@ -141,7 +149,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       // Property names are random
       keys    = List.fill(length)(Random.nextString(10))
       schema  = keys.foldLeft[Record[_]](emptyRecord)((schema, key) => schema.zip(field[Int](key))).named("Resource")
-      item    = endpoint(get(path): Request[Unit], ok(jsonResponse(schema)))
+      item    = endpoint(get(path): Request[Unit], ok(jsonResponse(schema)): Response[Record[_]])
       docs    = openApi(Info("test", "0.0.0"))(item)
       json    = ujson.read(OpenApi.stringEncoder.encode(docs))
     } {
@@ -189,6 +197,14 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val assets =
     endpoint(get(path / "assets2" / remainingSegments("file")), ok(bytesChunksResponse))
 
+  val versionedResource =
+    endpoint(
+      get(path / "versioned-resource"),
+      ok(
+        textResponse,
+        headers = responseHeader("ETag", Some("version number")))
+    )
+
 }
 
 object Fixtures
@@ -198,6 +214,7 @@ object Fixtures
     with JsonEntitiesFromSchemas
     with ChunkedEntities {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux, assets)
+  val documentation =
+    openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux, assets, versionedResource)
 
 }

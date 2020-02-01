@@ -4,7 +4,7 @@ import akka.http.scaladsl.model.HttpHeader.ParsingResult
 import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
 import akka.stream.Materializer
 import endpoints.algebra.{Decoder, Documentation}
-import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.{Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -142,10 +142,45 @@ trait EndpointsWithCustomErrors
     }
   }
 
-  def response[A](statusCode: StatusCode, responseEntity: ResponseEntity[A], docs: Documentation = None): Response[A] =
-    (status, _) =>
-      if (status == statusCode) Some(responseEntity)
-      else None
+  type ResponseHeaders[A] = Seq[HttpHeader] => Validated[A]
+
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+    new Semigroupal[ResponseHeaders] {
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+        headers => fa(headers).zip(fb(headers))
+    }
+
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+    new PartialInvariantFunctor[ResponseHeaders] {
+      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+        headers => fa(headers).flatMap(f)
+    }
+
+  def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
+
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+    headers =>
+      Validated.fromOption(
+        headers.find(_.lowercaseName() == name.toLowerCase).map(_.value())
+      )(s"Missing response header '$name'")
+
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] =
+    headers =>
+      Valid(headers.find(_.lowercaseName() == name.toLowerCase).map(_.value()))
+
+  def response[A, B, R](
+    statusCode: StatusCode,
+    responseEntity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(implicit tupler: Tupler.Aux[A, B, R]): Response[R] =
+    (status, httpHeaders) =>
+      if (status == statusCode) {
+        headers(httpHeaders) match {
+          case Valid(b)        => Some(mapResponseEntity(responseEntity)(tupler(_, b)))
+          case Invalid(errors) => Some(_ => Future.successful(Left(new Exception(errors.mkString(". ")))))
+        }
+      } else None
 
   def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     (status, headers) =>

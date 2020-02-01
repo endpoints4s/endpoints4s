@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.util.UUID
 
-import endpoints.algebra
+import endpoints.{Invalid, Valid, algebra}
 
 trait EndpointsTestApi extends algebra.Endpoints {
 
@@ -87,6 +87,27 @@ trait EndpointsTestApi extends algebra.Endpoints {
   val optQsEndpoint = endpoint(
     get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & qs[Option[Int]]("age"))),
     ok(textResponse)
+  )
+
+  case class Cache(etag: String, lastModified: String /* I couldn’t find how to parse these dates */)
+
+  val cacheHeaders: ResponseHeaders[Cache] =
+    (responseHeader("ETag") ++ responseHeader("Last-Modified"))
+      .xmapPartial { case (etag, lastModified) =>
+        val validDate =
+          if (lastModified.contains("GMT")) Valid(lastModified)
+          else Invalid("Invalid date")
+        validDate.map(Cache(etag, _))
+      } (cache => (cache.etag, cache.lastModified))
+
+  val versionedResource = endpoint(
+    get(path / "versioned-resource"),
+    ok(textResponse, headers = cacheHeaders)
+  )
+
+  val endpointWithOptionalResponseHeader = endpoint(
+    get(path / "maybe-cors-enabled"),
+    ok(textResponse, headers = optResponseHeader("Access-Control-Allow-Origin"))
   )
 
 }

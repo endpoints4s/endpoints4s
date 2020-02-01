@@ -1,11 +1,12 @@
 package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
-import akka.http.scaladsl.model.HttpEntity
+import akka.http.scaladsl.model.headers.RawHeader
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader}
 import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
-import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.{InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Validated, algebra}
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
@@ -32,6 +33,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   type RequestEntity[A] = Directive1[A]
 
   type ResponseEntity[A] = ToEntityMarshaller[A]
+
+  type ResponseHeaders[A] = A => collection.immutable.Seq[HttpHeader]
 
   type Response[A] = A => Route
 
@@ -94,14 +97,48 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       RESPONSES
   ************************* */
 
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+    new Semigroupal[ResponseHeaders] {
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+        out => {
+          val (a, b) = tupler.unapply(out)
+          fa(a) ++ fb(b)
+        }
+    }
+
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+    new PartialInvariantFunctor[ResponseHeaders] {
+      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+        fa compose g
+    }
+
+  def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Nil
+
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+    value => RawHeader(name, value) :: Nil
+
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] = {
+    case Some(value) => RawHeader(name, value) :: Nil
+    case None        => Nil
+  }
+
   def emptyResponse: ResponseEntity[Unit] = Marshaller.opaque(_ => HttpEntity.Empty)
 
   def textResponse: ResponseEntity[String] = implicitly
 
-  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
-    a => {
+  def response[A, B, R](
+    statusCode: StatusCode,
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(implicit
+    tupler: Tupler.Aux[A, B, R]
+  ): Response[R] =
+    r => {
+      val (a, b) = tupler.unapply(r)
+      val httpHeaders = headers(b)
       implicit val marshaller: ToResponseMarshaller[A] =
-        Marshaller.fromToEntityMarshaller(statusCode)(entity)
+        Marshaller.fromToEntityMarshaller(statusCode, httpHeaders)(entity)
       Directives.complete(a)
     }
 

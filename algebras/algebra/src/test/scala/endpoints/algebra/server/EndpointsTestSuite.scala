@@ -5,9 +5,9 @@ import java.util.UUID
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{DateTime, HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.HttpMethods.{DELETE, PUT}
-import akka.http.scaladsl.model.headers.`Content-Type`
+import akka.http.scaladsl.model.headers.{ETag, `Access-Control-Allow-Origin`, `Content-Type`, `Last-Modified`}
 import akka.util.ByteString
 import endpoints.{Invalid, Valid}
 
@@ -315,6 +315,50 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
           assert(response.status.intValue() == 500)
           assert(entity == "[\"Sorry.\"]")
+          ()
+        }
+      }
+    }
+
+    "encode response headers" in {
+      val entity  = "foo"
+      val etag = UUID.randomUUID().toString
+      val lastModified = DateTime.now
+      val cache = serverApi.Cache(s""""$etag"""", lastModified.toRfc1123DateTimeString())
+      serveEndpoint(serverApi.versionedResource, (entity, cache)) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/versioned-resource")
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(response.header[ETag].contains(ETag(etag)))
+          assert(response.header[`Last-Modified`].contains(`Last-Modified`(lastModified)))
+          ()
+        }
+      }
+    }
+
+    "encode optional response headers" in {
+      val entity  = "foo"
+      val origin = Some("*")
+      serveEndpoint(serverApi.endpointWithOptionalResponseHeader, (entity, origin)) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/maybe-cors-enabled")
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(
+            response.header[`Access-Control-Allow-Origin`]
+              .contains(`Access-Control-Allow-Origin`.*)
+          )
+          ()
+        }
+      }
+    }
+
+    "skip missing optional response headers" in {
+      val entity  = "foo"
+      serveEndpoint(serverApi.endpointWithOptionalResponseHeader, (entity, None)) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/maybe-cors-enabled")
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(response.header[`Access-Control-Allow-Origin`].isEmpty)
           ()
         }
       }
