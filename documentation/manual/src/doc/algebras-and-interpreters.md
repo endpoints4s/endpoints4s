@@ -46,6 +46,7 @@ work with JSON.
 |[Endpoints](algebras/endpoints.md)|HTTP endpoints|
 |[JsonEntities](algebras/json-entities.md)|JSON request and response entities|
 |[JsonSchemas](algebras/json-schemas.md)|JSON schemas of data types|
+|[ChunkedEntities](algebras/chunked-entities.md)|Streamed requests and responses|
 |[Assets](algebras/assets.md)|Asset segments, endpoints serving fingerprinted assets|
 |[MuxEndpoints](algebras/mux-endpoints.md)|Multiplexed HTTP endpoints|
 

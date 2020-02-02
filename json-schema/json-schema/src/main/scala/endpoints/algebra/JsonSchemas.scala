@@ -218,7 +218,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** The JSON schema of a record with no fields
     * @group operations
     */
-  def emptyRecord: Record[Unit]
+  implicit def emptyRecord: Record[Unit]
 
   /** The JSON schema of a record with a single field `name` of type `A`
     * @group operations

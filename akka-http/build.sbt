@@ -8,9 +8,6 @@ val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
-val akkaActorVersion = "2.6.1"
-val akkaHttpVersion = "10.1.11"
-
 val `akka-http-client` =
   project.in(file("client"))
     .settings(

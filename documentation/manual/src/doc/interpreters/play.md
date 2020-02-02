@@ -34,6 +34,8 @@ It can be invoked as follows:
 
 [API documentation](unchecked:/api/endpoints/play/server/index.html)
 
+### `Endpoints`
+
 The `Endpoints` interpreter provides a `routesFromEndpoints` operation that turns
 a sequence of endpoints with their implementation into a `play.api.routing.Router.Routes`
 value that can be integrated to your Play application.
@@ -52,6 +54,20 @@ In practice, the routes are put in a class taking an `endpoints.play.server.Play
 parameter. An HTTP server can then be started as in the following example:
 
 ~~~ scala src=../../../../../documentation/examples/documented/src/main/scala/counter/Counter.scala#main-only
+~~~
+
+### `ChunkedEntities`
+
+The `ChunkedEntities` interpreter fixes the type `Chunks[A]` to `akka.stream.scaladsl.Source[A, _]`.
+
+For instance, given the following chunked endpoint definition:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala#streamed-endpoint
+~~~
+
+It can be implemented as follows:
+
+~~~ scala src=../../../../../play/server/src/test/scala/endpoints/play/server/ChunkedEntitiesDocs.scala#implementation
 ~~~
 
 ### Error handling

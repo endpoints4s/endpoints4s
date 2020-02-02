@@ -26,14 +26,14 @@ object Server extends App with Results with DefaultNettyServerComponents {
           |  <head>
           |  </head>
           |  <body>
-          |    <script src="/assets/sample-client-fastopt.js"></script>
+          |    <script src="/assets/app.js"></script>
           |    <script>sample.Main().main();</script>
           |  </body>
           |</html>
         """.stripMargin
       Ok(html).as(HTML)
     }
-    case GET(p"/assets/sample-client-fastopt.js") =>
+    case GET(p"/assets/app.js") =>
       assets.versioned("/", "example-basic-client-fastopt.js")
     case GET(p"/api/description") => action {
       Ok(OpenApi.stringEncoder.encode(sample.openapi.DocumentedApi.documentation)).as(JSON)

@@ -10,7 +10,10 @@ val algebra =
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.25.1" % Test,
-        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
+        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test,
+        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test,
+        "com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test,
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test
       )
     )
     .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")

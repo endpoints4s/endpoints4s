@@ -10,6 +10,8 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 
 [API documentation](unchecked:/api/endpoints/akkahttp/client/index.html)
 
+### `Endpoints`
+
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function
 from `A` to `Future[B]`:
 
@@ -26,6 +28,23 @@ It can be invoked as follows:
 ~~~ scala src=../../../../../akka-http/client/src/test/scala/endpoints/akkahttp/client/EndpointsDocs.scala#invocation
 ~~~
 
+### `ChunkedEntities`
+
+The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.scaladsl.Source[A, _]`:
+
+~~~ scala src=../../../../../akka-http/client/src/main/scala/endpoints/akkahttp/client/ChunkedEntities.scala#stream-type
+~~~
+
+This means that, given the following endpoint definition:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala#streamed-endpoint
+~~~
+
+It can be invoked as follows:
+
+~~~ scala src=../../../../../akka-http/client/src/test/scala/endpoints/akkahttp/client/ChunkedEntitiesDocs.scala#invocation
+~~~
+
 ## Server
 
 ~~~ scala expandVars=true
@@ -33,6 +52,8 @@ It can be invoked as follows:
 ~~~
 
 [API documentation](unchecked:/api/endpoints/akkahttp/server/index.html)
+
+### `Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to something that,
 given an implementation function `A => B`, returns an `akka.http.scaladsl.server.Route`
@@ -46,6 +67,23 @@ For instance, given the following endpoint definition:
 It can be implemented as follows:
 
 ~~~ scala src=../../../../../akka-http/server/src/test/scala/endpoints/akkahttp/server/EndpointsDocs.scala#implementation
+~~~
+
+Alternatively, there is also a method `implementedByAsync` that takes an implementing function
+returning a `Future[B]`.
+
+### `ChunkedEntities`
+
+The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.scaladsl.Source[A, _]`.
+
+For instance, given the following chunked endpoint definition:
+
+~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala#streamed-endpoint
+~~~
+
+It can be implemented as follows:
+
+~~~ scala src=../../../../../akka-http/server/src/test/scala/endpoints/akkahttp/server/ChunkedEntitiesDocs.scala#implementation
 ~~~
 
 ### Error handling

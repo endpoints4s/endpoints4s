@@ -14,7 +14,7 @@ class TestClient(address: String, wsClient: WSClient)
   extends Endpoints(address, wsClient)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
-    with algebra.BasicAuthTestApi
+    with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with circe.JsonFromCirceCodecTestApi

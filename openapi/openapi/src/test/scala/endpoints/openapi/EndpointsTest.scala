@@ -153,7 +153,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
 }
 
-trait Fixtures extends algebra.Endpoints {
+trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
   val foo = endpoint(
     get(path / "foo"),
@@ -186,14 +186,18 @@ trait Fixtures extends algebra.Endpoints {
   val multipleSegmentsPath =
     endpoint(get(path / "assets" / remainingSegments("file")), ok(textResponse))
 
+  val assets =
+    endpoint(get(path / "assets2" / remainingSegments("file")), ok(bytesChunksResponse))
+
 }
 
 object Fixtures
   extends Fixtures
     with algebra.JsonSchemasTest
     with Endpoints
-    with JsonEntitiesFromSchemas {
+    with JsonEntitiesFromSchemas
+    with ChunkedEntities {
 
-  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux)
+  val documentation = openApi(Info("Test API", "1.0.0"))(foo, bar, baz, textRequestEndp,emptySegmentNameEndp, quux, assets)
 
 }

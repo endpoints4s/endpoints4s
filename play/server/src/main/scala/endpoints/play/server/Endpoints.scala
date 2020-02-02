@@ -2,7 +2,7 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import endpoints.{Invalid, Semigroupal, Tupler, Valid, Validated, algebra}
-import play.api.http.Writeable
+import play.api.http.{HttpEntity, Writeable}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -213,19 +213,23 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
     }
 
-  type ResponseEntity[A] = Writeable[A]
+  type ResponseEntity[A] = A => HttpEntity
+
+  private[server] def responseEntityFromWriteable[A](writeable: Writeable[A]): ResponseEntity[A] =
+    a => writeable.toEntity(a)
 
   /** An empty response entity */
-  def emptyResponse: ResponseEntity[Unit] = Writeable.writeableOf_EmptyContent.map(_ => Results.EmptyContent())
+  def emptyResponse: ResponseEntity[Unit] =
+    responseEntityFromWriteable(Writeable.writeableOf_EmptyContent.map[Unit](_ => Results.EmptyContent()))
 
   /** A text entity */
-  def textResponse: ResponseEntity[String] = implicitly
+  def textResponse: ResponseEntity[String] = responseEntityFromWriteable(implicitly)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
-  lazy val htmlResponse: ResponseEntity[Html] = implicitly
+  lazy val htmlResponse: ResponseEntity[Html] = responseEntityFromWriteable(implicitly)
 
   def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): A => Result =
-    a => statusCode.sendEntity(entity.toEntity(a))
+    a => statusCode.sendEntity(entity(a))
 
   def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
     case Left(a)  => responseA(a)
