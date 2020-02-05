@@ -1,14 +1,14 @@
 package endpoints.scalaj.client
 
 import endpoints.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite}
-import endpoints.algebra.{BasicAuthTestApi, EndpointsTestApi}
+import endpoints.algebra.{BasicAuthenticationTestApi, EndpointsTestApi}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class TestClient(val address: String)
   extends EndpointsTestApi
-  with BasicAuthTestApi
+  with BasicAuthenticationTestApi
   with Endpoints
   with BasicAuthentication
 

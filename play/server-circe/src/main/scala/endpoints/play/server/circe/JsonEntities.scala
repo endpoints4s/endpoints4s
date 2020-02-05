@@ -34,6 +34,6 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
     }
 
   def jsonResponse[A : CirceEncoder]: ResponseEntity[A] =
-    implicitly[Writeable[Json]].map(CirceEncoder[A].apply(_))
+    responseEntityFromWriteable(implicitly[Writeable[Json]].map(CirceEncoder[A].apply(_)))
 
 }

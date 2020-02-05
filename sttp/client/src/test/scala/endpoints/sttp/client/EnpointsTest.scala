@@ -4,7 +4,7 @@ import com.softwaremill.sttp
 import com.softwaremill.sttp.TryHttpURLConnectionBackend
 import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonFromCodecTestSuite, EndpointsTestSuite}
-import endpoints.algebra.{BasicAuthTestApi, EndpointsTestApi}
+import endpoints.algebra.{BasicAuthenticationTestApi, EndpointsTestApi}
 import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -14,7 +14,7 @@ class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
   extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
-    with BasicAuthTestApi
+    with BasicAuthenticationTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
 

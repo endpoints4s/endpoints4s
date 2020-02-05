@@ -21,7 +21,7 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
             .withStatus(200)
             .withBody(addressStr)))
 
-        whenReady(call(client.smokeEndpoint, user))(_ shouldEqual address)
+        whenReady(call(client.jsonEndpoint, user))(_ shouldEqual address)
 
       }
 

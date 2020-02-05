@@ -19,7 +19,7 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
     JsonEntities.decodeRequest(this)(stringCodec(codec))
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
-    JsonEntities.encodeResponse(stringCodec(codec))
+    responseEntityFromWriteable(JsonEntities.encodeResponse(stringCodec(codec)))
 
 }
 
@@ -58,7 +58,7 @@ trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with Endp
     JsonEntities.decodeRequest(this)(decoder)
 
   def jsonResponse[A](implicit encoder: JsonResponse[A]): ResponseEntity[A] =
-    JsonEntities.encodeResponse(encoder)
+    responseEntityFromWriteable(JsonEntities.encodeResponse(encoder))
 
 }
 

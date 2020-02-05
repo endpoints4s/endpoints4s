@@ -8,7 +8,7 @@ trait JsonTestApi extends algebra.Endpoints with algebra.JsonEntities {
   implicit def addresCodec: JsonResponse[Address]
 
 
-  val smokeEndpoint = endpoint(
+  val jsonEndpoint = endpoint(
     post(path / "user", jsonRequest[User]),
     ok(jsonResponse[Address])
   )
