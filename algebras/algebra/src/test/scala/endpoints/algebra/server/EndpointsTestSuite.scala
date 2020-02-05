@@ -102,6 +102,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
       decodeUrl(path / "foo" /? qs[Int]("n"))     ("/foo?n=42")    shouldEqual Matched(42)
       decodeUrl(path / "foo" /? qs[Long]("n"))    ("/foo?n=42")    shouldEqual Matched(42L)
       decodeUrl(path / "foo" /? qs[String]("s"))  ("/foo?s=bar")   shouldEqual Matched("bar")
+      decodeUrl(path / "foo" /? qs[String]("s"))  ("/foo?s=bar%2Cbaz") shouldEqual Matched("bar,baz")
       decodeUrl(path / "foo" /? qs[Boolean]("b")) ("/foo?b=true")  shouldEqual Matched(true)
       decodeUrl(path / "foo" /? qs[Boolean]("b")) ("/foo?b=false") shouldEqual Matched(false)
       decodeUrl(path / "foo" /? qs[Int]("n"))     ("/foo")         shouldEqual Malformed(Seq(
@@ -142,6 +143,12 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
       decodeUrl(url)("/?page=foo") shouldEqual Malformed(Seq(
         "Invalid integer value 'foo' for query parameter 'page'"
       ))
+
+      implicit val blogSlugQueryString: QueryStringParam[BlogSlug] =
+        stringQueryString.xmap(BlogSlug)(_.slug)
+      val url2 = path /? qs[BlogSlug]("slug")
+      decodeUrl(url2)("/?slug=this-is-a-slug") shouldEqual(Matched(BlogSlug("this-is-a-slug")))
+      decodeUrl(url2)("/?slug=this%20is%20a%20slug") shouldEqual(Matched(BlogSlug("this is a slug")))
     }
 
   }
