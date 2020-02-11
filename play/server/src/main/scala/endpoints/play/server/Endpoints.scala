@@ -1,8 +1,8 @@
 package endpoints.play.server
 
 import endpoints.algebra.Documentation
-import endpoints.{Invalid, Semigroupal, Tupler, Valid, Validated, algebra}
 import play.api.http.{HttpEntity, Writeable}
+import endpoints.{Invalid, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -228,8 +228,46 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   /** A successful HTTP response (status code 200) with an HTML entity */
   lazy val htmlResponse: ResponseEntity[Html] = responseEntityFromWriteable(implicitly)
 
-  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): A => Result =
-    a => statusCode.sendEntity(entity(a))
+  type ResponseHeaders[A] = A => Seq[(String, String)]
+
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+    new Semigroupal[ResponseHeaders] {
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+        out => {
+          val (a, b) = tupler.unapply(out)
+          fa(a) ++ fb(b)
+        }
+    }
+
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+    new PartialInvariantFunctor[ResponseHeaders] {
+      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+        fa compose g
+    }
+
+  def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Nil
+
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+    value => (name, value) :: Nil
+
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] = {
+    case Some(value) => (name, value) :: Nil
+    case None        => Nil
+  }
+
+  def response[A, B, R](
+    statusCode: StatusCode,
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B]
+  )(implicit
+    tupler: Tupler.Aux[A, B, R]
+  ): Response[R] =
+    r => {
+      val (a, b) = tupler.unapply(r)
+      val httpHeaders = headers(b)
+      statusCode.sendEntity(entity(a)).withHeaders(httpHeaders: _*)
+    }
 
   def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
     case Left(a)  => responseA(a)

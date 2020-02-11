@@ -12,16 +12,10 @@ import endpoints.openapi.model.{MediaType, Schema}
 trait Requests
   extends algebra.Requests
     with Urls
-    with Methods {
+    with Methods
+    with Headers {
 
   type RequestHeaders[A] = DocumentedHeaders
-
-  /**
-    * @param value List of request header names (e.g. “Authorization”)
-    */
-  case class DocumentedHeaders(value: List[DocumentedHeader])
-
-  case class DocumentedHeader(name: String, description: Option[String], required: Boolean, schema: Schema)
 
   def emptyHeaders = DocumentedHeaders(Nil)
 

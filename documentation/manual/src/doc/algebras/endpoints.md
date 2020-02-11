@@ -112,7 +112,7 @@ details about constructors and operations for the type `RequestHeaders`.
 
 ### Request Entity
 
-The type`RequestEntity[A]` models a request entity carrying some information of type `A`. For
+The type `RequestEntity[A]` models a request entity carrying some information of type `A`. For
 instance, a value of type `RequestEntity[Command]` describes a request entity containing a
 command.
 
@@ -130,8 +130,8 @@ serialization schema of a `User`.
 
 ### Constructing Responses
 
-A response is defined in terms of a status and an entity. Here is an example
-of a simple OK response with no entity:
+A response is defined in terms of a status, headers and an entity. Here is an example
+of a simple OK response with no entity and no headers:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#response
 ~~~
@@ -145,6 +145,20 @@ Additional documentation about the response can be passed as an extra parameter:
 
 ~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala#documented-response
 ~~~
+
+### Response Headers
+
+The type `ResponseHeaders[A]` models response headers carrying some information of type `A`. For
+instance, a value of type `ResponseHeaders[Origin]` describes response headers containing an
+origin (e.g., an `Access-Control-Allow-Origin` header).
+
+Refer to the [API documentation](unchecked:/api/endpoints/algebra/Endpoints.html#ResponseHeaders[A]) for
+details about constructors and operations for the type `ResponseHeaders`.
+
+### Response Entity
+
+The type `ResponseEntity[A]` models a response entity carrying some information of type `A`. For
+instance, a value of type `ResponseEntity[Event]` describes a response entity containing an event.
 
 The `Endpoints` algebra provides a few [`ResponseEntity` constructors and operations](unchecked:/api/endpoints/algebra/Endpoints.html#ResponseEntity[A]),
 which can be extended to support more content-types. For instance, the

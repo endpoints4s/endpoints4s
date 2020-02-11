@@ -24,8 +24,8 @@ trait Assets
   def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyHeaders, None, emptyRequest),
-      DocumentedResponse(OK, docs.getOrElse(""), Map.empty) ::
-        DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), Map.empty) ::
+      DocumentedResponse(OK, docs.getOrElse(""), emptyResponseHeaders, Map.empty) ::
+        DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), emptyResponseHeaders, Map.empty) ::
         Nil
     )
 

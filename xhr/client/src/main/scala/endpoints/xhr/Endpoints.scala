@@ -1,6 +1,6 @@
 package endpoints.xhr
 
-import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.{Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import endpoints.algebra.{Decoder, Documentation}
 import org.scalajs.dom.XMLHttpRequest
 
@@ -149,10 +149,44 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     */
   def textResponse: ResponseEntity[String] = xhr => Right(xhr.responseText)
 
-  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
+  type ResponseHeaders[A] = XMLHttpRequest => Validated[A]
+
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+    new Semigroupal[ResponseHeaders] {
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+        headers => fa(headers).zip(fb(headers))
+    }
+
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+    new PartialInvariantFunctor[ResponseHeaders] {
+      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+        headers => fa(headers).flatMap(f)
+    }
+
+  def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
+
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
     xhr =>
-      if (xhr.status == statusCode) Some(entity)
-      else None
+      Validated.fromOption(Option(xhr.getResponseHeader(name)))(s"Missing response header '$name'")
+
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] =
+    xhr => Valid(Option(xhr.getResponseHeader(name)))
+
+  def response[A, B, R](
+    statusCode: StatusCode,
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(implicit
+    tupler: Tupler.Aux[A, B, R]
+  ): Response[R] =
+    xhr =>
+      if (xhr.status == statusCode) {
+        headers(xhr) match {
+          case Valid(b)        => Some(mapResponseEntity(entity)(tupler(_, b)))
+          case Invalid(errors) => Some(_ => Left(new Exception(errors.mkString(". "))))
+        }
+      } else None
 
   def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
     xhr =>

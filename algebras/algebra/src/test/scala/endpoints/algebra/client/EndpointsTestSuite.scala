@@ -3,6 +3,7 @@ package endpoints.algebra.client
 import java.time.LocalDate
 import java.util.UUID
 
+import akka.http.scaladsl.model.DateTime
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.{Invalid, Valid}
 import endpoints.algebra.EndpointsTestApi
@@ -260,7 +261,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
               location => (location.longitude, location.latitude)
             }
           //#xmap
-          
+
           encodeUrl(path /? locationQueryString) (Location(12.0, 32.9)) shouldEqual "?lon=12.0&lat=32.9"
           encodeUrl(path /? locationQueryString) (Location(-12.0, 32.9)) shouldEqual "?lon=-12.0&lat=32.9"
           encodeUrl(path /? locationQueryString) (Location(Math.PI, -32.9)) shouldEqual s"?lon=${Math.PI}&lat=-32.9"
@@ -281,7 +282,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
                 case BlogUuid(uuid) => (Some(uuid), None)
                 case BlogSlug(slug) => (None, Some(slug))
               }
-          
+
           val testUUID: UUID = UUID.randomUUID()
           val testSlug: String = "test-slug"
 
@@ -291,10 +292,72 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
       }
 
+      "Decode response headers" in {
+        val response = "foo"
+        val etag     = s""""${UUID.randomUUID()}""""
+        val lastModified = DateTime.now.toRfc1123DateTimeString()
+        wireMockServer.stubFor(get(urlEqualTo("/versioned-resource"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)
+            .withHeader("ETag", etag)
+            .withHeader("Last-Modified", lastModified)
+          ))
+
+        whenReady(call(client.versionedResource, ())) {
+          case (entity, cache) =>
+            assert(entity == response)
+            assert(cache.etag.startsWith(etag.dropRight(1))) // Some http client add a “--gzip” suffix
+            assert(cache.lastModified == lastModified)
+        }
+      }
+
+      "Report failures when decoding response headers" in {
+        val response = "foo"
+        val etag     = s""""${UUID.randomUUID()}""""
+        wireMockServer.stubFor(get(urlEqualTo("/versioned-resource"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)
+            .withHeader("ETag", etag)
+            .withHeader("Last-Modified", "dummy")
+          ))
+
+        whenReady(call(client.versionedResource, ()).failed) { exception =>
+          assert(exception.getMessage == "Invalid date")
+        }
+      }
+
+      "Decode optional response headers" in {
+        val response = "foo"
+        val origin   = "*"
+        wireMockServer.stubFor(get(urlEqualTo("/maybe-cors-enabled"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)
+            .withHeader("Access-Control-Allow-Origin", origin)
+          ))
+
+        whenReady(call(client.endpointWithOptionalResponseHeader, ())) {
+          case (entity, header) => (entity, header) shouldEqual ((response, Some(origin)))
+        }
+      }
+
+      "Decode missing optional response headers" in {
+        val response = "foo"
+        wireMockServer.stubFor(get(urlEqualTo("/maybe-cors-enabled"))
+          .willReturn(aResponse()
+            .withStatus(200)
+            .withBody(response)
+          ))
+
+        whenReady(call(client.endpointWithOptionalResponseHeader, ())) {
+          case (entity, header) => (entity, header) shouldEqual ((response, None))
+        }
+      }
+
     }
 
-
   }
-
 
 }

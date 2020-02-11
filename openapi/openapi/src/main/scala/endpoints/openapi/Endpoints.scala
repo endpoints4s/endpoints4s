@@ -89,9 +89,13 @@ trait EndpointsWithCustomErrors
       pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
         request.url.queryParameters.map(p => Parameter(p.name, In.Query, p.required, p.description, p.schema)) ++
         request.headers.value.map(h => Parameter(h.name, In.Header, required = h.required, h.description, h.schema))
+    def responseHeaders(documentedHeaders: DocumentedHeaders): Map[String, ResponseHeader] =
+      documentedHeaders.value.map { header =>
+        header.name -> ResponseHeader(header.required, header.description, header.schema)
+      }.toMap
     val responses =
       (clientErrorsResponse ++ serverErrorResponse ++ response)
-        .map(r => r.status.toString -> Response(r.documentation, r.content))
+        .map(r => r.status.toString -> Response(r.documentation, responseHeaders(r.headers), r.content))
         .toMap
     val operation =
       Operation(
@@ -109,7 +113,7 @@ trait EndpointsWithCustomErrors
               val requestBody = RequestBody(callback.requestDocs, callback.entity)
               val responses =
                 callback.response
-                  .map(r => r.status.toString -> Response(r.documentation, r.content))
+                  .map(r => r.status.toString -> Response(r.documentation, responseHeaders(r.headers), r.content))
                   .toMap
               val callbackOperation =
                 Operation(None, None, Nil, Some(requestBody), responses, Nil, Nil, Map.empty, deprecated = false)
@@ -133,6 +137,7 @@ trait EndpointsWithCustomErrors
       documentedEndpoint <- endpoints
       operations = documentedEndpoint.item.operations.values
       operation <- operations ++ operations.flatMap(_.callbacks.values.flatMap(_.values.flatMap(_.operations.values)))
+      operationParametersSchemas = operation.parameters.map(_.schema)
       requestBodySchema = for {
         body <- operation.requestBody.toIterable
         mediaType <- body.content.values
@@ -141,9 +146,9 @@ trait EndpointsWithCustomErrors
       responseSchemas = for {
         (_, response) <- operation.responses.toSeq
         (_, mediaType) <- response.content.toSeq
-        schema <- mediaType.schema.toIterable
+        schema <- mediaType.schema.toIterable ++ response.headers.values.map(_.schema)
       } yield schema
-      schema <- requestBodySchema ++ responseSchemas
+      schema <- requestBodySchema ++ responseSchemas ++ operationParametersSchemas
       recSchema <- captureReferencedSchemasRec(schema)
     } yield recSchema
 

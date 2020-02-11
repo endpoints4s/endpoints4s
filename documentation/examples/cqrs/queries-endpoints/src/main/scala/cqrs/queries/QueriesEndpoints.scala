@@ -19,7 +19,7 @@ trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEn
 
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
     val request = post(path / "query", jsonRequest[Json])
-    muxEndpoint[QueryReq, QueryResp, Json](request, ok(jsonResponse))
+    muxEndpoint(request, ok(jsonResponse[Json]))
   }
 
 }

@@ -116,8 +116,24 @@ object OpenApi {
     val fields = mutable.LinkedHashMap[String, ujson.Value](
       "description" -> ujson.Str(response.description)
     )
+    if (response.headers.nonEmpty) {
+      fields += "headers" -> mapJson(response.headers)(responseHeaderJson)
+    }
     if (response.content.nonEmpty) {
       fields += "content" -> mapJson(response.content)(mediaTypeJson)
+    }
+    new ujson.Obj(fields)
+  }
+
+  def responseHeaderJson(responseHeader: ResponseHeader): ujson.Value = {
+    val fields = mutable.LinkedHashMap[String, ujson.Value](
+      "schema" -> schemaJson(responseHeader.schema)
+    )
+    if (responseHeader.required) {
+      fields += "required" -> ujson.True
+    }
+    responseHeader.description.foreach { description =>
+      fields += "description" -> ujson.Str(description)
     }
     new ujson.Obj(fields)
   }
@@ -257,8 +273,12 @@ case class RequestBody(
 
 case class Response(
   description: String,
+  headers: Map[String, ResponseHeader],
   content: Map[String, MediaType]
 )
+
+// Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
+case class ResponseHeader(required: Boolean, description: Option[String], schema: Schema)
 
 case class Parameter(
   name: String,
