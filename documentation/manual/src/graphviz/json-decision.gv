@@ -1,0 +1,15 @@
+digraph {
+
+  doc [ label="Do I want to publish documentation?",shape=diamond ]
+  codec [ label="Do I want to implement both a client and a server?",shape=diamond ]
+
+  JsonEntitiesFromSchemas [shape=box,fontname=mono]
+  JsonEntitiesFromCodecs [shape=box,fontname=mono]
+  JsonEntitiesFromEncodersAndDecoders [shape=box,fontname=mono]
+
+  doc -> JsonEntitiesFromSchemas [ label="yes" ]
+  doc -> codec [ label="no" ]
+  codec -> JsonEntitiesFromCodecs [ label="yes" ]
+  codec -> JsonEntitiesFromEncodersAndDecoders [ label="no" ]
+
+}

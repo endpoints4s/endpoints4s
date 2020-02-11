@@ -1,11 +1,11 @@
 # `Tupler`
 
-This guide explains why we use implicit [`Tupler`](unchecked:/api/endpoints/Tupler.html) parameters
+This guide explains why we use implicit @scaladoc[`Tupler`](endpoints.Tupler) parameters
 in the signature of some algebra operations and how it works.
 
 ## Motivation
 
-As explained in the [design](/design.md) page, to model a request that carries
+As explained in the @ref[design](../design.md) page, to model a request that carries
 an information of type `A`, we use the type `Request[A]`. This type `A` is
 important because it represents what is needed by clients to build such
 a request and what is received by servers to process such a request. For
@@ -58,8 +58,7 @@ The `Tupler[A, B]` type takes two type parameters `A` and `B`
 and defines an abstract type member `Out`. This `Out` type defines
 the “useful” form of tupling `A` and `B`.
 
-~~~ scala src=../../../../../json-schema/json-schema/src/main/scala/endpoints/Tupler.scala#definition
-~~~
+@@snip [Tupler.scala](/json-schema/json-schema/src/main/scala/endpoints/Tupler.scala) { #definition }
 
 Algebra operations that want to tuple types `A` and `B` take as
 parameter an implicit `tupler: Tupler[A, B]` and return a

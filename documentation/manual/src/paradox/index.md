@@ -1,6 +1,16 @@
 endpoints
 =========
 
+@@@ index
+* [Use Cases](use-cases.md)
+* [Quick Start](quick-start.md)
+* [Design in a Nutshell](design.md)
+* [Algebras and Interpreters](algebras-and-interpreters.md)
+* [Guides](guides.md)
+* [Comparison with Similar Tools](comparison.md)
+* [Talks and Publications](talks.md)
+@@@
+
 *endpoints* is a Scala library for remote communication. It ensures
 that HTTP servers, HTTP clients, and documentation always agree on the same protocol.
 
@@ -12,27 +22,25 @@ protocol details (e.g., which verb, path, query parameters, headers, authenticat
 use). For instance, here is an endpoint for incrementing a counter. It uses the HTTP verb `POST`, the URL path
 `/increment`, a JSON request entity containing an `Increment` value, and it returns an empty response.
 
-~~~ scala src=../../../../documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala#endpoint-definition
-~~~
+@@snip [CounterEndpoints.scala](/documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala) { #endpoint-definition }
 
 From the client perspective, calling an HTTP endpoint is as simple as calling a function:
 
-~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClientFuture.scala#endpoint-invocation
-~~~
+@@snip [CounterClientFuture.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClientFuture.scala) { #endpoint-invocation }
 
 Conversely, from the server perspective implementing an HTTP endpoint is as simple as implementing a function:
 
-~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala#endpoint-implementation
-~~~
+@@snip [CounterServer.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala) { #endpoint-implementation }
 
 The *endpoints* library takes care of constructing the HTTP requests and responses and decoding the server
 responses or client requests into high-level data types according to the endpoint descriptions.
 
-In contrast with [most other approaches](comparison.md), *endpoints* is a pure, “*vanilla*”, Scala library.
+In contrast with @ref[most other approaches](comparison.md), *endpoints* is a pure, "*vanilla*", Scala library.
 **No code generation**. **No macros**. **IDE friendly**. Endpoint descriptions are **first-class Scala values**,
 which can be reused, combined, and abstracted over.
 
 The library currently supports the following backends:
+
 - clients: Akka-Http, Play-WS, sttp, scalaj, and XMLHttpRequest (Scala.js) ;
 - servers: Akka-Http and Play ;
 - documentation: OpenAPI document ;
@@ -47,10 +55,10 @@ The library currently supports the following backends:
 
 ## Getting started
 
-- Have a look at the [quick start](quick-start.md) guide to understand
+- Have a look at the @ref[quick start](quick-start.md) guide to understand
   in a few minutes what the library does and how to setup a project ;
-- Check out the [use cases](use-cases.md) to know the typical problems that *endpoints* addresses ;
-- Browse the [API documentation](unchecked:/api/endpoints/index.html) or the
+- Check out the @ref[use cases](use-cases.md) to know the typical problems that *endpoints* addresses ;
+- Browse the @scaladoc[API documentation](endpoints.index) or the
   [samples](https://github.com/julienrf/endpoints/tree/master/documentation/examples) ;
 - Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
 

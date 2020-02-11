@@ -17,30 +17,26 @@ The `shared` project contains the *description* of the communication
 protocol. The `server` project *implements* this communication protocol.
 The `client` project *uses* the protocol to communicate with the `server`.
 
-~~~ mermaid
-graph BT
-  shared
-  server -.-> shared
-  client -.-> shared
-~~~
+![](project-layout.svg)
 
 ## Dependencies
 
 The `shared` project has to depend on so-called *algebras*, which provide the vocabulary
 to describe the communication endpoints, and the `client` and `server` projects
 have to depend on *interpreters*, which give a concrete meaning to the endpoint descriptions.
-See the [algebras and interpreters](algebras-and-interpreters.md) page for an exhaustive
+See the @ref[algebras and interpreters](algebras-and-interpreters.md) page for an exhaustive
 list.
 
 In this example you will use the following dependencies:
 
-~~~ scala expandVars=true
+@@@vars
+~~~ scala
 val shared =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %%% "endpoints-algebra" % "{{version}}",
+      "org.julienrf" %%% "endpoints-algebra" % "$version$",
       // optional, see explanation below
-      "org.julienrf" %%% "endpoints-json-schema-generic" % "{{version}}"
+      "org.julienrf" %%% "endpoints-json-schema-generic" % "$version$"
     )
   )
 
@@ -49,27 +45,28 @@ val sharedJVM = shared.jvm
 
 val client =
   project.enablePlugins(ScalaJSPlugin).settings(
-    libraryDependencies += "org.julienrf" %%% "endpoints-xhr-client" % "{{version}}"
+    libraryDependencies += "org.julienrf" %%% "endpoints-xhr-client" % "$version$"
   ).dependsOn(sharedJS)
 
 val server =
   project.settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %% "endpoints-akka-http-server" % "{{version}}",
+      "org.julienrf" %% "endpoints-akka-http-server" % "$version$",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
   ).dependsOn(sharedJVM)
 ~~~
+@@@
 
 The `shared` project uses the
-[`endpoints-json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas)
-in addition to the required algebra interface [`endpoints-algebra`](algebras/endpoints.md),
+@ref[`endpoints-json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas)
+in addition to the required algebra interface @ref[`endpoints-algebra`](algebras/endpoints.md),
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
 
-The `client` project uses a [Scala.js web](interpreters/scalajs-web.md) client interpreter.
+The `client` project uses a @ref[Scala.js web](interpreters/scalajs-web.md) client interpreter.
 
-Finally, the `server` project uses a server interpreter backed by [Akka HTTP](interpreters/akka-http.md).
+Finally, the `server` project uses a server interpreter backed by @ref[Akka HTTP](interpreters/akka-http.md).
 It also uses the scala-stm library for implementing the business logic.
 
 ## Description of the HTTP endpoints
@@ -77,8 +74,7 @@ It also uses the scala-stm library for implementing the business logic.
 In the `shared` project, define a `CounterEndpoints` trait describing two endpoints, one
 for getting a counter value and one for incrementing it:
 
-~~~ scala src=../../../../documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala#relevant-code
-~~~
+@@snip [CounterEndpoints.scala](/documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala) { #relevant-code }
 
 The `currentValue` and `increment` members define the endpoints for getting the counter
 current value or incrementing it, as their names suggest. The `counterSchema` and
@@ -91,18 +87,15 @@ A client implementation of the endpoints can be obtained by mixing so-called “
 trait defined above. In this example, you want to get a JavaScript (Scala.js) client that uses `XMLHttpRequest` under
 the hood. Defines the following `CounterClient` object in the `client` project:
 
-~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClient.scala#relevant-code
-~~~
+@@snip [CounterClient.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClient.scala) { #relevant-code }
 
 And then, the `CounterClient` object can be used as follows:
 
-~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala#current-value
-~~~
+@@snip [Usage.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala) { #current-value }
 
 And also:
 
-~~~ scala src=../../../../documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala#increment
-~~~
+@@snip [Usage.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala) { #increment }
 
 As you can see, invoking an endpoint consists of calling a function on the `CounterClient` object.
 The *endpoints* library then builds an HTTP request (according to the endpoint description), sends
@@ -115,8 +108,8 @@ interpreters to the `CounterEndpoints` trait. In this example, you want to get a
 that uses Akka HTTP under the hood. Create the following `CounterServer` class in the
 `server` project:
 
-~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala#relevant-code
-~~~
+
+@@snip [CounterServer.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala) { #relevant-code }
 
 The `routes` value produced by the *endpoints* library is a `Route` value directly
 usable by Akka HTTP. The last section shows how to setup an Akka HTTP server that
@@ -131,8 +124,7 @@ You can also generate documentation for the endpoints,
 again by mixing the appropriate interpreters. Create the following `CounterDocumentation`
 object in the `server` project:
 
-~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/CounterDocumentation.scala#relevant-code
-~~~
+@@snip [CounterDocumentation.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/CounterDocumentation.scala) { #relevant-code }
 
 This code defines a `CounterDocumentation` object with an `api` member containing an OpenAPI object documenting
 the `currentValue` and `increment` endpoints.
@@ -142,8 +134,7 @@ the `currentValue` and `increment` endpoints.
 Finally, to run your application you need to build a proper Akka HTTP server serving your routes.
 Define the following `Main` object:
 
-~~~ scala src=../../../../documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala#relevant-code
-~~~
+@@snip [Main.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala) { #relevant-code }
 
 You can then browse the
 [http://localhost:8000/current-value](http://localhost:8000/current-value)
@@ -270,4 +261,4 @@ the following:
 
 ## Next Step
 
-Learn about the [design principles](design.md) of the _endpoints_ library.
+Learn about the @ref[design principles](design.md) of the _endpoints_ library.

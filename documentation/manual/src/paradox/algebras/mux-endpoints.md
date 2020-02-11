@@ -1,13 +1,15 @@
-# `MuxEndpoints`
+# Multiplexed Endpoints
 
 This algebra provides vocabulary to define endpoints multiplexing several
 requests and responses.
 
-~~~ scala expandVars=true
-"org.julienrf" %% "endpoints-algebra" % "{{version}}"
+@@@vars
+~~~ scala
+"org.julienrf" %% "endpoints-algebra" % "$version$"
 ~~~
+@@@
 
-[API documentation](unchecked:/api/endpoints/algebra/MuxEndpoints.html)
+@scaladoc[API documentation](endpoints.algebra.MuxEndpoints)
 
 In general, each possible resource or action supported by a service
 is exposed through a specific endpoint, taking a specific request type
@@ -28,8 +30,7 @@ contain `Event` values, and which serialize commands and events to `Json`.
 Since the type of a response can vary according to the type of specific request,
 multiplexed endpoints require that request types extend the `MuxRequest` type:
 
-~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/MuxEndpointsDocs.scala#mux-endpoint
-~~~
+@@snip [MuxEndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/MuxEndpointsDocs.scala) { #mux-endpoint }
 
 Note that the `Command` request type extends `MuxRequest` and that each
 concrete `Command` refines its `Response` type member to refer to a

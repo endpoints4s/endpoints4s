@@ -1,0 +1,12 @@
+digraph {
+  rankdir = BT
+  node [shape=box,fontname=mono]
+  edge [arrowhead=onormal]
+
+  algebra [ label="algebra.Endpoints" ]
+  json [ label="algebra.JsonEntitiesFromSchemas" ]
+  auth [ label="algebra.BasicAuthentication" ]
+
+  json -> algebra
+  auth -> algebra
+}

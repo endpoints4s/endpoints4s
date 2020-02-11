@@ -1,0 +1,27 @@
+@startuml
+client -> server : GET /login
+note over client
+ Client sends its credentials
+ (e.g., a password or an API key)
+end note
+alt valid credentials
+  server --> client : OK: JSON Web Token
+  note over server
+  Server replies with a JSON Web
+  Token attached to its response
+  end note
+else invalid credentials
+  server --> client : Bad Request
+end
+...
+client -> server : GET /protected-resource
+note over client
+  Client tries to access to a protected
+  resource by using its JWT
+end note
+alt valid JWT
+  server --> client : OK
+else invalid or missing JWT
+  server --> client : Unauthorized
+end
+@enduml

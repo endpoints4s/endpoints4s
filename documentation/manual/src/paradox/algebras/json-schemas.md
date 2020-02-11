@@ -1,19 +1,22 @@
-# JSON schemas
+# JSON Schemas
 
 ## `JsonSchemas`
 
 This algebra provides vocabulary to define JSON schemas of data types.
 
-~~~ scala expandVars=true
-"org.julienrf" %% "endpoints-algebra-json-schema" % "{{version}}"
+@@@vars
+~~~ scala
+"org.julienrf" %% "endpoints-algebra-json-schema" % "$version$"
 ~~~
+@@@
 
-[API documentation](unchecked:/api/endpoints/algebra/JsonSchemas.html)
+@scaladoc[API documentation](endpoints.algebra.JsonSchemas)
 
-> {.note}
-> This module is dependency-free, it can be used independently of *endpoints*
-> to define JSON schemas and interpret them as actual encoder, decoders or
-> documentation.
+@@@note
+This module is dependency-free, it can be used independently of *endpoints*
+to define JSON schemas and interpret them as actual encoder, decoders or
+documentation.
+@@@
 
 The algebra introduces the concept of `JsonSchema[A]`: a JSON schema for a type `A`.
 
@@ -24,14 +27,12 @@ and ways to combine them together to build more complex schemas.
 
 For instance, given the following `Rectangle` data type:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#record-type
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #record-type }
 
 We can represent instances of `Rectangle` in JSON with a JSON object having properties corresponding
 to the case class fields. A JSON schema for such objects would be defined as follows:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#record-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #record-schema }
 
 The `field` constructor defines a JSON object schema with one field of the given
 type and name (and an optional text documentation). A similar constructor, `optField`,
@@ -52,15 +53,13 @@ a `Record[Rectangle]`.
 It is also possible to define schemas for sum types. Consider the following type definition,
 defining a `Shape`, which can be either a `Circle` or a `Rectangle`:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#sum-type
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #sum-type }
 
 A possible JSON schema for this data type consists in using a JSON object with a discriminator
 field indicating whether the `Shape` is a `Rectangle` or a `Circle`. Such a schema can
 be defined as follows:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#sum-type-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #sum-type-schema }
 
 (We have omitted the definition of `circleSchema` for the sake of conciseness)
 
@@ -85,8 +84,7 @@ The examples above show how to use `xmap` to transform a `JsonSchema[A]` into a 
 case the transformation function from `A` to `B` can fail (for example, if it applies additional
 validation), you can use `xmapPartial` instead of `xmap`:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala#refined
-~~~
+@@snip [JsonSchemasTest.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala) { #refined }
 
 In this example, we check that the decoded integer is even. If it is not, we return an error message.
 
@@ -100,14 +98,12 @@ There are different ways to represent enumerations in Scala:
 
 For example, an enumeration with three possible values can be defined as a sealed trait with three case objects:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #enum-status }
 
 The method `stringEnumeration` in the `JsonSchemas` algebra supports mapping the enum values to JSON strings.
 It has two parameters: the possible values, and a function to encode an enum value as a string.
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#enum-status-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #enum-status-schema }
 
 The resulting `JsonSchema[Status]` allows defining JSON members with string values that are mapped to
 our case objects.
@@ -125,34 +121,32 @@ a `JsonSchema[(A, B, C)]`. Tuples are modeled in JSON with arrays, as recommende
 
 Here is an example of JSON schema for a GeoJSON `Point`, where GPS coordinates are modeled with a pair (longitude, latitude):
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#tuple
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #tuple }
 
 ### Recursive types
 
 You can reference a currently being defined schema without causing a `StackOverflow` error
 by wrapping it in the `lazyRecord` or `lazyTagged` constructor:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#recursive
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #recursive }
 
 ### Alternatives between schemas
 
 You can define a schema as an alternative between other schemas with the operation
 `orFallbackTo`:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala#one-of
-~~~
+@@snip [JsonSchemasTest.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasTest.scala) { #one-of }
 
-> {.warning}
-> Because decoders derived from schemas defined with the operation `orFallbackTo` literally
-> “fallback” from one alternative to another, it makes it impossible to report good decoding
-> failure messages. You should generally prefer using `orElse` on “tagged” schemas.
+@@@warning
+Because decoders derived from schemas defined with the operation `orFallbackTo` literally
+“fallback” from one alternative to another, it makes it impossible to report good decoding
+failure messages. You should generally prefer using `orElse` on “tagged” schemas.
+@@@
 
 ### Schemas documentation
 
 Schema descriptions can include documentation information which is used by documentation
-interpreters such as the [OpenAPI](/interpreters/openapi.md) interpreter. We have already
+interpreters such as the @ref[OpenAPI](../interpreters/openapi.md) interpreter. We have already
 seen in the first section that object fields could be documented with a description.
 This section shows two other features related to schemas documentation.
 
@@ -166,8 +160,7 @@ You can also include examples of values for a schema (see the
 [Swagger “Adding Examples” documentation](https://swagger.io/docs/specification/adding-examples/)).
 This is done by using the `withExample` operation:
 
-~~~ scala src=../../../../../json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala#with-example
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #with-example }
 
 Applying the OpenAPI interpreter to this schema definition produces the
 following JSON document:
@@ -191,24 +184,25 @@ following JSON document:
 }
 ~~~
 
-## Generic derivation of JSON schemas (based on Shapeless) {#generic-derivation-of-json-schemas}
+## Generic derivation of JSON schemas (based on Shapeless) 
 
 The module presented in this section uses Shapeless to generically derive JSON schemas
 for algebraic data type definitions (sealed traits and case classes).
 
-~~~ scala expandVars=true
-"org.julienrf" %% "endpoints-json-schema-generic" % "{{version}}"
+@@@vars
+~~~ scala
+"org.julienrf" %% "endpoints-json-schema-generic" % "$version$"
 ~~~
+@@@
 
-[API documentation](unchecked:/api/endpoints/generic/JsonSchemas.html)
+@scaladoc[API documentation](endpoints.generic.JsonSchemas)
 
 ### JSON schemas derivation
 
 With this module, defining the JSON schema of the `Shape` data type is
 reduced to the following:
 
-~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#generic-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala) { #generic-schema }
 
 The `genericJsonSchema` operation builds a JSON schema for the given
 type. The rules for deriving the schema are the following:
@@ -231,8 +225,7 @@ type. The rules for deriving the schema are the following:
 
 Here is an example that illustrates how to configure the generic schema derivation process:
 
-~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#documented-generic-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala) { #documented-generic-schema }
 
 In case you need to transform further a generically derived schema, you might want to use the
 `genericRecord` or `genericTagged` operations instead of `genericJsonSchema`. These operations
@@ -244,8 +237,7 @@ and `genericTagged` returns a `Tagged`.
 The module also takes advantage shapeless to provide a more convenient `as` operation for
 transforming JSON schema definitions, instead of `xmap`:
 
-~~~ scala src=../../../../../json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala#explicit-schema
-~~~
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema-generic/src/test/scala/endpoints/generic/JsonSchemasDocs.scala) { #explicit-schema }
 
 ## Generic derivation of JSON schemas (based on macros)
 

@@ -1,19 +1,20 @@
-# `Assets`
+# Assets
 
 This algebra provides vocabulary to define endpoints serving static assets.
 
-~~~ scala expandVars=true
-"org.julienrf" %% "endpoints-algebra" % "{{version}}"
+@@@vars
+~~~ scala
+"org.julienrf" %% "endpoints-algebra" % "$version$"
 ~~~
+@@@
 
-[API documentation](unchecked:/api/endpoints/algebra/Assets.html)
+@scaladoc[API documentation](endpoints.algebra.Assets)
 
 The module enriches the `Endpoints` algebra with new constructors for endpoints and
 path segments. It also introduces the concepts of `AssetRequest`, `AssetResponse`
 and `AssetPath`. The typical usage looks like the following:
 
-~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/AssetsDocs.scala#assets-endpoint
-~~~
+@@snip [AssetsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/AssetsDocs.scala) { #assets-endpoint }
 
 The `assetsSegments` method defines a path containing (possibly) multiple segments.
 
@@ -27,8 +28,7 @@ or `Cache-Control`, and gzip content encoding. Incidentally, the algebra provide
 an abstract `digest: Map[String, String]` member to be overridden by users with
 digests uniquely identifying the assets:
 
-~~~ scala src=../../../../../algebras/algebra/src/test/scala/endpoints/algebra/AssetsDocs.scala#digests
-~~~
+@@snip [AssetsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/AssetsDocs.scala) { #digests }
 
 The content of the digests can be included to the asset segments so that servers
 know that the requested version of the asset matches the one it uses, enabling servers

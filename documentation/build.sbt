@@ -1,7 +1,8 @@
 import EndpointsSettings._
 import LocalCrossProject._
 import sbtcrossproject.CrossProject
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
+import xerial.sbt.Sonatype.GitHubHosting
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
@@ -34,7 +35,7 @@ val apiDoc =
     .enablePlugins(ScalaUnidocPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12`,
+      `scala 2.13`,
       coverageEnabled := false,
       scalacOptions in(ScalaUnidoc, unidoc) ++= Seq(
         "-implicits",
@@ -56,21 +57,40 @@ val apiDoc =
 
 val manual =
   project.in(file("manual"))
-    .enablePlugins(OrnatePlugin, GhpagesPlugin)
+    .enablePlugins(ParadoxMaterialThemePlugin, ParadoxPlugin, ParadoxSitePlugin, GhpagesPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12`, // Ornate does not support Scala 2.13
+      `scala 2.13`,
       coverageEnabled := false,
-      git.remoteRepo := "git@github.com:julienrf/endpoints.git",
-      ornateSettings := Map("version" -> version.value),
-      siteSubdirName in ornate := "",
-      addMappingsToSiteDir(mappings in ornate, siteSubdirName in ornate),
-      mappings in ornate := {
-        val output = ornate.value
-        output ** AllPassFilter --- output pair sbt.io.Path.relativeTo(output)
+      git.remoteRepo := (ThisBuild / sonatypeProjectHosting).value.get.scmUrl,
+      ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
+      Paradox / paradoxMaterialTheme := {
+        val theme      = (Paradox / paradoxMaterialTheme).value
+        val repository = (ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl.toURI
+        theme
+          .withRepository(repository)
+          .withSocial(repository)
+          .withCustomStylesheet("snippets.css")
       },
-      siteSubdirName in packageDoc := "api",
-      addMappingsToSiteDir(mappings in ScalaUnidoc in packageDoc in apiDoc, siteSubdirName in packageDoc),
+      (Paradox / paradoxProperties) ++= Map(
+        "version"           -> version.value,
+        "scaladoc.base_url" -> s"/${(packageDoc / siteSubdirName).value}",
+        "github.base_url"   -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/tree/${version.value}"
+      ),
+      packageDoc / siteSubdirName := "api",
+      addMappingsToSiteDir(apiDoc / ScalaUnidoc / packageDoc / mappings, packageDoc / siteSubdirName),
+      makeSite / mappings ++= {
+        val gvSourceDirectory = sourceDirectory.value / "graphviz"
+        val gvTargetDirectory = target.value / "graphviz"
+        (gvSourceDirectory ** "*.gv").get().pair(Path.relativeTo(gvSourceDirectory)).map { case (sourceFile, relativePath) =>
+          import scala.sys.process._
+          val targetRelativePath = s"${relativePath.stripSuffix(".gv")}.svg"
+          val targetFile = gvTargetDirectory / targetRelativePath
+          IO.createDirectory(targetFile.getParentFile)
+          assert(s"dot -Tsvg -o${targetFile} ${sourceFile}".! == 0)
+          (targetFile, targetRelativePath)
+        }
+      },
       previewLaunchBrowser := false
     )
 

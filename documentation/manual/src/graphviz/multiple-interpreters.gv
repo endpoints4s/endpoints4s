@@ -1,0 +1,14 @@
+digraph {
+  rankdir = BT
+  node [shape=box,fontname=mono]
+  edge [arrowhead=onormal]
+
+  algebra [ label="algebra.Endpoints" ]
+  playServer [ label="play.server.Endpoints" ]
+  akkaClient [ label="akkahttp.client.Endpoints" ]
+  openapi [ label="openapi.Endpoints" ]
+
+  playServer -> algebra
+  akkaClient -> algebra
+  openapi -> algebra
+}
