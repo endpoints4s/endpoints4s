@@ -1,11 +1,11 @@
 package endpoints.algebra
 
-import endpoints.{InvariantFunctor, InvariantFunctorSyntax}
+import endpoints.{InvariantFunctor, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Semigroupal, Tupler}
 
 /**
   * @group algebras
   */
-trait Responses extends StatusCodes with InvariantFunctorSyntax { this: Errors =>
+trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: Errors =>
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A
     *
@@ -38,15 +38,87 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax { this: Errors =
   def textResponse: ResponseEntity[String]
 
   /**
+    * Information carried by responses’ headers.
+    *
+    * You can construct values of type `ResponseHeaders` by using the operations [[responseHeader]],
+    * [[optResponseHeader]], or [[emptyResponseHeaders]].
+    *
+    * @note This type has implicit methods provided by the [[SemigroupalSyntax]]
+    *       and [[PartialInvariantFunctorSyntax]] classes.
+    * @group types
+    */
+  type ResponseHeaders[A]
+
+  /**
+    * Provides `++` operation.
+    * @see [[SemigroupalSyntax]]
+    */
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders]
+
+  /**
+    * Provides `xmap` and `xmapPartial` operations.
+    * @see [[PartialInvariantFunctorSyntax]]
+    */
+  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders]
+
+  /**
+    * No particular response header.
+    * Client interpreters should ignore information carried by response headers.
+    * @group operations
+    */
+  def emptyResponseHeaders: ResponseHeaders[Unit]
+
+  /**
+    * Response headers containing a header with the given `name`.
+    * Client interpreters should model the header value as `String`, or
+    * fail if the response header is missing.
+    * Server interpreters should produce such a response header.
+    * Documentation interpreters should document this header.
+    *
+    * Example:
+    *
+    * {{{
+    *   val versionedResource: Endpoint[Unit, (SomeResource, String)] =
+    *     endpoint(
+    *       get(path / "versioned-resource"),
+    *       ok(
+    *         jsonResponse[SomeResource],
+    *         headers = responseHeader("ETag")
+    *       )
+    *     )
+    * }}}
+    *
+    * @group operations
+    */
+  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String]
+
+  /**
+    * Response headers optionally containing a header with the given `name`.
+    * Client interpreters should model the header value as `Some[String]`, or
+    * `None` if the response header is missing.
+    * Server interpreters should produce such a response header.
+    * Documentation interpreters should document this header.
+    *
+    * @group operations
+    */
+  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]]
+
+  /**
     * Server interpreters construct a response with the given status and entity.
     * Client interpreters accept a response only if it has a corresponding status code.
     *
     * @param statusCode Response status code
     * @param entity     Response entity
     * @param docs       Response documentation
+    * @param headers    Response headers
     * @group operations
     */
-  def response[A](statusCode: StatusCode, entity: ResponseEntity[A], docs: Documentation = None): Response[A]
+  def response[A, B, R](
+    statusCode: StatusCode,
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(implicit tupler: Tupler.Aux[A, B, R]): Response[R]
 
   /**
     * Alternative between two possible choices of responses.
@@ -61,24 +133,38 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax { this: Errors =
     * OK (200) Response with the given entity
     * @group operations
     */
-  final def ok[A](entity: ResponseEntity[A], docs: Documentation = None): Response[A] =
-    response(OK, entity, docs)
+  final def ok[A, B, R](
+    entity: ResponseEntity[A],
+    docs: Documentation = None,
+    headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(implicit tupler: Tupler.Aux[A, B, R]): Response[R] =
+    response(OK, entity, docs, headers)
 
   /**
     * Bad Request (400) response, with an entity of type `ClientErrors`.
     * @see [[endpoints.algebra.Errors]] and [[endpoints.algebra.BuiltInErrors]]
     * @group operations
     */
-  final def badRequest(docs: Documentation = None): Response[ClientErrors] =
-    response(BadRequest, clientErrorsResponseEntity, docs)
+  final def badRequest[A, R](
+    docs: Documentation = None,
+    headers: ResponseHeaders[A] = emptyResponseHeaders
+  )(implicit
+    tupler: Tupler.Aux[ClientErrors, A, R]
+  ): Response[R] =
+    response(BadRequest, clientErrorsResponseEntity, docs, headers)
 
   /**
     * Internal Server Error (500) response, with an entity of type `ServerError`.
     * @see [[endpoints.algebra.Errors]] and [[endpoints.algebra.BuiltInErrors]]
     * @group operations
     */
-  final def internalServerError(docs: Documentation = None): Response[ServerError] =
-    response(InternalServerError, serverErrorResponseEntity, docs)
+  final def internalServerError[A, R](
+    docs: Documentation = None,
+    headers: ResponseHeaders[A] = emptyResponseHeaders
+  )(implicit
+    tupler: Tupler.Aux[ServerError, A, R]
+  ): Response[R] =
+    response(InternalServerError, serverErrorResponseEntity, docs, headers)
 
   /**
     * Turns a `Response[A]` into a `Response[Option[A]]`.

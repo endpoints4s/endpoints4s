@@ -11,7 +11,7 @@ class ArraysTest extends AnyWordSpec with Matchers {
 
     val arrays: Endpoint[List[String], (Boolean, Int, String)] = endpoint(
       post(path / "foo", jsonRequest[List[String]]),
-      ok(jsonResponse)
+      ok(jsonResponse[(Boolean, Int, String)])
     )
 
   }
