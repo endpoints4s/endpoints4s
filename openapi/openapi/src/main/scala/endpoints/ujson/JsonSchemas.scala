@@ -2,6 +2,7 @@ package endpoints.ujson
 
 import endpoints.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 import endpoints.algebra.{Codec, Decoder, Encoder}
+import ujson.{Obj, Value}
 
 import scala.collection.compat._
 import scala.collection.mutable
@@ -99,14 +100,14 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = new JsonSchema[A] {
+  def lazyRecord[A](schema: => Record[A], name: String): Record[A] = new Record[A] {
     val decoder = json => schema.decoder.decode(json)
     val encoder = value => schema.encoder.encode(value)
   }
 
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = new JsonSchema[A] {
-    val decoder = json => schema.decoder.decode(json)
-    val encoder = value => schema.encoder.encode(value)
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = new Tagged[A](schema.discriminator) {
+    def findDecoder(tag: String): Option[Decoder[Value, A]] = schema.findDecoder(tag)
+    def tagAndObj(a: A): (String, Obj) = schema.tagAndObj(a)
   }
 
   lazy val emptyRecord: Record[Unit] = new Record[Unit] {

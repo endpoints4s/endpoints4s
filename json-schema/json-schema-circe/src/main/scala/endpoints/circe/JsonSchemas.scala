@@ -120,17 +120,24 @@ trait JsonSchemas
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
-  private def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+  def lazyRecord[A](schema: => Record[A], name: String): Record[A] = {
     // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
     lazy val evaluatedSchema = schema
-    new JsonSchema[A] {
-      def encoder: Encoder[A] = Encoder.instance(a => evaluatedSchema.encoder(a))
-      def decoder: Decoder[A] = Decoder.instance(c => evaluatedSchema.decoder(c))
+    new Record[A] {
+      def encoder: Encoder.AsObject[A] = evaluatedSchema.encoder
+      def decoder: Decoder[A] = evaluatedSchema.decoder
     }
   }
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = lazySchema(schema, name)
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = lazySchema(schema, name)
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = {
+    // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
+    lazy val evaluatedSchema = schema
+    new Tagged[A] {
+      override def discriminator: String = evaluatedSchema.discriminator
+      def taggedEncoded(a: A): (String, JsonObject) = evaluatedSchema.taggedEncoded(a)
+      def taggedDecoder(tag: String): Option[Decoder[A]] = evaluatedSchema.taggedDecoder(tag)
+    }
+  }
 
   def emptyRecord: Record[Unit] =
     Record(

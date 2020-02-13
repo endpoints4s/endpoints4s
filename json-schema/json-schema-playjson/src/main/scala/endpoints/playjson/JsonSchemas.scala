@@ -75,17 +75,24 @@ trait JsonSchemas
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
-  private def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] = {
+  def lazyRecord[A](schema: => Record[A], name: String): Record[A] = {
     // The schema won’t be evaluated until its `reads` or `writes` is effectively used
     lazy val evaluatedSchema = schema
-    new JsonSchema[A] {
+    new Record[A] {
       def reads: Reads[A] = Reads(js => evaluatedSchema.reads.reads(js))
-      def writes: Writes[A] = Writes(a => evaluatedSchema.writes.writes(a))
+      def writes: OWrites[A] = OWrites(a => evaluatedSchema.writes.writes(a))
     }
   }
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = lazySchema(schema, name)
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = lazySchema(schema, name)
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    new Tagged[A] {
+      override def discriminator: String = evaluatedSchema.discriminator
+      def tagAndJson(a: A): (String, JsObject) = evaluatedSchema.tagAndJson(a)
+      def findReads(tagName: String): Option[Reads[A]] = evaluatedSchema.findReads(tagName)
+    }
+  }
 
     def emptyRecord: Record[Unit] =
     Record(

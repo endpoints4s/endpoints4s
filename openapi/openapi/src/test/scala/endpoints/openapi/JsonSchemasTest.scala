@@ -54,7 +54,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "recursive" in {
     DocumentedJsonSchemas.recursiveSchema.docs match {
-      case DocumentedRecord(List(Field("next", tpe, true, None)), None, None, None) => assert(tpe.isInstanceOf[LazySchema])
+      case StrictDocumentedRecord(List(Field("next", tpe, true, None)), None, None, None) => assert(tpe.isInstanceOf[LazyDocumentedRecord])
       case _ => fail(s"Unexpected type for 'recSchema': ${DocumentedJsonSchemas.recursiveSchema.docs}")
     }
   }

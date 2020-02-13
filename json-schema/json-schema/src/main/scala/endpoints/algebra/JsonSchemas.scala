@@ -194,26 +194,26 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *   ).xmap(Recursive)(_.next)
     * }}}
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
+    * Interpreters should return a Record value that does not evaluate
     * the given `schema` unless it is effectively used.
     *
     * @param schema The record JSON schema whose evaluation should be delayed
     * @param name A unique name identifying the schema
     * @group operations
     */
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
+  def lazyRecord[A](schema: => Record[A], name: String): Record[A]
 
   /**
     * Captures a lazy reference to a JSON schema currently being defined.
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
+    * Interpreters should return a Tagged value that does not evaluate
     * the given `schema` unless it is effectively used.
     *
     * @param schema The tagged JSON schema whose evaluation should be delayed
     * @param name A unique name identifying the schema
     * @group operations
     */
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A]
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A]
 
   /** The JSON schema of a record with no fields
     * @group operations

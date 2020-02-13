@@ -4,7 +4,9 @@ import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
 import endpoints.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
+import ujson.Value
 
+import scala.annotation.tailrec
 import scala.collection.compat._
 
 /**
@@ -35,20 +37,88 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
 
   object DocumentedJsonSchema {
 
-    case class DocumentedRecord(
+    sealed trait DocumentedRecord extends DocumentedJsonSchema {
+      def evaluate: StrictDocumentedRecord
+      def fields: List[Field]
+      def additionalProperties: Option[DocumentedJsonSchema]
+      def name: Option[String]
+      def example: Option[ujson.Value]
+      def withName(name: String): DocumentedRecord
+    }
+
+    object DocumentedRecord {
+      def apply(
+        fields: List[Field],
+        additionalProperties: Option[DocumentedJsonSchema] = None,
+        name: Option[String] = None,
+        example: Option[ujson.Value] = None
+      ): DocumentedRecord = StrictDocumentedRecord(fields, additionalProperties, name, example)
+    }
+    case class StrictDocumentedRecord(
       fields: List[Field],
       additionalProperties: Option[DocumentedJsonSchema] = None,
       name: Option[String] = None,
       example: Option[ujson.Value] = None
-    ) extends DocumentedJsonSchema
+    ) extends DocumentedRecord {
+      val evaluate: StrictDocumentedRecord = this
+      def withName(name: String): DocumentedRecord = copy(name = Some(name))
+    }
+
+    class LazyDocumentedRecord(_record: => StrictDocumentedRecord) extends DocumentedRecord {
+      lazy val evaluate: StrictDocumentedRecord = _record
+
+      def fields: List[DocumentedJsonSchema.Field] = evaluate.fields
+      def additionalProperties: Option[DocumentedJsonSchema] = evaluate.additionalProperties
+      def name: Option[String] = evaluate.name
+      def example: Option[Value] = evaluate.example
+      def withName(name: String): DocumentedRecord = new LazyDocumentedRecord(evaluate.copy(name = Some(name)))
+    }
+
     case class Field(name: String, tpe: DocumentedJsonSchema, isOptional: Boolean, documentation: Option[String])
 
-    case class DocumentedCoProd(
+    sealed trait DocumentedCoProd extends DocumentedJsonSchema {
+      def alternatives: List[(String, DocumentedRecord)]
+      def name: Option[String]
+      def discriminatorName: String
+      def example: Option[ujson.Value]
+      def evaluate: StrictDocumentedCoProd
+      def withName(name: String): DocumentedCoProd
+      def withDiscriminatorName(name: String): DocumentedCoProd
+    }
+
+    object DocumentedCoProd {
+      def apply(
+         alternatives: List[(String, DocumentedRecord)],
+         name: Option[String] = None,
+         discriminatorName: String = defaultDiscriminatorName,
+         example: Option[ujson.Value] = None
+       ): DocumentedCoProd = StrictDocumentedCoProd(alternatives, name, discriminatorName, example)
+
+    }
+
+    case class StrictDocumentedCoProd(
       alternatives: List[(String, DocumentedRecord)],
       name: Option[String] = None,
       discriminatorName: String = defaultDiscriminatorName,
       example: Option[ujson.Value] = None
-    ) extends DocumentedJsonSchema
+    ) extends DocumentedCoProd {
+      val evaluate: StrictDocumentedCoProd = this
+      def withName(name: String): DocumentedCoProd = copy(name = Some(name))
+      def withAlternatives(alternatives: List[(String, DocumentedRecord)]): DocumentedCoProd = copy(alternatives = alternatives)
+      def withDiscriminatorName(name: String): DocumentedCoProd = copy(discriminatorName = name)
+    }
+
+    class LazyDocumentedCoProd(_coProd: => StrictDocumentedCoProd) extends DocumentedCoProd {
+      lazy val evaluate: StrictDocumentedCoProd = _coProd
+
+      def alternatives: List[(String, DocumentedRecord)] = evaluate.alternatives
+      def name: Option[String] = evaluate.name
+      def discriminatorName: String = evaluate.discriminatorName
+      def example: Option[Value] = evaluate.example
+
+      def withName(name: String): DocumentedCoProd = new LazyDocumentedCoProd(evaluate.copy(name = Some(name)))
+      def withDiscriminatorName(name: String): DocumentedCoProd = new LazyDocumentedCoProd(evaluate.copy(discriminatorName = name))
+    }
 
     case class Primitive(
       name: String,
@@ -70,18 +140,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
       name: Option[String],
       example: Option[ujson.Value] = None
     ) extends DocumentedJsonSchema
-
-    // A documented JSON schema that is unevaluated unless its `value` is accessed
-    sealed trait LazySchema extends DocumentedJsonSchema {
-      def value: DocumentedJsonSchema
-    }
-    object LazySchema {
-      def apply(s: => DocumentedJsonSchema): LazySchema =
-        new LazySchema {
-          lazy val value: DocumentedJsonSchema = s
-          def example: Option[ujson.Value] = value.example
-        }
-    }
 
     case class OneOf(alternatives: List[DocumentedJsonSchema], example: Option[ujson.Value] = None) extends DocumentedJsonSchema
   }
@@ -119,21 +177,23 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
   }
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] =
-    new Record(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+    new Record(schema.ujsonSchema, schema.docs.withName(name))
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
-    new Tagged(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+    new Tagged(schema.ujsonSchema, schema.docs.withName(name))
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
     new Enum(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
-    new JsonSchema(
+  def lazyRecord[A](schema: => Record[A], name: String): Record[A] = {
+    new Record[A](
       ujsonSchemas.lazyRecord(schema.ujsonSchema, name),
-      LazySchema(namedRecord(schema, name).docs)
+      new LazyDocumentedRecord(namedRecord(schema, name).docs.evaluate)
     )
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
-    new JsonSchema(
+  }
+
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] =
+    new Tagged(
       ujsonSchemas.lazyTagged(schema.ujsonSchema, name),
-      LazySchema(namedTagged(schema, name).docs)
+      new LazyDocumentedCoProd(namedTagged(schema, name).docs.evaluate)
     )
 
   def emptyRecord: Record[Unit] =
@@ -160,7 +220,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
   def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
     new Tagged(
       ujsonSchemas.withDiscriminatorTagged(tagged.ujsonSchema, discriminatorName),
-      tagged.docs.copy(discriminatorName = discriminatorName)
+      tagged.docs.withDiscriminatorName(discriminatorName)
     )
 
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] =
@@ -179,14 +239,16 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
     val exampleJson = schema.ujsonSchema.codec.encode(example)
     def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
       djs match {
-        case s: DocumentedRecord => s.copy(example = Some(exampleJson))
-        case s: DocumentedCoProd => s.copy(example = Some(exampleJson))
+        case s: StrictDocumentedRecord => s.copy(example = Some(exampleJson))
+        case s: StrictDocumentedCoProd => s.copy(example = Some(exampleJson))
+        case s: LazyDocumentedRecord => new LazyDocumentedRecord(s.evaluate.copy(example = Some(exampleJson)))
+        case s: LazyDocumentedCoProd => new LazyDocumentedCoProd(s.evaluate.copy(example = Some(exampleJson)))
         case s: Primitive        => s.copy(example = Some(exampleJson))
         case s: Array            => s.copy(example = Some(exampleJson))
         case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
-        case s: LazySchema       => LazySchema(updatedDocs(s.value))
         case s: OneOf            => s.copy(example = Some(exampleJson))
       }
+
     new JsonSchema(
       schema.ujsonSchema,
       updatedDocs(schema.docs)
@@ -253,34 +315,39 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
     toSchema(jsonSchema, None, Set.empty)
 
   private def toSchema(documentedCodec: DocumentedJsonSchema, coprodBase: Option[(String, DocumentedCoProd)], referencedSchemas: Set[String]): Schema = {
-    documentedCodec match {
-      case record @ DocumentedRecord(_, _, Some(name), _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None, None)
-        else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)), None)
-      case record @ DocumentedRecord(_, _, None, _) =>
-        expandRecordSchema(record, coprodBase, referencedSchemas)
-      case coprod @ DocumentedCoProd(_, Some(name), _, _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None, None)
-        else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)), None)
-      case coprod @ DocumentedCoProd(_, None, _, _) =>
-        expandCoproductSchema(coprod, referencedSchemas)
-      case Primitive(name, format, example) =>
-        Schema.Primitive(name, format, None, example)
-      case Array(Left(elementType), example) =>
-        Schema.Array(Left(toSchema(elementType, coprodBase, referencedSchemas)), None, example)
-      case Array(Right(elementTypes), example) =>
-        Schema.Array(Right(elementTypes.map(elementType => toSchema(elementType, coprodBase, referencedSchemas))), None, example)
-      case DocumentedEnum(elementType, values, Some(name), example) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None, None)
-        else Schema.Reference(name, Some(Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas + name), values, None, example)), None)
-      case DocumentedEnum(elementType, values, None, example) =>
-        Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None, example)
-      case lzy: LazySchema =>
-        toSchema(lzy.value, coprodBase, referencedSchemas)
-      case OneOf(alternatives, example) =>
-        val alternativeSchemas = alternatives.map(alternative => toSchema(alternative, coprodBase, referencedSchemas))
-        Schema.OneOf(EnumeratedAlternatives(alternativeSchemas), None, example)
-    }
+    @tailrec
+    def inner(innerSchema: DocumentedJsonSchema): Schema =
+      innerSchema match {
+        case record @ StrictDocumentedRecord(_, _, Some(name), _) =>
+          if (referencedSchemas(name)) Schema.Reference(name, None, None)
+          else Schema.Reference(name, Some(expandRecordSchema(record, coprodBase, referencedSchemas + name)), None)
+        case record @ StrictDocumentedRecord(_, _, None, _) =>
+          expandRecordSchema(record, coprodBase, referencedSchemas)
+        case record: LazyDocumentedRecord => inner(record.evaluate)
+        case coprod @ StrictDocumentedCoProd(_, Some(name), _, _) =>
+          if (referencedSchemas(name)) Schema.Reference(name, None, None)
+          else Schema.Reference(name, Some(expandCoproductSchema(coprod, referencedSchemas + name)), None)
+        case coprod @ StrictDocumentedCoProd(_, None, _, _) =>
+          expandCoproductSchema(coprod, referencedSchemas)
+        case coprod: LazyDocumentedCoProd => inner(coprod.evaluate)
+        case Primitive(name, format, example) =>
+          Schema.Primitive(name, format, None, example)
+        case Array(Left(elementType), example) =>
+          Schema.Array(Left(toSchema(elementType, coprodBase, referencedSchemas)), None, example)
+        case Array(Right(elementTypes), example) =>
+          Schema.Array(Right(elementTypes.map(elementType => toSchema(elementType, coprodBase, referencedSchemas))), None, example)
+        case DocumentedEnum(elementType, values, Some(name), example) =>
+          if (referencedSchemas(name)) Schema.Reference(name, None, None)
+          else Schema.Reference(name, Some(Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas + name), values, None, example)), None)
+        case DocumentedEnum(elementType, values, None, example) =>
+          Schema.Enum(toSchema(elementType, coprodBase, referencedSchemas), values, None, example)
+
+        case OneOf(alternatives, example) =>
+          val alternativeSchemas = alternatives.map(alternative => toSchema(alternative, coprodBase, referencedSchemas))
+          Schema.OneOf(EnumeratedAlternatives(alternativeSchemas), None, example)
+      }
+
+    inner(documentedCodec)
   }
 
   private def expandRecordSchema(record: DocumentedJsonSchema.DocumentedRecord, coprodBase: Option[(String, DocumentedCoProd)], referencedSchemas: Set[String]): Schema = {
