@@ -93,7 +93,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
          discriminatorName: String = defaultDiscriminatorName,
          example: Option[ujson.Value] = None
        ): DocumentedCoProd = StrictDocumentedCoProd(alternatives, name, discriminatorName, example)
-
     }
 
     case class StrictDocumentedCoProd(
@@ -118,6 +117,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
 
       def withName(name: String): DocumentedCoProd = new LazyDocumentedCoProd(evaluate.copy(name = Some(name)))
       def withDiscriminatorName(name: String): DocumentedCoProd = new LazyDocumentedCoProd(evaluate.copy(discriminatorName = name))
+    }
+
+    class LazySchema(_schema: => DocumentedJsonSchema) extends DocumentedJsonSchema {
+      lazy val value: DocumentedJsonSchema = _schema
+      def example: Option[ujson.Value] = value.example
     }
 
     case class Primitive(
