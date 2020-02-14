@@ -30,7 +30,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   }
 
-  abstract class Tagged[A](val discriminator: String) extends Record[A] {
+  abstract class Tagged[A] extends Record[A] {
+    val discriminator: String
     def findDecoder(tag: String): Option[Decoder[ujson.Value, A]]
     def tagAndObj(a: A): (String, ujson.Obj)
     final val decoder = {
@@ -75,7 +76,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
     new PartialInvariantFunctor[Tagged] {
       def xmapPartial[A, B](fa: Tagged[A], f: A => Validated[B], g: B => A): Tagged[B] =
-        new Tagged[B](fa.discriminator) {
+        new Tagged[B] {
+          val discriminator: String = fa.discriminator
           def findDecoder(tag: String): Option[Decoder[ujson.Value, B]] =
             fa.findDecoder(tag).map(Decoder.sequentially(_)(a => f(a)))
           def tagAndObj(b: B): (String, ujson.Obj) = fa.tagAndObj(g(b))
@@ -105,7 +107,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     val encoder = value => schema.encoder.encode(value)
   }
 
-  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = new Tagged[A](schema.discriminator) {
+  def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = new Tagged[A] {
+    val discriminator: String = schema.discriminator
     def findDecoder(tag: String): Option[Decoder[Value, A]] = schema.findDecoder(tag)
     def tagAndObj(a: A): (String, Obj) = schema.tagAndObj(a)
   }
@@ -151,20 +154,23 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =
-    new Tagged[A](defaultDiscriminatorName) {
+    new Tagged[A] {
+      val discriminator: String = defaultDiscriminatorName
       def findDecoder(tagName: String) = if (tagName == tag) Some(recordA.decoder) else None
       def tagAndObj(value: A) = (tag, recordA.encoder.encode(value))
     }
 
   def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
-    new Tagged[A](discriminatorName) {
+    new Tagged[A] {
+      val discriminator: String = discriminatorName
       def findDecoder(tag: String): Option[Decoder[ujson.Value, A]] = tagged.findDecoder(tag)
       def tagAndObj(value: A) = tagged.tagAndObj(value)
     }
 
   def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]] = {
     assert(taggedA.discriminator == taggedB.discriminator)
-    new Tagged[Either[A, B]](taggedB.discriminator) {
+    new Tagged[Either[A, B]] {
+      val discriminator: String = taggedB.discriminator
       def findDecoder(tag: String): Option[Decoder[ujson.Value, Either[A, B]]] =
         taggedA.findDecoder(tag).map(Decoder.sequentially(_)(a => Valid(Left(a)))) orElse
         taggedB.findDecoder(tag).map(Decoder.sequentially(_)(b => Valid(Right(b))))
