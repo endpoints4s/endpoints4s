@@ -103,14 +103,16 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
   def lazyRecord[A](schema: => Record[A], name: String): Record[A] = new Record[A] {
-    val decoder = json => schema.decoder.decode(json)
-    val encoder = value => schema.encoder.encode(value)
+    lazy private val evaluatedSchema = schema
+    val decoder = json => evaluatedSchema.decoder.decode(json)
+    val encoder = value => evaluatedSchema.encoder.encode(value)
   }
 
   def lazyTagged[A](schema: => Tagged[A], name: String): Tagged[A] = new Tagged[A] {
-    val discriminator: String = schema.discriminator
-    def findDecoder(tag: String): Option[Decoder[Value, A]] = schema.findDecoder(tag)
-    def tagAndObj(a: A): (String, Obj) = schema.tagAndObj(a)
+    lazy private val evaluatedSchema = schema
+    lazy val discriminator: String = evaluatedSchema.discriminator
+    def findDecoder(tag: String): Option[Decoder[Value, A]] = evaluatedSchema.findDecoder(tag)
+    def tagAndObj(a: A): (String, Obj) = evaluatedSchema.tagAndObj(a)
   }
 
   lazy val emptyRecord: Record[Unit] = new Record[Unit] {
