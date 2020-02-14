@@ -247,6 +247,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
         case s: StrictDocumentedCoProd => s.copy(example = Some(exampleJson))
         case s: LazyDocumentedRecord => new LazyDocumentedRecord(s.evaluate.copy(example = Some(exampleJson)))
         case s: LazyDocumentedCoProd => new LazyDocumentedCoProd(s.evaluate.copy(example = Some(exampleJson)))
+        case s: LazySchema       => new LazySchema(updatedDocs(s.value))
         case s: Primitive        => s.copy(example = Some(exampleJson))
         case s: Array            => s.copy(example = Some(exampleJson))
         case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
@@ -334,6 +335,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas { openapiJsonSc
         case coprod @ StrictDocumentedCoProd(_, None, _, _) =>
           expandCoproductSchema(coprod, referencedSchemas)
         case coprod: LazyDocumentedCoProd => inner(coprod.evaluate)
+        case lzy: LazySchema => inner(lzy.value)
         case Primitive(name, format, example) =>
           Schema.Primitive(name, format, None, example)
         case Array(Left(elementType), example) =>
