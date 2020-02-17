@@ -1,7 +1,6 @@
 package endpoints
 package circe
 
-import io.circe.Json.JString
 import io.circe.{DecodingFailure, Json}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -11,7 +10,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     extends algebra.JsonSchemasTest
       with circe.JsonSchemas
 
-  import JsonSchemasCodec.{User, Foo, Bar}
+  import JsonSchemasCodec.{Bar, Foo, User}
 
   "case class" in {
     val userJson =

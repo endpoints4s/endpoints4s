@@ -65,11 +65,11 @@ class JsonSchemasTest extends AnyFreeSpec {
   "recursive co-product" in {
     DocumentedJsonSchemas.recursiveTaggedSchema.docs match {
       case lazyCoProduct: LazyDocumentedCoProd =>
-        assert(lazyCoProduct.discriminatorName == "type")
-        assert(lazyCoProduct.alternatives.size == 1)
-        assert(lazyCoProduct.alternatives.head._1 == "RecursiveTagged")
+        assert(lazyCoProduct.toStrict.discriminatorName == "type")
+        assert(lazyCoProduct.toStrict.alternatives.size == 1)
+        assert(lazyCoProduct.toStrict.alternatives.head._1 == "RecursiveTagged")
         assert(lazyCoProduct.example.isEmpty)
-        testStrict(lazyCoProduct.alternatives.head._2)
+        testStrict(lazyCoProduct.toStrict.alternatives.head._2)
       case _ =>
         fail(s"Unexpected type for 'recTaggedSchema': ${DocumentedJsonSchemas.recursiveTaggedSchema.docs}")
     }
