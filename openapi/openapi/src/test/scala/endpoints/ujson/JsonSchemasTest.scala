@@ -287,10 +287,18 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson.Obj("quux" -> ujson.Str("bar")))
   }
 
-  "recursive type" in {
+  "recursive record type" in {
     checkRoundTrip(
-      recursiveSchema,
+      recursiveRecordSchema,
       ujson.Obj("next" -> ujson.Obj("next" -> ujson.Obj())),
+      Recursive(Some(Recursive(Some(Recursive(None)))))
+    )
+  }
+
+  "recursive tagged type" in {
+    checkRoundTrip(
+      recursiveTaggedSchema,
+      ujson.Obj("type" -> ujson.Str("RecursiveTagged"),"next" -> ujson.Obj("next" -> ujson.Obj())),
       Recursive(Some(Recursive(Some(Recursive(None)))))
     )
   }

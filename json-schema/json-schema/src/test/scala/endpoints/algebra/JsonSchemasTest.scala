@@ -75,9 +75,12 @@ trait JsonSchemasTest extends JsonSchemas {
   }
 
   case class Recursive(next: Option[Recursive])
-  val recursiveSchema: Record[Recursive] = (
-    optField("next")(lazyRecord(recursiveSchema, "Rec"))
+  val recursiveRecordSchema: Record[Recursive] = (
+    optField("next")(lazyRecord(recursiveRecordSchema, "Rec"))
   ).xmap(Recursive)(_.next)
+
+  val recursiveTaggedSchema: Tagged[Recursive] =
+    lazyTagged(recursiveRecordSchema.tagged("RecursiveTagged"), "RecTagged")
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 

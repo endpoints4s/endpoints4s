@@ -63,26 +63,75 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
   }
 
-  "Recursive types" in {
-    val recSchema =
-      Schema.Reference(
-        "Rec",
-        Some(Schema.Object(
-          Schema.Property("next", Schema.Reference("Rec", None, None), isRequired = false, description = None) :: Nil,
-          additionalProperties = None,
-          description = None,
-          example = None
-        )),
-        None
-      )
+  val recSchema =
+    Schema.Reference(
+      "Rec",
+      Some(Schema.Object(
+        Schema.Property("next", Schema.Reference("Rec", None, None), isRequired = false, description = None) :: Nil,
+        additionalProperties = None,
+        description = None,
+        example = None
+      )),
+      None
+    )
+
+  val recProperty = Schema.Property("next", recSchema, isRequired = false, description = None)
+
+  "Recursive record types" in {
     val expectedSchema =
       Schema.Object(
-        Schema.Property("next", recSchema, isRequired = false, description = None) :: Nil,
+        recProperty :: Nil,
         additionalProperties = None,
         description = None,
         example = None
       )
-    Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
+    Fixtures.toSchema(Fixtures.recursiveRecordSchema.docs) shouldBe expectedSchema
+  }
+
+  "Recursive tagged types" in {
+    val oneOfSchema = Schema.OneOf(
+      alternatives = Schema.DiscriminatedAlternatives(
+        discriminatorFieldName = "type",
+        alternatives = List(
+          (
+            "RecursiveTagged",
+            Schema.AllOf(
+              List(
+                Schema.Reference("RecTagged", None, None, None),
+                Schema.Object(
+                  List(
+                    Schema.Property(
+                      name = "type",
+                      schema = Schema.Enum(
+                        elementType = Schema.Primitive("string", None, None, None),
+                        values = List("RecursiveTagged"),
+                        description = None,
+                        example = Some("RecursiveTagged")),
+                      isRequired = true,
+                      description = None),
+                    recProperty
+                  ),
+                  additionalProperties = None,
+                  description = None,
+                  example = None
+                )
+              ),
+              description = None,
+              example = None
+            )))
+      ),
+      description = None,
+      example = None
+    )
+
+    val expectedSchema = Schema.Reference(
+      name = "RecTagged",
+      original = Some(oneOfSchema),
+      description = None,
+      example = None
+    )
+
+    Fixtures.toSchema(Fixtures.recursiveTaggedSchema.docs) shouldBe expectedSchema
   }
 
   "Refining JSON schemas preserves documentation" should {

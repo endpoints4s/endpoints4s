@@ -353,10 +353,18 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
-  "recursive type" in {
+  "recursive record type" in {
     testRoundtrip(
-      recursiveSchema,
+      recursiveRecordSchema,
       Json.obj("next" -> Json.obj("next" -> Json.obj())),
+      Recursive(Some(Recursive(Some(Recursive(None)))))
+    )
+  }
+
+  "recursive tagged type" in {
+    testRoundtrip(
+      recursiveTaggedSchema,
+      Json.obj("type" -> JsString("RecursiveTagged"), "next" -> Json.obj("next" -> Json.obj())),
       Recursive(Some(Recursive(Some(Recursive(None)))))
     )
   }

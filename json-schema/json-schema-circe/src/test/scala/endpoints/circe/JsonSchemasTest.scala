@@ -1,6 +1,7 @@
 package endpoints
 package circe
 
+import io.circe.Json.JString
 import io.circe.{DecodingFailure, Json}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -42,11 +43,18 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(Foo.schema.decoder.decodeJson(wrongJson).swap.exists(_ == DecodingFailure("No decoder for discriminator 'Unknown'!", Nil)))
   }
 
-  "recursive type" in {
+  "recursive record type" in {
     val json = Json.obj("next" -> Json.obj("next" -> Json.obj()))
     val rec = JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(None)))))
-    assert(JsonSchemasCodec.recursiveSchema.decoder.decodeJson(json).exists(_ == rec))
-    assert(JsonSchemasCodec.recursiveSchema.encoder(rec) == json)
+    assert(JsonSchemasCodec.recursiveRecordSchema.decoder.decodeJson(json).exists(_ == rec))
+    assert(JsonSchemasCodec.recursiveRecordSchema.encoder(rec) == json)
+  }
+
+  "recursive tagged type" in {
+    val json = Json.obj("type" -> Json.fromString("RecursiveTagged"), "next" -> Json.obj("next" -> Json.obj()))
+    val rec = JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(Some(JsonSchemasCodec.Recursive(None)))))
+    assert(JsonSchemasCodec.recursiveTaggedSchema.decoder.decodeJson(json).exists(_ == rec))
+    assert(JsonSchemasCodec.recursiveTaggedSchema.encoder(rec) == json)
   }
 
   "tuple" in {

@@ -1,6 +1,7 @@
 package endpoints.openapi
 
 import endpoints.algebra
+import org.scalatest.Assertion
 import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasTest extends AnyFreeSpec {
@@ -13,7 +14,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "case class" in {
     val expectedSchema =
-      DocumentedRecord(
+      StrictDocumentedRecord(
         Field("name", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = Some("Name of the user")) ::
         Field("age", DocumentedJsonSchemas.intJsonSchema.docs, isOptional = false, documentation = None) ::
         Nil
@@ -23,12 +24,12 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "sealed trait" in {
     val expectedSchema =
-      DocumentedCoProd(
-        ("Bar", DocumentedRecord(Field("s", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
-        ("Baz", DocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
-        ("Bax", DocumentedRecord(Nil)) ::
-        ("Qux", DocumentedRecord(Nil)) ::
-        ("Quux", DocumentedRecord(Field("b", DocumentedJsonSchemas.byteJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
+      StrictDocumentedCoProd(
+        ("Bar", StrictDocumentedRecord(Field("s", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
+        ("Baz", StrictDocumentedRecord(Field("i", DocumentedJsonSchemas.intJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
+        ("Bax", StrictDocumentedRecord(Nil)) ::
+        ("Qux", StrictDocumentedRecord(Nil)) ::
+        ("Quux", StrictDocumentedRecord(Field("b", DocumentedJsonSchemas.byteJsonSchema.docs, isOptional = false, documentation = None) :: Nil)) ::
         Nil
       )
     assert(DocumentedJsonSchemas.Foo.schema.docs == expectedSchema)
@@ -43,7 +44,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "non-string enum" in {
     val expectedSchema =
       DocumentedEnum(
-        DocumentedRecord(
+        StrictDocumentedRecord(
           Field("quux", DocumentedJsonSchemas.defaultStringJsonSchema.docs, isOptional = false, documentation = None) :: Nil
         ),
         ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj("quux" -> ujson.Str("baz")) :: Nil,
@@ -52,15 +53,30 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(DocumentedJsonSchemas.NonStringEnum.enumSchema.docs == expectedSchema)
   }
 
-  "recursive" in {
-    DocumentedJsonSchemas.recursiveSchema.docs match {
-      case StrictDocumentedRecord(List(Field("next", tpe, true, None)), None, None, None) => assert(tpe.isInstanceOf[LazyDocumentedRecord])
-      case _ => fail(s"Unexpected type for 'recSchema': ${DocumentedJsonSchemas.recursiveSchema.docs}")
+  def testStrict(schema: DocumentedJsonSchemas.DocumentedJsonSchema.DocumentedRecord): Assertion = schema match {
+    case StrictDocumentedRecord(List(Field("next", tpe, true, None)), None, None, None) => assert(tpe.isInstanceOf[LazyDocumentedRecord])
+    case _ => fail(s"Unexpected type for 'recRecordSchema': $schema")
+  }
+
+  "recursive record" in {
+    testStrict(DocumentedJsonSchemas.recursiveRecordSchema.docs)
+  }
+
+  "recursive co-product" in {
+    DocumentedJsonSchemas.recursiveTaggedSchema.docs match {
+      case lazyCoProduct: LazyDocumentedCoProd =>
+        assert(lazyCoProduct.discriminatorName == "type")
+        assert(lazyCoProduct.alternatives.size == 1)
+        assert(lazyCoProduct.alternatives.head._1 == "RecursiveTagged")
+        assert(lazyCoProduct.example.isEmpty)
+        testStrict(lazyCoProduct.alternatives.head._2)
+      case _ =>
+        fail(s"Unexpected type for 'recTaggedSchema': ${DocumentedJsonSchemas.recursiveTaggedSchema.docs}")
     }
   }
 
   "maps" in {
-    val expected = DocumentedRecord(Nil, Some(DocumentedJsonSchemas.intJsonSchema.docs), None)
+    val expected = StrictDocumentedRecord(Nil, Some(DocumentedJsonSchemas.intJsonSchema.docs), None)
     assert(DocumentedJsonSchemas.intDictionary.docs == expected)
   }
 
