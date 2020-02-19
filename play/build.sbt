@@ -16,7 +16,7 @@ val `play-server` =
         "com.typesafe.play" %% "play-netty-server" % playVersion,
         "com.typesafe.play" %% "play-test" % playVersion % Test,
         "com.typesafe.play" %% "play-ahc-ws" % playVersion % Test,
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0" % Test, // See https://github.com/playframework/play-ws/issues/371
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1" % Test, // See https://github.com/playframework/play-ws/issues/371
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -41,7 +41,7 @@ val `play-client` =
       name := "endpoints-play-client",
       libraryDependencies ++= Seq(
         "com.typesafe.play" %% "play-ahc-ws" % playVersion,
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.0", // See https://github.com/playframework/play-ws/issues/371
+        "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1", // See https://github.com/playframework/play-ws/issues/371
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile", `algebra-circe-jvm` % "compile->test;test->test")
