@@ -84,7 +84,7 @@ object EndpointsSettings {
   val akkaHttpVersion = "10.1.11"
 
 
-  val scalaTestVersion = "3.1.0"
+  val scalaTestVersion = "3.1.1"
   val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(
