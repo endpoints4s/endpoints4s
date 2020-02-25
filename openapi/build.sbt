@@ -12,10 +12,10 @@ lazy val openapi =
       libraryDependencies += "com.lihaoyi" %%% "ujson" % "0.9.8"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .dependsOnLocalCrossProjects("json-schema-generic")
     .dependsOnLocalCrossProjectsWithScope(
       "algebra" -> "test->test;compile->compile",
-      "json-schema" -> "test->test;compile->compile"
+      "json-schema" -> "test->test;compile->compile",
+      "json-schema-generic" -> "test->test"
     )
 
 lazy val `openapi-js` = openapi.js
