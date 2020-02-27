@@ -178,7 +178,11 @@ trait EndpointsWithCustomErrors
       if (status == statusCode) {
         headers(httpHeaders) match {
           case Valid(b)        => Some(mapResponseEntity(responseEntity)(tupler(_, b)))
-          case Invalid(errors) => Some(_ => Future.successful(Left(new Exception(errors.mkString(". ")))))
+          case Invalid(errors) =>
+            Some { httpEntity =>
+              httpEntity.discardBytes()
+              Future.successful(Left(new Exception(errors.mkString(". "))))
+            }
         }
       } else None
 
