@@ -333,7 +333,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to latest`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "4.2.0",
+        "com.pauldijou" %% "jwt-play" % "4.3.0",
         scalaTestDependency
       )
     )
