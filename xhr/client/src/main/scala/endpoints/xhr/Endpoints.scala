@@ -34,12 +34,12 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   type RequestHeaders[A] = js.Function2[A, XMLHttpRequest, Unit]
 
   /** Sets up no headers on the given XMLHttpRequest */
-  lazy val emptyHeaders: RequestHeaders[Unit] = (_, _) => ()
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, _) => ()
 
-  def header(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[String] =
+  def requestHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[String] =
     (value, xhr) => xhr.setRequestHeader(name, value)
 
-  def optHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[Option[String]] =
+  def optRequestHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[Option[String]] =
     (valueOpt, xhr) => valueOpt.foreach(value => xhr.setRequestHeader(name, value))
 
   implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {

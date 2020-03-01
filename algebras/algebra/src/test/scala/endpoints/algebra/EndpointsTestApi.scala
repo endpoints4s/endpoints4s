@@ -54,13 +54,13 @@ trait EndpointsTestApi extends algebra.Endpoints {
     wheneverFound(ok(textResponse))
   )
 
-  val headers1 = header("A") ++ header("B")
+  val headers1 = requestHeader("A") ++ requestHeader("B")
   val joinedHeadersEndpoint = endpoint(
     get(path / "joinedHeadersEndpoint", headers = headers1),
     ok(textResponse)
   )
 
-  val headers2 = header("C").xmap(_.toInt)(_.toString)
+  val headers2 = requestHeader("C").xmap(_.toInt)(_.toString)
   val xmapHeadersEndpoint = endpoint(
     get(path / "xmapHeadersEndpoint", headers = headers2),
     ok(textResponse)

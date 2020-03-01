@@ -51,14 +51,14 @@ trait EndpointsWithCustomErrors
       }
   }
 
-  lazy val emptyHeaders: RequestHeaders[Unit] = (_, req) => req
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, req) => req
 
   case class InvalidHeaderDefinition(parsingResult: ParsingResult) extends RuntimeException
 
-  def header(name: String, docs: Option[String]): (String, List[HttpHeader]) => List[HttpHeader] =
+  def requestHeader(name: String, docs: Option[String]): (String, List[HttpHeader]) => List[HttpHeader] =
     (value, headers) => createHeader(name, value) :: headers
 
-  def optHeader(name: String, docs: Option[String]): (Option[String], List[HttpHeader]) => List[HttpHeader] =
+  def optRequestHeader(name: String, docs: Option[String]): (Option[String], List[HttpHeader]) => List[HttpHeader] =
     (valueOpt, headers) => valueOpt match {
       case Some(value) => createHeader(name, value) :: headers
       case None => headers

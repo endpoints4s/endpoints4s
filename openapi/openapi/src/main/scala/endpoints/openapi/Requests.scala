@@ -17,12 +17,12 @@ trait Requests
 
   type RequestHeaders[A] = DocumentedHeaders
 
-  def emptyHeaders = DocumentedHeaders(Nil)
+  def emptyRequestHeaders = DocumentedHeaders(Nil)
 
-  def header(name: String, docs: Documentation): RequestHeaders[String] =
+  def requestHeader(name: String, docs: Documentation): RequestHeaders[String] =
     DocumentedHeaders(List(DocumentedHeader(name, docs, required = true, Schema.simpleString)))
 
-  def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] =
+  def optRequestHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] =
     DocumentedHeaders(List(DocumentedHeader(name, docs, required = false, Schema.simpleString)))
 
 
@@ -47,7 +47,7 @@ trait Requests
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
     docs: Documentation = None,
-    headers: RequestHeaders[C] = emptyHeaders
+    headers: RequestHeaders[C] = emptyRequestHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
     DocumentedRequest(method, url, headers, docs, entity)
 

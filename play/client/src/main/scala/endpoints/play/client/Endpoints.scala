@@ -40,12 +40,12 @@ trait EndpointsWithCustomErrors
   type RequestHeaders[A] = (A, WSRequest) => WSRequest
 
   /** Does not modify the request */
-  lazy val emptyHeaders: RequestHeaders[Unit] = (_, wsRequest) => wsRequest
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, wsRequest) => wsRequest
 
-  def header(name: String, docs: Documentation): (String, WSRequest) => WSRequest =
+  def requestHeader(name: String, docs: Documentation): (String, WSRequest) => WSRequest =
     (value, req) => req.addHttpHeaders(name -> value)
 
-  def optHeader(name: String, docs: Documentation): (Option[String], WSRequest) => WSRequest = {
+  def optRequestHeader(name: String, docs: Documentation): (Option[String], WSRequest) => WSRequest = {
     case (Some(value), req) => req.addHttpHeaders(name -> value)
     case (None, req) => req
   }

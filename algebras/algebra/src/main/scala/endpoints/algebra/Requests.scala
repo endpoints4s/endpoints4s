@@ -7,7 +7,11 @@ import endpoints._
   */
 trait Requests extends Urls with Methods with SemigroupalSyntax {
 
-  /** Information carried by requests’ headers
+  /** Information carried by requests’ headers.
+    *
+    * You can construct values of type `RequestHeaders` by using the operations
+    * [[requestHeader]], [[optRequestHeader]], or [[emptyRequestHeaders]].
+    *
     * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
     *        and [[InvariantFunctorSyntax]] classes.
     * @group types */
@@ -22,21 +26,21 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document empty headers.
     * @group operations
     */
-  def emptyHeaders: RequestHeaders[Unit]
+  def emptyRequestHeaders: RequestHeaders[Unit]
 
   /**
     * A required request header
     * @param name Header name (e.g., “Authorization”)
     * @group operations
     */
-  def header(name: String, docs: Documentation = None): RequestHeaders[String]
+  def requestHeader(name: String, docs: Documentation = None): RequestHeaders[String]
 
   /**
     * An optional request header
     * @param name Header name (e.g., “Authorization”)
     * @group operations
     */
-  def optHeader(name: String, docs: Documentation = None): RequestHeaders[Option[String]]
+  def optRequestHeader(name: String, docs: Documentation = None): RequestHeaders[Option[String]]
 
   /** Provides `++` operation.
     * @see [[SemigroupalSyntax]] */
@@ -91,7 +95,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     url: Url[UrlP],
     entity: RequestEntity[BodyP] = emptyRequest,
     docs: Documentation = None,
-    headers: RequestHeaders[HeadersP] = emptyHeaders
+    headers: RequestHeaders[HeadersP] = emptyRequestHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out]
 
   /**
@@ -103,7 +107,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   final def get[UrlP, HeadersP, Out](
     url: Url[UrlP],
     docs: Documentation = None,
-    headers: RequestHeaders[HeadersP] = emptyHeaders
+    headers: RequestHeaders[HeadersP] = emptyRequestHeaders
   )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
     request(Get, url, docs = docs, headers = headers)
 
@@ -120,7 +124,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     url: Url[UrlP],
     entity: RequestEntity[BodyP],
     docs: Documentation = None,
-    headers: RequestHeaders[HeadersP] = emptyHeaders
+    headers: RequestHeaders[HeadersP] = emptyRequestHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] =
     request(Post, url, entity, docs, headers)
 
@@ -136,7 +140,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     url: Url[UrlP],
     entity: RequestEntity[BodyP],
     docs: Documentation = None,
-    headers: RequestHeaders[HeadersP] = emptyHeaders
+    headers: RequestHeaders[HeadersP] = emptyRequestHeaders
   )(implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled], tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]): Request[Out] =
     request(Put, url, entity, docs, headers)
 
@@ -149,7 +153,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   final def delete[UrlP, HeadersP, Out](
     url: Url[UrlP],
     docs: Documentation = None,
-    headers: RequestHeaders[HeadersP] = emptyHeaders
+    headers: RequestHeaders[HeadersP] = emptyRequestHeaders
   )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
     request(Delete, url, docs = docs, headers = headers)
 

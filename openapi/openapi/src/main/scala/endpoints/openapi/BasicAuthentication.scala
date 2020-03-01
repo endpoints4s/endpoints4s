@@ -36,7 +36,7 @@ trait BasicAuthentication
     url: Url[U],
     response: Response[R],
     requestEntity: RequestEntity[E] = emptyRequest,
-    requestHeaders: RequestHeaders[H] = emptyHeaders,
+    requestHeaders: RequestHeaders[H] = emptyRequestHeaders,
     unauthenticatedDocs: Documentation = None,
     requestDocs: Documentation = None,
     endpointDocs: EndpointDocs = EndpointDocs()

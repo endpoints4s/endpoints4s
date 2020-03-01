@@ -17,11 +17,11 @@ trait Requests extends algebra.Requests with Urls with Methods {
 
   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
-  def emptyHeaders: RequestHeaders[Unit] = _ => Seq()
+  def emptyRequestHeaders: RequestHeaders[Unit] = _ => Seq()
 
-  def header(name: String, docs: Documentation): String => Seq[(String, String)] = value => Seq(name -> value)
+  def requestHeader(name: String, docs: Documentation): String => Seq[(String, String)] = value => Seq(name -> value)
 
-  def optHeader(name: String, docs: Documentation): Option[String] => Seq[(String, String)] =
+  def optRequestHeader(name: String, docs: Documentation): Option[String] => Seq[(String, String)] =
     valueOpt => valueOpt.map(v => name -> v).toSeq
 
   implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
@@ -53,7 +53,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
     url: Url[U],
     entity: RequestEntity[E] = emptyRequest,
     docs: Documentation = None,
-    headers: RequestHeaders[H] = emptyHeaders
+    headers: RequestHeaders[H] = emptyRequestHeaders
   )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler.Aux[UE, H, Out]): Request[Out] =
     (ueh) => {
       val (ue, h) = tuplerUEH.unapply(ueh)
