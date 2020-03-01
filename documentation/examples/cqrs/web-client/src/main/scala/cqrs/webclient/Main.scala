@@ -34,7 +34,8 @@ object Main {
       if (name.isEmpty) dom.window.alert("Please type a name for the meter to create")
       else {
         //#webapps-invocation
-        val eventuallyCreatedMeter: Future[Meter] = PublicEndpoints.createMeter(CreateMeter(name))
+        val eventuallyCreatedMeter: Future[Meter] =
+          PublicEndpoints.createMeter(CreateMeter(name))
         //#webapps-invocation
         eventuallyCreatedMeter.map { createdMeter =>
           metersVar.update(_ + (createdMeter.id -> createdMeter))

@@ -1,0 +1,25 @@
+a.go-to-source::before {
+  transition: color   0.25s, opacity 0.25s;
+  color: rgba(0, 0, 0, 0.07);
+  content: "📄";
+}
+a.go-to-source {
+  position: absolute;
+  top: 0.6rem;
+  right: 4.0rem;
+  width: 2.8rem;
+  height: 2.8rem;
+  border-radius: 0.2rem;
+  font-size: 1.6rem;
+  cursor: pointer;
+  z-index: 1;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+pre:hover .go-to-source::before,
+.codehilite:hover .go-to-source::before, .md-typeset .highlight:hover .go-to-source::before {
+  color: rgba(0, 0, 0, 0.54);
+}
+.go-to-source:focus::before, .go-to-source:hover::before {
+  color: #536dfe;
+}

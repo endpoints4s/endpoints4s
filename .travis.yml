@@ -38,10 +38,10 @@ jobs:
 
     - stage: test
       scala: 2.12.10
-      script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
+      script: sbt ++$TRAVIS_SCALA_VERSION test
     - stage: test
       scala: 2.13.1
-      script: sbt "++ $TRAVIS_SCALA_VERSION test"
+      script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
 
     - stage: coverage
       if: tag is blank
@@ -58,7 +58,7 @@ jobs:
         - chmod 600 ci/travis-key
         - eval "$(ssh-agent -s)"
         - ssh-add ci/travis-key
-        - sbt "++ 2.12.10 publishSigned" "++ 2.13.1 publishSigned" sonatypeReleaseAll "++ 2.12.10 manual/makeSite" manual/ghpagesPushSite
+        - sbt "++ 2.12.10 publishSigned" "++ 2.13.1 publishSigned" sonatypeReleaseAll "++ 2.13.1 manual/makeSite" manual/ghpagesPushSite
 
 env:
   global:

@@ -1,0 +1,16 @@
+digraph {
+  rankdir=BT
+  node [fontname=mono,shape=box]
+  algebraEndpoints [label="algebra.Endpoints", style=filled, color=lightGray]
+  serverEndpoints [label="server.Endpoints", style=filled, color=lightGray]
+
+  serverEndpoints -> algebraEndpoints [arrowhead=onormal,label="implement"]
+
+  Authentication -> algebraEndpoints [label="enrich"]
+  AuthenticationEndpoints -> Authentication [label="use"]
+  ServerAuthentication -> Authentication [label="implement", arrowhead=onormal]
+  ServerAuthentication -> serverEndpoints [label="apply"]
+  Server -> AuthenticationEndpoints [label="use"]
+  Server -> ServerAuthentication [label="apply"]
+
+}

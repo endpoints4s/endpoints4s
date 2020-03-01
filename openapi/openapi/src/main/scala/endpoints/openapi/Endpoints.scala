@@ -95,7 +95,7 @@ trait EndpointsWithCustomErrors
       }.toMap
     val responses =
       (clientErrorsResponse ++ serverErrorResponse ++ response)
-        .map(r => r.status.toString -> Response(r.documentation, responseHeaders(r.headers), r.content))
+        .map(r => r.status.toString() -> Response(r.documentation, responseHeaders(r.headers), r.content))
         .toMap
     val operation =
       Operation(
@@ -113,7 +113,7 @@ trait EndpointsWithCustomErrors
               val requestBody = RequestBody(callback.requestDocs, callback.entity)
               val responses =
                 callback.response
-                  .map(r => r.status.toString -> Response(r.documentation, responseHeaders(r.headers), r.content))
+                  .map(r => r.status.toString() -> Response(r.documentation, responseHeaders(r.headers), r.content))
                   .toMap
               val callbackOperation =
                 Operation(None, None, Nil, Some(requestBody), responses, Nil, Nil, Map.empty, deprecated = false)

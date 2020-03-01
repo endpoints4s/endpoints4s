@@ -18,24 +18,7 @@ attached to HTTP requests. The client will first login to the server, to get
 its JWT, and then will use the JWT issued by the server to access to protected
 resources. This can be summarized by the following diagram:
 
-~~~ mermaid
-sequenceDiagram
-client->>server: GET /login
-Note over client,server: Client sends its credentials (e.g. a password or an API key)
-alt valid credentials
-  server-->>client: Ok: JSON Web Token
-  Note over client,server: Server replies with a JSON Web Token attached to its response
-else invalid credentials
-  server-->>client: Bad Request
-end
-client->>server: GET /protected-resource
-Note over client,server: Client tries to access to a protected resource by using its JWT
-alt valid JWT
-  server-->>client: Ok
-else invalid or missing JWT
-  server-->>client: Unauthorized
-end
-~~~
+![authentication-flow](authentication-flow.svg)
 
 We want to enrich the *endpoints* algebras with new vocabulary describing the login
 endpoint as well as the protected endpoints.
@@ -58,8 +41,7 @@ A JWT contains information about the logged-in user (for instance, his name), an
 is serialized and is cryptographically signed by the server (that’s why clients can not forge an
 arbitrary JWT). In our case, the user information we are interested in is only its name:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#user-info-type
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #user-info-type }
 
 The type used to model the authentication token will be different on client-side and
 server-side. On server-side, we are only interested in the user info and we want to let the algebra
@@ -70,16 +52,14 @@ type member `AuthenticationToken`.
 
 In the end, we need to add the following members to our algebra:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#enriched-algebra
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #enriched-algebra }
 
 We define our algebra in a trait named `Authentication`, which extends the main
 algebra, `algebra.Endpoints`.
 
 Given this new algebra, we can now describe the login endpoint as follows:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Usage.scala#login-endpoint
-~~~
+@@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #login-endpoint }
 
 The `login` endpoint is defined in an `AuthenticationTrait`, which uses (by inheritance)
 the main algebra, `algebra.Endpoints`, and the `Authentication` algebra.
@@ -93,8 +73,7 @@ parameter `apiKey` containing the credentials. The returned response is either a
 The server interpreter fixes the `AuthenticationToken` type member to `UserInfo`
 and implements the `authenticationToken` and `wheneverValid` methods:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#server-interpreter
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #server-interpreter }
 
 The `ServerAuthentication` trait extends the `Authentication` algebra as well
 as a server `Endpoints` interpreter based on Play framework.
@@ -113,8 +92,7 @@ it calls the underlying response.
 With this interpreter, the implementation of the login endpoint looks like
 the following:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Usage.scala#login-implementation
-~~~
+@@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #login-implementation }
 
 Our `Server` class extends the traits that defines the `login` endpoint,
 namely the `AuthenticationEndpoints`, and mixes the Play-based server
@@ -151,24 +129,7 @@ application-specific needs:
 
 These relationships are illustrated by the following diagram:
 
-~~~ mermaid
-graph BT
-
-Authentication -- "« enrich »" --> algebra.Endpoints
-AuthenticationEndpoints -- " « use » " --> Authentication
-AuthenticationEndpoints -- " « use » " --> algebra.Endpoints
-
-server.Endpoints -- "« implement »" --> algebra.Endpoints
-ServerAuthentication -- "« implement »" --> Authentication
-ServerAuthentication -- "« apply »" --> server.Endpoints
-
-Server -- "« use »" --> AuthenticationEndpoints
-Server -- "« apply »" --> ServerAuthentication
-Server -- "« apply »" --> server.Endpoints
-
-style algebra.Endpoints fill:#eee
-style server.Endpoints fill:#eee
-~~~
+![interactions](/interactions.svg)
 
 The traits provided by *endpoints* are shown in gray.
 
@@ -178,8 +139,7 @@ The implementation of the client interpreter repeats the same
 recipe: we define a trait `ClientAuthentication`, which extends
 `Authentication` and mixes a `client.Endpoints` base interpreter:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#client-interpreter
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #client-interpreter }
 
 The `AuthenticationToken` type is implemented as a class whose
 constructor is private. If it was public, clients could build
@@ -216,8 +176,7 @@ returns the underlying response wrapped in a `Some`.
 If we create an instance of our `Client` an run our `Server`, we can test
 that the following scenarios work as expected:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/test/scala/authentication/AuthenticationTest.scala#login-test-client
-~~~
+@@snip [AuthenticationTest.scala](/documentation/examples/authentication/src/test/scala/authentication/AuthenticationTest.scala) { #login-test-client }
 
 These tests check that if we login with an unknown API key we get no authentication
 token, but if we login with the `"foobar"` API key then we get some authentication token.
@@ -240,8 +199,7 @@ contain the authentication token. Second, we need a way to define that responses
 might be `Unauthorized`. Last, we need a convenient `Endpoint` constructor that
 puts all the pieces together.
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#protected-endpoints-algebra
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-algebra }
 
 The `authenticatedRequest` method defines a request expecting an authentication token
 to be provided in the `Authorization` header. The `wheneverAuthenticated` method transforms
@@ -261,24 +219,24 @@ for defining protected endpoints (the two other operations are private). It guar
 that the request will always have the authentication token in its headers, and that the
 response can always be `Unauthorized`.
 
-> {.note}
-> The `authenticatedRequest` operation takes several type parameters.
-> In particular, they model the type of the request URL (`U`) and entity
-> (`E`). These types must be tracked by the type system so that, eventually,
-> an `Endpoint[Req, Resp]` is built, where the `Req` type is a tuple of
-> all the information (URL and entity) carried by the request.
-> In this example we enrich the request headers with the authentication
-> token. However, instead of simply returning nested tuples (e.g.
-> `((U, E), AuthenticationToken)`), we rely on implicit `Tupler` instances to
-> compute the type of the tuple. `Tupler` instances are defined in a way
-> that always flattens nested tuples (e.g. they will return
-> `(U, E, AuthenticationToken)`) and removes `Unit` types (e.g. if the URL
-> is static—of type `Url[Unit]`—the tuplers return `(E, AuthenticationToken)`).
+@@@note
+The `authenticatedRequest` operation takes several type parameters.
+In particular, they model the type of the request URL (`U`) and entity
+(`E`). These types must be tracked by the type system so that, eventually,
+an `Endpoint[Req, Resp]` is built, where the `Req` type is a tuple of
+all the information (URL and entity) carried by the request.
+In this example we enrich the request headers with the authentication
+token. However, instead of simply returning nested tuples (e.g.
+`((U, E), AuthenticationToken)`), we rely on implicit `Tupler` instances to
+compute the type of the tuple. `Tupler` instances are defined in a way
+that always flattens nested tuples (e.g. they will return
+`(U, E, AuthenticationToken)`) and removes `Unit` types (e.g. if the URL
+is static—of type `Url[Unit]`—the tuplers return `(E, AuthenticationToken)`).
+@@@
 
 The `authenticatedEndpoint` operation can be used as follows:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Usage.scala#protected-endpoint
-~~~
+@@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #protected-endpoint }
 
 Since the request URL is static and the request has no entity, the information carried
 by the request is just the `AuthenticationToken`.
@@ -287,27 +245,23 @@ by the request is just the `AuthenticationToken`.
 
 Our Play-based server is implemented as follows:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#protected-endpoints-server
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-server }
 
 And the protected endpoint can be implemented as follows:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Usage.scala#protected-resource-implementation
-~~~
+@@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #protected-resource-implementation }
 
 ### Client interpreter
 
 And our Play-based client is implemented as follows:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/main/scala/authentication/Authentication.scala#protected-endpoints-client
-~~~
+@@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-client }
 
 ### Putting things together
 
 Our `Client` and `Server` instances are now able to have more sophisticated exchanges:
 
-~~~ scala src=../../../../../documentation/examples/authentication/src/test/scala/authentication/AuthenticationTest.scala#protected-endpoint-test
-~~~
+@@snip [AuthenticationTest.scala](/documentation/examples/authentication/src/test/scala/authentication/AuthenticationTest.scala) { #protected-endpoint-test }
 
 This test first gets an authentication token by calling the `login` endpoint, and then
 accesses the protected endpoint by supplying its token.

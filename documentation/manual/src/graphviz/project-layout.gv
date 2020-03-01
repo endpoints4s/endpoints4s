@@ -1,0 +1,8 @@
+digraph {
+  rankdir = BT
+  node [shape=box,fontname=mono]
+  edge [style=dashed]
+
+  server -> shared
+  client -> shared
+}

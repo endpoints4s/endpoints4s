@@ -1,6 +1,6 @@
 # Design in a nutshell
 
-You have seen in the [quick start](quick-start.md) page that using the _endpoints_ library consists in
+You have seen in the @ref[quick start](quick-start.md) page that using the _endpoints_ library consists in
 first defining abstract **descriptions** of HTTP endpoints, and then producing clients, servers, or
 documentation, by **interpreting** these descriptions. This page takes a step back to
 explain the underlying architecture of the library, and then provides some guidelines
@@ -10,17 +10,16 @@ to embrace this design.
 
 Here is an example of endpoint description:
 
-~~~ scala src=../../../../documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala#get-endpoint-definition
-~~~
+@@snip [CounterEndpoints.scala](/documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala) { #get-endpoint-definition }
 
 Endpoint descriptions are defined in terms of operations (e.g., `endpoint`, `get`, `path`, `ok`, etc.)
-provided by traits living in the [`endpoints.algebra` package](unchecked:/api/endpoints/algebra/index.html).
+provided by traits living in the @scaladoc[`endpoints.algebra` package](endpoints.algebra.index).
 These operations are all **abstract**. Furthermore, their return **types** are also abstract. Their
 purpose is only to define the **rules** for constructing and combining parts of HTTP endpoint
 descriptions. This is why they are called “algebra interfaces”, or just **algebras**.
 
 For instance, consider the following truncated version of the
-[`Endpoints` algebra](unchecked:/api/endpoints/algebra/Endpoints.html):
+@scaladoc[`Endpoints` algebra](endpoints.algebra.Endpoints):
 
 ~~~ scala
 package endpoints.algebra
@@ -38,10 +37,11 @@ trait Endpoints {
 
 Here, the `get` method provides a way to define an HTTP request description from a URL description.
 
-> {.note}
-> Since the `Request[A]` type is abstract, the _only_ way to construct a value of that type is
-> by calling a method that returns a `Request[A]`, such as the method `get`, in the above
-> code. For this reason, we say that the method `get` is a **constructor** for `Request[A]`.
+@@@note
+Since the `Request[A]` type is abstract, the _only_ way to construct a value of that type is
+by calling a method that returns a `Request[A]`, such as the method `get`, in the above
+code. For this reason, we say that the method `get` is a **constructor** for `Request[A]`.
+@@@
 
 The `Request[A]` type models an HTTP request that *carries* an information of type `A`. From a client
 point of view, this `A` is what is **needed** to build a `Request[A]`. Conversely, from a server point
@@ -80,14 +80,15 @@ As you can see, each interpreter brings its own **concrete semantic type** for `
 interpreters typically fix the `Request[A]` type to a function that *takes* an `A` as parameter. Conversely,
 server interpreters typically fix the `Request[A]` type to a function that *returns* an `A`. Can you guess
 what documentation interpreters do with this type parameter `A`? You can see the answer
-[here](unchecked:/api/endpoints/openapi/Requests.html#Request[A]=Requests.this.DocumentedRequest). It is
+@scaladoc[here](endpoints.openapi.Requests#Request[A]=Requests.this.DocumentedRequest). It is
 discarded because this type `A` models the information that is carried by an actual request, at run-time,
 but the documentation is static (so, there is no `A` value to deal with).
 
-> {.note}
-> This technique has been described in details by Bruno C. d. S. Oliveira *et al.* [1].
-> Note that we use a variant discovered by Christian Hofer *et al.* [2], which uses
-> type members rather than type parameters.
+@@@note
+This technique has been described in details by Bruno C. d. S. Oliveira *et al.* [1].
+Note that we use a variant discovered by Christian Hofer *et al.* [2], which uses
+type members rather than type parameters.
+@@@
 
 ### Summary
 
@@ -106,23 +107,18 @@ stacks can be completely different (one can use Play framework while the other u
 Akka, for instance). Here is a diagram illustrating the fact that multiple
 interpreters can be applied to a same algebra:
 
-~~~ mermaid
-graph BT
-  algebra.Endpoints
-  play.server.Endpoints --> algebra.Endpoints
-  akkahttp.client.Endpoints --> algebra.Endpoints
-  openapi.Endpoints --> algebra.Endpoints
-~~~
+![multiple-interpreters](multiple-interpreters.svg)
 
-> {.note}
-> From that perspective, endpoint descriptions are equivalent to protobuf or Swagger
-> files: they are machine-readable descriptors for a service. As a consequence, if you
-> want to share a descriptor of your service with the outside world, one option is
-> to publish the artifact containing the traits that provide your endpoint descriptions.
-> Downstream users will then be able to turn these descriptions to a client of
-> their choice by applying the interpreter of their choice. Of course, this works only
-> if your users use Scala. For the rest of the world, you can distribute the
-> descriptor produced by the OpenAPI interpreter.
+@@@note
+From that perspective, endpoint descriptions are equivalent to protobuf or Swagger
+files: they are machine-readable descriptors for a service. As a consequence, if you
+want to share a descriptor of your service with the outside world, one option is
+to publish the artifact containing the traits that provide your endpoint descriptions.
+Downstream users will then be able to turn these descriptions to a client of
+their choice by applying the interpreter of their choice. Of course, this works only
+if your users use Scala. For the rest of the world, you can distribute the
+descriptor produced by the OpenAPI interpreter.
+@@@
 
 The fact that algebras are defined in traits and that we can mix several traits
 together provides a second dimension of modularity: the algebra itself is modular.
@@ -130,12 +126,7 @@ For instance, you have seen in the code example at the top of this page that two
 algebras were used together: `algebra.Endpoints` and `algebra.JsonEntitiesFromSchemas`.
 The diagram below shows a couple of algebras and their relations:
 
-~~~ mermaid
-graph BT
-  algebra.Endpoints
-  algebra.JsonEntitiesFromSchemas --> algebra.Endpoints
-  algebra.BasicAuthentication --> algebra.Endpoints
-~~~
+![extensible-algebra](extensible-algebra.svg)
 
 We say that the `BasicAuthentication` algebra **enriches** the `Endpoints` algebra
 with operations related to authentication.
@@ -150,7 +141,7 @@ relevant to them. Another benefit is that the algebras provided by the _endpoint
 can be extended *outside* of the library itself. Any application-specific concern can
 be introduced as another algebra without having to make the _endpoints_ library aware of
 it. This point is illustrated in the
-[authentication example](guides/custom-authentication.md).
+@ref[authentication example](guides/custom-authentication.md).
 
 On the other hand, a modular algebra means that you have to select the algebra modules
 to use before you can write endpoint descriptions. For instance, the provided
@@ -158,7 +149,7 @@ to use before you can write endpoint descriptions. For instance, the provided
 probably, you will complete it with one of the `JsonEntities` algebras. Once you have
 settled on the algebra modules you want to use, you will have to find the matching
 interpreter modules. In general, interpreters follow a specific
-[naming convention](algebras-and-interpreters.md#naming-conventions) that should make
+@ref[naming convention](algebras-and-interpreters.md#naming-conventions) that should make
 this process easier.
 
 Another consequence of the modularity of the algebras is that the library *intentionally*
@@ -174,7 +165,7 @@ The more algebras are used, the less interpreters can interpret them.
 
 ## Next Step
 
-Discover the hierarchy of [algebras](algebras-and-interpreters.md).
+Discover the hierarchy of @ref[algebras](algebras-and-interpreters.md).
 
 ---
 
