@@ -65,15 +65,15 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   type RequestHeaders[A] = Headers => Validated[A]
 
   /** Always succeeds in extracting no information from the headers */
-  lazy val emptyHeaders: RequestHeaders[Unit] = _ => Valid(())
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = _ => Valid(())
 
-  def header(name: String,docs: Option[String]): Headers => Validated[String] =
+  def requestHeader(name: String,docs: Option[String]): Headers => Validated[String] =
     headers => headers.get(name) match {
       case Some(value) => Valid(value)
       case None        => Invalid(s"Missing header $name")
     }
 
-  def optHeader(name: String,docs: Option[String]): Headers => Validated[Option[String]] =
+  def optRequestHeader(name: String,docs: Option[String]): Headers => Validated[Option[String]] =
     headers => Valid(headers.get(name))
 
   implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new endpoints.InvariantFunctor[RequestHeaders] {
