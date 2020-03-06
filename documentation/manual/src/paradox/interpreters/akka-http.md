@@ -96,13 +96,11 @@ having a `handleNotFound` clause.
 
 In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
-@scaladoc[handleClientErrors](endpoints.akkahttp.server.Urls#handleClientErrors(invalid:endpoints.Invalid):akka.http.scaladsl.server.StandardRoute)
-method.
+@scaladoc[handleClientErrors](endpoints.akkahttp.server.Urls) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
 encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
-[handleServerError](endpoints.akkahttp.server.Endpoints#handleServerError(throwable:Throwable):akka.http.scaladsl.server.StandardRoute)
-method.
+@scaladoc[handleServerError](endpoints.akkahttp.server.Endpoints) method.

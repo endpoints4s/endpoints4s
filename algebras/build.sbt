@@ -13,7 +13,8 @@ val algebra =
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test,
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test,
         "com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test,
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test,
+        "com.lihaoyi" %% "ujson" % ujsonVersion % Test
       )
     )
     .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
