@@ -7,7 +7,7 @@ import org.scalatest.freespec.AnyFreeSpec
 class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec
-    extends algebra.JsonSchemasTest
+    extends algebra.JsonSchemasFixtures
       with circe.JsonSchemas
 
   import JsonSchemasCodec.{User, Foo, Bar}
@@ -93,7 +93,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(enumSchema.encoder(validValue) == validJson)
     assert(enumSchema.decoder.decodeJson(validJson).exists(_ == validValue))
     val invalidJson = Json.obj("quux" -> Json.fromString("wrong"))
-    assert(enumSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid value: {\n  \"quux\" : \"wrong\"\n}. Valid values are: {\n  \"quux\" : \"bar\"\n}, {\n  \"quux\" : \"baz\"\n}.", Nil)))
+    assert(enumSchema.decoder.decodeJson(invalidJson).left.exists(_ == DecodingFailure("Invalid value: {\n  \"quux\" : \"wrong\"\n} ; valid values are: {\n  \"quux\" : \"bar\"\n}, {\n  \"quux\" : \"baz\"\n}", Nil)))
   }
 
   "oneOf" in {

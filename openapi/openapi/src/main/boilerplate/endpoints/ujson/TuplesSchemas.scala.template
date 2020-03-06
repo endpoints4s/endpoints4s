@@ -11,7 +11,7 @@ trait TuplesSchemas extends algebra.TuplesSchemas { this: JsonSchemas =>
     new JsonSchema[([#T1#])] {
       val decoder = {
         case ujson.Arr(items) if items.length == 1 => [#schema1.decoder.decode(items(0))# zip ]
-        case json => Invalid(s"Invalid JSON array of 1 elements: $json.")
+        case json => Invalid(s"Invalid JSON array of 1 elements: $json")
       }
       val encoder = { case ([#t1#]) => ujson.Arr([#schema1.encoder.encode(t1)#]) }
     }#
