@@ -1,5 +1,7 @@
 package endpoints
 
+import scala.util.{Failure, Success, Try}
+
 /**
   * A validated value of type `A` can either be `Valid` or `Invalid`
   * @tparam A Type of the validated value
@@ -94,6 +96,15 @@ object Validated {
   def fromEither[A](either: Either[Seq[String], A]): Validated[A] = either match {
     case Left(errors) => Invalid(errors)
     case Right(a)     => Valid(a)
+  }
+
+  /**
+    * Turns a `Success[A]` into a `Validated[A]`
+    * Turns a `Failure[A]` into an invalid value, using the exception message as an 'error' message
+    */
+  def fromTry[A](tryA: Try[A]): Validated[A] = tryA match {
+    case Success(value) => Valid(value)
+    case Failure(error) => Invalid(error.getMessage)
   }
 
 }
