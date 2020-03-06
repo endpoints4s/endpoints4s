@@ -82,11 +82,11 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       HEADERS
   ************************* */
 
-  def emptyHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
+  def emptyRequestHeaders: RequestHeaders[Unit] = convToDirective1(Directives.pass)
 
-  def header(name: String, docs: Documentation): RequestHeaders[String] = Directives.headerValueByName(name)
+  def requestHeader(name: String, docs: Documentation): RequestHeaders[String] = Directives.headerValueByName(name)
 
-  def optHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
+  def optRequestHeader(name: String, docs: Documentation): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
   implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = directive1InvFunctor
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
@@ -152,7 +152,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     url: Url[A],
     entity: RequestEntity[B] = emptyRequest,
     docs: Documentation = None,
-    headers: RequestHeaders[C] = emptyHeaders
+    headers: RequestHeaders[C] = emptyRequestHeaders
   )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))
     val matchDirective = methodDirective & url.directive & headers

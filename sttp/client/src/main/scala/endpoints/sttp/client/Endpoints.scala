@@ -44,11 +44,11 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
   type RequestHeaders[A] = (A, SttpRequest) => SttpRequest
 
   /** Does not modify the request */
-  lazy val emptyHeaders: RequestHeaders[Unit] = (_, request) => request
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, request) => request
 
-  def header(name: String, docs: Documentation): RequestHeaders[String] = (value, request) => request.header(name, value)
+  def requestHeader(name: String, docs: Documentation): RequestHeaders[String] = (value, request) => request.header(name, value)
 
-  def optHeader(name: String, docs: Documentation): (Option[String], SttpRequest) => SttpRequest = {
+  def optRequestHeader(name: String, docs: Documentation): (Option[String], SttpRequest) => SttpRequest = {
     case (Some(value), request) => request.header(name, value)
     case (None, request) => request
   }

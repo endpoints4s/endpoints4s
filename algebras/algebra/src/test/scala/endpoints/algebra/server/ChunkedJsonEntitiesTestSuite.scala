@@ -37,7 +37,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
     httpClient.singleRequest(request).flatMap { response =>
       val chunksSource =
         response.entity.dataBytes
-          .map(chunk => Right(jsonCodec.decode(decodeEntityAsText(response, chunk)).toEither.right.get))
+          .map(chunk => Right(jsonCodec.decode(decodeEntityAsText(response, chunk)).toEither.toOption.get))
           .recover { case NonFatal(e) => Left(e) }
       chunksSource.runWith(Sink.seq).map { as =>
         (response, as)

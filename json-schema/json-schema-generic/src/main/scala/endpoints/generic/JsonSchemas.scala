@@ -5,6 +5,7 @@ import shapeless.labelled.{FieldType, field => shapelessField}
 import shapeless.ops.hlist.Tupler
 import shapeless.{:+:, ::, Annotation, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
 
+import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 
 /**
@@ -40,6 +41,15 @@ import scala.reflect.ClassTag
   */
 trait JsonSchemas extends algebra.JsonSchemas {
 
+  @implicitNotFound(
+    "Unable to derive an instance of JsonSchema[${A}].\n" +
+    "The type ${A} must be a sealed trait or a case class.\n" +
+    "If it is a sealed trait, make sure it is only extended by case classes and that a " +
+    "JsonSchema can be derived for each of these case classes (see hereafter).\n" +
+    "If it is a case class, make sure each field of the case class has an implicit JsonSchema.\n" +
+    "You can check that a JsonSchema is available for a type T by compiling the expression " +
+    "`implicitly[JsonSchema[T]]`."
+  )
   trait GenericJsonSchema[A] {
     def jsonSchema: JsonSchema[A]
   }
@@ -111,8 +121,23 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   trait GenericJsonSchemaLowLowPriority { this: GenericJsonSchema.type =>
 
+    @implicitNotFound(
+      "Unable to derive an instance of JsonSchema[${A}].\n" +
+      "The type ${A} must be a case class. Make sure each field of the case class has an implicit JsonSchema.\n" +
+      "You can check that a JsonSchema is available for a type T by compiling the expression " +
+      "`implicitly[JsonSchema[T]]`.\n" +
+      "If type ${A} is a sealed trait, use `genericTagged` or `genericJsonSchema` instead."
+    )
     class GenericRecord[A](val jsonSchema: Record[A]) extends GenericJsonSchema[A]
 
+    @implicitNotFound(
+      "Unable to derive an instance of JsonSchema[${A}].\n" +
+      "The type ${A} must be a sealed trait. Make sure it is only extended by case classes, and " +
+      "for each case class, make sure each field of the case class has an implicit JsonSchema.\n" +
+      "You can check that a JsonSchema is available for a type T by compiling the expression " +
+      "`implicitly[JsonSchema[T]]`.\n" +
+      "If type ${A} is a case class, use `genericRecord` or `genericJsonSchema` instead."
+    )
     class GenericTagged[A](val jsonSchema: Tagged[A]) extends GenericJsonSchema[A]
 
     trait DocumentedGenericRecord[A, D <: HList] {

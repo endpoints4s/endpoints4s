@@ -1,49 +1,16 @@
 package endpoints.algebra.server
 
-import java.nio.charset.StandardCharsets
 import java.util.UUID
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{DateTime, HttpRequest, HttpResponse}
 import akka.http.scaladsl.model.HttpMethods.{DELETE, PUT}
-import akka.http.scaladsl.model.headers.{ETag, `Access-Control-Allow-Origin`, `Content-Type`, `Last-Modified`}
-import akka.util.ByteString
+import akka.http.scaladsl.model.headers.{ETag, `Access-Control-Allow-Origin`, `Last-Modified`}
+import akka.http.scaladsl.model.{DateTime, HttpRequest}
 import endpoints.{Invalid, Valid}
-
-import scala.concurrent.{ExecutionContext, Future}
 
 trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends ServerTestBase[T] {
 
-  import serverApi.{ segment => s, _}
   import DecodedUrl._
-
-  private[server] implicit val actorSystem: ActorSystem = ActorSystem()
-  implicit val executionContext: ExecutionContext = actorSystem.dispatcher
-
-  val httpClient = Http()
-
-  def sendAndDecodeEntityAsText(request: HttpRequest): Future[(HttpResponse, String)] = {
-    send(request).map { case (response, entity) =>
-      (response, decodeEntityAsText(response, entity))
-    }
-  }
-
-  def send(request: HttpRequest): Future[(HttpResponse, ByteString)] = {
-    httpClient.singleRequest(request).flatMap { response =>
-      response.entity.toStrict(patienceConfig.timeout).map { entity =>
-        (response, entity.data)
-      }
-    }
-  }
-
-  def decodeEntityAsText(response: HttpResponse, entity: ByteString): String = {
-    val charset =
-      response.header[`Content-Type`]
-        .flatMap(_.contentType.charsetOption.map(_.nioCharset))
-        .getOrElse(StandardCharsets.UTF_8)
-    entity.decodeString(charset)
-  }
+  import serverApi.{segment => s, _}
 
   "paths" should {
 
@@ -260,7 +227,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(uri = s"http://localhost:$port/user/$uuid/description?name=name1&age=18")
         whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
           assert(entity == mockedResponse)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
@@ -269,7 +236,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(method = PUT, uri = s"http://localhost:$port/user/$uuid")
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
@@ -278,7 +245,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(method = DELETE, uri = s"http://localhost:$port/user/$uuid")
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
@@ -292,7 +259,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(uri = s"http://localhost:$port/user/userId/description?name=name1&age=18")
         whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
           assert(entity == mockedResponse)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
@@ -301,7 +268,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(method = PUT, uri = s"http://localhost:$port/user/foo123")
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
@@ -310,7 +277,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi] extends Server
         val request = HttpRequest(method = DELETE, s"http://localhost:$port/user/foo123")
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
-          assert(response.status.intValue == 200)
+          assert(response.status.intValue() == 200)
           ()
         }
       }
