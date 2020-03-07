@@ -57,7 +57,7 @@ trait JsonEntitiesFromSchemasTestSuite[T <: algebra.JsonEntitiesFromSchemasTestA
           sendAndDecodeEntityAsText(request(s"http://localhost:$port/user/42", "{\"name\":\"Alice\",\"age\":true}"))
         ) { case (response, entity) =>
           assert(response.status.intValue() == 400)
-          ujson.read(entity) shouldBe ujson.Arr(ujson.Str("Invalid integer value: true."))
+          ujson.read(entity) shouldBe ujson.Arr(ujson.Str("Invalid integer value: true"))
         }
 
         // Valid URL and entity

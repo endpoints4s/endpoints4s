@@ -29,7 +29,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
+  trait Fixtures extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasFixtures {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
       genericTagged[Storage]

@@ -146,7 +146,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     assert(encoded.size == decoded.size, "Enumeration values must have different string representation")
     enumeration(values)(
       tpe.xmapPartial { str =>
-        Validated.fromOption(decoded.get(str))(s"Invalid value: ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
+        Validated.fromOption(decoded.get(str))(s"Invalid value: ${str} ; valid values are: ${values.map(encode).mkString(", ")}")
       } (encode)
     )
   }
@@ -226,6 +226,14 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A]
 
   /** The JSON schema of a record with a single optional field `name` of type `A`
+    *
+    * Decoder interpreters successfully decode `None` if the field is absent or if
+    * it is present but has the value `null`.
+    * Decoder interpreters fail if the field is present but contains an invalid
+    * value.
+    * Encoder interpreters can omit the field or emit a field with a `null` value.
+    * Documentation interpreters must mark the field as optional.
+    *
     * @group operations
     */
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]]
@@ -357,7 +365,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     stringJsonSchema(format = Some("uuid")).xmapPartial { str =>
       Validated.fromEither(
         Exception.nonFatalCatch.either(UUID.fromString(str))
-          .left.map(_ => s"Invalid UUID value: '$str'." :: Nil)
+          .left.map(_ => s"Invalid UUID value: '$str'" :: Nil)
       )
     } (_.toString)
 

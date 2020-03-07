@@ -209,7 +209,7 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
 object Fixtures
   extends Fixtures
-    with algebra.JsonSchemasTest
+    with algebra.JsonSchemasFixtures
     with Endpoints
     with JsonEntitiesFromSchemas
     with ChunkedEntities {

@@ -111,7 +111,7 @@ trait JsonSchemas
       tpe.encoder,
       tpe.decoder.emap { a =>
         if (values.contains(a)) Right(a)
-        else Left(s"Invalid value: ${tpe.encoder(a).spaces2}. Valid values are: ${values.map(a => tpe.encoder(a).spaces2).mkString(", ")}.")
+        else Left(s"Invalid value: ${tpe.encoder(a).spaces2} ; valid values are: ${values.map(a => tpe.encoder(a).spaces2).mkString(", ")}")
       }
     )
   }
@@ -135,7 +135,10 @@ trait JsonSchemas
   def emptyRecord: Record[Unit] =
     Record(
       io.circe.Encoder.encodeUnit,
-      io.circe.Decoder.decodeJsonObject.map(_ => ())
+      io.circe.Decoder.instance { cursor =>
+        if (cursor.value.isObject) Right(())
+        else Left(DecodingFailure(s"Invalid JSON object: ${cursor.value.noSpaces}", cursor.history))
+      }
     )
 
   def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A] =
@@ -144,7 +147,6 @@ trait JsonSchemas
       io.circe.Decoder.instance[A](cursor => tpe.decoder.tryDecode(cursor.downField(name)))
     )
 
-  // FIXME Check that this is the correct way to model optional fields with circe
   def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]] =
     Record(
       io.circe.Encoder.AsObject.instance[Option[A]](maybeA => JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))),
@@ -184,9 +186,8 @@ trait JsonSchemas
         // and `recordB`.
         recordB.encoder.apply(b).deepMerge(recordA.encoder.apply(a)).asObject.get
       }
-    val decoder = new io.circe.Decoder[t.Out] {
-      def apply(c: HCursor) = recordA.decoder.product(recordB.decoder).apply(c).map { case (a, b) => t(a, b) }
-    }
+    val decoder =
+      recordA.decoder.product(recordB.decoder).map { case (a, b) => t(a, b) }
     Record(encoder, decoder)
   }
 

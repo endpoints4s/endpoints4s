@@ -20,6 +20,6 @@ class OneOfTest extends AnyWordSpec with Matchers {
     }
   }
 
-  trait Fixtures extends algebra.JsonSchemasTest with JsonSchemas
+  trait Fixtures extends algebra.JsonSchemasFixtures with JsonSchemas
 
 }

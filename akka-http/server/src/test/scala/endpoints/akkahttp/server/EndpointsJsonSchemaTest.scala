@@ -71,7 +71,7 @@ class EndpointsJsonSchemaTest extends AnyWordSpec with Matchers with ScalatestRo
       request("/user/42", "{\"name\":\"Alice\",\"age\":true}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe BadRequest
-        ujson.read(responseAs[String]) shouldBe ujson.Arr(ujson.Str("Invalid integer value: true."))
+        ujson.read(responseAs[String]) shouldBe ujson.Arr(ujson.Str("Invalid integer value: true"))
       }
 
       // Valid URL and entity

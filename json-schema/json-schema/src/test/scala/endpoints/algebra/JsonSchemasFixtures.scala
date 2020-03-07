@@ -9,7 +9,7 @@ import endpoints.{Invalid, Valid}
   *
   * Its content can be used as fixtures by [[JsonSchemas]] interpreters.
   */
-trait JsonSchemasTest extends JsonSchemas {
+trait JsonSchemasFixtures extends JsonSchemas {
 
   case class User(name: String, age: Int)
 

@@ -6,7 +6,7 @@ import org.scalatest.freespec.AnyFreeSpec
 class JsonSchemasTest extends AnyFreeSpec {
 
   object DocumentedJsonSchemas
-    extends algebra.JsonSchemasTest
+    extends algebra.JsonSchemasFixtures
       with JsonSchemas
 
   import DocumentedJsonSchemas.DocumentedJsonSchema._

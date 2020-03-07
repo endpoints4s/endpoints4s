@@ -64,7 +64,7 @@ trait JsonSchemas
         if (values.contains(a)) {
           Reads.pure(a)
         } else {
-          Reads.failed(s"Invalid value: ${Json.stringify(jsonSchema.writes.writes(a))}. Valid values are: ${values.map(a => Json.stringify(jsonSchema.writes.writes(a))).mkString(", ")}.")
+          Reads.failed(s"Invalid value: ${Json.stringify(jsonSchema.writes.writes(a))} ; valid values are: ${values.map(a => Json.stringify(jsonSchema.writes.writes(a))).mkString(", ")}")
         }
       },
       jsonSchema.writes
@@ -90,13 +90,13 @@ trait JsonSchemas
     def emptyRecord: Record[Unit] =
     Record(
       new Reads[Unit] {
-        override def reads(json: JsValue): JsResult[Unit] = json match {
+        def reads(json: JsValue): JsResult[Unit] = json match {
           case JsObject(_) => JsSuccess(())
-          case _ => JsError("expected JSON object, but found: " + json)
+          case _ => JsError(s"Invalid JSON object: $json")
         }
       },
       new OWrites[Unit] {
-        override def writes(o: Unit): JsObject = Json.obj()
+        def writes(o: Unit): JsObject = Json.obj()
       }
     )
 
@@ -118,7 +118,7 @@ trait JsonSchemas
     val reads =
       schemaA.reads.map[Either[A, B]](Left(_))
         .orElse(schemaB.reads.map[Either[A, B]](Right(_)))
-        .orElse(Reads(json => JsError(s"Invalid value: $json.")))
+        .orElse(Reads(json => JsError(s"Invalid value: $json")))
     val writes =
       Writes[Either[A, B]] { case Left(a) => schemaA.writes.writes(a) case Right(b) => schemaB.writes.writes(b)}
     JsonSchema(reads, writes)

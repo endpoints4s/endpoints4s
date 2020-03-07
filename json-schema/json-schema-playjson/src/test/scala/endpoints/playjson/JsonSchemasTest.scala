@@ -6,93 +6,16 @@ import org.scalatest.freespec.AnyFreeSpec
 class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec
-    extends endpoints.algebra.JsonSchemasTest
+    extends endpoints.algebra.JsonSchemasFixtures
       with endpoints.playjson.JsonSchemas
 
   import JsonSchemasCodec._
-
-  "empty record" in {
-    testRoundtrip(
-      emptyRecord,
-      Json.obj(),
-      ()
-    )
-  }
-
-  "invalid empty record" in {
-    val jsonSchema = emptyRecord
-    val json = Json.arr()
-
-    assertError(jsonSchema, json, "expected JSON object, but found: []")
-  }
-
-  "single record" in {
-    testRoundtrip(
-      field[String]("field1"),
-      Json.obj("field1" -> "string1"),
-      "string1"
-    )
-  }
-
-  "ignore record" in {
-    val jsonSchema = field[Int]("relevant")
-    val input = Json.obj("relevant" -> JsNumber(1), "irrelevant" -> JsNumber(0))
-
-    val deserialized = jsonSchema.reads.reads(input).get
-    assert(deserialized == 1)
-
-    val output = jsonSchema.writes.writes(deserialized)
-    assert(output == Json.obj("relevant" -> JsNumber(1)))
-  }
 
   "invalid json" in {
     val jsonSchema = field[Int]("relevant")
     val json = Json.obj("irrelevant" -> JsNumber(0))
 
     assertError(jsonSchema, json, "error.path.missing")
-  }
-
-  "missing optional field" in {
-    testRoundtrip(
-      optField[Int]("relevant"),
-      Json.obj(),
-      None
-    )
-  }
-
-  "optional field" in {
-    testRoundtrip(
-      optField[Int]("relevant"),
-      Json.obj("relevant" -> JsNumber(123)),
-      Some(123)
-    )
-  }
-
-  "optional field null" in {
-    val jsonSchema = optField[Int]("relevant")
-    val input = Json.obj("relevant" -> JsNull)
-
-    val deserialized = jsonSchema.reads.reads(input).get
-    assert(deserialized == None)
-
-    val output = jsonSchema.writes.writes(deserialized)
-    assert(output == Json.obj())
-  }
-
-  "nested optional field" in {
-    testRoundtrip(
-      optField[Int]("level1")(field[Int]("level2")),
-      Json.obj("level1" -> Json.obj("level2" -> JsNumber(123))),
-      Some(123)
-    )
-  }
-
-  "missing nested optional field" in {
-    testRoundtrip(
-      optField[Int]("level1")(field[Int]("level2")),
-      Json.obj(),
-      None
-    )
   }
 
   "nested record" in {
@@ -319,7 +242,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     assertError(
       colorSchema,
       JsString("yellow"),
-      "Invalid value: yellow. Valid values are Red, Blue."
+      "Invalid value: yellow ; valid values are: Red, Blue"
     )
   }
 
@@ -327,7 +250,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     assertError(
       colorSchema,
       JsString("Green"),
-      "Invalid value: Green. Valid values are Red, Blue."
+      "Invalid value: Green ; valid values are: Red, Blue"
     )
   }
 
@@ -349,7 +272,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     assertError(
       enumSchema,
       Json.obj("quux" -> "wrong"),
-      "Invalid value: {\"quux\":\"wrong\"}. Valid values are: {\"quux\":\"bar\"}, {\"quux\":\"baz\"}."
+      "Invalid value: {\"quux\":\"wrong\"} ; valid values are: {\"quux\":\"bar\"}, {\"quux\":\"baz\"}"
     )
   }
 
@@ -391,7 +314,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "oneOf" in {
     testRoundtrip(intOrBoolean, JsNumber(42), Left(42))
     testRoundtrip(intOrBoolean, JsBoolean(true), Right(true))
-    assertError(intOrBoolean, JsString("foo"), "Invalid value: \"foo\".")
+    assertError(intOrBoolean, JsString("foo"), "Invalid value: \"foo\"")
   }
 
   private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {

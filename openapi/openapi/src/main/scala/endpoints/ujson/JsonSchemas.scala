@@ -38,11 +38,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           case Some(ujson.Str(tag)) =>
             findDecoder(tag) match {
               case Some(decoder) => decoder.decode(json)
-              case None          => Invalid(s"Invalid type discriminator: '$tag'.")
+              case None          => Invalid(s"Invalid type discriminator: '$tag'")
             }
-          case _ => Invalid(s"Missing type discriminator property '$discriminator': $json.")
+          case _ => Invalid(s"Missing type discriminator property '$discriminator': $json")
         }
-      case json => Invalid(s"Invalid JSON object: $json.")
+      case json => Invalid(s"Invalid JSON object: $json")
     }
     final val encoder = value => {
       val (tag, json) = tagAndObj(value)
@@ -87,7 +87,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         if (values.contains(a)) {
           Valid(a)
         } else {
-          Invalid(s"Invalid value: ${tpe.encoder.encode(a)}. Valid values are ${values.map(a => tpe.encoder.encode(a)).mkString(", ")}.")
+          Invalid(s"Invalid value: ${tpe.encoder.encode(a)} ; valid values are: ${values.map(a => tpe.encoder.encode(a)).mkString(", ")}")
         }
       }
       val encoder = tpe.encoder
@@ -112,7 +112,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   lazy val emptyRecord: Record[Unit] = new Record[Unit] {
     val decoder = {
       case _: ujson.Obj => Valid(())
-      case json         => Invalid(s"Invalid JSON object: $json.")
+      case json         => Invalid(s"Invalid JSON object: $json")
     }
     val encoder = _ => ujson.Obj()
   }
@@ -123,9 +123,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case obj @ ujson.Obj(fields) =>
           fields.get(name) match {
             case Some(json) => tpe.decoder.decode(json)
-            case None       => Invalid(s"Missing property '$name' in JSON object: $obj.")
+            case None       => Invalid(s"Missing property '$name' in JSON object: $obj")
           }
-        case json => Invalid(s"Invalid JSON object: $json.")
+        case json => Invalid(s"Invalid JSON object: $json")
       }
       val encoder = value => ujson.Obj(name -> tpe.encoder.encode(value))
     }
@@ -136,10 +136,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       val decoder = {
         case ujson.Obj(fields) =>
           fields.get(name) match {
-            case Some(json) => tpe.decoder.decode(json).map(Some(_))
-            case None       => Valid(None)
+            case Some(ujson.Null) => Valid(None)
+            case Some(json)       => tpe.decoder.decode(json).map(Some(_))
+            case None             => Valid(None)
           }
-        case json => Invalid(s"Invalid JSON object: $json.")
+        case json => Invalid(s"Invalid JSON object: $json")
       }
       val encoder = new Encoder[Option[A], ujson.Obj] {
         def encode(maybeValue: Option[A]) = maybeValue match {
@@ -192,7 +193,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       val decoder: Decoder[ujson.Value, Either[A, B]] = json => {
         schemaA.decoder.decode(json) match {
           case Valid(value) => Valid(Left(value))
-          case Invalid(_)   => schemaB.decoder.decode(json).map(Right(_)).mapErrors(_ => s"Invalid value: $json." :: Nil)
+          case Invalid(_)   => schemaB.decoder.decode(json).map(Right(_)).mapErrors(_ => s"Invalid value: $json" :: Nil)
         }
       }
       val encoder: Encoder[Either[A, B], ujson.Value] = {
@@ -204,7 +205,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   def stringJsonSchema(format: Option[String]): JsonSchema[String] = new JsonSchema[String] {
     val decoder = {
       case ujson.Str(str) => Valid(str)
-      case json           => Invalid(s"Invalid string value: $json.")
+      case json           => Invalid(s"Invalid string value: $json")
     }
     val encoder = ujson.Str(_)
   }
@@ -212,7 +213,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def intJsonSchema: JsonSchema[Int] = new JsonSchema[Int] {
     val decoder = {
       case ujson.Num(x) if x.isValidInt => Valid(x.toInt)
-      case json                         => Invalid(s"Invalid integer value: $json.")
+      case json                         => Invalid(s"Invalid integer value: $json")
     }
     val encoder = n => ujson.Num(n.toDouble)
   }
@@ -222,7 +223,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       case json @ ujson.Num(x) =>
         val y = BigDecimal(x) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
         if (y.isValidLong) Valid(y.toLong) else Invalid(s"Invalid integer value: $json")
-      case json => Invalid(s"Invalid number value: $json.")
+      case json => Invalid(s"Invalid number value: $json")
     }
     val encoder = n => ujson.Num(n.toDouble)
   }
@@ -230,7 +231,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] = new JsonSchema[BigDecimal] {
     val decoder = {
       case ujson.Num(x) => Valid(BigDecimal(x))
-      case json         => Invalid(s"Invalid number value: $json.")
+      case json         => Invalid(s"Invalid number value: $json")
     }
     val encoder = x => ujson.Num(x.doubleValue)
   }
@@ -238,7 +239,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def floatJsonSchema: JsonSchema[Float] = new JsonSchema[Float] {
     val decoder = {
       case ujson.Num(x) => Valid(x.toFloat)
-      case json         => Invalid(s"Invalid number value: $json.")
+      case json         => Invalid(s"Invalid number value: $json")
     }
     val encoder = x => ujson.Num(x.toDouble)
   }
@@ -246,7 +247,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def doubleJsonSchema: JsonSchema[Double] = new JsonSchema[Double] {
     val decoder = {
       case ujson.Num(x) => Valid(x)
-      case json         => Invalid(s"Invalid number value: $json.")
+      case json         => Invalid(s"Invalid number value: $json")
     }
     val encoder = ujson.Num(_)
   }
@@ -254,7 +255,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def booleanJsonSchema: JsonSchema[Boolean] = new JsonSchema[Boolean] {
     val decoder = {
       case ujson.Bool(b) => Valid(b)
-      case json          => Invalid(s"Invalid boolean value: $json.")
+      case json          => Invalid(s"Invalid boolean value: $json")
     }
     val encoder = ujson.Bool(_)
   }
@@ -262,7 +263,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit def byteJsonSchema: JsonSchema[Byte] = new JsonSchema[Byte] {
     val decoder = {
       case ujson.Num(x) if x.isValidByte => Valid(x.toByte)
-      case json                          => Invalid(s"Invalid byte value: $json.")
+      case json                          => Invalid(s"Invalid byte value: $json")
     }
     val encoder = b => ujson.Num(b.toDouble)
   }
@@ -279,7 +280,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           .foldLeft[Validated[collection.mutable.Builder[A, C[A]]]](Valid(builder)) {
             case (acc, value) => acc.zip(value).map { case (b, a) => b += a }
           }.map(_.result())
-      case json => Invalid(s"Invalid JSON array: $json.")
+      case json => Invalid(s"Invalid JSON array: $json")
     }
     val encoder = as => ujson.Arr(as.map(jsonSchema.codec.encode): _*)
   }
@@ -294,7 +295,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             .foldLeft[Validated[collection.mutable.Builder[(String, A), Map[String, A]]]](Valid(builder)) {
               case (acc, value) => acc.zip(value).map { case (b, name, value) => b += name -> value }
             }.map(_.result())
-        case json => Invalid(s"Invalid JSON object: $json.")
+        case json => Invalid(s"Invalid JSON object: $json")
       }
       val encoder = map => {
         new ujson.Obj(mutable.LinkedHashMap(map.map { case (k, v) => (k, jsonSchema.codec.encode(v)) }.toSeq: _*))
