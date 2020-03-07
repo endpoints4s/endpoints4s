@@ -23,7 +23,10 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
   type Params = Map[String, Seq[String]]
 
   type QueryString[A] = Params => Validated[A]
-  type QueryStringParam[A] = (String, Params) => Validated[A]
+
+  trait QueryStringParam[A] {
+    def decode(name: String, params: Params): Validated[A]
+  }
 
   trait Url[A] {
     def decodeUrl(uri: http4s.Uri): Option[Validated[A]]
@@ -36,7 +39,9 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
       pathExtractor(this, uri)
   }
 
-  type Segment[A] = String => Validated[A]
+  trait Segment[A] {
+    def decode(rawSegment: String): Validated[A]
+  }
 
   /** Concatenates two `QueryString`s */
   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
@@ -45,14 +50,14 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
 
   def qs[A](name: String, docs: Documentation = None)(
       implicit value: QueryStringParam[A]): QueryString[A] =
-    params => value(name, params).mapErrors(_.map(error => s"$error for query parameter '$name'"))
+    params => value.decode(name, params).mapErrors(_.map(error => s"$error for query parameter '$name'"))
 
   implicit def optionalQueryStringParam[A](
       implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] =
     (name, params) =>
       params.get(name) match {
         case None    => Valid(None)
-        case Some(_) => param(name, params).map(Some(_))
+        case Some(_) => param.decode(name, params).map(Some(_))
     }
 
   implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
@@ -66,18 +71,18 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
           vs.foldLeft[Validated[mutable.Builder[A, CC[A]]]](Valid(factory.newBuilder)) {
             case (inv: Invalid, v) =>
               // Pretend that this was the query string and delegate to the `A` query string param
-              param(name, Map(name -> (v :: Nil)))
+              param.decode(name, Map(name -> (v :: Nil)))
                 .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
             case (Valid(b), v) =>
               // Pretend that this was the query string and delegate to the `A` query string param
-              param(name, Map(name -> (v :: Nil))).map(b += _)
+              param.decode(name, Map(name -> (v :: Nil))).map(b += _)
           }.map(_.result())
       }
 
   implicit def queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Validated[B], g: B => A): QueryStringParam[B] =
-        (str, params) => fa(str, params).flatMap(f)
+        (str, params) => fa.decode(str, params).flatMap(f)
     }
 
   implicit def stringQueryString: QueryStringParam[String] =
@@ -89,7 +94,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
   implicit def segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](fa: Segment[A], f: A => Validated[B], g: B => A): Segment[B] =
-        s => fa(s).flatMap(f)
+        s => fa.decode(s).flatMap(f)
     }
 
   implicit def pathPartialInvariantFunctor: PartialInvariantFunctor[Path] =
@@ -115,7 +120,7 @@ trait Urls extends algebra.Urls with StatusCodes { this: EndpointsWithCustomErro
       segments match {
         case head :: tail =>
           val validatedA =
-            A(head)
+            A.decode(head)
               .mapErrors(_.map(error => s"$error for segment${ if (name.isEmpty) "" else s" '$name'" }"))
           Some((validatedA, tail))
         case Nil => None
