@@ -184,7 +184,7 @@ val `example-basic-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       scalaJSUseMainModuleInitializer := true,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC5"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -223,7 +223,7 @@ val `example-cqrs-public-endpoints` =
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC5"
       )
     )
     .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
@@ -243,7 +243,7 @@ val `example-cqrs-web-client` =
       libraryDependencies ++= Seq(
         "in.nvilla" %%% "monadic-html" % "0.4.0",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
-        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC3"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0-RC5"
       ),
       scalaJSUseMainModuleInitializer := true
     )
