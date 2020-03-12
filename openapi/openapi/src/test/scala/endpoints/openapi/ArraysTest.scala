@@ -16,10 +16,16 @@ class ArraysTest extends AnyWordSpec with Matchers {
 
   }
 
-  object ArraysDocumentation extends Arrays with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
+  object ArraysDocumentation
+      extends Arrays
+      with openapi.Endpoints
+      with openapi.JsonEntitiesFromSchemas {
 
     val api: OpenApi = openApi(
-      Info(title = "Example of API using homogeneous and heterogeneous arrays", version = "0.0.0")
+      Info(
+        title = "Example of API using homogeneous and heterogeneous arrays",
+        version = "0.0.0"
+      )
     )(arrays)
 
   }
@@ -111,7 +117,8 @@ class ArraysTest extends AnyWordSpec with Matchers {
         |}""".stripMargin
 
     "be documented" in {
-      ujson.read(OpenApi.stringEncoder.encode(ArraysDocumentation.api)) shouldBe ujson.read(expectedSchema)
+      ujson.read(OpenApi.stringEncoder.encode(ArraysDocumentation.api)) shouldBe ujson
+        .read(expectedSchema)
     }
 
   }

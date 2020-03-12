@@ -4,7 +4,7 @@ import endpoints.openapi
 import endpoints.openapi.model.{Info, OpenApi}
 
 object DocumentedApi
-  extends sample.algebra.DocumentedApi
+    extends sample.algebra.DocumentedApi
     with openapi.Endpoints
     with openapi.BasicAuthentication
     with openapi.JsonEntities {
@@ -16,7 +16,9 @@ object DocumentedApi
     openApi(
       Info("API to get information about items", "1.0.0")
     )(
-      items, item, admin
+      items,
+      item,
+      admin
     )
 
 }

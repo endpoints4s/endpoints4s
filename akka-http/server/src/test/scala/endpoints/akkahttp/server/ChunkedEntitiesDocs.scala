@@ -4,7 +4,9 @@ import akka.http.scaladsl.server.Route
 import endpoints.algebra
 import endpoints.algebra.JsonStreamingExample
 
-trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
+trait ChunkedEntitiesDocs
+    extends algebra.ChunkedEntitiesDocs
+    with ChunkedEntities {
 
   //#implementation
   import java.nio.file.Paths
@@ -25,7 +27,7 @@ import akka.stream.scaladsl.Source
 import endpoints.akkahttp.server
 
 object JsonStreamingExampleServer
-  extends JsonStreamingExample
+    extends JsonStreamingExample
     with server.Endpoints
     with server.ChunkedJsonEntities
     with server.JsonEntitiesFromSchemas {

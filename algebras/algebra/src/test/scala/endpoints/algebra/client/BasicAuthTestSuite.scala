@@ -3,7 +3,8 @@ package endpoints.algebra.client
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.{BasicAuthenticationTestApi, BasicAuthentication}
 
-trait BasicAuthTestSuite[T <: BasicAuthenticationTestApi] extends ClientTestBase[T] {
+trait BasicAuthTestSuite[T <: BasicAuthenticationTestApi]
+    extends ClientTestBase[T] {
 
   def basicAuthSuite() = {
 
@@ -14,13 +15,19 @@ trait BasicAuthTestSuite[T <: BasicAuthenticationTestApi] extends ClientTestBase
         val credentials = BasicAuthentication.Credentials("user1", "pass2")
         val response = "wiremockeResponse"
 
-        wireMockServer.stubFor(get(urlEqualTo("/users"))
-          .withBasicAuth(credentials.username, credentials.password)
-          .willReturn(aResponse()
-            .withStatus(200)
-            .withBody(response)))
+        wireMockServer.stubFor(
+          get(urlEqualTo("/users"))
+            .withBasicAuth(credentials.username, credentials.password)
+            .willReturn(
+              aResponse()
+                .withStatus(200)
+                .withBody(response)
+            )
+        )
 
-        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual Some(response))
+        whenReady(call(client.protectedEndpoint, credentials))(
+          _ shouldEqual Some(response)
+        )
 
       }
 
@@ -28,12 +35,18 @@ trait BasicAuthTestSuite[T <: BasicAuthenticationTestApi] extends ClientTestBase
 
         val credentials = BasicAuthentication.Credentials("user1", "pass2")
 
-        wireMockServer.stubFor(get(urlEqualTo("/users"))
-          .willReturn(aResponse()
-            .withStatus(403)
-            .withBody("")))
+        wireMockServer.stubFor(
+          get(urlEqualTo("/users"))
+            .willReturn(
+              aResponse()
+                .withStatus(403)
+                .withBody("")
+            )
+        )
 
-        whenReady(call(client.protectedEndpoint, credentials))(_ shouldEqual None)
+        whenReady(call(client.protectedEndpoint, credentials))(
+          _ shouldEqual None
+        )
 
       }
     }

@@ -3,7 +3,21 @@ package generic
 
 import shapeless.labelled.{FieldType, field => shapelessField}
 import shapeless.ops.hlist.Tupler
-import shapeless.{:+:, ::, Annotation, Annotations, CNil, Coproduct, Generic, HList, HNil, Inl, Inr, LabelledGeneric, Witness}
+import shapeless.{
+  :+:,
+  ::,
+  Annotation,
+  Annotations,
+  CNil,
+  Coproduct,
+  Generic,
+  HList,
+  HNil,
+  Inl,
+  Inr,
+  LabelledGeneric,
+  Witness
+}
 
 import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
@@ -43,31 +57,34 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   @implicitNotFound(
     "Unable to derive an instance of JsonSchema[${A}].\n" +
-    "The type ${A} must be a sealed trait or a case class.\n" +
-    "If it is a sealed trait, make sure it is only extended by case classes and that a " +
-    "JsonSchema can be derived for each of these case classes (see hereafter).\n" +
-    "If it is a case class, make sure each field of the case class has an implicit JsonSchema.\n" +
-    "You can check that a JsonSchema is available for a type T by compiling the expression " +
-    "`implicitly[JsonSchema[T]]`."
+      "The type ${A} must be a sealed trait or a case class.\n" +
+      "If it is a sealed trait, make sure it is only extended by case classes and that a " +
+      "JsonSchema can be derived for each of these case classes (see hereafter).\n" +
+      "If it is a case class, make sure each field of the case class has an implicit JsonSchema.\n" +
+      "You can check that a JsonSchema is available for a type T by compiling the expression " +
+      "`implicitly[JsonSchema[T]]`."
   )
   trait GenericJsonSchema[A] {
     def jsonSchema: JsonSchema[A]
   }
 
-  object GenericJsonSchema extends GenericJsonSchemaLowPriority with GenericDiscriminatorNames with GenericSchemaNames {
+  object GenericJsonSchema
+      extends GenericJsonSchemaLowPriority
+      with GenericDiscriminatorNames
+      with GenericSchemaNames {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
 
-    implicit def singletonCoproduct[L <: Symbol, A](implicit
-      labelSingleton: Witness.Aux[L],
-      recordA: GenericRecord[A]
+    implicit def singletonCoproduct[L <: Symbol, A](
+        implicit
+        labelSingleton: Witness.Aux[L],
+        recordA: GenericRecord[A]
     ): GenericTagged[FieldType[L, A] :+: CNil] =
       new GenericTagged[FieldType[L, A] :+: CNil](
-        jsonSchema =
-          recordA.jsonSchema.tagged(labelSingleton.value.name).xmap[FieldType[L, A] :+: CNil] {
-            a => Inl(shapelessField[L](a))
-          } {
+        jsonSchema = recordA.jsonSchema
+          .tagged(labelSingleton.value.name)
+          .xmap[FieldType[L, A] :+: CNil] { a => Inl(shapelessField[L](a)) } {
             case Inl(a) => a
             case Inr(_) => sys.error("Unreachable code")
           }
@@ -75,45 +92,57 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   }
 
-  trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority { this: GenericJsonSchema.type =>
+  trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority {
+    this: GenericJsonSchema.type =>
 
-    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
-      labelHead: Witness.Aux[L],
-      jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: DocumentedGenericRecord[T, DT]
+    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](
+        implicit
+        labelHead: Witness.Aux[L],
+        jsonSchemaHead: JsonSchema[H],
+        jsonSchemaTail: DocumentedGenericRecord[T, DT]
     ): DocumentedGenericRecord[FieldType[L, H] :: T, DH :: DT] =
       new DocumentedGenericRecord[FieldType[L, H] :: T, DH :: DT] {
         def record(docs: DH :: DT) =
-          (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
-            .xmap[FieldType[L, H] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+          (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail
+            .record(docs.tail))
+            .xmap[FieldType[L, H] :: T] {
+              case (h, t) => shapelessField[L](h) :: t
+            }(ht => (ht.head, ht.tail))
       }
 
-    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
-      labelHead: Witness.Aux[L],
-      jsonSchemaHead: JsonSchema[H],
-      jsonSchemaTail: DocumentedGenericRecord[T, DT]
+    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](
+        implicit
+        labelHead: Witness.Aux[L],
+        jsonSchemaHead: JsonSchema[H],
+        jsonSchemaTail: DocumentedGenericRecord[T, DT]
     ): DocumentedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT] =
       new DocumentedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT] {
         def record(docs: DH :: DT) =
-          (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail.record(docs.tail))
-            .xmap[FieldType[L, Option[H]] :: T] { case (h, t) => shapelessField[L](h) :: t }(ht => (ht.head, ht.tail))
+          (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail
+            .record(docs.tail))
+            .xmap[FieldType[L, Option[H]] :: T] {
+              case (h, t) => shapelessField[L](h) :: t
+            }(ht => (ht.head, ht.tail))
       }
 
-    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
-      labelHead: Witness.Aux[L],
-      recordHead: GenericRecord[H],
-      taggedTail: GenericTagged[T]
+    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](
+        implicit
+        labelHead: Witness.Aux[L],
+        recordHead: GenericRecord[H],
+        taggedTail: GenericTagged[T]
     ): GenericTagged[FieldType[L, H] :+: T] =
       new GenericTagged[FieldType[L, H] :+: T](
         jsonSchema = {
           val taggedHead = recordHead.jsonSchema.tagged(labelHead.value.name)
-          taggedHead.orElse(taggedTail.jsonSchema).xmap[FieldType[L, H] :+: T] {
-            case Left(h)  => Inl(shapelessField[L](h))
-            case Right(t) => Inr(t)
-          } {
-            case Inl(h) => Left(h)
-            case Inr(t) => Right(t)
-          }
+          taggedHead
+            .orElse(taggedTail.jsonSchema)
+            .xmap[FieldType[L, H] :+: T] {
+              case Left(h)  => Inl(shapelessField[L](h))
+              case Right(t) => Inr(t)
+            } {
+              case Inl(h) => Left(h)
+              case Inr(t) => Right(t)
+            }
         }
       )
 
@@ -123,45 +152,50 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     @implicitNotFound(
       "Unable to derive an instance of JsonSchema[${A}].\n" +
-      "The type ${A} must be a case class. Make sure each field of the case class has an implicit JsonSchema.\n" +
-      "You can check that a JsonSchema is available for a type T by compiling the expression " +
-      "`implicitly[JsonSchema[T]]`.\n" +
-      "If type ${A} is a sealed trait, use `genericTagged` or `genericJsonSchema` instead."
+        "The type ${A} must be a case class. Make sure each field of the case class has an implicit JsonSchema.\n" +
+        "You can check that a JsonSchema is available for a type T by compiling the expression " +
+        "`implicitly[JsonSchema[T]]`.\n" +
+        "If type ${A} is a sealed trait, use `genericTagged` or `genericJsonSchema` instead."
     )
-    class GenericRecord[A](val jsonSchema: Record[A]) extends GenericJsonSchema[A]
+    class GenericRecord[A](val jsonSchema: Record[A])
+        extends GenericJsonSchema[A]
 
     @implicitNotFound(
       "Unable to derive an instance of JsonSchema[${A}].\n" +
-      "The type ${A} must be a sealed trait. Make sure it is only extended by case classes, and " +
-      "for each case class, make sure each field of the case class has an implicit JsonSchema.\n" +
-      "You can check that a JsonSchema is available for a type T by compiling the expression " +
-      "`implicitly[JsonSchema[T]]`.\n" +
-      "If type ${A} is a case class, use `genericRecord` or `genericJsonSchema` instead."
+        "The type ${A} must be a sealed trait. Make sure it is only extended by case classes, and " +
+        "for each case class, make sure each field of the case class has an implicit JsonSchema.\n" +
+        "You can check that a JsonSchema is available for a type T by compiling the expression " +
+        "`implicitly[JsonSchema[T]]`.\n" +
+        "If type ${A} is a case class, use `genericRecord` or `genericJsonSchema` instead."
     )
-    class GenericTagged[A](val jsonSchema: Tagged[A]) extends GenericJsonSchema[A]
+    class GenericTagged[A](val jsonSchema: Tagged[A])
+        extends GenericJsonSchema[A]
 
     trait DocumentedGenericRecord[A, D <: HList] {
       def record(docs: D): Record[A]
     }
 
-    implicit def recordGeneric[A, R, D <: HList](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      docAnns: Annotations.Aux[docs, A, D],
-      record: DocumentedGenericRecord[R, D],
-      name: GenericSchemaName[A]
+    implicit def recordGeneric[A, R, D <: HList](
+        implicit
+        gen: LabelledGeneric.Aux[A, R],
+        docAnns: Annotations.Aux[docs, A, D],
+        record: DocumentedGenericRecord[R, D],
+        name: GenericSchemaName[A]
     ): GenericRecord[A] =
       new GenericRecord[A](
         record.record(docAnns()).xmap[A](gen.from)(gen.to).named(name.value)
       )
 
-    implicit def taggedGeneric[A, R](implicit
-      gen: LabelledGeneric.Aux[A, R],
-      tagged: GenericTagged[R],
-      name: GenericSchemaName[A],
-      discriminator: GenericDiscriminatorName[A]
+    implicit def taggedGeneric[A, R](
+        implicit
+        gen: LabelledGeneric.Aux[A, R],
+        tagged: GenericTagged[R],
+        name: GenericSchemaName[A],
+        discriminator: GenericDiscriminatorName[A]
     ): GenericTagged[A] =
       new GenericTagged[A](
-        tagged.jsonSchema.xmap[A](gen.from)(gen.to)
+        tagged.jsonSchema
+          .xmap[A](gen.from)(gen.to)
           .named(name.value)
           .withDiscriminator(discriminator.name)
       )
@@ -173,8 +207,11 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     class GenericDiscriminatorName[A](val name: String)
 
-    object GenericDiscriminatorName extends GenericDiscriminatorNameLowPriority {
-      implicit def annotated[A](implicit ann: Annotation[discriminator, A]): GenericDiscriminatorName[A] =
+    object GenericDiscriminatorName
+        extends GenericDiscriminatorNameLowPriority {
+      implicit def annotated[A](
+          implicit ann: Annotation[discriminator, A]
+      ): GenericDiscriminatorName[A] =
         new GenericDiscriminatorName(ann().name)
     }
 
@@ -191,12 +228,16 @@ trait JsonSchemas extends algebra.JsonSchemas {
     class GenericSchemaName[A](val value: String)
 
     object GenericSchemaName extends GenericSchemaNameLowPriority {
-      implicit def annotated[A](implicit ann: Annotation[name, A]): GenericSchemaName[A] =
+      implicit def annotated[A](
+          implicit ann: Annotation[name, A]
+      ): GenericSchemaName[A] =
         new GenericSchemaName(ann().value)
     }
 
     trait GenericSchemaNameLowPriority {
-      implicit def fromClassTag[A](implicit ct: ClassTag[A]): GenericSchemaName[A] =
+      implicit def fromClassTag[A](
+          implicit ct: ClassTag[A]
+      ): GenericSchemaName[A] =
         new GenericSchemaName(classTagToSchemaName(ct))
     }
 
@@ -212,8 +253,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
   def classTagToSchemaName(ct: ClassTag[_]): String = {
     val jvmName = ct.runtimeClass.getName
     // name fix for case objects
-    val name = if(jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
-    name.replace('$','.')
+    val name =
+      if (jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
+    name.replace('$', '.')
   }
 
   /** Derives a `JsonSchema[A]` for a type `A`.
@@ -225,7 +267,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * @see [[genericRecord]] for details on how schemas are derived for case classes
     * @see [[genericTagged]] for details on how schemas are derived for sealed traits
     */
-  def genericJsonSchema[A](implicit genJsonSchema: GenericJsonSchema[A]): JsonSchema[A] =
+  def genericJsonSchema[A](
+      implicit genJsonSchema: GenericJsonSchema[A]
+  ): JsonSchema[A] =
     genJsonSchema.jsonSchema
 
   /** Derives a `Record[A]` schema for a case class `A`.
@@ -241,7 +285,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *   - has a name, computed from a `ClassTag[A]` by the [[classTagToSchemaName]]
     *     operation.
     */
-  def genericRecord[A](implicit genRecord: GenericJsonSchema.GenericRecord[A]): Record[A] =
+  def genericRecord[A](
+      implicit genRecord: GenericJsonSchema.GenericRecord[A]
+  ): Record[A] =
     genRecord.jsonSchema
 
   /** Derives a `Tagged[A]` schema for a sealed trait `A`.
@@ -255,23 +301,28 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *   - each alternative is discriminated by the name (not qualified) of the
     *     case class.
     */
-  def genericTagged[A](implicit genTagged: GenericJsonSchema.GenericTagged[A]): Tagged[A] =
+  def genericTagged[A](
+      implicit genTagged: GenericJsonSchema.GenericTagged[A]
+  ): Tagged[A] =
     genTagged.jsonSchema
 
   implicit final class RecordGenericOps[A](record: Record[A]) {
-    def as[B](implicit gen: Generic.Aux[A, B]): Record[B] = record.xmap(gen.to)(gen.from)
+    def as[B](implicit gen: Generic.Aux[A, B]): Record[B] =
+      record.xmap(gen.to)(gen.from)
   }
 
   implicit final class JsonSchemaGenericOps[A](schema: JsonSchema[A]) {
-    def as[B](implicit gen: Generic.Aux[A, B]): JsonSchema[B] = schema.xmap(gen.to)(gen.from)
+    def as[B](implicit gen: Generic.Aux[A, B]): JsonSchema[B] =
+      schema.xmap(gen.to)(gen.from)
   }
 
   // Summons a `Generic.Aux[T, A]` from a tuple type `T` to an arbitrary
   // type `A` that has the same generic representation as the tuple type `T`
-  implicit def shapelessGenericFromTuple[A, T, L <: HList](implicit
-    tup: Tupler.Aux[L, T],
-    genT: Generic.Aux[T, L],
-    genA: Generic.Aux[A, L]
+  implicit def shapelessGenericFromTuple[A, T, L <: HList](
+      implicit
+      tup: Tupler.Aux[L, T],
+      genT: Generic.Aux[T, L],
+      genA: Generic.Aux[A, L]
   ): Generic.Aux[T, A] =
     new Generic[T] {
       type Repr = A

@@ -3,7 +3,9 @@ import EndpointsSettings._
 import LocalCrossProject._
 
 val algebra =
-  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra"))
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("algebra"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -17,13 +19,17 @@ val algebra =
         "com.lihaoyi" %% "ujson" % ujsonVersion % Test
       )
     )
-    .dependsOnLocalCrossProjectsWithScope("json-schema" -> "test->test;compile->compile")
+    .dependsOnLocalCrossProjectsWithScope(
+      "json-schema" -> "test->test;compile->compile"
+    )
 
 val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
 
 val `algebra-circe` =
-  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra-circe"))
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("algebra-circe"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -39,7 +45,9 @@ val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
 
 val `algebra-playjson` =
-  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("algebra-playjson"))
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("algebra-playjson"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,

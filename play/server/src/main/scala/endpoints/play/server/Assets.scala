@@ -60,13 +60,21 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @return An `AssetRequest` describing the asset. Throws an exception if
     *         there is no digest for `name`.
     */
-  def asset(path: String, name: String): AssetRequest = makeAsset(Some(path), name)
+  def asset(path: String, name: String): AssetRequest =
+    makeAsset(Some(path), name)
 
   private def makeAsset(path: Option[String], name: String): AssetRequest = {
     val rawPath = path.fold(name)(p => s"$p/$name")
-    val digest = digests.getOrElse(rawPath, throw new Exception(s"No digest for asset $rawPath"))
-    val assetPath = AssetPath(path.fold(Seq.empty[String])(_.split("/")), digest, name)
-    AssetRequest(assetPath, isGzipSupported = false) // HACK isGzipSupported makes no sense here
+    val digest = digests.getOrElse(
+      rawPath,
+      throw new Exception(s"No digest for asset $rawPath")
+    )
+    val assetPath =
+      AssetPath(path.fold(Seq.empty[String])(_.split("/")), digest, name)
+    AssetRequest(
+      assetPath,
+      isGzipSupported = false
+    ) // HACK isGzipSupported makes no sense here
   }
 
   /**
@@ -75,6 +83,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   sealed trait AssetResponse
   case object AssetNotFound extends AssetResponse
+
   /**
     * @param data Asset content
     * @param contentLength Size, if known
@@ -82,10 +91,10 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @param isGzipped Whether `data` contains the gzipped version of the asset
     */
   case class Found(
-    data: Source[ByteString, _],
-    contentLength: Option[Long],
-    contentType: Option[String],
-    isGzipped: Boolean
+      data: Source[ByteString, _],
+      contentLength: Option[Long],
+      contentType: Option[String],
+      isGzipped: Boolean
   ) extends AssetResponse
 
   /**
@@ -105,12 +114,15 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
           case Nil => None
         }
       def encode(s: AssetPath) =
-        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))((segment, path) => s"${stringPath.encode(segment)}/$path")
+        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))(
+          (segment, path) => s"${stringPath.encode(segment)}/$path"
+        )
     }
   }
 
   private lazy val gzipSupport: RequestHeaders[Boolean] =
-    headers => Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
+    headers =>
+      Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
 
   /**
     * An endpoint for serving assets.
@@ -118,13 +130,19 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @param url URL description
     * @return An HTTP endpoint serving assets
     */
-  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] = {
+  def assetsEndpoint(
+      url: Url[AssetPath],
+      docs: Documentation,
+      notFoundDocs: Documentation
+  ): Endpoint[AssetRequest, AssetResponse] = {
     val req =
-      invariantFunctorRequest.inmap( // TODO remove this boilerplate using play-products
-        request(Get, url, headers = gzipSupport),
-        (t: (AssetPath, Boolean)) => AssetRequest(t._1, t._2),
-        (assetRequest: AssetRequest) => (assetRequest.assetPath, assetRequest.isGzipSupported)
-      )
+      invariantFunctorRequest
+        .inmap( // TODO remove this boilerplate using play-products
+          request(Get, url, headers = gzipSupport),
+          (t: (AssetPath, Boolean)) => AssetRequest(t._1, t._2),
+          (assetRequest: AssetRequest) =>
+            (assetRequest.assetPath, assetRequest.isGzipSupported)
+        )
 
     endpoint(req, assetResponse)
   }
@@ -133,17 +151,20 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * Builds a Play `Result` from an [[AssetResponse]]
     */
   private def assetResponse: Response[AssetResponse] = {
-      case Found(resource, maybeLength, maybeContentType, isGzipped) =>
-        val result =
-          Results.Ok
-            .sendEntity(HttpEntity.Streamed(resource, maybeLength, maybeContentType))
-            .withHeaders(
-              HeaderNames.CONTENT_DISPOSITION -> "inline",
-              HeaderNames.CACHE_CONTROL -> "public, max-age=31536000"
-            )
-        if (isGzipped) result.withHeaders(HeaderNames.CONTENT_ENCODING -> "gzip") else result
-      case AssetNotFound => NotFound
-    }
+    case Found(resource, maybeLength, maybeContentType, isGzipped) =>
+      val result =
+        Results.Ok
+          .sendEntity(
+            HttpEntity.Streamed(resource, maybeLength, maybeContentType)
+          )
+          .withHeaders(
+            HeaderNames.CONTENT_DISPOSITION -> "inline",
+            HeaderNames.CACHE_CONTROL -> "public, max-age=31536000"
+          )
+      if (isGzipped) result.withHeaders(HeaderNames.CONTENT_ENCODING -> "gzip")
+      else result
+    case AssetNotFound => NotFound
+  }
 
   /**
     * @param pathPrefix Prefix to use to look up the resources in the classpath. You
@@ -151,31 +172,41 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
     *         looking for the requested asset in the classpath resources.
     */
-  def assetsResources(pathPrefix: Option[String] = None): AssetRequest => AssetResponse =
+  def assetsResources(
+      pathPrefix: Option[String] = None
+  ): AssetRequest => AssetResponse =
     assetRequest => {
       val assetInfo = assetRequest.assetPath
       val path =
-        if (assetInfo.path.nonEmpty) assetInfo.path.mkString("", "/", s"/${assetInfo.name}") else assetInfo.name
+        if (assetInfo.path.nonEmpty)
+          assetInfo.path.mkString("", "/", s"/${assetInfo.name}")
+        else assetInfo.name
       if (digests.get(path).contains(assetInfo.digest)) {
         val resourcePath = pathPrefix.getOrElse("") ++ s"/$path"
         val maybeAsset = {
-          def nonGzippedAsset = Option(getClass.getResourceAsStream(resourcePath)).map((_, false))
-            if (assetRequest.isGzipSupported) {
-              Option(getClass.getResourceAsStream(s"$resourcePath.gz")).map((_, true))
-                .orElse(nonGzippedAsset)
-            } else {
-              nonGzippedAsset
-            }
+          def nonGzippedAsset =
+            Option(getClass.getResourceAsStream(resourcePath)).map((_, false))
+          if (assetRequest.isGzipSupported) {
+            Option(getClass.getResourceAsStream(s"$resourcePath.gz"))
+              .map((_, true))
+              .orElse(nonGzippedAsset)
+          } else {
+            nonGzippedAsset
+          }
         }
         maybeAsset
-          .map { case (stream, isGzipped) =>
-            Found(
-              StreamConverters.fromInputStream(() => stream),
-              Some(stream.available().toLong),
-              playComponents.fileMimeTypes.forFileName(assetInfo.name).orElse(Some(ContentTypes.BINARY)),
-              isGzipped
-            )
-          }.getOrElse(AssetNotFound)
+          .map {
+            case (stream, isGzipped) =>
+              Found(
+                StreamConverters.fromInputStream(() => stream),
+                Some(stream.available().toLong),
+                playComponents.fileMimeTypes
+                  .forFileName(assetInfo.name)
+                  .orElse(Some(ContentTypes.BINARY)),
+                isGzipped
+              )
+          }
+          .getOrElse(AssetNotFound)
       } else AssetNotFound
     }
 

@@ -1,6 +1,9 @@
 package endpoints.algebra
 
-trait ChunkedJsonEntitiesTestApi extends EndpointsTestApi with ChunkedJsonEntities with JsonEntitiesFromCodecs {
+trait ChunkedJsonEntitiesTestApi
+    extends EndpointsTestApi
+    with ChunkedJsonEntities
+    with JsonEntitiesFromCodecs {
 
   case class Counter(value: Int)
 
@@ -13,6 +16,9 @@ trait ChunkedJsonEntitiesTestApi extends EndpointsTestApi with ChunkedJsonEntiti
     endpoint(post(path / "upload", bytesChunksRequest), ok(textResponse))
 
   val streamedJsonUpload: Endpoint[Chunks[Counter], String] =
-    endpoint(post(path / "counter-values", jsonChunksRequest[Counter]), ok(textResponse))
+    endpoint(
+      post(path / "counter-values", jsonChunksRequest[Counter]),
+      ok(textResponse)
+    )
 
 }

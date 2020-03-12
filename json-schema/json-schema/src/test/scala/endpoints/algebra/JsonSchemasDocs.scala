@@ -9,7 +9,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     //#record-schema
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
-      field[Double]("height")
+        field[Double]("height")
     ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
     //#record-schema
   }
@@ -28,14 +28,14 @@ trait JsonSchemasDocs extends JsonSchemas {
 
       val rectangleSchema = (
         field[Double]("width") zip
-        field[Double]("height")
+          field[Double]("height")
       ).xmap((Rectangle.apply _).tupled)(r => (r.width, r.height))
 
       //#sum-type-schema
       // Given a `circleSchema: Record[Circle]` and a `rectangleSchema: Record[Rectangle]`
       (
         circleSchema.tagged("Circle") orElse
-        rectangleSchema.tagged("Rectangle")
+          rectangleSchema.tagged("Rectangle")
       ).xmap[Shape] {
         case Left(circle) => circle
         case Right(rect)  => rect
@@ -80,13 +80,12 @@ trait JsonSchemasDocs extends JsonSchemas {
 
   locally {
     case class Rectangle(width: Double, height: Double)
-  //#with-example
+    //#with-example
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
-      field[Double]("height")
-    )
-      .xmap(Rectangle.tupled)(rect => (rect.width, rect.height))
+        field[Double]("height")
+    ).xmap(Rectangle.tupled)(rect => (rect.width, rect.height))
       .withExample(Rectangle(10, 20))
-  //#with-example
+    //#with-example
   }
 }

@@ -6,14 +6,20 @@ package endpoints.scalaj.client
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs
+    extends EndpointsWithCustomErrors
+    with endpoints.algebra.JsonEntitiesFromCodecs {
 
-  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = (data, request) => {
-    request.header("Content-Type", "application/json")
-    request.postData(stringCodec(codec).encode(data))
-  }
+  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
+    (data, request) => {
+      request.header("Content-Type", "application/json")
+      request.postData(stringCodec(codec).encode(data))
+    }
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
-    resp => stringCodec(codec).decode(resp).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
+    resp =>
+      stringCodec(codec)
+        .decode(resp)
+        .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
 }

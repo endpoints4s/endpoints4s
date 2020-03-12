@@ -7,7 +7,9 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasTest extends AnyFreeSpec {
 
-  object JsonSchemasCodec extends algebra.JsonSchemasFixtures with endpoints.ujson.JsonSchemas
+  object JsonSchemasCodec
+      extends algebra.JsonSchemasFixtures
+      with endpoints.ujson.JsonSchemas
   import JsonSchemasCodec._
 
   "invalid records" in {
@@ -85,11 +87,13 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "three records" in {
     checkRoundTrip(
-      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi"),
+      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double](
+        "pi"
+      ),
       ujson.Obj(
         "foo" -> ujson.Num(123.456),
         "bar" -> ujson.True,
-        "pi"  -> ujson.Num(3.1416)
+        "pi" -> ujson.Num(3.1416)
       ),
       (BigDecimal(123.456), true, 3.1416)
     )
@@ -116,7 +120,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class TestClass(i: Int, s: String)
     checkRoundTrip(
       (field[Int]("i") zip field[String]("s"))
-        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s)),
+        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test =>
+          (test.i, test.s)
+        ),
       ujson.Obj("i" -> ujson.Num(1), "s" -> ujson.Str("one")),
       TestClass(1, "one")
     )
@@ -213,10 +219,13 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "two tagged choices with a custom discriminator" in {
     val schema =
-      field[Int]("i").tagged("I")
+      field[Int]("i")
+        .tagged("I")
         .orElse(field[String]("s").tagged("S"))
         .withDiscriminator("kind")
-        .xmap(identity)(identity) // Make sure that `xmap` preserves the discriminator
+        .xmap(identity)(
+          identity
+        ) // Make sure that `xmap` preserves the discriminator
     checkRoundTrip(
       schema,
       ujson.Obj("kind" -> ujson.Str("I"), "i" -> ujson.Num(2)),
@@ -248,7 +257,10 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "non-string enum" in {
-    assert(NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson.Obj("quux" -> ujson.Str("bar")))
+    assert(
+      NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson
+        .Obj("quux" -> ujson.Str("bar"))
+    )
   }
 
   "recursive type" in {
@@ -302,10 +314,18 @@ class JsonSchemasTest extends AnyFreeSpec {
   "oneOf" in {
     checkRoundTrip(intOrBoolean, ujson.Num(42), Left(42))
     checkRoundTrip(intOrBoolean, ujson.Bool(true), Right(true))
-    checkDecodingFailure(intOrBoolean, ujson.Str("foo"), Seq("Invalid value: \"foo\""))
+    checkDecodingFailure(
+      intOrBoolean,
+      ujson.Str("foo"),
+      Seq("Invalid value: \"foo\"")
+    )
   }
 
-  def checkRoundTrip[A](schema: JsonSchema[A], json: ujson.Value, expected: A): Unit = {
+  def checkRoundTrip[A](
+      schema: JsonSchema[A],
+      json: ujson.Value,
+      expected: A
+  ): Unit = {
     schema.codec.decode(json) match {
       case Valid(decoded)  => assert(decoded == expected)
       case Invalid(errors) => fail(errors.toString)
@@ -314,7 +334,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(encoded == json)
   }
 
-  def checkDecodingFailure[A](schema: JsonSchema[A], json: ujson.Value, expectedErrors: Seq[String]): Unit =
+  def checkDecodingFailure[A](
+      schema: JsonSchema[A],
+      json: ujson.Value,
+      expectedErrors: Seq[String]
+  ): Unit =
     schema.codec.decode(json) match {
       case Valid(_)        => fail("Expected decoding failure")
       case Invalid(errors) => assert(errors == expectedErrors)

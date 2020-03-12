@@ -6,7 +6,7 @@ import org.scalatest.freespec.AnyFreeSpec
 class JsonSchemasTest extends AnyFreeSpec {
 
   object JsonSchemasCodec
-    extends endpoints.algebra.JsonSchemasFixtures
+      extends endpoints.algebra.JsonSchemasFixtures
       with endpoints.playjson.JsonSchemas
 
   import JsonSchemasCodec._
@@ -36,15 +36,22 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "three records" in {
     testRoundtrip(
-      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi"),
-      Json.obj("foo" -> JsNumber(BigDecimal(123.456)), "bar" -> JsBoolean(true), "pi" -> JsNumber(3.1416)),
+      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double](
+        "pi"
+      ),
+      Json.obj(
+        "foo" -> JsNumber(BigDecimal(123.456)),
+        "bar" -> JsBoolean(true),
+        "pi" -> JsNumber(3.1416)
+      ),
       (BigDecimal(123.456), true, 3.1416)
     )
   }
 
   "case class with one field" in {
     case class IntClass(i: Int)
-    val jsonSchemaTestClass = field[Int]("i").xmap[IntClass](i => IntClass(i))(_.i)
+    val jsonSchemaTestClass =
+      field[Int]("i").xmap[IntClass](i => IntClass(i))(_.i)
 
     testRoundtrip(
       jsonSchemaTestClass,
@@ -56,7 +63,9 @@ class JsonSchemasTest extends AnyFreeSpec {
   "case class with two fields" in {
     case class TestClass(i: Int, s: String)
     val jsonSchemaTestClass = (field[Int]("i") zip field[String]("s"))
-      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s))
+      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test =>
+        (test.i, test.s)
+      )
 
     testRoundtrip(
       jsonSchemaTestClass,
@@ -102,7 +111,8 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "heterogeneous array" in {
     val jsonSchema = field[String]("relevant")
-    val input = Json.obj("relevant" -> Json.arr(JsString("hi"), JsBoolean(false)))
+    val input =
+      Json.obj("relevant" -> Json.arr(JsString("hi"), JsBoolean(false)))
 
     assertError(jsonSchema, input, "error.expected.jsstring")
   }
@@ -110,7 +120,10 @@ class JsonSchemasTest extends AnyFreeSpec {
   "map with string key" in {
     testRoundtrip(
       field[Map[String, Boolean]]("relevant"),
-      Json.obj("relevant" -> Json.obj("no" -> JsBoolean(false), "yes" -> JsBoolean(true))),
+      Json.obj(
+        "relevant" -> Json
+          .obj("no" -> JsBoolean(false), "yes" -> JsBoolean(true))
+      ),
       Map("no" -> false, "yes" -> true)
     )
   }
@@ -157,7 +170,9 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "tagged and zipped" in {
-    val schema = field[Double]("r").tagged("Circle") orElse (field[Int]("w") zip field[Int]("h")).tagged("Rect")
+    val schema = field[Double]("r")
+      .tagged("Circle") orElse (field[Int]("w") zip field[Int]("h"))
+      .tagged("Rect")
 
     testRoundtrip(
       schema,
@@ -166,7 +181,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     testRoundtrip(
       schema,
-      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
+      Json.obj(
+        "type" -> JsString("Rect"),
+        "w" -> JsNumber(3),
+        "h" -> JsNumber(4)
+      ),
       Right((3, 4))
     )
   }
@@ -177,7 +196,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Rect(w: Int, h: Int) extends Shape
 
     val schema = field[Double]("r").tagged("Circle").xmap(Circle)(_.r) orElse
-      (field[Int]("w") zip field[Int]("h")).tagged("Rect").xmap(Rect.tupled)(rect => (rect.w, rect.h))
+      (field[Int]("w") zip field[Int]("h"))
+        .tagged("Rect")
+        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
 
     testRoundtrip(
       schema,
@@ -186,7 +207,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     testRoundtrip(
       schema,
-      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
+      Json.obj(
+        "type" -> JsString("Rect"),
+        "w" -> JsNumber(3),
+        "h" -> JsNumber(4)
+      ),
       Right(Rect(3, 4))
     )
   }
@@ -197,7 +222,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Rect(w: Int, h: Int) extends Shape
 
     val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
-      (field[Int]("w") zip field[Int]("h")).xmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
+      (field[Int]("w") zip field[Int]("h"))
+        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+        .tagged("Rect")
 
     testRoundtrip(
       schema,
@@ -206,7 +233,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     testRoundtrip(
       schema,
-      Json.obj("type" -> JsString("Rect"), "w" -> JsNumber(3), "h" -> JsNumber(4)),
+      Json.obj(
+        "type" -> JsString("Rect"),
+        "w" -> JsNumber(3),
+        "h" -> JsNumber(4)
+      ),
       Right(Rect(3, 4))
     )
   }
@@ -217,7 +248,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Rect(w: Int, h: Int) extends Shape
 
     val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
-      (field[Int]("w") zip field[Int]("h")).xmap(Rect.tupled)(rect => (rect.w, rect.h)).tagged("Rect")
+      (field[Int]("w") zip field[Int]("h"))
+        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+        .tagged("Rect")
 
     assertError(
       schema,
@@ -308,7 +341,11 @@ class JsonSchemasTest extends AnyFreeSpec {
       Json.obj("type" -> "Baz", "i" -> 42),
       RefinedTagged(42)
     )
-    assertError(refinedTaggedSchema, Json.obj("type" -> "Bar", "s" -> "foo"), "Invalid tagged alternative")
+    assertError(
+      refinedTaggedSchema,
+      Json.obj("type" -> "Bar", "s" -> "foo"),
+      "Invalid tagged alternative"
+    )
   }
 
   "oneOf" in {
@@ -317,7 +354,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     assertError(intOrBoolean, JsString("foo"), "Invalid value: \"foo\"")
   }
 
-  private def testRoundtrip[A](jsonSchema: JsonSchema[A], json: JsValue, expected: A) = {
+  private def testRoundtrip[A](
+      jsonSchema: JsonSchema[A],
+      json: JsValue,
+      expected: A
+  ) = {
     val result = jsonSchema.reads.reads(json)
     assert(result.isSuccess, result)
     val deserialized: A = result.get
@@ -327,11 +368,17 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(serialized == json)
   }
 
-  private def assertError[A](jsonSchema: JsonSchema[A], json: JsValue, expectedError: String) = {
+  private def assertError[A](
+      jsonSchema: JsonSchema[A],
+      json: JsValue,
+      expectedError: String
+  ) = {
     val jsResult = jsonSchema.reads.reads(json)
     assert(jsResult.isError)
 
-    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.left.get.flatMap(_._2).flatMap(_.messages) // ignoring JsPath
+    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.left.get
+      .flatMap(_._2)
+      .flatMap(_.messages) // ignoring JsPath
     assert(errorMessages.head == expectedError)
   }
 

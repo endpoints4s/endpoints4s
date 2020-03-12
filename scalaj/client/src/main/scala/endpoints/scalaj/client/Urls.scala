@@ -20,55 +20,93 @@ trait Urls extends algebra.Urls {
   type QueryStringParam[A] = A => List[String]
   type Segment[A] = A => String
 
-  case class Path[A](toStr: A => String) extends Url(toStr.andThen(url => Http(protocol + address + "/" + url)))
+  case class Path[A](toStr: A => String)
+      extends Url(toStr.andThen(url => Http(protocol + address + "/" + url)))
 
-  implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] = new PartialInvariantFunctor[Path] {
-    def xmapPartial[A, B](fa: Path[A], f: A => Validated[B], g: B => A): Path[B] = Path(fa.toStr compose g)
-  }
+  implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] =
+    new PartialInvariantFunctor[Path] {
+      def xmapPartial[A, B](
+          fa: Path[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Path[B] = Path(fa.toStr compose g)
+    }
 
   class Url[A](val toReq: A => HttpRequest)
-  
-  implicit lazy val queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString] = new PartialInvariantFunctor[QueryString] {
-    def xmapPartial[A, B](fa: QueryString[A], f: A => Validated[B], g: B => A): QueryString[B] = fa compose g
-  }
 
-  implicit lazy val queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam] = new PartialInvariantFunctor[QueryStringParam] {
-    def xmapPartial[A, B](fa: QueryStringParam[A], f: A => Validated[B], g: B => A): QueryStringParam[B] = fa compose g
-  }
+  implicit lazy val queryStringPartialInvFunctor
+      : PartialInvariantFunctor[QueryString] =
+    new PartialInvariantFunctor[QueryString] {
+      def xmapPartial[A, B](
+          fa: QueryString[A],
+          f: A => Validated[B],
+          g: B => A
+      ): QueryString[B] = fa compose g
+    }
 
-   implicit def stringQueryString: QueryStringParam[String] = _ :: Nil
+  implicit lazy val queryStringParamPartialInvFunctor
+      : PartialInvariantFunctor[QueryStringParam] =
+    new PartialInvariantFunctor[QueryStringParam] {
+      def xmapPartial[A, B](
+          fa: QueryStringParam[A],
+          f: A => Validated[B],
+          g: B => A
+      ): QueryStringParam[B] = fa compose g
+    }
 
-   def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] = {
-    ab => {
+  implicit def stringQueryString: QueryStringParam[String] = _ :: Nil
+
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
+      implicit tupler: Tupler[A, B]
+  ): QueryString[tupler.Out] = { ab =>
+    {
       val (a, b) = tupler.unapply(ab)
       first(a) ++ second(b)
     }
   }
 
-  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] = new PartialInvariantFunctor[Segment] {
-    def xmapPartial[A, B](fa: Segment[A], f: A => Validated[B], g: B => A): Segment[B] = fa compose g
-  }
+  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+    new PartialInvariantFunctor[Segment] {
+      def xmapPartial[A, B](
+          fa: Segment[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Segment[B] = fa compose g
+    }
 
-   implicit def stringSegment: Segment[String] = s => URLEncoder.encode(s, "utf8")
+  implicit def stringSegment: Segment[String] =
+    s => URLEncoder.encode(s, "utf8")
 
-   def qs[A](name: String, docs: Documentation)(implicit value: QueryStringParam[A]): QueryString[A] =
+  def qs[A](name: String, docs: Documentation)(
+      implicit value: QueryStringParam[A]
+  ): QueryString[A] =
     a => value(a).map(name -> _)
 
-  implicit def optionalQueryStringParam[A](implicit param: QueryStringParam[A]): QueryStringParam[Option[A]] = {
+  implicit def optionalQueryStringParam[A](
+      implicit param: QueryStringParam[A]
+  ): QueryStringParam[Option[A]] = {
     case Some(a) => param(a)
     case None    => Nil
   }
 
-  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit param: QueryStringParam[A], factory: Factory[A, CC[A]]): QueryStringParam[CC[A]] =
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
+      implicit param: QueryStringParam[A],
+      factory: Factory[A, CC[A]]
+  ): QueryStringParam[CC[A]] =
     as => as.iterator.flatMap(param).toList
 
-   def staticPathSegment(segment: String): Path[Unit] = Path(_ => segment)
+  def staticPathSegment(segment: String): Path[Unit] = Path(_ => segment)
 
-  def segment[A](name: String, docs: Documentation)(implicit s: Segment[A]): Path[A] = Path(s)
+  def segment[A](name: String, docs: Documentation)(
+      implicit s: Segment[A]
+  ): Path[A] = Path(s)
 
-  def remainingSegments(name: String, docs: Documentation): Path[String] = Path(s => s)
+  def remainingSegments(name: String, docs: Documentation): Path[String] =
+    Path(s => s)
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = {
+  def chainPaths[A, B](first: Path[A], second: Path[B])(
+      implicit tupler: Tupler[A, B]
+  ): Path[tupler.Out] = {
     Path(ab => {
       val (a, b) = tupler.unapply(ab)
       val firstStr = first.toStr(a)
@@ -79,16 +117,24 @@ trait Urls extends algebra.Urls {
   }
 
   /** Builds an URL from the given path and query string */
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = {
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
+      implicit tupler: Tupler[A, B]
+  ): Url[tupler.Out] = {
     new Url(ab => {
       val (a, b) = tupler.unapply(ab)
-      path.toReq(a)
+      path
+        .toReq(a)
         .params(qs(b))
     })
   }
 
-  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] = new PartialInvariantFunctor[Url] {
-    def xmapPartial[A, B](fa: Url[A], f: A => Validated[B], g: B => A): Url[B] = new Url((b: B) => fa.toReq(g(b)))
-  }
+  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+    new PartialInvariantFunctor[Url] {
+      def xmapPartial[A, B](
+          fa: Url[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Url[B] = new Url((b: B) => fa.toReq(g(b)))
+    }
 
 }

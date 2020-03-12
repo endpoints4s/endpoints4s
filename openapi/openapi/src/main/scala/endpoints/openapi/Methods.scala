@@ -16,5 +16,4 @@ trait Methods extends endpoints.algebra.Methods {
   case object Options extends Method
   case object Patch extends Method
 
-
 }

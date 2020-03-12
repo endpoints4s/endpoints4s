@@ -11,7 +11,8 @@ import org.http4s.headers.`Content-Type`
 /**
   * @group interpreters
   */
-trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
+trait BuiltInErrors extends algebra.BuiltInErrors {
+  this: EndpointsWithCustomErrors =>
 
   def clientErrorsResponseEntity: ResponseEntity[Invalid] = {
     val hdr = `Content-Type`(MediaType.application.json)

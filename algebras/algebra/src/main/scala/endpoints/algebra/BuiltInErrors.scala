@@ -18,10 +18,13 @@ trait BuiltInErrors extends Errors { this: EndpointsWithCustomErrors =>
   type ServerError = Throwable
 
   final def invalidToClientErrors(invalid: Invalid): ClientErrors = invalid
-  final def clientErrorsToInvalid(clientErrors: ClientErrors): Invalid = clientErrors
+  final def clientErrorsToInvalid(clientErrors: ClientErrors): Invalid =
+    clientErrors
 
-  final def throwableToServerError(throwable: Throwable): ServerError = throwable
-  final def serverErrorToThrowable(serverError: ServerError): Throwable = serverError
+  final def throwableToServerError(throwable: Throwable): ServerError =
+    throwable
+  final def serverErrorToThrowable(serverError: ServerError): Throwable =
+    serverError
 
   /**
     * Response entity format for [[Invalid]] values

@@ -1,16 +1,17 @@
 package endpoints.algebra
 
 trait JsonEntitiesFromSchemasTestApi
-  extends EndpointsTestApi
+    extends EndpointsTestApi
     with JsonEntitiesFromSchemas {
 
   implicit val userJsonSchema: JsonSchema[User] = {
     field[String]("name") zip
-    field[Int]("age")
+      field[Int]("age")
   }.xmap(User.tupled)(user => (user.name, user.age))
 
   val singleStaticGetSegment = endpoint[Unit, User](
-    get(path / "user"), ok(jsonResponse[User])
+    get(path / "user"),
+    ok(jsonResponse[User])
   )
 
   val updateUser =

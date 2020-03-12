@@ -18,36 +18,42 @@ object AssetsTasks {
     * @return The generated Scala file.
     */
   def generateDigests(
-    baseDirectory: File,
-    targetDirectory: File,
-    generatedObjectName: String,
-    generatedPackage: Option[String],
-    assetsPath: File => File = _ / "src" / "main" / "assets"
+      baseDirectory: File,
+      targetDirectory: File,
+      generatedObjectName: String,
+      generatedPackage: Option[String],
+      assetsPath: File => File = _ / "src" / "main" / "assets"
   ): Seq[File] = {
-      val assetsDirectory = assetsPath(baseDirectory)
-      val assets = assetsDirectory.allPaths.get
-      val digests = assets.collect {
-        case asset if asset.isFile =>
-          val hash = org.apache.commons.codec.digest.DigestUtils.md5Hex(IO.readBytes(asset))
-          asset.relativeTo(assetsDirectory).get.getPath -> hash
-      }
-      val scalaCode = {
-        val scalaMap =
-          digests
-            .map { case (name, hash) => s""""${name.replace("\\", "/").replace("\"", "\\\"")}" -> "$hash"""" }
-            .mkString("Map(", ", ", ")")
-        s"""
+    val assetsDirectory = assetsPath(baseDirectory)
+    val assets = assetsDirectory.allPaths.get
+    val digests = assets.collect {
+      case asset if asset.isFile =>
+        val hash = org.apache.commons.codec.digest.DigestUtils
+          .md5Hex(IO.readBytes(asset))
+        asset.relativeTo(assetsDirectory).get.getPath -> hash
+    }
+    val scalaCode = {
+      val scalaMap =
+        digests
+          .map {
+            case (name, hash) =>
+              s""""${name
+                .replace("\\", "/")
+                .replace("\"", "\\\"")}" -> "$hash""""
+          }
+          .mkString("Map(", ", ", ")")
+      s"""
            |${generatedPackage.fold("")(name => s"package $name")}
            |
            |object $generatedObjectName {
            |  val digests: Map[String, String] = $scalaMap
            |}
             """.stripMargin
-      }
-      val scalaFile = targetDirectory / "assets" / s"$generatedObjectName.scala"
-      IO.write(scalaFile, scalaCode)
-      Seq(scalaFile)
     }
+    val scalaFile = targetDirectory / "assets" / s"$generatedObjectName.scala"
+    IO.write(scalaFile, scalaCode)
+    Seq(scalaFile)
+  }
 
   /**
     * Creates a gzipped copy of the assets.
@@ -59,9 +65,9 @@ object AssetsTasks {
     * @return The gzipped assets.
     */
   def gzipAssets(
-    baseDirectory: File,
-    targetDirectory: File,
-    assetsPath: File => File = _ / "src" / "main" / "assets"
+      baseDirectory: File,
+      targetDirectory: File,
+      assetsPath: File => File = _ / "src" / "main" / "assets"
   ): Seq[File] = {
     val assetsDirectory = assetsPath(baseDirectory)
     val assets = assetsDirectory.allPaths.get

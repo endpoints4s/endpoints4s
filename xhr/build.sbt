@@ -1,7 +1,8 @@
 import EndpointsSettings._
 
 val `xhr-client` =
-  project.in(file("client"))
+  project
+    .in(file("client"))
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
@@ -18,7 +19,8 @@ val `xhr-client` =
     .dependsOn(LocalProject("openapiJS"))
 
 val `xhr-client-faithful` =
-  project.in(file("client-faithful"))
+  project
+    .in(file("client-faithful"))
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
@@ -31,7 +33,8 @@ val `xhr-client-faithful` =
     .dependsOn(`xhr-client`)
 
 val `xhr-client-circe` =
-  project.in(file("client-circe"))
+  project
+    .in(file("client-circe"))
     .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,

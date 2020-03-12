@@ -12,7 +12,7 @@ import scala.concurrent.stm.Ref
   * in the `CounterEndpoints` trait.
   */
 object CounterServer
-  extends CounterEndpoints
+    extends CounterEndpoints
     with server.Endpoints
     with server.JsonEntitiesFromSchemas {
 
@@ -27,7 +27,7 @@ object CounterServer
   val incrementRoute =
     //#endpoint-implementation
     increment.implementedBy(inc => counter.single += inc.step)
-    //#endpoint-implementation
+  //#endpoint-implementation
 
   val routes: Route =
     currentValueRoute ~ incrementRoute

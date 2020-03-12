@@ -17,13 +17,15 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
-  with Matchers
-  with ScalaFutures
-  with BeforeAndAfterAll
-  with BeforeAndAfter {
+trait ServerTestBase[T <: algebra.Endpoints]
+    extends AnyWordSpec
+    with Matchers
+    with ScalaFutures
+    with BeforeAndAfterAll
+    with BeforeAndAfter {
 
-  override implicit def patienceConfig: PatienceConfig = PatienceConfig(10.seconds, 10.millisecond)
+  override implicit def patienceConfig: PatienceConfig =
+    PatienceConfig(10.seconds, 10.millisecond)
 
   val serverApi: T
 
@@ -39,16 +41,22 @@ trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
     * @param runTests A function that is called after the server is started and before it is stopped. It takes
     *                 the TCP port number as parameter.
     */
-  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: => Resp)(runTests: Int => Unit): Unit
+  def serveEndpoint[Resp](
+      endpoint: serverApi.Endpoint[_, Resp],
+      response: => Resp
+  )(runTests: Int => Unit): Unit
 
   private[server] implicit val actorSystem: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 
   val httpClient = Http()
 
-  def sendAndDecodeEntityAsText(request: HttpRequest): Future[(HttpResponse, String)] = {
-    send(request).map { case (response, entity) =>
-      (response, decodeEntityAsText(response, entity))
+  def sendAndDecodeEntityAsText(
+      request: HttpRequest
+  ): Future[(HttpResponse, String)] = {
+    send(request).map {
+      case (response, entity) =>
+        (response, decodeEntityAsText(response, entity))
     }
   }
 
@@ -62,7 +70,8 @@ trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
 
   def decodeEntityAsText(response: HttpResponse, entity: ByteString): String = {
     val charset =
-      response.header[`Content-Type`]
+      response
+        .header[`Content-Type`]
         .flatMap(_.contentType.charsetOption.map(_.nioCharset()))
         .getOrElse(StandardCharsets.UTF_8)
     entity.decodeString(charset)
@@ -75,10 +84,13 @@ trait ServerTestBase[T <: algebra.Endpoints] extends AnyWordSpec
   */
 sealed trait DecodedUrl[+A] extends Serializable
 object DecodedUrl {
+
   /** The URL candidate matched the given URL definition, and a `A` value was extracted from it */
-  case class  Matched[+A](value: A)         extends DecodedUrl[A]
+  case class Matched[+A](value: A) extends DecodedUrl[A]
+
   /** The URL candidate didn’t match the given URL definition */
-  case object NotMatched                    extends DecodedUrl[Nothing]
+  case object NotMatched extends DecodedUrl[Nothing]
+
   /** The URL candidate matched the given URL definition, but the decoding process failed */
   case class Malformed(errors: Seq[String]) extends DecodedUrl[Nothing]
 }

@@ -59,7 +59,8 @@ sealed trait UpdateCommand extends Command {
 case class CreateMeter(label: String) extends CreationCommand
 
 /** Add a record for an existing meter */
-case class AddRecord(meterId: UUID, date: Instant, value: BigDecimal) extends UpdateCommand
+case class AddRecord(meterId: UUID, date: Instant, value: BigDecimal)
+    extends UpdateCommand
 
 object Command {
   implicit val decoder: Decoder[Command] = deriveDecoder

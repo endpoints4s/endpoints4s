@@ -15,7 +15,7 @@ import org.http4s.{EntityEncoder, MediaType}
   * @group interpreters
   */
 trait JsonEntitiesFromCodecs
-  extends algebra.JsonEntitiesFromCodecs
+    extends algebra.JsonEntitiesFromCodecs
     with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
@@ -34,7 +34,9 @@ trait JsonEntitiesFromCodecs
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
     EntityEncoder[Effect, Chunk[Byte]]
-      .contramap[A](value => Chunk.bytes(stringCodec(codec).encode(value).getBytes()))
+      .contramap[A](value =>
+        Chunk.bytes(stringCodec(codec).encode(value).getBytes())
+      )
       .withContentType(`Content-Type`(MediaType.application.json))
 
 }
@@ -46,10 +48,11 @@ trait JsonEntitiesFromCodecs
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with JsonEntitiesFromCodecs
     with endpoints.ujson.JsonSchemas {
 
-  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] = codec.stringCodec
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }

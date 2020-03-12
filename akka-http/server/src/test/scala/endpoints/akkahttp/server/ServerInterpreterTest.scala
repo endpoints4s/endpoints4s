@@ -3,7 +3,13 @@ package endpoints.akkahttp.server
 import java.net.ServerSocket
 
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, HttpRequest, HttpResponse, StatusCodes => AkkaStatusCodes, Uri}
+import akka.http.scaladsl.model.{
+  HttpEntity,
+  HttpRequest,
+  HttpResponse,
+  StatusCodes => AkkaStatusCodes,
+  Uri
+}
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Source
@@ -14,7 +20,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
 class ServerInterpreterTest
-  extends algebra.server.EndpointsTestSuite[EndpointsCodecsTestApi]
+    extends algebra.server.EndpointsTestSuite[EndpointsCodecsTestApi]
     with algebra.server.BasicAuthenticationTestSuite[EndpointsCodecsTestApi]
     with algebra.server.ChunkedJsonEntitiesTestSuite[EndpointsCodecsTestApi]
     with ScalatestRouteTest {
@@ -39,22 +45,25 @@ class ServerInterpreterTest
     }
   }
 
-  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: => Resp)(runTests: Int => Unit): Unit =
+  def serveEndpoint[Resp](
+      endpoint: serverApi.Endpoint[_, Resp],
+      response: => Resp
+  )(runTests: Int => Unit): Unit =
     serveRoute(endpoint.implementedBy(_ => response))(runTests)
 
   def serveStreamedEndpoint[Resp](
-    endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
-    response: Source[Resp, _]
+      endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
+      response: Source[Resp, _]
   )(
-    runTests: Int => Unit
+      runTests: Int => Unit
   ): Unit =
     serveRoute(endpoint.implementedBy(_ => response))(runTests)
 
   def serveStreamedEndpoint[Req, Resp](
-    endpoint: serverApi.Endpoint[serverApi.Chunks[Req], Resp],
-    logic: Source[Req, _] => Future[Resp]
+      endpoint: serverApi.Endpoint[serverApi.Chunks[Req], Resp],
+      logic: Source[Req, _] => Future[Resp]
   )(
-    runTests: Int => Unit
+      runTests: Int => Unit
   ): Unit =
     serveRoute(endpoint.implementedByAsync(logic))(runTests)
 
@@ -62,7 +71,8 @@ class ServerInterpreterTest
     import java.io._
 
     val directive =
-      url.directive.map(a => DecodedUrl.Matched(a)) |[Tuple1[DecodedUrl[A]]] Directives.provide(DecodedUrl.NotMatched)
+      url.directive.map(a => DecodedUrl.Matched(a)) | [Tuple1[DecodedUrl[A]]] Directives
+        .provide(DecodedUrl.NotMatched)
     val route = directive { decodedA => req =>
       val baos = new ByteArrayOutputStream
       val oos = new ObjectOutputStream(baos)
@@ -80,8 +90,15 @@ class ServerInterpreterTest
       if (status == AkkaStatusCodes.BadRequest) {
         val s = responseAs[String]
         val errors =
-          endpoints.ujson.codecs.invalidCodec.decode(s)
-            .fold(_.errors, errors => sys.error(s"Unable to parse server response: ${errors.mkString(". ")}"))
+          endpoints.ujson.codecs.invalidCodec
+            .decode(s)
+            .fold(
+              _.errors,
+              errors =>
+                sys.error(
+                  s"Unable to parse server response: ${errors.mkString(". ")}"
+                )
+            )
         DecodedUrl.Malformed(errors)
       } else {
         val bs = responseAs[Array[Byte]]

@@ -1,14 +1,22 @@
 package cqrs.publicserver
 
 import endpoints.openapi.model.OpenApi
-import endpoints.play.server.{Assets, Endpoints, JsonEntitiesFromEncodersAndDecoders, PlayComponents}
+import endpoints.play.server.{
+  Assets,
+  Endpoints,
+  JsonEntitiesFromEncodersAndDecoders,
+  PlayComponents
+}
 import play.api.routing.{Router => PlayRouter}
 import play.twirl.api.{Html, StringInterpolation}
 
 /**
   * These endpoints serve the web page and the assets.
   */
-class BootstrapEndpoints(val playComponents: PlayComponents) extends Endpoints with Assets with JsonEntitiesFromEncodersAndDecoders {
+class BootstrapEndpoints(val playComponents: PlayComponents)
+    extends Endpoints
+    with Assets
+    with JsonEntitiesFromEncodersAndDecoders {
 
   val index: Endpoint[Unit, Html] =
     endpoint(get(path), ok(htmlResponse))
@@ -23,7 +31,7 @@ class BootstrapEndpoints(val playComponents: PlayComponents) extends Endpoints w
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
       index.implementedBy(_ => indexHtml),
-      assets.implementedBy(assetsResources(/*pathPrefix = Some("/public")*/))
+      assets.implementedBy(assetsResources( /*pathPrefix = Some("/public")*/ ))
     )
 
   lazy val digests = BootstrapDigests.digests
@@ -32,7 +40,9 @@ class BootstrapEndpoints(val playComponents: PlayComponents) extends Endpoints w
     html"""<!DOCTYPE html>
           <html>
             <head>
-              <script src="${assets.call(asset("example-cqrs-web-client-fastopt.js")).url}" defer></script>
+              <script src="${assets
+      .call(asset("example-cqrs-web-client-fastopt.js"))
+      .url}" defer></script>
               <title>Meters</title>
             </head>
             <body></body>

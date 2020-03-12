@@ -20,10 +20,11 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
   /** Decodes an `A` using circe’s [[io.circe.Decoder]] */
   type JsonResponse[A] = CirceDecoder[A]
 
-  def jsonRequest[A : JsonRequest]: RequestEntity[A] = (a: A, xhr: XMLHttpRequest) => {
-    xhr.setRequestHeader("Content-Type", "application/json")
-    CirceEncoder[A].apply(a).noSpaces
-  }
+  def jsonRequest[A: JsonRequest]: RequestEntity[A] =
+    (a: A, xhr: XMLHttpRequest) => {
+      xhr.setRequestHeader("Content-Type", "application/json")
+      CirceEncoder[A].apply(a).noSpaces
+    }
 
   def jsonResponse[A](implicit decoder: CirceDecoder[A]): ResponseEntity[A] =
     xhr => parser.parse(xhr.responseText).flatMap(decoder.decodeJson)

@@ -9,15 +9,24 @@ import play.api.libs.ws.{BodyWritable, InMemoryBody}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with endpoints.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs
+    extends EndpointsWithCustomErrors
+    with endpoints.algebra.JsonEntitiesFromCodecs {
 
-  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, wsRequest) =>
-    val playCodec: play.api.mvc.Codec = implicitly[play.api.mvc.Codec]
-    val writable = BodyWritable((s: String) => InMemoryBody(playCodec.encode(s)), ContentTypes.JSON)
-    wsRequest.withBody(stringCodec(codec).encode(a))(writable)
+  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = {
+    (a, wsRequest) =>
+      val playCodec: play.api.mvc.Codec = implicitly[play.api.mvc.Codec]
+      val writable = BodyWritable(
+        (s: String) => InMemoryBody(playCodec.encode(s)),
+        ContentTypes.JSON
+      )
+      wsRequest.withBody(stringCodec(codec).encode(a))(writable)
   }
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
-    wsResp => stringCodec(codec).decode(wsResp.body).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
+    wsResp =>
+      stringCodec(codec)
+        .decode(wsResp.body)
+        .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
 }

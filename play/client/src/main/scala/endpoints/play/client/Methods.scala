@@ -15,7 +15,8 @@ trait Methods extends algebra.Methods {
     */
   type Method = WSRequest => WSRequest
 
-  private def setMethod(method: String): Method = (r: WSRequest) => r.withMethod(method)
+  private def setMethod(method: String): Method =
+    (r: WSRequest) => r.withMethod(method)
 
   def Get = setMethod("GET")
 

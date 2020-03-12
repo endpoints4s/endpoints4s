@@ -1,11 +1,18 @@
 package endpoints.algebra
 
-import endpoints.{InvariantFunctor, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Semigroupal, Tupler}
+import endpoints.{
+  InvariantFunctor,
+  PartialInvariantFunctor,
+  PartialInvariantFunctorSyntax,
+  Semigroupal,
+  Tupler
+}
 
 /**
   * @group algebras
   */
-trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: Errors =>
+trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
+  this: Errors =>
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A
     *
@@ -59,7 +66,8 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]]
     */
-  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders]
+  implicit def responseHeadersInvFunctor
+      : PartialInvariantFunctor[ResponseHeaders]
 
   /**
     * No particular response header.
@@ -90,7 +98,10 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     *
     * @group operations
     */
-  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String]
+  def responseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[String]
 
   /**
     * Response headers optionally containing a header with the given `name`.
@@ -101,7 +112,10 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     *
     * @group operations
     */
-  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]]
+  def optResponseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[Option[String]]
 
   /**
     * Server interpreters construct a response with the given status and entity.
@@ -114,10 +128,10 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * @group operations
     */
   def response[A, B, R](
-    statusCode: StatusCode,
-    entity: ResponseEntity[A],
-    docs: Documentation = None,
-    headers: ResponseHeaders[B] = emptyResponseHeaders
+      statusCode: StatusCode,
+      entity: ResponseEntity[A],
+      docs: Documentation = None,
+      headers: ResponseHeaders[B] = emptyResponseHeaders
   )(implicit tupler: Tupler.Aux[A, B, R]): Response[R]
 
   /**
@@ -127,16 +141,19 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * Client interpreters accept either one or the other response.
     * Documentation interpreters list all the possible responses.
     */
-  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]]
+  def choiceResponse[A, B](
+      responseA: Response[A],
+      responseB: Response[B]
+  ): Response[Either[A, B]]
 
   /**
     * OK (200) Response with the given entity
     * @group operations
     */
   final def ok[A, B, R](
-    entity: ResponseEntity[A],
-    docs: Documentation = None,
-    headers: ResponseHeaders[B] = emptyResponseHeaders
+      entity: ResponseEntity[A],
+      docs: Documentation = None,
+      headers: ResponseHeaders[B] = emptyResponseHeaders
   )(implicit tupler: Tupler.Aux[A, B, R]): Response[R] =
     response(OK, entity, docs, headers)
 
@@ -146,10 +163,11 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * @group operations
     */
   final def badRequest[A, R](
-    docs: Documentation = None,
-    headers: ResponseHeaders[A] = emptyResponseHeaders
-  )(implicit
-    tupler: Tupler.Aux[ClientErrors, A, R]
+      docs: Documentation = None,
+      headers: ResponseHeaders[A] = emptyResponseHeaders
+  )(
+      implicit
+      tupler: Tupler.Aux[ClientErrors, A, R]
   ): Response[R] =
     response(BadRequest, clientErrorsResponseEntity, docs, headers)
 
@@ -159,10 +177,11 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * @group operations
     */
   final def internalServerError[A, R](
-    docs: Documentation = None,
-    headers: ResponseHeaders[A] = emptyResponseHeaders
-  )(implicit
-    tupler: Tupler.Aux[ServerError, A, R]
+      docs: Documentation = None,
+      headers: ResponseHeaders[A] = emptyResponseHeaders
+  )(
+      implicit
+      tupler: Tupler.Aux[ServerError, A, R]
   ): Response[R] =
     response(InternalServerError, serverErrorResponseEntity, docs, headers)
 
@@ -174,8 +193,12 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     *
     * @group operations
     */
-  final def wheneverFound[A](responseA: Response[A], notFoundDocs: Documentation = None): Response[Option[A]] =
-    responseA.orElse(response(NotFound, emptyResponse, notFoundDocs))
+  final def wheneverFound[A](
+      responseA: Response[A],
+      notFoundDocs: Documentation = None
+  ): Response[Option[A]] =
+    responseA
+      .orElse(response(NotFound, emptyResponse, notFoundDocs))
       .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 
   /** Extension methods for [[Response]].
@@ -183,13 +206,16 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
     * @group operations
     */
   implicit class ResponseSyntax[A](response: Response[A]) {
+
     /**
       * Turns a `Response[A]` into a `Response[Option[A]]`.
       *
       * Interpreters represent `None` with
       * an empty HTTP response whose status code is 404 (Not Found).
       */
-    final def orNotFound(notFoundDocs: Documentation = None): Response[Option[A]] = wheneverFound(response, notFoundDocs)
+    final def orNotFound(
+        notFoundDocs: Documentation = None
+    ): Response[Option[A]] = wheneverFound(response, notFoundDocs)
 
     /**
       * Alternative between two possible choices of responses.
@@ -198,7 +224,8 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax { this: E
       * Client interpreters accept either one or the other response.
       * Documentation interpreters list all the possible responses.
       */
-    final def orElse[B](otherResponse: Response[B]): Response[Either[A, B]] = choiceResponse(response, otherResponse)
+    final def orElse[B](otherResponse: Response[B]): Response[Either[A, B]] =
+      choiceResponse(response, otherResponse)
   }
 
 }

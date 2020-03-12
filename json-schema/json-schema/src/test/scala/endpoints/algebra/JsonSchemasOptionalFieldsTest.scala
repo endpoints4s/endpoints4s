@@ -8,7 +8,9 @@ import org.scalatest.freespec.AnyFreeSpec
 /**
   * Tests that must be run on all [[JsonSchemas]] interpreters.
   */
-trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures {
+trait JsonSchemasOptionalFieldsTest
+    extends AnyFreeSpec
+    with JsonSchemasFixtures {
 
   // Abstract over concrete JSON library (such as circe, Play JSON, or ujson)
   trait Json {
@@ -93,8 +95,8 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
   }
 
   "ignore extra record fields" in {
-    val schema  = field[Int]("relevant")
-    val json    = Json.obj("relevant" -> Json.num(1), "irrelevant" -> Json.num(0))
+    val schema = field[Int]("relevant")
+    val json = Json.obj("relevant" -> Json.num(1), "irrelevant" -> Json.num(0))
     val decoded = decodeJson(schema, json)
     decoded match {
       case Valid(n)        => assert(n == 1)
@@ -112,7 +114,11 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
         fail(errors.mkString(". "))
     }
 
-  def checkDecodingFailure[A](schema: JsonSchema[A], json: Json.Json, expectedErrors: Seq[String]) =
+  def checkDecodingFailure[A](
+      schema: JsonSchema[A],
+      json: Json.Json,
+      expectedErrors: Seq[String]
+  ) =
     decodeJson(schema, json) match {
       case Valid(_)        => fail("Expected decoding failure")
       case Invalid(errors) => assert(errors == expectedErrors)
