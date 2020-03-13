@@ -13,13 +13,15 @@ import scala.concurrent.duration._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-trait ClientTestBase[T <: algebra.Endpoints] extends AnyWordSpec
-  with Matchers
-  with ScalaFutures
-  with BeforeAndAfterAll
-  with BeforeAndAfter {
+trait ClientTestBase[T <: algebra.Endpoints]
+    extends AnyWordSpec
+    with Matchers
+    with ScalaFutures
+    with BeforeAndAfterAll
+    with BeforeAndAfter {
 
-  override implicit def patienceConfig: PatienceConfig = PatienceConfig(15.seconds, 10.millisecond)
+  override implicit def patienceConfig: PatienceConfig =
+    PatienceConfig(15.seconds, 10.millisecond)
 
   val wiremockPort = findOpenPort
   val wireMockServer = new WireMockServer(options().port(wiremockPort))
@@ -40,7 +42,10 @@ trait ClientTestBase[T <: algebra.Endpoints] extends AnyWordSpec
 
   val client: T
 
-  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req): Future[Resp]
+  def call[Req, Resp](
+      endpoint: client.Endpoint[Req, Resp],
+      args: Req
+  ): Future[Resp]
 
   def encodeUrl[A](url: client.Url[A])(a: A): String
 

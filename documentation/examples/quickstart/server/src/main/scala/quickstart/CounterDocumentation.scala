@@ -8,7 +8,7 @@ import endpoints.openapi.model.{Info, OpenApi}
   * Generates OpenAPI documentation for the endpoints described in the `CounterEndpoints` trait.
   */
 object CounterDocumentation
-  extends CounterEndpoints
+    extends CounterEndpoints
     with openapi.Endpoints
     with openapi.JsonEntitiesFromSchemas {
 

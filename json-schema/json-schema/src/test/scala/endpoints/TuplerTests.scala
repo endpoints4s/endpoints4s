@@ -2,7 +2,8 @@ package endpoints
 
 class TuplerTests {
 
-  def tupling[A, B](a: A, b: B)(implicit tupler: Tupler[A, B]): tupler.Out = tupler(a, b)
+  def tupling[A, B](a: A, b: B)(implicit tupler: Tupler[A, B]): tupler.Out =
+    tupler(a, b)
 
   def forall[A, B, C, D, E, F](a: A, b: B, c: C, d: D, e: E, f: F): Unit = {
     tupling(a, b): (A, B)

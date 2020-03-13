@@ -52,7 +52,9 @@ sealed trait Validated[+A] {
     *
     * @see [[Tupler]]
     */
-  def zip[A0 >: A, B](that: Validated[B])(implicit tupler: Tupler[A0, B]): Validated[tupler.Out] = (this, that) match {
+  def zip[A0 >: A, B](that: Validated[B])(
+      implicit tupler: Tupler[A0, B]
+  ): Validated[tupler.Out] = (this, that) match {
     case (Valid(a), Valid(b))             => Valid(tupler(a, b))
     case (_: Valid[A], invalid: Invalid)  => invalid
     case (invalid: Invalid, _: Valid[B])  => invalid
@@ -71,10 +73,12 @@ sealed trait Validated[+A] {
 
 /** A valid value of type `A` */
 case class Valid[A](value: A) extends Validated[A]
+
 /** A list of validation errors */
 case class Invalid(errors: Seq[String]) extends Validated[Nothing]
 
 object Invalid {
+
   /** An invalid value due to a single error */
   def apply(error: String): Invalid = Invalid(error :: Nil)
 }
@@ -85,18 +89,20 @@ object Validated {
     * Turns `None` into an invalid value, using the given `error` message.
     * Turns a `Some[A]` value into a `Valid[A]` value.
     */
-  def fromOption[A](maybeA: Option[A])(error: => String): Validated[A] = maybeA match {
-    case Some(value) => Valid(value)
-    case None        => Invalid(error)
-  }
+  def fromOption[A](maybeA: Option[A])(error: => String): Validated[A] =
+    maybeA match {
+      case Some(value) => Valid(value)
+      case None        => Invalid(error)
+    }
 
   /**
     * Turns an `Either[Seq[String], A]` into a `Validated[A]`
     */
-  def fromEither[A](either: Either[Seq[String], A]): Validated[A] = either match {
-    case Left(errors) => Invalid(errors)
-    case Right(a)     => Valid(a)
-  }
+  def fromEither[A](either: Either[Seq[String], A]): Validated[A] =
+    either match {
+      case Left(errors) => Invalid(errors)
+      case Right(a)     => Valid(a)
+    }
 
   /**
     * Turns a `Success[A]` into a `Validated[A]`

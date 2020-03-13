@@ -28,7 +28,7 @@ object Operation {
 import endpoints.{algebra, generic}
 
 trait CounterEndpoints
-  extends algebra.Endpoints
+    extends algebra.Endpoints
     with algebra.JsonEntitiesFromSchemas
     with generic.JsonSchemas {
 
@@ -41,7 +41,11 @@ trait CounterEndpoints
   // and the path ''/counter''. The request entity contains an `Operation` object encoded
   // in JSON. The endpoint returns the current value of the counter in a JSON object.
   val update = endpoint(
-    post(path / "counter", jsonRequest[Operation], docs = Some("The operation to apply to the counter")),
+    post(
+      path / "counter",
+      jsonRequest[Operation],
+      docs = Some("The operation to apply to the counter")
+    ),
     counterJsonResponse
   )
 
@@ -61,7 +65,8 @@ trait CounterEndpoints
   // data type. This schema describes that `Operation` can be
   // either `Set` or `Add`, and that `Set` has one `Int` field
   // name `value`, and `Add` has one `Int` field named `delta`
-  implicit lazy val jsonSchemaOperation: JsonSchema[Operation] = genericJsonSchema
+  implicit lazy val jsonSchemaOperation: JsonSchema[Operation] =
+    genericJsonSchema
 
 }
 //#documented-endpoints
@@ -71,7 +76,7 @@ import endpoints.openapi
 import endpoints.openapi.model.{Info, OpenApi}
 
 object CounterDocumentation
-  extends CounterEndpoints
+    extends CounterEndpoints
     with openapi.Endpoints
     with openapi.JsonEntitiesFromSchemas {
 
@@ -85,7 +90,7 @@ object CounterDocumentation
 import endpoints.play
 
 class CounterServer(val playComponents: PlayComponents)
-  extends CounterEndpoints
+    extends CounterEndpoints
     with play.server.Endpoints
     with play.server.JsonEntitiesFromSchemas { parent =>
 
@@ -100,9 +105,7 @@ class CounterServer(val playComponents: PlayComponents)
   // decoding and response encoding for us, so that here we can just use our
   // business domain data types
   val routes = routesFromEndpoints(
-
     currentValue.implementedBy(_ => Counter(value.get())),
-
     update.implementedBy {
       case Operation.Set(newValue) =>
         value.set(newValue)
@@ -111,7 +114,6 @@ class CounterServer(val playComponents: PlayComponents)
         val newValue = value.addAndGet(delta)
         Counter(newValue)
     }
-
   )
 }
 
@@ -119,22 +121,29 @@ class CounterServer(val playComponents: PlayComponents)
 object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
-    val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
+    val playConfig = ServerConfig(port =
+      sys.props.get("http.port").map(_.toInt).orElse(Some(9000))
+    )
     NettyServer.fromRouterWithComponents(playConfig) { components =>
       val playComponents = PlayComponents.fromBuiltInComponents(components)
-      new CounterServer(playComponents).routes orElse new DocumentationServer(playComponents).routes
+      new CounterServer(playComponents).routes orElse new DocumentationServer(
+        playComponents
+      ).routes
     }
   }
 
   //#main-only
   class DocumentationServer(val playComponents: PlayComponents)
-    extends play.server.Endpoints
+      extends play.server.Endpoints
       with play.server.JsonEntitiesFromEncodersAndDecoders
       with play.server.Assets {
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
-    val documentation = endpoint[Unit, OpenApi](get(path / "documentation.json"), ok(jsonResponse[OpenApi]))
+    val documentation = endpoint[Unit, OpenApi](
+      get(path / "documentation.json"),
+      ok(jsonResponse[OpenApi])
+    )
 
     // We “render” the OpenAPI document using the swagger-ui, provided as static assets
     val assets = assetsEndpoint(path / "assets" / assetSegments())

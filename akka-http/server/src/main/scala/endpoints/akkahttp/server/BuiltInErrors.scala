@@ -7,14 +7,20 @@ import endpoints.{Invalid, algebra}
 /**
   * @group interpreters
   */
-trait BuiltInErrors extends algebra.BuiltInErrors { this: EndpointsWithCustomErrors =>
+trait BuiltInErrors extends algebra.BuiltInErrors {
+  this: EndpointsWithCustomErrors =>
 
   def clientErrorsResponseEntity: ResponseEntity[Invalid] =
     Marshaller.withFixedContentType(MediaTypes.`application/json`) { invalid =>
-      HttpEntity(MediaTypes.`application/json`, endpoints.ujson.codecs.invalidCodec.encode(invalid))
+      HttpEntity(
+        MediaTypes.`application/json`,
+        endpoints.ujson.codecs.invalidCodec.encode(invalid)
+      )
     }
 
   def serverErrorResponseEntity: ResponseEntity[Throwable] =
-    clientErrorsResponseEntity.compose(throwable => Invalid(throwable.getMessage))
+    clientErrorsResponseEntity.compose(throwable =>
+      Invalid(throwable.getMessage)
+    )
 
 }

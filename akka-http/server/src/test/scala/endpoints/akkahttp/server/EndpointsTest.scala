@@ -13,8 +13,7 @@ import org.scalatest.wordspec.AnyWordSpec
 trait EndpointsTestApi extends Endpoints with algebra.EndpointsTestApi
 
 /* implements the endpoint using an akka-based custom json handling */
-class EndpointsEntitiesTestApi extends EndpointsTestApi
-  with JsonEntities
+class EndpointsEntitiesTestApi extends EndpointsTestApi with JsonEntities
 
 class EndpointsTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
 
@@ -29,7 +28,9 @@ class EndpointsTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
       smokeEndpoint.implementedBy(_ => sys.error("Sorry."))
 
     val smokeEndpointAsyncRoute =
-      smokeEndpoint.implementedByAsync(_ => Future.failed(new Exception("Sorry.")))
+      smokeEndpoint.implementedByAsync(_ =>
+        Future.failed(new Exception("Sorry."))
+      )
 
   }
 

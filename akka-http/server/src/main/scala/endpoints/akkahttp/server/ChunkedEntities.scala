@@ -1,7 +1,13 @@
 package endpoints.akkahttp.server
 
 import akka.http.scaladsl.marshalling.Marshaller
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, MessageEntity}
+import akka.http.scaladsl.model.{
+  ContentType,
+  ContentTypes,
+  HttpEntity,
+  HttpRequest,
+  MessageEntity
+}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.stream.scaladsl.Source
@@ -15,7 +21,9 @@ import scala.concurrent.Future
   *
   * @group interpreters
   */
-trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomErrors {
+trait ChunkedEntities
+    extends algebra.ChunkedEntities
+    with EndpointsWithCustomErrors {
 
   type Chunks[A] = Source[A, _]
 
@@ -23,15 +31,23 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
     chunkedRequestEntity(byteString => Right(byteString.utf8String))
 
   def textChunksResponse: ResponseEntity[Chunks[String]] =
-    chunkedResponseEntity(ContentTypes.`text/plain(UTF-8)`, ByteString.fromString)
+    chunkedResponseEntity(
+      ContentTypes.`text/plain(UTF-8)`,
+      ByteString.fromString
+    )
 
   def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]] =
     chunkedRequestEntity(byteString => Right(byteString.toArray))
 
   def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] =
-    chunkedResponseEntity(ContentTypes.`application/octet-stream`, ByteString.fromArray)
+    chunkedResponseEntity(
+      ContentTypes.`application/octet-stream`,
+      ByteString.fromArray
+    )
 
-  private[server] def chunkedRequestEntity[A](fromByteString: ByteString => Either[Throwable, A]): RequestEntity[Chunks[A]] =
+  private[server] def chunkedRequestEntity[A](
+      fromByteString: ByteString => Either[Throwable, A]
+  ): RequestEntity[Chunks[A]] =
     Directives.entity(Unmarshaller[HttpRequest, Chunks[A]] { _ => request =>
       val source = request.entity.dataBytes.map(fromByteString).flatMapConcat {
         case Left(error)  => Source.failed(error)
@@ -40,10 +56,14 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
       Future.successful(source)
     })
 
-  private[server] def chunkedResponseEntity[A](contentType: ContentType, toByteString: A => ByteString): ResponseEntity[Chunks[A]] =
-    Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) { as =>
-      val byteStrings = as.map(toByteString)
-      HttpEntity.Chunked.fromData(contentType, byteStrings)
+  private[server] def chunkedResponseEntity[A](
+      contentType: ContentType,
+      toByteString: A => ByteString
+  ): ResponseEntity[Chunks[A]] =
+    Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) {
+      as =>
+        val byteStrings = as.map(toByteString)
+        HttpEntity.Chunked.fromData(contentType, byteStrings)
     }
 
 }
@@ -53,19 +73,33 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   *
   * @group interpreters
   */
-trait ChunkedJsonEntities extends algebra.ChunkedJsonEntities with ChunkedEntities with JsonEntitiesFromCodecs {
+trait ChunkedJsonEntities
+    extends algebra.ChunkedJsonEntities
+    with ChunkedEntities
+    with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](implicit codec: JsonCodec[A]): RequestEntity[Chunks[A]] = {
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedRequestEntity { byteString =>
       val string = byteString.utf8String
-      decoder.decode(string).toEither.left.map(errors => new Throwable(errors.mkString(". ")))
+      decoder
+        .decode(string)
+        .toEither
+        .left
+        .map(errors => new Throwable(errors.mkString(". ")))
     }
   }
 
-  def jsonChunksResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[Chunks[A]] = {
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
-    chunkedResponseEntity(ContentTypes.`application/json`, a => ByteString(encoder.encode(a)))
+    chunkedResponseEntity(
+      ContentTypes.`application/json`,
+      a => ByteString(encoder.encode(a))
+    )
   }
 
 }

@@ -6,10 +6,23 @@ import org.scalatest.freespec.AnyFreeSpec
 // of the underlying representation of header in the xhr algebra.
 trait FixturesAlgebra extends endpoints.algebra.Endpoints {
   val foo = endpoint(get(path / "foo" / segment[String]()), ok(emptyResponse))
-  val bar = endpoint(post(path / "bar" /? qs[Int]("quux"), emptyRequest), ok(emptyResponse))
+  val bar = endpoint(
+    post(path / "bar" /? qs[Int]("quux"), emptyRequest),
+    ok(emptyResponse)
+  )
   // Currently, the fact that this line compiles is a test, as there's no way
   // to inspect the result of constructing headers at the moment.
-  val baz = endpoint(post(path / "baz", emptyRequest, headers = requestHeader("quuz") ++ requestHeader("corge") ++ optRequestHeader("grault")), ok(emptyResponse))
+  val baz = endpoint(
+    post(
+      path / "baz",
+      emptyRequest,
+      headers =
+        requestHeader("quuz") ++ requestHeader("corge") ++ optRequestHeader(
+          "grault"
+        )
+    ),
+    ok(emptyResponse)
+  )
 }
 
 object Fixtures extends FixturesAlgebra with thenable.Endpoints

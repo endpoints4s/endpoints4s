@@ -8,9 +8,9 @@ import scala.collection.mutable
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   */
 case class OpenApi(
-  info: Info,
-  paths: Map[String, PathItem],
-  components: Components
+    info: Info,
+    paths: Map[String, PathItem],
+    components: Components
 )
 
 object OpenApi {
@@ -18,7 +18,9 @@ object OpenApi {
   val openApiVersion = "3.0.0"
 
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
-    new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) => (k, f(v)) }.toSeq: _*))
+    new ujson.Obj(mutable.LinkedHashMap(map.iterator.map {
+      case (k, v) => (k, f(v))
+    }.toSeq: _*))
 
   private[openapi] def schemaJson(schema: Schema): ujson.Obj = {
     val fields = mutable.LinkedHashMap.empty[String, ujson.Value]
@@ -28,23 +30,31 @@ object OpenApi {
         format.foreach(s => fields += "format" -> ujson.Str(s))
       case Schema.Object(properties, additionalProperties, _, _) =>
         fields ++= List(
-          "type"       -> "object",
-          "properties" -> new ujson.Obj(mutable.LinkedHashMap(
-            properties.map(p => p.name -> schemaJson(p.schema.withDefinedDescription(p.description))): _*
-          ))
+          "type" -> "object",
+          "properties" -> new ujson.Obj(
+            mutable.LinkedHashMap(
+              properties.map(p =>
+                p.name -> schemaJson(
+                  p.schema.withDefinedDescription(p.description)
+                )
+              ): _*
+            )
+          )
         )
         val required = properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
           fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
         }
-        additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
+        additionalProperties.foreach(p =>
+          fields += "additionalProperties" -> schemaJson(p)
+        )
       case Schema.Array(elementType, _, _) =>
         val itemsSchema = elementType match {
           case Left(value)  => schemaJson(value)
           case Right(value) => ujson.Arr(value.map(schemaJson): _*)
         }
         fields ++= List(
-          "type"  -> "array",
+          "type" -> "array",
           "items" -> itemsSchema
         )
       case Schema.Enum(elementType, values, description, _) =>
@@ -53,16 +63,21 @@ object OpenApi {
       case Schema.OneOf(alternatives, _, _) =>
         fields ++=
           (alternatives match {
-            case Schema.DiscriminatedAlternatives(discriminatorFieldName, alternatives) =>
+            case Schema.DiscriminatedAlternatives(
+                discriminatorFieldName,
+                alternatives
+                ) =>
               val mappingJson =
                 new ujson.Obj(mutable.LinkedHashMap(alternatives.collect {
-                  case (tag, ref: Schema.Reference) => tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
+                  case (tag, ref: Schema.Reference) =>
+                    tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
                 }: _*))
               List(
-                "oneOf"         -> ujson.Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
+                "oneOf" -> ujson
+                  .Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
                 "discriminator" -> ujson.Obj(
                   "propertyName" -> ujson.Str(discriminatorFieldName),
-                  "mapping"      -> mappingJson
+                  "mapping" -> mappingJson
                 )
               )
             case Schema.EnumeratedAlternatives(alternatives) =>
@@ -108,8 +123,10 @@ object OpenApi {
 
   private def componentsJson(components: Components): ujson.Obj =
     ujson.Obj(
-      "schemas"         -> mapJson(components.schemas)(schemaJson),
-      "securitySchemes" -> mapJson(components.securitySchemes)(securitySchemeJson)
+      "schemas" -> mapJson(components.schemas)(schemaJson),
+      "securitySchemes" -> mapJson(components.securitySchemes)(
+        securitySchemeJson
+      )
     )
 
   private def responseJson(response: Response): ujson.Obj = {
@@ -152,7 +169,9 @@ object OpenApi {
       fields += "summary" -> ujson.Str(summary)
     }
     if (operation.parameters.nonEmpty) {
-      fields += "parameters" -> ujson.Arr(operation.parameters.map(parameterJson): _*)
+      fields += "parameters" -> ujson.Arr(
+        operation.parameters.map(parameterJson): _*
+      )
     }
     operation.requestBody.foreach { requestBody =>
       fields += "requestBody" -> requestBodyJson(requestBody)
@@ -161,7 +180,9 @@ object OpenApi {
       fields += "tags" -> ujson.Arr(operation.tags.map(ujson.Str): _*)
     }
     if (operation.security.nonEmpty) {
-      fields += "security" -> ujson.Arr(operation.security.map(securityRequirementJson): _*)
+      fields += "security" -> ujson.Arr(
+        operation.security.map(securityRequirementJson): _*
+      )
     }
     if (operation.callbacks.nonEmpty) {
       fields += "callbacks" -> mapJson(operation.callbacks)(pathsJson)
@@ -174,8 +195,8 @@ object OpenApi {
 
   private def parameterJson(parameter: Parameter): ujson.Value = {
     val fields = mutable.LinkedHashMap[String, ujson.Value](
-      "name"   -> ujson.Str(parameter.name),
-      "in"     -> inJson(parameter.in),
+      "name" -> ujson.Str(parameter.name),
+      "in" -> inJson(parameter.in),
       "schema" -> schemaJson(parameter.schema)
     )
     parameter.description.foreach { description =>
@@ -205,26 +226,29 @@ object OpenApi {
     new ujson.Obj(fields)
   }
 
-  private def securityRequirementJson(securityRequirement: SecurityRequirement): ujson.Value =
+  private def securityRequirementJson(
+      securityRequirement: SecurityRequirement
+  ): ujson.Value =
     ujson.Obj(
-      securityRequirement.name -> ujson.Arr(securityRequirement.scopes.map(ujson.Str): _*)
+      securityRequirement.name -> ujson.Arr(
+        securityRequirement.scopes.map(ujson.Str): _*
+      )
     )
 
   private def pathsJson(paths: Map[String, PathItem]): ujson.Obj =
-    mapJson(paths)(pathItem =>
-      mapJson(pathItem.operations)(operationJson)
-    )
+    mapJson(paths)(pathItem => mapJson(pathItem.operations)(operationJson))
 
   private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
     openApi => {
-      val fields: mutable.LinkedHashMap[String, ujson.Value] = mutable.LinkedHashMap(
-        "openapi" -> ujson.Str(openApiVersion),
-        "info"    -> ujson.Obj(
-          "title"   -> ujson.Str(openApi.info.title),
-          "version" -> ujson.Str(openApi.info.version)
-        ),
-        "paths"   -> pathsJson(openApi.paths)
-      )
+      val fields: mutable.LinkedHashMap[String, ujson.Value] =
+        mutable.LinkedHashMap(
+          "openapi" -> ujson.Str(openApiVersion),
+          "info" -> ujson.Obj(
+            "title" -> ujson.Str(openApi.info.title),
+            "version" -> ujson.Str(openApi.info.version)
+          ),
+          "paths" -> pathsJson(openApi.paths)
+        )
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)
       }
@@ -232,60 +256,69 @@ object OpenApi {
     }
 
   implicit val stringEncoder: Encoder[OpenApi, String] =
-    openApi => jsonEncoder.encode(openApi).transform(ujson.StringRenderer()).toString
+    openApi =>
+      jsonEncoder.encode(openApi).transform(ujson.StringRenderer()).toString
 
 }
 
 case class Info(
-  title: String,
-  version: String
+    title: String,
+    version: String
 )
 
 case class PathItem(
-  operations: Map[String, Operation]
+    operations: Map[String, Operation]
 )
 
-case class Components(schemas: Map[String, Schema],
-                      securitySchemes: Map[String, SecurityScheme])
+case class Components(
+    schemas: Map[String, Schema],
+    securitySchemes: Map[String, SecurityScheme]
+)
 
 case class Operation(
-  summary: Option[String],
-  description: Option[String],
-  parameters: List[Parameter],
-  requestBody: Option[RequestBody],
-  responses: Map[String, Response],
-  tags: List[String],
-  security: List[SecurityRequirement],
-  callbacks: Map[String, Map[String, PathItem]],
-  deprecated: Boolean
+    summary: Option[String],
+    description: Option[String],
+    parameters: List[Parameter],
+    requestBody: Option[RequestBody],
+    responses: Map[String, Response],
+    tags: List[String],
+    security: List[SecurityRequirement],
+    callbacks: Map[String, Map[String, PathItem]],
+    deprecated: Boolean
 )
 
-case class SecurityRequirement(name: String,
-                               scheme: SecurityScheme,
-                               scopes: List[String] = Nil)
+case class SecurityRequirement(
+    name: String,
+    scheme: SecurityScheme,
+    scopes: List[String] = Nil
+)
 
 case class RequestBody(
-  description: Option[String],
-  content: Map[String, MediaType]
+    description: Option[String],
+    content: Map[String, MediaType]
 ) {
   assert(content.nonEmpty)
 }
 
 case class Response(
-  description: String,
-  headers: Map[String, ResponseHeader],
-  content: Map[String, MediaType]
+    description: String,
+    headers: Map[String, ResponseHeader],
+    content: Map[String, MediaType]
 )
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
-case class ResponseHeader(required: Boolean, description: Option[String], schema: Schema)
+case class ResponseHeader(
+    required: Boolean,
+    description: Option[String],
+    schema: Schema
+)
 
 case class Parameter(
-  name: String,
-  in: In,
-  required: Boolean,
-  description: Option[String],
-  schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
+    name: String,
+    in: In,
+    required: Boolean,
+    description: Option[String],
+    schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
 )
 
 sealed trait In
@@ -311,68 +344,84 @@ sealed trait Schema {
     *         or stay unchanged if this one is empty.
     */
   def withDefinedDescription(description: Option[String]): Schema = this match {
-    case s: Schema.Object    => s.copy(description = description.orElse(s.description))
-    case s: Schema.Array     => s.copy(description = description.orElse(s.description))
-    case s: Schema.Enum      => s.copy(description = description.orElse(s.description))
-    case s: Schema.Primitive => s.copy(description = description.orElse(s.description))
-    case s: Schema.OneOf     => s.copy(description = description.orElse(s.description))
-    case s: Schema.AllOf     => s.copy(description = description.orElse(s.description))
-    case s: Schema.Reference => s.copy(description = description.orElse(s.description))
+    case s: Schema.Object =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.Array =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.Enum =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.Primitive =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.OneOf =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.AllOf =>
+      s.copy(description = description.orElse(s.description))
+    case s: Schema.Reference =>
+      s.copy(description = description.orElse(s.description))
   }
 }
 
 object Schema {
 
   case class Object(
-    properties: List[Property],
-    additionalProperties: Option[Schema],
-    description: Option[String],
-    example: Option[ujson.Value]
+      properties: List[Property],
+      additionalProperties: Option[Schema],
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
   case class Array(
-    elementType: Either[Schema, List[Schema]],
-    description: Option[String],
-    example: Option[ujson.Value]
+      elementType: Either[Schema, List[Schema]],
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
   case class Enum(
-    elementType: Schema,
-    values: List[ujson.Value],
-    description: Option[String],
-    example: Option[ujson.Value]
+      elementType: Schema,
+      values: List[ujson.Value],
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
-  case class Property(name: String, schema: Schema, isRequired: Boolean, description: Option[String])
+  case class Property(
+      name: String,
+      schema: Schema,
+      isRequired: Boolean,
+      description: Option[String]
+  )
 
   case class Primitive(
-    name: String,
-    format: Option[String],
-    description: Option[String],
-    example: Option[ujson.Value]
+      name: String,
+      format: Option[String],
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
   case class OneOf(
-    alternatives: Alternatives,
-    description: Option[String],
-    example: Option[ujson.Value]
+      alternatives: Alternatives,
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
   sealed trait Alternatives
-  case class DiscriminatedAlternatives(discriminatorFieldName: String, alternatives: List[(String, Schema)]) extends Alternatives
-  case class EnumeratedAlternatives(alternatives: List[Schema]) extends Alternatives
+  case class DiscriminatedAlternatives(
+      discriminatorFieldName: String,
+      alternatives: List[(String, Schema)]
+  ) extends Alternatives
+  case class EnumeratedAlternatives(alternatives: List[Schema])
+      extends Alternatives
 
   case class AllOf(
-    schemas: List[Schema],
-    description: Option[String],
-    example: Option[ujson.Value]
+      schemas: List[Schema],
+      description: Option[String],
+      example: Option[ujson.Value]
   ) extends Schema
 
   case class Reference(
-    name: String,
-    original: Option[Schema],
-    description: Option[String],
-    override val example: None.type = None // Reference objects can’t have examples
+      name: String,
+      original: Option[Schema],
+      description: Option[String],
+      override val example: None.type = None // Reference objects can’t have examples
   ) extends Schema
 
   object Reference {
@@ -388,12 +437,14 @@ object Schema {
 
 }
 
-case class SecurityScheme(`type`: String, // TODO This should be a sealed trait, the `type` field should only exist in the JSON representation
-                          description: Option[String],
-                          name: Option[String],
-                          in: Option[String], // TODO Create a typed enumeration
-                          scheme: Option[String],
-                          bearerFormat: Option[String])
+case class SecurityScheme(
+    `type`: String, // TODO This should be a sealed trait, the `type` field should only exist in the JSON representation
+    description: Option[String],
+    name: Option[String],
+    in: Option[String], // TODO Create a typed enumeration
+    scheme: Option[String],
+    bearerFormat: Option[String]
+)
 
 object SecurityScheme {
 

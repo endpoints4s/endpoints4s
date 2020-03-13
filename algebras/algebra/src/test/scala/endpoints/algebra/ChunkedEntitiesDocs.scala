@@ -11,7 +11,7 @@ trait ChunkedEntitiesDocs extends ChunkedEntities {
 
 //#json-streaming
 trait JsonStreamingExample
-  extends endpoints.algebra.Endpoints
+    extends endpoints.algebra.Endpoints
     with endpoints.algebra.ChunkedJsonEntities
     with endpoints.algebra.JsonEntitiesFromSchemas {
 

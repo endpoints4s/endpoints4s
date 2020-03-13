@@ -51,7 +51,10 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
     case AssetPath(path, name) =>
       val rawPath = s"$path/$name"
-      val digest = digests.getOrElse(rawPath, throw new Exception(s"Asset not found: $rawPath"))
+      val digest = digests.getOrElse(
+        rawPath,
+        throw new Exception(s"Asset not found: $rawPath")
+      )
       s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
   }
 
@@ -64,12 +67,18 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @param url URL description
     * @return An HTTP endpoint for requesting assets
     */
-  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(
+      url: Url[AssetPath],
+      docs: Documentation,
+      notFoundDocs: Documentation
+  ): Endpoint[AssetRequest, AssetResponse] =
     endpoint(arrayBufferGet(url), arrayBufferResponse)
 
   private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
     new Request[AssetRequest] {
-      def apply(assetRequest: AssetRequest): (XMLHttpRequest, Option[js.Any]) = {
+      def apply(
+          assetRequest: AssetRequest
+      ): (XMLHttpRequest, Option[js.Any]) = {
         val xhr = new XMLHttpRequest
         xhr.open("GET", url.encode(assetRequest))
         xhr.responseType = "arraybuffer"

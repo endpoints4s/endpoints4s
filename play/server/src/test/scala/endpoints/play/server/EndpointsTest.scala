@@ -4,8 +4,10 @@ import endpoints.algebra
 import endpoints.algebra.circe.JsonFromCirceCodecTestApi
 
 // not really a test, just verifies algebra compatibility
-class EndpointsTestApi(val playComponents: PlayComponents, val digests: Map[String, String])
-  extends Endpoints
+class EndpointsTestApi(
+    val playComponents: PlayComponents,
+    val digests: Map[String, String]
+) extends Endpoints
     with JsonEntitiesFromCodecs
     with BasicAuthentication
     with Assets

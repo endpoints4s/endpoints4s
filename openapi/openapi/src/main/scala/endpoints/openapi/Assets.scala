@@ -10,7 +10,7 @@ import endpoints.openapi.model._
   * @group interpreters
   */
 trait Assets
-  extends algebra.Assets
+    extends algebra.Assets
     with EndpointsWithCustomErrors
     with StatusCodes {
 
@@ -18,14 +18,41 @@ trait Assets
   type AssetPath = Nothing
   type AssetResponse = Nothing
 
-  def assetSegments(name: String, description: Option[String]): Path[AssetPath] =
-    DocumentedUrl(Right(DocumentedParameter(name, required = true, description, Schema.simpleString)) :: Nil, Nil)
+  def assetSegments(
+      name: String,
+      description: Option[String]
+  ): Path[AssetPath] =
+    DocumentedUrl(
+      Right(
+        DocumentedParameter(
+          name,
+          required = true,
+          description,
+          Schema.simpleString
+        )
+      ) :: Nil,
+      Nil
+    )
 
-  def assetsEndpoint(url: Url[AssetPath], docs: Documentation, notFoundDocs: Documentation): Endpoint[AssetRequest, AssetResponse] =
+  def assetsEndpoint(
+      url: Url[AssetPath],
+      docs: Documentation,
+      notFoundDocs: Documentation
+  ): Endpoint[AssetRequest, AssetResponse] =
     endpoint(
       DocumentedRequest(Get, url, emptyRequestHeaders, None, emptyRequest),
-      DocumentedResponse(OK, docs.getOrElse(""), emptyResponseHeaders, Map.empty) ::
-        DocumentedResponse(NotFound, notFoundDocs.getOrElse(""), emptyResponseHeaders, Map.empty) ::
+      DocumentedResponse(
+        OK,
+        docs.getOrElse(""),
+        emptyResponseHeaders,
+        Map.empty
+      ) ::
+        DocumentedResponse(
+          NotFound,
+          notFoundDocs.getOrElse(""),
+          emptyResponseHeaders,
+          Map.empty
+        ) ::
         Nil
     )
 

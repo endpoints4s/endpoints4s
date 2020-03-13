@@ -15,7 +15,10 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
   *    entity gives way more details about failures than status codes.
   */
 //#mux-endpoint
-trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEntitiesFromCodecs {
+trait QueriesEndpoints
+    extends MuxEndpoints
+    with BuiltInErrors
+    with circe.JsonEntitiesFromCodecs {
 
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
     val request = post(path / "query", jsonRequest[Json])
@@ -28,7 +31,9 @@ trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEn
 /** A request carrying a query */
 //#mux-requests
 sealed trait QueryReq extends MuxRequest
-final case class FindById(id: UUID, after: Option[Long]) extends QueryReq { type Response = MaybeResource }
+final case class FindById(id: UUID, after: Option[Long]) extends QueryReq {
+  type Response = MaybeResource
+}
 final case object FindAll extends QueryReq { type Response = ResourceList }
 //#mux-requests
 // TODO Add a type of query including complex filters

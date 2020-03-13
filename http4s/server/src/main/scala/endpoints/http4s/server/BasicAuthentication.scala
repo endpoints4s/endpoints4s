@@ -18,10 +18,14 @@ trait BasicAuthentication
 
   private val unauthorizedRequestResponse = http4s
     .Response[Effect](Unauthorized)
-    .withHeaders(`WWW-Authenticate`(
-      NonEmptyList.of(Challenge("Basic", "Realm", Map("charset" -> "UTF-8")))))
+    .withHeaders(
+      `WWW-Authenticate`(
+        NonEmptyList.of(Challenge("Basic", "Realm", Map("charset" -> "UTF-8")))
+      )
+    )
 
-  private[endpoints] def basicAuthenticationHeader: RequestHeaders[Option[Credentials]] =
+  private[endpoints] def basicAuthenticationHeader
+      : RequestHeaders[Option[Credentials]] =
     headers =>
       Valid(
         headers
@@ -36,15 +40,16 @@ trait BasicAuthentication
       )
 
   def authenticatedRequest[U, E, H, UE, HC, Out](
-    method: Method,
-    url: Url[U],
-    entity: RequestEntity[E],
-    headers: RequestHeaders[H],
-    requestDocs: Documentation = None
-  )(implicit
-    tuplerUE: Tupler.Aux[U, E, UE],
-    tuplerHC: Tupler.Aux[H, Credentials, HC],
-    tuplerUEHC: Tupler.Aux[UE, HC, Out]
+      method: Method,
+      url: Url[U],
+      entity: RequestEntity[E],
+      headers: RequestHeaders[H],
+      requestDocs: Documentation = None
+  )(
+      implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerHC: Tupler.Aux[H, Credentials, HC],
+      tuplerUEHC: Tupler.Aux[UE, HC, Out]
   ): Request[Out] =
     extractUrlAndHeaders(method, url, headers ++ basicAuthenticationHeader) {
       case (_, (_, None)) =>
@@ -52,7 +57,9 @@ trait BasicAuthentication
       case (u, (h, Some(credentials))) =>
         http4sRequest =>
           entity(http4sRequest)
-            .map(_.map(e => tuplerUEHC(tuplerUE(u, e), tuplerHC(h, credentials))))
+            .map(
+              _.map(e => tuplerUEHC(tuplerUE(u, e), tuplerHC(h, credentials)))
+            )
     }
 
 }

@@ -5,7 +5,8 @@ val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
 val `scalaj-client` =
-  project.in(file("client"))
+  project
+    .in(file("client"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,

@@ -1,3 +1,5 @@
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.2")
+
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.32")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 
@@ -17,7 +19,9 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 
-addSbtPlugin("com.heroku" % "sbt-heroku" % "2.1.4") // Used by the example-documented project
+addSbtPlugin(
+  "com.heroku" % "sbt-heroku" % "2.1.4"
+) // Used by the example-documented project
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")

@@ -4,7 +4,8 @@ val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
 val `sttp-client` =
-  project.in(file("client"))
+  project
+    .in(file("client"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -16,4 +17,7 @@ val `sttp-client` =
       )
     )
     .dependsOn(LocalProject("openapiJVM"))
-    .dependsOn(`algebra-jvm` % "compile->compile;test->test", `algebra-playjson-jvm` % "test->test")
+    .dependsOn(
+      `algebra-jvm` % "compile->compile;test->test",
+      `algebra-playjson-jvm` % "test->test"
+    )

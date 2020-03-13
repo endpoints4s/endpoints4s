@@ -43,10 +43,10 @@ jobs:
       scala: 2.13.1
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
 
-    - stage: coverage
+    - stage: coverage and code formatting
       if: tag is blank
       script:
-        - sbt ++2.12.10 coverage test coverageReport coverageAggregate
+        - sbt scalafmtCheck ++2.12.10 coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
 
     - stage: publish

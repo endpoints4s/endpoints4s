@@ -3,7 +3,9 @@ import EndpointsSettings._
 import LocalCrossProject._
 
 lazy val openapi =
-  crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).in(file("openapi"))
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("openapi"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -20,4 +22,3 @@ lazy val openapi =
 
 lazy val `openapi-js` = openapi.js
 lazy val `openapi-jvm` = openapi.jvm
-

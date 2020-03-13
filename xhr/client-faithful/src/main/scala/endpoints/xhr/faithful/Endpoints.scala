@@ -14,9 +14,9 @@ trait Endpoints extends xhr.Endpoints {
   type Result[A] = Future[A]
 
   def endpoint[A, B](
-    request: Request[A],
-    response: Response[B],
-    docs: EndpointDocs = EndpointDocs()
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {

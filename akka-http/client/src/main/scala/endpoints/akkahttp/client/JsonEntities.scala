@@ -10,13 +10,22 @@ import endpoints.algebra.Codec
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs
+    extends algebra.JsonEntitiesFromCodecs
+    with EndpointsWithCustomErrors {
 
-  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, req) =>
-    req.copy(entity = HttpEntity(ContentTypes.`application/json`, stringCodec(codec).encode(a)))
+  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = {
+    (a, req) =>
+      req.copy(entity =
+        HttpEntity(
+          ContentTypes.`application/json`,
+          stringCodec(codec).encode(a)
+        )
+      )
   }
 
-  def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] = stringCodecResponse(stringCodec(codec))
+  def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
+    stringCodecResponse(stringCodec(codec))
 
 }
 
@@ -27,10 +36,11 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with JsonEntitiesFromCodecs
     with endpoints.ujson.JsonSchemas {
 
-  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] = codec.stringCodec
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }

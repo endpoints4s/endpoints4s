@@ -33,17 +33,23 @@ trait EndpointsDocs extends Endpoints {
   //#convenient-get
 
   //#urls
-  path                                            // the root path “/”
-  path / "users"                                  // “/users”
-  path / "users" / segment[Long]()                // “/users/1234”, “/users/5678”, …
-  path / "assets" / remainingSegments()           // “/assets/images/logo.png”
-  path / "articles" /? qs[Int]("page")            // “/articles?page=2”, “/articles?page=5”, …
+  path // the root path “/”
+  path / "users" // “/users”
+  path / "users" / segment[Long]() // “/users/1234”, “/users/5678”, …
+  path / "assets" / remainingSegments() // “/assets/images/logo.png”
+  path / "articles" /? qs[Int](
+    "page"
+  ) // “/articles?page=2”, “/articles?page=5”, …
   // Optional parameter
-  path / "articles" /? qs[Option[Int]]("page")    // “/articles”, “/articles?page=2”, …
+  path / "articles" /? qs[Option[Int]](
+    "page"
+  ) // “/articles”, “/articles?page=2”, …
   // Repeated parameter
-  path / "articles" /? qs[List[String]]("kinds")  // “/articles?kinds=garden&kinds=woodworking”, …
+  path / "articles" /? qs[List[String]](
+    "kinds"
+  ) // “/articles?kinds=garden&kinds=woodworking”, …
   // Several parameters
-  path /? (qs[String]("q") & qs[String]("lang"))  // “/?q=foo&lang=en”, …
+  path /? (qs[String]("q") & qs[String]("lang")) // “/?q=foo&lang=en”, …
   //#urls
 
   //#urls-with-docs
@@ -67,7 +73,10 @@ trait EndpointsDocs extends Endpoints {
   //#general-response
 
   //#documented-response
-  ok(emptyResponse, docs = Some("A response with an OK status code and no entity"))
+  ok(
+    emptyResponse,
+    docs = Some("A response with an OK status code and no entity")
+  )
   //#documented-response
 
   // Shared definition used by the documentation of interpreters
@@ -79,7 +88,9 @@ trait EndpointsDocs extends Endpoints {
   //#xmap-partial
   import java.time.LocalDate
   import endpoints.{Invalid, Valid}
-  implicit def localDateSegment(implicit string: Segment[String]): Segment[LocalDate] =
+  implicit def localDateSegment(
+      implicit string: Segment[String]
+  ): Segment[LocalDate] =
     string.xmapPartial { s =>
       Try(LocalDate.parse(s)) match {
         case Failure(_)    => Invalid(s"Invalid date value '$s'")

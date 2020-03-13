@@ -16,15 +16,19 @@ pomExtra :=
   </developers>
 
 scalacOptions in (Compile, doc) ++= Seq(
-  "-doc-source-url", s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
-  "-sourcepath", baseDirectory.in(LocalRootProject).value.getAbsolutePath
+  "-doc-source-url",
+  s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
+  "-sourcepath",
+  baseDirectory.in(LocalRootProject).value.getAbsolutePath
 )
 
 autoAPIMappings := true
 
 homepage := Some(url(s"https://github.com/julienrf/endpoints"))
 
-licenses := Seq("MIT License" -> url("http://opensource.org/licenses/mit-license.php"))
+licenses := Seq(
+  "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
+)
 
 scmInfo := Some(
   ScmInfo(

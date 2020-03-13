@@ -11,8 +11,8 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint
 
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+      request: Request[Transport],
+      response: Response[Transport]
   ): MuxEndpoint[Req, Resp, Transport] = endpoint(request, response)
 
 }

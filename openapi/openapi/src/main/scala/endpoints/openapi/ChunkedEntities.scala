@@ -9,7 +9,7 @@ import endpoints.openapi.model.{MediaType, Schema}
   * @group interpreters
   */
 trait ChunkedEntities
-  extends algebra.ChunkedEntities
+    extends algebra.ChunkedEntities
     with EndpointsWithCustomErrors {
 
   type Chunks[A] = Unit
@@ -26,7 +26,8 @@ trait ChunkedEntities
 
   def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]] = bytesChunksEntity
 
-  def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] = bytesChunksEntity
+  def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] =
+    bytesChunksEntity
 
 }
 
@@ -36,17 +37,21 @@ trait ChunkedEntities
   * @group interpreters
   */
 trait ChunkedJsonEntities
-  extends algebra.ChunkedJsonEntities
+    extends algebra.ChunkedJsonEntities
     with ChunkedEntities
     with JsonEntitiesFromSchemas {
 
   private def jsonChunksEntity[A](codec: JsonCodec[A]) =
     Map("application/json" -> MediaType(Some(toSchema(codec.docs))))
 
-  def jsonChunksRequest[A](implicit codec: JsonCodec[A]): RequestEntity[Chunks[A]] =
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
-  def jsonChunksResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[Chunks[A]] =
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
 }

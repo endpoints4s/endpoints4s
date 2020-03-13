@@ -22,17 +22,19 @@ object CommandsService {
     * @return The completed event, or `None` if the command was not applicable
     */
   def apply(command: Command): Option[StoredEvent] = // …
-  //#signatures
+    //#signatures
     atomic { implicit txn =>
-
       val state = aggregatesRef()
 
-      def handleEvent(maybeEvent: Option[Event], maybeAggregate: Option[Meter]): Option[StoredEvent] =
+      def handleEvent(
+          maybeEvent: Option[Event],
+          maybeAggregate: Option[Meter]
+      ): Option[StoredEvent] =
         maybeEvent.map { event =>
           val aggregate = Meter.handleEvent(maybeAggregate, event)
           val timestamp = state.lastTimestamp + 1
           val storedEvent = StoredEvent(timestamp, event)
-          aggregatesRef()= state.copy(
+          aggregatesRef() = state.copy(
             data = state.data + (aggregate.id -> aggregate),
             eventLog = state.eventLog :+ storedEvent,
             timestamp
@@ -45,7 +47,10 @@ object CommandsService {
           handleEvent(Meter.handleCreationCommand(creation), None)
         case update: UpdateCommand =>
           state.data.get(update.meterId).flatMap { aggregate =>
-            handleEvent(Meter.handleUpdateCommand(aggregate, update), Some(aggregate))
+            handleEvent(
+              Meter.handleUpdateCommand(aggregate, update),
+              Some(aggregate)
+            )
           }
       }
 
@@ -53,9 +58,9 @@ object CommandsService {
 
   /** Internal state of the commands service */
   case class State(
-    data: Map[UUID, Meter],
-    eventLog: Vector[StoredEvent],
-    lastTimestamp: Long
+      data: Map[UUID, Meter],
+      eventLog: Vector[StoredEvent],
+      lastTimestamp: Long
   )
 
   //#signatures
@@ -64,8 +69,10 @@ object CommandsService {
     *         before the given optional timestamp are discarded.
     */
   def events(maybeSince: Option[Long]): Vector[StoredEvent] = // …
-  //#signatures
-    aggregatesRef.single().eventLog
+    //#signatures
+    aggregatesRef
+      .single()
+      .eventLog
       .dropWhile(e => maybeSince.exists(e.timestamp < _))
 
 }

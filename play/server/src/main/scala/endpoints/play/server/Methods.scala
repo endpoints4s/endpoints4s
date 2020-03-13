@@ -29,4 +29,3 @@ trait Methods extends algebra.Methods {
 
   def Patch = Method("PATCH")
 }
-

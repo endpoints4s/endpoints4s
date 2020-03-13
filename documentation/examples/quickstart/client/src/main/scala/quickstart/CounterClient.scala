@@ -9,7 +9,7 @@ import endpoints.xhr
   * results in a `js.Thenable`.
   */
 object CounterClient
-  extends CounterEndpoints
+    extends CounterEndpoints
     with xhr.thenable.Endpoints
     with xhr.JsonEntitiesFromSchemas
 //#relevant-code

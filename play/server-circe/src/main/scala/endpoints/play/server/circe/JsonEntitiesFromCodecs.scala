@@ -7,5 +7,5 @@ package endpoints.play.server.circe
   * @group interpreters
   */
 trait JsonEntitiesFromCodecs
-  extends endpoints.play.server.JsonEntitiesFromCodecs
+    extends endpoints.play.server.JsonEntitiesFromCodecs
     with endpoints.algebra.circe.JsonEntitiesFromCodecs

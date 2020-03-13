@@ -27,11 +27,11 @@ trait JsonEntities extends EndpointsWithCustomErrors {
 
   /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]`
     * @group operations */
-  def jsonRequest[A : JsonRequest]: RequestEntity[A]
+  def jsonRequest[A: JsonRequest]: RequestEntity[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]`
     * @group operations */
-  def jsonResponse[A : JsonResponse]: ResponseEntity[A]
+  def jsonResponse[A: JsonResponse]: ResponseEntity[A]
 }
 
 /**
@@ -64,7 +64,7 @@ trait JsonEntitiesFromCodecs extends JsonCodecs {
 
   /** Turns a JsonCodec[A] into a Codec[String, A]
     * @group operations */
-  def stringCodec[A : JsonCodec]: Codec[String, A]
+  def stringCodec[A: JsonCodec]: Codec[String, A]
 
 }
 

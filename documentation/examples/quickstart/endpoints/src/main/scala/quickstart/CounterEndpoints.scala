@@ -12,7 +12,7 @@ import endpoints.{algebra, generic}
   */
 //#get-endpoint-definition
 trait CounterEndpoints
-  extends algebra.Endpoints
+    extends algebra.Endpoints
     with algebra.JsonEntitiesFromSchemas
     with generic.JsonSchemas {
 
@@ -35,7 +35,10 @@ trait CounterEndpoints
     */
 //#endpoint-definition
   val increment: Endpoint[Increment, Unit] =
-    endpoint(post(path / "increment", jsonRequest[Increment]), ok(emptyResponse))
+    endpoint(
+      post(path / "increment", jsonRequest[Increment]),
+      ok(emptyResponse)
+    )
 //#endpoint-definition
 
   // Generically derive the JSON schema of our `Counter`

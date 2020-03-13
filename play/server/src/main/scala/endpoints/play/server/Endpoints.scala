@@ -2,7 +2,15 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import play.api.http.{HttpEntity, Writeable}
-import endpoints.{Invalid, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import endpoints.{
+  Invalid,
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Valid,
+  Validated,
+  algebra
+}
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -43,13 +51,20 @@ import scala.util.control.NonFatal
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+trait Endpoints
+    extends algebra.Endpoints
+    with EndpointsWithCustomErrors
+    with BuiltInErrors
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
   * @group interpreters
   */
-trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes {
+trait EndpointsWithCustomErrors
+    extends algebra.EndpointsWithCustomErrors
+    with Urls
+    with Methods
+    with StatusCodes {
 
   val playComponents: PlayComponents
 
@@ -67,24 +82,40 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   /** Always succeeds in extracting no information from the headers */
   lazy val emptyRequestHeaders: RequestHeaders[Unit] = _ => Valid(())
 
-  def requestHeader(name: String,docs: Option[String]): Headers => Validated[String] =
-    headers => headers.get(name) match {
-      case Some(value) => Valid(value)
-      case None        => Invalid(s"Missing header $name")
-    }
+  def requestHeader(
+      name: String,
+      docs: Option[String]
+  ): Headers => Validated[String] =
+    headers =>
+      headers.get(name) match {
+        case Some(value) => Valid(value)
+        case None        => Invalid(s"Missing header $name")
+      }
 
-  def optRequestHeader(name: String,docs: Option[String]): Headers => Validated[Option[String]] =
+  def optRequestHeader(
+      name: String,
+      docs: Option[String]
+  ): Headers => Validated[Option[String]] =
     headers => Valid(headers.get(name))
 
-  implicit lazy val reqHeadersInvFunctor: endpoints.InvariantFunctor[RequestHeaders] = new endpoints.InvariantFunctor[RequestHeaders] {
-    def xmap[A, B](fa: RequestHeaders[A], f: A => B, g: B => A): RequestHeaders[B] =
-      headers => fa(headers).map(f)
-  }
+  implicit lazy val reqHeadersInvFunctor
+      : endpoints.InvariantFunctor[RequestHeaders] =
+    new endpoints.InvariantFunctor[RequestHeaders] {
+      def xmap[A, B](
+          fa: RequestHeaders[A],
+          f: A => B,
+          g: B => A
+      ): RequestHeaders[B] =
+        headers => fa(headers).map(f)
+    }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit tupler: Tupler[A, B]): RequestHeaders[tupler.Out] =
-      headers => fa(headers).zip(fb(headers))
-  }
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+    new Semigroupal[RequestHeaders] {
+      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
+          implicit tupler: Tupler[A, B]
+      ): RequestHeaders[tupler.Out] =
+        headers => fa(headers).zip(fb(headers))
+    }
 
   /**
     * An HTTP request.
@@ -92,6 +123,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     * Has an instance of `InvariantFunctor`.
     */
   trait Request[A] {
+
     /**
       * Extracts a `BodyParser[A]` from an incoming request. That is
       * a way to extract an `A` from an incoming request.
@@ -111,7 +143,10 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] =
         new Request[B] {
           def decode: RequestExtractor[BodyParser[B]] =
-            functorRequestExtractor.fmap(m.decode, (bodyParser: BodyParser[A]) => bodyParser.map(f1))
+            functorRequestExtractor.fmap(
+              m.decode,
+              (bodyParser: BodyParser[A]) => bodyParser.map(f1)
+            )
           def encode(a: B): Call = m.encode(f2(a))
         }
     }
@@ -120,6 +155,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     * The URL and HTTP headers of a request.
     */
   trait UrlAndHeaders[A] { parent =>
+
     /**
       * Attempts to extract an `A` from an incoming request.
       *
@@ -149,7 +185,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
         def decode: RequestExtractor[BodyParser[B]] =
           request =>
             parent.decode(request).map {
-              case inv: Invalid => BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
+              case inv: Invalid =>
+                BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
               case Valid(a) => toB(a)
             }
         def encode(b: B): Call = parent.encode(toA(b))
@@ -159,23 +196,34 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   /** Decodes a request entity */
   type RequestEntity[A] = BodyParser[A]
 
-  lazy val emptyRequest: BodyParser[Unit] = BodyParser(_ => Accumulator.done(Right(())))
+  lazy val emptyRequest: BodyParser[Unit] =
+    BodyParser(_ => Accumulator.done(Right(())))
 
   lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
 
-  implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] = new endpoints.InvariantFunctor[RequestEntity] {
-    def xmap[From, To](f: BodyParser[From], map: From => To, contramap: To => From): BodyParser[To] =
-      f.map(map)
-  }
+  implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] =
+    new endpoints.InvariantFunctor[RequestEntity] {
+      def xmap[From, To](
+          f: BodyParser[From],
+          map: From => To,
+          contramap: To => From
+      ): BodyParser[To] =
+        f.map(map)
+    }
 
-  protected def extractMethodUrlAndHeaders[A, B](method: Method, url: Url[A], headers: RequestHeaders[B]): UrlAndHeaders[(A, B)] =
+  protected def extractMethodUrlAndHeaders[A, B](
+      method: Method,
+      url: Url[A],
+      headers: RequestHeaders[B]
+  ): UrlAndHeaders[(A, B)] =
     new UrlAndHeaders[(A, B)] {
       val decode: RequestExtractor[Validated[(A, B)]] =
-        request => method.extract(request).flatMap { _ =>
-          url.decodeUrl(request).map { validatedA =>
-            validatedA.zip(headers(request.headers))
+        request =>
+          method.extract(request).flatMap { _ =>
+            url.decodeUrl(request).map { validatedA =>
+              validatedA.zip(headers(request.headers))
+            }
           }
-        }
       def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
     }
 
@@ -187,12 +235,15 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     * @param headers Request headers
     */
   def request[A, B, C, AB, Out](
-    method: Method,
-    url: Url[A],
-    entity: RequestEntity[B],
-    docs: Documentation,
-    headers: RequestHeaders[C]
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+      method: Method,
+      url: Url[A],
+      entity: RequestEntity[B],
+      docs: Documentation,
+      headers: RequestHeaders[C]
+  )(
+      implicit tuplerAB: Tupler.Aux[A, B, AB],
+      tuplerABC: Tupler.Aux[AB, C, Out]
+  ): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
         case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
@@ -202,7 +253,6 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
         (a, c)
       }
 
-
   /**
     * Turns the `A` information into a proper Play `Result`
     */
@@ -210,58 +260,80 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
 
   implicit lazy val responseInvFunctor: endpoints.InvariantFunctor[Response] =
     new endpoints.InvariantFunctor[Response] {
-      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa compose g
+      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+        fa compose g
     }
 
   type ResponseEntity[A] = A => HttpEntity
 
-  private[server] def responseEntityFromWriteable[A](writeable: Writeable[A]): ResponseEntity[A] =
+  private[server] def responseEntityFromWriteable[A](
+      writeable: Writeable[A]
+  ): ResponseEntity[A] =
     a => writeable.toEntity(a)
 
   /** An empty response entity */
   def emptyResponse: ResponseEntity[Unit] =
-    responseEntityFromWriteable(Writeable.writeableOf_EmptyContent.map[Unit](_ => Results.EmptyContent()))
+    responseEntityFromWriteable(
+      Writeable.writeableOf_EmptyContent.map[Unit](_ => Results.EmptyContent())
+    )
 
   /** A text entity */
-  def textResponse: ResponseEntity[String] = responseEntityFromWriteable(implicitly)
+  def textResponse: ResponseEntity[String] =
+    responseEntityFromWriteable(implicitly)
 
   /** A successful HTTP response (status code 200) with an HTML entity */
-  lazy val htmlResponse: ResponseEntity[Html] = responseEntityFromWriteable(implicitly)
+  lazy val htmlResponse: ResponseEntity[Html] = responseEntityFromWriteable(
+    implicitly
+  )
 
   type ResponseHeaders[A] = A => Seq[(String, String)]
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
+          implicit tupler: Tupler[A, B]
+      ): ResponseHeaders[tupler.Out] =
         out => {
           val (a, b) = tupler.unapply(out)
           fa(a) ++ fb(b)
         }
     }
 
-  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvFunctor
+      : PartialInvariantFunctor[ResponseHeaders] =
     new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+      def xmapPartial[A, B](
+          fa: ResponseHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): ResponseHeaders[B] =
         fa compose g
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Nil
 
-  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+  def responseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[String] =
     value => (name, value) :: Nil
 
-  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] = {
+  def optResponseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[Option[String]] = {
     case Some(value) => (name, value) :: Nil
     case None        => Nil
   }
 
   def response[A, B, R](
-    statusCode: StatusCode,
-    entity: ResponseEntity[A],
-    docs: Documentation = None,
-    headers: ResponseHeaders[B]
-  )(implicit
-    tupler: Tupler.Aux[A, B, R]
+      statusCode: StatusCode,
+      entity: ResponseEntity[A],
+      docs: Documentation = None,
+      headers: ResponseHeaders[B]
+  )(
+      implicit
+      tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     r => {
       val (a, b) = tupler.unapply(r)
@@ -269,7 +341,10 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       statusCode.sendEntity(entity(a)).withHeaders(httpHeaders: _*)
     }
 
-  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
+  def choiceResponse[A, B](
+      responseA: Response[A],
+      responseB: Response[B]
+  ): Response[Either[A, B]] = {
     case Left(a)  => responseA(a)
     case Right(b) => responseB(b)
   }
@@ -279,7 +354,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     * @param other Endpoint to redirect to
     * @param args Arguments to pass to the endpoint to generate its URL
     */
-  def redirect[A](other: => Endpoint[A, _])(args: A): Response[Unit] = _ => Results.Redirect(other.call(args))
+  def redirect[A](other: => Endpoint[A, _])(args: A): Response[Unit] =
+    _ => Results.Redirect(other.call(args))
 
   /** Something that can be used as a Play request handler */
   trait ToPlayHandler {
@@ -290,6 +366,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     * Concrete representation of an `Endpoint` for routing purpose.
     */
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
+
     /** Reverse routing */
     def call(a: A): Call = request.encode(a)
 
@@ -300,33 +377,39 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       * @param service Function that turns the information carried by the request into
       *                the information necessary to build the response
       */
-    def implementedBy(service: A => B): EndpointWithHandler[A, B] = EndpointWithHandler(this, service andThen Future.successful)
+    def implementedBy(service: A => B): EndpointWithHandler[A, B] =
+      EndpointWithHandler(this, service andThen Future.successful)
 
     /**
       * Same as `implementedBy`, but with an async `service`.
       */
-    def implementedByAsync(service: A => Future[B]): EndpointWithHandler[A, B] = EndpointWithHandler(this, service)
+    def implementedByAsync(service: A => Future[B]): EndpointWithHandler[A, B] =
+      EndpointWithHandler(this, service)
   }
 
   /**
     * An endpoint from which we can get a Play request handler.
     */
-  case class EndpointWithHandler[A, B](endpoint: Endpoint[A, B], service: A => Future[B]) extends ToPlayHandler {
+  case class EndpointWithHandler[A, B](
+      endpoint: Endpoint[A, B],
+      service: A => Future[B]
+  ) extends ToPlayHandler {
+
     /**
       * Builds a request `Handler` (a Play `Action`) if the incoming request headers matches
       * the `endpoint` definition.
       */
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       try {
-        endpoint.request.decode(header)
+        endpoint.request
+          .decode(header)
           .map { bodyParser =>
             EssentialAction { headers =>
               try {
                 val action =
-                  playComponents.defaultActionBuilder.async(bodyParser) { request =>
-                    service(request.body).map { b =>
-                      endpoint.response(b)
-                    }
+                  playComponents.defaultActionBuilder.async(bodyParser) {
+                    request =>
+                      service(request.body).map { b => endpoint.response(b) }
                   }
                 action(headers).recover {
                   case NonFatal(t) => handleServerError(t)
@@ -337,14 +420,15 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
             }
           }
       } catch {
-        case NonFatal(t) => Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
+        case NonFatal(t) =>
+          Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
       }
   }
 
   def endpoint[A, B](
-    request: Request[A],
-    response: Response[B],
-    docs: EndpointDocs = EndpointDocs()
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     Endpoint(request, response)
 
@@ -357,17 +441,21 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     *   )
     * }}}
     */
-  def routesFromEndpoints(endpoints: ToPlayHandler*): PartialFunction[RequestHeader, PlayHandler] =
-    Function.unlift { request : RequestHeader =>
+  def routesFromEndpoints(
+      endpoints: ToPlayHandler*
+  ): PartialFunction[RequestHeader, PlayHandler] =
+    Function.unlift { request: RequestHeader =>
       def loop(es: Seq[ToPlayHandler]): Option[PlayHandler] =
         es match {
           case e +: es2 => e.playHandler(request).orElse(loop(es2))
-          case Nil => None
+          case Nil      => None
         }
       loop(endpoints)
     }
 
-  implicit def EmptyEndpointToPlayHandler[A, B](endpoint: Endpoint[A, B])(implicit ev: Unit =:= B): ToPlayHandler =
+  implicit def EmptyEndpointToPlayHandler[A, B](
+      endpoint: Endpoint[A, B]
+  )(implicit ev: Unit =:= B): ToPlayHandler =
     endpoint.implementedBy(_ => ())
 
   /**

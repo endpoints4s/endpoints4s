@@ -63,24 +63,33 @@ trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
   type JsonCodec[A] = Format[A]
 //#type-carrier
 
-  def stringCodec[A : Format]: Codec[String, A] = new Codec[String, A] {
+  def stringCodec[A: Format]: Codec[String, A] = new Codec[String, A] {
 
     def decode(from: String): Validated[A] =
       (Try(Json.parse(from)) match {
         case Failure(_) => Left(Invalid("Unable to parse entity as JSON"))
         case Success(a) => Right(a)
       }).flatMap { json =>
-          def showErrors(errors: collection.Seq[(JsPath, collection.Seq[JsonValidationError])]): Invalid =
-            Invalid((
+        def showErrors(
+            errors: collection.Seq[
+              (JsPath, collection.Seq[JsonValidationError])
+            ]
+        ): Invalid =
+          Invalid(
+            (
               for {
                 (path, pathErrors) <- errors.iterator
                 error <- pathErrors
               } yield s"${error.message} for ${path.toJsonString}"
-            ).toSeq)
-          Json.fromJson[A](json).asEither
-            .left.map(showErrors)
-            .map(Valid(_))
-        }.merge
+            ).toSeq
+          )
+        Json
+          .fromJson[A](json)
+          .asEither
+          .left
+          .map(showErrors)
+          .map(Valid(_))
+      }.merge
 
     def encode(from: A): String = Json.stringify(Json.toJson(from))
 

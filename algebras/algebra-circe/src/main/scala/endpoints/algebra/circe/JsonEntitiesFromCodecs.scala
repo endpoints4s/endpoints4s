@@ -3,7 +3,14 @@ package endpoints.algebra.circe
 import cats.Show
 import endpoints.{Invalid, Valid, Validated}
 import endpoints.algebra.{Codec, Decoder, Encoder}
-import io.circe.{DecodingFailure, Json, ParsingFailure, parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
+import io.circe.{
+  DecodingFailure,
+  Json,
+  ParsingFailure,
+  parser,
+  Decoder => CirceDecoder,
+  Encoder => CirceEncoder
+}
 
 /**
   * Partial interpreter for [[endpoints.algebra.JsonEntitiesFromCodecs]] that only
@@ -64,28 +71,40 @@ trait JsonEntitiesFromCodecs extends endpoints.algebra.JsonEntitiesFromCodecs {
   type JsonCodec[A] = CirceCodec[A]
 //#type-carrier
 
-  def stringCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] = new Codec[String, A] {
+  def stringCodec[A](implicit codec: CirceCodec[A]): Codec[String, A] =
+    new Codec[String, A] {
 
-    def decode(from: String): Validated[A] =
-      parser.parse(from).left.map(Show[ParsingFailure].show)
-        .flatMap { json =>
-          codec.decoder.decodeJson(json).left.map(Show[DecodingFailure].show)
-        }
-        .fold(Invalid(_), Valid(_))
+      def decode(from: String): Validated[A] =
+        parser
+          .parse(from)
+          .left
+          .map(Show[ParsingFailure].show)
+          .flatMap { json =>
+            codec.decoder.decodeJson(json).left.map(Show[DecodingFailure].show)
+          }
+          .fold(Invalid(_), Valid(_))
 
-    def encode(from: A): String =
-      codec.encoder.apply(from).noSpaces
+      def encode(from: A): String =
+        codec.encoder.apply(from).noSpaces
 
-  }
-
-  implicit def circeDecoderToDecoder[A](implicit decoder: CirceDecoder[A]): Decoder[Json, A] =
-    new Decoder[Json, A] {
-      def decode(from: Json): Validated[A] =
-        decoder.decodeJson(from)
-          .fold(failure => Invalid(Show[DecodingFailure].show(failure)), Valid(_))
     }
 
-  implicit def circeEncoderToEncoder[A](implicit encoder: CirceEncoder[A]): Encoder[A, Json] =
+  implicit def circeDecoderToDecoder[A](
+      implicit decoder: CirceDecoder[A]
+  ): Decoder[Json, A] =
+    new Decoder[Json, A] {
+      def decode(from: Json): Validated[A] =
+        decoder
+          .decodeJson(from)
+          .fold(
+            failure => Invalid(Show[DecodingFailure].show(failure)),
+            Valid(_)
+          )
+    }
+
+  implicit def circeEncoderToEncoder[A](
+      implicit encoder: CirceEncoder[A]
+  ): Encoder[A, Json] =
     new Encoder[A, Json] {
       def encode(from: A): Json = encoder(from)
     }

@@ -13,6 +13,11 @@ trait Headers {
     */
   case class DocumentedHeaders(value: List[DocumentedHeader])
 
-  case class DocumentedHeader(name: String, description: Option[String], required: Boolean, schema: Schema)
+  case class DocumentedHeader(
+      name: String,
+      description: Option[String],
+      required: Boolean,
+      schema: Schema
+  )
 
 }

@@ -14,25 +14,26 @@ object EndpointsSettings {
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
-      "-encoding", "UTF-8",
+      "-encoding",
+      "UTF-8",
       "-unchecked",
       "-language:implicitConversions",
       "-Xlint",
       "-Ywarn-dead-code",
       "-Ywarn-numeric-widen"
     ) ++
-    (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, n)) if n >= 13 => Seq("-Xsource:2.14")
-      case _ =>
-        Seq(
-          "-Yno-adapted-args",
-          "-Ywarn-unused-import",
-          "-Ywarn-value-discard",
-          "-Xexperimental",
-          "-Xfuture",
-          "-language:higherKinds"
-        )
-    })
+      (CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, n)) if n >= 13 => Seq("-Xsource:2.14")
+        case _ =>
+          Seq(
+            "-Yno-adapted-args",
+            "-Ywarn-unused-import",
+            "-Ywarn-value-discard",
+            "-Xexperimental",
+            "-Xfuture",
+            "-language:higherKinds"
+          )
+      })
   )
   val `scala 2.13` = Seq(
     scalaVersion := "2.13.1",
@@ -53,13 +54,19 @@ object EndpointsSettings {
         </developer>
       </developers>,
     scalacOptions in (Compile, doc) ++= Seq(
-      "-doc-source-url", s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
-      "-sourcepath", baseDirectory.in(LocalRootProject).value.getAbsolutePath
+      "-doc-source-url",
+      s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
+      "-sourcepath",
+      baseDirectory.in(LocalRootProject).value.getAbsolutePath
     ),
-    apiURL := Some(url(s"http://julienrf.github.io/endpoints/api/${version.value}/")),
+    apiURL := Some(
+      url(s"http://julienrf.github.io/endpoints/api/${version.value}/")
+    ),
     autoAPIMappings := true,
     homepage := Some(url(s"https://github.com/julienrf/endpoints")),
-    licenses := Seq("MIT License" -> url("http://opensource.org/licenses/mit-license.php")),
+    licenses := Seq(
+      "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
+    ),
     scmInfo := Some(
       ScmInfo(
         url(s"https://github.com/julienrf/endpoints"),
@@ -86,19 +93,24 @@ object EndpointsSettings {
   val ujsonVersion = "1.0.0"
 
   val scalaTestVersion = "3.1.1"
-  val scalaTestDependency = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
-  val addScalaTestCrossDependency = libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
+  val scalaTestDependency =
+    "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+  val addScalaTestCrossDependency =
+    libraryDependencies += "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(
     scalacOptions in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 13 => "-Ymacro-annotations" :: Nil
-        case _ => Nil
+        case _                       => Nil
       }
     },
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 13 => Nil
-        case _ => compilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full) :: Nil
+        case _ =>
+          compilerPlugin(
+            "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
+          ) :: Nil
       }
     }
   )

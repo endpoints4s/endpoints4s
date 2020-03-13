@@ -4,14 +4,20 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.testkit.TestKit
 import endpoints.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
-import endpoints.algebra.{Address, BasicAuthenticationTestApi, JsonTestApi, User}
+import endpoints.algebra.{
+  Address,
+  BasicAuthenticationTestApi,
+  JsonTestApi,
+  User
+}
 import endpoints.generic
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestJsonSchemaClient(settings: EndpointsSettings)(implicit EC: ExecutionContext,
-                                              M: Materializer)
-    extends Endpoints(settings)
+class TestJsonSchemaClient(settings: EndpointsSettings)(
+    implicit EC: ExecutionContext,
+    M: Materializer
+) extends Endpoints(settings)
     with BasicAuthentication
     with BasicAuthenticationTestApi
     with generic.JsonSchemas
@@ -30,11 +36,15 @@ class AkkaHttpClientEndpointsJsonSchemaTest
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(
-      AkkaHttpRequestExecutor.cachedHostConnectionPool("localhost",
-                                                       wiremockPort)))
+      AkkaHttpRequestExecutor
+        .cachedHostConnectionPool("localhost", wiremockPort)
+    )
+  )
 
-  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp],
-                      args: Req): Future[Resp] = endpoint(args)
+  def call[Req, Resp](
+      endpoint: client.Endpoint[Req, Resp],
+      args: Req
+  ): Future[Resp] = endpoint(args)
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 

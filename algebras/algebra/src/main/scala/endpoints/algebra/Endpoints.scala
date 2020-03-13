@@ -46,9 +46,9 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @group operations
     */
   def endpoint[A, B](
-    request: Request[A],
-    response: Response[B],
-    docs: EndpointDocs = EndpointDocs()
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B]
 
   /**
@@ -59,11 +59,11 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param deprecated  Indicates whether this endpoint is deprecated or not
     */
   case class EndpointDocs(
-    summary: Documentation = None,
-    description: Documentation = None,
-    tags: List[String] = Nil,
-    callbacks: Map[String, CallbacksDocs] = Map.empty,
-    deprecated: Boolean = false
+      summary: Documentation = None,
+      description: Documentation = None,
+      tags: List[String] = Nil,
+      callbacks: Map[String, CallbacksDocs] = Map.empty,
+      deprecated: Boolean = false
   )
 
   /**
@@ -78,10 +78,10 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param response Expected response
     */
   case class CallbackDocs(
-    method: Method,
-    entity: RequestEntity[_],
-    response: Response[_],
-    requestDocs: Documentation = None
+      method: Method,
+      entity: RequestEntity[_],
+      response: Response[_],
+      requestDocs: Documentation = None
   )
 
 }

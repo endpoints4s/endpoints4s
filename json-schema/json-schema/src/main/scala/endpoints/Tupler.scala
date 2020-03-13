@@ -81,27 +81,32 @@ trait Tupler3 extends Tupler2 {
   implicit def tupler2And2[A, B, C, D]: Aux[(A, B), (C, D), (A, B, C, D)] =
     new Tupler[(A, B), (C, D)] {
       type Out = (A, B, C, D)
-      def apply(ab: (A, B), cd: (C, D)): (A, B, C, D) = (ab._1, ab._2, cd._1, cd._2)
+      def apply(ab: (A, B), cd: (C, D)): (A, B, C, D) =
+        (ab._1, ab._2, cd._1, cd._2)
       def unapply(out: (A, B, C, D)): ((A, B), (C, D)) = {
         val (a, b, c, d) = out
         ((a, b), (c, d))
       }
     }
 
-  implicit def tupler1And4[A, B, C, D, E]: Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
+  implicit def tupler1And4[A, B, C, D, E]
+      : Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
     new Tupler[A, (B, C, D, E)] {
       type Out = (A, B, C, D, E)
-      def apply(a: A, bcde: (B, C, D, E)): (A, B, C, D, E) = (a, bcde._1, bcde._2, bcde._3, bcde._4)
+      def apply(a: A, bcde: (B, C, D, E)): (A, B, C, D, E) =
+        (a, bcde._1, bcde._2, bcde._3, bcde._4)
       def unapply(out: (A, B, C, D, E)): (A, (B, C, D, E)) = {
         val (a, b, c, d, e) = out
         (a, (b, c, d, e))
       }
     }
 
-  implicit def tupler2And3[A, B, C, D, E]: Tupler[(A, B), (C, D, E)] { type Out = (A, B, C, D, E) } =
+  implicit def tupler2And3[A, B, C, D, E]
+      : Tupler[(A, B), (C, D, E)] { type Out = (A, B, C, D, E) } =
     new Tupler[(A, B), (C, D, E)] {
       type Out = (A, B, C, D, E)
-      def apply(ab: (A, B), cde: (C, D, E)): (A, B, C, D, E) = (ab._1, ab._2, cde._1, cde._2, cde._3)
+      def apply(ab: (A, B), cde: (C, D, E)): (A, B, C, D, E) =
+        (ab._1, ab._2, cde._1, cde._2, cde._3)
       def unapply(out: (A, B, C, D, E)): ((A, B), (C, D, E)) = {
         val (a, b, c, d, e) = out
         ((a, b), (c, d, e))

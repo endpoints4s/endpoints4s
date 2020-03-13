@@ -2,7 +2,16 @@ package endpoints.sttp.client
 
 import java.net.URI
 
-import endpoints.{Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import endpoints.{
+  Invalid,
+  InvariantFunctor,
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Valid,
+  Validated,
+  algebra
+}
 import endpoints.algebra.{Codec, Documentation}
 import com.softwaremill.sttp
 
@@ -19,8 +28,12 @@ import com.softwaremill.sttp
   *
   * @group interpreters
   */
-class Endpoints[R[_]](val host: String, val backend: sttp.SttpBackend[R, Nothing])
-  extends algebra.Endpoints with EndpointsWithCustomErrors[R] with BuiltInErrors[R]
+class Endpoints[R[_]](
+    val host: String,
+    val backend: sttp.SttpBackend[R, Nothing]
+) extends algebra.Endpoints
+    with EndpointsWithCustomErrors[R]
+    with BuiltInErrors[R]
 
 /**
   * An interpreter for [[endpoints.algebra.Endpoints]] that builds a client issuing requests using
@@ -29,8 +42,11 @@ class Endpoints[R[_]](val host: String, val backend: sttp.SttpBackend[R, Nothing
   * @tparam R The monad wrapping the response. It is defined by the backend
   * @group interpreters
   */
-trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
-  with Urls with Methods with StatusCodes {
+trait EndpointsWithCustomErrors[R[_]]
+    extends algebra.EndpointsWithCustomErrors
+    with Urls
+    with Methods
+    with StatusCodes {
 
   val host: String
   val backend: sttp.SttpBackend[R, Nothing]
@@ -46,26 +62,40 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
   /** Does not modify the request */
   lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, request) => request
 
-  def requestHeader(name: String, docs: Documentation): RequestHeaders[String] = (value, request) => request.header(name, value)
+  def requestHeader(name: String, docs: Documentation): RequestHeaders[String] =
+    (value, request) => request.header(name, value)
 
-  def optRequestHeader(name: String, docs: Documentation): (Option[String], SttpRequest) => SttpRequest = {
+  def optRequestHeader(
+      name: String,
+      docs: Documentation
+  ): (Option[String], SttpRequest) => SttpRequest = {
     case (Some(value), request) => request.header(name, value)
-    case (None, request) => request
+    case (None, request)        => request
   }
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
-    override def xmap[From, To](f: (From, SttpRequest) => SttpRequest, map: From => To, contramap: To => From): (To, SttpRequest) => SttpRequest =
-      (to, request) => f(contramap(to), request)
-  }
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
+    new InvariantFunctor[RequestHeaders] {
+      override def xmap[From, To](
+          f: (From, SttpRequest) => SttpRequest,
+          map: From => To,
+          contramap: To => From
+      ): (To, SttpRequest) => SttpRequest =
+        (to, request) => f(contramap(to), request)
+    }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def product[A, B](fa: (A, SttpRequest) => SttpRequest, fb: (B, SttpRequest) => SttpRequest)(implicit tupler: Tupler[A, B]): (tupler.Out, SttpRequest) => SttpRequest =
-      (ab, request) => {
-        val (a, b) = tupler.unapply(ab)
-        fa(a, fb(b, request))
-      }
-  }
-
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+    new Semigroupal[RequestHeaders] {
+      override def product[A, B](
+          fa: (A, SttpRequest) => SttpRequest,
+          fb: (B, SttpRequest) => SttpRequest
+      )(
+          implicit tupler: Tupler[A, B]
+      ): (tupler.Out, SttpRequest) => SttpRequest =
+        (ab, request) => {
+          val (a, b) = tupler.unapply(ab)
+          fa(a, fb(b, request))
+        }
+    }
 
   /**
     * A function that takes an `A` information and returns a `sttp.Request`
@@ -85,15 +115,26 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
     case (bodyValue, request) => request.body(bodyValue)
   }
 
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
-    override def xmap[From, To](f: (From, SttpRequest) => SttpRequest, map: From => To, contramap: To => From): (To, SttpRequest) => SttpRequest =
-      (to, req) => f(contramap(to), req)
-  }
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
+    new InvariantFunctor[RequestEntity] {
+      override def xmap[From, To](
+          f: (From, SttpRequest) => SttpRequest,
+          map: From => To,
+          contramap: To => From
+      ): (To, SttpRequest) => SttpRequest =
+        (to, req) => f(contramap(to), req)
+    }
 
   def request[A, B, C, AB, Out](
-    method: Method, url: Url[A],
-    entity: RequestEntity[B], docs: Documentation, headers: RequestHeaders[C]
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+      method: Method,
+      url: Url[A],
+      entity: RequestEntity[B],
+      docs: Documentation,
+      headers: RequestHeaders[C]
+  )(
+      implicit tuplerAB: Tupler.Aux[A, B, AB],
+      tuplerABC: Tupler.Aux[AB, C, Out]
+  ): Request[Out] =
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
@@ -104,6 +145,7 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
     }
 
   trait Response[A] {
+
     /**
       * Function to validate the response (headers, code).
       */
@@ -115,7 +157,8 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
         new Response[B] {
           def decodeResponse(response: sttp.Response[String]): Option[R[B]] =
-            fa.decodeResponse(response).map(ra => backend.responseMonad.map(ra)(f))
+            fa.decodeResponse(response)
+              .map(ra => backend.responseMonad.map(ra)(f))
         }
     }
 
@@ -126,7 +169,9 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
     def decodeEntity(response: sttp.Response[String]): R[A]
   }
 
-  private[sttp] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
+  private[sttp] def mapResponseEntity[A, B](
+      entity: ResponseEntity[A]
+  )(f: A => B): ResponseEntity[B] =
     new ResponseEntity[B] {
       def decodeEntity(response: sttp.Response[String]): R[B] =
         backend.responseMonad.map(entity.decodeEntity(response))(f)
@@ -134,7 +179,8 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
 
   /** Successfully decodes no information from a response */
   def emptyResponse: ResponseEntity[Unit] = new ResponseEntity[Unit] {
-    def decodeEntity(response: sttp.Response[String]) = backend.responseMonad.unit(())
+    def decodeEntity(response: sttp.Response[String]) =
+      backend.responseMonad.unit(())
   }
 
   /** Successfully decodes string information from a response */
@@ -143,64 +189,101 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
       backend.responseMonad.unit(response.body.merge)
   }
 
-  def stringCodecResponse[A](implicit codec: Codec[String, A]): ResponseEntity[A] =
+  def stringCodecResponse[A](
+      implicit codec: Codec[String, A]
+  ): ResponseEntity[A] =
     sttpResponse =>
       codec.decode(sttpResponse.body.merge) match {
         case Valid(a) => backend.responseMonad.unit(a)
-        case Invalid(errors) => backend.responseMonad.error(new Exception(errors.mkString(". ")))
+        case Invalid(errors) =>
+          backend.responseMonad.error(new Exception(errors.mkString(". ")))
       }
 
   type ResponseHeaders[A] = Map[String, String] => Validated[A]
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
+          implicit tupler: Tupler[A, B]
+      ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvFunctor
+      : PartialInvariantFunctor[ResponseHeaders] =
     new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+      def xmapPartial[A, B](
+          fa: ResponseHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): ResponseHeaders[B] =
         headers => fa(headers).flatMap(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
 
-  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+  def responseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[String] =
     headers =>
       Validated.fromOption(
         headers.get(name.toLowerCase)
       )(s"Missing response header '$name'")
 
-  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] =
+  def optResponseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[Option[String]] =
     headers => Valid(headers.get(name.toLowerCase))
 
   def response[A, B, Res](
-    statusCode: StatusCode,
-    entity: ResponseEntity[A],
-    docs: Documentation = None,
-    headers: ResponseHeaders[B]
-  )(implicit
-    tupler: Tupler.Aux[A, B, Res]
+      statusCode: StatusCode,
+      entity: ResponseEntity[A],
+      docs: Documentation = None,
+      headers: ResponseHeaders[B]
+  )(
+      implicit
+      tupler: Tupler.Aux[A, B, Res]
   ): Response[Res] = {
     new Response[Res] {
       def decodeResponse(response: sttp.Response[String]) = {
         if (response.code == statusCode) {
-          val headersMap = response.headers.iterator.map { case (k, v) => (k.toLowerCase, v) }.toMap
+          val headersMap = response.headers.iterator.map {
+            case (k, v) => (k.toLowerCase, v)
+          }.toMap
           headers(headersMap) match {
-            case Valid(b)        => Some(mapResponseEntity(entity)(tupler(_, b)).decodeEntity(response))
-            case Invalid(errors) => Some(backend.responseMonad.error(new Exception(errors.mkString(". "))))
+            case Valid(b) =>
+              Some(
+                mapResponseEntity(entity)(tupler(_, b)).decodeEntity(response)
+              )
+            case Invalid(errors) =>
+              Some(
+                backend.responseMonad
+                  .error(new Exception(errors.mkString(". ")))
+              )
           }
         } else None
       }
     }
   }
 
-  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] = {
+  def choiceResponse[A, B](
+      responseA: Response[A],
+      responseB: Response[B]
+  ): Response[Either[A, B]] = {
     new Response[Either[A, B]] {
-      def decodeResponse(response: sttp.Response[String]): Option[R[Either[A, B]]] =
-        responseA.decodeResponse(response).map(backend.responseMonad.map(_)(Left(_): Either[A, B]))
-          .orElse(responseB.decodeResponse(response).map(backend.responseMonad.map(_)(Right(_))))
+      def decodeResponse(
+          response: sttp.Response[String]
+      ): Option[R[Either[A, B]]] =
+        responseA
+          .decodeResponse(response)
+          .map(backend.responseMonad.map(_)(Left(_): Either[A, B]))
+          .orElse(
+            responseB
+              .decodeResponse(response)
+              .map(backend.responseMonad.map(_)(Right(_)))
+          )
     }
   }
 
@@ -212,29 +295,53 @@ trait EndpointsWithCustomErrors[R[_]] extends algebra.EndpointsWithCustomErrors
   //#endpoint-type
 
   def endpoint[A, B](
-    request: Request[A],
-    response: Response[B],
-    docs: EndpointDocs = EndpointDocs()
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     a => {
-      val req: sttp.Request[String, Nothing] = request(a).response(sttp.asString)
+      val req: sttp.Request[String, Nothing] =
+        request(a).response(sttp.asString)
       val result = backend.send(req)
       backend.responseMonad.flatMap(result) { sttpResponse =>
         decodeResponse(response, sttpResponse)
       }
     }
 
-  private[client] def decodeResponse[A](response: Response[A], sttpResponse: sttp.Response[String]): R[A] = {
+  private[client] def decodeResponse[A](
+      response: Response[A],
+      sttpResponse: sttp.Response[String]
+  ): R[A] = {
     val maybeResponse =
       response.decodeResponse(sttpResponse)
     def maybeClientErrors =
-      clientErrorsResponse.decodeResponse(sttpResponse)
-        .map(backend.responseMonad.flatMap[ClientErrors, A](_)(clientErrors => backend.responseMonad.error(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+      clientErrorsResponse
+        .decodeResponse(sttpResponse)
+        .map(
+          backend.responseMonad.flatMap[ClientErrors, A](_)(clientErrors =>
+            backend.responseMonad.error(
+              new Exception(
+                clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+              )
+            )
+          )
+        )
     def maybeServerError =
-      serverErrorResponse.decodeResponse(sttpResponse)
-        .map(backend.responseMonad.flatMap[ServerError, A](_)(serverError => backend.responseMonad.error(serverErrorToThrowable(serverError))))
-    maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
-      .getOrElse(backend.responseMonad.error(new Throwable(s"Unexpected response status: ${sttpResponse.code}")))
+      serverErrorResponse
+        .decodeResponse(sttpResponse)
+        .map(
+          backend.responseMonad.flatMap[ServerError, A](_)(serverError =>
+            backend.responseMonad.error(serverErrorToThrowable(serverError))
+          )
+        )
+    maybeResponse
+      .orElse(maybeClientErrors)
+      .orElse(maybeServerError)
+      .getOrElse(
+        backend.responseMonad.error(
+          new Throwable(s"Unexpected response status: ${sttpResponse.code}")
+        )
+      )
   }
 
 }

@@ -3,7 +3,11 @@ package endpoints.akkahttp.server
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
 import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
 import akka.http.scaladsl.server.{Directive1, Directives}
-import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, FromRequestUnmarshaller, Unmarshaller}
+import akka.http.scaladsl.unmarshalling.{
+  FromEntityUnmarshaller,
+  FromRequestUnmarshaller,
+  Unmarshaller
+}
 import endpoints.algebra.{Codec, Decoder, Encoder}
 import endpoints.{Invalid, Valid, Validated, algebra}
 
@@ -19,12 +23,12 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
   type JsonRequest[A] = FromRequestUnmarshaller[A]
 
-  def jsonRequest[A : JsonRequest]: RequestEntity[A] = Directives.entity[A](implicitly)
-
+  def jsonRequest[A: JsonRequest]: RequestEntity[A] =
+    Directives.entity[A](implicitly)
 
   type JsonResponse[A] = ToEntityMarshaller[A]
 
-  def jsonResponse[A : JsonResponse]: ResponseEntity[A] =
+  def jsonResponse[A: JsonResponse]: ResponseEntity[A] =
     implicitly
 
 }
@@ -35,7 +39,9 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs
+    extends algebra.JsonEntitiesFromCodecs
+    with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
     JsonEntities.decodeJsonRequest(this)(stringCodec(codec))
@@ -52,11 +58,12 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with JsonEntitiesFromCodecs
     with endpoints.ujson.JsonSchemas {
 
-  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] = codec.stringCodec
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }
 
@@ -71,7 +78,9 @@ trait JsonEntitiesFromSchemas
   *
   * @group interpreters
   */
-trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with EndpointsWithCustomErrors {
+trait JsonEntitiesFromEncodersAndDecoders
+    extends algebra.JsonEntities
+    with EndpointsWithCustomErrors {
 
   type JsonRequest[A] = Decoder[String, A]
   type JsonResponse[A] = Encoder[A, String]
@@ -86,7 +95,9 @@ trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with Endp
 
 private object JsonEntities {
 
-  def decodeJsonRequest[A](endpoints: EndpointsWithCustomErrors)(decoder: Decoder[String, A]): Directive1[A] = {
+  def decodeJsonRequest[A](
+      endpoints: EndpointsWithCustomErrors
+  )(decoder: Decoder[String, A]): Directive1[A] = {
     implicit val fromEntityUnmarshaller: FromEntityUnmarshaller[Validated[A]] =
       Unmarshaller.stringUnmarshaller
         .forContentTypes(MediaTypes.`application/json`)
@@ -97,7 +108,9 @@ private object JsonEntities {
     }
   }
 
-  def encodeJsonResponse[A](encoder: Encoder[A, String]): ToEntityMarshaller[A] =
+  def encodeJsonResponse[A](
+      encoder: Encoder[A, String]
+  ): ToEntityMarshaller[A] =
     Marshaller.withFixedContentType(MediaTypes.`application/json`) { value =>
       HttpEntity(MediaTypes.`application/json`, encoder.encode(value))
     }
