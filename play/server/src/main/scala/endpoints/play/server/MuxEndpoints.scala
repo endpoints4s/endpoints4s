@@ -16,30 +16,33 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   import playComponents.executionContext
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+      request: Request[Transport],
+      response: Response[Transport]
   ) {
     def implementedBy(
-      handler: MuxHandler[Req, Resp]
-    )(implicit
-      decoder: Decoder[Transport, Req],
-      encoder: Encoder[Resp, Transport]
+        handler: MuxHandler[Req, Resp]
+    )(
+        implicit
+        decoder: Decoder[Transport, Req],
+        encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
       toPlayHandler(req => Future.successful(handler(req)))
 
     def implementedByAsync(
-      handler: MuxHandlerAsync[Req, Resp]
-    )(implicit
-      decoder: Decoder[Transport, Req],
-      encoder: Encoder[Resp, Transport]
+        handler: MuxHandlerAsync[Req, Resp]
+    )(
+        implicit
+        decoder: Decoder[Transport, Req],
+        encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
       toPlayHandler(req => handler(req))
 
     def toPlayHandler(
-      handler: Req { type Response = Resp } => Future[Resp]
-    )(implicit
-      decoder: Decoder[Transport, Req],
-      encoder: Encoder[Resp, Transport]
+        handler: Req { type Response = Resp } => Future[Resp]
+    )(
+        implicit
+        decoder: Decoder[Transport, Req],
+        encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
       header =>
         try {
@@ -47,12 +50,16 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
             EssentialAction { headers =>
               try {
                 val action =
-                  playComponents.defaultActionBuilder.async(bodyParser) { request =>
-                    decoder.decode(request.body) match {
-                      case Valid(value) =>
-                        handler(value.asInstanceOf[Req {type Response = Resp}]).map(resp => response(encoder.encode(resp)))
-                      case inv: Invalid => Future.successful(handleClientErrors(inv))
-                    }
+                  playComponents.defaultActionBuilder.async(bodyParser) {
+                    request =>
+                      decoder.decode(request.body) match {
+                        case Valid(value) =>
+                          handler(
+                            value.asInstanceOf[Req { type Response = Resp }]
+                          ).map(resp => response(encoder.encode(resp)))
+                        case inv: Invalid =>
+                          Future.successful(handleClientErrors(inv))
+                      }
                   }
                 action(headers).recover {
                   case NonFatal(t) => handleServerError(t)
@@ -63,18 +70,18 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
             }
           }
         } catch {
-          case NonFatal(t) => Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
+          case NonFatal(t) =>
+            Some(playComponents.defaultActionBuilder(_ => handleServerError(t)))
         }
   }
 
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Transport => Result
+      request: Request[Transport],
+      response: Transport => Result
   ): MuxEndpoint[Req, Resp, Transport] =
     new MuxEndpoint[Req, Resp, Transport](request, response)
 
 }
-
 
 //#mux-handler-async
 /**

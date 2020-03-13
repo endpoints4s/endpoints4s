@@ -2,7 +2,14 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{Invalid, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Valid, Validated}
+import endpoints.{
+  Invalid,
+  PartialInvariantFunctor,
+  PartialInvariantFunctorSyntax,
+  Tupler,
+  Valid,
+  Validated
+}
 
 import scala.collection.compat.Factory
 import scala.util.{Failure, Success, Try}
@@ -57,11 +64,13 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringPartialInvFunctor: PartialInvariantFunctor[QueryString]
+  implicit def queryStringPartialInvFunctor
+      : PartialInvariantFunctor[QueryString]
 
   /** Extension methods on [[QueryString]].
     * @group operations */
   implicit class QueryStringSyntax[A](first: QueryString[A]) {
+
     /**
       * Convenient method to concatenate two [[QueryString]]s.
       *
@@ -73,12 +82,16 @@ trait Urls extends PartialInvariantFunctorSyntax {
       * @tparam B Information carried by the second `QueryString`
       * @return A `QueryString` that carries both `A` and `B` information
       */
-    final def & [B](second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
+    final def &[B](
+        second: QueryString[B]
+    )(implicit tupler: Tupler[A, B]): QueryString[tupler.Out] =
       combineQueryStrings(first, second)
   }
 
   /** Concatenates two `QueryString`s */
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit tupler: Tupler[A, B]): QueryString[tupler.Out]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
+      implicit tupler: Tupler[A, B]
+  ): QueryString[tupler.Out]
 
   /**
     * Builds a `QueryString` with one parameter.
@@ -95,7 +108,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @tparam A Type of the value carried by the parameter
     * @group operations
     */
-  def qs[A](name: String, docs: Documentation = None)(implicit value: QueryStringParam[A]): QueryString[A]
+  def qs[A](name: String, docs: Documentation = None)(
+      implicit value: QueryStringParam[A]
+  ): QueryString[A]
 
   /**
     * Make a query string parameter optional:
@@ -111,7 +126,8 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  implicit def optionalQueryStringParam[A: QueryStringParam]: QueryStringParam[Option[A]]
+  implicit def optionalQueryStringParam[A: QueryStringParam]
+      : QueryStringParam[Option[A]]
 
   /**
     * Support query string parameters with multiple values:
@@ -125,7 +141,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  implicit def repeatedQueryStringParam[A: QueryStringParam, CC[X] <: Iterable[X]](implicit factory: Factory[A, CC[A]]): QueryStringParam[CC[A]]
+  implicit def repeatedQueryStringParam[A: QueryStringParam, CC[X] <: Iterable[
+    X
+  ]](implicit factory: Factory[A, CC[A]]): QueryStringParam[CC[A]]
 
   /**
     * A query string parameter codec for type `A`.
@@ -137,9 +155,12 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringParamPartialInvFunctor: PartialInvariantFunctor[QueryStringParam]
+  implicit def queryStringParamPartialInvFunctor
+      : PartialInvariantFunctor[QueryStringParam]
 
-  def tryParseString[A](`type`: String)(parse: String => A): String => Validated[A] =
+  def tryParseString[A](
+      `type`: String
+  )(parse: String => A): String => Validated[A] =
     s =>
       Try(parse(s)) match {
         case Failure(_) => Invalid(s"Invalid ${`type`} value '$s'")
@@ -153,23 +174,29 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Ability to define `UUID` query string parameters
     * @group operations */
   implicit def uuidQueryString: QueryStringParam[UUID] =
-    stringQueryString.xmapPartial(tryParseString("UUID")(UUID.fromString))(_.toString())
+    stringQueryString.xmapPartial(tryParseString("UUID")(UUID.fromString))(
+      _.toString()
+    )
 
   /** Ability to define `Int` query string parameters
     * @group operations */
   implicit def intQueryString: QueryStringParam[Int] =
-    stringQueryString.xmapPartial(tryParseString("integer")(_.toInt))(_.toString())
+    stringQueryString.xmapPartial(tryParseString("integer")(_.toInt))(
+      _.toString()
+    )
 
   /** Query string parameter containing a `Long` value
     * @group operations */
   implicit def longQueryString: QueryStringParam[Long] =
-    stringQueryString.xmapPartial(tryParseString("integer")(_.toLong))(_.toString())
+    stringQueryString.xmapPartial(tryParseString("integer")(_.toLong))(
+      _.toString()
+    )
 
   /** Query string parameter containing a `Boolean` value
     * @group operations */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
     stringQueryString.xmapPartial[Boolean] {
-      case "true"  | "1" => Valid(true)
+      case "true" | "1"  => Valid(true)
       case "false" | "0" => Valid(false)
       case s             => Invalid(s"Invalid boolean value '$s'")
     }(_.toString())
@@ -177,7 +204,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Codec for query string parameters of type `Double`
     * @group operations */
   implicit def doubleQueryString: QueryStringParam[Double] =
-    stringQueryString.xmapPartial(tryParseString("number")(_.toDouble))(_.toString())
+    stringQueryString.xmapPartial(tryParseString("number")(_.toDouble))(
+      _.toString()
+    )
 
   /**
     * An URL path segment codec for type `A`.
@@ -201,7 +230,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Ability to define `UUID` path segments
     * @group operations */
   implicit def uuidSegment: Segment[UUID] =
-    stringSegment.xmapPartial(tryParseString("UUID")(UUID.fromString))(_.toString())
+    stringSegment.xmapPartial(tryParseString("UUID")(UUID.fromString))(
+      _.toString()
+    )
 
   /** Ability to define `Int` path segments
     * @group operations */
@@ -218,7 +249,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @group operations
     */
   implicit def doubleSegment: Segment[Double] =
-    stringSegment.xmapPartial(tryParseString("number")(_.toDouble))(_.toString())
+    stringSegment.xmapPartial(tryParseString("number")(_.toDouble))(
+      _.toString()
+    )
 
   /** An URL path carrying an `A` information
     * @note  This type has implicit methods provided by the [[PathOps]],
@@ -237,12 +270,20 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Convenient methods for [[Path]]s.
     * @group operations */
   implicit class PathOps[A](first: Path[A]) {
+
     /** Chains this path with the `second` constant path segment */
-    final def / (second: String): Path[A] = chainPaths(first, staticPathSegment(second))
+    final def /(second: String): Path[A] =
+      chainPaths(first, staticPathSegment(second))
+
     /** Chains this path with the `second` path segment */
-    final def / [B](second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out] = chainPaths(first, second)
+    final def /[B](second: Path[B])(
+        implicit tupler: Tupler[A, B]
+    ): Path[tupler.Out] = chainPaths(first, second)
+
     /** Chains this path with the given [[QueryString]] */
-    final def /? [B](qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out] = urlWithQueryString(first, qs)
+    final def /?[B](qs: QueryString[B])(
+        implicit tupler: Tupler[A, B]
+    ): Url[tupler.Out] = urlWithQueryString(first, qs)
   }
 
   /** A path segment whose value is the given `segment`
@@ -251,14 +292,21 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** A path segment carrying an `A` information
     * @group operations */
-  def segment[A](name: String = "", docs: Documentation = None)(implicit s: Segment[A]): Path[A]
+  def segment[A](name: String = "", docs: Documentation = None)(
+      implicit s: Segment[A]
+  ): Path[A]
 
   /** The remaining segments of the path. The `String` value carried by this `Path` is still URL-encoded.
     * @group operations */
-  def remainingSegments(name: String = "", docs: Documentation = None): Path[String] // TODO Make it impossible to chain it with another path (ie, `path / remainingSegments() / "foo"` should not compile)
+  def remainingSegments(
+      name: String = "",
+      docs: Documentation = None
+  ): Path[String] // TODO Make it impossible to chain it with another path (ie, `path / remainingSegments() / "foo"` should not compile)
 
   /** Chains the two paths */
-  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit tupler: Tupler[A, B]): Path[tupler.Out]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(
+      implicit tupler: Tupler[A, B]
+  ): Path[tupler.Out]
 
   /**
     * An empty path.
@@ -286,6 +334,8 @@ trait Urls extends PartialInvariantFunctorSyntax {
   implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url]
 
   /** Builds an URL from the given path and query string */
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit tupler: Tupler[A, B]): Url[tupler.Out]
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
+      implicit tupler: Tupler[A, B]
+  ): Url[tupler.Out]
 
 }

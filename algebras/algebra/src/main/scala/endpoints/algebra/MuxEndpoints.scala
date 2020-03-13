@@ -30,8 +30,8 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
     * @group operations
     */
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+      request: Request[Transport],
+      response: Response[Transport]
   ): MuxEndpoint[Req, Resp, Transport]
 
 }
@@ -40,6 +40,7 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
   * Multiplexed request type
   */
 trait MuxRequest {
+
   /** Type of the response for `this` specific request */
   type Response
 }

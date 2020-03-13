@@ -12,10 +12,15 @@ import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.Future
 import scala.concurrent.stm.{Ref, atomic}
+
 /**
   * Implementation of the queries service
   */
-class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Scheduler) {
+class QueriesService(
+    commandsBaseUrl: String,
+    wsClient: WSClient,
+    scheduler: Scheduler
+) {
 
   // --- public API
 
@@ -32,7 +37,7 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
 
   /** Client for the event log */
   private object eventLog
-    extends Endpoints(commandsBaseUrl, wsClient)
+      extends Endpoints(commandsBaseUrl, wsClient)
       with JsonEntitiesFromCodecs
       with CommandsEndpoints
   //#event-log-client
@@ -50,8 +55,8 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
 
   /** Internal state */
   case class State(
-    lastEventTimestamp: Option[Long],
-    meters: Map[UUID, Meter]
+      lastEventTimestamp: Option[Long],
+      meters: Map[UUID, Meter]
   )
 
   /** Update the internal state so that the timestamp of the last applied event is greater or
@@ -59,7 +64,9 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
     *
     * This is used by the public service to get consistent write-and-read.
     */
-  private def updateIfRequired[A](maybeTimestamp: Option[Long])(f: State => A): Future[A] = {
+  private def updateIfRequired[A](
+      maybeTimestamp: Option[Long]
+  )(f: State => A): Future[A] = {
     val currentState = stateRef.single()
     maybeTimestamp.filter(t => currentState.lastEventTimestamp.forall(_ < t)) match {
       case None    => Future.successful(f(currentState))
@@ -77,7 +84,9 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
         val currentState = stateRef()
         val newState =
           events
-            .dropWhile(e => currentState.lastEventTimestamp.exists(_ >= e.timestamp)) // Don’t apply events twice (in case several updates are performed in parallel)
+            .dropWhile(e =>
+              currentState.lastEventTimestamp.exists(_ >= e.timestamp)
+            ) // Don’t apply events twice (in case several updates are performed in parallel)
             .foldLeft(currentState)(applyEvent)
         stateRef() = newState
         newState
@@ -85,8 +94,8 @@ class QueriesService(commandsBaseUrl: String, wsClient: WSClient, scheduler: Sch
 
     //#invocation
     val eventuallyUpdatedState: Future[State] =
-      eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
-        atomicallyApplyEvents(newEvents)
+      eventLog.events(maybeLastEventTimestamp).map {
+        (newEvents: Seq[StoredEvent]) => atomicallyApplyEvents(newEvents)
       }
     //#invocation
     eventuallyUpdatedState

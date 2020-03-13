@@ -1,6 +1,15 @@
 package endpoints.xhr
 
-import endpoints.{Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import endpoints.{
+  Invalid,
+  InvariantFunctor,
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Valid,
+  Validated,
+  algebra
+}
 import endpoints.algebra.{Decoder, Documentation}
 import org.scalajs.dom.XMLHttpRequest
 
@@ -17,7 +26,10 @@ import scala.scalajs.js
   *
   * @group interpreters
   */
-trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
+trait Endpoints
+    extends algebra.Endpoints
+    with EndpointsWithCustomErrors
+    with BuiltInErrors
 
 /**
   * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
@@ -25,7 +37,11 @@ trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with Bu
   *
   * @group interpreters
   */
-trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Urls with Methods with StatusCodes{
+trait EndpointsWithCustomErrors
+    extends algebra.EndpointsWithCustomErrors
+    with Urls
+    with Methods
+    with StatusCodes {
 
   /**
     * A function that takes the information `A` and the XMLHttpRequest
@@ -36,25 +52,43 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   /** Sets up no headers on the given XMLHttpRequest */
   lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, _) => ()
 
-  def requestHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[String] =
+  def requestHeader(
+      name: String,
+      docs: endpoints.algebra.Documentation
+  ): RequestHeaders[String] =
     (value, xhr) => xhr.setRequestHeader(name, value)
 
-  def optRequestHeader(name: String, docs: endpoints.algebra.Documentation): RequestHeaders[Option[String]] =
-    (valueOpt, xhr) => valueOpt.foreach(value => xhr.setRequestHeader(name, value))
+  def optRequestHeader(
+      name: String,
+      docs: endpoints.algebra.Documentation
+  ): RequestHeaders[Option[String]] =
+    (valueOpt, xhr) =>
+      valueOpt.foreach(value => xhr.setRequestHeader(name, value))
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
-    override def xmap[From, To](f: js.Function2[From, XMLHttpRequest, Unit], map: From => To, contramap: To => From): js.Function2[To, XMLHttpRequest, Unit] =
-      (to, xhr) => f(contramap(to), xhr)
-  }
+  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
+    new InvariantFunctor[RequestHeaders] {
+      override def xmap[From, To](
+          f: js.Function2[From, XMLHttpRequest, Unit],
+          map: From => To,
+          contramap: To => From
+      ): js.Function2[To, XMLHttpRequest, Unit] =
+        (to, xhr) => f(contramap(to), xhr)
+    }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders]{
-    override def product[A, B](fa: js.Function2[A, XMLHttpRequest, Unit], fb: js.Function2[B, XMLHttpRequest, Unit])(implicit tupler: Tupler[A, B]): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
-      (out, xhr) => {
-        val (a, b) = tupler.unapply(out)
-        fa(a, xhr)
-        fb(b, xhr)
-      }
-  }
+  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+    new Semigroupal[RequestHeaders] {
+      override def product[A, B](
+          fa: js.Function2[A, XMLHttpRequest, Unit],
+          fb: js.Function2[B, XMLHttpRequest, Unit]
+      )(
+          implicit tupler: Tupler[A, B]
+      ): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
+        (out, xhr) => {
+          val (a, b) = tupler.unapply(out)
+          fa(a, xhr)
+          fb(b, xhr)
+        }
+    }
 
   /**
     * A function that takes the information `A` and returns an XMLHttpRequest
@@ -83,18 +117,26 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
     body
   }
 
-  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
-    override def xmap[From, To](f: js.Function2[From, XMLHttpRequest, js.Any], map: From => To, contramap: To => From): js.Function2[To, XMLHttpRequest, js.Any] =
-      (to, xhr) => f(contramap(to), xhr)
-  }
+  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
+    new InvariantFunctor[RequestEntity] {
+      override def xmap[From, To](
+          f: js.Function2[From, XMLHttpRequest, js.Any],
+          map: From => To,
+          contramap: To => From
+      ): js.Function2[To, XMLHttpRequest, js.Any] =
+        (to, xhr) => f(contramap(to), xhr)
+    }
 
   def request[A, B, C, AB, Out](
-    method: Method,
-    url: Url[A],
-    entity: RequestEntity[B],
-    docs: Documentation,
-    headers: RequestHeaders[C]
-  )(implicit tuplerAB: Tupler.Aux[A, B, AB], tuplerABC: Tupler.Aux[AB, C, Out]): Request[Out] =
+      method: Method,
+      url: Url[A],
+      entity: RequestEntity[B],
+      docs: Documentation,
+      headers: RequestHeaders[C]
+  )(
+      implicit tuplerAB: Tupler.Aux[A, B, AB],
+      tuplerABC: Tupler.Aux[AB, C, Out]
+  ): Request[Out] =
     new Request[Out] {
       def apply(abc: Out) = {
         val (ab, c) = tuplerABC.unapply(abc)
@@ -110,7 +152,13 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
       }
     }
 
-  private def makeXhr[A, B](method: String, url: Url[A], a: A, headers: RequestHeaders[B], b: B): XMLHttpRequest = {
+  private def makeXhr[A, B](
+      method: String,
+      url: Url[A],
+      a: A,
+      headers: RequestHeaders[B],
+      b: B
+  ): XMLHttpRequest = {
     val xhr = new XMLHttpRequest
     xhr.open(method, url.encode(a))
     headers(b, xhr)
@@ -130,14 +178,23 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
 
   type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Throwable, A]]
 
-  private[xhr] def mapResponseEntity[A, B](entity: ResponseEntity[A])(f: A => B): ResponseEntity[B] =
+  private[xhr] def mapResponseEntity[A, B](
+      entity: ResponseEntity[A]
+  )(f: A => B): ResponseEntity[B] =
     mapPartialResponseEntity(entity)(a => Right(f(a)))
 
-  private[xhr] def mapPartialResponseEntity[A, B](entity: ResponseEntity[A])(f: A => Either[Throwable, B]): ResponseEntity[B] =
+  private[xhr] def mapPartialResponseEntity[A, B](
+      entity: ResponseEntity[A]
+  )(f: A => Either[Throwable, B]): ResponseEntity[B] =
     xhr => entity(xhr).flatMap(f)
 
-  def stringCodecResponse[A](implicit codec: Decoder[String, A]): ResponseEntity[A] =
-    xhr => codec.decode(xhr.responseText).fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
+  def stringCodecResponse[A](
+      implicit codec: Decoder[String, A]
+  ): ResponseEntity[A] =
+    xhr =>
+      codec
+        .decode(xhr.responseText)
+        .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
   /**
     * Discards response entity
@@ -153,44 +210,65 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit tupler: Tupler[A, B]): ResponseHeaders[tupler.Out] =
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
+          implicit tupler: Tupler[A, B]
+      ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor: PartialInvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvFunctor
+      : PartialInvariantFunctor[ResponseHeaders] =
     new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](fa: ResponseHeaders[A], f: A => Validated[B], g: B => A): ResponseHeaders[B] =
+      def xmapPartial[A, B](
+          fa: ResponseHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): ResponseHeaders[B] =
         headers => fa(headers).flatMap(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
 
-  def responseHeader(name: String, docs: Documentation = None): ResponseHeaders[String] =
+  def responseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[String] =
     xhr =>
-      Validated.fromOption(Option(xhr.getResponseHeader(name)))(s"Missing response header '$name'")
+      Validated.fromOption(Option(xhr.getResponseHeader(name)))(
+        s"Missing response header '$name'"
+      )
 
-  def optResponseHeader(name: String, docs: Documentation = None): ResponseHeaders[Option[String]] =
+  def optResponseHeader(
+      name: String,
+      docs: Documentation = None
+  ): ResponseHeaders[Option[String]] =
     xhr => Valid(Option(xhr.getResponseHeader(name)))
 
   def response[A, B, R](
-    statusCode: StatusCode,
-    entity: ResponseEntity[A],
-    docs: Documentation = None,
-    headers: ResponseHeaders[B] = emptyResponseHeaders
-  )(implicit
-    tupler: Tupler.Aux[A, B, R]
+      statusCode: StatusCode,
+      entity: ResponseEntity[A],
+      docs: Documentation = None,
+      headers: ResponseHeaders[B] = emptyResponseHeaders
+  )(
+      implicit
+      tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     xhr =>
       if (xhr.status == statusCode) {
         headers(xhr) match {
-          case Valid(b)        => Some(mapResponseEntity(entity)(tupler(_, b)))
-          case Invalid(errors) => Some(_ => Left(new Exception(errors.mkString(". "))))
+          case Valid(b) => Some(mapResponseEntity(entity)(tupler(_, b)))
+          case Invalid(errors) =>
+            Some(_ => Left(new Exception(errors.mkString(". "))))
         }
       } else None
 
-  def choiceResponse[A, B](responseA: Response[A], responseB: Response[B]): Response[Either[A, B]] =
+  def choiceResponse[A, B](
+      responseA: Response[A],
+      responseB: Response[B]
+  ): Response[Either[A, B]] =
     xhr =>
-      responseA(xhr).map(mapResponseEntity(_)(Left(_)))
+      responseA(xhr)
+        .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(xhr).map(mapResponseEntity(_)(Right(_))))
 
   /**
@@ -212,20 +290,37 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with U
   type Result[A]
 
   protected final def performXhr[A, B](
-    request: Request[A],
-    response: Response[B],
-    a: A
-  )(onload: Either[Throwable, B] => Unit, onerror: XMLHttpRequest => Unit): Unit = {
+      request: Request[A],
+      response: Response[B],
+      a: A
+  )(
+      onload: Either[Throwable, B] => Unit,
+      onerror: XMLHttpRequest => Unit
+  ): Unit = {
     val (xhr, maybeEntity) = request(a)
     xhr.onload = _ => {
       val maybeResponse = response(xhr)
       def maybeClientErrors =
         clientErrorsResponse(xhr)
-          .map(mapPartialResponseEntity[ClientErrors, B](_)(clientErrors => Left(new Exception(clientErrorsToInvalid(clientErrors).errors.mkString(". ")))))
+          .map(
+            mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
+              Left(
+                new Exception(
+                  clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+                )
+              )
+            )
+          )
       def maybeServerError =
-        serverErrorResponse(xhr).map(mapPartialResponseEntity[ServerError, B](_)(serverError => Left(serverErrorToThrowable(serverError))))
+        serverErrorResponse(xhr).map(
+          mapPartialResponseEntity[ServerError, B](_)(serverError =>
+            Left(serverErrorToThrowable(serverError))
+          )
+        )
       val maybeB =
-        maybeResponse.orElse(maybeClientErrors).orElse(maybeServerError)
+        maybeResponse
+          .orElse(maybeClientErrors)
+          .orElse(maybeServerError)
           .toRight(new Exception(s"Unexpected response status: ${xhr.status}"))
           .flatMap(_(xhr))
       onload(maybeB)

@@ -9,7 +9,8 @@ trait EndpointsDocs extends Endpoints[IO] with algebra.EndpointsDocs {
   val routes: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
       someResource.implementedBy(x => s"Received $x")
-    ))
+    )
+  )
   //#implementation
 
 }

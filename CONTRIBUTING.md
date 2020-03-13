@@ -37,6 +37,13 @@ $ sbt "++ 2.12.10 test"
 $ sbt "++ 2.13.1 test"
 ~~~
 
+### Format source code
+
+We use Scalafmt. You can use the `scalafmt` sbt task like the following:
+
+~~~ sh
+> scalafmt
+~~~
 
 ### Preview the documentation
 

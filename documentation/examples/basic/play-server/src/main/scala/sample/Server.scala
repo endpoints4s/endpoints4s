@@ -13,14 +13,19 @@ import sample.play.server.DocumentedApi
 object Server extends App with Results with DefaultNettyServerComponents {
 
   lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
-  lazy val assetsMetadata = new DefaultAssetsMetadata(environment, AssetsConfiguration.fromConfiguration(configuration), fileMimeTypes)
+  lazy val assetsMetadata = new DefaultAssetsMetadata(
+    environment,
+    AssetsConfiguration.fromConfiguration(configuration),
+    fileMimeTypes
+  )
   lazy val assets = new AssetsBuilder(httpErrorHandler, assetsMetadata)
   lazy val action = defaultActionBuilder
 
   lazy val bootstrap: PartialFunction[RequestHeader, Handler] = {
-    case GET(p"/") => action {
-      val html =
-        """
+    case GET(p"/") =>
+      action {
+        val html =
+          """
           |<!DOCTYPE html>
           |<html>
           |  <head>
@@ -31,16 +36,21 @@ object Server extends App with Results with DefaultNettyServerComponents {
           |  </body>
           |</html>
         """.stripMargin
-      Ok(html).as(HTML)
-    }
+        Ok(html).as(HTML)
+      }
     case GET(p"/assets/app.js") =>
       assets.versioned("/", "example-basic-client-fastopt.js")
-    case GET(p"/api/description") => action {
-      Ok(OpenApi.stringEncoder.encode(sample.openapi.DocumentedApi.documentation)).as(JSON)
-    }
-    case GET(p"/api/ui") => action {
-      val html =
-        """
+    case GET(p"/api/description") =>
+      action {
+        Ok(
+          OpenApi.stringEncoder
+            .encode(sample.openapi.DocumentedApi.documentation)
+        ).as(JSON)
+      }
+    case GET(p"/api/ui") =>
+      action {
+        val html =
+          """
           |<!DOCTYPE html>
           |<html>
           |  <head>
@@ -65,14 +75,15 @@ object Server extends App with Results with DefaultNettyServerComponents {
           |  </body>
           |</html>
         """.stripMargin
-      Ok(html).as(HTML)
-    }
+        Ok(html).as(HTML)
+      }
   }
 
   lazy val api = new Api(playComponents)
   lazy val documentedApi = new DocumentedApi(playComponents)
 
-  lazy val router = Router.from(bootstrap orElse api.routes orElse documentedApi.routes)
+  lazy val router =
+    Router.from(bootstrap orElse api.routes orElse documentedApi.routes)
 
   server
 }

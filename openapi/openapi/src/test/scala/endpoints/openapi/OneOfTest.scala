@@ -12,7 +12,10 @@ class OneOfTest extends AnyWordSpec with Matchers {
       val expected =
         ujson.Obj(
           "oneOf" -> ujson.Arr(
-            ujson.Obj("type" -> ujson.Str("integer"), "format" -> ujson.Str("int32")),
+            ujson.Obj(
+              "type" -> ujson.Str("integer"),
+              "format" -> ujson.Str("int32")
+            ),
             ujson.Obj("type" -> ujson.Str("boolean"))
           )
         )
@@ -20,6 +23,6 @@ class OneOfTest extends AnyWordSpec with Matchers {
     }
   }
 
-  trait Fixtures extends algebra.JsonSchemasTest with JsonSchemas
+  trait Fixtures extends algebra.JsonSchemasFixtures with JsonSchemas
 
 }

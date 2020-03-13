@@ -15,10 +15,10 @@ import scala.concurrent.Future
   * Implementation of the public API based on our “commands” and “queries” microservices.
   */
 class PublicServer(
-  commandsBaseUrl: String,
-  queriesBaseUrl: String,
-  wsClient: WSClient,
-  val playComponents: PlayComponents
+    commandsBaseUrl: String,
+    queriesBaseUrl: String,
+    wsClient: WSClient,
+    val playComponents: PlayComponents
 ) extends PublicEndpoints
     with Endpoints
     with JsonEntitiesFromCodecs {
@@ -32,18 +32,15 @@ class PublicServer(
 
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
-
       listMeters.implementedByAsync { _ =>
         //#invocation
         val metersList: Future[ResourceList] = queriesClient.query(FindAll)
         //#invocation
         metersList.map(_.value)
       },
-
       getMeter.implementedByAsync { id =>
         queriesClient.query(FindById(id, None)).map(_.value)
       },
-
       createMeter.implementedByAsync { createData =>
         //#microservice-endpoint-invocation
         val eventuallyMaybeEvent: Future[Option[StoredEvent]] =
@@ -55,28 +52,39 @@ class PublicServer(
             maybeEvent.collect {
               case StoredEvent(t, MeterCreated(id, _)) =>
                 //#invocation-find-by-id
-                val maybeMeter: Future[MaybeResource] = queriesClient.query(FindById(id, after = Some(t)))
+                val maybeMeter: Future[MaybeResource] =
+                  queriesClient.query(FindById(id, after = Some(t)))
                 //#invocation-find-by-id
                 maybeMeter.map(_.value)
             }
           )
-          meter <- maybeMeter.fold[Future[Meter]](Future.failed(new NoSuchElementException))(Future.successful)
+          meter <- maybeMeter.fold[Future[Meter]](
+            Future.failed(new NoSuchElementException)
+          )(Future.successful)
         } yield meter
       },
-
-      addRecord.implementedByAsync { case (id, addData) =>
-        for {
-          maybeEvent <- commandsClient.command(AddRecord(id, addData.date, addData.value))
-          findMeter = (evt: StoredEvent) => queriesClient.query(FindById(id, after = Some(evt.timestamp))).map(_.value)
-          maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
-          meter <- maybeMeter.fold[Future[Meter]](Future.failed(new NoSuchElementException))(Future.successful)
-        } yield meter
+      addRecord.implementedByAsync {
+        case (id, addData) =>
+          for {
+            maybeEvent <- commandsClient.command(
+              AddRecord(id, addData.date, addData.value)
+            )
+            findMeter = (evt: StoredEvent) =>
+              queriesClient
+                .query(FindById(id, after = Some(evt.timestamp)))
+                .map(_.value)
+            maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
+            meter <- maybeMeter.fold[Future[Meter]](
+              Future.failed(new NoSuchElementException)
+            )(Future.successful)
+          } yield meter
       }
-
     )
 
   // These aliases are probably due to a limitation of circe
-  implicit private def circeEncoderReq: io.circe.Encoder[QueryReq] = QueryReq.queryEncoder
-  implicit private def circeDecoderResp: io.circe.Decoder[QueryResp] = QueryResp.queryDecoder
+  implicit private def circeEncoderReq: io.circe.Encoder[QueryReq] =
+    QueryReq.queryEncoder
+  implicit private def circeDecoderResp: io.circe.Decoder[QueryResp] =
+    QueryResp.queryDecoder
 
 }

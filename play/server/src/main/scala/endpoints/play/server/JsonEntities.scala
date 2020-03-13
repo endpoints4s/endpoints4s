@@ -13,7 +13,9 @@ import play.api.http.{ContentTypes, Writeable}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs
+    extends algebra.JsonEntitiesFromCodecs
+    with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
     JsonEntities.decodeRequest(this)(stringCodec(codec))
@@ -30,11 +32,12 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with JsonEntitiesFromCodecs
     with endpoints.ujson.JsonSchemas {
 
-  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] = codec.stringCodec
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }
 
@@ -49,10 +52,12 @@ trait JsonEntitiesFromSchemas
   *
   * @group interpreters
   */
-trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with EndpointsWithCustomErrors {
+trait JsonEntitiesFromEncodersAndDecoders
+    extends algebra.JsonEntities
+    with EndpointsWithCustomErrors {
 
   type JsonResponse[A] = Encoder[A, String]
-  type JsonRequest[A]  = Decoder[String, A]
+  type JsonRequest[A] = Decoder[String, A]
 
   def jsonRequest[A](implicit decoder: JsonRequest[A]): RequestEntity[A] =
     JsonEntities.decodeRequest(this)(decoder)
@@ -64,9 +69,15 @@ trait JsonEntitiesFromEncodersAndDecoders extends algebra.JsonEntities with Endp
 
 private object JsonEntities {
 
-  def decodeRequest[A](endpoints: EndpointsWithCustomErrors)(decoder: Decoder[String, A]): BodyParser[A] =
+  def decodeRequest[A](
+      endpoints: EndpointsWithCustomErrors
+  )(decoder: Decoder[String, A]): BodyParser[A] =
     endpoints.playComponents.playBodyParsers.byteString.validate { bs =>
-      decoder.decode(bs.utf8String).toEither.left.map(errs => endpoints.handleClientErrors(Invalid(errs)))
+      decoder
+        .decode(bs.utf8String)
+        .toEither
+        .left
+        .map(errs => endpoints.handleClientErrors(Invalid(errs)))
     }(endpoints.playComponents.executionContext)
 
   def encodeResponse[A](encoder: Encoder[A, String]): Writeable[A] =

@@ -3,7 +3,7 @@ package endpoints.algebra.circe
 import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
 trait JsonFromCirceCodecTestApi
-  extends JsonFromCodecTestApi
+    extends JsonFromCodecTestApi
     with endpoints.algebra.circe.JsonEntitiesFromCodecs {
 
   import io.circe._

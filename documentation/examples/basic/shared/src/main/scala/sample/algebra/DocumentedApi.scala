@@ -4,14 +4,19 @@ import endpoints.algebra.{BasicAuthentication, circe, Endpoints}
 import io.circe.generic.JsonCodec
 
 trait DocumentedApi
-  extends Endpoints
+    extends Endpoints
     with BasicAuthentication
     with circe.JsonEntitiesFromCodecs {
 
   val items =
     endpoint(
-      get(path / "items" / segment[String]("category") /? qs[Option[Int]]("page")),
-      ok(jsonResponse[List[Item]], Some("List all the items of the given category"))
+      get(
+        path / "items" / segment[String]("category") /? qs[Option[Int]]("page")
+      ),
+      ok(
+        jsonResponse[List[Item]],
+        Some("List all the items of the given category")
+      )
     )
 
   val itemId = segment[String]("id")

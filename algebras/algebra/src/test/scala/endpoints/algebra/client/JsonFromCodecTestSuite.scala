@@ -4,7 +4,8 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints.algebra.JsonFromCodecTestApi
 import endpoints.algebra.{Address, JsonFromCodecTestApi, User}
 
-trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T] {
+trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi]
+    extends ClientTestBase[T] {
 
   def jsonFromCodecTestSuite() = {
 

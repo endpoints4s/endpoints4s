@@ -12,7 +12,9 @@ import play.api.mvc.BodyParser
   *
   * @group interpreters
   */
-trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEntities {
+trait ChunkedEntities
+    extends EndpointsWithCustomErrors
+    with algebra.ChunkedEntities {
 
   import playComponents.executionContext
 
@@ -30,19 +32,25 @@ trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEnti
   def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] =
     chunkedResponseEntity(ContentTypes.BINARY, ByteString.fromArray)
 
-  private[server] def chunkedRequestEntity[A](fromByteString: ByteString => Either[Throwable, A]): RequestEntity[Chunks[A]] = {
+  private[server] def chunkedRequestEntity[A](
+      fromByteString: ByteString => Either[Throwable, A]
+  ): RequestEntity[Chunks[A]] = {
     BodyParser.apply { _ =>
       Accumulator.source[ByteString].map { byteStrings =>
-        val source: Source[A, _] = byteStrings.map(fromByteString).flatMapConcat {
-          case Left(error)  => Source.failed(error)
-          case Right(value) => Source.single(value)
-        }
+        val source: Source[A, _] =
+          byteStrings.map(fromByteString).flatMapConcat {
+            case Left(error)  => Source.failed(error)
+            case Right(value) => Source.single(value)
+          }
         Right(source)
       }
     }
   }
 
-  private[server] def chunkedResponseEntity[A](contentType: String, toByteString: A => ByteString): ResponseEntity[Chunks[A]] =
+  private[server] def chunkedResponseEntity[A](
+      contentType: String,
+      toByteString: A => ByteString
+  ): ResponseEntity[Chunks[A]] =
     as => {
       val byteStrings = as.map(a => HttpChunk.Chunk(toByteString(a)))
       HttpEntity.Chunked(byteStrings, Some(contentType))
@@ -55,17 +63,28 @@ trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEnti
   *
   * @group interpreters
   */
-trait ChunkedJsonEntities extends ChunkedEntities with algebra.ChunkedJsonEntities with JsonEntitiesFromCodecs {
+trait ChunkedJsonEntities
+    extends ChunkedEntities
+    with algebra.ChunkedJsonEntities
+    with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](implicit codec: JsonCodec[A]): RequestEntity[Chunks[A]] = {
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedRequestEntity { byteString =>
       val string = byteString.utf8String
-      decoder.decode(string).toEither.left.map(errors => new Throwable(errors.mkString(". ")))
+      decoder
+        .decode(string)
+        .toEither
+        .left
+        .map(errors => new Throwable(errors.mkString(". ")))
     }
   }
 
-  def jsonChunksResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[Chunks[A]] = {
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedResponseEntity(ContentTypes.JSON, a => ByteString(encoder.encode(a)))
   }

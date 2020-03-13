@@ -9,7 +9,8 @@ val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
 val `akka-http-client` =
-  project.in(file("client"))
+  project
+    .in(file("client"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`, // Note that we could support 2.11, only our tests depend on circe (which has dropped 2.11 support)
@@ -28,7 +29,8 @@ val `akka-http-client` =
     .dependsOn(`json-schema-generic-jvm` % "test->test")
 
 val `akka-http-server` =
-  project.in(file("server"))
+  project
+    .in(file("server"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,

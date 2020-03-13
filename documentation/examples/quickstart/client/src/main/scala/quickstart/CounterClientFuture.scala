@@ -5,7 +5,7 @@ import endpoints.xhr
 import scala.concurrent.Future
 
 object CounterClientFuture
-  extends CounterEndpoints
+    extends CounterEndpoints
     with xhr.future.Endpoints
     with xhr.JsonEntitiesFromSchemas {
 

@@ -1,6 +1,9 @@
 package endpoints.akkahttp.client
 
-import akka.http.scaladsl.model.{StatusCode => AkkaStatusCode, StatusCodes => AkkaStatusCodes}
+import akka.http.scaladsl.model.{
+  StatusCode => AkkaStatusCode,
+  StatusCodes => AkkaStatusCodes
+}
 import endpoints.algebra
 
 /**
@@ -17,7 +20,7 @@ trait StatusCodes extends algebra.StatusCodes {
   def Accepted = AkkaStatusCodes.Accepted
   def NoContent = AkkaStatusCodes.NoContent
 
-  def BadRequest= AkkaStatusCodes.BadRequest
+  def BadRequest = AkkaStatusCodes.BadRequest
   def Unauthorized = AkkaStatusCodes.Unauthorized
   def Forbidden = AkkaStatusCodes.Forbidden
   def NotFound = AkkaStatusCodes.NotFound

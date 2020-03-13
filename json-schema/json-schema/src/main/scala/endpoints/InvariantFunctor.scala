@@ -2,6 +2,7 @@ package endpoints
 
 /** Defines ways to transform a given type constructor F */
 trait InvariantFunctor[F[_]] {
+
   /**
     * Transforms an `F[A]` value into an `F[B]` value given a pair
     * of functions from `A` to `B` and from `B` to `A`.
@@ -12,11 +13,15 @@ trait InvariantFunctor[F[_]] {
 }
 
 trait InvariantFunctorSyntax {
+
   /**
     * Extension methods for values of type `F[A]` for which there is an implicit
     * `InvariantFunctor[F]` instance.
     */
-  implicit class InvariantFunctorSyntax[A, F[_]](val fa: F[A])(implicit ev: InvariantFunctor[F]) {
+  implicit class InvariantFunctorSyntax[A, F[_]](val fa: F[A])(
+      implicit ev: InvariantFunctor[F]
+  ) {
+
     /**
       * Transforms an `F[A]` value into an `F[B]` value given a pair
       * of functions from `A` to `B` and from `B` to `A`.
@@ -34,6 +39,7 @@ trait InvariantFunctorSyntax {
   * transformation function is total (ie, `A => Valid[B]`).
   */
 trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
+
   /**
     * Transforms an `F[A]` value into an `F[B]` value given a partial function
     * from `A` to `B`, and a total function from `B` to `A`.
@@ -43,11 +49,15 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
     */
   def xmapPartial[A, B](fa: F[A], f: A => Validated[B], g: B => A): F[B]
-  def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] = xmapPartial[A, B](fa, a => Valid(f(a)), g)
+  def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] =
+    xmapPartial[A, B](fa, a => Valid(f(a)), g)
 }
 
 trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
-  implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(implicit ev: PartialInvariantFunctor[F]) {
+  implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(
+      implicit ev: PartialInvariantFunctor[F]
+  ) {
+
     /**
       * Transforms an `F[A]` value into an `F[B]` value given a partial function
       * from `A` to `B`, and a total function from `B` to `A`.
@@ -56,6 +66,7 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
       *
       * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
       */
-    def xmapPartial[B](f: A => Validated[B])(g: B => A): F[B] = ev.xmapPartial(fa, f, g)
+    def xmapPartial[B](f: A => Validated[B])(g: B => A): F[B] =
+      ev.xmapPartial(fa, f, g)
   }
 }

@@ -10,14 +10,18 @@ import org.scalajs.dom.XMLHttpRequest
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs
+    extends EndpointsWithCustomErrors
+    with algebra.JsonEntitiesFromCodecs {
 
-  def jsonRequest[A](implicit codec: JsonCodec[A]) = (a: A, xhr: XMLHttpRequest) => {
-    xhr.setRequestHeader("Content-Type", "application/json")
-    stringCodec(codec).encode(a)
-  }
+  def jsonRequest[A](implicit codec: JsonCodec[A]) =
+    (a: A, xhr: XMLHttpRequest) => {
+      xhr.setRequestHeader("Content-Type", "application/json")
+      stringCodec(codec).encode(a)
+    }
 
-  def jsonResponse[A](implicit codec: JsonCodec[A]) = stringCodecResponse(stringCodec(codec))
+  def jsonResponse[A](implicit codec: JsonCodec[A]) =
+    stringCodecResponse(stringCodec(codec))
 
 }
 
@@ -28,10 +32,11 @@ trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.Json
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with JsonEntitiesFromCodecs
     with endpoints.ujson.JsonSchemas {
 
-  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] = codec.stringCodec
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }

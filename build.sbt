@@ -15,7 +15,8 @@ val sttp = project.in(file("sttp")).settings(noPublishSettings)
 val http4s = project.in(file("http4s")).settings(noPublishSettings)
 
 // Documentation and examples
-val documentation = project.in(file("documentation")).settings(noPublishSettings)
+val documentation =
+  project.in(file("documentation")).settings(noPublishSettings)
 
 noPublishSettings
 
@@ -25,4 +26,6 @@ publishTo in ThisBuild := sonatypePublishTo.value
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
-ThisBuild / sonatypeProjectHosting := Some(GitHubHosting("julienrf", "endpoints", "julien.richard-foy@epfl.ch"))
+ThisBuild / sonatypeProjectHosting := Some(
+  GitHubHosting("julienrf", "endpoints", "julien.richard-foy@epfl.ch")
+)

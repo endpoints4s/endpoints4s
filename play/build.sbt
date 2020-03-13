@@ -7,7 +7,8 @@ val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 
 val `play-server` =
-  project.in(file("server"))
+  project
+    .in(file("server"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
@@ -23,7 +24,8 @@ val `play-server` =
     .dependsOn(`algebra-circe-jvm` % "test->test")
 
 val `play-server-circe` =
-  project.in(file("server-circe"))
+  project
+    .in(file("server-circe"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -33,7 +35,8 @@ val `play-server-circe` =
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
 
 val `play-client` =
-  project.in(file("client"))
+  project
+    .in(file("client"))
     .settings(
       publishSettings,
       `scala 2.12 to latest`,
@@ -42,5 +45,8 @@ val `play-client` =
         "com.typesafe.play" %% "play-ahc-ws" % playVersion
       )
     )
-    .dependsOn(`algebra-jvm` % "test->test;compile->compile", `algebra-circe-jvm` % "compile->test;test->test")
+    .dependsOn(
+      `algebra-jvm` % "test->test;compile->compile",
+      `algebra-circe-jvm` % "compile->test;test->test"
+    )
     .dependsOn(`openapi-jvm`)

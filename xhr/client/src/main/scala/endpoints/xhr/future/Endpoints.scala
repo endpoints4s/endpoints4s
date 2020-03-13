@@ -22,15 +22,17 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
   type Result[A] = Future[A]
 
   def endpoint[A, B](
-    request: Request[A],
-    response: Response[B],
-    docs: EndpointDocs = EndpointDocs()
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     new Endpoint[A, B](request) {
       def apply(a: A) = {
         val promise = Promise[B]()
         performXhr(request, response, a)(
-          _.fold(exn => { promise.failure(exn); () }, b => { promise.success(b); () }),
+          _.fold(exn => { promise.failure(exn); () }, b => {
+            promise.success(b); ()
+          }),
           xhr => { promise.failure(new Exception(xhr.responseText)); () }
         )
         promise.future

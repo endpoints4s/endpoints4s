@@ -30,7 +30,10 @@ object Meter {
       case CreateMeter(label) => Some(MeterCreated(UUID.randomUUID(), label))
     }
 
-  def handleUpdateCommand(meter: Meter, updateCommand: UpdateCommand): Option[Event] =
+  def handleUpdateCommand(
+      meter: Meter,
+      updateCommand: UpdateCommand
+  ): Option[Event] =
     updateCommand match {
       case AddRecord(id, date, value) => Some(RecordAdded(id, date, value))
     }

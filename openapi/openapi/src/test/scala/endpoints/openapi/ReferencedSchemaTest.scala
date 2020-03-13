@@ -20,31 +20,58 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
   case class Author(name: String)
 
-  case class Book(id: UUID, title: String, author: Author, isbnCodes: List[String], storage: Storage)
+  case class Book(
+      id: UUID,
+      title: String,
+      author: Author,
+      isbnCodes: List[String],
+      storage: Storage
+  )
 
-  object Fixtures extends Fixtures with openapi.Endpoints with openapi.JsonEntitiesFromSchemas with openapi.BasicAuthentication {
+  object Fixtures
+      extends Fixtures
+      with openapi.Endpoints
+      with openapi.JsonEntitiesFromSchemas
+      with openapi.BasicAuthentication {
 
-    def openApiDocument: OpenApi = openApi(
-      Info(title = "TestFixturesOpenApi", version = "0.0.0")
-    )(Fixtures.listBooks, Fixtures.postBook)
+    def openApiDocument: OpenApi =
+      openApi(
+        Info(title = "TestFixturesOpenApi", version = "0.0.0")
+      )(Fixtures.listBooks, Fixtures.postBook)
   }
 
-  trait Fixtures extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas with generic.JsonSchemas with algebra.BasicAuthentication with algebra.JsonSchemasTest {
+  trait Fixtures
+      extends algebra.Endpoints
+      with algebra.JsonEntitiesFromSchemas
+      with generic.JsonSchemas
+      with algebra.BasicAuthentication
+      with algebra.JsonSchemasFixtures {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
       genericTagged[Storage]
 
     implicit val schemaAuthor: JsonSchema[Author] = (
-      field[String]("name", documentation = Some("Author name")).xmap[Author](Author)(_.name)
-    )
+      field[String]("name", documentation = Some("Author name"))
+        .xmap[Author](Author)(_.name)
+      )
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 
-    val listBooks = endpoint(get(path / "books"), ok(jsonResponse[List[Book]], Some("Books list")), docs = EndpointDocs(tags = List("Books")))
+    val listBooks = endpoint(
+      get(path / "books"),
+      ok(jsonResponse[List[Book]], Some("Books list")),
+      docs = EndpointDocs(tags = List("Books"))
+    )
 
     val postBook =
       authenticatedEndpoint(
-        Post, path / "books", ok(jsonResponse(Enum.colorSchema)), jsonRequest[Book], requestDocs = Some("Books list"), endpointDocs = EndpointDocs(tags = List("Books")))
+        Post,
+        path / "books",
+        ok(jsonResponse(Enum.colorSchema)),
+        jsonRequest[Book],
+        requestDocs = Some("Books list"),
+        endpointDocs = EndpointDocs(tags = List("Books"))
+      )
   }
 
   "OpenApi" should {
@@ -288,7 +315,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |}""".stripMargin
 
     "be documented" in {
-      ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument)) shouldBe ujson.read(expectedSchema)
+      ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument)) shouldBe ujson
+        .read(expectedSchema)
     }
 
   }

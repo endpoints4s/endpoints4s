@@ -4,7 +4,13 @@ import java.net.ServerSocket
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
+import akka.http.scaladsl.model.{
+  ContentTypes,
+  HttpEntity,
+  HttpMethods,
+  HttpRequest,
+  StatusCodes
+}
 import akka.http.scaladsl.server.Directives._
 import org.scalatest.BeforeAndAfterAll
 
@@ -21,7 +27,10 @@ class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
   val server = Http().bindAndHandle(routes, interface, port)
 
   override protected def afterAll(): Unit = {
-    Await.result(Await.result(server, 10.seconds).terminate(3.seconds), 15.seconds)
+    Await.result(
+      Await.result(server, 10.seconds).terminate(3.seconds),
+      15.seconds
+    )
     Await.result(actorSystem.terminate(), 5.seconds)
     super.afterAll()
   }
@@ -29,8 +38,10 @@ class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
   "CounterServer" - {
     "Query counter value" in {
       for {
-        response <- Http().singleRequest(HttpRequest(uri = uri("/current-value")))
-        entity   <- response.entity.toStrict(1.second)
+        response <- Http().singleRequest(
+          HttpRequest(uri = uri("/current-value"))
+        )
+        entity <- response.entity.toStrict(1.second)
       } yield {
         assert(response.status == StatusCodes.OK)
         assert(entity.contentType == ContentTypes.`application/json`)
@@ -52,8 +63,10 @@ class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
     }
     "Query API documentation" in {
       for {
-        response <- Http().singleRequest(HttpRequest(uri = uri("/documentation.json")))
-        entity   <- response.entity.toStrict(1.second)
+        response <- Http().singleRequest(
+          HttpRequest(uri = uri("/documentation.json"))
+        )
+        entity <- response.entity.toStrict(1.second)
       } yield {
         assert(response.status == StatusCodes.OK)
         assert(entity.contentType == ContentTypes.`application/json`)

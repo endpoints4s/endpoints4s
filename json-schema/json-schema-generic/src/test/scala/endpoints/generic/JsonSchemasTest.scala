@@ -1,7 +1,6 @@
 package endpoints
 package generic
 
-
 import scala.collection.compat._
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -31,9 +30,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     sealed trait Doc
     case class DocA(@docs("fieldDocI") i: Int) extends Doc
     case class DocB(
-      a: String,
-      @docs("fieldDocB") b: Boolean,
-      @docs("fieldDocSS") ss: List[String]
+        a: String,
+        @docs("fieldDocB") b: Boolean,
+        @docs("fieldDocSS") ss: List[String]
     ) extends Doc
     @name("DocC")
     case object DocC extends Doc
@@ -49,65 +48,101 @@ class JsonSchemasTest extends AnyFreeSpec {
     val schema3: JsonSchema[Point2] = tupledSchema2.as[Point2]
 
     case class Point3(x: Int, y: Int, z: Int)
-    val schemaPoint3 = (field[Int]("x") zip field[Int]("y") zip field[Int]("z")).as[Point3]
+    val schemaPoint3 =
+      (field[Int]("x") zip field[Int]("y") zip field[Int]("z")).as[Point3]
   }
 
-  object FakeAlgebraJsonSchemas extends GenericSchemas with endpoints.algebra.JsonSchemas with FakeTuplesSchemas {
+  object FakeAlgebraJsonSchemas
+      extends GenericSchemas
+      with endpoints.algebra.JsonSchemas
+      with FakeTuplesSchemas {
 
-      type Record[+A] = String
-      type Tagged[+A] = String
-      type Enum[+A] = String
+    type Record[+A] = String
+    type Tagged[+A] = String
+    type Enum[+A] = String
 
-      def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): String =
-        s"$tpe"
+    def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): String =
+      s"$tpe"
 
-      def namedRecord[A](schema: Record[A], name: String): Record[A] = s"'$name'!($schema)"
-      def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = s"'$name'!($schema)"
-      def namedEnum[A](schema: Enum[A], name: String): Enum[A] = s"'$name'!($schema)"
+    def namedRecord[A](schema: Record[A], name: String): Record[A] =
+      s"'$name'!($schema)"
+    def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
+      s"'$name'!($schema)"
+    def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
+      s"'$name'!($schema)"
 
-      def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] = s"=>'$name'!($schema)"
-      def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] = s"=>'$name'!($schema)"
+    def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
+      s"=>'$name'!($schema)"
+    def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
+      s"=>'$name'!($schema)"
 
-      def emptyRecord: String =
-        "%"
+    def emptyRecord: String =
+      "%"
 
-      def field[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe${docs.fold("")(doc => s"{$doc}")}"
+    def field[A](name: String, docs: Option[String])(
+        implicit tpe: String
+    ): String =
+      s"$name:$tpe${docs.fold("")(doc => s"{$doc}")}"
 
-      def optField[A](name: String, docs: Option[String])(implicit tpe: String): String =
-        s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
+    def optField[A](name: String, docs: Option[String])(
+        implicit tpe: String
+    ): String =
+      s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
 
-      def taggedRecord[A](recordA: String, tag: String): String =
-        s"$recordA@$tag"
+    def taggedRecord[A](recordA: String, tag: String): String =
+      s"$recordA@$tag"
 
-      def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A] =
-        s"$tagged#$discriminatorName"
+    def withDiscriminatorTagged[A](
+        tagged: Tagged[A],
+        discriminatorName: String
+    ): Tagged[A] =
+      s"$tagged#$discriminatorName"
 
-      def choiceTagged[A, B](taggedA: String, taggedB: String): String =
-        s"$taggedA|$taggedB"
+    def choiceTagged[A, B](taggedA: String, taggedB: String): String =
+      s"$taggedA|$taggedB"
 
-      def zipRecords[A, B](recordA: String, recordB: String)(implicit t: Tupler[A, B]): String =
-        s"$recordA,$recordB"
+    def zipRecords[A, B](recordA: String, recordB: String)(
+        implicit t: Tupler[A, B]
+    ): String =
+      s"$recordA,$recordB"
 
-    def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A] =
+    def withExampleJsonSchema[A](
+        schema: JsonSchema[A],
+        example: A
+    ): JsonSchema[A] =
       schema
 
-    def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] =
+    def orFallbackToJsonSchema[A, B](
+        schemaA: JsonSchema[A],
+        schemaB: JsonSchema[B]
+    ): JsonSchema[Either[A, B]] =
       s"$schemaA|$schemaB"
 
     def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
       new PartialInvariantFunctor[JsonSchema] {
-        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        def xmapPartial[A, B](
+            fa: String,
+            f: A => Validated[B],
+            g: B => A
+        ): String = fa
         override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
       }
     def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
       new PartialInvariantFunctor[Record] {
-        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        def xmapPartial[A, B](
+            fa: String,
+            f: A => Validated[B],
+            g: B => A
+        ): String = fa
         override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
       }
     def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
       new PartialInvariantFunctor[Tagged] {
-        def xmapPartial[A, B](fa: String, f: A => Validated[B], g: B => A): String = fa
+        def xmapPartial[A, B](
+            fa: String,
+            f: A => Validated[B],
+            g: B => A
+        ): String = fa
         override def xmap[A, B](fa: String, f: A => B, g: B => A): String = fa
       }
 
@@ -127,14 +162,16 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     lazy val byteJsonSchema: String = "byte"
 
-    def arrayJsonSchema[C[X] <: Seq[X], A](implicit
-                                           jsonSchema: String,
-                                           factory: Factory[A, C[A]]
-                                          ): String = s"[$jsonSchema]"
+    def arrayJsonSchema[C[X] <: Seq[X], A](
+        implicit
+        jsonSchema: String,
+        factory: Factory[A, C[A]]
+    ): String = s"[$jsonSchema]"
 
-    def mapJsonSchema[A](implicit
-                         jsonSchema: String
-                        ): String = s"{$jsonSchema}"
+    def mapJsonSchema[A](
+        implicit
+        jsonSchema: String
+    ): String = s"{$jsonSchema}"
   }
 
   val ns = "endpoints.generic.JsonSchemasTest.GenericSchemas"
@@ -145,26 +182,22 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "sealed trait" in {
-    val expectedSchema = s"'$ns.Quux'!(${
-      List(
-        s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
-        s"'$ns.QuuxB'!(id:[integer, number],%)@QuuxB",
-        s"'$ns.QuuxC'!(b:boolean,%)@QuuxC",
-        s"'$ns.QuuxD'!(%)@QuuxD",
-        s"'$ns.QuuxE'!(%)@QuuxE"
-      ).mkString("|")
-    })#type"
+    val expectedSchema = s"'$ns.Quux'!(${List(
+      s"'$ns.QuuxA'!(ss:[string],%)@QuuxA",
+      s"'$ns.QuuxB'!(id:[integer, number],%)@QuuxB",
+      s"'$ns.QuuxC'!(b:boolean,%)@QuuxC",
+      s"'$ns.QuuxD'!(%)@QuuxD",
+      s"'$ns.QuuxE'!(%)@QuuxE"
+    ).mkString("|")})#type"
     assert(FakeAlgebraJsonSchemas.Quux.schema == expectedSchema)
   }
 
   "documentations" in {
-    val expectedSchema = s"'DocResource'!(${
-      List(
-        s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
-        s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
-        s"'DocC'!(%)@DocC"
-      ).mkString("|")
-    })#$$type"
+    val expectedSchema = s"'DocResource'!(${List(
+      s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
+      s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
+      s"'DocC'!(%)@DocC"
+    ).mkString("|")})#$$type"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 

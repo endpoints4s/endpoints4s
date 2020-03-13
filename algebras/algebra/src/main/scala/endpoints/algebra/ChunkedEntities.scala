@@ -92,7 +92,9 @@ trait ChunkedJsonEntities extends ChunkedEntities with JsonCodecs {
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksRequest[A](implicit codec: JsonCodec[A]): RequestEntity[Chunks[A]]
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]]
 
   /**
     * A response entity carrying chunks of JSON values
@@ -100,6 +102,8 @@ trait ChunkedJsonEntities extends ChunkedEntities with JsonCodecs {
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[Chunks[A]]
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]]
 
 }

@@ -12,14 +12,12 @@ import endpoints.algebra
   *
   * @group interpreters
   */
-trait JsonEntities
-  extends algebra.JsonEntities
-    with EndpointsWithCustomErrors {
+trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
-  def jsonRequest[A : JsonRequest]: RequestEntity[A] =
+  def jsonRequest[A: JsonRequest]: RequestEntity[A] =
     Map("application/json" -> MediaType(None))
 
-  def jsonResponse[A : JsonResponse]: ResponseEntity[A] =
+  def jsonResponse[A: JsonResponse]: ResponseEntity[A] =
     Map("application/json" -> MediaType(None))
 
 }
@@ -30,7 +28,7 @@ trait JsonEntities
   * @group interpreters
   */
 trait JsonEntitiesFromSchemas
-  extends algebra.JsonEntitiesFromSchemas
+    extends algebra.JsonEntitiesFromSchemas
     with EndpointsWithCustomErrors
     with JsonSchemas {
 

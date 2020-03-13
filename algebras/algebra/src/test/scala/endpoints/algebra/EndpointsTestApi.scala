@@ -8,9 +8,12 @@ import endpoints.{Invalid, Valid, algebra}
 
 trait EndpointsTestApi extends algebra.Endpoints {
 
-
   val UUIDEndpoint = endpoint(
-    get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    get(
+      path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
     ok(textResponse)
   )
 
@@ -25,12 +28,20 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val emptyResponseUUIDEndpoint = endpoint(
-    get(path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    get(
+      path / "user" / segment[UUID]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
     ok(emptyResponse)
   )
 
   val smokeEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    get(
+      path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
     ok(textResponse)
   )
 
@@ -45,7 +56,11 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val emptyResponseSmokeEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[Int]("age"))),
+    get(
+      path / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
     ok(emptyResponse)
   )
 
@@ -66,39 +81,55 @@ trait EndpointsTestApi extends algebra.Endpoints {
     ok(textResponse)
   )
 
-  val url1 = (path / "xmapUrlEndpoint" / segment[Long]() : Url[Long]).xmap(_.toString)( _.toLong)
+  val url1 = (path / "xmapUrlEndpoint" / segment[Long](): Url[Long])
+    .xmap(_.toString)(_.toLong)
   val xmapUrlEndpoint = endpoint(
     get(url1),
     ok(textResponse)
   )
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
-  val reqBody1 = textRequest.xmap(s => LocalDate.parse(s, dateTimeFormatter))( d => dateTimeFormatter.format(d))
+  val reqBody1 =
+    textRequest.xmap(s => LocalDate.parse(s, dateTimeFormatter))(d =>
+      dateTimeFormatter.format(d)
+    )
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
     ok(textResponse)
   )
 
   val optUUIDQsEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & qs[Option[Int]]("age"))),
+    get(
+      path / "user" / segment[String]() / "whatever" /? (qs[UUID]("id") & qs[
+        Option[Int]
+      ]("age"))
+    ),
     ok(textResponse)
   )
 
   val optQsEndpoint = endpoint(
-    get(path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & qs[Option[Int]]("age"))),
+    get(
+      path / "user" / segment[String]() / "whatever" /? (qs[String]("name") & qs[
+        Option[Int]
+      ]("age"))
+    ),
     ok(textResponse)
   )
 
-  case class Cache(etag: String, lastModified: String /* I couldn’t find how to parse these dates */)
+  case class Cache(
+      etag: String,
+      lastModified: String /* I couldn’t find how to parse these dates */
+  )
 
   val cacheHeaders: ResponseHeaders[Cache] =
     (responseHeader("ETag") ++ responseHeader("Last-Modified"))
-      .xmapPartial { case (etag, lastModified) =>
-        val validDate =
-          if (lastModified.contains("GMT")) Valid(lastModified)
-          else Invalid("Invalid date")
-        validDate.map(Cache(etag, _))
-      } (cache => (cache.etag, cache.lastModified))
+      .xmapPartial {
+        case (etag, lastModified) =>
+          val validDate =
+            if (lastModified.contains("GMT")) Valid(lastModified)
+            else Invalid("Invalid date")
+          validDate.map(Cache(etag, _))
+      }(cache => (cache.etag, cache.lastModified))
 
   val versionedResource = endpoint(
     get(path / "versioned-resource"),

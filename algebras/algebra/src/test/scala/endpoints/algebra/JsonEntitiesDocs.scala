@@ -34,9 +34,10 @@ trait JsonEntitiesDocs extends JsonEntities {
   locally {
     //#response-xmap
     val maybeUserResponse: Response[Option[User]] =
-      response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
+      response(NotImplemented, emptyResponse)
+        .orElse(ok(jsonResponse[User]))
         .xmap {
-          case Left(()) => None
+          case Left(())    => None
           case Right(user) => Some(user)
         }(_.toRight(()))
     //#response-xmap

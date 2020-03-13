@@ -12,14 +12,19 @@ import scala.concurrent.Future
   *
   * @group interpreters
   */
-trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomErrors {
+trait ChunkedEntities
+    extends algebra.ChunkedEntities
+    with EndpointsWithCustomErrors {
 
   //#stream-type
   type Chunks[A] = akka.stream.scaladsl.Source[A, _]
   //#stream-type
 
   def textChunksRequest: RequestEntity[Chunks[String]] =
-    chunkedRequestEntity(ContentTypes.`text/plain(UTF-8)`, ByteString.fromString)
+    chunkedRequestEntity(
+      ContentTypes.`text/plain(UTF-8)`,
+      ByteString.fromString
+    )
 
   def textChunksResponse: ResponseEntity[Chunks[String]] =
     chunkedResponseEntity(byteString => Right(byteString.utf8String))
@@ -30,14 +35,25 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] =
     chunkedResponseEntity(byteString => Right(byteString.toArray))
 
-  private[client] def chunkedRequestEntity[A](contentType: ContentType, toByteString: A => ByteString): RequestEntity[Chunks[A]] =
-    (as, httpRequest) => httpRequest.withEntity(HttpEntity.Chunked.fromData(contentType, as.map(toByteString)))
+  private[client] def chunkedRequestEntity[A](
+      contentType: ContentType,
+      toByteString: A => ByteString
+  ): RequestEntity[Chunks[A]] =
+    (as, httpRequest) =>
+      httpRequest.withEntity(
+        HttpEntity.Chunked.fromData(contentType, as.map(toByteString))
+      )
 
-  private[client] def chunkedResponseEntity[A](fromByteString: ByteString => Either[Throwable, A]): ResponseEntity[Chunks[A]] =
-    httpEntity => Future.successful(Right(httpEntity.dataBytes.map(fromByteString).flatMapConcat {
-      case Left(error)  => Source.failed(error)
-      case Right(value) => Source.single(value)
-    }))
+  private[client] def chunkedResponseEntity[A](
+      fromByteString: ByteString => Either[Throwable, A]
+  ): ResponseEntity[Chunks[A]] =
+    httpEntity =>
+      Future.successful(
+        Right(httpEntity.dataBytes.map(fromByteString).flatMapConcat {
+          case Left(error)  => Source.failed(error)
+          case Right(value) => Source.single(value)
+        })
+      )
 
 }
 
@@ -46,18 +62,32 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   *
   * @group interpreters
   */
-trait ChunkedJsonEntities extends algebra.ChunkedJsonEntities with ChunkedEntities with JsonEntitiesFromCodecs {
+trait ChunkedJsonEntities
+    extends algebra.ChunkedJsonEntities
+    with ChunkedEntities
+    with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](implicit codec: JsonCodec[A]): RequestEntity[Chunks[A]] = {
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
-    chunkedRequestEntity(ContentTypes.`application/json`, a => ByteString.fromString(encoder.encode(a)))
+    chunkedRequestEntity(
+      ContentTypes.`application/json`,
+      a => ByteString.fromString(encoder.encode(a))
+    )
   }
 
-  def jsonChunksResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[Chunks[A]] = {
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedResponseEntity { byteString =>
       val string = byteString.utf8String
-      decoder.decode(string).toEither.left.map(errors => new Throwable(errors.mkString(". ")))
+      decoder
+        .decode(string)
+        .toEither
+        .left
+        .map(errors => new Throwable(errors.mkString(". ")))
     }
   }
 

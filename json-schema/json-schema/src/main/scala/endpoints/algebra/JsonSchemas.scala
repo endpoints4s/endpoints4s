@@ -2,7 +2,12 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
+import endpoints.{
+  PartialInvariantFunctor,
+  PartialInvariantFunctorSyntax,
+  Tupler,
+  Validated
+}
 
 import scala.collection.compat._
 import scala.util.control.Exception
@@ -140,14 +145,21 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * Convenient constructor for enumerations represented by string values.
     * @group operations
     */
-  final def stringEnumeration[A](values: Seq[A])(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
+  final def stringEnumeration[A](
+      values: Seq[A]
+  )(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
     val encoded = values.map(a => (a, encode(a))).toMap
     val decoded = encoded.map(_.swap)
-    assert(encoded.size == decoded.size, "Enumeration values must have different string representation")
+    assert(
+      encoded.size == decoded.size,
+      "Enumeration values must have different string representation"
+    )
     enumeration(values)(
       tpe.xmapPartial { str =>
-        Validated.fromOption(decoded.get(str))(s"Invalid value: ${str}. Valid values are ${values.map(encode).mkString(", ")}.")
-      } (encode)
+        Validated.fromOption(decoded.get(str))(
+          s"Invalid value: ${str} ; valid values are: ${values.map(encode).mkString(", ")}"
+        )
+      }(encode)
     )
   }
 
@@ -172,7 +184,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  final def literal[A](value: A)(implicit tpe: JsonSchema[A]): JsonSchema[Unit] =
+  final def literal[A](
+      value: A
+  )(implicit tpe: JsonSchema[A]): JsonSchema[Unit] =
     (enumeration(value :: Nil)(tpe): JsonSchema[A]).xmap(_ => ())(_ => value)
 
   /** Annotates the record JSON schema with a name */
@@ -223,12 +237,24 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** The JSON schema of a record with a single field `name` of type `A`
     * @group operations
     */
-  def field[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[A]
+  def field[A](name: String, documentation: Option[String] = None)(
+      implicit tpe: JsonSchema[A]
+  ): Record[A]
 
   /** The JSON schema of a record with a single optional field `name` of type `A`
+    *
+    * Decoder interpreters successfully decode `None` if the field is absent or if
+    * it is present but has the value `null`.
+    * Decoder interpreters fail if the field is present but contains an invalid
+    * value.
+    * Encoder interpreters can omit the field or emit a field with a `null` value.
+    * Documentation interpreters must mark the field as optional.
+    *
     * @group operations
     */
-  def optField[A](name: String, documentation: Option[String] = None)(implicit tpe: JsonSchema[A]): Record[Option[A]]
+  def optField[A](name: String, documentation: Option[String] = None)(
+      implicit tpe: JsonSchema[A]
+  ): Record[Option[A]]
 
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
@@ -243,13 +269,21 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   def defaultDiscriminatorName: String = "type"
 
   /** Allows to specify name of discriminator field for sum type */
-  def withDiscriminatorTagged[A](tagged: Tagged[A], discriminatorName: String): Tagged[A]
+  def withDiscriminatorTagged[A](
+      tagged: Tagged[A],
+      discriminatorName: String
+  ): Tagged[A]
 
   /** The JSON schema of a coproduct made of the given alternative tagged records */
-  def choiceTagged[A, B](taggedA: Tagged[A], taggedB: Tagged[B]): Tagged[Either[A, B]]
+  def choiceTagged[A, B](
+      taggedA: Tagged[A],
+      taggedB: Tagged[B]
+  ): Tagged[Either[A, B]]
 
   /** The JSON schema of a record merging the fields of the two given records */
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
+      implicit t: Tupler[A, B]
+  ): Record[t.Out]
 
   /** Include an example value within the given schema */
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
@@ -271,20 +305,25 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *       of the other), otherwise, a value of type `B` might also be successfully
     *       decoded as a value of type `A`, and this could have surprising consequences.
     */
-  def orFallbackToJsonSchema[A, B](schemaA: JsonSchema[A], schemaB: JsonSchema[B]): JsonSchema[Either[A, B]]
+  def orFallbackToJsonSchema[A, B](
+      schemaA: JsonSchema[A],
+      schemaB: JsonSchema[B]
+  ): JsonSchema[Either[A, B]]
 
   /**
     * Implicit methods for values of type [[JsonSchema]]
     * @group operations
     */
   final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A]) {
+
     /**
       * Include an example of value in this schema. Documentation interpreters
       * can show this example value. Encoder and decoder interpreters ignore
       * this value.
       * @param example Example value to attach to the schema
       */
-    def withExample(example: A): JsonSchema[A] = withExampleJsonSchema(schemaA, example)
+    def withExample(example: A): JsonSchema[A] =
+      withExampleJsonSchema(schemaA, example)
 
     /**
       * A schema that can be either `schemaA` or `schemaB`.
@@ -304,15 +343,18 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *       decoded as a value of type `A`, and this could have surprising consequences.
       * @param schemaB fallback schema
       */
-    def orFallbackTo[B](schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] = orFallbackToJsonSchema(schemaA, schemaB)
+    def orFallbackTo[B](schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] =
+      orFallbackToJsonSchema(schemaA, schemaB)
   }
 
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
   final implicit class RecordOps[A](recordA: Record[A]) {
+
     /** Merge the fields of `recordA` with the fields of `recordB` */
-    def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] = zipRecords(recordA, recordB)
+    def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] =
+      zipRecords(recordA, recordB)
 
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
 
@@ -326,7 +368,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** @group operations */
   final implicit class TaggedOps[A](taggedA: Tagged[A]) {
-    def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] = choiceTagged(taggedA, taggedB)
+    def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] =
+      choiceTagged(taggedA, taggedB)
+
     /**
       * Give a name to the schema.
       * Documentation interpreters use that name to refer to this schema.
@@ -337,11 +381,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     /**
       * Override the name of the type discriminator field of this record.
       */
-    def withDiscriminator(name: String): Tagged[A] = withDiscriminatorTagged(taggedA, name)
+    def withDiscriminator(name: String): Tagged[A] =
+      withDiscriminatorTagged(taggedA, name)
   }
 
   /** @group operations */
   final implicit class EnumOps[A](enumA: Enum[A]) {
+
     /**
       * Give a name to the schema.
       * Documentation interpreters use that name to refer to this schema.
@@ -356,10 +402,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   final implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
     stringJsonSchema(format = Some("uuid")).xmapPartial { str =>
       Validated.fromEither(
-        Exception.nonFatalCatch.either(UUID.fromString(str))
-          .left.map(_ => s"Invalid UUID value: '$str'." :: Nil)
+        Exception.nonFatalCatch
+          .either(UUID.fromString(str))
+          .left
+          .map(_ => s"Invalid UUID value: '$str'" :: Nil)
       )
-    } (_.toString)
+    }(_.toString)
 
   /**
     * A JSON schema for type `String`.
@@ -373,7 +421,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for type `String`
     * @group operations
     */
-  final implicit def defaultStringJsonSchema: JsonSchema[String] = stringJsonSchema(format = None)
+  final implicit def defaultStringJsonSchema: JsonSchema[String] =
+    stringJsonSchema(format = None)
 
   /** A JSON schema for type `Int`
     * @group operations
@@ -413,14 +462,17 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for sequences
     * @group operations
     */
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
-    jsonSchema: JsonSchema[A],
-    factory: Factory[A, C[A]]
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](
+      implicit
+      jsonSchema: JsonSchema[A],
+      factory: Factory[A, C[A]]
   ): JsonSchema[C[A]]
 
   /** A JSON schema for maps with string keys
     * @group operations
     */
-  implicit def mapJsonSchema[A](implicit jsonSchema: JsonSchema[A]): JsonSchema[Map[String, A]]
+  implicit def mapJsonSchema[A](
+      implicit jsonSchema: JsonSchema[A]
+  ): JsonSchema[Map[String, A]]
 
 }

@@ -3,7 +3,11 @@ package endpoints.sttp.client
 import com.softwaremill.sttp
 import com.softwaremill.sttp.TryHttpURLConnectionBackend
 import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
-import endpoints.algebra.client.{BasicAuthTestSuite, JsonFromCodecTestSuite, EndpointsTestSuite}
+import endpoints.algebra.client.{
+  BasicAuthTestSuite,
+  JsonFromCodecTestSuite,
+  EndpointsTestSuite
+}
 import endpoints.algebra.{BasicAuthenticationTestApi, EndpointsTestApi}
 import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
@@ -11,7 +15,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
-  extends Endpoints(address, backend)
+    extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
     with BasicAuthenticationTestApi
@@ -19,13 +23,14 @@ class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
     with JsonFromPlayJsonCodecTestApi
 
 class EndpointsTestSync
-  extends EndpointsTestSuite[TestClient[Try]]
+    extends EndpointsTestSuite[TestClient[Try]]
     with BasicAuthTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]] {
 
   val backend = TryHttpURLConnectionBackend()
 
-  val client: TestClient[Try] = new TestClient(s"http://localhost:$wiremockPort", backend)
+  val client: TestClient[Try] =
+    new TestClient(s"http://localhost:$wiremockPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
@@ -39,7 +44,7 @@ class EndpointsTestSync
 }
 
 class EndpointsTestAkka
-  extends EndpointsTestSuite[TestClient[Future]]
+    extends EndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
     with JsonFromCodecTestSuite[TestClient[Future]] {
 
@@ -47,9 +52,11 @@ class EndpointsTestAkka
 
   val backend = AkkaHttpBackend()
 
-  val client: TestClient[Future] = new TestClient(s"http://localhost:$wiremockPort", backend)
+  val client: TestClient[Future] =
+    new TestClient(s"http://localhost:$wiremockPort", backend)
 
-  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = endpoint(args)
+  def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) =
+    endpoint(args)
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
@@ -63,4 +70,3 @@ class EndpointsTestAkka
     super.afterAll()
   }
 }
-

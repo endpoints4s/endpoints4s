@@ -14,7 +14,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     //#explicit-schema
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width") zip
-      field[Double]("height")
+        field[Double]("height")
     ).as[Rectangle]
     //#explicit-schema
   }
@@ -30,8 +30,8 @@ trait JsonSchemasDocs extends JsonSchemas {
 
     @name("RectangleSchema")
     case class Rectangle(
-      @docs("Rectangle width") width: Double,
-      height: Double
+        @docs("Rectangle width") width: Double,
+        height: Double
     )
     //#documented-generic-schema
   }

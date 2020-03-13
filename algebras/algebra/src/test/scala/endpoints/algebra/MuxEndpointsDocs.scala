@@ -29,6 +29,4 @@ trait MuxEndpointsDocs extends MuxEndpoints with JsonEntities {
   case class UserDeleted(id: Long) extends Event
   //#mux-endpoint
 
-
-
 }

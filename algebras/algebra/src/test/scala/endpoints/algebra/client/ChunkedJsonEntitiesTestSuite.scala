@@ -12,7 +12,8 @@ import endpoints.algebra.ChunkedJsonEntitiesTestApi
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends ClientTestBase[T] {
+trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
+    extends ClientTestBase[T] {
 
   val streamingClient: T
 
@@ -20,37 +21,61 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
   val streamingPort: Int = findOpenPort
 
   def serving[A](route: Route)(thunk: => Unit): Unit = {
-    whenReady(Http().bindAndHandle(route, "localhost", streamingPort)) { binding =>
-      try {
-        thunk
-      } finally {
-        whenReady(binding.terminate(10.seconds))(_ => ())
-      }
+    whenReady(Http().bindAndHandle(route, "localhost", streamingPort)) {
+      binding =>
+        try {
+          thunk
+        } finally {
+          whenReady(binding.terminate(10.seconds))(_ => ())
+        }
     }
   }
 
-  import streamingClient.{Counter, Endpoint, Chunks, streamedEndpointTest, uploadEndpointTest}
+  import streamingClient.{
+    Counter,
+    Endpoint,
+    Chunks,
+    streamedEndpointTest,
+    uploadEndpointTest
+  }
 
   /**
     * Calls the endpoint and accumulates the messages sent by the server.
     * (only endpoints streaming a finite number of items can be tested)
     */
-  def callStreamedEndpoint[A, B](endpoint: Endpoint[A, Chunks[B]], req: A): Future[Seq[Either[String, B]]]
-  def callStreamedEndpoint[A, B](endpoint: Endpoint[Chunks[A], B], req: Source[A, _]): Future[B]
+  def callStreamedEndpoint[A, B](
+      endpoint: Endpoint[A, Chunks[B]],
+      req: A
+  ): Future[Seq[Either[String, B]]]
+  def callStreamedEndpoint[A, B](
+      endpoint: Endpoint[Chunks[A], B],
+      req: Source[A, _]
+  ): Future[B]
 
   "Decode chunks streamed by a server" in {
 
-    val expectedItems = Right(Counter(1)) :: Right(Counter(2)) :: Right(Counter(3)) :: Nil
+    val expectedItems =
+      Right(Counter(1)) :: Right(Counter(2)) :: Right(Counter(3)) :: Nil
 
     serving(
       (get & path("notifications")) {
-        complete(HttpEntity.Chunked.fromData(
-          ContentTypes.`application/json`,
-          Source(List(ByteString("{\"value\":1}"), ByteString("{\"value\":2}"), ByteString("{\"value\":3}")))
-        ))
+        complete(
+          HttpEntity.Chunked.fromData(
+            ContentTypes.`application/json`,
+            Source(
+              List(
+                ByteString("{\"value\":1}"),
+                ByteString("{\"value\":2}"),
+                ByteString("{\"value\":3}")
+              )
+            )
+          )
+        )
       }
     ) {
-      whenReady(callStreamedEndpoint(streamedEndpointTest, ()))(_ shouldEqual expectedItems)
+      whenReady(callStreamedEndpoint(streamedEndpointTest, ()))(
+        _ shouldEqual expectedItems
+      )
       ()
     }
 
@@ -58,17 +83,25 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
 
   "Report errors when decoding chunks streamed by a server" in {
 
-    val expectedItems = Right(Counter(1)) :: Left("java.lang.Throwable: DecodingFailure at .value: Int") :: Nil
+    val expectedItems = Right(Counter(1)) :: Left(
+      "java.lang.Throwable: DecodingFailure at .value: Int"
+    ) :: Nil
 
     serving(
       (get & path("notifications")) {
-        complete(HttpEntity.Chunked.fromData(
-          ContentTypes.`application/json`,
-          Source(List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}")))
-        ))
+        complete(
+          HttpEntity.Chunked.fromData(
+            ContentTypes.`application/json`,
+            Source(
+              List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}"))
+            )
+          )
+        )
       }
     ) {
-      whenReady(callStreamedEndpoint(streamedEndpointTest, ()))(_ shouldEqual expectedItems)
+      whenReady(callStreamedEndpoint(streamedEndpointTest, ()))(
+        _ shouldEqual expectedItems
+      )
       ()
     }
 

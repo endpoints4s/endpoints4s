@@ -31,12 +31,16 @@ object PlayComponents {
     *   }
     * }}}
     */
-  def fromBuiltInComponents(builtInComponents: BuiltInComponents): PlayComponents =
+  def fromBuiltInComponents(
+      builtInComponents: BuiltInComponents
+  ): PlayComponents =
     new PlayComponents {
       def playBodyParsers: PlayBodyParsers = builtInComponents.playBodyParsers
-      def defaultActionBuilder: DefaultActionBuilder = builtInComponents.defaultActionBuilder
+      def defaultActionBuilder: DefaultActionBuilder =
+        builtInComponents.defaultActionBuilder
       def fileMimeTypes: FileMimeTypes = builtInComponents.fileMimeTypes
-      implicit def executionContext: ExecutionContext = builtInComponents.executionContext
+      implicit def executionContext: ExecutionContext =
+        builtInComponents.executionContext
     }
 
 }

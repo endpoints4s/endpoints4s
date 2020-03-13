@@ -10,8 +10,7 @@ import scalaj.http.HttpRequest
   */
 trait Requests extends algebra.Requests with Urls with Methods {
 
-
-   type RequestHeaders[A] = A => Seq[(String, String)]
+  type RequestHeaders[A] = A => Seq[(String, String)]
 
   type Request[A] = A => HttpRequest
 
@@ -19,46 +18,69 @@ trait Requests extends algebra.Requests with Urls with Methods {
 
   def emptyRequestHeaders: RequestHeaders[Unit] = _ => Seq()
 
-  def requestHeader(name: String, docs: Documentation): String => Seq[(String, String)] = value => Seq(name -> value)
+  def requestHeader(
+      name: String,
+      docs: Documentation
+  ): String => Seq[(String, String)] = value => Seq(name -> value)
 
-  def optRequestHeader(name: String, docs: Documentation): Option[String] => Seq[(String, String)] =
+  def optRequestHeader(
+      name: String,
+      docs: Documentation
+  ): Option[String] => Seq[(String, String)] =
     valueOpt => valueOpt.map(v => name -> v).toSeq
 
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] = new InvariantFunctor[RequestHeaders] {
-    override def xmap[From, To](f: From => Seq[(String, String)], map: From => To, contramap: To => From): To => Seq[(String, String)] =
-      to => f(contramap(to))
-  }
+  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
+    new InvariantFunctor[RequestHeaders] {
+      override def xmap[From, To](
+          f: From => Seq[(String, String)],
+          map: From => To,
+          contramap: To => From
+      ): To => Seq[(String, String)] =
+        to => f(contramap(to))
+    }
 
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] = new Semigroupal[RequestHeaders] {
-    override def product[A, B](fa: A => Seq[(String, String)], fb: B => Seq[(String, String)])(implicit tupler: Tupler[A, B]): tupler.Out => Seq[(String, String)] =
-      out => {
-        val (a, b) = tupler.unapply(out)
-        fa(a) ++ fb(b)
-      }
-  }
-
+  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+    new Semigroupal[RequestHeaders] {
+      override def product[A, B](
+          fa: A => Seq[(String, String)],
+          fb: B => Seq[(String, String)]
+      )(implicit tupler: Tupler[A, B]): tupler.Out => Seq[(String, String)] =
+        out => {
+          val (a, b) = tupler.unapply(out)
+          fa(a) ++ fb(b)
+        }
+    }
 
   def emptyRequest: RequestEntity[Unit] = (x: Unit, req: HttpRequest) => req
 
   def textRequest: (String, HttpRequest) => scalaj.http.HttpRequest =
     (body, req) => req.postData(body)
 
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] = new InvariantFunctor[RequestEntity] {
-    override def xmap[From, To](f: (From, HttpRequest) => HttpRequest, map: From => To, contramap: To => From): (To, HttpRequest) => HttpRequest =
-      (to, req) => f(contramap(to), req)
-  }
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
+    new InvariantFunctor[RequestEntity] {
+      override def xmap[From, To](
+          f: (From, HttpRequest) => HttpRequest,
+          map: From => To,
+          contramap: To => From
+      ): (To, HttpRequest) => HttpRequest =
+        (to, req) => f(contramap(to), req)
+    }
 
-
-  def request[U, E, H, UE, Out](method: Method,
-    url: Url[U],
-    entity: RequestEntity[E] = emptyRequest,
-    docs: Documentation = None,
-    headers: RequestHeaders[H] = emptyRequestHeaders
-  )(implicit tuplerUE: Tupler.Aux[U, E, UE], tuplerUEH: Tupler.Aux[UE, H, Out]): Request[Out] =
+  def request[U, E, H, UE, Out](
+      method: Method,
+      url: Url[U],
+      entity: RequestEntity[E] = emptyRequest,
+      docs: Documentation = None,
+      headers: RequestHeaders[H] = emptyRequestHeaders
+  )(
+      implicit tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerUEH: Tupler.Aux[UE, H, Out]
+  ): Request[Out] =
     (ueh) => {
       val (ue, h) = tuplerUEH.unapply(ueh)
       val (u, e) = tuplerUE.unapply(ue)
-      val req = url.toReq(u)
+      val req = url
+        .toReq(u)
         .headers(headers(h))
       entity(e, req)
         .method(method)

@@ -49,7 +49,8 @@ trait Authentication extends algebra.Endpoints {
     * Conversely, servers build a `BadRequest` response on `None`, or the underlying `response` otherwise.
     */
   final def wheneverValid[A](responseA: Response[A]): Response[Option[A]] =
-    responseA.orElse(response(BadRequest, emptyResponse))
+    responseA
+      .orElse(response(BadRequest, emptyResponse))
       .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 //#enriched-algebra
 
@@ -61,19 +62,22 @@ trait Authentication extends algebra.Endpoints {
     * doesn’t contain a valid JWT.
     */
   private[authentication] def authenticatedRequest[U, E, UE, UET](
-    method: Method,
-    url: Url[U],
-    entity: RequestEntity[E]
-  )(implicit
-    tuplerUE: Tupler.Aux[U, E, UE],
-    tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
+      method: Method,
+      url: Url[U],
+      entity: RequestEntity[E]
+  )(
+      implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Request[UET]
 
   /** A response that might signal to the client that his request was not authenticated.
     * Clients throw an exception if the response status is `Unauthorized`.
     * Servers build an `Unauthorized` response in case the incoming request was not correctly authenticated.
     */
-  private[authentication] def wheneverAuthenticated[A](response: Response[A]): Response[A]
+  private[authentication] def wheneverAuthenticated[A](
+      response: Response[A]
+  ): Response[A]
 
   /**
     * User-facing constructor for endpoints requiring authentication.
@@ -92,13 +96,14 @@ trait Authentication extends algebra.Endpoints {
     * @tparam R Information carried by the response
     */
   final def authenticatedEndpoint[U, E, R, UE, UET](
-    method: Method,
-    url: Url[U],
-    requestEntity: RequestEntity[E],
-    response: Response[R]
-  )(implicit
-    tuplerUE: Tupler.Aux[U, E, UE],
-    tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
+      method: Method,
+      url: Url[U],
+      requestEntity: RequestEntity[E],
+      response: Response[R]
+  )(
+      implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Endpoint[UET, R] =
     endpoint(
       authenticatedRequest(method, url, requestEntity),
@@ -121,7 +126,9 @@ object UserInfo {
   implicit val oformat: OFormat[UserInfo] =
     (__ \ "name").format[String].inmap(UserInfo(_), (_: UserInfo).name)
 
-  def decodeToken(token: String)(implicit conf: Configuration): Option[UserInfo] =
+  def decodeToken(
+      token: String
+  )(implicit conf: Configuration): Option[UserInfo] =
     JwtSession.deserialize(token.trim).getAs[UserInfo]("user")
 
 }
@@ -137,60 +144,65 @@ object ClockSettings {
   * Interpreter for the [[Authentication]] algebra interface that produces
   * a Play client (using `play.api.libs.ws.WSClient`).
   */
-trait ClientAuthentication
-  extends client.Endpoints
-    with Authentication {
+trait ClientAuthentication extends client.Endpoints with Authentication {
 
   implicit protected def playConfiguration: Configuration
 
   // The constructor is private so that users can not
   // forge instances themselves
-  class AuthenticationToken private[ClientAuthentication](
-    private[ClientAuthentication] val token: String,
-    val decoded: UserInfo
+  class AuthenticationToken private[ClientAuthentication] (
+      private[ClientAuthentication] val token: String,
+      val decoded: UserInfo
   )
 
   // Decodes the user info from an OK response
-  def authenticationToken: Response[AuthenticationToken] = { (status, headers) =>
-    if (status == OK) {
-      headers.get(HeaderNames.AUTHORIZATION) match {
-        case Some(Seq(headerValue)) =>
-          val token = headerValue.stripPrefix("Bearer ")
-          // Note: the default implementation of `JwtSession.deserialize`
-          // returns an “empty” JwtSession object when it is invalid.
-          // You might want to tweak the logic to return an error in such a case.
-          UserInfo.decodeToken(token) match {
-            case Some(user) => Some(_ => Right(new AuthenticationToken(token,user)))
-            case None       => Some(_ => Left(new Exception("Invalid JWT session")))
-          }
-        case _ => Some(_ => Left(new Exception("Missing JWT session")))
-      }
-    } else None
+  def authenticationToken: Response[AuthenticationToken] = {
+    (status, headers) =>
+      if (status == OK) {
+        headers.get(HeaderNames.AUTHORIZATION) match {
+          case Some(Seq(headerValue)) =>
+            val token = headerValue.stripPrefix("Bearer ")
+            // Note: the default implementation of `JwtSession.deserialize`
+            // returns an “empty” JwtSession object when it is invalid.
+            // You might want to tweak the logic to return an error in such a case.
+            UserInfo.decodeToken(token) match {
+              case Some(user) =>
+                Some(_ => Right(new AuthenticationToken(token, user)))
+              case None => Some(_ => Left(new Exception("Invalid JWT session")))
+            }
+          case _ => Some(_ => Left(new Exception("Missing JWT session")))
+        }
+      } else None
   }
 //#client-interpreter
 //#protected-endpoints-client
   def authenticatedRequest[U, E, UE, UET](
-    method: Method,
-    url: Url[U],
-    entity: RequestEntity[E]
-  )(implicit
-    tuplerUE: Tupler.Aux[U, E, UE],
-    tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
+      method: Method,
+      url: Url[U],
+      entity: RequestEntity[E]
+  )(
+      implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Request[UET] = {
     // Encodes the user info as a JWT object in the `Authorization` request header
-    val authenticationTokenRequestHeaders: RequestHeaders[AuthenticationToken] = { (user, wsRequest) =>
-      wsRequest.withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer ${user.token}")
+    val authenticationTokenRequestHeaders
+        : RequestHeaders[AuthenticationToken] = { (user, wsRequest) =>
+      wsRequest.withHttpHeaders(
+        HeaderNames.AUTHORIZATION -> s"Bearer ${user.token}"
+      )
     }
     request(method, url, entity, headers = authenticationTokenRequestHeaders)
   }
 
   // Checks that the response is not `Unauthorized` before continuing
-  def wheneverAuthenticated[A](response: Response[A]): Response[A] = { (status, headers) =>
-    if (status == Status.UNAUTHORIZED) {
-      Some(_ => Left(new Exception("Unauthorized")))
-    } else {
-      response(status, headers)
-    }
+  def wheneverAuthenticated[A](response: Response[A]): Response[A] = {
+    (status, headers) =>
+      if (status == Status.UNAUTHORIZED) {
+        Some(_ => Left(new Exception("Unauthorized")))
+      } else {
+        response(status, headers)
+      }
   }
 //#protected-endpoints-client
 //#client-interpreter
@@ -203,9 +215,7 @@ trait ClientAuthentication
   * a Play server.
   */
 //#server-interpreter
-trait ServerAuthentication
-  extends Authentication
-    with server.Endpoints {
+trait ServerAuthentication extends Authentication with server.Endpoints {
 
   import ClockSettings._
   import playComponents.executionContext
@@ -222,26 +232,35 @@ trait ServerAuthentication
 
 //#protected-endpoints-server
   def authenticatedRequest[U, E, UE, UET](
-    method: Method,
-    url: Url[U],
-    entity: RequestEntity[E]
-  )(implicit
-    tuplerUE: Tupler.Aux[U, E, UE],
-    tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
+      method: Method,
+      url: Url[U],
+      entity: RequestEntity[E]
+  )(
+      implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
+      tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Request[UET] = {
     // Extracts and validates user info from a request header
-    val authenticationTokenRequestHeaders: RequestHeaders[Option[AuthenticationToken]] = { headers =>
-      Valid(headers.get(HeaderNames.AUTHORIZATION)
-        .flatMap(headerValue => UserInfo.decodeToken(headerValue.stripPrefix("Bearer "))) match {
-        case Some(token) => Some(token)
-        case None        => None
-      })
+    val authenticationTokenRequestHeaders
+        : RequestHeaders[Option[AuthenticationToken]] = { headers =>
+      Valid(
+        headers
+          .get(HeaderNames.AUTHORIZATION)
+          .flatMap(headerValue =>
+            UserInfo.decodeToken(headerValue.stripPrefix("Bearer "))
+          ) match {
+          case Some(token) => Some(token)
+          case None        => None
+        }
+      )
     }
 
     extractMethodUrlAndHeaders(method, url, authenticationTokenRequestHeaders)
       .toRequest[UET] {
-        case (_, None)        => BodyParser(_ => Accumulator.done(Left(Results.Unauthorized)))
-        case (u, Some(token)) => entity.map(e => tuplerUET(tuplerUE(u, e), token))
+        case (_, None) =>
+          BodyParser(_ => Accumulator.done(Left(Results.Unauthorized)))
+        case (u, Some(token)) =>
+          entity.map(e => tuplerUET(tuplerUE(u, e), token))
       } { uet =>
         val (ue, t) = tuplerUET.unapply(uet)
         val (u, _) = tuplerUE.unapply(ue)

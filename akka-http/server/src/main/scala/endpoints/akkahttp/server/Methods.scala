@@ -24,4 +24,3 @@ trait Methods extends algebra.Methods {
 
   def Patch = HttpMethods.PATCH
 }
-

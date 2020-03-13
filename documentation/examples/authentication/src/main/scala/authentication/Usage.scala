@@ -17,9 +17,7 @@ import scala.concurrent.ExecutionContext
 
 /** Example of endpoints making use of authentication */
 //#login-endpoint
-trait AuthenticationEndpoints
-  extends algebra.Endpoints
-    with Authentication {
+trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
 
   /**
     * Login endpoint: takes the API key in a query string parameter and returns either `Some(authenticationToken)`
@@ -37,12 +35,13 @@ trait AuthenticationEndpoints
     * “Hello ''user_name''” if the request is correctly authenticated, otherwise returns
     * an `Unauthorized` HTTP response.
     */
-  val someResource: Endpoint[AuthenticationToken, String] = authenticatedEndpoint(
-    Get,
-    path / "some-resource",
-    emptyRequest,
-    ok(textResponse)
-  )
+  val someResource: Endpoint[AuthenticationToken, String] =
+    authenticatedEndpoint(
+      Get,
+      path / "some-resource",
+      emptyRequest,
+      ok(textResponse)
+    )
 //#protected-endpoint
 //#login-endpoint
 
@@ -53,8 +52,12 @@ trait AuthenticationEndpoints
   * Client for the `AuthenticationEndpoints`, using the `ClientAuthentication`
   * interpreter (implementing the authentication logic), defined below.
   */
-class Client(host: String, wsClient: WSClient, val playConfiguration: Configuration)(implicit ec: ExecutionContext)
-  extends client.Endpoints(host, wsClient)
+class Client(
+    host: String,
+    wsClient: WSClient,
+    val playConfiguration: Configuration
+)(implicit ec: ExecutionContext)
+    extends client.Endpoints(host, wsClient)
     with AuthenticationEndpoints
     with ClientAuthentication
 
@@ -62,8 +65,10 @@ class Client(host: String, wsClient: WSClient, val playConfiguration: Configurat
   * Example of server implementing the `AuthenticationEndpoints`
   */
 //#login-implementation
-class Server(val playComponents: PlayComponents, val playConfiguration: Configuration)
-  extends AuthenticationEndpoints
+class Server(
+    val playComponents: PlayComponents,
+    val playConfiguration: Configuration
+) extends AuthenticationEndpoints
     with server.Endpoints
     with ServerAuthentication {
 

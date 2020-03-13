@@ -13,10 +13,16 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   val host = "0.0.0.0"
   val port = 8765
-  val playConfig = ServerConfig(port = Some(port), mode = Mode.Test, address = host)
-  val server = NettyServer.fromRouterWithComponents(playConfig) { components =>
-    new Server(PlayComponents.fromBuiltInComponents(components), components.configuration).routes
-  }.asInstanceOf[NettyServer]
+  val playConfig =
+    ServerConfig(port = Some(port), mode = Mode.Test, address = host)
+  val server = NettyServer
+    .fromRouterWithComponents(playConfig) { components =>
+      new Server(
+        PlayComponents.fromBuiltInComponents(components),
+        components.configuration
+      ).routes
+    }
+    .asInstanceOf[NettyServer]
   import server.materializer
   import server.actorSystem.dispatcher
   import ClockSettings._
@@ -40,35 +46,48 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
     }
     "invalid authenticated request gets rejected" in {
       for {
-        response <- wsClient.url(uri("/some-resource"))
+        response <- wsClient
+          .url(uri("/some-resource"))
           .withHttpHeaders(HeaderNames.AUTHORIZATION -> "lol")
           .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
     "invalid json token gets rejected" in {
-      val token = """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"""
+      val token =
+        """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"""
       for {
-        response <- wsClient.url(uri("/some-resource"))
+        response <- wsClient
+          .url(uri("/some-resource"))
           .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
           .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
     "wrong login is rejected" in {
       for {
-        loginResponse <- wsClient.url(uri("/login")).withQueryStringParameters("apiKey" -> "unknown").get()
+        loginResponse <- wsClient
+          .url(uri("/login"))
+          .withQueryStringParameters("apiKey" -> "unknown")
+          .get()
       } yield assert(loginResponse.status == Status.BAD_REQUEST)
     }
     "login gives a valid json token" in {
       for {
-        loginResponse <- wsClient.url(uri("/login")).withQueryStringParameters("apiKey" -> "foobar").get()
-        token = loginResponse.headers(HeaderNames.AUTHORIZATION).head.drop("Bearer ".length)
+        loginResponse <- wsClient
+          .url(uri("/login"))
+          .withQueryStringParameters("apiKey" -> "foobar")
+          .get()
+        token = loginResponse
+          .headers(HeaderNames.AUTHORIZATION)
+          .head
+          .drop("Bearer ".length)
         _ = {
           assert(loginResponse.status == Status.OK)
           val jwtSession = JwtSession.deserialize(token)
           val user = jwtSession.getAs[UserInfo]("user").get
           assert(user == UserInfo("Alice"))
         }
-        response <- wsClient.url(uri("/some-resource"))
+        response <- wsClient
+          .url(uri("/some-resource"))
           .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
           .get()
       } yield assert(response.status == Status.OK)

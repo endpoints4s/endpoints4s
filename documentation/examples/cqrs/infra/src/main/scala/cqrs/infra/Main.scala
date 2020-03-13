@@ -26,7 +26,11 @@ object Main extends App {
 
   object queriesService extends PlayService(port = 9002, Mode.Prod) {
     lazy val wsClient = AhcWSClient(AhcWSClientConfig())
-    lazy val service = new QueriesService(baseUrl(commandsService.port), wsClient, actorSystem.scheduler)
+    lazy val service = new QueriesService(
+      baseUrl(commandsService.port),
+      wsClient,
+      actorSystem.scheduler
+    )
     lazy val queries = new Queries(service, playComponents)
     lazy val router = Router.from(queries.routes)
   }
@@ -34,7 +38,12 @@ object Main extends App {
   object publicService extends PlayService(port = 9000, Mode.Prod) {
     lazy val routes =
       new cqrs.publicserver.Router(
-        new PublicServer(baseUrl(commandsService.port), baseUrl(queriesService.port), queriesService.wsClient, playComponents),
+        new PublicServer(
+          baseUrl(commandsService.port),
+          baseUrl(queriesService.port),
+          queriesService.wsClient,
+          playComponents
+        ),
         new BootstrapEndpoints(playComponents)
       ).routes
     lazy val router = Router.from(routes)
@@ -62,7 +71,8 @@ object Main extends App {
 
 }
 
-abstract class PlayService(val port: Int, mode: Mode) extends DefaultNettyServerComponents {
+abstract class PlayService(val port: Int, mode: Mode)
+    extends DefaultNettyServerComponents {
   override lazy val serverConfig = ServerConfig(port = Some(port), mode = mode)
   lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
 }

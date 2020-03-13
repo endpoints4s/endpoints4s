@@ -7,60 +7,26 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasTest extends AnyFreeSpec {
 
-  object JsonSchemasCodec extends algebra.JsonSchemasTest with endpoints.ujson.JsonSchemas
+  object JsonSchemasCodec
+      extends algebra.JsonSchemasFixtures
+      with endpoints.ujson.JsonSchemas
   import JsonSchemasCodec._
-
-  "empty record" in {
-    checkRoundTrip(
-      emptyRecord,
-      ujson.Obj(),
-      ()
-    )
-  }
-
-  "invalid empty record" in {
-    checkDecodingFailure(
-      emptyRecord,
-      ujson.Arr(),
-      "Invalid JSON object: []." :: Nil
-    )
-  }
-
-  "single record" in {
-    checkRoundTrip(
-      field[String]("field1"),
-      ujson.Obj("field1" -> ujson.Str("string1")),
-      "string1"
-    )
-  }
-
-  "ignore extra record fields" in {
-    val schema  = field[Int]("relevant")
-    val json    = ujson.Obj("relevant" -> ujson.Num(1), "irrelevant" -> ujson.Num(0))
-    val decoded = schema.codec.decode(json)
-    decoded match {
-      case Valid(n)        => assert(n == 1)
-      case Invalid(errors) => fail(errors.toString)
-    }
-    val encoded = schema.codec.encode(1)
-    assert(encoded == ujson.Obj("relevant" -> ujson.Num(1)))
-  }
 
   "invalid records" in {
     checkDecodingFailure(
       field[Int]("foo"),
       ujson.True,
-      "Invalid JSON object: true." :: Nil
+      "Invalid JSON object: true" :: Nil
     )
     checkDecodingFailure(
       field[Int]("foo"),
       ujson.Obj("bar" -> ujson.True),
-      "Missing property 'foo' in JSON object: {\"bar\":true}." :: Nil
+      "Missing property 'foo' in JSON object: {\"bar\":true}" :: Nil
     )
     checkDecodingFailure(
       field[Int]("foo"),
       ujson.Obj("foo" -> ujson.True),
-      "Invalid integer value: true." :: Nil
+      "Invalid integer value: true" :: Nil
     )
   }
 
@@ -81,7 +47,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       optField[Int]("x"),
       ujson.Obj("x" -> ujson.Str("foo")),
-      "Invalid integer value: \"foo\"." :: Nil
+      "Invalid integer value: \"foo\"" :: Nil
     )
   }
 
@@ -121,11 +87,13 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "three records" in {
     checkRoundTrip(
-      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double]("pi"),
+      field[BigDecimal]("foo") zip field[Boolean]("bar") zip field[Double](
+        "pi"
+      ),
       ujson.Obj(
         "foo" -> ujson.Num(123.456),
         "bar" -> ujson.True,
-        "pi"  -> ujson.Num(3.1416)
+        "pi" -> ujson.Num(3.1416)
       ),
       (BigDecimal(123.456), true, 3.1416)
     )
@@ -135,7 +103,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       field[Int]("foo") zip field[Boolean]("bar"),
       ujson.Obj("foo" -> ujson.Str("quux")),
-      "Invalid integer value: \"quux\"." :: "Missing property 'bar' in JSON object: {\"foo\":\"quux\"}." :: Nil
+      "Invalid integer value: \"quux\"" :: "Missing property 'bar' in JSON object: {\"foo\":\"quux\"}" :: Nil
     )
   }
 
@@ -152,7 +120,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class TestClass(i: Int, s: String)
     checkRoundTrip(
       (field[Int]("i") zip field[String]("s"))
-        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s)),
+        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test =>
+          (test.i, test.s)
+        ),
       ujson.Obj("i" -> ujson.Num(1), "s" -> ujson.Str("one")),
       TestClass(1, "one")
     )
@@ -172,12 +142,12 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       arrayJsonSchema[List, Int],
       ujson.Obj(),
-      "Invalid JSON array: {}." :: Nil
+      "Invalid JSON array: {}" :: Nil
     )
     checkDecodingFailure(
       arrayJsonSchema[List, Int],
       ujson.Arr(ujson.Num(0), ujson.Str("foo"), ujson.Num(3.14)),
-      "Invalid integer value: \"foo\"." :: "Invalid integer value: 3.14." :: Nil
+      "Invalid integer value: \"foo\"" :: "Invalid integer value: 3.14" :: Nil
     )
   }
 
@@ -190,12 +160,12 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       boolIntString,
       ujson.Arr(ujson.True, ujson.Str("foo"), ujson.Num(42)),
-      "Invalid integer value: \"foo\"." :: "Invalid string value: 42." :: Nil
+      "Invalid integer value: \"foo\"" :: "Invalid string value: 42" :: Nil
     )
     checkDecodingFailure(
       boolIntString,
       ujson.Arr(ujson.True),
-      "Invalid JSON array of 3 elements: [true]." :: Nil
+      "Invalid JSON array of 3 elements: [true]" :: Nil
     )
   }
 
@@ -208,7 +178,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       mapJsonSchema[Boolean],
       ujson.Obj("foo" -> ujson.Num(42)),
-      "Invalid boolean value: 42." :: Nil
+      "Invalid boolean value: 42" :: Nil
     )
   }
 
@@ -228,31 +198,34 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       schema,
       ujson.Arr(),
-      "Invalid JSON object: []." :: Nil
+      "Invalid JSON object: []" :: Nil
     )
     checkDecodingFailure(
       schema,
       ujson.Obj("s" -> ujson.Str("string")),
-      "Missing type discriminator property 'type': {\"s\":\"string\"}." :: Nil
+      "Missing type discriminator property 'type': {\"s\":\"string\"}" :: Nil
     )
     checkDecodingFailure(
       schema,
       ujson.Obj("type" -> ujson.Str("B"), "s" -> ujson.Str("string")),
-      "Invalid type discriminator: 'B'." :: Nil
+      "Invalid type discriminator: 'B'" :: Nil
     )
     checkDecodingFailure(
       schema,
       ujson.Obj("type" -> ujson.Str("I"), "s" -> ujson.Str("string")),
-      "Missing property 'i' in JSON object: {\"type\":\"I\",\"s\":\"string\"}." :: Nil
+      "Missing property 'i' in JSON object: {\"type\":\"I\",\"s\":\"string\"}" :: Nil
     )
   }
 
   "two tagged choices with a custom discriminator" in {
     val schema =
-      field[Int]("i").tagged("I")
+      field[Int]("i")
+        .tagged("I")
         .orElse(field[String]("s").tagged("S"))
         .withDiscriminator("kind")
-        .xmap(identity)(identity) // Make sure that `xmap` preserves the discriminator
+        .xmap(identity)(
+          identity
+        ) // Make sure that `xmap` preserves the discriminator
     checkRoundTrip(
       schema,
       ujson.Obj("kind" -> ujson.Str("I"), "i" -> ujson.Num(2)),
@@ -274,17 +247,20 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       Enum.colorSchema,
       ujson.Num(42),
-      "Invalid string value: 42." :: Nil
+      "Invalid string value: 42" :: Nil
     )
     checkDecodingFailure(
       Enum.colorSchema,
       ujson.Str("Orange"),
-      "Invalid value: Orange. Valid values are Red, Blue." :: Nil
+      "Invalid value: Orange ; valid values are: Red, Blue" :: Nil
     )
   }
 
   "non-string enum" in {
-    assert(NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson.Obj("quux" -> ujson.Str("bar")))
+    assert(
+      NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson
+        .Obj("quux" -> ujson.Str("bar"))
+    )
   }
 
   "recursive type" in {
@@ -331,17 +307,25 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       uuidJsonSchema,
       ujson.Str("foo"),
-      "Invalid UUID value: 'foo'." :: Nil
+      "Invalid UUID value: 'foo'" :: Nil
     )
   }
 
   "oneOf" in {
     checkRoundTrip(intOrBoolean, ujson.Num(42), Left(42))
     checkRoundTrip(intOrBoolean, ujson.Bool(true), Right(true))
-    checkDecodingFailure(intOrBoolean, ujson.Str("foo"), Seq("Invalid value: \"foo\"."))
+    checkDecodingFailure(
+      intOrBoolean,
+      ujson.Str("foo"),
+      Seq("Invalid value: \"foo\"")
+    )
   }
 
-  def checkRoundTrip[A](schema: JsonSchema[A], json: ujson.Value, expected: A): Unit = {
+  def checkRoundTrip[A](
+      schema: JsonSchema[A],
+      json: ujson.Value,
+      expected: A
+  ): Unit = {
     schema.codec.decode(json) match {
       case Valid(decoded)  => assert(decoded == expected)
       case Invalid(errors) => fail(errors.toString)
@@ -350,7 +334,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(encoded == json)
   }
 
-  def checkDecodingFailure[A](schema: JsonSchema[A], json: ujson.Value, expectedErrors: Seq[String]): Unit =
+  def checkDecodingFailure[A](
+      schema: JsonSchema[A],
+      json: ujson.Value,
+      expectedErrors: Seq[String]
+  ): Unit =
     schema.codec.decode(json) match {
       case Valid(_)        => fail("Expected decoding failure")
       case Invalid(errors) => assert(errors == expectedErrors)

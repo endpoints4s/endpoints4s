@@ -11,14 +11,15 @@ import scala.scalajs.js
 trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
 
   class MuxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+      request: Request[Transport],
+      response: Response[Transport]
   ) {
     def apply(
-      req: Req
-    )(implicit
-      encoder: Encoder[Req, Transport],
-      decoder: Decoder[Transport, Resp]
+        req: Req
+    )(
+        implicit
+        encoder: Encoder[Req, Transport],
+        decoder: Decoder[Transport, Resp]
     ): js.Thenable[req.Response] = {
       new js.Promise[req.Response]((resolve, error) => {
         muxPerformXhr(request, response, req)(
@@ -30,8 +31,8 @@ trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
   }
 
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
-    request: Request[Transport],
-    response: Response[Transport]
+      request: Request[Transport],
+      response: Response[Transport]
   ): MuxEndpoint[Req, Resp, Transport] =
     new MuxEndpoint[Req, Resp, Transport](request, response)
 

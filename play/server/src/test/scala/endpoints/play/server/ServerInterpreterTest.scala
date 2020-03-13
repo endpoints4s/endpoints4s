@@ -4,16 +4,25 @@ import java.net.ServerSocket
 
 import akka.stream.scaladsl.Source
 import endpoints.{Invalid, Valid}
-import endpoints.algebra.server.{BasicAuthenticationTestSuite, DecodedUrl, EndpointsTestSuite, ChunkedJsonEntitiesTestSuite}
+import endpoints.algebra.server.{
+  BasicAuthenticationTestSuite,
+  DecodedUrl,
+  EndpointsTestSuite,
+  ChunkedJsonEntitiesTestSuite
+}
 import play.api.Mode
 import play.api.routing.Router
 import play.api.test.FakeRequest
-import play.core.server.{DefaultNettyServerComponents, NettyServer, ServerConfig}
+import play.core.server.{
+  DefaultNettyServerComponents,
+  NettyServer,
+  ServerConfig
+}
 
 import scala.concurrent.Future
 
 class ServerInterpreterTest
-  extends EndpointsTestSuite[EndpointsTestApi]
+    extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with ChunkedJsonEntitiesTestSuite[EndpointsTestApi] {
 
@@ -22,25 +31,36 @@ class ServerInterpreterTest
       override lazy val serverConfig = ServerConfig(mode = Mode.Test)
       lazy val router = Router.empty
     }
-    new EndpointsTestApi(PlayComponents.fromBuiltInComponents(NettyServerComponents), Map.empty)
+    new EndpointsTestApi(
+      PlayComponents.fromBuiltInComponents(NettyServerComponents),
+      Map.empty
+    )
   }
 
-  def serveEndpoint[Resp](endpoint: serverApi.Endpoint[_, Resp], response: => Resp)(runTests: Int => Unit): Unit =
-    serveRoutes(serverApi.routesFromEndpoints(endpoint.implementedBy(_ => response)))(runTests)
+  def serveEndpoint[Resp](
+      endpoint: serverApi.Endpoint[_, Resp],
+      response: => Resp
+  )(runTests: Int => Unit): Unit =
+    serveRoutes(
+      serverApi.routesFromEndpoints(endpoint.implementedBy(_ => response))
+    )(runTests)
 
-  def serveStreamedEndpoint[Resp](endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]], response: Source[Resp, _])(runTests: Int => Unit): Unit =
+  def serveStreamedEndpoint[Resp](
+      endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
+      response: Source[Resp, _]
+  )(runTests: Int => Unit): Unit =
     serveRoutes(
       serverApi.routesFromEndpoints(endpoint.implementedBy(_ => response))
     )(runTests)
 
   def serveStreamedEndpoint[Req, Resp](
-    endpoint: serverApi.Endpoint[serverApi.Chunks[Req], Resp],
-    logic: Source[Req, _] => Future[Resp]
+      endpoint: serverApi.Endpoint[serverApi.Chunks[Req], Resp],
+      logic: Source[Req, _] => Future[Resp]
   )(
-    runTests: Int => Unit
+      runTests: Int => Unit
   ): Unit =
-    serveRoutes(serverApi.routesFromEndpoints(
-      endpoint.implementedByAsync(logic))
+    serveRoutes(
+      serverApi.routesFromEndpoints(endpoint.implementedByAsync(logic))
     )(runTests)
 
   def serveRoutes(routes: Router.Routes)(runTests: Int => Unit): Unit = {

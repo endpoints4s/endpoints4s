@@ -12,7 +12,8 @@ trait Methods extends algebra.Methods {
 
   type Method = sttp.Request[_, Nothing] => sttp.Request[_, Nothing]
 
-  private def setMethod(method: sttp.Method): Method = _.copy(method = method: sttp.Id[sttp.Method])
+  private def setMethod(method: sttp.Method): Method =
+    _.copy(method = method: sttp.Id[sttp.Method])
 
   def Get = setMethod(sttp.Method.GET)
 

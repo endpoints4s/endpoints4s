@@ -8,6 +8,7 @@ import ujson.StringRenderer
 object codecs {
 
   object schemas extends openapi.JsonSchemas {
+
     /** The default schema for representing `Invalid` values is a JSON array containing error strings */
     val invalid: JsonSchema[Invalid] =
       arrayJsonSchema[Seq, String]
@@ -15,12 +16,14 @@ object codecs {
   }
 
   val stringJson: Codec[String, ujson.Value] =
-    Codec.fromEncoderAndDecoder(
-      (json: ujson.Value) => json.transform(StringRenderer()).toString
-    )(
-      from => Validated.fromEither(
-        util.control.Exception.nonFatalCatch.either(ujson.read(from))
-          .left.map(_ => "Invalid JSON document" :: Nil)
+    Codec.fromEncoderAndDecoder((json: ujson.Value) =>
+      json.transform(StringRenderer()).toString
+    )(from =>
+      Validated.fromEither(
+        util.control.Exception.nonFatalCatch
+          .either(ujson.read(from))
+          .left
+          .map(_ => "Invalid JSON document" :: Nil)
       )
     )
 
