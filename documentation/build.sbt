@@ -98,7 +98,7 @@ val manual =
       },
       (Paradox / paradoxProperties) ++= Map(
         "version" -> version.value,
-        "scaladoc.base_url" -> s"/${(packageDoc / siteSubdirName).value}",
+        "scaladoc.base_url" -> s"${(packageDoc / siteSubdirName).value}",
         "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/tree/v${version.value}"
       ),
       packageDoc / siteSubdirName := "api",
