@@ -11,7 +11,7 @@ val `play-server` =
     .in(file("server"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
+      `scala 2.12 to 2.13`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
         "com.typesafe.play" %% "play-netty-server" % playVersion,
@@ -28,7 +28,7 @@ val `play-server-circe` =
     .in(file("server-circe"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       name := "endpoints-play-server-circe",
       libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
     )
@@ -39,7 +39,7 @@ val `play-client` =
     .in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       name := "endpoints-play-client",
       libraryDependencies ++= Seq(
         "com.typesafe.play" %% "play-ahc-ws" % playVersion
@@ -47,6 +47,6 @@ val `play-client` =
     )
     .dependsOn(
       `algebra-jvm` % "test->test;compile->compile",
-      `algebra-circe-jvm` % "test->compile;test->test"
+      `algebra-circe-jvm` % "test->test"
     )
     .dependsOn(`openapi-jvm`)
