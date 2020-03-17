@@ -13,7 +13,9 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
 
   type QueryString[A] = A => Query
 
-  type QueryStringParam[A] = A => List[String]
+  trait QueryStringParam[A] {
+    def encode(a: A): List[String]
+  }
 
   override def queryStringPartialInvFunctor
       : PartialInvariantFunctor[QueryString] =
@@ -38,12 +40,12 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
   override def qs[A](name: String, docs: endpoints.algebra.Documentation)(
       implicit value: QueryStringParam[A]
   ): QueryString[A] =
-    a => Query.fromPairs(value(a).tupleLeft(name): _*)
+    a => Query.fromPairs(value.encode(a).tupleLeft(name): _*)
 
   override def optionalQueryStringParam[A](
       implicit param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] = {
-    case Some(a) => param(a)
+    case Some(a) => param.encode(a)
     case _       => List.empty
   }
 
@@ -52,23 +54,25 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
       param: QueryStringParam[A],
       factory: collection.compat.Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
-    _.iterator.flatMap(param).toList
+    _.iterator.flatMap(param.encode).toList
 
   override def queryStringParamPartialInvFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       override def xmapPartial[A, B](
-          fa: A => List[String],
+          fa: QueryStringParam[A],
           f: A => Validated[B],
           g: B => A
-      ): B => List[String] =
-        b => fa(g(b))
+      ): QueryStringParam[B] =
+        b => fa.encode(g(b))
     }
 
   override def stringQueryString: QueryStringParam[String] =
     s => Uri.encode(s) :: Nil
 
-  type Segment[A] = A => Uri.Path
+  trait Segment[A] {
+    def encode(a: A): Uri.Path
+  }
 
   override def segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
@@ -77,7 +81,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
           f: A => Validated[B],
           g: B => A
       ): Segment[B] =
-        b => fa(g(b))
+        b => fa.encode(g(b))
     }
 
   override def stringSegment: Segment[String] = Uri.encode(_)
@@ -102,7 +106,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
 
   def segment[A](name: String, docs: Documentation)(
       implicit s: Segment[A]
-  ): Path[A] = a => s(a) :: Nil
+  ): Path[A] = a => s.encode(a) :: Nil
 
   def remainingSegments(name: String, docs: Documentation): Path[String] =
     _ :: Nil

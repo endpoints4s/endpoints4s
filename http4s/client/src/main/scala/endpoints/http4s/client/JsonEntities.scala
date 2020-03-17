@@ -1,6 +1,7 @@
 package endpoints.http4s.client
 
 import cats.implicits._
+import endpoints.algebra.Codec
 
 trait JsonEntitiesFromCodecs
     extends EndpointsWithCustomErrors
@@ -18,5 +19,15 @@ trait JsonEntitiesFromCodecs
           errors => effect.raiseError(new Exception(errors.mkString(", ")))
         )
     )
+
+}
+
+trait JsonEntitiesFromSchemas
+    extends endpoints.algebra.JsonEntitiesFromSchemas
+    with JsonEntitiesFromCodecs
+    with endpoints.ujson.JsonSchemas {
+
+  def stringCodec[A](implicit codec: JsonCodec[A]): Codec[String, A] =
+    codec.stringCodec
 
 }

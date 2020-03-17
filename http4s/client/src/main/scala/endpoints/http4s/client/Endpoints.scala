@@ -57,7 +57,7 @@ trait EndpointsWithCustomErrors
         case None    => req
       }
 
-  override def reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
 
       override def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
@@ -70,7 +70,7 @@ trait EndpointsWithCustomErrors
 
     }
 
-  override def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
+  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
     new InvariantFunctor[RequestHeaders] {
 
       override def xmap[A, B](
@@ -84,7 +84,7 @@ trait EndpointsWithCustomErrors
 
   type RequestEntity[A] = (A, Http4sRequest[Effect]) => Http4sRequest[Effect]
 
-  override def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
+  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
     new InvariantFunctor[RequestEntity] {
 
       override def xmap[A, B](
@@ -127,7 +127,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = Http4sResponse[Effect] => Effect[A]
 
-  override def responseInvFunctor: InvariantFunctor[Response] =
+  implicit def responseInvFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
 
       override def xmap[A, B](
@@ -145,7 +145,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseHeaders[A] = Headers => Validated[A]
 
-  override def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
+  implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
 
       override def product[A, B](
@@ -156,7 +156,7 @@ trait EndpointsWithCustomErrors
 
     }
 
-  override def responseHeadersInvFunctor
+  implicit def responseHeadersInvFunctor
       : PartialInvariantFunctor[ResponseHeaders] =
     new PartialInvariantFunctor[ResponseHeaders] {
 
