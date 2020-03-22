@@ -17,8 +17,9 @@ import endpoints.Valid
 import org.http4s.util.CaseInsensitiveString
 import cats.data.Kleisli
 import org.http4s.Status
+import org.http4s.Uri
 
-class Endpoints[F[_]: Sync](val client: Client[F])
+class Endpoints[F[_]: Sync](val host: Uri, val client: Client[F])
     extends algebra.Endpoints
     with EndpointsWithCustomErrors
     with BuiltInErrors {
@@ -35,6 +36,7 @@ trait EndpointsWithCustomErrors
   type Effect[A]
   implicit def effect: Sync[Effect]
 
+  def host: Uri
   def client: Client[Effect]
 
   type RequestHeaders[A] = (A, Http4sRequest[Effect]) => Http4sRequest[Effect]
@@ -45,7 +47,7 @@ trait EndpointsWithCustomErrors
       name: String,
       docs: Option[String]
   ): RequestHeaders[String] =
-    (value, req) => req.withHeaders(Header(name, value))
+    (value, req) => req.putHeaders(Header(name, value))
 
   override def optRequestHeader(
       name: String,
@@ -53,7 +55,7 @@ trait EndpointsWithCustomErrors
   ): RequestHeaders[Option[String]] =
     (value, req) =>
       value match {
-        case Some(v) => req.withHeaders(Header(name, v))
+        case Some(v) => req.putHeaders(Header(name, v))
         case None    => req
       }
 
@@ -118,7 +120,7 @@ trait EndpointsWithCustomErrors
     val (urlP, bodyP) = tuplerUB.unapply(ub)
 
     effect.flatMap(effect.fromEither(url.encodeUrl(urlP))) { uri =>
-      val req: Http4sRequest[Effect] = Http4sRequest(method, uri)
+      val req: Http4sRequest[Effect] = Http4sRequest(method, Uri.resolve(host, uri))
       client.fetch(entity(bodyP, headers(headersP, req)))(_.pure[Effect])
     }
   }
@@ -219,17 +221,45 @@ trait EndpointsWithCustomErrors
       docs: EndpointDocs
   ): Endpoint[A, B] =
     Kleisli { a =>
-      request(a).flatMap(res =>
-        response(res.status, res.headers) match {
-          case None =>
+      request(a).flatMap { res =>
+        decodeResponse(response, res).flatMap(_.apply(res))
+      }
+    }
+
+    private[client] def decodeResponse[A](
+      response: Response[A],
+      hResponse: Http4sResponse[Effect]
+  ): Effect[ResponseEntity[A]] = {
+    val maybeResponse = response(hResponse.status, hResponse.headers)
+    def maybeClientErrors =
+      clientErrorsResponse(hResponse.status, hResponse.headers)
+        .map(
+          mapPartialResponseEntity[ClientErrors, A](_)(clientErrors =>
             effect.raiseError(
-              new Throwable(
-                s"Unexpected status code: ${res.status.renderString}"
+              new Exception(
+                clientErrorsToInvalid(clientErrors).errors.mkString(". ")
               )
             )
-          case Some(f) => f(res)
-        }
+          )
+        )
+    def maybeServerError =
+      serverErrorResponse(hResponse.status, hResponse.headers)
+        .map(
+          mapPartialResponseEntity[ServerError, A](_)(serverError =>
+            effect.raiseError(serverErrorToThrowable(serverError))
+          )
+        )
+    effect.fromEither(
+      maybeResponse
+        .orElse(maybeClientErrors)
+        .orElse(maybeServerError)
+        .toRight(new Throwable(s"Unexpected response status: ${hResponse.status.code}"))
       )
-    }
+  }
+
+  private[client] def mapPartialResponseEntity[A, B](
+      entity: ResponseEntity[A]
+  )(f: A => Effect[B]): ResponseEntity[B] =
+    res => entity(res).flatMap(f)
 
 }

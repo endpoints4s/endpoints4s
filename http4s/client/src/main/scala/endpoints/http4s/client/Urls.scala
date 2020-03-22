@@ -8,6 +8,8 @@ import endpoints.Validated
 import org.http4s.Query
 import endpoints.algebra.Documentation
 import org.http4s.ParseResult
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets.UTF_8
 
 trait Urls extends endpoints.algebra.Urls with StatusCodes {
 
@@ -68,7 +70,9 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
     }
 
   override def stringQueryString: QueryStringParam[String] =
-    s => Uri.encode(s) :: Nil
+    s => 
+      URLEncoder.encode(s, UTF_8.name) :: Nil
+    
 
   trait Segment[A] {
     def encode(a: A): Uri.Path
@@ -84,7 +88,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
         b => fa.encode(g(b))
     }
 
-  override def stringSegment: Segment[String] = Uri.encode(_)
+  override def stringSegment: Segment[String] = s => URLEncoder.encode(s, UTF_8.name)
 
   trait Path[A] extends Url[A] {
     final def encodeUrl(value: A): ParseResult[Uri] =
