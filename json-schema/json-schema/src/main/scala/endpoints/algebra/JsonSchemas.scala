@@ -288,6 +288,18 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Include an example value within the given schema */
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
 
+  /** Add a description to the given schema */
+  def withDescriptionJsonSchema[A](
+      schema: JsonSchema[A],
+      description: String
+  ): JsonSchema[A]
+
+  /** Add a title to the given schema */
+  def withTitleJsonSchema[A](
+      schema: JsonSchema[A],
+      title: String
+  ): JsonSchema[A]
+
   /**
     * A schema that can be either `schemaA` or `schemaB`.
     *
@@ -326,6 +338,23 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       withExampleJsonSchema(schemaA, example)
 
     /**
+      * Include a description of what this schema represents. Documentation
+      * interpreters can show this description. Encoder and decoder interpreters
+      * ignore this description.
+      * @param description information about the values described by the schema
+      */
+    def withDescription(description: String): JsonSchema[A] =
+      withDescriptionJsonSchema(schemaA, description)
+
+    /**
+      * Include a title for the schema. Documentation interpreters can show
+      * this title. Encoder and decoder interpreters ignore the title.
+      * @param title short title to attach to the schema
+      */
+    def withTitle(title: String): JsonSchema[A] =
+      withTitleJsonSchema(schemaA, title)
+
+    /**
       * A schema that can be either `schemaA` or `schemaB`.
       *
       * Documentation interpreter produce a `oneOf` JSON schema.
@@ -362,6 +391,11 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Give a name to the schema.
       * Documentation interpreters use that name to refer to this schema.
       * Encoder and decoder interpreters ignore the name.
+      *
+      * @note Names are used by documentation interpreters to construct
+      *       references and that the JSON schema specification requires these
+      *       to be valid URI's. Consider using `withTitle` if you just want
+      *       to override the heading displayed in documentation.
       */
     def named(name: String): Record[A] = namedRecord(recordA, name)
   }
@@ -375,6 +409,11 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Give a name to the schema.
       * Documentation interpreters use that name to refer to this schema.
       * Encoder and decoder interpreters ignore the name.
+      *
+      * @note Names are used by documentation interpreters to construct
+      *       references and that the JSON schema specification requires these
+      *       to be valid URI's. Consider using `withTitle` if you just want
+      *       to override the heading displayed in documentation.
       */
     def named(name: String): Tagged[A] = namedTagged(taggedA, name)
 
@@ -392,6 +431,11 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Give a name to the schema.
       * Documentation interpreters use that name to refer to this schema.
       * Encoder and decoder interpreters ignore the name.
+      *
+      * @note Names are used by documentation interpreters to construct
+      *       references and that the JSON schema specification requires these
+      *       to be valid URI's. Consider using `withTitle` if you just want
+      *       to override the heading displayed in documentation.
       */
     def named(name: String): Enum[A] = namedEnum(enumA, name)
   }

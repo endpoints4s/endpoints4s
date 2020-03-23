@@ -64,7 +64,12 @@ trait Urls extends algebra.Urls {
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     DocumentedQueryStringParam(
-      Schema.Array(Left(param.schema), description = None, example = None),
+      Schema.Array(
+        Left(param.schema),
+        description = None,
+        example = None,
+        title = None
+      ),
       isRequired = false
     )
 

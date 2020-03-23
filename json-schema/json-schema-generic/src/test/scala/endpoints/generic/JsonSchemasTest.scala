@@ -112,6 +112,16 @@ class JsonSchemasTest extends AnyFreeSpec {
     ): JsonSchema[A] =
       schema
 
+    def withDescriptionJsonSchema[A](
+        schema: JsonSchema[A],
+        description: String
+    ): JsonSchema[A] = schema
+
+    def withTitleJsonSchema[A](
+        schema: JsonSchema[A],
+        title: String
+    ): JsonSchema[A] = schema
+
     def orFallbackToJsonSchema[A, B](
         schemaA: JsonSchema[A],
         schemaB: JsonSchema[B]
