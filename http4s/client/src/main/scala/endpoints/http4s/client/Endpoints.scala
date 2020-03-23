@@ -120,7 +120,8 @@ trait EndpointsWithCustomErrors
     val (urlP, bodyP) = tuplerUB.unapply(ub)
 
     effect.flatMap(effect.fromEither(url.encodeUrl(urlP))) { uri =>
-      val req: Http4sRequest[Effect] = Http4sRequest(method, Uri.resolve(host, uri))
+      val req: Http4sRequest[Effect] =
+        Http4sRequest(method, Uri.resolve(host, uri))
       client.fetch(entity(bodyP, headers(headersP, req)))(_.pure[Effect])
     }
   }
@@ -226,7 +227,7 @@ trait EndpointsWithCustomErrors
       }
     }
 
-    private[client] def decodeResponse[A](
+  private[client] def decodeResponse[A](
       response: Response[A],
       hResponse: Http4sResponse[Effect]
   ): Effect[ResponseEntity[A]] = {
@@ -253,8 +254,10 @@ trait EndpointsWithCustomErrors
       maybeResponse
         .orElse(maybeClientErrors)
         .orElse(maybeServerError)
-        .toRight(new Throwable(s"Unexpected response status: ${hResponse.status.code}"))
-      )
+        .toRight(
+          new Throwable(s"Unexpected response status: ${hResponse.status.code}")
+        )
+    )
   }
 
   private[client] def mapPartialResponseEntity[A, B](

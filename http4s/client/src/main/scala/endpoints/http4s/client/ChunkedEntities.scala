@@ -29,3 +29,34 @@ trait ChunkedEntities
     res => effect.pure(res.body.chunks.map(_.toArray))
 
 }
+
+trait ChunkedJsonEntities
+    extends endpoints.algebra.ChunkedJsonEntities
+    with ChunkedEntities
+    with JsonEntitiesFromCodecs {
+
+  def jsonChunksRequest[A](
+      implicit codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = { (stream, req) =>
+    val encoder = stringCodec(codec)
+    req.withEntity(stream.map(encoder.encode))
+  }
+
+  def jsonChunksResponse[A](
+      implicit codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = { response =>
+    val decoder = stringCodec[A](codec)
+    val stream =
+      response.bodyAsText.evalMap(s =>
+        decoder
+          .decode(s)
+          .fold(
+            effect.pure,
+            es => effect.raiseError[A](new Throwable(es.mkString(", ")))
+          )
+      )
+    effect.pure(stream)
+
+  }
+
+}

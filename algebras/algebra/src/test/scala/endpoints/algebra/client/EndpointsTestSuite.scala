@@ -281,10 +281,6 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
           ) shouldEqual "/foo?id=f4b9defa-1ad8-453f-9a06-2683b8564b8d"
         }
 
-        "escaping" in {
-          encodeUrl(path /? qs[String]("q"))("foo bar/baz") shouldEqual "?q=foo+bar%2Fbaz"
-        }
-
         "multiple parameters" in {
           encodeUrl(path /? (qs[Int]("x") & qs[Int]("y")))((0, 1)) shouldEqual "?x=0&y=1"
         }

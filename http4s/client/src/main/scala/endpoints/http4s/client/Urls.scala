@@ -70,9 +70,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
     }
 
   override def stringQueryString: QueryStringParam[String] =
-    s => 
-      URLEncoder.encode(s, UTF_8.name) :: Nil
-    
+    s => s :: Nil
 
   trait Segment[A] {
     def encode(a: A): Uri.Path
@@ -88,7 +86,8 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
         b => fa.encode(g(b))
     }
 
-  override def stringSegment: Segment[String] = s => URLEncoder.encode(s, UTF_8.name)
+  override def stringSegment: Segment[String] =
+    s => URLEncoder.encode(s, UTF_8.name)
 
   trait Path[A] extends Url[A] {
     final def encodeUrl(value: A): ParseResult[Uri] =
