@@ -16,6 +16,8 @@ class TitlesTest extends AnyWordSpec with Matchers {
       checkTitle(arraySchema)("list of ints")
       checkTitle(mapSchema)("map of ints")
       checkTitle(pairSchema)("pair")
+      checkTitle(hexSchema)("hex string")
+      checkTitle(fallbackSchema)("fallback literals")
     }
 
   }
@@ -45,6 +47,13 @@ class TitlesTest extends AnyWordSpec with Matchers {
     val pairSchema =
       implicitly[JsonSchema[(Int, String)]].withTitle("pair")
 
+    val hexSchema =
+      stringJsonSchema(Some("hex")).withTitle("hex string")
+
+    val fallbackSchema =
+      defaultStringJsonSchema
+        .orFallbackTo(longJsonSchema)
+        .withTitle("fallback literals")
   }
 
   trait Fixtures

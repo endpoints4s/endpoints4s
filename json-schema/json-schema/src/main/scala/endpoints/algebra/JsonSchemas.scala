@@ -393,7 +393,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Encoder and decoder interpreters ignore the name.
       *
       * @note Names are used by documentation interpreters to construct
-      *       references and that the JSON schema specification requires these
+      *       references and the JSON schema specification requires these
       *       to be valid URI's. Consider using `withTitle` if you just want
       *       to override the heading displayed in documentation.
       */
@@ -411,7 +411,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Encoder and decoder interpreters ignore the name.
       *
       * @note Names are used by documentation interpreters to construct
-      *       references and that the JSON schema specification requires these
+      *       references and the JSON schema specification requires these
       *       to be valid URI's. Consider using `withTitle` if you just want
       *       to override the heading displayed in documentation.
       */
@@ -433,7 +433,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * Encoder and decoder interpreters ignore the name.
       *
       * @note Names are used by documentation interpreters to construct
-      *       references and that the JSON schema specification requires these
+      *       references and the JSON schema specification requires these
       *       to be valid URI's. Consider using `withTitle` if you just want
       *       to override the heading displayed in documentation.
       */

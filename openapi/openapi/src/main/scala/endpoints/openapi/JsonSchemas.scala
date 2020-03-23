@@ -107,7 +107,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     ) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
-    sealed trait LazySchema extends DocumentedJsonSchema {
+    sealed abstract class LazySchema extends DocumentedJsonSchema {
       def value: DocumentedJsonSchema
     }
     object LazySchema {

@@ -16,6 +16,8 @@ class DescriptionsTest extends AnyWordSpec with Matchers {
       checkDescription(arraySchema)("a list of ints")
       checkDescription(mapSchema)("a map of ints")
       checkDescription(pairSchema)("a pair of int and string")
+      checkDescription(hexSchema)("a hex string")
+      checkDescription(fallbackSchema)("a foo or 1 or 4")
     }
 
   }
@@ -45,6 +47,13 @@ class DescriptionsTest extends AnyWordSpec with Matchers {
     val pairSchema =
       implicitly[JsonSchema[(Int, String)]].withDescription("a pair of int and string")
 
+    val hexSchema =
+      stringJsonSchema(Some("hex")).withDescription("a hex string")
+
+    val fallbackSchema =
+      defaultStringJsonSchema
+        .orFallbackTo(longJsonSchema)
+        .withDescription("a foo or 1 or 4")
   }
 
   trait Fixtures
