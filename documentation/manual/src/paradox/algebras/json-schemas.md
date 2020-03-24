@@ -228,6 +228,7 @@ type. The rules for deriving the schema are the following:
 - the schema is named by the `@name` annotation, if present, or by invoking the
   `classTagToSchemaName` operation with the `ClassTag` of the type for which the schema
   is derived.
+- the schema title is set with the `@title` annotation, if present
 
 Here is an example that illustrates how to configure the generic schema derivation process:
 
