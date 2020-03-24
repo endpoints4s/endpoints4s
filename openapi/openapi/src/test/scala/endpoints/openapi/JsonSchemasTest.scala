@@ -98,6 +98,8 @@ class JsonSchemasTest extends AnyFreeSpec {
         ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj(
           "quux" -> ujson.Str("baz")
         ) :: Nil,
+        None,
+        None,
         None
       )
     assert(
@@ -109,6 +111,8 @@ class JsonSchemasTest extends AnyFreeSpec {
     DocumentedJsonSchemas.recursiveSchema.docs match {
       case DocumentedRecord(
           List(Field("next", tpe, true, None)),
+          None,
+          None,
           None,
           None,
           None

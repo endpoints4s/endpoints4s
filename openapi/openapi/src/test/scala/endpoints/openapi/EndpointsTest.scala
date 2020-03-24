@@ -40,7 +40,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             In.Query,
             required = false,
             description = None,
-            schema = Schema.Array(Left(Schema.simpleInteger), None, None)
+            schema = Schema.Array(Left(Schema.simpleInteger), None, None, None)
           ) ::
           Nil
       Fixtures.quux.item
@@ -68,17 +68,18 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
         Schema.Object(
           Schema.Property(
             "name",
-            Schema.Primitive("string", None, None, None),
+            Schema.Primitive("string", None, None, None, None),
             isRequired = true,
             description = Some("Name of the user")
           ) ::
             Schema.Property(
               "age",
-              Schema.Primitive("integer", Some("int32"), None, None),
+              Schema.Primitive("integer", Some("int32"), None, None, None),
               isRequired = true,
               description = None
             ) ::
             Nil,
+          None,
           None,
           None,
           None
@@ -93,12 +94,15 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
         "Color",
         Some(
           Schema.Enum(
-            Schema.Primitive("string", None, None, None),
+            Schema.Primitive("string", None, None, None, None),
             ujson.Str("Red") :: ujson.Str("Blue") :: Nil,
+            None,
             None,
             None
           )
         ),
+        None,
+        None,
         None
       )
     Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
@@ -118,9 +122,12 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             ) :: Nil,
             additionalProperties = None,
             description = None,
-            example = None
+            example = None,
+            title = None
           )
         ),
+        None,
+        None,
         None
       )
     val expectedSchema =
@@ -133,7 +140,8 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
         ) :: Nil,
         additionalProperties = None,
         description = None,
-        example = None
+        example = None,
+        title = None
       )
     Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
   }
@@ -159,7 +167,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       reqBody shouldBe defined
       reqBody.value.description.value shouldEqual "Text Req"
       reqBody.value.content("text/plain").schema.value shouldEqual Schema
-        .Primitive("string", None, None, None)
+        .Primitive("string", None, None, None, None)
     }
   }
 
