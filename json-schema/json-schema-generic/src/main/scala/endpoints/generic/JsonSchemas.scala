@@ -71,7 +71,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
   object GenericJsonSchema
       extends GenericJsonSchemaLowPriority
       with GenericDiscriminatorNames
-      with GenericSchemaNames {
+      with GenericSchemaNames
+      with GenericDescriptions {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
@@ -178,28 +179,34 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def recordGeneric[A, R, D <: HList](
         implicit
         gen: LabelledGeneric.Aux[A, R],
+        docOpt: GenericDescription[A],
         docAnns: Annotations.Aux[docs, A, D],
         record: DocumentedGenericRecord[R, D],
         name: GenericSchemaName[A]
-    ): GenericRecord[A] =
-      new GenericRecord[A](
-        record.record(docAnns()).xmap[A](gen.from)(gen.to).named(name.value)
-      )
+    ): GenericRecord[A] = {
+      val recordA = record
+        .record(docAnns())
+        .xmap[A](gen.from)(gen.to)
+        .named(name.value)
+      val docA = docOpt.description.fold(recordA)(recordA.withDescription(_))
+      new GenericRecord[A](docA)
+    }
 
     implicit def taggedGeneric[A, R](
         implicit
         gen: LabelledGeneric.Aux[A, R],
+        docOpt: GenericDescription[A],
         tagged: GenericTagged[R],
         name: GenericSchemaName[A],
         discriminator: GenericDiscriminatorName[A]
-    ): GenericTagged[A] =
-      new GenericTagged[A](
-        tagged.jsonSchema
-          .xmap[A](gen.from)(gen.to)
-          .named(name.value)
-          .withDiscriminator(discriminator.name)
-      )
-
+    ): GenericTagged[A] = {
+      val taggedA = tagged.jsonSchema
+        .xmap[A](gen.from)(gen.to)
+        .named(name.value)
+        .withDiscriminator(discriminator.name)
+      val docA = docOpt.description.fold(taggedA)(taggedA.withDescription(_))
+      new GenericTagged[A](docA)
+    }
   }
 
   /** Internal machinery for deriving the discriminator name of a type */
@@ -241,6 +248,24 @@ trait JsonSchemas extends algebra.JsonSchemas {
         new GenericSchemaName(classTagToSchemaName(ct))
     }
 
+  }
+
+  /** Internal machinery for extracting a description of a type */
+  trait GenericDescriptions {
+
+    class GenericDescription[A](val description: Option[String])
+
+    object GenericDescription extends GenericDescriptionLowPriority {
+      implicit def annotated[A](
+          implicit ann: Annotation[docs, A]
+      ): GenericDescription[A] =
+        new GenericDescription(Some(ann().text))
+    }
+
+    trait GenericDescriptionLowPriority {
+      implicit def noDescription[A]: GenericDescription[A] =
+        new GenericDescription[A](None)
+    }
   }
 
   /**
