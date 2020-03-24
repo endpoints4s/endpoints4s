@@ -1,10 +1,10 @@
 package endpoints.generic
 
 /**
-  * Documents a case class field.
+  * Documents a case class field, case class, or sealed trait.
   *
-  * Annotate a case class field with this annotation to define its
-  * documentation.
+  * Annotate a case class field, case class, or selaed trait with this
+  * annotation to define its documentation.
   *
   * @param text Description of the annotated field
   */
