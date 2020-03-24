@@ -106,16 +106,61 @@ class JsonSchemasTest extends AnyFreeSpec {
     ): String =
       s"$recordA,$recordB"
 
+    def withExampleRecord[A](
+        schema: Record[A],
+        example: A
+    ): Record[A] = schema
+
+    def withExampleTagged[A](
+        schema: Tagged[A],
+        example: A
+    ): Tagged[A] = schema
+
+    def withExampleEnum[A](
+        schema: Enum[A],
+        example: A
+    ): Enum[A] = schema
+
     def withExampleJsonSchema[A](
         schema: JsonSchema[A],
         example: A
     ): JsonSchema[A] =
       schema
 
+    def withDescriptionRecord[A](
+        schema: Record[A],
+        description: String
+    ): Record[A] = schema
+
+    def withDescriptionTagged[A](
+        schema: Tagged[A],
+        description: String
+    ): Tagged[A] = schema
+
+    def withDescriptionEnum[A](
+        schema: Enum[A],
+        description: String
+    ): Enum[A] = schema
+
     def withDescriptionJsonSchema[A](
         schema: JsonSchema[A],
         description: String
     ): JsonSchema[A] = schema
+
+    def withTitleRecord[A](
+        schema: Record[A],
+        title: String
+    ): Record[A] = schema
+
+    def withTitleTagged[A](
+        schema: Tagged[A],
+        title: String
+    ): Tagged[A] = schema
+
+    def withTitleEnum[A](
+        schema: Enum[A],
+        title: String
+    ): Enum[A] = schema
 
     def withTitleJsonSchema[A](
         schema: JsonSchema[A],
