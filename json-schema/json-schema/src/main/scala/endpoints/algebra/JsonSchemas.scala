@@ -195,7 +195,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Annotates the tagged JSON schema with a name */
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A]
 
-  /** Annotates the tagged JSON schema with a name */
+  /** Annotates the enum JSON schema with a name */
   def namedEnum[A](schema: Enum[A], name: String): Enum[A]
 
   /**
@@ -285,14 +285,47 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       implicit t: Tupler[A, B]
   ): Record[t.Out]
 
-  /** Include an example value within the given schema */
+  /** Include an example value within the given record JSON schema */
+  def withExampleRecord[A](record: Record[A], example: A): Record[A]
+
+  /** Include an example value within the given tagged JSON schema */
+  def withExampleTagged[A](tagged: Tagged[A], example: A): Tagged[A]
+
+  /** Include an example value within the given enum JSON schema */
+  def withExampleEnum[A](enum: Enum[A], example: A): Enum[A]
+
+  /** Include an example value within the given JSON schema */
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
 
-  /** Add a description to the given schema */
+  /** Add a description to the given record JSON schema */
+  def withDescriptionRecord[A](
+      record: Record[A],
+      description: String
+  ): Record[A]
+
+  /** Add a description to the given tagged JSON schema */
+  def withDescriptionTagged[A](
+      tagged: Tagged[A],
+      description: String
+  ): Tagged[A]
+
+  /** Add a description to the given enum JSON schema */
+  def withDescriptionEnum[A](enum: Enum[A], description: String): Enum[A]
+
+  /** Add a description to the given JSON schema */
   def withDescriptionJsonSchema[A](
       schema: JsonSchema[A],
       description: String
   ): JsonSchema[A]
+
+  /** Add a title to the given record JSON schema */
+  def withTitleRecord[A](record: Record[A], title: String): Record[A]
+
+  /** Add a title to the given tagged JSON schema */
+  def withTitleTagged[A](tagged: Tagged[A], title: String): Tagged[A]
+
+  /** Add a title to the given enum JSON schema */
+  def withTitleEnum[A](enum: Enum[A], title: String): Enum[A]
 
   /** Add a title to the given schema */
   def withTitleJsonSchema[A](
@@ -323,34 +356,53 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   ): JsonSchema[Either[A, B]]
 
   /**
-    * Implicit methods for values of type [[JsonSchema]]
-    * @group operations
+    * Documentation related methods for annotating schemas. Encoder and decoder
+    * interpreters ignore this information.
     */
-  final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A]) {
+  sealed trait DocOps[A] {
+    type Repr[X] <: JsonSchema[X]
 
     /**
       * Include an example of value in this schema. Documentation interpreters
       * can show this example value. Encoder and decoder interpreters ignore
       * this value.
+      *
       * @param example Example value to attach to the schema
       */
-    def withExample(example: A): JsonSchema[A] =
-      withExampleJsonSchema(schemaA, example)
+    def withExample(example: A): Repr[A]
 
     /**
       * Include a description of what this schema represents. Documentation
       * interpreters can show this description. Encoder and decoder interpreters
       * ignore this description.
+      *
       * @param description information about the values described by the schema
       */
-    def withDescription(description: String): JsonSchema[A] =
-      withDescriptionJsonSchema(schemaA, description)
+    def withDescription(description: String): Repr[A]
 
     /**
       * Include a title for the schema. Documentation interpreters can show
       * this title. Encoder and decoder interpreters ignore the title.
+      *
       * @param title short title to attach to the schema
       */
+    def withTitle(title: String): Repr[A]
+  }
+
+  /**
+    * Implicit methods for values of type [[JsonSchema]]
+    * @group operations
+    */
+  final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A])
+      extends DocOps[A] {
+    type Repr[X] = JsonSchema[X]
+
+    def withExample(example: A): JsonSchema[A] =
+      withExampleJsonSchema(schemaA, example)
+
+    def withDescription(description: String): JsonSchema[A] =
+      withDescriptionJsonSchema(schemaA, description)
+
     def withTitle(title: String): JsonSchema[A] =
       withTitleJsonSchema(schemaA, title)
 
@@ -379,7 +431,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
-  final implicit class RecordOps[A](recordA: Record[A]) {
+  final implicit class RecordOps[A](recordA: Record[A]) extends DocOps[A] {
+    type Repr[X] = Record[X]
 
     /** Merge the fields of `recordA` with the fields of `recordB` */
     def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] =
@@ -398,10 +451,21 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *       to override the heading displayed in documentation.
       */
     def named(name: String): Record[A] = namedRecord(recordA, name)
+
+    def withExample(example: A): Record[A] =
+      withExampleRecord(recordA, example)
+
+    def withDescription(description: String): Record[A] =
+      withDescriptionRecord(recordA, description)
+
+    def withTitle(title: String): Record[A] =
+      withTitleRecord(recordA, title)
   }
 
   /** @group operations */
-  final implicit class TaggedOps[A](taggedA: Tagged[A]) {
+  final implicit class TaggedOps[A](taggedA: Tagged[A]) extends DocOps[A] {
+    type Repr[X] = Tagged[X]
+
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] =
       choiceTagged(taggedA, taggedB)
 
@@ -422,10 +486,20 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       */
     def withDiscriminator(name: String): Tagged[A] =
       withDiscriminatorTagged(taggedA, name)
+
+    def withExample(example: A): Tagged[A] =
+      withExampleTagged(taggedA, example)
+
+    def withDescription(description: String): Tagged[A] =
+      withDescriptionTagged(taggedA, description)
+
+    def withTitle(title: String): Tagged[A] =
+      withTitleTagged(taggedA, title)
   }
 
   /** @group operations */
-  final implicit class EnumOps[A](enumA: Enum[A]) {
+  final implicit class EnumOps[A](enumA: Enum[A]) extends DocOps[A] {
+    type Repr[X] = Enum[X]
 
     /**
       * Give a name to the schema.
@@ -438,6 +512,15 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *       to override the heading displayed in documentation.
       */
     def named(name: String): Enum[A] = namedEnum(enumA, name)
+
+    def withExample(example: A): Enum[A] =
+      withExampleEnum(enumA, example)
+
+    def withDescription(description: String): Enum[A] =
+      withDescriptionEnum(enumA, description)
+
+    def withTitle(title: String): Enum[A] =
+      withTitleEnum(enumA, title)
   }
 
   /** A JSON schema for type `UUID`
