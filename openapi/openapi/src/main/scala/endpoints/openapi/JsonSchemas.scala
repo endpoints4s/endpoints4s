@@ -14,6 +14,10 @@ import scala.collection.compat._
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
   *
+  * The encoding of the schemas of sealed traits (obtained with the operation
+  * `orElse` or via generic derivation) can be configured by overriding
+  * [[JsonSchemas.coproductEncoding]].
+  *
   * @group interpreters
   */
 trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
@@ -424,6 +428,168 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       )
     )
 
+  sealed trait CoproductEncoding
+
+  /**
+    * This object contains the options for how to encode coproduct JSON schemas.
+    *
+    * The following Scala coproduct is the candidate example. Each encoding
+    * option includes the schema that it would generate for that example.
+    *
+    * {{{
+    * sealed trait Pet
+    * case class Cat(name: String) extends Pet
+    * case class Lizard(lovesRocks: Boolean) extends Pet
+    * }}}
+    */
+  object CoproductEncoding {
+
+    /** Strategy defining the base type schema in terms of `oneOf` and the
+      * variant schemas. The variants themselves don't refer to the base type,
+      * but they do include the discriminator field.
+      *
+      *  - simpler looking schemas in Swagger UI
+      *  - some OpenAPI clients don't handle `oneOf` properly
+      *
+      * Using the `Pet` example above, this strategy yields the following:
+      *
+      * {{{
+      * "schemas": {
+      *   "Pet": {
+      *     "oneOf": [
+      *       { "$ref": "#/components/schemas/Cat" },
+      *       { "$ref": "#/components/schemas/Lizard" }
+      *     ],
+      *     "discriminator": {
+      *       "propertyName": "type",
+      *       "mapping": {
+      *         "Cat": "#/components/schemas/Cat",
+      *         "Lizard": "#/components/schemas/Lizard"
+      *       }
+      *     }
+      *   },
+      *
+      *   "Cat": {
+      *     "type": "object",
+      *     "properties": {
+      *       "type": {
+      *         "type": "string",
+      *         "enum": [ "Cat" ]
+      *       },
+      *       "name": {
+      *         "type": "string"
+      *       }
+      *     },
+      *     "required": [
+      *       "type",
+      *       "name"
+      *     ]
+      *   },
+      *
+      *   "Lizard": {
+      *     "type": "object",
+      *     "properties": {
+      *       "type": {
+      *         "type": "string",
+      *         "enum": [ "Lizard" ]
+      *       },
+      *       "lovesRocks": {
+      *         "type": "boolean"
+      *       }
+      *     },
+      *     "required": [
+      *       "type",
+      *       "lovesRocks"
+      *     ]
+      *   }
+      * }
+      * }}}
+      */
+    case object OneOf extends CoproductEncoding
+
+    /** Strategy that extends [[OneOf]] so that each variant also refers back
+      * to the base type schema using `allOf`. This approach is sometimes
+      * referred to in OpenAPI 3 as a way to model polymorphism.
+      *
+      *  - compatible with OpenAPI clients that don't handle `oneOf` properly
+      *  - more complex schemas in Swagger UI
+      *
+      * Using the `Pet` example above, this strategy yields the following:
+      *
+      * {{{
+      * "schemas": {
+      *   "Pet": {
+      *     "oneOf": [
+      *       { "$ref": "#/components/schemas/Cat" },
+      *       { "$ref": "#/components/schemas/Lizard" }
+      *     ],
+      *     "discriminator": {
+      *       "propertyName": "type",
+      *       "mapping": {
+      *         "Cat": "#/components/schemas/Cat",
+      *         "Lizard": "#/components/schemas/Lizard"
+      *       }
+      *     }
+      *   },
+      *
+      *   "Cat": {
+      *     "allOf": [
+      *       { "$ref": "#/components/schemas/Pet" },
+      *       {
+      *         "type": "object",
+      *         "properties": {
+      *           "type": {
+      *             "type": "string",
+      *             "enum": [ "Cat" ]
+      *           },
+      *           "name": {
+      *             "type": "string"
+      *           }
+      *         },
+      *         "required": [
+      *           "type",
+      *           "name"
+      *         ]
+      *       }
+      *     ]
+      *   },
+      *
+      *   "Lizard": {
+      *     "allOf": [
+      *       { "$ref": "#/components/schemas/Pet" },
+      *       {
+      *         "type": "object",
+      *         "properties": {
+      *           "type": {
+      *             "type": "string",
+      *             "enum": [ "Lizard" ]
+      *           },
+      *           "lovesRocks": {
+      *             "type": "boolean"
+      *           }
+      *         },
+      *         "required": [
+      *           "type",
+      *           "lovesRocks"
+      *         ]
+      *       }
+      *     ]
+      *   }
+      * }
+      * }}}
+      */
+    case object OneOfWithBaseRef extends CoproductEncoding
+  }
+
+  /**
+    * Override this method to customize the strategy used to encode the JSON
+    * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
+    *
+    * @see [[JsonSchemas.CoproductEncoding$]]
+    *
+    */
+  def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
+
   /** Convert the internal representation of a JSON schema into the public OpenAPI AST */
   def toSchema(jsonSchema: DocumentedJsonSchema): Schema =
     toSchema(jsonSchema, None, Set.empty)
@@ -572,30 +738,32 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             description = None
           )
 
-        coprod.name.fold[Schema] {
-          Schema.Object(
-            discriminatorField :: fieldsSchema,
-            additionalProperties,
-            record.description,
-            record.example,
-            record.title
-          )
-        } { coproductName =>
-          Schema.AllOf(
-            schemas = List(
-              Schema.Reference(coproductName, None, None),
-              Schema.Object(
-                discriminatorField :: fieldsSchema,
-                additionalProperties,
-                None,
-                None,
-                None
-              )
-            ),
-            record.description,
-            record.example,
-            record.title
-          )
+        (coprod.name, coproductEncoding) match {
+          case (Some(coproductName), CoproductEncoding.OneOfWithBaseRef) =>
+            Schema.AllOf(
+              schemas = List(
+                Schema.Reference(coproductName, None, None),
+                Schema.Object(
+                  discriminatorField :: fieldsSchema,
+                  additionalProperties,
+                  None,
+                  None,
+                  None
+                )
+              ),
+              record.description,
+              record.example,
+              record.title
+            )
+
+          case _ =>
+            Schema.Object(
+              discriminatorField :: fieldsSchema,
+              additionalProperties,
+              record.description,
+              record.example,
+              record.title
+            )
         }
     }
   }
