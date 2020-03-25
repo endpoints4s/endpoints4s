@@ -37,8 +37,7 @@ class CoproductEncodingTest extends AnyFreeSpec {
   "OneOf schema encoding" in {
     val expectedJsonSchema = ujson.Obj(
       "discriminator" -> ujson.Obj(
-        "propertyName" -> ujson.Str("type"),
-        "mapping" -> ujson.Obj()
+        "propertyName" -> ujson.Str("type")
       ),
       "oneOf" -> ujson.Arr(
         ujson.Obj(
@@ -116,8 +115,7 @@ class CoproductEncodingTest extends AnyFreeSpec {
   "OneOfWithBaseRef schema encoding" in {
     val expectedJsonSchema = ujson.Obj(
       "discriminator" -> ujson.Obj(
-        "propertyName" -> ujson.Str("type"),
-        "mapping" -> ujson.Obj() // TODO
+        "propertyName" -> ujson.Str("type")
       ),
       "oneOf" -> ujson.Arr(
         ujson.Obj(

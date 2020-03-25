@@ -67,18 +67,20 @@ object OpenApi {
                 discriminatorFieldName,
                 alternatives
                 ) =>
-              val mappingJson =
-                new ujson.Obj(mutable.LinkedHashMap(alternatives.collect {
+              val mappingFields: mutable.LinkedHashMap[String, ujson.Value] =
+                mutable.LinkedHashMap(alternatives.collect {
                   case (tag, ref: Schema.Reference) =>
                     tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
-                }: _*))
+                }: _*)
+              val discFields = mutable.LinkedHashMap.empty[String, ujson.Value]
+              discFields += "propertyName" -> ujson.Str(discriminatorFieldName)
+              if (mappingFields.nonEmpty) {
+                discFields += "mapping" -> new ujson.Obj(mappingFields)
+              }
               List(
                 "oneOf" -> ujson
                   .Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
-                "discriminator" -> ujson.Obj(
-                  "propertyName" -> ujson.Str(discriminatorFieldName),
-                  "mapping" -> mappingJson
-                )
+                "discriminator" -> ujson.Obj(discFields)
               )
             case Schema.EnumeratedAlternatives(alternatives) =>
               List(
