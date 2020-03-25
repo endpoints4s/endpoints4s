@@ -230,6 +230,19 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     }
   }
 
+  "Descriptions and summary documentation" should {
+    "be rendered according to provided docs" in {
+      import Fixtures.{openApi, documentedEndp}
+
+      val docs = openApi(Info("test", "0.0.0"))(documentedEndp)
+      val json = ujson.read(OpenApi.stringEncoder.encode(docs))
+      val documentedEndpJson = json("paths")("/documented")("get")
+
+      documentedEndpJson("summary") shouldBe ujson.Str("summary of endpoint")
+      documentedEndpJson("description") shouldBe ujson.Str("description of endpoint")
+    }
+  }
+
   "Fields order" in {
     import Fixtures.{
       emptyRecord,
@@ -337,6 +350,14 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
       ok(textResponse, headers = responseHeader("ETag", Some("version number")))
     )
 
+  val documentedEndp = endpoint(
+    request = get(path / "documented"),
+    response = ok(emptyResponse),
+    docs = EndpointDocs(
+      summary = Some("summary of endpoint"),
+      description = Some("description of endpoint")
+    )
+  )
 }
 
 object Fixtures
