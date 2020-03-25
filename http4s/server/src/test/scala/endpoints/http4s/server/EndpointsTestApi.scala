@@ -6,7 +6,10 @@ import endpoints.algebra
 class EndpointsTestApi
     extends Endpoints[IO]
     with BasicAuthentication
-    with JsonEntitiesFromSchemas
+    with JsonEntitiesFromCodecs
+    with ChunkedJsonEntities
     with algebra.EndpointsTestApi
     with algebra.BasicAuthenticationTestApi
-    with algebra.JsonEntitiesFromSchemasTestApi
+    with algebra.circe.JsonFromCirceCodecTestApi
+    with algebra.ChunkedJsonEntitiesTestApi
+    with algebra.circe.ChunkedJsonEntitiesTestApi
