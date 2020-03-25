@@ -14,6 +14,10 @@ import scala.collection.compat._
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
   *
+  * The encoding of the schemas of sealed traits (obtained with the operation
+  * `orElse` or via generic derivation) can be configured by overriding
+  * [[JsonSchemas.coproductEncoding]].
+  *
   * @group interpreters
   */
 trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
@@ -430,7 +434,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     * This object contains the options for how to encode coproduct JSON schemas.
     *
     * The following Scala coproduct is the candidate example. Each encoding
-    * option includes the schema that it would geenrate for that example.
+    * option includes the schema that it would generate for that example.
     *
     * {{{
     * sealed trait Pet
@@ -508,7 +512,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       * referred to in OpenAPI 3 as a way to model polymorphism.
       *
       *  - compatible with OpenAPI clients that don't handle `oneOf` properly
-      *  - complex confusing schemas in Swagger UI
+      *  - more complex schemas in Swagger UI
       *
       * Using the `Pet` example above, this strategy yields the following:
       *
@@ -578,12 +582,13 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   /**
-    * Strategy used to encode the JSON schema of coproducts
+    * Override this method to customize the strategy used to encode the JSON
+    * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
     *
     * @see [[JsonSchemas.CoproductEncoding$]]
     *
     */
-  def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOfWithBaseRef
+  def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
 
   /** Convert the internal representation of a JSON schema into the public OpenAPI AST */
   def toSchema(jsonSchema: DocumentedJsonSchema): Schema =

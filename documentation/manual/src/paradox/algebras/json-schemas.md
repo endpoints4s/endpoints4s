@@ -184,6 +184,12 @@ following JSON document:
 }
 ~~~
 
+The encoding of sealed traits in OpenAPI can be configured by overriding the `coproductEncoding`
+method in the OpenAPI interpreter. By default, the OpenAPI interpreter will encode variants of
+sealed traits in the same way that they would be encoded if they were standalone records. However,
+it is sometimes useful to include in each variants' schema a reference to the base type schema.
+The @scaladoc[API documentation](endpoints.openapi.JsonSchemas.coproductEncoding) has more details.
+
 ## Generic derivation of JSON schemas (based on Shapeless) 
 
 The module presented in this section uses Shapeless to generically derive JSON schemas
