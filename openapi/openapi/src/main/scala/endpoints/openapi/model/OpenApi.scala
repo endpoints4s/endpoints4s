@@ -173,6 +173,9 @@ object OpenApi {
     operation.summary.foreach { summary =>
       fields += "summary" -> ujson.Str(summary)
     }
+    operation.description.foreach { description =>
+      fields += "description" -> ujson.Str(description)
+    }
     if (operation.parameters.nonEmpty) {
       fields += "parameters" -> ujson.Arr(
         operation.parameters.map(parameterJson): _*
