@@ -35,290 +35,187 @@ class CoproductEncodingTest extends AnyFreeSpec {
   }
 
   "OneOf schema encoding" in {
-    val expectedSchema = Schema.OneOf(
-      Schema.DiscriminatedAlternatives(
-        "type",
-        List(
-          "Bar" -> Schema.Object(
-            List(
-              Schema.Property(
-                "type",
-                Schema.Enum(
-                  Schema.simpleString,
-                  List("Bar"),
-                  None,
-                  Some("Bar"),
-                  None
-                ),
-                true,
-                None
-              ),
-              Schema.Property("s", Schema.simpleString, true, None)
-            ),
-            None,
-            None,
-            None,
-            None
-          ),
-          "Baz" -> Schema.Object(
-            List(
-              Schema.Property(
-                "type",
-                Schema.Enum(
-                  Schema.simpleString,
-                  List("Baz"),
-                  None,
-                  Some("Baz"),
-                  None
-                ),
-                true,
-                None
-              ),
-              Schema.Property(
-                "i",
-                Schema.Primitive("integer", Some("int32"), None, None, None),
-                true,
-                None
-              )
-            ),
-            None,
-            None,
-            None,
-            None
-          ),
-          "Bax" -> Schema.Object(
-            List(
-              Schema.Property(
-                "type",
-                Schema.Enum(
-                  Schema.simpleString,
-                  List("Bax"),
-                  None,
-                  Some("Bax"),
-                  None
-                ),
-                true,
-                None
-              )
-            ),
-            None,
-            None,
-            None,
-            None
-          ),
-          "Qux" -> Schema.Object(
-            List(
-              Schema.Property(
-                "type",
-                Schema.Enum(
-                  Schema.simpleString,
-                  List("Qux"),
-                  None,
-                  Some("Qux"),
-                  None
-                ),
-                true,
-                None
-              )
-            ),
-            None,
-            None,
-            None,
-            None
-          ),
-          "Quux" -> Schema.Object(
-            List(
-              Schema.Property(
-                "type",
-                Schema.Enum(
-                  Schema.simpleString,
-                  List("Quux"),
-                  None,
-                  Some("Quux"),
-                  None
-                ),
-                true,
-                None
-              ),
-              Schema.Property("b", Schema.simpleInteger, true, None)
-            ),
-            None,
-            None,
-            None,
-            None
-          )
-        )
+    val expectedJsonSchema = ujson.Obj(
+      "discriminator" -> ujson.Obj(
+        "propertyName" -> ujson.Str("type"),
+        "mapping" -> ujson.Obj()
       ),
-      None,
-      None,
-      None
+      "oneOf" -> ujson.Arr(
+        ujson.Obj(
+          "type" -> ujson.Str("object"),
+          "properties" -> ujson.Obj(
+            "type" -> ujson.Obj(
+              "type" -> ujson.Str("string"),
+              "enum" -> ujson.Arr(ujson.Str("Bar")),
+              "example" -> ujson.Str("Bar")
+            ),
+            "s" -> ujson.Obj(
+              "type" -> ujson.Str("string")
+            )
+          ),
+          "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("s"))
+        ),
+        ujson.Obj(
+          "type" -> ujson.Str("object"),
+          "properties" -> ujson.Obj(
+            "type" -> ujson.Obj(
+              "type" -> ujson.Str("string"),
+              "enum" -> ujson.Arr(ujson.Str("Baz")),
+              "example" -> ujson.Str("Baz")
+            ),
+            "i" -> ujson.Obj(
+              "type" -> ujson.Str("integer"),
+              "format" -> ujson.Str("int32")
+            )
+          ),
+          "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("i"))
+        ),
+        ujson.Obj(
+          "type" -> ujson.Str("object"),
+          "properties" -> ujson.Obj(
+            "type" -> ujson.Obj(
+              "type" -> ujson.Str("string"),
+              "enum" -> ujson.Arr(ujson.Str("Bax")),
+              "example" -> ujson.Str("Bax")
+            )
+          ),
+          "required" -> ujson.Arr(ujson.Str("type"))
+        ),
+        ujson.Obj(
+          "type" -> ujson.Str("object"),
+          "properties" -> ujson.Obj(
+            "type" -> ujson.Obj(
+              "type" -> ujson.Str("string"),
+              "enum" -> ujson.Arr(ujson.Str("Qux")),
+              "example" -> ujson.Str("Qux")
+            )
+          ),
+          "required" -> ujson.Arr(ujson.Str("type"))
+        ),
+        ujson.Obj(
+          "type" -> ujson.Str("object"),
+          "properties" -> ujson.Obj(
+            "type" -> ujson.Obj(
+              "type" -> ujson.Str("string"),
+              "enum" -> ujson.Arr(ujson.Str("Quux")),
+              "example" -> ujson.Str("Quux")
+            ),
+            "b" -> ujson.Obj(
+              "type" -> ujson.Str("integer")
+            )
+          ),
+          "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("b"))
+        )
+      )
     )
-    assert(OneOfStrategyDocs.api.components.schemas("Foo") == expectedSchema)
+    assert(
+      OpenApi.schemaJson(OneOfStrategyDocs.api.components.schemas("Foo")) == expectedJsonSchema
+    )
   }
 
   "OneOfWithBaseRef schema encoding" in {
-    val expectedSchema = Schema.OneOf(
-      Schema.DiscriminatedAlternatives(
-        "type",
-        List(
-          "Bar" -> Schema.AllOf(
-            List(
-              Schema.Reference("Foo", None, None, None, None),
-              Schema.Object(
-                List(
-                  Schema.Property(
-                    "type",
-                    Schema.Enum(
-                      Schema.simpleString,
-                      List("Bar"),
-                      None,
-                      Some("Bar"),
-                      None
-                    ),
-                    true,
-                    None
-                  ),
-                  Schema.Property("s", Schema.simpleString, true, None)
+    val expectedJsonSchema = ujson.Obj(
+      "discriminator" -> ujson.Obj(
+        "propertyName" -> ujson.Str("type"),
+        "mapping" -> ujson.Obj() // TODO
+      ),
+      "oneOf" -> ujson.Arr(
+        ujson.Obj(
+          "allOf" -> ujson.Arr(
+            ujson.Obj("$ref" -> ujson.Str("#/components/schemas/Foo")),
+            ujson.Obj(
+              "type" -> ujson.Str("object"),
+              "properties" -> ujson.Obj(
+                "type" -> ujson.Obj(
+                  "type" -> ujson.Str("string"),
+                  "enum" -> ujson.Arr(ujson.Str("Bar")),
+                  "example" -> ujson.Str("Bar")
                 ),
-                None,
-                None,
-                None,
-                None
-              )
-            ),
-            None,
-            None,
-            None
-          ),
-          "Baz" -> Schema.AllOf(
-            List(
-              Schema.Reference("Foo", None, None, None, None),
-              Schema.Object(
-                List(
-                  Schema.Property(
-                    "type",
-                    Schema.Enum(
-                      Schema.simpleString,
-                      List("Baz"),
-                      None,
-                      Some("Baz"),
-                      None
-                    ),
-                    true,
-                    None
-                  ),
-                  Schema.Property(
-                    "i",
-                    Schema
-                      .Primitive("integer", Some("int32"), None, None, None),
-                    true,
-                    None
-                  )
+                "s" -> ujson.Obj(
+                  "type" -> ujson.Str("string")
+                )
+              ),
+              "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("s"))
+            )
+          )
+        ),
+        ujson.Obj(
+          "allOf" -> ujson.Arr(
+            ujson.Obj("$ref" -> ujson.Str("#/components/schemas/Foo")),
+            ujson.Obj(
+              "type" -> ujson.Str("object"),
+              "properties" -> ujson.Obj(
+                "type" -> ujson.Obj(
+                  "type" -> ujson.Str("string"),
+                  "enum" -> ujson.Arr(ujson.Str("Baz")),
+                  "example" -> ujson.Str("Baz")
                 ),
-                None,
-                None,
-                None,
-                None
-              )
-            ),
-            None,
-            None,
-            None
-          ),
-          "Bax" -> Schema.AllOf(
-            List(
-              Schema.Reference("Foo", None, None, None, None),
-              Schema.Object(
-                List(
-                  Schema.Property(
-                    "type",
-                    Schema.Enum(
-                      Schema.simpleString,
-                      List("Bax"),
-                      None,
-                      Some("Bax"),
-                      None
-                    ),
-                    true,
-                    None
-                  )
+                "i" -> ujson.Obj(
+                  "type" -> ujson.Str("integer"),
+                  "format" -> ujson.Str("int32")
+                )
+              ),
+              "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("i"))
+            )
+          )
+        ),
+        ujson.Obj(
+          "allOf" -> ujson.Arr(
+            ujson.Obj("$ref" -> ujson.Str("#/components/schemas/Foo")),
+            ujson.Obj(
+              "type" -> ujson.Str("object"),
+              "properties" -> ujson.Obj(
+                "type" -> ujson.Obj(
+                  "type" -> ujson.Str("string"),
+                  "enum" -> ujson.Arr(ujson.Str("Bax")),
+                  "example" -> ujson.Str("Bax")
+                )
+              ),
+              "required" -> ujson.Arr(ujson.Str("type"))
+            )
+          )
+        ),
+        ujson.Obj(
+          "allOf" -> ujson.Arr(
+            ujson.Obj("$ref" -> ujson.Str("#/components/schemas/Foo")),
+            ujson.Obj(
+              "type" -> ujson.Str("object"),
+              "properties" -> ujson.Obj(
+                "type" -> ujson.Obj(
+                  "type" -> ujson.Str("string"),
+                  "enum" -> ujson.Arr(ujson.Str("Qux")),
+                  "example" -> ujson.Str("Qux")
+                )
+              ),
+              "required" -> ujson.Arr(ujson.Str("type"))
+            )
+          )
+        ),
+        ujson.Obj(
+          "allOf" -> ujson.Arr(
+            ujson.Obj("$ref" -> ujson.Str("#/components/schemas/Foo")),
+            ujson.Obj(
+              "type" -> ujson.Str("object"),
+              "properties" -> ujson.Obj(
+                "type" -> ujson.Obj(
+                  "type" -> ujson.Str("string"),
+                  "enum" -> ujson.Arr(ujson.Str("Quux")),
+                  "example" -> ujson.Str("Quux")
                 ),
-                None,
-                None,
-                None,
-                None
-              )
-            ),
-            None,
-            None,
-            None
-          ),
-          "Qux" -> Schema.AllOf(
-            List(
-              Schema.Reference("Foo", None, None, None, None),
-              Schema.Object(
-                List(
-                  Schema.Property(
-                    "type",
-                    Schema.Enum(
-                      Schema.simpleString,
-                      List("Qux"),
-                      None,
-                      Some("Qux"),
-                      None
-                    ),
-                    true,
-                    None
-                  )
-                ),
-                None,
-                None,
-                None,
-                None
-              )
-            ),
-            None,
-            None,
-            None
-          ),
-          "Quux" -> Schema.AllOf(
-            List(
-              Schema.Reference("Foo", None, None, None, None),
-              Schema.Object(
-                List(
-                  Schema.Property(
-                    "type",
-                    Schema.Enum(
-                      Schema.simpleString,
-                      List("Quux"),
-                      None,
-                      Some("Quux"),
-                      None
-                    ),
-                    true,
-                    None
-                  ),
-                  Schema.Property("b", Schema.simpleInteger, true, None)
-                ),
-                None,
-                None,
-                None,
-                None
-              )
-            ),
-            None,
-            None,
-            None
+                "b" -> ujson.Obj(
+                  "type" -> ujson.Str("integer")
+                )
+              ),
+              "required" -> ujson.Arr(ujson.Str("type"), ujson.Str("b"))
+            )
           )
         )
-      ),
-      None,
-      None,
-      None
+      )
     )
     assert(
-      OneOfWithBaseRefStrategyDocs.api.components
-        .schemas("Foo") == expectedSchema
+      OpenApi.schemaJson(
+        OneOfWithBaseRefStrategyDocs.api.components.schemas("Foo")
+      ) == expectedJsonSchema
     )
   }
 }
