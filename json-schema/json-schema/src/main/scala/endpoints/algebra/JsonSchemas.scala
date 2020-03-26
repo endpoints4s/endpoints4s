@@ -359,8 +359,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * Documentation related methods for annotating schemas. Encoder and decoder
     * interpreters ignore this information.
     */
-  sealed trait DocOps[A] {
-    type Repr[X] <: JsonSchema[X]
+  sealed trait JsonSchemaDocumentationOps[A] {
+    type Self <: JsonSchema[A]
 
     /**
       * Include an example of value in this schema. Documentation interpreters
@@ -369,7 +369,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *
       * @param example Example value to attach to the schema
       */
-    def withExample(example: A): Repr[A]
+    def withExample(example: A): Self
 
     /**
       * Include a description of what this schema represents. Documentation
@@ -378,7 +378,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *
       * @param description information about the values described by the schema
       */
-    def withDescription(description: String): Repr[A]
+    def withDescription(description: String): Self
 
     /**
       * Include a title for the schema. Documentation interpreters can show
@@ -386,7 +386,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *
       * @param title short title to attach to the schema
       */
-    def withTitle(title: String): Repr[A]
+    def withTitle(title: String): Self
   }
 
   /**
@@ -394,8 +394,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @group operations
     */
   final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A])
-      extends DocOps[A] {
-    type Repr[X] = JsonSchema[X]
+      extends JsonSchemaDocumentationOps[A] {
+    type Self = JsonSchema[A]
 
     def withExample(example: A): JsonSchema[A] =
       withExampleJsonSchema(schemaA, example)
@@ -431,8 +431,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
-  final implicit class RecordOps[A](recordA: Record[A]) extends DocOps[A] {
-    type Repr[X] = Record[X]
+  final implicit class RecordOps[A](recordA: Record[A])
+      extends JsonSchemaDocumentationOps[A] {
+    type Self = Record[A]
 
     /** Merge the fields of `recordA` with the fields of `recordB` */
     def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] =
@@ -463,8 +464,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class TaggedOps[A](taggedA: Tagged[A]) extends DocOps[A] {
-    type Repr[X] = Tagged[X]
+  final implicit class TaggedOps[A](taggedA: Tagged[A])
+      extends JsonSchemaDocumentationOps[A] {
+    type Self = Tagged[A]
 
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] =
       choiceTagged(taggedA, taggedB)
@@ -498,8 +500,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class EnumOps[A](enumA: Enum[A]) extends DocOps[A] {
-    type Repr[X] = Enum[X]
+  final implicit class EnumOps[A](enumA: Enum[A])
+      extends JsonSchemaDocumentationOps[A] {
+    type Self = Enum[A]
 
     /**
       * Give a name to the schema.
