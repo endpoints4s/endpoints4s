@@ -221,8 +221,8 @@ type. The rules for deriving the schema are the following:
   type has a `width` required property of type `integer`),
 - each case class field of type `Option[A]` for some type `A` has a corresponding
   optional JSON object property of the same name and type,
-- documentation specific to case class fields can be defined by annotating the fields
-  with the `@docs` annotation,
+- descriptions can be set for case class fields, case classes, or sealed traits
+  by annotating these things with the `@docs` annotation,
 - for sealed traits, the discriminator field name can be defined by the `@discriminator`
   annotation, otherwise the `defaultDiscriminatorName` value is used,
 - the schema is named by the `@name` annotation, if present, or by invoking the

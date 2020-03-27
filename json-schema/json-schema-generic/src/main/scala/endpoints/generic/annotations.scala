@@ -4,7 +4,7 @@ package endpoints.generic
   * Adds a description to a case class field, a case class, or a sealed trait.
   *
   * Annotate a case class field, case class, or sealed trait with this
-  * annotation to define its the description of the schema or record field.
+  * annotation to set a description for the schema or the record field.
   *
   * @param text Description of the annotated schema or field
   */

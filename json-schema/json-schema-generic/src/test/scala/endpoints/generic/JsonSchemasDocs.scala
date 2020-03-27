@@ -29,6 +29,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     case class Circle(radius: Double) extends Shape
 
     @name("RectangleSchema")
+    @docs("A quadrilateral with four right angles")
     case class Rectangle(
         @docs("Rectangle width") width: Double,
         height: Double
