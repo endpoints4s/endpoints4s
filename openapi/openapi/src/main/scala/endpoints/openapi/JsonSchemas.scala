@@ -272,6 +272,39 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       DocumentedRecord(recordA.docs.fields ++ recordB.docs.fields)
     )
 
+  def withExampleRecord[A](
+      record: Record[A],
+      example: A
+  ): Record[A] = {
+    val exampleJson = record.ujsonSchema.codec.encode(example)
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(example = Some(exampleJson))
+    )
+  }
+
+  def withExampleTagged[A](
+      tagged: Tagged[A],
+      example: A
+  ): Tagged[A] = {
+    val exampleJson = tagged.ujsonSchema.codec.encode(example)
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(example = Some(exampleJson))
+    )
+  }
+
+  def withExampleEnum[A](
+      enum: Enum[A],
+      example: A
+  ): Enum[A] = {
+    val exampleJson = enum.ujsonSchema.codec.encode(example)
+    new Enum[A](
+      enum.ujsonSchema,
+      enum.docs.copy(example = Some(exampleJson))
+    )
+  }
+
   def withExampleJsonSchema[A](
       schema: JsonSchema[A],
       example: A
@@ -293,6 +326,33 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
+  def withTitleRecord[A](
+      record: Record[A],
+      title: String
+  ): Record[A] =
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(title = Some(title))
+    )
+
+  def withTitleTagged[A](
+      tagged: Tagged[A],
+      title: String
+  ): Tagged[A] =
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(title = Some(title))
+    )
+
+  def withTitleEnum[A](
+      enum: Enum[A],
+      title: String
+  ): Enum[A] =
+    new Enum[A](
+      enum.ujsonSchema,
+      enum.docs.copy(title = Some(title))
+    )
+
   def withTitleJsonSchema[A](
       schema: JsonSchema[A],
       title: String
@@ -312,6 +372,33 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       updatedDocs(schema.docs)
     )
   }
+
+  def withDescriptionRecord[A](
+      record: Record[A],
+      description: String
+  ): Record[A] =
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(description = Some(description))
+    )
+
+  def withDescriptionTagged[A](
+      tagged: Tagged[A],
+      description: String
+  ): Tagged[A] =
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(description = Some(description))
+    )
+
+  def withDescriptionEnum[A](
+      enum: Enum[A],
+      description: String
+  ): Enum[A] =
+    new Enum[A](
+      enum.ujsonSchema,
+      enum.docs.copy(description = Some(description))
+    )
 
   def withDescriptionJsonSchema[A](
       schema: JsonSchema[A],
