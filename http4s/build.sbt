@@ -20,3 +20,4 @@ val `http4s-server` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
+    .dependsOn(`algebra-circe-jvm` % "compile->test;test->test")
