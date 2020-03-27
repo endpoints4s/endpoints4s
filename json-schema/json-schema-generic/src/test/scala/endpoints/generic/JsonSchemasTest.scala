@@ -27,7 +27,9 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     @discriminator("$type")
     @name("DocResource")
+    @docs("traitDoc")
     sealed trait Doc
+    @docs("recordDocA")
     case class DocA(@docs("fieldDocI") i: Int) extends Doc
     case class DocB(
         a: String,
@@ -35,6 +37,7 @@ class JsonSchemasTest extends AnyFreeSpec {
         @docs("fieldDocSS") ss: List[String]
     ) extends Doc
     @name("DocC")
+    @docs("recordDocC")
     case object DocC extends Doc
 
     object Doc {
@@ -130,22 +133,22 @@ class JsonSchemasTest extends AnyFreeSpec {
     def withDescriptionRecord[A](
         schema: Record[A],
         description: String
-    ): Record[A] = schema
+    ): String = s"$schema{$description}"
 
     def withDescriptionTagged[A](
         schema: Tagged[A],
         description: String
-    ): Tagged[A] = schema
+    ): String = s"$schema{$description}"
 
     def withDescriptionEnum[A](
         schema: Enum[A],
         description: String
-    ): Enum[A] = schema
+    ): String = s"$schema{$description}"
 
     def withDescriptionJsonSchema[A](
         schema: JsonSchema[A],
         description: String
-    ): JsonSchema[A] = schema
+    ): String = s"$schema{$description}"
 
     def withTitleRecord[A](
         schema: Record[A],
@@ -249,10 +252,10 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "documentations" in {
     val expectedSchema = s"'DocResource'!(${List(
-      s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
+      s"'$ns.DocA'!(i:integer{fieldDocI},%){recordDocA}@DocA",
       s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
-      s"'DocC'!(%)@DocC"
-    ).mkString("|")})#$$type"
+      s"'DocC'!(%){recordDocC}@DocC"
+    ).mkString("|")})#$$type{traitDoc}"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 
