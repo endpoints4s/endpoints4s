@@ -103,7 +103,7 @@ trait EndpointsWithCustomErrors
   override def textRequest: RequestEntity[String] =
     (value, req) => req.withEntity(value)
 
-  type Request[A] = A => Effect[Http4sResponse[Effect]]
+  type Request[A] = A => Effect[Http4sRequest[Effect]]
 
   override def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
       method: Method,
@@ -119,11 +119,12 @@ trait EndpointsWithCustomErrors
     val (ub, headersP) = tuplerUBH.unapply(out)
     val (urlP, bodyP) = tuplerUB.unapply(ub)
 
-    effect.flatMap(effect.fromEither(url.encodeUrl(urlP))) { uri =>
-      val req: Http4sRequest[Effect] =
-        Http4sRequest(method, Uri.resolve(host, uri))
-      client.fetch(entity(bodyP, headers(headersP, req)))(_.pure[Effect])
-    }
+    effect.map(effect.fromEither(url.encodeUrl(urlP)))(uri =>
+      entity(
+        bodyP,
+        headers(headersP, Http4sRequest(method, Uri.resolve(host, uri)))
+      )
+    )
   }
 
   type Response[A] = (StatusCode, Headers) => Option[ResponseEntity[A]]
@@ -222,8 +223,10 @@ trait EndpointsWithCustomErrors
       docs: EndpointDocs
   ): Endpoint[A, B] =
     Kleisli { a =>
-      request(a).flatMap { res =>
-        decodeResponse(response, res).flatMap(_.apply(res))
+      request(a).flatMap { req =>
+        client.fetch(req)(res =>
+          decodeResponse(response, res).flatMap(_.apply(res))
+        )
       }
     }
 
