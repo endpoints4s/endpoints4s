@@ -22,6 +22,7 @@ trait JsonSchemasDocs extends JsonSchemas {
   locally {
     //#documented-generic-schema
     @discriminator("kind")
+    @title("Geometric shape")
     @name("ShapeSchema")
     sealed trait Shape
 

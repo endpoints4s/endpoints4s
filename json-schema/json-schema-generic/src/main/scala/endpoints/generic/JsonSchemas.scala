@@ -72,7 +72,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
       extends GenericJsonSchemaLowPriority
       with GenericDiscriminatorNames
       with GenericSchemaNames
-      with GenericDescriptions {
+      with GenericDescriptions
+      with GenericTitles {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
@@ -181,6 +182,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
         gen: LabelledGeneric.Aux[A, R],
         docOpt: GenericDescription[A],
         docAnns: Annotations.Aux[docs, A, D],
+        titleOpt: GenericTitle[A],
         record: DocumentedGenericRecord[R, D],
         name: GenericSchemaName[A]
     ): GenericRecord[A] = {
@@ -189,13 +191,15 @@ trait JsonSchemas extends algebra.JsonSchemas {
         .xmap[A](gen.from)(gen.to)
         .named(name.value)
       val docA = docOpt.description.fold(recordA)(recordA.withDescription(_))
-      new GenericRecord[A](docA)
+      val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
+      new GenericRecord[A](titleA)
     }
 
     implicit def taggedGeneric[A, R](
         implicit
         gen: LabelledGeneric.Aux[A, R],
         docOpt: GenericDescription[A],
+        titleOpt: GenericTitle[A],
         tagged: GenericTagged[R],
         name: GenericSchemaName[A],
         discriminator: GenericDiscriminatorName[A]
@@ -205,7 +209,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
         .named(name.value)
         .withDiscriminator(discriminator.name)
       val docA = docOpt.description.fold(taggedA)(taggedA.withDescription(_))
-      new GenericTagged[A](docA)
+      val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
+      new GenericTagged[A](titleA)
     }
   }
 
@@ -265,6 +270,24 @@ trait JsonSchemas extends algebra.JsonSchemas {
     trait GenericDescriptionLowPriority {
       implicit def noDescription[A]: GenericDescription[A] =
         new GenericDescription[A](None)
+    }
+  }
+
+  /** Internal machinery for extracting a title of a type */
+  trait GenericTitles {
+
+    class GenericTitle[A](val title: Option[String])
+
+    object GenericTitle extends GenericTitleLowPriority {
+      implicit def annotated[A](
+          implicit ann: Annotation[title, A]
+      ): GenericTitle[A] =
+        new GenericTitle(Some(ann().value))
+    }
+
+    trait GenericTitleLowPriority {
+      implicit def noTitle[A]: GenericTitle[A] =
+        new GenericTitle[A](None)
     }
   }
 

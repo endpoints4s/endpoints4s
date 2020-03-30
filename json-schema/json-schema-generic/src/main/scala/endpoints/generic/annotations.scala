@@ -11,10 +11,29 @@ package endpoints.generic
 case class docs(text: String) extends scala.annotation.Annotation
 
 /**
+  * Defines the title of a generic schema.
+  *
+  * Annotate a sealed trait or case class definition with this annotation
+  * to define its schema title.
+  *
+  * @param text Title of the schema
+  */
+case class title(value: String) extends scala.annotation.Annotation
+
+/**
   * Defines the name of a generic schema.
   *
   * Annotate a sealed trait or case class definition with this annotation
-  * to define its schema name.
+  * to define its schema name. Setting the name of a schema explicitly means
+  * that you can control exactly what the URI of the JSON schema will be in the
+  * OpenAPI documentation.
+  *
+  * @note The name of the schema is used internally by OpenAPI in the URI that
+  *       gets used to refer to the schema. Consequently, the name set here
+  *       should include only characters allowed in URIs.
+  *
+  * @see Use [[title]] to customize the user-friendly name of the schema in the
+  *      OpenAPI documentation
   *
   * @param value Name of the schema
   */
