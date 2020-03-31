@@ -32,6 +32,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     sealed trait Doc
     @docs("recordDocA")
     case class DocA(@docs("fieldDocI") i: Int) extends Doc
+    @unnamed()
     case class DocB(
         a: String,
         @docs("fieldDocB") b: Boolean,
@@ -248,7 +249,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "documentations" in {
     val expectedSchema = s"[[Doc Resource]]'DocResource'!(${List(
       s"'$ns.DocA'!(i:integer{fieldDocI},%){recordDocA}@DocA",
-      s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
+      s"a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%@DocB",
       s"'DocC'!(%){recordDocC}@DocC"
     ).mkString("|")})#$$type{traitDoc}"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)

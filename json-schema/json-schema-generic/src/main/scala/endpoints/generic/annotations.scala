@@ -40,6 +40,15 @@ case class title(value: String) extends scala.annotation.Annotation
 case class name(value: String) extends scala.annotation.Annotation
 
 /**
+  * Specifies that a generic schema should not have a name.
+  *
+  * Annotate a sealed trait or case class definition with this annotation to
+  * prevent the schema from being named. This is sometimes useful for forcing
+  * nested schemas to be inlined in OpenAPI documentation.
+  */
+case class unnamed() extends scala.annotation.Annotation
+
+/**
   * Defines the name of the discriminator field of a generic tagged schema.
   *
   * Annotate a sealed trait definition with this annotation to define
