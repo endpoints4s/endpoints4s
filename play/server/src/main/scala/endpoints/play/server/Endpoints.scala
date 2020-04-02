@@ -98,7 +98,7 @@ trait EndpointsWithCustomErrors
   ): Headers => Validated[Option[String]] =
     headers => Valid(headers.get(name))
 
-  implicit lazy val reqHeadersInvFunctor
+  implicit lazy val requestHeadersPartialInvariantFunctor
       : endpoints.PartialInvariantFunctor[RequestHeaders] =
     new endpoints.PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[A, B](
@@ -109,7 +109,7 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).flatMap(f)
     }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
           implicit tupler: Tupler[A, B]
@@ -218,7 +218,8 @@ trait EndpointsWithCustomErrors
 
   lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
 
-  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
           f: BodyParser[From],
@@ -280,7 +281,8 @@ trait EndpointsWithCustomErrors
     */
   type Response[A] = A => Result
 
-  implicit lazy val responseInvFunctor: endpoints.InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor
+      : endpoints.InvariantFunctor[Response] =
     new endpoints.InvariantFunctor[Response] {
       def xmap[A, B](
           fa: Response[A],
@@ -336,7 +338,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  implicit def responseHeadersInvFunctor
+  implicit def responseHeadersInvariantFunctor
       : endpoints.InvariantFunctor[ResponseHeaders] =
     new endpoints.InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](

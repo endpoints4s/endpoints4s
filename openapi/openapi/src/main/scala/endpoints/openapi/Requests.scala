@@ -68,7 +68,7 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
       ): Request[B] = fa
     }
 
-  implicit lazy val reqEntityInvFunctor
+  implicit lazy val requestEntityPartialInvariantFunctor
       : endpoints.PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
@@ -77,7 +77,7 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
           contramap: To => From
       ): RequestEntity[To] = x
     }
-  implicit lazy val reqHeadersInvFunctor
+  implicit lazy val requestHeadersPartialInvariantFunctor
       : endpoints.PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[From, To](
@@ -86,7 +86,7 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
           contramap: To => From
       ): RequestHeaders[To] = x
     }
-  implicit lazy val reqHeadersSemigroupal
+  implicit lazy val requestHeadersSemigroupal
       : endpoints.Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(

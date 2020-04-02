@@ -72,7 +72,7 @@ trait EndpointsWithCustomErrors
     case (None, req)        => req
   }
 
-  implicit lazy val reqHeadersInvFunctor
+  implicit lazy val requestHeadersPartialInvariantFunctor
       : PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[A, B](
@@ -83,7 +83,7 @@ trait EndpointsWithCustomErrors
         (b, req) => fa(g(b), req)
     }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       override def product[A, B](
           fa: (A, WSRequest) => WSRequest,
@@ -123,7 +123,7 @@ trait EndpointsWithCustomErrors
   lazy val textRequest: (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
-  implicit lazy val reqEntityInvFunctor
+  implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[A, B](
@@ -161,7 +161,7 @@ trait EndpointsWithCustomErrors
       Map[String, scala.collection.Seq[String]]
   ) => Option[ResponseEntity[A]]
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
         (status, headers) => fa(status, headers).map(mapResponseEntity(_)(f))
@@ -208,7 +208,8 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],

@@ -50,11 +50,12 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Provides `++` operation.
     * @see [[SemigroupalSyntax]] */
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
+  implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders]
 
   /** Provides the operations `xmap` and `xmapPartial`.
     * @see [[PartialInvariantFunctorSyntax]] */
-  implicit def reqHeadersInvFunctor: PartialInvariantFunctor[RequestHeaders]
+  implicit def requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders]
 
   /** Information carried by a whole request (headers and entity)
     * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
@@ -72,7 +73,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Provides the operations `xmap` and `xmapPartial`.
     * @see [[PartialInvariantFunctorSyntax]] */
-  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity]
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity]
 
   /**
     * Empty request -- request without a body.

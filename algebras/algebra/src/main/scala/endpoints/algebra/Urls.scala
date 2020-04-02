@@ -64,7 +64,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringPartialInvFunctor
+  implicit def queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString]
 
   /** Extension methods on [[QueryString]].
@@ -155,7 +155,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringParamPartialInvFunctor
+  implicit def queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam]
 
   def tryParseString[A](
@@ -218,7 +218,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations.
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def segmentPartialInvFunctor: PartialInvariantFunctor[Segment]
+  implicit def segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment]
 
   /** Ability to define `String` path segments
     * Servers should return an URL-decoded string value,
@@ -331,7 +331,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Provides `xmap` and `xmapPartial` operations
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url]
+  implicit def urlPartialInvariantFunctor: PartialInvariantFunctor[Url]
 
   /** Builds an URL from the given path and query string */
   def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(

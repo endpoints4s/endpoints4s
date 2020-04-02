@@ -20,7 +20,7 @@ trait Responses extends algebra.Responses with StatusCodes {
 
   type Response[A] = HttpResponse[String] => Option[ResponseEntity[A]]
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](
           fa: Response[A],
@@ -59,7 +59,8 @@ trait Responses extends algebra.Responses with StatusCodes {
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],

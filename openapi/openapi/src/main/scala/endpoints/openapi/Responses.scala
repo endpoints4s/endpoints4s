@@ -31,7 +31,7 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
       content: Map[String, MediaType]
   )
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa
     }
@@ -76,7 +76,8 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
         DocumentedHeaders(fa.value ++ fb.value)
     }
 
-  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],

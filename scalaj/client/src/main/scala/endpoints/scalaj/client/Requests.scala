@@ -45,7 +45,8 @@ trait Requests extends algebra.Requests with Urls with Methods {
   ): Option[String] => Seq[(String, String)] =
     valueOpt => valueOpt.map(v => name -> v).toSeq
 
-  implicit def reqHeadersInvFunctor: PartialInvariantFunctor[RequestHeaders] =
+  implicit def requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[From, To](
           f: RequestHeaders[From],
@@ -55,7 +56,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
         to => f(contramap(to))
     }
 
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       override def product[A, B](
           fa: A => Seq[(String, String)],
@@ -72,7 +73,8 @@ trait Requests extends algebra.Requests with Urls with Methods {
   def textRequest: (String, HttpRequest) => scalaj.http.HttpRequest =
     (body, req) => req.postData(body)
 
-  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[A, B](
           fa: RequestEntity[A],

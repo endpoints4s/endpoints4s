@@ -19,7 +19,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
   /** Provides the operation `xmap` to the type `Response`
     * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseInvFunctor: InvariantFunctor[Response]
+  implicit def responseInvariantFunctor: InvariantFunctor[Response]
 
   /** An HTTP response entity carrying an information of type A
     *
@@ -65,7 +65,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     * Provides `xmap` operation.
     * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders]
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders]
 
   /**
     * No particular response header.

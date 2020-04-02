@@ -64,7 +64,7 @@ trait EndpointsWithCustomErrors
 
   type Response[A] = A => Route
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](
           fa: Response[A],
@@ -119,7 +119,7 @@ trait EndpointsWithCustomErrors
     Directives.entity[String](um)
   }
 
-  implicit lazy val reqEntityInvFunctor
+  implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     directive1InvFunctor
 
@@ -138,10 +138,10 @@ trait EndpointsWithCustomErrors
       docs: Documentation
   ): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
-  implicit lazy val reqHeadersInvFunctor
+  implicit lazy val requestHeadersPartialInvariantFunctor
       : PartialInvariantFunctor[RequestHeaders] =
     directive1InvFunctor
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       override def product[A, B](fa: Directive1[A], fb: Directive1[B])(
           implicit tupler: Tupler[A, B]
@@ -163,7 +163,8 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
