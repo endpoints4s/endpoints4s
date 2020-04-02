@@ -4,7 +4,6 @@ import scalaj.http.HttpResponse
 import endpoints.{
   Invalid,
   InvariantFunctor,
-  PartialInvariantFunctor,
   Semigroupal,
   Tupler,
   Valid,
@@ -23,11 +22,26 @@ trait Responses extends algebra.Responses with StatusCodes {
 
   implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
-      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
-        resp => fa(resp).map(entity => s => entity(s).map(f))
+      def xmap[A, B](
+          fa: Response[A],
+          f: A => B,
+          g: B => A
+      ): Response[B] =
+        resp => fa(resp).map(_.xmap(f)(g))
     }
 
   type ResponseEntity[A] = String => Either[Throwable, A]
+
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        s => fa(s).map(f)
+    }
 
   def emptyResponse: ResponseEntity[Unit] =
     _ => Right(())
@@ -45,15 +59,14 @@ trait Responses extends algebra.Responses with StatusCodes {
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
-        headers => fa(headers).flatMap(f)
+        headers => fa(headers).map(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())

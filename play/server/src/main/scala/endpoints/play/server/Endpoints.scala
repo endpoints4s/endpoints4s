@@ -99,14 +99,14 @@ trait EndpointsWithCustomErrors
     headers => Valid(headers.get(name))
 
   implicit lazy val reqHeadersInvFunctor
-      : endpoints.InvariantFunctor[RequestHeaders] =
-    new endpoints.InvariantFunctor[RequestHeaders] {
-      def xmap[A, B](
+      : endpoints.PartialInvariantFunctor[RequestHeaders] =
+    new endpoints.PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[A, B](
           fa: RequestHeaders[A],
-          f: A => B,
+          f: A => Validated[B],
           g: B => A
       ): RequestHeaders[B] =
-        headers => fa(headers).map(f)
+        headers => fa(headers).flatMap(f)
     }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
@@ -138,17 +138,34 @@ trait EndpointsWithCustomErrors
     def encode(a: A): Call
   }
 
-  implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
-    new InvariantFunctor[Request] {
-      def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] =
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
         new Request[B] {
           def decode: RequestExtractor[BodyParser[B]] =
             functorRequestExtractor.fmap(
-              m.decode,
-              (bodyParser: BodyParser[A]) => bodyParser.map(f1)
+              fa.decode,
+              (bodyParser: BodyParser[A]) => bodyParser.xmapPartial(f)(g)
             )
-          def encode(a: B): Call = m.encode(f2(a))
+          def encode(b: B): Call = fa.encode(g(b))
         }
+    }
+
+  implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
+    new InvariantFunctor[Request] {
+      def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] = {
+        val transformedRequest = requestPartialInvariantFunctor.xmap(m, f1, f2)
+        new Request[B] {
+          def decode: RequestExtractor[BodyParser[B]] =
+            transformedRequest.decode
+          def encode(b: B): Call = transformedRequest.encode(b)
+        }
+      }
     }
 
   /**
@@ -201,14 +218,19 @@ trait EndpointsWithCustomErrors
 
   lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
 
-  implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] =
-    new endpoints.InvariantFunctor[RequestEntity] {
-      def xmap[From, To](
+  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[From, To](
           f: BodyParser[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): BodyParser[To] =
-        f.map(map)
+        f.validate(from =>
+          map(from) match {
+            case Valid(value)     => Right(value)
+            case invalid: Invalid => Left(handleClientErrors(invalid))
+          }
+        )
     }
 
   protected def extractMethodUrlAndHeaders[A, B](
@@ -260,11 +282,26 @@ trait EndpointsWithCustomErrors
 
   implicit lazy val responseInvFunctor: endpoints.InvariantFunctor[Response] =
     new endpoints.InvariantFunctor[Response] {
-      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+      def xmap[A, B](
+          fa: Response[A],
+          f: A => B,
+          g: B => A
+      ): Response[B] =
         fa compose g
     }
 
   type ResponseEntity[A] = A => HttpEntity
+
+  implicit lazy val responseEntityInvariantFunctor
+      : endpoints.InvariantFunctor[ResponseEntity] =
+    new endpoints.InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        fa compose g
+    }
 
   private[server] def responseEntityFromWriteable[A](
       writeable: Writeable[A]
@@ -300,11 +337,11 @@ trait EndpointsWithCustomErrors
     }
 
   implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+      : endpoints.InvariantFunctor[ResponseHeaders] =
+    new endpoints.InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
         fa compose g

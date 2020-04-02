@@ -1,23 +1,17 @@
 package endpoints.algebra
 
-import endpoints.{
-  InvariantFunctor,
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Semigroupal,
-  Tupler
-}
+import endpoints.{InvariantFunctor, InvariantFunctorSyntax, Semigroupal, Tupler}
 
 /**
   * @group algebras
   */
-trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
+trait Responses extends StatusCodes with InvariantFunctorSyntax {
   this: Errors =>
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A
     *
     * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
-    *       and [[ResponseSyntax]] class
+    *       and [[ResponseSyntax]] classes
     * @group types
     */
   type Response[A]
@@ -28,9 +22,14 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
   implicit def responseInvFunctor: InvariantFunctor[Response]
 
   /** An HTTP response entity carrying an information of type A
+    *
+    * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
+    *       class
     * @group types
     */
   type ResponseEntity[A]
+
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity]
 
   /**
     * Empty response entity
@@ -51,7 +50,7 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
     * [[optResponseHeader]], or [[emptyResponseHeaders]].
     *
     * @note This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *       and [[PartialInvariantFunctorSyntax]] classes.
+    *       and [[InvariantFunctorSyntax]] classes.
     * @group types
     */
   type ResponseHeaders[A]
@@ -63,11 +62,10 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders]
 
   /**
-    * Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]]
+    * Provides `xmap` operation.
+    * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders]
+  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders]
 
   /**
     * No particular response header.

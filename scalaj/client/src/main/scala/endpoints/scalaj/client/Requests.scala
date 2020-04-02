@@ -1,8 +1,13 @@
 package endpoints.scalaj.client
 
-import endpoints.{InvariantFunctor, Semigroupal, Tupler, algebra}
+import endpoints.{
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Validated,
+  algebra
+}
 import endpoints.algebra.Documentation
-
 import scalaj.http.HttpRequest
 
 /**
@@ -13,6 +18,17 @@ trait Requests extends algebra.Requests with Urls with Methods {
   type RequestHeaders[A] = A => Seq[(String, String)]
 
   type Request[A] = A => HttpRequest
+
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        fa compose g
+    }
 
   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
@@ -29,13 +45,13 @@ trait Requests extends algebra.Requests with Urls with Methods {
   ): Option[String] => Seq[(String, String)] =
     valueOpt => valueOpt.map(v => name -> v).toSeq
 
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      override def xmap[From, To](
-          f: From => Seq[(String, String)],
-          map: From => To,
+  implicit def reqHeadersInvFunctor: PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[From, To](
+          f: RequestHeaders[From],
+          map: From => Validated[To],
           contramap: To => From
-      ): To => Seq[(String, String)] =
+      ): RequestHeaders[To] =
         to => f(contramap(to))
     }
 
@@ -56,14 +72,14 @@ trait Requests extends algebra.Requests with Urls with Methods {
   def textRequest: (String, HttpRequest) => scalaj.http.HttpRequest =
     (body, req) => req.postData(body)
 
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      override def xmap[From, To](
-          f: (From, HttpRequest) => HttpRequest,
-          map: From => To,
-          contramap: To => From
-      ): (To, HttpRequest) => HttpRequest =
-        (to, req) => f(contramap(to), req)
+  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[A, B](
+          fa: RequestEntity[A],
+          f: A => Validated[B],
+          g: B => A
+      ): RequestEntity[B] =
+        (to, req) => fa(g(to), req)
     }
 
   def request[U, E, H, UE, Out](

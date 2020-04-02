@@ -65,11 +65,12 @@ trait EndpointsWithCustomErrors
     (valueOpt, xhr) =>
       valueOpt.foreach(value => xhr.setRequestHeader(name, value))
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      override def xmap[From, To](
+  implicit lazy val reqHeadersInvFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      override def xmapPartial[From, To](
           f: js.Function2[From, XMLHttpRequest, Unit],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): js.Function2[To, XMLHttpRequest, Unit] =
         (to, xhr) => f(contramap(to), xhr)
@@ -102,6 +103,20 @@ trait EndpointsWithCustomErrors
     def href(a: A): String
   }
 
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        new Request[B] {
+          def apply(b: B): (XMLHttpRequest, Option[js.Any]) = fa(g(b))
+          def href(b: B): String = fa.href(g(b))
+        }
+    }
+
   /**
     * A function that, given information `A` and an XMLHttpRequest, returns
     * a request entity.
@@ -117,11 +132,12 @@ trait EndpointsWithCustomErrors
     body
   }
 
-  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      override def xmap[From, To](
+  implicit lazy val reqEntityInvFunctor
+      : PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[From, To](
           f: js.Function2[From, XMLHttpRequest, js.Any],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): js.Function2[To, XMLHttpRequest, js.Any] =
         (to, xhr) => f(contramap(to), xhr)
@@ -178,6 +194,17 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Throwable, A]]
 
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        mapResponseEntity(fa)(f)
+    }
+
   private[xhr] def mapResponseEntity[A, B](
       entity: ResponseEntity[A]
   )(f: A => B): ResponseEntity[B] =
@@ -216,15 +243,14 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
-        headers => fa(headers).flatMap(f)
+        headers => fa(headers).map(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())

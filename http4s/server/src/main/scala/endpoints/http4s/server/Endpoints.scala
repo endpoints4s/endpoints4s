@@ -5,7 +5,6 @@ import cats.implicits._
 import endpoints.algebra.Documentation
 import endpoints.{
   Invalid,
-  InvariantFunctor,
   PartialInvariantFunctor,
   Semigroupal,
   Tupler,
@@ -154,13 +153,26 @@ trait EndpointsWithCustomErrors
         case h if h.name.value == name => h.value
       })
 
-  /**
-    * RESPONSES
-    */
+  // RESPONSES
   implicit lazy val responseInvFunctor: endpoints.InvariantFunctor[Response] =
     new endpoints.InvariantFunctor[Response] {
-      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+      def xmap[A, B](
+          fa: Response[A],
+          f: A => B,
+          g: B => A
+      ): Response[B] =
         fa compose g
+    }
+
+  implicit def responseEntityInvariantFunctor
+      : endpoints.InvariantFunctor[ResponseEntity] =
+    new endpoints.InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        fa.contramap(g)
     }
 
   def response[A, B, R](
@@ -204,11 +216,11 @@ trait EndpointsWithCustomErrors
     }
 
   implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+      : endpoints.InvariantFunctor[ResponseHeaders] =
+    new endpoints.InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
         fa compose g
@@ -238,9 +250,24 @@ trait EndpointsWithCustomErrors
   ): Endpoint[A, B] =
     Endpoint(request, response)
 
-  /**
-    * REQUESTS
-    */
+  // REQUESTS
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        Function.unlift(http4sRequest =>
+          fa.lift(http4sRequest)
+            .map(_.map(_.flatMap(f(_) match {
+              case Valid(value)     => Right(value)
+              case invalid: Invalid => Left(handleClientErrors(invalid))
+            })))
+        )
+    }
+
   def emptyRequest: RequestEntity[Unit] = _ => Effect.pure(Right(()))
 
   def textRequest: RequestEntity[String] =
@@ -288,25 +315,30 @@ trait EndpointsWithCustomErrors
       } else None
     }
 
-  implicit def reqEntityInvFunctor: endpoints.InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      def xmap[From, To](
+  implicit def reqEntityInvFunctor
+      : endpoints.PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[From, To](
           f: RequestEntity[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): RequestEntity[To] =
-        body => f(body).map(_.map(map))
+        body =>
+          f(body).map(_.flatMap(map(_) match {
+            case Valid(value)     => Right(value)
+            case invalid: Invalid => Left(handleClientErrors(invalid))
+          }))
     }
 
   implicit def reqHeadersInvFunctor
-      : endpoints.InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      def xmap[From, To](
+      : endpoints.PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[From, To](
           f: RequestHeaders[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): RequestHeaders[To] =
-        headers => f(headers).map(map)
+        headers => f(headers).flatMap(map)
     }
 
   implicit def reqHeadersSemigroupal: endpoints.Semigroupal[RequestHeaders] =

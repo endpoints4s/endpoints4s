@@ -73,13 +73,14 @@ trait EndpointsWithCustomErrors[R[_]]
     case (None, request)        => request
   }
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      override def xmap[From, To](
-          f: (From, SttpRequest) => SttpRequest,
-          map: From => To,
+  implicit lazy val reqHeadersInvFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      override def xmapPartial[From, To](
+          f: RequestHeaders[From],
+          map: From => Validated[To],
           contramap: To => From
-      ): (To, SttpRequest) => SttpRequest =
+      ): RequestHeaders[To] =
         (to, request) => f(contramap(to), request)
     }
 
@@ -102,6 +103,17 @@ trait EndpointsWithCustomErrors[R[_]]
     */
   type Request[A] = A => SttpRequest
 
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        fa compose g
+    }
+
   /**
     * A function that, given an `A` information and a `sttp.Request`, eventually returns a `sttp.Request`
     */
@@ -115,13 +127,13 @@ trait EndpointsWithCustomErrors[R[_]]
     case (bodyValue, request) => request.body(bodyValue)
   }
 
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      override def xmap[From, To](
-          f: (From, SttpRequest) => SttpRequest,
-          map: From => To,
+  implicit def reqEntityInvFunctor: PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      override def xmapPartial[From, To](
+          f: RequestEntity[From],
+          map: From => Validated[To],
           contramap: To => From
-      ): (To, SttpRequest) => SttpRequest =
+      ): RequestEntity[To] =
         (to, req) => f(contramap(to), req)
     }
 
@@ -169,6 +181,17 @@ trait EndpointsWithCustomErrors[R[_]]
     def decodeEntity(response: sttp.Response[String]): R[A]
   }
 
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        mapResponseEntity(fa)(f)
+    }
+
   private[sttp] def mapResponseEntity[A, B](
       entity: ResponseEntity[A]
   )(f: A => B): ResponseEntity[B] =
@@ -209,15 +232,14 @@ trait EndpointsWithCustomErrors[R[_]]
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
-        headers => fa(headers).flatMap(f)
+        headers => fa(headers).map(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())

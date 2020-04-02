@@ -52,15 +52,13 @@ trait EndpointsWithCustomErrors
   type RequestHeaders[A] = (A, List[HttpHeader]) => List[HttpHeader]
 
   implicit lazy val reqHeadersInvFunctor
-      : endpoints.InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      override def xmap[From, To](
-          f: (From, List[HttpHeader]) => List[HttpHeader],
-          map: From => To,
-          contramap: To => From
-      ): (To, List[HttpHeader]) => List[HttpHeader] = { (to, headers) =>
-        f(contramap(to), headers)
-      }
+      : PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[A, B](
+          fa: RequestHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): RequestHeaders[B] = (to, headers) => fa(g(to), headers)
     }
 
   implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
@@ -108,18 +106,27 @@ trait EndpointsWithCustomErrors
 
   type Request[A] = A => Future[HttpResponse]
 
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        fa compose g
+    }
+
   type RequestEntity[A] = (A, HttpRequest) => HttpRequest
 
   implicit lazy val reqEntityInvFunctor
-      : endpoints.InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      override def xmap[From, To](
-          f: (From, HttpRequest) => HttpRequest,
-          map: From => To,
-          contramap: To => From
-      ): (To, HttpRequest) => HttpRequest = { (to, req) =>
-        f(contramap(to), req)
-      }
+      : PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[A, B](
+          f: RequestEntity[A],
+          map: A => Validated[B],
+          contramap: B => A
+      ): RequestEntity[B] = (to, req) => f(contramap(to), req)
     }
 
   lazy val emptyRequest: RequestEntity[Unit] = (_, req) => req
@@ -163,6 +170,17 @@ trait EndpointsWithCustomErrors
     }
 
   type ResponseEntity[A] = HttpEntity => Future[Either[Throwable, A]]
+
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        httpEntity => fa(httpEntity).map(_.map(f))
+    }
 
   private[client] def mapResponseEntity[A, B](
       entity: ResponseEntity[A]
@@ -209,15 +227,14 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvFunctor: InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
-        headers => fa(headers).flatMap(f)
+        headers => fa(headers).map(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
