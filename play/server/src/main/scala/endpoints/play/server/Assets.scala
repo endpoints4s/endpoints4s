@@ -70,7 +70,11 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       throw new Exception(s"No digest for asset $rawPath")
     )
     val assetPath =
-      AssetPath(path.fold(Seq.empty[String])(_.split("/")), digest, name)
+      AssetPath(
+        path.fold(Seq.empty[String])(_.split("/").toIndexedSeq),
+        digest,
+        name
+      )
     AssetRequest(
       assetPath,
       isGzipSupported = false
