@@ -13,7 +13,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * [[requestHeader]], [[optRequestHeader]], or [[emptyRequestHeaders]].
     *
     * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *        and [[InvariantFunctorSyntax]] classes.
+    *        and [[PartialInvariantFunctorSyntax]] classes.
     * @group types */
   type RequestHeaders[A]
 
@@ -50,24 +50,31 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Provides `++` operation.
     * @see [[SemigroupalSyntax]] */
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
+  implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders]
 
-  /** Provides `xmap` operation.
-    * @see [[InvariantFunctorSyntax]] */
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders]
 
   /** Information carried by a whole request (headers and entity)
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
     * @group types */
   type Request[A]
 
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request]
+
   /** Information carried by request entity
-    * @note  This type has implicit methods provided by the [[InvariantFunctorSyntax]] class.
+    * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
     * @group types */
   type RequestEntity[A]
 
-  /** Provides `xmap` operation.
-    * @see [[InvariantFunctorSyntax]] */
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity]
 
   /**
     * Empty request -- request without a body.

@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import java.util.UUID
-
 import endpoints.{Invalid, Valid, Validated}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -100,7 +98,7 @@ trait JsonSchemasOptionalFieldsTest
     val decoded = decodeJson(schema, json)
     decoded match {
       case Valid(n)        => assert(n == 1)
-      case Invalid(errors) => fail(errors.toString)
+      case Invalid(errors) => fail(errors.toString())
     }
     val encoded = encodeJson(schema, 1)
     assert(encoded == Json.obj("relevant" -> Json.num(1)))

@@ -72,17 +72,18 @@ trait EndpointsWithCustomErrors
     case (None, req)        => req
   }
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      override def xmap[From, To](
-          f: (From, WSRequest) => WSRequest,
-          map: From => To,
-          contramap: To => From
-      ): (To, WSRequest) => WSRequest =
-        (to, req) => f(contramap(to), req)
+  implicit lazy val requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[A, B](
+          fa: RequestHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): RequestHeaders[B] =
+        (b, req) => fa(g(b), req)
     }
 
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       override def product[A, B](
           fa: (A, WSRequest) => WSRequest,
@@ -99,8 +100,19 @@ trait EndpointsWithCustomErrors
     */
   type Request[A] = A => Future[WSResponse]
 
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        fa compose g
+    }
+
   /**
-    * A function that, given an `A` information and a `WSRequest`, eventually returns a `WSResponse`
+    * A function that, given an `A` information and a `WSRequest`, returns a `WSRequest` with a body correctly set
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
@@ -111,14 +123,15 @@ trait EndpointsWithCustomErrors
   lazy val textRequest: (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
-  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      override def xmap[From, To](
-          f: (From, WSRequest) => WSRequest,
-          map: From => To,
-          contramap: To => From
-      ): (To, WSRequest) => WSRequest =
-        (to, req) => f(contramap(to), req)
+  implicit lazy val requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[A, B](
+          fa: RequestEntity[A],
+          f: A => Validated[B],
+          g: B => A
+      ): RequestEntity[B] =
+        (b, req) => fa(g(b), req)
     }
 
   def request[A, B, C, AB, Out](
@@ -148,7 +161,7 @@ trait EndpointsWithCustomErrors
       Map[String, scala.collection.Seq[String]]
   ) => Option[ResponseEntity[A]]
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
         (status, headers) => fa(status, headers).map(mapResponseEntity(_)(f))
@@ -156,10 +169,21 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = WSResponse => Either[Throwable, A]
 
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        mapResponseEntity(fa)(f)
+    }
+
   private[client] def mapResponseEntity[A, B](
       entity: ResponseEntity[A]
   )(f: A => B): ResponseEntity[B] =
-    mapPartialResponseEntity(entity)(a => Right(f(a)))
+    wsResp => entity(wsResp).map(f)
 
   private[client] def mapPartialResponseEntity[A, B](
       entity: ResponseEntity[A]
@@ -184,15 +208,15 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
-        headers => fa(headers).flatMap(f)
+        headers => fa(headers).map(f)
     }
 
   def emptyResponseHeaders: ResponseHeaders[Unit] = _ => Valid(())
