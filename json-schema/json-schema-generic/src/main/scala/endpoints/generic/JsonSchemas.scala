@@ -184,13 +184,11 @@ trait JsonSchemas extends algebra.JsonSchemas {
         docAnns: Annotations.Aux[docs, A, D],
         titleOpt: GenericTitle[A],
         record: DocumentedGenericRecord[R, D],
-        name: GenericSchemaName[A]
+        nameOpt: GenericSchemaName[A]
     ): GenericRecord[A] = {
-      val recordA = record
-        .record(docAnns())
-        .xmap[A](gen.from)(gen.to)
-        .named(name.value)
-      val docA = docOpt.description.fold(recordA)(recordA.withDescription(_))
+      val recordA = record.record(docAnns()).xmap[A](gen.from)(gen.to)
+      val namedA = nameOpt.value.fold(recordA)(recordA.named(_))
+      val docA = docOpt.description.fold(namedA)(namedA.withDescription(_))
       val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
       new GenericRecord[A](titleA)
     }
@@ -201,14 +199,13 @@ trait JsonSchemas extends algebra.JsonSchemas {
         docOpt: GenericDescription[A],
         titleOpt: GenericTitle[A],
         tagged: GenericTagged[R],
-        name: GenericSchemaName[A],
+        nameOpt: GenericSchemaName[A],
         discriminator: GenericDiscriminatorName[A]
     ): GenericTagged[A] = {
-      val taggedA = tagged.jsonSchema
-        .xmap[A](gen.from)(gen.to)
-        .named(name.value)
-        .withDiscriminator(discriminator.name)
-      val docA = docOpt.description.fold(taggedA)(taggedA.withDescription(_))
+      val taggedA = tagged.jsonSchema.xmap[A](gen.from)(gen.to)
+      val namedA = nameOpt.value.fold(taggedA)(taggedA.named(_))
+      val discA = namedA.withDiscriminator(discriminator.name)
+      val docA = docOpt.description.fold(discA)(discA.withDescription(_))
       val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
       new GenericTagged[A](titleA)
     }
@@ -237,20 +234,25 @@ trait JsonSchemas extends algebra.JsonSchemas {
   /** Internal machinery for deriving the schema name of a type */
   trait GenericSchemaNames {
 
-    class GenericSchemaName[A](val value: String)
+    class GenericSchemaName[A](val value: Option[String])
 
     object GenericSchemaName extends GenericSchemaNameLowPriority {
-      implicit def annotated[A](
+      implicit def annotatedName[A](
           implicit ann: Annotation[name, A]
       ): GenericSchemaName[A] =
-        new GenericSchemaName(ann().value)
+        new GenericSchemaName(Some(ann().value))
+
+      implicit def annotatedUnnamed[A](
+          implicit ann: Annotation[unnamed, A]
+      ): GenericSchemaName[A] =
+        new GenericSchemaName(None)
     }
 
     trait GenericSchemaNameLowPriority {
       implicit def fromClassTag[A](
           implicit ct: ClassTag[A]
       ): GenericSchemaName[A] =
-        new GenericSchemaName(classTagToSchemaName(ct))
+        new GenericSchemaName(Some(classTagToSchemaName(ct)))
     }
 
   }

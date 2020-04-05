@@ -227,7 +227,8 @@ type. The rules for deriving the schema are the following:
   annotation, otherwise the `defaultDiscriminatorName` value is used,
 - the schema is named by the `@name` annotation, if present, or by invoking the
   `classTagToSchemaName` operation with the `ClassTag` of the type for which the schema
-  is derived.
+  is derived. If you wish to avoid naming the schema, use the `@unnamed` annotation
+  (unnamed schemas get inlined in their OpenAPI documentation).
 - the schema title is set with the `@title` annotation, if present
 
 Here is an example that illustrates how to configure the generic schema derivation process:
