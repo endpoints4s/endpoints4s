@@ -33,6 +33,10 @@ See the [open issues](https://github.com/julienrf/endpoints/issues).
 
 [Bestmile](https://bestmile.com) supports engineering work on the project.
 
+## Support
+
+[JetBrains](https://www.jetbrains.com/?from=scala-endpoints) offers one Open Source license.
+
 ## License
 
 This content is released under the [MIT License](http://opensource.org/licenses/mit-license.php).
