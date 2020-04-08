@@ -108,10 +108,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     def choiceTagged[A, B](taggedA: String, taggedB: String): String =
       s"$taggedA|$taggedB"
 
+    // Note that this one is not used in the generic versions, so it doesn't matter
     def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
         taggedA: String,
         taggedB: String,
-    ): Tagged[C] = s"$taggedA||$taggedB" //TODO: not sure what is needed here
+    ): Tagged[C] = ???
 
     def zipRecords[A, B](recordA: String, recordB: String)(
         implicit t: Tupler[A, B]
