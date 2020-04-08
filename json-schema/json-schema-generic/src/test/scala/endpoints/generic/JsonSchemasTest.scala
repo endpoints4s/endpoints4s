@@ -4,6 +4,8 @@ package generic
 import scala.collection.compat._
 import org.scalatest.freespec.AnyFreeSpec
 
+import scala.reflect.ClassTag
+
 class JsonSchemasTest extends AnyFreeSpec {
 
   trait GenericSchemas extends JsonSchemas {
@@ -105,6 +107,11 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     def choiceTagged[A, B](taggedA: String, taggedB: String): String =
       s"$taggedA|$taggedB"
+
+    def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
+        taggedA: String,
+        taggedB: String,
+    ): Tagged[C] = s"$taggedA||$taggedB" //TODO: not sure what is needed here
 
     def zipRecords[A, B](recordA: String, recordB: String)(
         implicit t: Tupler[A, B]

@@ -9,9 +9,11 @@ import endpoints.{
   algebra
 }
 import endpoints.algebra.{Codec, Decoder, Encoder}
+import ujson.{Obj, Value}
 
 import scala.collection.compat._
 import scala.collection.mutable
+import scala.reflect.ClassTag
 
 /**
   * @group interpreters
@@ -66,7 +68,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   type Enum[A] = JsonSchema[A]
 
   implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+    : PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -218,6 +220,30 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       def tagAndObj(value: Either[A, B]) = value match {
         case Left(a)  => taggedA.tagAndObj(a)
         case Right(b) => taggedB.tagAndObj(b)
+      }
+    }
+  }
+
+  def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
+      taggedA: Tagged[A],
+      taggedB: Tagged[B],
+  ): Tagged[C] = {
+    assert(taggedA.discriminator == taggedB.discriminator)
+    new Tagged[C](taggedA.discriminator) {
+      override def findDecoder(tag: String): Option[Decoder[Value, C]] = {
+        val a: Option[Decoder[Value, C]] = taggedA.findDecoder(tag)
+        val b: Option[Decoder[Value, C]] = taggedB.findDecoder(tag)
+        a orElse b
+      }
+
+      override def tagAndObj(c: C): (String, Obj) = c match {
+        case b: B => taggedB.tagAndObj(b)
+        case a: A => taggedA.tagAndObj(a)
+        case any =>
+          throw new IllegalStateException(
+            s"Could not match: A = ${implicitly[ClassTag[A]]}, B = ${implicitly[
+              ClassTag[B]]}, C = ${any.getClass}"
+          )
       }
     }
   }

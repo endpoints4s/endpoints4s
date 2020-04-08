@@ -10,6 +10,7 @@ import endpoints.{
 }
 
 import scala.collection.compat._
+import scala.reflect.ClassTag
 import scala.util.control.Exception
 
 /**
@@ -280,6 +281,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       taggedB: Tagged[B]
   ): Tagged[Either[A, B]]
 
+  /** The JSON schema of a coproduct that share the same parent type and thus can be widened to that parent type */
+  def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
+      taggedA: Tagged[A],
+      taggedB: Tagged[B],
+  ): Tagged[C]
+
   /** The JSON schema of a record merging the fields of the two given records */
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
       implicit t: Tupler[A, B]
@@ -470,6 +477,11 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] =
       choiceTagged(taggedA, taggedB)
+
+    def orElseMerge[B <: C, C >: A](
+        taggedB: Tagged[B]
+    )(implicit cta: ClassTag[A], ctb: ClassTag[B], isSub: A <:< C): Tagged[C] =
+      orElseMergeTagged(taggedA, taggedB)
 
     /**
       * Give a name to the schema.

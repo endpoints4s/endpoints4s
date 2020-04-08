@@ -5,6 +5,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 import scala.collection.compat._
+import scala.reflect.ClassTag
 
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces Play JSON `play.api.libs.json.Reads`
@@ -30,7 +31,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+    : PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -38,12 +39,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           g: B => A
       ): JsonSchema[B] =
         JsonSchema(
-          fa.reads.flatMap(a =>
-            f(a).fold(
-              Reads.pure(_),
-              errors => Reads.failed(errors.mkString(". "))
-            )
-          ),
+          fa.reads.flatMap(
+            a =>
+              f(a).fold(
+                Reads.pure(_),
+                errors => Reads.failed(errors.mkString(". "))
+            )),
           fa.writes.contramap(g)
         )
       override def xmap[A, B](
@@ -76,12 +77,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           g: B => A
       ): Record[B] =
         Record(
-          fa.reads.flatMap(a =>
-            f(a).fold(
-              Reads.pure(_),
-              errors => Reads.failed(errors.mkString(". "))
-            )
-          ),
+          fa.reads.flatMap(
+            a =>
+              f(a).fold(
+                Reads.pure(_),
+                errors => Reads.failed(errors.mkString(". "))
+            )),
           fa.writes.contramap(g)
         )
       override def xmap[A, B](fa: Record[A], f: A => B, g: B => A): Record[B] =
@@ -332,12 +333,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           def findReads(tag: String): Option[Reads[B]] =
             fa.findReads(tag)
               .map(
-                _.flatMap(a =>
-                  f(a).fold(
-                    Reads.pure(_),
-                    errors => Reads.failed(errors.mkString(". "))
-                  )
-                )
+                _.flatMap(
+                  a =>
+                    f(a).fold(
+                      Reads.pure(_),
+                      errors => Reads.failed(errors.mkString(". "))
+                  ))
               )
         }
       override def xmap[A, B](fa: Tagged[A], f: A => B, g: B => A): Tagged[B] =
@@ -378,6 +379,28 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     def findReads(tagName: String): Option[Reads[Either[A, B]]] =
       taggedA.findReads(tagName).map(_.map[Either[A, B]](Left(_))) orElse
         taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
+  }
+
+  def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
+      taggedA: Tagged[A],
+      taggedB: Tagged[B],
+  ): Tagged[C] = new Tagged[C] {
+    override def tagAndJson(c: C): (String, JsObject) =
+      c match {
+        case b: B => taggedB.tagAndJson(b)
+        case a: A => taggedA.tagAndJson(a)
+        case any =>
+          val cta = implicitly[ClassTag[A]]
+          val ctb = implicitly[ClassTag[B]]
+          throw new IllegalStateException(s"Could not match: A = $cta, B = $ctb, C = ${any.getClass}")
+      }
+
+    override def findReads(tagName: String): Option[Reads[C]] = {
+      // Safe cast, since C is always a super type of both A and B. However Reads is invariant, so doesn't accept it
+      val a = taggedA.findReads(tagName).asInstanceOf[Option[Reads[C]]]
+      val b = taggedB.findReads(tagName).asInstanceOf[Option[Reads[C]]]
+      a.orElse(b)
+    }
   }
 
 }
