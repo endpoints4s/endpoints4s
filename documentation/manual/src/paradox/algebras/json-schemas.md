@@ -71,12 +71,18 @@ The result of the `tagged` operation is a `Tagged[A]` schema. This subtype of `J
 schema that accepts one of several alternative schemas. It provides the `orElse` operation.
 
 The `orElse` operation turns the `Tagged[Circle]` and `Tagged[Rectangle]` values into
-a `Record[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
+a `Tagged[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
 `Record[Shape]` by using `xmap`.
 
 By default, the discriminator field is named `type`, but you can use another field name either by
 overriding the `defaultDiscriminatorName` method of the algebra, or by wrapping the `Tagged` schema
 in a `withDiscriminator` call specifying the field name to use.
+
+Instead of using `orElse` you can also make use of the `orElseMerge` operation. This is similar to
+`orElse`, but requires alternatives to share a parent. In this case this requirement is met since both
+`Circle` and `Rectangle` extends `Shape`. The `orElse` operation turns the `Tagged[Circle]` and
+`Tagged[Rectangle]` values into a `Tagged[Shape]` without any mapping. Note, however, that `orElseMerge`
+uses `ClassTag` under the hood, and thus also suffers from the same limitations.
 
 ### Refining schemas
 
