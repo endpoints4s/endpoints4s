@@ -59,6 +59,38 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "sealed trait tagged merge" in {
+    val barJson =
+      Json.obj(
+        "type" -> Json.fromString("Bar"),
+        "s" -> Json.fromString("foo")
+      )
+    val bar = Bar("foo")
+    assert(Foo.alternativeSchemaForMerge.decoder.decodeJson(barJson).exists(_ == bar))
+    assert(Foo.alternativeSchemaForMerge.encoder.apply(bar) == barJson)
+
+    assert(
+      Foo.alternativeSchemaForMerge.decoder
+        .decodeJson(Json.obj())
+        .swap
+        .exists(
+          _ == DecodingFailure("Missing type discriminator field 'type'!", Nil)
+        )
+    )
+    val wrongJson = Json.obj(
+      "type" -> Json.fromString("Unknown"),
+      "s" -> Json.fromString("foo")
+    )
+    assert(
+      Foo.alternativeSchemaForMerge.decoder
+        .decodeJson(wrongJson)
+        .swap
+        .exists(
+          _ == DecodingFailure("No decoder for discriminator 'Unknown'!", Nil)
+        )
+    )
+  }
+
   "recursive type" in {
     val json = Json.obj("next" -> Json.obj("next" -> Json.obj()))
     val rec = JsonSchemasCodec.Recursive(
