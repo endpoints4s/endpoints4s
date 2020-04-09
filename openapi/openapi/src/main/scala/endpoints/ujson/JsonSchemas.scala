@@ -9,11 +9,9 @@ import endpoints.{
   algebra
 }
 import endpoints.algebra.{Codec, Decoder, Encoder}
-import ujson.{Obj, Value}
 
 import scala.collection.compat._
 import scala.collection.mutable
-import scala.reflect.ClassTag
 
 /**
   * @group interpreters
@@ -68,7 +66,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   type Enum[A] = JsonSchema[A]
 
   implicit def jsonSchemaPartialInvFunctor
-    : PartialInvariantFunctor[JsonSchema] =
+      : PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],

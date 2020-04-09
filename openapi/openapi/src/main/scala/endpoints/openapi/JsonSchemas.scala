@@ -1,16 +1,14 @@
 package endpoints.openapi
 
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
-import endpoints.algebra.{Decoder, Documentation}
+import endpoints.algebra.Documentation
 import endpoints.openapi.model.Schema
 import endpoints.openapi.model.Schema.{
   DiscriminatedAlternatives,
   EnumeratedAlternatives
 }
-import ujson.{Obj, Value}
 
 import scala.collection.compat._
-import scala.reflect.ClassTag
 
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
@@ -135,7 +133,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   implicit def jsonSchemaPartialInvFunctor
-    : PartialInvariantFunctor[JsonSchema] =
+      : PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -724,7 +722,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         Schema.Array(
           Right(
             elementTypes.map(elementType =>
-              toSchema(elementType, coprodBase, referencedSchemas))
+              toSchema(elementType, coprodBase, referencedSchemas)
+            )
           ),
           description,
           example,
@@ -772,7 +771,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         toSchema(lzy.value, coprodBase, referencedSchemas)
       case OneOf(alternatives, description, example, title) =>
         val alternativeSchemas = alternatives.map(alternative =>
-          toSchema(alternative, coprodBase, referencedSchemas))
+          toSchema(alternative, coprodBase, referencedSchemas)
+        )
         Schema.OneOf(
           EnumeratedAlternatives(alternativeSchemas),
           description,
@@ -788,14 +788,14 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       referencedSchemas: Set[String]
   ): Schema = {
     val fieldsSchema = record.fields
-      .map(
-        f =>
-          Schema.Property(
-            f.name,
-            toSchema(f.tpe, None, referencedSchemas),
-            !f.isOptional,
-            f.documentation
-        ))
+      .map(f =>
+        Schema.Property(
+          f.name,
+          toSchema(f.tpe, None, referencedSchemas),
+          !f.isOptional,
+          f.documentation
+        )
+      )
 
     val additionalProperties =
       record.additionalProperties.map(toSchema(_, None, referencedSchemas))

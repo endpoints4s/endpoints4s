@@ -5,7 +5,6 @@ import endpoints.algebra.circe.CirceCodec
 import io.circe._
 
 import scala.collection.compat._
-import scala.reflect.ClassTag
 
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
@@ -18,7 +17,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   implicit def jsonSchemaPartialInvFunctor
-    : PartialInvariantFunctor[JsonSchema] =
+      : PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -212,9 +211,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[A] =
     Record(
       io.circe.Encoder.AsObject.instance[A](a =>
-        JsonObject.singleton(name, tpe.encoder.apply(a))),
+        JsonObject.singleton(name, tpe.encoder.apply(a))
+      ),
       io.circe.Decoder.instance[A](cursor =>
-        tpe.decoder.tryDecode(cursor.downField(name)))
+        tpe.decoder.tryDecode(cursor.downField(name))
+      )
     )
 
   def optField[A](name: String, documentation: Option[String] = None)(
@@ -222,12 +223,13 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[Option[A]] =
     Record(
       io.circe.Encoder.AsObject.instance[Option[A]](maybeA =>
-        JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))),
-      io.circe.Decoder.instance[Option[A]](
-        cursor =>
-          io.circe.Decoder
-            .decodeOption(tpe.decoder)
-            .tryDecode(cursor.downField(name)))
+        JsonObject.fromIterable(maybeA.map(a => name -> tpe.encoder.apply(a)))
+      ),
+      io.circe.Decoder.instance[Option[A]](cursor =>
+        io.circe.Decoder
+          .decodeOption(tpe.decoder)
+          .tryDecode(cursor.downField(name))
+      )
     )
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =
