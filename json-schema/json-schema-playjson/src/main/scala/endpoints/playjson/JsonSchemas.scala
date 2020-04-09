@@ -381,26 +381,4 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
   }
 
-  def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
-      taggedA: Tagged[A],
-      taggedB: Tagged[B],
-  ): Tagged[C] = new Tagged[C] {
-    override def tagAndJson(c: C): (String, JsObject) =
-      c match {
-        case b: B => taggedB.tagAndJson(b)
-        case a: A => taggedA.tagAndJson(a)
-        case any =>
-          val cta = implicitly[ClassTag[A]]
-          val ctb = implicitly[ClassTag[B]]
-          throw new IllegalStateException(s"Could not match: A = $cta, B = $ctb, C = ${any.getClass}")
-      }
-
-    override def findReads(tagName: String): Option[Reads[C]] = {
-      // Safe cast, since C is always a super type of both A and B. However Reads is invariant, so doesn't accept it
-      val a = taggedA.findReads(tagName).asInstanceOf[Option[Reads[C]]]
-      val b = taggedB.findReads(tagName).asInstanceOf[Option[Reads[C]]]
-      a.orElse(b)
-    }
-  }
-
 }

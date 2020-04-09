@@ -285,7 +285,18 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
       taggedA: Tagged[A],
       taggedB: Tagged[B],
-  ): Tagged[C]
+  ): Tagged[C] = choiceTagged(taggedA, taggedB).xmap {
+    case Left(a) => (a: C)
+    case Right(b) => (b: C)
+  } {
+    case b: B => Right(b)
+    case a: A => Left(a)
+    case any =>
+      throw new IllegalStateException(
+        s"Could not match: A = ${implicitly[ClassTag[A]]}, B = ${implicitly[
+          ClassTag[B]]}, C = ${any.getClass}"
+      )
+  }
 
   /** The JSON schema of a record merging the fields of the two given records */
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(

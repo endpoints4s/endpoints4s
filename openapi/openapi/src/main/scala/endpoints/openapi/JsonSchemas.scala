@@ -266,34 +266,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       DocumentedCoProd(taggedA.docs.alternatives ++ taggedB.docs.alternatives)
     )
 
-  def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
-      taggedA: Tagged[A],
-      taggedB: Tagged[B],
-  ): Tagged[C] = {
-    new Tagged[C](
-      new ujsonSchemas.Tagged[C](taggedA.ujsonSchema.discriminator) {
-        override def findDecoder(tag: String): Option[Decoder[Value, C]] = {
-          val a: Option[Decoder[Value, C]] =
-            taggedA.ujsonSchema.findDecoder(tag)
-          val b: Option[Decoder[Value, C]] =
-            taggedB.ujsonSchema.findDecoder(tag)
-          a orElse b
-        }
-
-        override def tagAndObj(c: C): (String, Obj) = c match {
-          case b: B => taggedB.ujsonSchema.tagAndObj(b)
-          case a: A => taggedA.ujsonSchema.tagAndObj(a)
-          case any =>
-            throw new IllegalStateException(
-              s"Could not match: A = ${implicitly[ClassTag[A]]}, B = ${implicitly[
-                ClassTag[B]]}, C = ${any.getClass}"
-            )
-        }
-      },
-      DocumentedCoProd(taggedA.docs.alternatives ++ taggedB.docs.alternatives),
-    )
-  }
-
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
       implicit t: Tupler[A, B]
   ): Record[t.Out] =
