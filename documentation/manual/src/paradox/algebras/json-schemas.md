@@ -72,7 +72,7 @@ schema that accepts one of several alternative schemas. It provides the `orElse`
 
 The `orElse` operation turns the `Tagged[Circle]` and `Tagged[Rectangle]` values into
 a `Tagged[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
-`Record[Shape]` by using `xmap`.
+`Tagged[Shape]` by using `xmap`.
 
 By default, the discriminator field is named `type`, but you can use another field name either by
 overriding the `defaultDiscriminatorName` method of the algebra, or by wrapping the `Tagged` schema
@@ -80,13 +80,13 @@ in a `withDiscriminator` call specifying the field name to use.
 
 Instead of using `orElse` you can also make use of the `orElseMerge` operation. This is similar to
 `orElse`, but requires alternatives to share a parent. In this case this requirement is met since both
-`Circle` and `Rectangle` extends `Shape`. The `orElseMerge` operation turns the `Tagged[Circle]` and
+`Circle` and `Rectangle` extend `Shape`. The `orElseMerge` operation turns the `Tagged[Circle]` and
 `Tagged[Rectangle]` values into a `Tagged[Shape]` without any mapping. Note, however, that `orElseMerge`
 uses `ClassTag` under the hood, and thus requires both alternatives to have distinct types after erasure.
 Our example is valid because `Rectangle` and `Shape` are distinct classes, but consider a type
 `Resource[A]`: then the types `Resource[Rectangle]` and `Resource[Circle]` have the same erased type
 (`Resource[_]`), making them indistinguishable by the `orElseMerge` operation. See also the documentation
-of [`isInstanceOf`](https://www.scala-lang.org/api/current/scala/Any.html#asInstanceOf[T0]:T0).
+of [`isInstanceOf`](https://www.scala-lang.org/api/current/scala/Any.html#isInstanceOf[T0]:T0).
 
 ### Refining schemas
 
