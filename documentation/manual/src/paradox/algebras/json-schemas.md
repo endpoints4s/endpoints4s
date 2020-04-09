@@ -80,9 +80,13 @@ in a `withDiscriminator` call specifying the field name to use.
 
 Instead of using `orElse` you can also make use of the `orElseMerge` operation. This is similar to
 `orElse`, but requires alternatives to share a parent. In this case this requirement is met since both
-`Circle` and `Rectangle` extends `Shape`. The `orElse` operation turns the `Tagged[Circle]` and
+`Circle` and `Rectangle` extends `Shape`. The `orElseMerge` operation turns the `Tagged[Circle]` and
 `Tagged[Rectangle]` values into a `Tagged[Shape]` without any mapping. Note, however, that `orElseMerge`
-uses `ClassTag` under the hood, and thus also suffers from the same limitations.
+uses `ClassTag` under the hood, and thus requires both alternatives to have distinct types after erasure.
+Our example is valid because `Rectangle` and `Shape` are distinct classes, but consider a type
+`Resource[A]`: then the types `Resource[Rectangle]` and `Resource[Circle]` have the same erased type
+(`Resource[_]`), making them indistinguishable by the `orElseMerge` operation. See also the documentation
+of [`isInstanceOf`](https://www.scala-lang.org/api/current/scala/Any.html#asInstanceOf[T0]:T0).
 
 ### Refining schemas
 
