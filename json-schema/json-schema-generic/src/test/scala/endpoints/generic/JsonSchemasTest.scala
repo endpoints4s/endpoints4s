@@ -4,8 +4,6 @@ package generic
 import scala.collection.compat._
 import org.scalatest.freespec.AnyFreeSpec
 
-import scala.reflect.ClassTag
-
 class JsonSchemasTest extends AnyFreeSpec {
 
   trait GenericSchemas extends JsonSchemas {
