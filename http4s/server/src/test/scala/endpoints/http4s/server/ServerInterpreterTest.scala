@@ -4,23 +4,17 @@ import java.net.ServerSocket
 
 import cats.effect.{ContextShift, IO, Timer}
 import endpoints.{Invalid, Valid}
-import endpoints.algebra.server.{
-  BasicAuthenticationTestSuite,
-  DecodedUrl,
-  EndpointsTestSuite,
-  ChunkedJsonEntitiesTestSuite
-}
+import endpoints.algebra.server.{BasicAuthenticationTestSuite, ChunkedJsonEntitiesTestSuite, DecodedUrl, EndpointsTestSuite}
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
-import akka.stream.scaladsl.Source
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Keep, Sink, Source}
+
 import scala.concurrent.Future
 import akka.actor.ActorSystem
-import fs2.concurrent.Queue
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
@@ -37,15 +31,15 @@ class ServerInterpreterTest
       try socket.getLocalPort
       finally if (socket != null) socket.close()
     }
-    
-    val stream = for {
-      q <- fs2.Stream.eval(Queue.unbounded[IO, Option[Resp]])
-      _ <- fs2.Stream.eval(
-        IO.fromFuture(IO(response.runForeach(r => q.enqueue1(Some(r)))))
-      )
-      _ <- fs2.Stream.eval(q.enqueue1(None))
-      res <- q.dequeue.unNone
-    } yield res
+
+    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    val stream =
+      fs2.Stream.force(IO.delay {
+        val subscriber = response.toMat(Sink.queue[Resp]())(Keep.right).run()
+        val pull = cats.effect.Async.fromFuture(IO.delay(subscriber.pull()))
+        val cancel = IO.delay(subscriber.cancel())
+        fs2.Stream.repeatEval(pull).unNoneTerminate.onFinalize(cancel)
+      })
 
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => stream))
     val httpApp = Router("/" -> service).orNotFound
