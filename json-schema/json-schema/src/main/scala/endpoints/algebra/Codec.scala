@@ -1,6 +1,7 @@
 package endpoints.algebra
 
-import endpoints.Validated
+import java.util.UUID
+import endpoints.{Valid, Invalid, Validated}
 
 /**
   * A way to decode a `From` value into a `To` value.
@@ -22,7 +23,6 @@ object Decoder {
       ab: Decoder[A, B]
   )(bc: Decoder[B, C]): Decoder[A, C] =
     from => ab.decode(from).flatMap(bc.decode)
-
 }
 
 /**
@@ -41,7 +41,6 @@ object Encoder {
       ab: Encoder[A, B]
   )(bc: Encoder[B, C]): Encoder[A, C] =
     from => bc.encode(ab.encode(from))
-
 }
 
 /**
@@ -68,4 +67,40 @@ object Codec {
       Decoder.sequentially(ab)(bc)
     )
 
+  /** Produce a codec that passes values through without touching them */
+  def identity[A]: Codec[A, A] = new Codec[A, A] {
+    def decode(from: A): Validated[A] = Valid(from)
+    def encode(from: A): A = from
+  }
+
+  /** Produce a codec to/from a string. An [[Invalid]] message mentioning the
+    * type name is produced when parsing fails.
+    *
+    * @param type name of the type being decoded
+    * @param parse parsing function to use
+    * @param print printing function to use
+    */
+  def tryParseString[A](
+      `type`: String,
+      parse: String => A,
+      print: A => String = (x: A) => x.toString()
+  ): Codec[String, A] = new Codec[String, A] {
+    def encode(x: A): String = print(x)
+    def decode(str: String): Validated[A] =
+      try { Valid(parse(str)) }
+      catch { case _: Throwable => Invalid(s"Invalid ${`type`} value '$str'") }
+  }
+
+  val uuidCodec: Codec[String, UUID] = tryParseString("UUID", UUID.fromString)
+
+  val intCodec: Codec[String, Int] = tryParseString("integer", _.toInt)
+
+  val longCodec: Codec[String, Long] = tryParseString("integer", _.toLong)
+
+  val doubleCodec: Codec[String, Double] = tryParseString("number", _.toDouble)
+
+  val booleanCodec: Codec[String, Boolean] = tryParseString("boolean", {
+    case "true" | "1"  => true
+    case "false" | "0" => false
+  })
 }
