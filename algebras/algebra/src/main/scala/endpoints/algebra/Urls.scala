@@ -5,11 +5,11 @@ import java.util.UUID
 import endpoints.{
   Invalid,
   PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
   Tupler,
   Valid,
   Validated
 }
+import endpoints.algebra.PartialInvariantFunctorCodecSyntax
 
 import scala.collection.compat.Factory
 import scala.util.{Failure, Success, Try}
@@ -44,7 +44,7 @@ import scala.util.{Failure, Success, Try}
   * @groupdesc operations Operations creating and transforming values
   * @groupprio operations 2
   */
-trait Urls extends PartialInvariantFunctorSyntax {
+trait Urls extends PartialInvariantFunctorCodecSyntax {
 
   /** A query string carrying an `A` information
     *

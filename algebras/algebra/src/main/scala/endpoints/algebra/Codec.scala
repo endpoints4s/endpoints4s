@@ -1,6 +1,6 @@
 package endpoints.algebra
 
-import endpoints.Validated
+import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Validated}
 
 /**
   * A way to decode a `From` value into a `To` value.
@@ -23,6 +23,8 @@ object Decoder {
   )(bc: Decoder[B, C]): Decoder[A, C] =
     from => ab.decode(from).flatMap(bc.decode)
 
+  /** Produce a decoder that just outputs its input value */
+  def identity[A]: Decoder[A, A] = identity[A]
 }
 
 /**
@@ -42,6 +44,8 @@ object Encoder {
   )(bc: Encoder[B, C]): Encoder[A, C] =
     from => bc.encode(ab.encode(from))
 
+  /** Produce an encoder that just outputs its input value */
+  def identity[A]: Encoder[A, A] = identity[A]
 }
 
 /**
@@ -68,4 +72,22 @@ object Codec {
       Decoder.sequentially(ab)(bc)
     )
 
+  /** Produce a codec that passes values through without touching them */
+  def identity[A]: Codec[A, A] =
+    fromEncoderAndDecoder[A, A](Encoder.identity)(Decoder.identity)
+}
+
+trait PartialInvariantFunctorCodecSyntax extends PartialInvariantFunctorSyntax {
+  implicit class PartialInvariantFunctorCodecSyntax[A, F[_]](val fa: F[A])(
+      implicit ev: PartialInvariantFunctor[F]
+  ) {
+
+    /**
+      * Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
+      *
+      * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
+      */
+     def xmapPartialAlong[B](codec: Codec[A, B]): F[B] =
+       ev.xmapPartial[A, B](fa, codec.decode, codec.encode)
+  }
 }
