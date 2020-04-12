@@ -10,7 +10,7 @@ import scala.collection.compat._
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces Play JSON `play.api.libs.json.Reads`
   * and `play.api.libs.json.Writes`.
   */
-trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
+trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {
     def reads: Reads[A]
@@ -107,10 +107,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
-  def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
-  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
-  def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
-
   private def lazySchema[A](
       schema: => JsonSchema[A],
       name: String
@@ -156,66 +152,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       (__ \ name).readNullable(tpe.reads),
       (__ \ name).writeNullable(tpe.writes)
     )
-
-  def withExampleRecord[A](
-      schema: Record[A],
-      example: A
-  ): Record[A] = schema
-
-  def withExampleTagged[A](
-      schema: Tagged[A],
-      example: A
-  ): Tagged[A] = schema
-
-  def withExampleEnum[A](
-      schema: Enum[A],
-      example: A
-  ): Enum[A] = schema
-
-  def withExampleJsonSchema[A](
-      schema: JsonSchema[A],
-      example: A
-  ): JsonSchema[A] = schema
-
-  def withDescriptionRecord[A](
-      schema: Record[A],
-      description: String
-  ): Record[A] = schema
-
-  def withDescriptionTagged[A](
-      schema: Tagged[A],
-      description: String
-  ): Tagged[A] = schema
-
-  def withDescriptionEnum[A](
-      schema: Enum[A],
-      description: String
-  ): Enum[A] = schema
-
-  def withDescriptionJsonSchema[A](
-      schema: JsonSchema[A],
-      description: String
-  ): JsonSchema[A] = schema
-
-  def withTitleRecord[A](
-      schema: Record[A],
-      title: String
-  ): Record[A] = schema
-
-  def withTitleTagged[A](
-      schema: Tagged[A],
-      title: String
-  ): Tagged[A] = schema
-
-  def withTitleEnum[A](
-      schema: Enum[A],
-      title: String
-  ): Enum[A] = schema
-
-  def withTitleJsonSchema[A](
-      schema: JsonSchema[A],
-      title: String
-  ): JsonSchema[A] = schema
 
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],
