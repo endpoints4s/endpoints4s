@@ -94,7 +94,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
   val reqBody1 = textRequest.xmapWithCodec(
-    Codec.tryParseString(
+    Codec.parseStringCatchingExceptions(
       `type` = "date",
       parse = LocalDate.parse(_, dateTimeFormatter),
       print = dateTimeFormatter.format(_)

@@ -67,20 +67,14 @@ object Codec {
       Decoder.sequentially(ab)(bc)
     )
 
-  /** Produce a codec that passes values through without touching them */
-  def identity[A]: Codec[A, A] = new Codec[A, A] {
-    def decode(from: A): Validated[A] = Valid(from)
-    def encode(from: A): A = from
-  }
-
-  /** Produce a codec to/from a string. An [[Invalid]] message mentioning the
-    * type name is produced when parsing fails.
+  /** Produce a codec to/from a string. If the parsing function fails, the
+    * decoding output is an [[Invalid]] with a message mentioning the type name.
     *
     * @param type name of the type being decoded
-    * @param parse parsing function to use
-    * @param print printing function to use
+    * @param parse parsing function to use, with exceptions turned into [[Invalid]]
+    * @param print printing function to use, not supposed to throw exceptions
     */
-  def tryParseString[A](
+  def parseStringCatchingExceptions[A](
       `type`: String,
       parse: String => A,
       print: A => String = (x: A) => x.toString()
@@ -91,16 +85,21 @@ object Codec {
       catch { case _: Throwable => Invalid(s"Invalid ${`type`} value '$str'") }
   }
 
-  val uuidCodec: Codec[String, UUID] = tryParseString("UUID", UUID.fromString)
+  val uuidCodec: Codec[String, UUID] =
+    parseStringCatchingExceptions("UUID", UUID.fromString)
 
-  val intCodec: Codec[String, Int] = tryParseString("integer", _.toInt)
+  val intCodec: Codec[String, Int] =
+    parseStringCatchingExceptions("integer", _.toInt)
 
-  val longCodec: Codec[String, Long] = tryParseString("integer", _.toLong)
+  val longCodec: Codec[String, Long] =
+    parseStringCatchingExceptions("integer", _.toLong)
 
-  val doubleCodec: Codec[String, Double] = tryParseString("number", _.toDouble)
+  val doubleCodec: Codec[String, Double] =
+    parseStringCatchingExceptions("number", _.toDouble)
 
-  val booleanCodec: Codec[String, Boolean] = tryParseString("boolean", {
-    case "true" | "1"  => true
-    case "false" | "0" => false
-  })
+  val booleanCodec: Codec[String, Boolean] =
+    parseStringCatchingExceptions("boolean", {
+      case "true" | "1"  => true
+      case "false" | "0" => false
+    })
 }
