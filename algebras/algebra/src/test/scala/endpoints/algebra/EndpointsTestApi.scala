@@ -93,12 +93,13 @@ trait EndpointsTestApi extends algebra.Endpoints {
   )
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
-  val reqBody1 =
-    textRequest.xmapPartial(s =>
-      Validated
-        .fromTry(Try(LocalDate.parse(s, dateTimeFormatter)))
-        .mapErrors(_ => Seq(s"Invalid date: $s"))
-    )(d => dateTimeFormatter.format(d))
+  val reqBody1 = textRequest.xmapWithCodec(
+    Codec.parseStringCatchingExceptions(
+      `type` = "date",
+      parse = LocalDate.parse(_, dateTimeFormatter),
+      print = dateTimeFormatter.format(_)
+    )
+  )
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
     ok(textResponse)

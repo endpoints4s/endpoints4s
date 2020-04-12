@@ -509,7 +509,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
         whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
           case (response, entity) =>
             assert(response.status == StatusCodes.BadRequest)
-            assert(entity == """["Invalid date: not a date"]""")
+            assert(entity == """["Invalid date value 'not a date'"]""")
         }
       }
     }

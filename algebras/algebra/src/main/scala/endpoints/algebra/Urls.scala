@@ -158,15 +158,6 @@ trait Urls extends PartialInvariantFunctorSyntax {
   implicit def queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam]
 
-  def tryParseString[A](
-      `type`: String
-  )(parse: String => A): String => Validated[A] =
-    s =>
-      Try(parse(s)) match {
-        case Failure(_) => Invalid(s"Invalid ${`type`} value '$s'")
-        case Success(a) => Valid(a)
-      }
-
   /** Ability to define `String` query string parameters
     * @group operations */
   implicit def stringQueryString: QueryStringParam[String]
@@ -174,39 +165,27 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Ability to define `UUID` query string parameters
     * @group operations */
   implicit def uuidQueryString: QueryStringParam[UUID] =
-    stringQueryString.xmapPartial(tryParseString("UUID")(UUID.fromString))(
-      _.toString()
-    )
+    stringQueryString.xmapWithCodec(Codec.uuidCodec)
 
   /** Ability to define `Int` query string parameters
     * @group operations */
   implicit def intQueryString: QueryStringParam[Int] =
-    stringQueryString.xmapPartial(tryParseString("integer")(_.toInt))(
-      _.toString()
-    )
+    stringQueryString.xmapWithCodec(Codec.intCodec)
 
   /** Query string parameter containing a `Long` value
     * @group operations */
   implicit def longQueryString: QueryStringParam[Long] =
-    stringQueryString.xmapPartial(tryParseString("integer")(_.toLong))(
-      _.toString()
-    )
+    stringQueryString.xmapWithCodec(Codec.longCodec)
 
   /** Query string parameter containing a `Boolean` value
     * @group operations */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
-    stringQueryString.xmapPartial[Boolean] {
-      case "true" | "1"  => Valid(true)
-      case "false" | "0" => Valid(false)
-      case s             => Invalid(s"Invalid boolean value '$s'")
-    }(_.toString())
+    stringQueryString.xmapWithCodec(Codec.booleanCodec)
 
   /** Codec for query string parameters of type `Double`
     * @group operations */
   implicit def doubleQueryString: QueryStringParam[Double] =
-    stringQueryString.xmapPartial(tryParseString("number")(_.toDouble))(
-      _.toString()
-    )
+    stringQueryString.xmapWithCodec(Codec.doubleCodec)
 
   /**
     * An URL path segment codec for type `A`.
@@ -230,28 +209,24 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /** Ability to define `UUID` path segments
     * @group operations */
   implicit def uuidSegment: Segment[UUID] =
-    stringSegment.xmapPartial(tryParseString("UUID")(UUID.fromString))(
-      _.toString()
-    )
+    stringSegment.xmapWithCodec(Codec.uuidCodec)
 
   /** Ability to define `Int` path segments
     * @group operations */
   implicit def intSegment: Segment[Int] =
-    stringSegment.xmapPartial(tryParseString("integer")(_.toInt))(_.toString())
+    stringSegment.xmapWithCodec(Codec.intCodec)
 
   /** Segment containing a `Long` value
     * @group operations */
   implicit def longSegment: Segment[Long] =
-    stringSegment.xmapPartial(tryParseString("integer")(_.toLong))(_.toString())
+    stringSegment.xmapWithCodec(Codec.longCodec)
 
   /**
     * Segment codec for type `Double`
     * @group operations
     */
   implicit def doubleSegment: Segment[Double] =
-    stringSegment.xmapPartial(tryParseString("number")(_.toDouble))(
-      _.toString()
-    )
+    stringSegment.xmapWithCodec(Codec.doubleCodec)
 
   /** An URL path carrying an `A` information
     * @note  This type has implicit methods provided by the [[PathOps]],
