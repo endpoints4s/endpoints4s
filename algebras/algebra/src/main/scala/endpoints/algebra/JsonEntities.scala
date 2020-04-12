@@ -3,6 +3,9 @@ package endpoints.algebra
 /**
   * Algebra interface for describing JSON entities in requests and responses.
   *
+  * Generally, this algebra is not directly used, but one of its specialized algebras
+  * is used instead: [[JsonEntitiesFromSchemas]] or [[JsonEntitiesFromCodecs]].
+  *
   * {{{
   *   /**
   *     * Describes an HTTP endpoint whose:

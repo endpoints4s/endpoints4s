@@ -2,17 +2,9 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{
-  Invalid,
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Tupler,
-  Valid,
-  Validated
-}
+import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
 import scala.collection.compat.Factory
-import scala.util.{Failure, Success, Try}
 
 /**
   * Algebra interface for describing URLs made of a path and a query string.
@@ -55,6 +47,12 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *   val queryPageAndLang: QueryString[(Int, Option[String])] =
     *     qs[Int]("page") & qs[Option[String]]("lang")
     * }}}
+    *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request query string parameters as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
     *
     * @note  This type has implicit methods provided by the [[QueryStringSyntax]],
     *        [[InvariantFunctorSyntax]], and the [[PartialInvariantFunctorSyntax]] classes.
@@ -119,10 +117,11 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *   path / "articles" /? qs[Option[Int]]("page")
     * }}}
     *
-    * Client interpreters must omit optional query string parameters that are empty.
-    * Server interpreters must accept incoming requests whose optional query string parameters are missing.
-    * Server interpreters must report a failure for incoming requests whose optional query string
-    * parameters are present, but malformed.
+    *   - Client interpreters must omit optional query string parameters that are empty.
+    *   - Server interpreters must accept incoming requests whose optional query string
+    *     parameters are missing, and they must report a failure for incoming requests
+    *     whose optional query string parameters are present, but malformed,
+    *   - Documentation interpreters should mark the parameter as optional.
     *
     * @group operations
     */
@@ -136,8 +135,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *   path / "articles" /? qs[List[Long]]("id")
     * }}}
     *
-    * Server interpreters must accept incoming requests where such parameters are missing (in such a
-    * case, its value is an empty collection), and report a failure if at least one value is malformed.
+    *   - Server interpreters must accept incoming requests where such parameters are
+    *     missing (in such a case, its value is an empty collection), and report a
+    *     failure if at least one value is malformed.
     *
     * @group operations
     */
@@ -147,6 +147,12 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /**
     * A query string parameter codec for type `A`.
+    *
+    * The trait `Urls` provides implicit instances of type `QueryStringParem[A]`
+    * for basic types (e.g., `Int`, `String`, etc.). You can create additional
+    * instances by transforming or refining the existing instances with `xmap`
+    * and `xmapPartial`.
+    *
     * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]]
     *        and the [[InvariantFunctorSyntax]] classes.
     * @group types
@@ -189,6 +195,11 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /**
     * An URL path segment codec for type `A`.
+    *
+    * The trait `Urls` provides implicit instances of `Segment[A]` for basic types
+    * (e.g., `Int`, `String`). You can create additional instances by transforming
+    * or refining the existing instances with `xmap` and `xmapPartial`.
+    *
     * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]]
     *        and the [[InvariantFunctorSyntax]] classes.
     * @group types
@@ -199,36 +210,50 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
   implicit def segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment]
 
-  /** Ability to define `String` path segments
-    * Servers should return an URL-decoded string value,
-    * and clients should take an URL-decoded string value.
+  /** Path segment codec for type `String`
+    *
+    *   - Server interpreters should return an URL-decoded string value,
+    *   - Client interpreters should take an URL-decoded string value.
     * @group operations
     */
   implicit def stringSegment: Segment[String]
 
-  /** Ability to define `UUID` path segments
+  /** Path segment codec for type `UUID`
     * @group operations */
   implicit def uuidSegment: Segment[UUID] =
     stringSegment.xmapWithCodec(Codec.uuidCodec)
 
-  /** Ability to define `Int` path segments
+  /** Path segment codec for type `Int`
     * @group operations */
   implicit def intSegment: Segment[Int] =
     stringSegment.xmapWithCodec(Codec.intCodec)
 
-  /** Segment containing a `Long` value
+  /** Path segment codec for type `Long`
     * @group operations */
   implicit def longSegment: Segment[Long] =
     stringSegment.xmapWithCodec(Codec.longCodec)
 
-  /**
-    * Segment codec for type `Double`
+  /** Path segment codec for type `Double`
     * @group operations
     */
   implicit def doubleSegment: Segment[Double] =
     stringSegment.xmapWithCodec(Codec.doubleCodec)
 
   /** An URL path carrying an `A` information
+    *
+    * Values of type `Path[A]` can be constructed by the operations [[path]],
+    * [[segment]], and [[remainingSegments]].
+    *
+    * {{{
+    *   path / "user" / segment[UUID]("id")
+    * }}}
+    *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request path as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
+    *
     * @note  This type has implicit methods provided by the [[PathOps]],
     *        [[InvariantFunctorSyntax]], and the [[PartialInvariantFunctorSyntax]] classes.
     * @group types */
@@ -240,7 +265,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /** Implicit conversion to get rid of intellij errors when defining paths. Effectively should not be called.
     * @see [[https://youtrack.jetbrains.com/issue/SCL-16284]] */
-  implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
+  private[endpoints] implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
 
   /** Convenient methods for [[Path]]s.
     * @group operations */
@@ -298,6 +323,20 @@ trait Urls extends PartialInvariantFunctorSyntax {
 
   /**
     * An URL carrying an `A` information
+    *
+    * Values of type `URL[A]` are typically constructed by first using the [[path]]
+    * constructor and then chaining it with segments and query parameters.
+    *
+    * {{{
+    *   path / "users" / segment[UUID]("id") /? qs[String]("apiKey")
+    * }}}
+    *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request URL as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
+    *
     * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]]
     *        and [[InvariantFunctorSyntax]] classes.
     * @group types

@@ -1,5 +1,6 @@
 package endpoints
 
+/** Ability for a type constructor `F` to combine together two values of type `F[A]` and `F[B]` into a value of type `F[(A, B)]` */
 trait Semigroupal[F[_]] {
 
   def product[A, B](fa: F[A], fb: F[B])(
@@ -8,6 +9,7 @@ trait Semigroupal[F[_]] {
 
 }
 
+/** Provides extension methods for values of type [[Semigroupal]] */
 trait SemigroupalSyntax {
   implicit class SemigroupalSyntax[A, F[_]](val f: F[A])(
       implicit ev: Semigroupal[F]
