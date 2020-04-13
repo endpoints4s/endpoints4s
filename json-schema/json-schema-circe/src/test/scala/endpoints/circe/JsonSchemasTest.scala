@@ -10,7 +10,7 @@ class JsonSchemasTest extends AnyFreeSpec {
       extends algebra.JsonSchemasFixtures
       with circe.JsonSchemas
 
-  import JsonSchemasCodec.{User, Foo, Bar}
+  import JsonSchemasCodec.{User, Foo, Bar, Qux}
 
   "case class" in {
     val userJson =
@@ -68,6 +68,10 @@ class JsonSchemasTest extends AnyFreeSpec {
     val bar = Bar("foo")
     assert(Foo.alternativeSchemaForMerge.decoder.decodeJson(barJson).exists(_ == bar))
     assert(Foo.alternativeSchemaForMerge.encoder.apply(bar) == barJson)
+
+    val quxJson = Json.obj("type" -> Json.fromString("Qux"))
+    assert(Foo.alternativeSchemaForMerge.decoder.decodeJson(quxJson).exists(_ == Qux))
+    assert(Foo.alternativeSchemaForMerge.encoder(Qux) == quxJson)
 
     assert(
       Foo.alternativeSchemaForMerge.decoder

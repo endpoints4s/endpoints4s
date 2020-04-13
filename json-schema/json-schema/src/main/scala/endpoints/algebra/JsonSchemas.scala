@@ -580,6 +580,15 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       * @note Encoder interpreters rely on `ClassTag`s to perform the runtime type test
       *       used for deciding whether to encode the `C` value as an `A` or a `B`.
       *       Consequently, types `A` and `B` must be distinct after erasure.
+      *       Furthermore, the `orElseMerge` implementation requires the type `B` to
+      *       ''not'' be a supertype of `A`. This should not happen in general. For instance,
+      *       assuming three schemas, `schema1`, `schema2`, and `schema3`, for types having
+      *       a common super-type, if you write `schema1 orElseMerge schema2 orElseMerge schema3`,
+      *       then the right-hand side of `orElseMerge` is always a more specific type than its
+      *       left-hand side.
+      *       However, if you write `schema1 orElseMerge (schema2 orElseMerge schema3)` (note the
+      *       parentheses), then the result of `schema2 orElseMerge schema3` is a super-type of
+      *       `schema1`. In such a case, the `orElseMerge` operation won’t work.
       * @see  [[https://www.scala-lang.org/api/current/scala/Any.html#isInstanceOf[T0]:Boolean isInstanceOf]] API documentation
       */
     def orElseMerge[B <: C, C >: A](
