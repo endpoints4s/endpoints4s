@@ -259,7 +259,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     checkRoundTrip(
       schema,
-      ujson.Obj("type" -> ujson.Str("Rect"), "w" -> ujson.Num(1), "h" -> ujson.Num(2)),
+      ujson.Obj(
+        "type" -> ujson.Str("Rect"),
+        "w" -> ujson.Num(1),
+        "h" -> ujson.Num(2)
+      ),
       Rect(1, 2)
     )
     checkDecodingFailure(
@@ -297,7 +301,8 @@ class JsonSchemasTest extends AnyFreeSpec {
       .tagged("Rect")
       .xmap(Rect.tupled)(rect => (rect.w, rect.h))
 
-    val schema = (circleSchema orElseMerge rectSchema).withDiscriminator("shape")
+    val schema =
+      (circleSchema orElseMerge rectSchema).withDiscriminator("shape")
 
     checkRoundTrip(
       schema,
@@ -306,7 +311,11 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     checkRoundTrip(
       schema,
-      ujson.Obj("shape" -> ujson.Str("Rect"), "w" -> ujson.Num(1), "h" -> ujson.Num(2)),
+      ujson.Obj(
+        "shape" -> ujson.Str("Rect"),
+        "w" -> ujson.Num(1),
+        "h" -> ujson.Num(2)
+      ),
       Rect(1, 2)
     )
   }

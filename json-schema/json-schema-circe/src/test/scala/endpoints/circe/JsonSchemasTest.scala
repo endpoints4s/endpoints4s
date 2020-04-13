@@ -66,11 +66,15 @@ class JsonSchemasTest extends AnyFreeSpec {
         "s" -> Json.fromString("foo")
       )
     val bar = Bar("foo")
-    assert(Foo.alternativeSchemaForMerge.decoder.decodeJson(barJson).exists(_ == bar))
+    assert(
+      Foo.alternativeSchemaForMerge.decoder.decodeJson(barJson).exists(_ == bar)
+    )
     assert(Foo.alternativeSchemaForMerge.encoder.apply(bar) == barJson)
 
     val quxJson = Json.obj("type" -> Json.fromString("Qux"))
-    assert(Foo.alternativeSchemaForMerge.decoder.decodeJson(quxJson).exists(_ == Qux))
+    assert(
+      Foo.alternativeSchemaForMerge.decoder.decodeJson(quxJson).exists(_ == Qux)
+    )
     assert(Foo.alternativeSchemaForMerge.encoder(Qux) == quxJson)
 
     assert(

@@ -38,14 +38,17 @@ class DescriptionsTest extends AnyWordSpec with Matchers {
     }
 
     val enumSchema =
-      stringEnumeration(Seq("foo", "bar"))(identity).withDescription("a foo or a bar enum")
+      stringEnumeration(Seq("foo", "bar"))(identity)
+        .withDescription("a foo or a bar enum")
 
-    val arraySchema = arrayJsonSchema[List, Int].withDescription("a list of ints")
+    val arraySchema =
+      arrayJsonSchema[List, Int].withDescription("a list of ints")
 
     val mapSchema = mapJsonSchema[Int].withDescription("a map of ints")
 
     val pairSchema =
-      implicitly[JsonSchema[(Int, String)]].withDescription("a pair of int and string")
+      implicitly[JsonSchema[(Int, String)]]
+        .withDescription("a pair of int and string")
 
     val hexSchema =
       stringJsonSchema(Some("hex")).withDescription("a hex string")
@@ -62,7 +65,10 @@ class DescriptionsTest extends AnyWordSpec with Matchers {
       with openapi.JsonEntitiesFromSchemas {
 
     def checkDescription[A](schema: JsonSchema[A])(description: String) = {
-      assert(OpenApi.schemaJson(toSchema(schema.docs))("description") == ujson.Str(description))
+      assert(
+        OpenApi.schemaJson(toSchema(schema.docs))("description") == ujson
+          .Str(description)
+      )
     }
 
   }

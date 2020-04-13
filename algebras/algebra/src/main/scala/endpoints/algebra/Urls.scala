@@ -2,7 +2,11 @@ package endpoints.algebra
 
 import java.util.UUID
 
-import endpoints.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
+import endpoints.{
+  PartialInvariantFunctor,
+  PartialInvariantFunctorSyntax,
+  Tupler
+}
 
 import scala.collection.compat.Factory
 
