@@ -62,7 +62,9 @@ class TitlesTest extends AnyWordSpec with Matchers {
       with openapi.JsonEntitiesFromSchemas {
 
     def checkTitle[A](schema: JsonSchema[A])(title: String) = {
-      assert(OpenApi.schemaJson(toSchema(schema.docs))("title") == ujson.Str(title))
+      assert(
+        OpenApi.schemaJson(toSchema(schema.docs))("title") == ujson.Str(title)
+      )
     }
 
   }

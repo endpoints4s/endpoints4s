@@ -9,6 +9,7 @@ endpoints
 * [Guides](guides.md)
 * [Comparison with Similar Tools](comparison.md)
 * [Talks and Publications](talks.md)
+* [Release and Compatibility Notes](release-and-compatibility-notes.md)
 @@@
 
 *endpoints* is a Scala library for remote communication. It ensures
@@ -43,13 +44,13 @@ The library currently supports the following backends:
 
 - clients: Akka-Http, Play-WS, sttp, scalaj, and XMLHttpRequest (Scala.js) ;
 - servers: Akka-Http, Play, and http4s ;
-- documentation: OpenAPI document ;
-- JSON is supported via Circe or Play-Json ;
+- documentation: OpenAPI ;
+- JSON is supported via Circe, Play-Json, or ujson ;
 
 … but the library is designed to be **extensible**, anyone can:
 
 - implement a new interpreter for the existing endpoint descriptions (e.g. generation of RAML
-  documentation, http4s client and server backend, etc.) ;
+  documentation, finch client and server backend, etc.) ;
 - add new descriptions to the existing ones (e.g. to define an application-specific authentication
   strategy).
 
@@ -60,7 +61,7 @@ The library currently supports the following backends:
 - Check out the @ref[use cases](use-cases.md) to know the typical problems that *endpoints* addresses ;
 - Browse the @scaladoc[API documentation](endpoints.index) or the
   [samples](https://github.com/julienrf/endpoints/tree/master/documentation/examples) ;
-- Get in touch in the [gitter room](https://gitter.im/julienrf/endpoints).
+- Meet the community in the [gitter room](https://gitter.im/julienrf/endpoints).
 
 ## Contributing
 

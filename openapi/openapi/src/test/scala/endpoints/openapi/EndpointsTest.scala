@@ -239,7 +239,9 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       val documentedEndpJson = json("paths")("/documented")("get")
 
       documentedEndpJson("summary") shouldBe ujson.Str("summary of endpoint")
-      documentedEndpJson("description") shouldBe ujson.Str("description of endpoint")
+      documentedEndpJson("description") shouldBe ujson.Str(
+        "description of endpoint"
+      )
     }
   }
 

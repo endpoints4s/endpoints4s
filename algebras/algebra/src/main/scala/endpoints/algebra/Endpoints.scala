@@ -31,6 +31,9 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   /**
     * Information carried by an HTTP endpoint
     *
+    * Values of type [[Endpoint]] can be constructed by using the operation
+    * [[endpoint]].
+    *
     * @tparam A Information carried by the request
     * @tparam B Information carried by the response
     * @group types
@@ -38,7 +41,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   type Endpoint[A, B]
 
   /**
-    * HTTP endpoint.
+    * Define an HTTP endpoint
     *
     * @param request  Request
     * @param response Response

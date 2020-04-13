@@ -12,6 +12,7 @@ trait InvariantFunctor[F[_]] {
   def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B]
 }
 
+/** Provides extensions methods for values of type [[InvariantFunctor]] */
 trait InvariantFunctorSyntax {
 
   /**
@@ -64,6 +65,7 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     xmapPartial[A, B](fa, a => Valid(f(a)), g)
 }
 
+/** Provides extension methods for values of type [[PartialInvariantFunctor]] */
 trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
   implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(
       implicit ev: PartialInvariantFunctor[F]

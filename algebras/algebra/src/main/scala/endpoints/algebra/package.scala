@@ -1,6 +1,8 @@
 package endpoints
 
 /**
+  * Algebra interfaces
+  *
   * @groupname algebras Algebras
   * @groupname interpreters Interpreters
   */

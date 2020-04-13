@@ -77,7 +77,9 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "sealed trait tagged merge" in {
     val expectedSchema = expectedSealedTraitSchema
-    assert(DocumentedJsonSchemas.Foo.alternativeSchemaForMerge.docs == expectedSchema)
+    assert(
+      DocumentedJsonSchemas.Foo.alternativeSchemaForMerge.docs == expectedSchema
+    )
   }
 
   "enum" in {
