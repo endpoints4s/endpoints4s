@@ -148,7 +148,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
   /**
     * A query string parameter codec for type `A`.
     *
-    * The trait `Urls` provides implicit instances of type `QueryStringParem[A]`
+    * The trait `Urls` provides implicit instances of type `QueryStringParam[A]`
     * for basic types (e.g., `Int`, `String`, etc.). You can create additional
     * instances by transforming or refining the existing instances with `xmap`
     * and `xmapPartial`.
@@ -197,7 +197,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * An URL path segment codec for type `A`.
     *
     * The trait `Urls` provides implicit instances of `Segment[A]` for basic types
-    * (e.g., `Int`, `String`). You can create additional instances by transforming
+    * (e.g., `Int`, `String`, etc.). You can create additional instances by transforming
     * or refining the existing instances with `xmap` and `xmapPartial`.
     *
     * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]]

@@ -36,7 +36,7 @@ In practice, we have three kinds of interpreters:
     - e.g. the @scaladoc[`endpoints.algebra.Urls`](endpoints.algebra.Urls) trait defines
       an algebra for describing URLs.
 - algebras’ dependencies can be found in their super types ;
-- interpreters are traits that have the same name of the algebra they
+- interpreters are traits that have the same name as the algebra they
   implement (they can be found by looking at the “known subclasses”
   of an algebra, in the Scaladoc) ;
     - e.g. the @scaladoc[`endpoints.play.client.Urls`](endpoints.play.client.Urls) trait
