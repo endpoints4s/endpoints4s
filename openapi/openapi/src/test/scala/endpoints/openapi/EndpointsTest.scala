@@ -157,7 +157,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     }
   }
 
-  "Text response" should {
+  "Text request" should {
     "be properly encoded" in {
       val reqBody = Fixtures.documentation
         .paths("/textRequestEndpoint")
@@ -166,6 +166,20 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
       reqBody shouldBe defined
       reqBody.value.description.value shouldEqual "Text Req"
+      reqBody.value.content("*/*").schema.value shouldEqual Schema
+        .Primitive("string", None, None, None, None)
+    }
+  }
+
+  "Plain text request" should {
+    "be properly encoded" in {
+      val reqBody = Fixtures.documentation
+        .paths("/plainTextRequestEndpoint")
+        .operations("post")
+        .requestBody
+
+      reqBody shouldBe defined
+      reqBody.value.description.value shouldEqual "Plain Text Req"
       reqBody.value.content("text/plain").schema.value shouldEqual Schema
         .Primitive("string", None, None, None, None)
     }
@@ -320,6 +334,16 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
     docs = EndpointDocs(deprecated = true)
   )
 
+  val plainTextRequestEndp = endpoint(
+    post(
+      path / "plainTextRequestEndpoint",
+      plainTextRequest,
+      docs = Some("Plain Text Req")
+    ),
+    ok(emptyResponse),
+    docs = EndpointDocs(deprecated = true)
+  )
+
   val emptySegmentNameEndp = endpoint(
     post(
       path / "emptySegmentNameEndp" / segment[Int]() / "x" / segment[String](),
@@ -375,6 +399,7 @@ object Fixtures
       bar,
       baz,
       textRequestEndp,
+      plainTextRequestEndp,
       emptySegmentNameEndp,
       quux,
       assets,

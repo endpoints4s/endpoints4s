@@ -112,9 +112,35 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /**
     * Request with a `String` body.
+    *
+    *   - Server interpreters are expected to be permissive and accept multiple
+    *     content types (not just `text/plain`) using the charset defined in the
+    *     `Content-Type` header to decide how to decode the body. If no charset
+    *     is defined (or if there is no `Content-Type` header) the interpreters
+    *     are free to define their own defaults for decoding.
+    *
+    *   - Client interpreters produce an HTTP request with a `text/plain` content type.
+    *
+    * @see [[plainTextRequest]] if you want to avoid accepting any content type
     * @group operations
     */
   def textRequest: RequestEntity[String]
+
+  /**
+    * Request with content-type `text/plain`
+    *
+    *   - Server interpreters raise an error if the incoming request entity does
+    *     not have the right content type. By default, they produce a Bad Request (400)
+    *     response with a list of error messages in a JSON array. Refer to the documentation
+    *     of your server interpreter to customize this behavior.
+    *
+    *   - Client interpreters produce an HTTP request with a `text/plain` content type.
+    *
+    * @see [[textRequest]] for a more permissive text request entity.
+    *
+    * @group operations
+    */
+  def plainTextRequest: RequestEntity[String]
 
   /**
     * Request for given parameters

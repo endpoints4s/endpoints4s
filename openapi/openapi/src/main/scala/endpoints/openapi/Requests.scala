@@ -43,6 +43,10 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
   lazy val emptyRequest = Map.empty[String, MediaType]
 
   lazy val textRequest = Map(
+    "*/*" -> MediaType(Some(Schema.simpleString))
+  )
+
+  lazy val plainTextRequest = Map(
     "text/plain" -> MediaType(Some(Schema.simpleString))
   )
 

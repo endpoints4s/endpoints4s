@@ -73,6 +73,8 @@ trait Requests extends algebra.Requests with Urls with Methods {
   def textRequest: (String, HttpRequest) => scalaj.http.HttpRequest =
     (body, req) => req.postData(body)
 
+  def plainTextRequest = textRequest
+
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

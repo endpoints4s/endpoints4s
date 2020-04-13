@@ -216,7 +216,11 @@ trait EndpointsWithCustomErrors
   lazy val emptyRequest: BodyParser[Unit] =
     BodyParser(_ => Accumulator.done(Right(())))
 
-  lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
+  lazy val textRequest: BodyParser[String] =
+    playComponents.playBodyParsers.tolerantText
+
+  lazy val plainTextRequest: BodyParser[String] =
+    playComponents.playBodyParsers.text
 
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =

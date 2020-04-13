@@ -15,6 +15,7 @@ class EndpointsTestApi(
     with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
+    with algebra.TextEntitiesTestApi
     with algebra.Assets
     with JsonFromCirceCodecTestApi
     with algebra.circe.ChunkedJsonEntitiesTestApi

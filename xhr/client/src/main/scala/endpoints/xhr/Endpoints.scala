@@ -132,6 +132,8 @@ trait EndpointsWithCustomErrors
     body
   }
 
+  lazy val plainTextRequest: RequestEntity[String] = textRequest
+
   implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

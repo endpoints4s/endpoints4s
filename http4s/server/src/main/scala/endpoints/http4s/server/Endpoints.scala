@@ -12,9 +12,8 @@ import endpoints.{
   Validated,
   algebra
 }
-import fs2._
 import org.http4s
-import org.http4s.{EntityEncoder, Header, Headers}
+import org.http4s.{EntityEncoder, EntityDecoder, Header, Headers}
 
 import scala.util.control.NonFatal
 
@@ -273,10 +272,22 @@ trait EndpointsWithCustomErrors
 
   def textRequest: RequestEntity[String] =
     req =>
-      req.body
-        .through(text.utf8Decode)
-        .compile
-        .toList
+      EntityDecoder
+        .decodeString(req)
+        .map(chunks => Right(chunks.mkString))
+
+  def plainTextRequest: RequestEntity[String] =
+    req =>
+      EntityDecoder
+        .decodeBy(http4s.MediaType.text.plain) { msg: http4s.Media[Effect] =>
+          val charset = msg.charset.getOrElse(http4s.DefaultCharset).nioCharset
+          EntityDecoder
+            .collectBinary(msg)
+            .map(chunk => new String(chunk.toArray, charset))
+        }
+        .decode(req, true)
+        .leftWiden[Throwable]
+        .rethrowT
         .map(chunks => Right(chunks.mkString))
 
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](

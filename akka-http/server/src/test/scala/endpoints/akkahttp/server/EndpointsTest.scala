@@ -10,7 +10,10 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 /* defines the common api to implement */
-trait EndpointsTestApi extends Endpoints with algebra.EndpointsTestApi
+trait EndpointsTestApi
+    extends Endpoints
+    with algebra.EndpointsTestApi
+    with algebra.TextEntitiesTestApi
 
 /* implements the endpoint using an akka-based custom json handling */
 class EndpointsEntitiesTestApi extends EndpointsTestApi with JsonEntities

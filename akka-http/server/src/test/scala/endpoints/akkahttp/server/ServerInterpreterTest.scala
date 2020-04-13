@@ -23,6 +23,7 @@ class ServerInterpreterTest
     extends algebra.server.EndpointsTestSuite[EndpointsCodecsTestApi]
     with algebra.server.BasicAuthenticationTestSuite[EndpointsCodecsTestApi]
     with algebra.server.ChunkedJsonEntitiesTestSuite[EndpointsCodecsTestApi]
+    with algebra.server.TextEntitiesTestSuite[EndpointsCodecsTestApi]
     with ScalatestRouteTest {
 
   val serverApi = new EndpointsCodecsTestApi
@@ -50,6 +51,11 @@ class ServerInterpreterTest
       response: => Resp
   )(runTests: Int => Unit): Unit =
     serveRoute(endpoint.implementedBy(_ => response))(runTests)
+
+  def serveIdentityEndpoint[Resp](
+      endpoint: serverApi.Endpoint[Resp, Resp]
+  )(runTests: Int => Unit): Unit =
+    serveRoute(endpoint.implementedBy(request => request))(runTests)
 
   def serveStreamedEndpoint[Resp](
       endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],

@@ -8,7 +8,8 @@ import endpoints.algebra.server.{
   BasicAuthenticationTestSuite,
   DecodedUrl,
   EndpointsTestSuite,
-  JsonEntitiesFromSchemasTestSuite
+  JsonEntitiesFromSchemasTestSuite,
+  TextEntitiesTestSuite
 }
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
@@ -20,7 +21,8 @@ import scala.concurrent.ExecutionContext
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
-    with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi] {
+    with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
+    with TextEntitiesTestSuite[EndpointsTestApi] {
 
   val serverApi = new EndpointsTestApi()
 
@@ -35,9 +37,9 @@ class ServerInterpreterTest
     }
   }
 
-  def serveEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, Resp],
-      response: => Resp
+  private def serveGeneralEndpoint[Req, Resp](
+      endpoint: serverApi.Endpoint[Req, Resp],
+      request2response: Req => Resp
   )(runTests: Int => Unit): Unit = {
     val port = {
       val socket = new ServerSocket(0)
@@ -46,7 +48,7 @@ class ServerInterpreterTest
     }
     implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
     implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
-    val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => response))
+    val service = HttpRoutes.of[IO](endpoint.implementedBy(request2response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
       BlazeServerBuilder[IO].bindHttp(port, "localhost").withHttpApp(httpApp)
@@ -58,4 +60,14 @@ class ServerInterpreterTest
     }
   }
 
+  def serveEndpoint[Resp](
+      endpoint: serverApi.Endpoint[_, Resp],
+      response: => Resp
+  )(runTests: Int => Unit): Unit =
+    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
+
+  def serveIdentityEndpoint[Resp](
+      endpoint: serverApi.Endpoint[Resp, Resp]
+  )(runTests: Int => Unit): Unit =
+    serveGeneralEndpoint(endpoint, identity[Resp])(runTests)
 }

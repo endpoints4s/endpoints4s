@@ -123,6 +123,8 @@ trait EndpointsWithCustomErrors
   lazy val textRequest: (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
+  lazy val plainTextRequest: (String, WSRequest) => WSRequest = textRequest
+
   implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

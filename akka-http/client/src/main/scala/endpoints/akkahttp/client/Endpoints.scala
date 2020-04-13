@@ -134,6 +134,8 @@ trait EndpointsWithCustomErrors
   lazy val textRequest: (String, HttpRequest) => HttpRequest =
     (body, request) => request.copy(entity = HttpEntity(body))
 
+  lazy val plainTextRequest = textRequest
+
   def request[A, B, C, AB, Out](
       method: Method,
       url: Url[A],

@@ -46,6 +46,14 @@ trait ServerTestBase[T <: algebra.Endpoints]
       response: => Resp
   )(runTests: Int => Unit): Unit
 
+  /**
+    * @param runTests A function that is called after the server is started and before it is stopped. It takes
+    *                 the TCP port number as parameter.
+    */
+  def serveIdentityEndpoint[Resp](
+      endpoint: serverApi.Endpoint[Resp, Resp]
+  )(runTests: Int => Unit): Unit
+
   private[server] implicit val actorSystem: ActorSystem = ActorSystem()
   implicit val executionContext: ExecutionContext = actorSystem.dispatcher
 

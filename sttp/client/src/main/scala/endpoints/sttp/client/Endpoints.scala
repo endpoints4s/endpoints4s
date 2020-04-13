@@ -127,6 +127,8 @@ trait EndpointsWithCustomErrors[R[_]]
     case (bodyValue, request) => request.body(bodyValue)
   }
 
+  lazy val plainTextRequest: RequestEntity[String] = textRequest
+
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
