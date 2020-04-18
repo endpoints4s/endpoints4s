@@ -8,7 +8,8 @@ import endpoints.algebra.server.{
   BasicAuthenticationTestSuite,
   DecodedUrl,
   EndpointsTestSuite,
-  ChunkedJsonEntitiesTestSuite
+  ChunkedJsonEntitiesTestSuite,
+  TextEntitiesTestSuite
 }
 import play.api.Mode
 import play.api.routing.Router
@@ -24,7 +25,8 @@ import scala.concurrent.Future
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
-    with ChunkedJsonEntitiesTestSuite[EndpointsTestApi] {
+    with ChunkedJsonEntitiesTestSuite[EndpointsTestApi]
+    with TextEntitiesTestSuite[EndpointsTestApi] {
 
   val serverApi: EndpointsTestApi = {
     object NettyServerComponents extends DefaultNettyServerComponents {
@@ -43,6 +45,13 @@ class ServerInterpreterTest
   )(runTests: Int => Unit): Unit =
     serveRoutes(
       serverApi.routesFromEndpoints(endpoint.implementedBy(_ => response))
+    )(runTests)
+
+  def serveIdentityEndpoint[Resp](
+      endpoint: serverApi.Endpoint[Resp, Resp]
+  )(runTests: Int => Unit): Unit =
+    serveRoutes(
+      serverApi.routesFromEndpoints(endpoint.implementedBy(request => request))
     )(runTests)
 
   def serveStreamedEndpoint[Resp](

@@ -2,7 +2,7 @@ package endpoints.scalaj.client
 
 import endpoints.algebra
 import endpoints.algebra.circe
-import endpoints.algebra.client.JsonFromCodecTestSuite
+import endpoints.algebra.client.{JsonFromCodecTestSuite, TextEntitiesTestSuite}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -11,9 +11,12 @@ class TestJsonClient(val address: String)
     with JsonEntitiesFromCodecs
     with circe.JsonEntitiesFromCodecs
     with algebra.JsonFromCodecTestApi
+    with algebra.TextEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi {}
 
-class JsonEntitiesFromCodecTest extends JsonFromCodecTestSuite[TestJsonClient] {
+class JsonEntitiesFromCodecTest
+    extends JsonFromCodecTestSuite[TestJsonClient]
+    with TextEntitiesTestSuite[TestJsonClient] {
 
   val client: TestJsonClient = new TestJsonClient(s"localhost:$wiremockPort")
   implicit val ec = ExecutionContext.Implicits.global
@@ -39,5 +42,6 @@ class JsonEntitiesFromCodecTest extends JsonFromCodecTestSuite[TestJsonClient] {
   }
 
   jsonFromCodecTestSuite()
+  textEntitiesTestSuite()
 
 }

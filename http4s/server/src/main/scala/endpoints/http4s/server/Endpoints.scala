@@ -12,9 +12,8 @@ import endpoints.{
   Validated,
   algebra
 }
-import fs2._
 import org.http4s
-import org.http4s.{EntityEncoder, Header, Headers}
+import org.http4s.{EntityEncoder, EntityDecoder, Header, Headers}
 
 import scala.util.control.NonFatal
 
@@ -271,13 +270,20 @@ trait EndpointsWithCustomErrors
 
   def emptyRequest: RequestEntity[Unit] = _ => Effect.pure(Right(()))
 
+  /* Setting `strict = true` means that this won't accept requests that are
+   * missing their Content-Type header. However, if we use `strict = false`,
+   * requests with incorrect specified `Content-Type` still get accepted.
+   */
   def textRequest: RequestEntity[String] =
     req =>
-      req.body
-        .through(text.utf8Decode)
-        .compile
-        .toList
-        .map(chunks => Right(chunks.mkString))
+      EntityDecoder
+        .decodeBy(http4s.MediaType.text.plain) { msg: http4s.Media[Effect] =>
+          http4s.DecodeResult.success(EntityDecoder.decodeString(msg))
+        }
+        .decode(req, strict = true)
+        .leftWiden[Throwable]
+        .rethrowT
+        .map(Right(_))
 
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
       method: Method,
