@@ -17,6 +17,7 @@ trait JsonTestSuite[T <: JsonTestApi] extends ClientTestBase[T] {
         val addressStr = """{"street":"avenue1","city":"NY"}"""
         wireMockServer.stubFor(
           post(urlEqualTo("/user"))
+            .withHeader("Content-Type", containing("application/json"))
             .withRequestBody(equalToJson(userStr))
             .willReturn(
               aResponse()

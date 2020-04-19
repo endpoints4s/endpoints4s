@@ -6,7 +6,7 @@ import endpoints.{Invalid, Valid, algebra}
 import fs2.Chunk
 import org.http4s
 import org.http4s.headers.`Content-Type`
-import org.http4s.{EntityEncoder, MediaType}
+import org.http4s.{EntityEncoder, EntityDecoder, MediaType}
 
 /**
   * Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests
@@ -18,10 +18,19 @@ trait JsonEntitiesFromCodecs
     extends algebra.JsonEntitiesFromCodecs
     with EndpointsWithCustomErrors {
 
+  /* Setting `strict = true` means that this won't accept requests that are
+   * missing their Content-Type header. However, if we use `strict = false`,
+   * requests with incorrect specified `Content-Type` still get accepted.
+   */
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
-    req => {
+    req =>
       http4s.EntityDecoder
-        .decodeString(req)
+        .decodeBy(MediaType.application.json) { msg: http4s.Media[Effect] =>
+          http4s.DecodeResult.success(EntityDecoder.decodeString(msg))
+        }
+        .decode(req, strict = true)
+        .leftWiden[Throwable]
+        .rethrowT
         .map { value =>
           stringCodec(codec)
             .decode(value) match {
@@ -29,8 +38,6 @@ trait JsonEntitiesFromCodecs
             case inv: Invalid => Left(handleClientErrors(inv))
           }
         }
-
-    }
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
     EntityEncoder[Effect, Chunk[Byte]]
