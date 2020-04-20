@@ -215,7 +215,9 @@ trait EndpointsWithCustomErrors
         .map(_.andThen(_.map(_.asLeft[B])))
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
 
+  //#endpoint-type
   type Endpoint[A, B] = Kleisli[Effect, A, B]
+  //#endpoint-type
 
   override def endpoint[A, B](
       request: Request[A],
