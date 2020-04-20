@@ -59,7 +59,7 @@ trait EndpointsWithCustomErrors
         case None    => req
       }
 
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
 
       override def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
@@ -72,12 +72,13 @@ trait EndpointsWithCustomErrors
 
     }
 
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
+  implicit def requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
 
-      override def xmap[A, B](
-          fa: (A, Http4sRequest[Effect]) => Http4sRequest[Effect],
-          f: A => B,
+      override def xmapPartial[A, B](
+          fa: RequestHeaders[A],
+          f: A => Validated[B],
           g: B => A
       ): (B, Http4sRequest[Effect]) => Http4sRequest[Effect] =
         (to, req) => fa(g(to), req)
@@ -86,12 +87,13 @@ trait EndpointsWithCustomErrors
 
   type RequestEntity[A] = (A, Http4sRequest[Effect]) => Http4sRequest[Effect]
 
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
 
-      override def xmap[A, B](
-          fa: (A, Http4sRequest[Effect]) => Http4sRequest[Effect],
-          f: A => B,
+      override def xmapPartial[A, B](
+          fa: RequestEntity[A],
+          f: A => Validated[B],
           g: B => A
       ): (B, Http4sRequest[Effect]) => Http4sRequest[Effect] =
         (to, req) => fa(g(to), req)
@@ -104,6 +106,17 @@ trait EndpointsWithCustomErrors
     (value, req) => req.withEntity(value)
 
   type Request[A] = A => Effect[Http4sRequest[Effect]]
+
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] =
+        b => fa(g(b))
+    }
 
   override def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
       method: Method,
@@ -131,7 +144,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = Http4sResponse[Effect] => Effect[A]
 
-  implicit def responseInvFunctor: InvariantFunctor[Response] =
+  implicit def responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
 
       override def xmap[A, B](
@@ -141,6 +154,17 @@ trait EndpointsWithCustomErrors
       ): (Status, Headers) => Option[Http4sResponse[Effect] => Effect[B]] =
         (sc, hs) => fa(sc, hs).map(_.andThen(_.map(f)))
 
+    }
+
+  implicit def responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] =
+        res => fa(res).map(f)
     }
 
   override def emptyResponse: ResponseEntity[Unit] = _ => ().pure[Effect]
@@ -160,16 +184,16 @@ trait EndpointsWithCustomErrors
 
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
 
-      override def xmapPartial[A, B](
+      override def xmap[A, B](
           fa: Headers => Validated[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): Headers => Validated[B] =
-        hs => fa(hs).flatMap(f)
+        hs => fa(hs).map(f)
 
     }
 

@@ -6,7 +6,7 @@ are different algebra modules to use depending on your needs.
 
 The following diagram summarizes which algebra to use in which case:
 
-![json-decision](/json-decision.svg)
+![json-decision](../json-decision.svg)
 
 The first question to ask is “do I want to publish documentation of my
 endpoints?”. In order to document the JSON entities of your requests and

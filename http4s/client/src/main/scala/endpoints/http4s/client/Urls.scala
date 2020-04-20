@@ -19,7 +19,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
     def encode(a: A): List[String]
   }
 
-  override def queryStringPartialInvFunctor
+  override def queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       override def xmapPartial[A, B](
@@ -58,7 +58,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
   ): QueryStringParam[CC[A]] =
     _.iterator.flatMap(param.encode).toList
 
-  override def queryStringParamPartialInvFunctor
+  override def queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       override def xmapPartial[A, B](
@@ -76,7 +76,8 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
     def encode(a: A): Uri.Path
   }
 
-  override def segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  override def segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       override def xmapPartial[A, B](
           fa: Segment[A],
@@ -127,7 +128,7 @@ trait Urls extends endpoints.algebra.Urls with StatusCodes {
     def encodeUrl(value: A): ParseResult[Uri]
   }
 
-  override def urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  override def urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       override def xmapPartial[A, B](
           fa: Url[A],

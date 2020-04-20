@@ -71,7 +71,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
   object GenericJsonSchema
       extends GenericJsonSchemaLowPriority
       with GenericDiscriminatorNames
-      with GenericSchemaNames {
+      with GenericSchemaNames
+      with GenericDescriptions
+      with GenericTitles {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
@@ -178,28 +180,35 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def recordGeneric[A, R, D <: HList](
         implicit
         gen: LabelledGeneric.Aux[A, R],
+        docOpt: GenericDescription[A],
         docAnns: Annotations.Aux[docs, A, D],
+        titleOpt: GenericTitle[A],
         record: DocumentedGenericRecord[R, D],
-        name: GenericSchemaName[A]
-    ): GenericRecord[A] =
-      new GenericRecord[A](
-        record.record(docAnns()).xmap[A](gen.from)(gen.to).named(name.value)
-      )
+        nameOpt: GenericSchemaName[A]
+    ): GenericRecord[A] = {
+      val recordA = record.record(docAnns()).xmap[A](gen.from)(gen.to)
+      val namedA = nameOpt.value.fold(recordA)(recordA.named(_))
+      val docA = docOpt.description.fold(namedA)(namedA.withDescription(_))
+      val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
+      new GenericRecord[A](titleA)
+    }
 
     implicit def taggedGeneric[A, R](
         implicit
         gen: LabelledGeneric.Aux[A, R],
+        docOpt: GenericDescription[A],
+        titleOpt: GenericTitle[A],
         tagged: GenericTagged[R],
-        name: GenericSchemaName[A],
+        nameOpt: GenericSchemaName[A],
         discriminator: GenericDiscriminatorName[A]
-    ): GenericTagged[A] =
-      new GenericTagged[A](
-        tagged.jsonSchema
-          .xmap[A](gen.from)(gen.to)
-          .named(name.value)
-          .withDiscriminator(discriminator.name)
-      )
-
+    ): GenericTagged[A] = {
+      val taggedA = tagged.jsonSchema.xmap[A](gen.from)(gen.to)
+      val namedA = nameOpt.value.fold(taggedA)(taggedA.named(_))
+      val discA = namedA.withDiscriminator(discriminator.name)
+      val docA = docOpt.description.fold(discA)(discA.withDescription(_))
+      val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
+      new GenericTagged[A](titleA)
+    }
   }
 
   /** Internal machinery for deriving the discriminator name of a type */
@@ -225,22 +234,63 @@ trait JsonSchemas extends algebra.JsonSchemas {
   /** Internal machinery for deriving the schema name of a type */
   trait GenericSchemaNames {
 
-    class GenericSchemaName[A](val value: String)
+    class GenericSchemaName[A](val value: Option[String])
 
     object GenericSchemaName extends GenericSchemaNameLowPriority {
-      implicit def annotated[A](
+      implicit def annotatedName[A](
           implicit ann: Annotation[name, A]
       ): GenericSchemaName[A] =
-        new GenericSchemaName(ann().value)
+        new GenericSchemaName(Some(ann().value))
+
+      implicit def annotatedUnnamed[A](
+          implicit ann: Annotation[unnamed, A]
+      ): GenericSchemaName[A] =
+        new GenericSchemaName(None)
     }
 
     trait GenericSchemaNameLowPriority {
       implicit def fromClassTag[A](
           implicit ct: ClassTag[A]
       ): GenericSchemaName[A] =
-        new GenericSchemaName(classTagToSchemaName(ct))
+        new GenericSchemaName(Some(classTagToSchemaName(ct)))
     }
 
+  }
+
+  /** Internal machinery for extracting a description of a type */
+  trait GenericDescriptions {
+
+    class GenericDescription[A](val description: Option[String])
+
+    object GenericDescription extends GenericDescriptionLowPriority {
+      implicit def annotated[A](
+          implicit ann: Annotation[docs, A]
+      ): GenericDescription[A] =
+        new GenericDescription(Some(ann().text))
+    }
+
+    trait GenericDescriptionLowPriority {
+      implicit def noDescription[A]: GenericDescription[A] =
+        new GenericDescription[A](None)
+    }
+  }
+
+  /** Internal machinery for extracting a title of a type */
+  trait GenericTitles {
+
+    class GenericTitle[A](val title: Option[String])
+
+    object GenericTitle extends GenericTitleLowPriority {
+      implicit def annotated[A](
+          implicit ann: Annotation[title, A]
+      ): GenericTitle[A] =
+        new GenericTitle(Some(ann().value))
+    }
+
+    trait GenericTitleLowPriority {
+      implicit def noTitle[A]: GenericTitle[A] =
+        new GenericTitle[A](None)
+    }
   }
 
   /**

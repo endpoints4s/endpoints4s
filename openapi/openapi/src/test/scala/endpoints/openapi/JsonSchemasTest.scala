@@ -11,6 +11,45 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   import DocumentedJsonSchemas.DocumentedJsonSchema._
 
+  private val expectedSealedTraitSchema = DocumentedCoProd(
+    (
+      "Bar",
+      DocumentedRecord(
+        Field(
+          "s",
+          DocumentedJsonSchemas.defaultStringJsonSchema.docs,
+          isOptional = false,
+          documentation = None
+        ) :: Nil
+      )
+    ) ::
+      (
+        "Baz",
+        DocumentedRecord(
+          Field(
+            "i",
+            DocumentedJsonSchemas.intJsonSchema.docs,
+            isOptional = false,
+            documentation = None
+          ) :: Nil
+        )
+      ) ::
+      ("Bax", DocumentedRecord(Nil)) ::
+      ("Qux", DocumentedRecord(Nil)) ::
+      (
+        "Quux",
+        DocumentedRecord(
+          Field(
+            "b",
+            DocumentedJsonSchemas.byteJsonSchema.docs,
+            isOptional = false,
+            documentation = None
+          ) :: Nil
+        )
+      ) ::
+      Nil
+  )
+
   "case class" in {
     val expectedSchema =
       DocumentedRecord(
@@ -32,46 +71,15 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "sealed trait" in {
-    val expectedSchema =
-      DocumentedCoProd(
-        (
-          "Bar",
-          DocumentedRecord(
-            Field(
-              "s",
-              DocumentedJsonSchemas.defaultStringJsonSchema.docs,
-              isOptional = false,
-              documentation = None
-            ) :: Nil
-          )
-        ) ::
-          (
-            "Baz",
-            DocumentedRecord(
-              Field(
-                "i",
-                DocumentedJsonSchemas.intJsonSchema.docs,
-                isOptional = false,
-                documentation = None
-              ) :: Nil
-            )
-          ) ::
-          ("Bax", DocumentedRecord(Nil)) ::
-          ("Qux", DocumentedRecord(Nil)) ::
-          (
-            "Quux",
-            DocumentedRecord(
-              Field(
-                "b",
-                DocumentedJsonSchemas.byteJsonSchema.docs,
-                isOptional = false,
-                documentation = None
-              ) :: Nil
-            )
-          ) ::
-          Nil
-      )
+    val expectedSchema = expectedSealedTraitSchema
     assert(DocumentedJsonSchemas.Foo.schema.docs == expectedSchema)
+  }
+
+  "sealed trait tagged merge" in {
+    val expectedSchema = expectedSealedTraitSchema
+    assert(
+      DocumentedJsonSchemas.Foo.alternativeSchemaForMerge.docs == expectedSchema
+    )
   }
 
   "enum" in {
@@ -98,6 +106,8 @@ class JsonSchemasTest extends AnyFreeSpec {
         ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj(
           "quux" -> ujson.Str("baz")
         ) :: Nil,
+        None,
+        None,
         None
       )
     assert(
@@ -109,6 +119,8 @@ class JsonSchemasTest extends AnyFreeSpec {
     DocumentedJsonSchemas.recursiveSchema.docs match {
       case DocumentedRecord(
           List(Field("next", tpe, true, None)),
+          None,
+          None,
           None,
           None,
           None

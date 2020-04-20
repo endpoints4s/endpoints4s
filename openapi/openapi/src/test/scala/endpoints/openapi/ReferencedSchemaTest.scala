@@ -188,27 +188,20 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |        "enum" : ["Red", "Blue"]
         |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Storage.Online" : {
-        |        "allOf" : [
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
+        |        "type" : "object",
+        |        "properties" : {
+        |          "storageType" : {
+        |            "type" : "string",
+        |            "enum" : ["Online"],
+        |            "example" : "Online"
         |          },
-        |          {
-        |            "type" : "object",
-        |            "properties" : {
-        |              "storageType" : {
-        |                "type" : "string",
-        |                "enum" : ["Online"],
-        |                "example" : "Online"
-        |              },
-        |              "link" : {
-        |                "type" : "string"
-        |              }
-        |            },
-        |            "required" : [
-        |              "storageType",
-        |              "link"
-        |            ]
+        |          "link" : {
+        |            "type" : "string"
         |          }
+        |        },
+        |        "required" : [
+        |          "storageType",
+        |          "link"
         |        ]
         |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Book" : {
@@ -275,32 +268,25 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |        }
         |      },
         |      "endpoints.openapi.ReferencedSchemaTest.Storage.Library" : {
-        |        "allOf" : [
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints.openapi.ReferencedSchemaTest.Storage"
+        |        "type" : "object",
+        |        "properties" : {
+        |          "storageType" : {
+        |            "type" : "string",
+        |            "enum" : ["Library"],
+        |            "example" : "Library"
         |          },
-        |          {
-        |            "type" : "object",
-        |            "properties" : {
-        |              "storageType" : {
-        |                "type" : "string",
-        |                "enum" : ["Library"],
-        |                "example" : "Library"
-        |              },
-        |              "room" : {
-        |                "type" : "string"
-        |              },
-        |              "shelf" : {
-        |                "type" : "integer",
-        |                "format" : "int32"
-        |              }
-        |            },
-        |            "required" : [
-        |              "storageType",
-        |              "room",
-        |              "shelf"
-        |            ]
+        |          "room" : {
+        |            "type" : "string"
+        |          },
+        |          "shelf" : {
+        |            "type" : "integer",
+        |            "format" : "int32"
         |          }
+        |        },
+        |        "required" : [
+        |          "storageType",
+        |          "room",
+        |          "shelf"
         |        ]
         |      }
         |    },

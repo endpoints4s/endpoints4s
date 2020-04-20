@@ -398,25 +398,6 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         }
       }
 
-      "Report failures when decoding response headers" in {
-        val response = "foo"
-        val etag = s""""${UUID.randomUUID()}""""
-        wireMockServer.stubFor(
-          get(urlEqualTo("/versioned-resource"))
-            .willReturn(
-              aResponse()
-                .withStatus(200)
-                .withBody(response)
-                .withHeader("ETag", etag)
-                .withHeader("Last-Modified", "dummy")
-            )
-        )
-
-        whenReady(call(client.versionedResource, ()).failed) { exception =>
-          assert(exception.getMessage == "Invalid date")
-        }
-      }
-
       "Decode optional response headers" in {
         val response = "foo"
         val origin = "*"

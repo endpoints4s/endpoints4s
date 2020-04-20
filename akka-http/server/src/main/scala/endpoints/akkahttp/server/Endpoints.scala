@@ -17,10 +17,12 @@ import akka.http.scaladsl.server.{
 import akka.http.scaladsl.unmarshalling._
 import endpoints.algebra.Documentation
 import endpoints.{
+  Invalid,
   InvariantFunctor,
   PartialInvariantFunctor,
   Semigroupal,
   Tupler,
+  Valid,
   Validated,
   algebra
 }
@@ -62,10 +64,24 @@ trait EndpointsWithCustomErrors
 
   type Response[A] = A => Route
 
-  implicit lazy val responseInvFunctor: InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
-      def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
+      def xmap[A, B](
+          fa: Response[A],
+          f: A => B,
+          g: B => A
+      ): Response[B] =
         fa compose g
+    }
+
+  implicit lazy val responseEntityInvariantFunctor
+      : InvariantFunctor[ResponseEntity] =
+    new InvariantFunctor[ResponseEntity] {
+      def xmap[A, B](
+          fa: ResponseEntity[A],
+          f: A => B,
+          g: B => A
+      ): ResponseEntity[B] = fa compose g
     }
 
   private[server] val endpointsExceptionHandler =
@@ -92,6 +108,10 @@ trait EndpointsWithCustomErrors
       REQUESTS
   ************************* */
 
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    directive1InvFunctor
+
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
   def textRequest: RequestEntity[String] = {
@@ -99,7 +119,8 @@ trait EndpointsWithCustomErrors
     Directives.entity[String](um)
   }
 
-  implicit lazy val reqEntityInvFunctor: InvariantFunctor[RequestEntity] =
+  implicit lazy val requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity] =
     directive1InvFunctor
 
   /* ************************
@@ -117,9 +138,10 @@ trait EndpointsWithCustomErrors
       docs: Documentation
   ): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
-  implicit lazy val reqHeadersInvFunctor: InvariantFunctor[RequestHeaders] =
+  implicit lazy val requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders] =
     directive1InvFunctor
-  implicit lazy val reqHeadersSemigroupal: Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       override def product[A, B](fa: Directive1[A], fb: Directive1[B])(
           implicit tupler: Tupler[A, B]
@@ -141,12 +163,12 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders] =
-    new PartialInvariantFunctor[ResponseHeaders] {
-      def xmapPartial[A, B](
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders] =
+    new InvariantFunctor[ResponseHeaders] {
+      def xmap[A, B](
           fa: ResponseHeaders[A],
-          f: A => Validated[B],
+          f: A => B,
           g: B => A
       ): ResponseHeaders[B] =
         fa compose g
@@ -222,13 +244,19 @@ trait EndpointsWithCustomErrors
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] = Endpoint(request, response)
 
-  lazy val directive1InvFunctor: InvariantFunctor[Directive1] =
-    new InvariantFunctor[Directive1] {
-      def xmap[From, To](
+  lazy val directive1InvFunctor: PartialInvariantFunctor[Directive1] =
+    new PartialInvariantFunctor[Directive1] {
+      def xmapPartial[From, To](
           f: Directive1[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
-      ): Directive1[To] = f.map(map)
+      ): Directive1[To] =
+        f.flatMap(from =>
+          map(from) match {
+            case Valid(value)     => Directives.provide(value)
+            case invalid: Invalid => handleClientErrors(invalid)
+          }
+        )
     }
 
   /**

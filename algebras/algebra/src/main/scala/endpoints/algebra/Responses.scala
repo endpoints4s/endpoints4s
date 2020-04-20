@@ -1,23 +1,21 @@
 package endpoints.algebra
 
-import endpoints.{
-  InvariantFunctor,
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Semigroupal,
-  Tupler
-}
+import endpoints.{InvariantFunctor, InvariantFunctorSyntax, Semigroupal, Tupler}
 
 /**
   * @group algebras
   */
-trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
+trait Responses extends StatusCodes with InvariantFunctorSyntax {
   this: Errors =>
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A
     *
+    * Values of type `Response[A]` can be constructed by using the operations
+    * [[ok]], [[badRequest]], [[internalServerError]], or the more general operation
+    * [[response]].
+    *
     * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
-    *       and [[ResponseSyntax]] class
+    *       and [[ResponseSyntax]] classes
     * @group types
     */
   type Response[A]
@@ -25,21 +23,37 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
   /** Provides the operation `xmap` to the type `Response`
     * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseInvFunctor: InvariantFunctor[Response]
+  implicit def responseInvariantFunctor: InvariantFunctor[Response]
 
   /** An HTTP response entity carrying an information of type A
+    *
+    * Values of type [[ResponseEntity]] can be constructed by using the operations
+    * [[emptyResponse]] or [[textResponse]]. Additional types of response entities are
+    * provided by other algebra modules, such as [[JsonEntities]] or [[ChunkedEntities]].
+    *
+    * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
+    *       class
     * @group types
     */
   type ResponseEntity[A]
 
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity]
+
   /**
     * Empty response entity
+    *
+    *   - Server interpreters produce no response entity,
+    *   - Client interpreters ignore the response entity.
+    *
     * @group operations
     */
   def emptyResponse: ResponseEntity[Unit]
 
   /**
     * Text response entity
+    *
+    *   - Server interpreters produce an HTTP response with a `text/plain` content type.
+    *
     * @group operations
     */
   def textResponse: ResponseEntity[String]
@@ -51,7 +65,7 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
     * [[optResponseHeader]], or [[emptyResponseHeaders]].
     *
     * @note This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *       and [[PartialInvariantFunctorSyntax]] classes.
+    *       and [[InvariantFunctorSyntax]] classes.
     * @group types
     */
   type ResponseHeaders[A]
@@ -63,25 +77,28 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders]
 
   /**
-    * Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]]
+    * Provides `xmap` operation.
+    * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseHeadersInvFunctor
-      : PartialInvariantFunctor[ResponseHeaders]
+  implicit def responseHeadersInvariantFunctor
+      : InvariantFunctor[ResponseHeaders]
 
   /**
     * No particular response header.
-    * Client interpreters should ignore information carried by response headers.
+    *
+    *   - Client interpreters should ignore information carried by response headers.
+    *
     * @group operations
     */
   def emptyResponseHeaders: ResponseHeaders[Unit]
 
   /**
     * Response headers containing a header with the given `name`.
-    * Client interpreters should model the header value as `String`, or
-    * fail if the response header is missing.
-    * Server interpreters should produce such a response header.
-    * Documentation interpreters should document this header.
+    *
+    *   - Client interpreters should model the header value as `String`, or
+    *    fail if the response header is missing.
+    *   - Server interpreters should produce such a response header.
+    *   - Documentation interpreters should document this header.
     *
     * Example:
     *
@@ -105,10 +122,11 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
 
   /**
     * Response headers optionally containing a header with the given `name`.
-    * Client interpreters should model the header value as `Some[String]`, or
-    * `None` if the response header is missing.
-    * Server interpreters should produce such a response header.
-    * Documentation interpreters should document this header.
+    *
+    *   - Client interpreters should model the header value as `Some[String]`, or
+    *     `None` if the response header is missing.
+    *   - Server interpreters should produce such a response header.
+    *   - Documentation interpreters should document this header.
     *
     * @group operations
     */
@@ -117,9 +135,10 @@ trait Responses extends StatusCodes with PartialInvariantFunctorSyntax {
       docs: Documentation = None
   ): ResponseHeaders[Option[String]]
 
-  /**
-    * Server interpreters construct a response with the given status and entity.
-    * Client interpreters accept a response only if it has a corresponding status code.
+  /** Define an HTTP response
+    *
+    *   - Server interpreters construct a response with the given status and entity.
+    *   - Client interpreters accept a response only if it has a corresponding status code.
     *
     * @param statusCode Response status code
     * @param entity     Response entity

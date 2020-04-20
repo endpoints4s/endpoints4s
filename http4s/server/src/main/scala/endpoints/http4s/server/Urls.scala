@@ -98,7 +98,7 @@ trait Urls extends algebra.Urls with StatusCodes {
             .map(_.result())
       }
 
-  implicit def queryStringParamPartialInvFunctor
+  implicit def queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -115,7 +115,8 @@ trait Urls extends algebra.Urls with StatusCodes {
       Validated.fromOption(maybeValue)("Missing value")
     }
 
-  implicit def segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit def segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -204,7 +205,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       }
   }
 
-  implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit def urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],
@@ -240,7 +241,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     }
   }
 
-  implicit def queryStringPartialInvFunctor
+  implicit def queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](

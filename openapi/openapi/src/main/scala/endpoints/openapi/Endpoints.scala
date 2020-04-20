@@ -209,7 +209,7 @@ trait EndpointsWithCustomErrors
     } yield recSchema
 
     allReferencedSchemas.collect {
-      case Schema.Reference(name, Some(original), _, _) => name -> original
+      case Schema.Reference(name, Some(original), _, _, _) => name -> original
     }.toMap
   }
 
@@ -217,18 +217,18 @@ trait EndpointsWithCustomErrors
       schema: Schema
   ): Seq[Schema.Reference] =
     schema match {
-      case Schema.Object(properties, additionalProperties, _, _) =>
+      case Schema.Object(properties, additionalProperties, _, _, _) =>
         properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
           additionalProperties.toList.flatMap(captureReferencedSchemasRec)
-      case Schema.Array(Left(elementType), _, _) =>
+      case Schema.Array(Left(elementType), _, _, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Array(Right(elementTypes), _, _) =>
+      case Schema.Array(Right(elementTypes), _, _, _) =>
         elementTypes.flatMap(captureReferencedSchemasRec)
-      case Schema.Enum(elementType, _, _, _) =>
+      case Schema.Enum(elementType, _, _, _, _) =>
         captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_, _, _, _) =>
+      case Schema.Primitive(_, _, _, _, _) =>
         Nil
-      case Schema.OneOf(alternatives, _, _) =>
+      case Schema.OneOf(alternatives, _, _, _) =>
         val alternativeSchemas =
           alternatives match {
             case Schema.DiscriminatedAlternatives(_, alternatives) =>
@@ -236,7 +236,7 @@ trait EndpointsWithCustomErrors
             case Schema.EnumeratedAlternatives(alternatives) => alternatives
           }
         alternativeSchemas.flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas, _, _) =>
+      case Schema.AllOf(schemas, _, _, _) =>
         schemas.flatMap {
           case _: Schema.Reference => Nil
           case s                   => captureReferencedSchemasRec(s)
