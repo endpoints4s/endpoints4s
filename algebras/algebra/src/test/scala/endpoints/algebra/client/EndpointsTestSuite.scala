@@ -281,10 +281,6 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
           ) shouldEqual "/foo?id=f4b9defa-1ad8-453f-9a06-2683b8564b8d"
         }
 
-        "escaping" in {
-          encodeUrl(path /? qs[String]("q"))("foo bar/baz") shouldEqual "?q=foo+bar%2Fbaz"
-        }
-
         "multiple parameters" in {
           encodeUrl(path /? (qs[Int]("x") & qs[Int]("y")))((0, 1)) shouldEqual "?x=0&y=1"
         }
@@ -399,25 +395,6 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
               cache.etag.startsWith(etag.dropRight(1))
             ) // Some http client add a “--gzip” suffix
             assert(cache.lastModified == lastModified)
-        }
-      }
-
-      "Report failures when decoding response headers" in {
-        val response = "foo"
-        val etag = s""""${UUID.randomUUID()}""""
-        wireMockServer.stubFor(
-          get(urlEqualTo("/versioned-resource"))
-            .willReturn(
-              aResponse()
-                .withStatus(200)
-                .withBody(response)
-                .withHeader("ETag", etag)
-                .withHeader("Last-Modified", "dummy")
-            )
-        )
-
-        whenReady(call(client.versionedResource, ()).failed) { exception =>
-          assert(exception.getMessage == "Invalid date")
         }
       }
 

@@ -58,6 +58,22 @@ trait JsonSchemasFixtures extends JsonSchemas {
         case quux: Quux    => Right(quux)
       }
     }
+
+    val alternativeSchemaForMerge: Tagged[Foo] = {
+      val barSchema: Record[Bar] = field[String]("s").xmap(Bar)(_.s)
+      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
+      val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
+      val quxSchema: Record[Qux.type] = emptyRecord.xmap(_ => Qux)(_ => ())
+      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux)(_.b)
+
+      (
+        barSchema.tagged("Bar") orElseMerge
+          bazSchema.tagged("Baz") orElseMerge
+          baxSchema.tagged("Bax") orElseMerge
+          quxSchema.tagged("Qux") orElseMerge
+          quuxSchema.tagged("Quux")
+      )
+    }
   }
 
   object Enum {

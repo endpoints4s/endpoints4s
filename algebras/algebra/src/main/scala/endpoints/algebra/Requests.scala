@@ -12,16 +12,22 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * You can construct values of type `RequestHeaders` by using the operations
     * [[requestHeader]], [[optRequestHeader]], or [[emptyRequestHeaders]].
     *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request headers as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
+    *
     * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *        and [[InvariantFunctorSyntax]] classes.
+    *        and [[PartialInvariantFunctorSyntax]] classes.
     * @group types */
   type RequestHeaders[A]
 
-  /**
-    * No particular information. Does not mean that the headers *have to*
-    * be empty. Just that, from a server point of view no information will
-    * be extracted from them, and from a client point of view no particular
-    * headers will be built in the request.
+  /** Ignore headers
+    *
+    *   - Server interpreters don’t try to parse any information from the
+    *     request headers,
+    *   - Client interpreters supply no specific headers
     *
     * Use `description` of [[endpoints.algebra.Endpoints#endpoint]] to document empty headers.
     * @group operations
@@ -50,24 +56,52 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Provides `++` operation.
     * @see [[SemigroupalSyntax]] */
-  implicit def reqHeadersSemigroupal: Semigroupal[RequestHeaders]
+  implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders]
 
-  /** Provides `xmap` operation.
-    * @see [[InvariantFunctorSyntax]] */
-  implicit def reqHeadersInvFunctor: InvariantFunctor[RequestHeaders]
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestHeadersPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestHeaders]
 
   /** Information carried by a whole request (headers and entity)
+    *
+    * Values of type `Request[A]` can be constructed by using the operations
+    * [[request]], [[get]], [[post]], [[put]], or [[delete]].
+    *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
+    *
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
     * @group types */
   type Request[A]
 
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request]
+
   /** Information carried by request entity
-    * @note  This type has implicit methods provided by the [[InvariantFunctorSyntax]] class.
+    *
+    * Values of type `RequestEntity[A]` can be constructed by using the operations
+    * [[emptyRequest]] or [[textRequest]]. Additional types of request entities
+    * are provided by other algebra modules, such as [[JsonEntities]] or [[ChunkedEntities]].
+    *
+    *   - Server interpreters raise an error if they can’t parse the incoming
+    *     request entity as a value of type `A`. By default,
+    *     they produce a Bad Request (400) response with a list of error messages
+    *     in a JSON array. Refer to the documentation of your server interpreter
+    *     to customize this behavior.
+    *
+    * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
     * @group types */
   type RequestEntity[A]
 
-  /** Provides `xmap` operation.
-    * @see [[InvariantFunctorSyntax]] */
-  implicit def reqEntityInvFunctor: InvariantFunctor[RequestEntity]
+  /** Provides the operations `xmap` and `xmapPartial`.
+    * @see [[PartialInvariantFunctorSyntax]] */
+  implicit def requestEntityPartialInvariantFunctor
+      : PartialInvariantFunctor[RequestEntity]
 
   /**
     * Empty request -- request without a body.

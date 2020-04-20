@@ -27,14 +27,19 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     @discriminator("$type")
     @name("DocResource")
+    @docs("traitDoc")
+    @title("Doc Resource")
     sealed trait Doc
+    @docs("recordDocA")
     case class DocA(@docs("fieldDocI") i: Int) extends Doc
+    @unnamed()
     case class DocB(
         a: String,
         @docs("fieldDocB") b: Boolean,
         @docs("fieldDocSS") ss: List[String]
     ) extends Doc
     @name("DocC")
+    @docs("recordDocC")
     case object DocC extends Doc
 
     object Doc {
@@ -106,11 +111,60 @@ class JsonSchemasTest extends AnyFreeSpec {
     ): String =
       s"$recordA,$recordB"
 
+    def withExampleRecord[A](
+        schema: Record[A],
+        example: A
+    ): Record[A] = schema
+
+    def withExampleTagged[A](
+        schema: Tagged[A],
+        example: A
+    ): Tagged[A] = schema
+
+    def withExampleEnum[A](
+        schema: Enum[A],
+        example: A
+    ): Enum[A] = schema
+
     def withExampleJsonSchema[A](
         schema: JsonSchema[A],
         example: A
     ): JsonSchema[A] =
       schema
+
+    def withDescriptionRecord[A](
+        schema: Record[A],
+        description: String
+    ): String = s"$schema{$description}"
+
+    def withDescriptionTagged[A](
+        schema: Tagged[A],
+        description: String
+    ): String = s"$schema{$description}"
+
+    def withDescriptionEnum[A](
+        schema: Enum[A],
+        description: String
+    ): String = s"$schema{$description}"
+
+    def withDescriptionJsonSchema[A](
+        schema: JsonSchema[A],
+        description: String
+    ): String = s"$schema{$description}"
+
+    def withTitleRecord[A](schema: Record[A], title: String): Record[A] =
+      s"[[$title]]$schema"
+
+    def withTitleTagged[A](schema: Tagged[A], title: String): Tagged[A] =
+      s"[[$title]]$schema"
+
+    def withTitleEnum[A](schema: Enum[A], title: String): Enum[A] =
+      s"[[$title]]$schema"
+
+    def withTitleJsonSchema[A](
+        schema: JsonSchema[A],
+        title: String
+    ): JsonSchema[A] = schema
 
     def orFallbackToJsonSchema[A, B](
         schemaA: JsonSchema[A],
@@ -193,11 +247,11 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "documentations" in {
-    val expectedSchema = s"'DocResource'!(${List(
-      s"'$ns.DocA'!(i:integer{fieldDocI},%)@DocA",
-      s"'$ns.DocB'!(a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%)@DocB",
-      s"'DocC'!(%)@DocC"
-    ).mkString("|")})#$$type"
+    val expectedSchema = s"[[Doc Resource]]'DocResource'!(${List(
+      s"'$ns.DocA'!(i:integer{fieldDocI},%){recordDocA}@DocA",
+      s"a:string,b:boolean{fieldDocB},ss:[string]{fieldDocSS},%@DocB",
+      s"'DocC'!(%){recordDocC}@DocC"
+    ).mkString("|")})#$$type{traitDoc}"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
   }
 

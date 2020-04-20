@@ -16,7 +16,7 @@ import scala.collection.mutable
 /**
   * @group interpreters
   */
-trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
+trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {
 
@@ -121,12 +121,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       }
       val encoder = tpe.encoder
     }
-
-  def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
-
-  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
-
-  def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
 
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
     new JsonSchema[A] {
@@ -237,11 +231,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         }
       }
     }
-
-  def withExampleJsonSchema[A](
-      schema: JsonSchema[A],
-      example: A
-  ): JsonSchema[A] = schema
 
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],

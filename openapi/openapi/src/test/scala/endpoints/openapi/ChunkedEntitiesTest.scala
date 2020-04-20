@@ -39,11 +39,13 @@ class ChunkedEntitiesTest extends AnyWordSpec {
                         "endpoints.Errors",
                         Some(
                           Array(
-                            Left(Primitive("string", None, None, None)),
+                            Left(Primitive("string", None, None, None, None)),
+                            None,
                             None,
                             None
                           )
                         ),
+                        None,
                         None,
                         None
                       )
@@ -61,11 +63,13 @@ class ChunkedEntitiesTest extends AnyWordSpec {
                         "endpoints.Errors",
                         Some(
                           Array(
-                            Left(Primitive("string", None, None, None)),
+                            Left(Primitive("string", None, None, None, None)),
+                            None,
                             None,
                             None
                           )
                         ),
+                        None,
                         None,
                         None
                       )

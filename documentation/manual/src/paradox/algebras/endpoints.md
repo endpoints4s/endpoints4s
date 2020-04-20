@@ -59,6 +59,7 @@ examples of URLs:
 
 The examples above show that basic types (e.g., `Int`, `String`, etc.) are supported out of the box as query
 and path parameters. A user-defined type `T` can be supported either by
+
 - defining implicit instances of `Segment[T]` (for path parameters) or `QueryStringParam[T]` (for query string
   parameters),
 - transforming or refining already supported types by using `xmap` or `xmapPartial` (see next section).
