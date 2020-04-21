@@ -44,12 +44,7 @@ class JsonSchemaInterpreterTest extends JsonEntitiesFromSchemasTestSuite[JsonSch
     val httpApp = Router("/" -> service).orNotFound
     val server =
       BlazeServerBuilder[IO].bindHttp(port, "localhost").withHttpApp(httpApp)
-    val fiber = server.resource.use(_ => IO.never).start.unsafeRunSync()
-    try {
-      runTests(port)
-    } finally {
-      fiber.cancel.unsafeRunSync()
-    }
+    server.resource.use(_ => IO(runTests(port))).start.unsafeRunSync()
   }
 
 }

@@ -6,6 +6,7 @@ import endpoints.algebra.client
 import cats.effect.Sync
 import org.http4s.client.Client
 import cats.effect.IO
+import cats.implicits._
 import cats.data.Kleisli
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.global
