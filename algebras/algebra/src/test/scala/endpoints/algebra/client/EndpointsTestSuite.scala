@@ -283,8 +283,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
         "escaping" in {
           val encoded = encodeUrl(path /? qs[String]("q"))("foo bar/baz")
-          println(encoded)
-          (encoded == "?q=foo+bar%2Fbaz" || encoded == "?q=foo%20bar/baz") shouldEqual true
+          assert(encoded == "?q=foo+bar%2Fbaz" || encoded == "?q=foo%20bar/baz")
         }
 
         "multiple parameters" in {
