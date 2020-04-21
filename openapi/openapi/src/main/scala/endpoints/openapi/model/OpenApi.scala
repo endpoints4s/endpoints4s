@@ -7,15 +7,38 @@ import scala.collection.mutable
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   */
-case class OpenApi(
-    info: Info,
-    paths: Map[String, PathItem],
-    components: Components
-)
+class OpenApi private (
+    val info: Info,
+    val paths: Map[String, PathItem],
+    val components: Components
+) extends Serializable {
+
+  override def toString =
+    s"OpenApi($info, $paths, $components)"
+
+  private[this] def copy(
+      info: Info = info,
+      paths: Map[String, PathItem] = paths,
+      components: Components = components
+  ): OpenApi =
+    new OpenApi(info, paths, components)
+
+  def withInfo(info: Info): OpenApi =
+    copy(info = info)
+
+  def withPaths(paths: Map[String, PathItem]): OpenApi =
+    copy(paths = paths)
+
+  def withComponents(components: Components): OpenApi =
+    copy(components = components)
+}
 
 object OpenApi {
 
   val openApiVersion = "3.0.0"
+
+  def apply(info: Info, paths: Map[String, PathItem], components: Components) =
+    new OpenApi(info, paths, components)
 
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
     new ujson.Obj(mutable.LinkedHashMap(map.iterator.map {
