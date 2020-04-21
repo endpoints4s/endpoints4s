@@ -1,6 +1,33 @@
 # http4s
 
-Server backed by [http4s](http://http4s.org).
+Client and server backed by [http4s](http://http4s.org).
+
+## Client
+
+@@@vars
+~~~ scala
+"org.julienrf" %% "endpoints-http4s-client" % "$version$"
+~~~
+@@@
+
+@scaladoc[API documentation](endpoints.http4s.client.index)
+
+### `Endpoints`
+
+The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a `Kleisli[Effect, A, B]` aka a function
+from `A` to `Effect[B]`, where `Effect[_]` can be any type constructor `F[_]` with a valid `cats.effect.Sync` instance (e.g. `cats.effect.IO` or `monix.eval.Task`) :
+
+@@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints/http4s/client/Endpoints.scala) { #endpoint-type }
+
+This means that, given the following endpoint definition:
+
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #endpoint-definition }
+
+It can be invoked as follows using `IO`:
+
+@@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints/http4s/client/EndpointsDocs.scala) { #invocation }
+
+## Server
 
 @@@vars
 ~~~ scala
@@ -10,7 +37,7 @@ Server backed by [http4s](http://http4s.org).
 
 @scaladoc[API documentation](endpoints.http4s.server.index)
 
-## `Endpoints`
+### `Endpoints`
 
 The `Endpoints` interpreter provides a `routesFromEndpoints` operation that
 turns a sequence of endpoints with their implementation into an `org.http4s.HttpRoutes[F]`
