@@ -17,10 +17,11 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import akka.stream.scaladsl.Source
 
 import scala.concurrent.Future
 import akka.actor.ActorSystem
+import streamz.converter._
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
@@ -39,13 +40,7 @@ class ServerInterpreterTest
     }
 
     // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
-    val stream =
-      fs2.Stream.force(IO.delay {
-        val subscriber = response.toMat(Sink.queue[Resp]())(Keep.right).run()
-        val pull = cats.effect.Async.fromFuture(IO.delay(subscriber.pull()))
-        val cancel = IO.delay(subscriber.cancel())
-        fs2.Stream.repeatEval(pull).unNoneTerminate.onFinalize(cancel)
-      })
+    val stream = response.toStream[IO]()
 
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => stream))
     val httpApp = Router("/" -> service).orNotFound
@@ -62,8 +57,8 @@ class ServerInterpreterTest
       finally if (socket != null) socket.close()
     }
 
-    def toSource(s: fs2.Stream[IO, Req]): Source[Req, _]=
-      Source.fromIterator(() => s.compile.to(Iterator).unsafeRunSync())
+    def toSource(s: fs2.Stream[IO, Req]): Source[Req, _] =
+      Source.fromGraph(s.toSource)
     
 
     val service = HttpRoutes.of[IO](endpoint.implementedByEffect(stream => IO.fromFuture(IO(logic(toSource(stream))))))

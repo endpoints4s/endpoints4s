@@ -11,6 +11,7 @@ object EndpointsSettings {
 
   val commonSettings = Seq(
     organization := "org.julienrf",
+    resolvers += "streamz at bintray" at "https://dl.bintray.com/streamz/maven",
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation",
@@ -89,6 +90,7 @@ object EndpointsSettings {
   val playjsonVersion = "2.8.1"
   val playVersion = "2.8.1"
   val sttpVersion = "1.7.2"
+  val streamzVersion = "0.12"
   val akkaActorVersion = "2.6.3"
   val akkaHttpVersion = "10.1.11"
   val http4sVersion = "0.21.3"

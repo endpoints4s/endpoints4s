@@ -6,7 +6,6 @@ import endpoints.algebra.client
 import cats.effect.Sync
 import org.http4s.client.Client
 import cats.effect.IO
-import cats.implicits._
 import cats.data.Kleisli
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.global
@@ -15,8 +14,8 @@ import cats.effect.ContextShift
 import endpoints.algebra.circe
 import org.http4s.Uri
 import akka.stream.scaladsl.Source
-import fs2.concurrent.Queue
 import akka.actor.ActorSystem
+import streamz.converter._
 
 class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
     extends Endpoints[F](host, client)
@@ -59,18 +58,8 @@ class Http4sClientEndpointsJsonSchemaTest
   def callStreamedEndpoint[A, B](
       endpoint: Kleisli[IO, fs2.Stream[IO, A], B],
       req: Source[A, _]
-  ): Future[B] = {
-    val inputStream = for {
-      q <- fs2.Stream.eval(Queue.unbounded[IO, Option[A]])
-      _ <- fs2.Stream.eval(
-        IO.fromFuture(IO(req.runForeach(a => q.enqueue1(Some(a)))))
-      )
-      _ <- fs2.Stream.eval(q.enqueue1(None))
-      res <- q.dequeue.unNone
-    } yield res
-
-    endpoint.run(inputStream).unsafeToFuture()
-  }
+  ): Future[B] =
+    endpoint.run(req.toStream[IO]()).unsafeToFuture()
 
   def callStreamedEndpoint[A, B](
       endpoint: Kleisli[IO, A, fs2.Stream[IO, B]],

@@ -15,7 +15,8 @@ val `http4s-server` =
       libraryDependencies ++= Seq(
         "org.http4s" %%% "http4s-core" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test
+        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
+        "com.github.krasserm" %% "streamz-converter" % streamzVersion % Test
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -31,8 +32,10 @@ val `http4s-client` =
       name := "endpoints-http4s-client",
       libraryDependencies ++= Seq(
         "org.http4s" %% "http4s-client" % http4sVersion,
-        "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test
-      )
+        "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
+        "com.github.krasserm" %% "streamz-converter" % streamzVersion % Test
+      ),
+      parallelExecution in Test := false
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
