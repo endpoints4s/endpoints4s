@@ -8,19 +8,66 @@ import endpoints.algebra.server.{
   BasicAuthenticationTestSuite,
   DecodedUrl,
   EndpointsTestSuite,
-  JsonEntitiesFromSchemasTestSuite
+  ChunkedJsonEntitiesTestSuite
 }
+import endpoints.algebra.server.{BasicAuthenticationTestSuite, ChunkedJsonEntitiesTestSuite, DecodedUrl, EndpointsTestSuite}
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
+import akka.stream.scaladsl.Source
+
+import scala.concurrent.Future
+import akka.actor.ActorSystem
+import streamz.converter._
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
-    with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi] {
+    with ChunkedJsonEntitiesTestSuite[EndpointsTestApi] {
+
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+  implicit val system = ActorSystem()
+
+  def serveStreamedEndpoint[Resp](endpoint: serverApi.Endpoint[_, fs2.Stream[IO, Resp]], response: Source[Resp, _])(runTests: Int => Unit): Unit = {
+    val port = {
+      val socket = new ServerSocket(0)
+      try socket.getLocalPort
+      finally if (socket != null) socket.close()
+    }
+
+    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    val stream = response.toStream[IO]()
+
+    val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => stream))
+    val httpApp = Router("/" -> service).orNotFound
+    val server =
+      BlazeServerBuilder[IO].bindHttp(port, "localhost").withHttpApp(httpApp)
+    server.resource.use(_ => IO(runTests(port))).start.unsafeRunSync()
+  }
+    
+
+  def serveStreamedEndpoint[Req, Resp](endpoint: serverApi.Endpoint[fs2.Stream[IO, Req],Resp], logic: Source[Req, _] => Future[Resp])(runTests: Int => Unit): Unit = {
+    val port = {
+      val socket = new ServerSocket(0)
+      try socket.getLocalPort
+      finally if (socket != null) socket.close()
+    }
+
+    def toSource(s: fs2.Stream[IO, Req]): Source[Req, _] =
+      Source.fromGraph(s.toSource)
+    
+
+    val service = HttpRoutes.of[IO](endpoint.implementedByEffect(stream => IO.fromFuture(IO(logic(toSource(stream))))))
+    val httpApp = Router("/" -> service).orNotFound
+    val server =
+      BlazeServerBuilder[IO].bindHttp(port, "localhost").withHttpApp(httpApp)
+    server.resource.use(_ => IO(runTests(port))).start.unsafeRunSync()
+  }
+
 
   val serverApi = new EndpointsTestApi()
 
@@ -44,8 +91,6 @@ class ServerInterpreterTest
       try socket.getLocalPort
       finally if (socket != null) socket.close()
     }
-    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-    implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => response))
     val httpApp = Router("/" -> service).orNotFound
     val server =

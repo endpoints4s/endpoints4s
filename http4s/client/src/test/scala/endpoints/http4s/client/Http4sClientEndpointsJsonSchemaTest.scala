@@ -14,23 +14,27 @@ import cats.effect.ContextShift
 import endpoints.algebra.circe
 import org.http4s.Uri
 import akka.stream.scaladsl.Source
-import fs2.concurrent.Queue
 import akka.actor.ActorSystem
+import streamz.converter._
 
 class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
     extends Endpoints[F](host, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
+    with ChunkedJsonEntities
     with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
+    with algebra.ChunkedJsonEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodecs
+    with algebra.circe.ChunkedJsonEntitiesTestApi
 
 class Http4sClientEndpointsJsonSchemaTest
     extends client.EndpointsTestSuite[TestJsonSchemaClient[IO]]
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
-    with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]] {
+    with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
+    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
   implicit val system = ActorSystem()
   implicit val ctx: ContextShift[IO] = IO.contextShift(global)
@@ -50,6 +54,28 @@ class Http4sClientEndpointsJsonSchemaTest
 
   def encodeUrl[A](url: client.Url[A])(a: A): String =
     url.encodeUrl(a).toOption.get.renderString
+
+  def callStreamedEndpoint[A, B](
+      endpoint: Kleisli[IO, fs2.Stream[IO, A], B],
+      req: Source[A, _]
+  ): Future[B] =
+    endpoint.run(req.toStream[IO]()).unsafeToFuture()
+
+  def callStreamedEndpoint[A, B](
+      endpoint: Kleisli[IO, A, fs2.Stream[IO, B]],
+      req: A
+  ): Future[Seq[Either[String, B]]] =
+    endpoint
+      .run(req)
+      .flatMap(stream =>
+        stream.attempt.map(_.left.map(_.toString)).compile.toList
+      )
+      .unsafeToFuture()
+
+  val streamingClient = new TestJsonSchemaClient[IO](
+    Uri.unsafeFromString(s"http://localhost:$streamingPort"),
+    ahc
+  )
 
   clientTestSuite()
   basicAuthSuite()

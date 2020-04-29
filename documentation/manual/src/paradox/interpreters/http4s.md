@@ -27,6 +27,20 @@ It can be invoked as follows using `IO`:
 
 @@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints/http4s/client/EndpointsDocs.scala) { #invocation }
 
+### `ChunkedEntities`
+
+The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `fs2.Stream[Effect, A]`:
+
+@@snip [ChunkedEntities.scala](/http4s/client/src/main/scala/endpoints/http4s/client/ChunkedEntities.scala) { #stream-type }
+
+This means that, given the following endpoint definition:
+
+@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+
+It can be invoked as follows:
+
+@@snip [ChunkedEntitiesDocs.scala](/http4s/client/src/test/scala/endpoints/http4s/client/ChunkedEntitiesDocs.scala) { #invocation }
+
 ## Server
 
 @@@vars
