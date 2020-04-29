@@ -11,13 +11,14 @@ trait NoDocsJsonSchemas extends JsonSchemas {
 
   def namedTagged[A](tagged: Tagged[A], name: String): Tagged[A] = tagged
 
-  def namedEnum[A](enum: Enum[A], name: String): Enum[A] = enum
+  def namedEnum[A](enumeration: Enum[A], name: String): Enum[A] = enumeration
 
   def withExampleRecord[A](record: Record[A], example: A): Record[A] = record
 
   def withExampleTagged[A](tagged: Tagged[A], example: A): Tagged[A] = tagged
 
-  def withExampleEnum[A](enum: Enum[A], example: A): Enum[A] = enum
+  def withExampleEnum[A](enumeration: Enum[A], example: A): Enum[A] =
+    enumeration
 
   def withExampleJsonSchema[A](
       schema: JsonSchema[A],
@@ -34,7 +35,10 @@ trait NoDocsJsonSchemas extends JsonSchemas {
       description: String
   ): Tagged[A] = tagged
 
-  def withDescriptionEnum[A](enum: Enum[A], description: String): Enum[A] = enum
+  def withDescriptionEnum[A](
+      enumeration: Enum[A],
+      description: String
+  ): Enum[A] = enumeration
 
   def withDescriptionJsonSchema[A](
       schema: JsonSchema[A],
@@ -45,7 +49,8 @@ trait NoDocsJsonSchemas extends JsonSchemas {
 
   def withTitleTagged[A](tagged: Tagged[A], title: String): Tagged[A] = tagged
 
-  def withTitleEnum[A](enum: Enum[A], title: String): Enum[A] = enum
+  def withTitleEnum[A](enumeration: Enum[A], title: String): Enum[A] =
+    enumeration
 
   def withTitleJsonSchema[A](
       schema: JsonSchema[A],

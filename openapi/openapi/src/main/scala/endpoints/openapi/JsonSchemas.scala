@@ -295,13 +295,13 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   def withExampleEnum[A](
-      enum: Enum[A],
+      enumeration: Enum[A],
       example: A
   ): Enum[A] = {
-    val exampleJson = enum.ujsonSchema.codec.encode(example)
+    val exampleJson = enumeration.ujsonSchema.codec.encode(example)
     new Enum[A](
-      enum.ujsonSchema,
-      enum.docs.copy(example = Some(exampleJson))
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(example = Some(exampleJson))
     )
   }
 
@@ -345,12 +345,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
 
   def withTitleEnum[A](
-      enum: Enum[A],
+      enumeration: Enum[A],
       title: String
   ): Enum[A] =
     new Enum[A](
-      enum.ujsonSchema,
-      enum.docs.copy(title = Some(title))
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(title = Some(title))
     )
 
   def withTitleJsonSchema[A](
@@ -392,12 +392,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
 
   def withDescriptionEnum[A](
-      enum: Enum[A],
+      enumeration: Enum[A],
       description: String
   ): Enum[A] =
     new Enum[A](
-      enum.ujsonSchema,
-      enum.docs.copy(description = Some(description))
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(description = Some(description))
     )
 
   def withDescriptionJsonSchema[A](

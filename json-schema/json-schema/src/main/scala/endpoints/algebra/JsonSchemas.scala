@@ -220,7 +220,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Annotates the tagged JSON schema with a name */
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A]
 
-  /** Annotates the enum JSON schema with a name */
+  /** Annotates the enumeration JSON schema with a name */
   def namedEnum[A](schema: Enum[A], name: String): Enum[A]
 
   /**
@@ -346,8 +346,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Include an example value within the given tagged JSON schema */
   def withExampleTagged[A](tagged: Tagged[A], example: A): Tagged[A]
 
-  /** Include an example value within the given enum JSON schema */
-  def withExampleEnum[A](enum: Enum[A], example: A): Enum[A]
+  /** Include an example value within the given enumeration JSON schema */
+  def withExampleEnum[A](enumeration: Enum[A], example: A): Enum[A]
 
   /** Include an example value within the given JSON schema */
   def withExampleJsonSchema[A](schema: JsonSchema[A], example: A): JsonSchema[A]
@@ -364,8 +364,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       description: String
   ): Tagged[A]
 
-  /** Add a description to the given enum JSON schema */
-  def withDescriptionEnum[A](enum: Enum[A], description: String): Enum[A]
+  /** Add a description to the given enumeration JSON schema */
+  def withDescriptionEnum[A](enumeration: Enum[A], description: String): Enum[A]
 
   /** Add a description to the given JSON schema */
   def withDescriptionJsonSchema[A](
@@ -379,8 +379,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Add a title to the given tagged JSON schema */
   def withTitleTagged[A](tagged: Tagged[A], title: String): Tagged[A]
 
-  /** Add a title to the given enum JSON schema */
-  def withTitleEnum[A](enum: Enum[A], title: String): Enum[A]
+  /** Add a title to the given enumeration JSON schema */
+  def withTitleEnum[A](enumeration: Enum[A], title: String): Enum[A]
 
   /** Add a title to the given schema */
   def withTitleJsonSchema[A](
