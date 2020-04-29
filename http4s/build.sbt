@@ -20,3 +20,19 @@ val `http4s-server` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
+
+val `http4s-client` =
+  project
+    .in(file("client"))
+    .settings(
+      publishSettings,
+      `scala 2.12 to latest`,
+      name := "endpoints-http4s-client",
+      libraryDependencies ++= Seq(
+        "org.http4s" %% "http4s-client" % http4sVersion,
+        "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test
+      )
+    )
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`openapi-jvm`)
+    .dependsOn(`algebra-circe-jvm` % "compile->test;test->test")
