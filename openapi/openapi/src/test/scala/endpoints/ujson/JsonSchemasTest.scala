@@ -410,7 +410,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   ): Unit = {
     schema.codec.decode(json) match {
       case Valid(decoded)  => assert(decoded == expected)
-      case Invalid(errors) => fail(errors.toString)
+      case Invalid(errors) => fail(errors.toString())
     }
     val encoded = schema.codec.encode(expected)
     assert(encoded == json)

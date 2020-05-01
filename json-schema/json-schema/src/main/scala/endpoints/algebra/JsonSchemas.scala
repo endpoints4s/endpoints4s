@@ -331,7 +331,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       case a: A => Left(a)
       case any =>
         throw new IllegalStateException(
-          s"Could not match: A = ${implicitly[ClassTag[A]]}, B = ${implicitly[ClassTag[B]]}, C = ${any.getClass}"
+          s"Could not match: A = ${implicitly[ClassTag[A]]}, B = ${implicitly[
+            ClassTag[B]
+          ]}, C = ${any.getClass()}"
         )
     }
 

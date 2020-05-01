@@ -6,16 +6,12 @@ import endpoints.algebra.client
 import cats.effect.Sync
 import org.http4s.client.Client
 import cats.effect.IO
-import cats.data.Kleisli
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.global
 import org.http4s.client.asynchttpclient.AsyncHttpClient
 import cats.effect.ContextShift
 import endpoints.algebra.circe
 import org.http4s.Uri
-import akka.stream.scaladsl.Source
-import fs2.concurrent.Queue
-import akka.actor.ActorSystem
 
 class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
     extends Endpoints[F](host, client)
@@ -32,7 +28,6 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]] {
 
-  implicit val system = ActorSystem()
   implicit val ctx: ContextShift[IO] = IO.contextShift(global)
 
   val (ahc, shutdown) =
