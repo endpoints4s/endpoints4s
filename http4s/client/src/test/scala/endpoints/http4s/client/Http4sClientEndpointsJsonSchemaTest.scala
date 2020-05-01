@@ -41,7 +41,12 @@ class Http4sClientEndpointsJsonSchemaTest
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
-  ): Future[Resp] = endpoint(args).unsafeToFuture()
+  ): Future[Resp] = {
+    Thread.sleep(50)
+    val eventualResponse = endpoint(args)
+    Thread.sleep(50)
+    eventualResponse.unsafeToFuture()
+  }
 
   def encodeUrl[A](url: client.Url[A])(a: A): String =
     url.encodeUrl(a).toOption.get.renderString
