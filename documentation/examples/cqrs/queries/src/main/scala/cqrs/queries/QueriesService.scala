@@ -51,7 +51,9 @@ class QueriesService(
   )
 
   // periodically poll the event log to keep our state up to date
-  val _ = scheduler.schedule(0.seconds, 5.seconds) { update(); () }
+  val _ = scheduler.scheduleAtFixedRate(0.seconds, 5.seconds) { () =>
+    update(); ()
+  }
 
   /** Internal state */
   case class State(
