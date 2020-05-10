@@ -243,7 +243,7 @@ trait EndpointsWithCustomErrors
       val decode: RequestExtractor[Validated[(A, B)]] =
         request =>
           method.extract(request).flatMap { _ =>
-            url.decodeUrl(request).map { validatedA =>
+            url.decodeUrl(request).map[Validated[(A, B)]] { validatedA =>
               validatedA.zip(headers(request.headers))
             }
           }
@@ -483,7 +483,7 @@ trait EndpointsWithCustomErrors
   def routesFromEndpoints(
       endpoints: ToPlayHandler*
   ): PartialFunction[RequestHeader, PlayHandler] =
-    Function.unlift { request: RequestHeader =>
+    Function.unlift { (request: RequestHeader) =>
       def loop(es: Seq[ToPlayHandler]): Option[PlayHandler] =
         es match {
           case e +: es2 => e.playHandler(request).orElse(loop(es2))

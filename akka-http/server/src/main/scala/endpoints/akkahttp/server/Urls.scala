@@ -142,7 +142,7 @@ trait Urls extends algebra.Urls with StatusCodes {
   ): Url[tupler.Out] = {
     (segments: List[String], query: Map[String, List[String]]) =>
       path.validate(segments).flatMap {
-        case (validA, Nil) => Some(validA.zip(qs.validate(query)))
+        case (validA, Nil) => Some(validA.zip(qs.validate(query))(tupler))
         case (_, _)        => None
       }
   }
@@ -271,7 +271,7 @@ trait Urls extends algebra.Urls with StatusCodes {
         case (validA, p2) =>
           second.validate(p2).map {
             case (validB, p3) =>
-              (validA.zip(validB), p3)
+              (validA.zip(validB)(tupler), p3)
           }
       }
     }

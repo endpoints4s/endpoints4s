@@ -11,12 +11,12 @@ val `play-server` =
     .in(file("server"))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
+      `scala 2.12 to dotty`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
       name := "endpoints-play-server",
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-netty-server" % playVersion,
-        "com.typesafe.play" %% "play-test" % playVersion % Test,
-        "com.typesafe.play" %% "play-ahc-ws" % playVersion % Test
+        ("com.typesafe.play" %% "play-netty-server" % playVersion).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.play" %% "play-test" % playVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -28,9 +28,9 @@ val `play-server-circe` =
     .in(file("server-circe"))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "endpoints-play-server-circe",
-      libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
+      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value)
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
 
@@ -39,10 +39,10 @@ val `play-client` =
     .in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "endpoints-play-client",
       libraryDependencies ++= Seq(
-        "com.typesafe.play" %% "play-ahc-ws" % playVersion
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(

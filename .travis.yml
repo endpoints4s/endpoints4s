@@ -43,8 +43,8 @@ jobs:
       scala: 2.13.2
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
-      scala: 0.25.0-bin-20200502-1f9bca3-NIGHTLY
-      script: sbt "++ $TRAVIS_SCALA_VERSION openapiJVM/compile"
+      scala: 0.25.0-bin-20200510-5154641-NIGHTLY
+      script: sbt "++ $TRAVIS_SCALA_VERSION ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;play-server/compile;akka-http-server/compile"
 
     - stage: coverage and code formatting
       if: tag is blank
