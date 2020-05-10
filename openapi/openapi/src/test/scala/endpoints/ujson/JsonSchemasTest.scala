@@ -414,6 +414,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     }
     val encoded = schema.codec.encode(expected)
     assert(encoded == json)
+    ()
   }
 
   def checkDecodingFailure[A](
@@ -422,8 +423,10 @@ class JsonSchemasTest extends AnyFreeSpec {
       expectedErrors: Seq[String]
   ): Unit =
     schema.codec.decode(json) match {
-      case Valid(_)        => fail("Expected decoding failure")
-      case Invalid(errors) => assert(errors == expectedErrors)
+      case Valid(_) => fail("Expected decoding failure")
+      case Invalid(errors) =>
+        assert(errors == expectedErrors)
+        ()
     }
 
 }

@@ -18,7 +18,7 @@ class EndpointsJsonSchemaTest
     with Matchers
     with ScalatestRouteTest {
 
-  val testRoutes = new EndpointsJsonSchemaTestApi {
+  object testRoutes extends EndpointsJsonSchemaTestApi {
 
     implicit val userJsonSchema: JsonSchema[User] = genericJsonSchema[User]
 

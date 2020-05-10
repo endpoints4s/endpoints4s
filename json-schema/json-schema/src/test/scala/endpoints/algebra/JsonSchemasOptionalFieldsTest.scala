@@ -107,7 +107,7 @@ trait JsonSchemasOptionalFieldsTest
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =
     decodeJson(schema, json) match {
       case Valid(a) =>
-        assert(encodeJson(schema, a) == json)
+        assert(a == decoded && encodeJson(schema, a) == json)
       case Invalid(errors) =>
         fail(errors.mkString(". "))
     }

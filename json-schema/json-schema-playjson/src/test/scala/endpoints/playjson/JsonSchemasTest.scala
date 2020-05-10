@@ -406,7 +406,8 @@ class JsonSchemasTest extends AnyFreeSpec {
     val jsResult = jsonSchema.reads.reads(json)
     assert(jsResult.isError)
 
-    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.left.get
+    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.swap
+      .getOrElse(fail("Expected failure"))
       .flatMap(_._2)
       .flatMap(_.messages) // ignoring JsPath
     assert(errorMessages.head == expectedError)

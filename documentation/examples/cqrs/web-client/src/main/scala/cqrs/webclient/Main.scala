@@ -121,5 +121,6 @@ object Main {
       </article>
 
     mount(dom.document.body, app)
+    ()
   }
 }
