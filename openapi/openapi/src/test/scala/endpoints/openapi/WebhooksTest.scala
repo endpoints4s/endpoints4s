@@ -21,8 +21,8 @@ class WebhooksTest extends AnyWordSpec with Matchers {
     val subscribe: Endpoint[String, Unit] = endpoint(
       post(path / "subscribe" /? qs[String]("callbackURL"), emptyRequest),
       ok(emptyResponse),
-      docs = EndpointDocs(
-        callbacks = Map(
+      docs = EndpointDocs()
+        .withCallbacks(Map(
           "message" -> Map(
             "{$request.query.callbackURL}" -> CallbackDocs(
               Post,
@@ -30,8 +30,7 @@ class WebhooksTest extends AnyWordSpec with Matchers {
               ok(emptyResponse)
             )
           )
-        )
-      )
+        ))
     )
 
   }

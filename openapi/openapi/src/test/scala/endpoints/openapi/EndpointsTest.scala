@@ -299,25 +299,25 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val foo = endpoint(
     get(path / "foo"),
     ok(emptyResponse, Some("Foo response")),
-    docs = EndpointDocs(tags = List("foo"))
+    docs = EndpointDocs().withTags(List("foo"))
   )
 
   val bar = endpoint(
     post(path / "foo", emptyRequest),
     ok(emptyResponse, Some("Bar response")),
-    docs = EndpointDocs(tags = List("bar", "bxx"))
+    docs = EndpointDocs().withTags(List("bar", "bxx"))
   )
 
   val baz = endpoint(
     get(path / "baz" / segment[Int]("quux")),
     ok(emptyResponse, Some("Baz response")),
-    docs = EndpointDocs(tags = List("baz", "bxx"))
+    docs = EndpointDocs().withTags(List("baz", "bxx"))
   )
 
   val textRequestEndp = endpoint(
     post(path / "textRequestEndpoint", textRequest, docs = Some("Text Req")),
     ok(emptyResponse),
-    docs = EndpointDocs(deprecated = true)
+    docs = EndpointDocs().withDeprecated(true)
   )
 
   val emptySegmentNameEndp = endpoint(
@@ -355,10 +355,9 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val documentedEndp = endpoint(
     request = get(path / "documented"),
     response = ok(emptyResponse),
-    docs = EndpointDocs(
-      summary = Some("summary of endpoint"),
-      description = Some("description of endpoint")
-    )
+    docs = EndpointDocs()
+      .withSummary(Some("summary of endpoint"))
+      .withDescription(Some("description of endpoint"))
   )
 }
 

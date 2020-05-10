@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import endpoints.Hashing
+
 /**
   * Algebra interface for describing endpoints made of requests and responses.
   *
@@ -61,13 +63,86 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param callbacks   Callbacks indexed by event name
     * @param deprecated  Indicates whether this endpoint is deprecated or not
     */
-  case class EndpointDocs(
-      summary: Documentation = None,
-      description: Documentation = None,
-      tags: List[String] = Nil,
-      callbacks: Map[String, CallbacksDocs] = Map.empty,
-      deprecated: Boolean = false
-  )
+  final class EndpointDocs private (
+      val summary: Documentation,
+      val description: Documentation,
+      val tags: List[String],
+      val callbacks: Map[String, CallbacksDocs],
+      val deprecated: Boolean
+  ) extends Serializable {
+
+    override def toString =
+      s"EndpointDocs($summary, $description, $tags, $callbacks, $deprecated)"
+
+    override def equals(other: Any): Boolean = other match {
+      case that: EndpointDocs =>
+        summary == that.summary &&
+          description == that.description &&
+          tags == that.tags &&
+          callbacks == that.callbacks &&
+          deprecated == that.deprecated
+      case _ => false
+    }
+
+    override def hashCode(): Int =
+      Hashing.hash(summary, description, tags, callbacks, deprecated)
+
+    private[this] def copy(
+        summary: Documentation = summary,
+        description: Documentation = description,
+        tags: List[String] = tags,
+        callbacks: Map[String, CallbacksDocs] = callbacks,
+        deprecated: Boolean = deprecated
+    ): EndpointDocs =
+      new EndpointDocs(summary, description, tags, callbacks, deprecated)
+
+    def withSummary(summary: Documentation): EndpointDocs =
+      copy(summary = summary)
+
+    def withDescription(description: Documentation): EndpointDocs =
+      copy(description = description)
+
+    def withTags(tags: List[String]): EndpointDocs =
+      copy(tags = tags)
+
+    def withCallbacks(callbacks: Map[String, CallbacksDocs]): EndpointDocs =
+      copy(callbacks = callbacks)
+
+    def withDeprecated(deprecated: Boolean): EndpointDocs =
+      copy(deprecated = deprecated)
+
+  }
+
+  object EndpointDocs {
+
+    /**
+      * @return An empty documentation value, with no summary, no description,
+      *         no tags, no callbacks, and the `deprecated` flag set to `false`.
+      *
+      * You can transform the returned [[EndpointDocs]] value by using the `withXxx`
+      * operations:
+      *
+      * {{{
+      *   EndpointDocs().withSummary(Some("endpoint summary"))
+      * }}}
+      */
+    def apply(): EndpointDocs =
+      new EndpointDocs(None, None, Nil, Map.empty, false)
+
+    @deprecated(
+      "Use `EndpointDocs().withXxx(...)` instead of `EndpointDocs(xxx = ...)`",
+      "1.0.0"
+    )
+    def apply(
+        summary: Documentation = None,
+        description: Documentation = None,
+        tags: List[String] = Nil,
+        callbacks: Map[String, CallbacksDocs] = Map.empty,
+        deprecated: Boolean = false
+    ): EndpointDocs =
+      new EndpointDocs(summary, description, tags, callbacks, deprecated)
+
+  }
 
   /**
     * Callbacks indexed by URL pattern
@@ -80,12 +155,49 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param entity   Contents of the callback message
     * @param response Expected response
     */
-  case class CallbackDocs private (
-      method: Method,
-      entity: CallbackDocs.SomeRequestEntity,
-      response: CallbackDocs.SomeResponse,
-      requestDocs: Documentation
-  )
+  final class CallbackDocs private (
+      val method: Method,
+      val entity: CallbackDocs.SomeRequestEntity,
+      val response: CallbackDocs.SomeResponse,
+      val requestDocs: Documentation
+  ) extends Serializable {
+
+    override def toString =
+      s"CallbackDocs($method, $entity, $response, $requestDocs)"
+
+    override def equals(other: Any): Boolean = other match {
+      case that: CallbackDocs =>
+        method == that.method &&
+          entity == that.entity &&
+          response == that.response &&
+          requestDocs == that.requestDocs
+      case _ => false
+    }
+
+    override def hashCode(): Int =
+      Hashing.hash(method, entity, response, requestDocs)
+
+    private[this] def copy(
+        method: Method = method,
+        entity: CallbackDocs.SomeRequestEntity = entity,
+        response: CallbackDocs.SomeResponse = response,
+        requestDocs: Documentation = requestDocs
+    ): CallbackDocs =
+      new CallbackDocs(method, entity, response, requestDocs)
+
+    def withMethod(method: Method): CallbackDocs =
+      copy(method = method)
+
+    def withRequestEntity[A](entity: RequestEntity[A]): CallbackDocs =
+      copy(entity = CallbackDocs.SomeRequestEntity(entity))
+
+    def withRequestDocs(requestDocs: Documentation): CallbackDocs =
+      copy(requestDocs = requestDocs)
+
+    def withResponse[A](response: Response[A]): CallbackDocs =
+      copy(response = CallbackDocs.SomeResponse(response))
+
+  }
 
   object CallbackDocs {
 
@@ -99,6 +211,14 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       def value: RequestEntity[T]
     }
 
+    object SomeRequestEntity {
+      def apply[A](requestEntity: RequestEntity[A]): SomeRequestEntity =
+        new SomeRequestEntity {
+          type T = A
+          def value: RequestEntity[T] = requestEntity
+        }
+    }
+
     /**
       * A wrapper type for a [[Response]] whose carried information is unknown.
       *
@@ -109,9 +229,33 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       def value: Response[T]
     }
 
+    object SomeResponse {
+      def apply[A](response: Response[A]): SomeResponse =
+        new SomeResponse {
+          type T = A
+          def value: Response[T] = response
+        }
+    }
+
     /**
       * Convenience constructor that wraps the `entity` and `response` parameters.
       */
+    def apply[A, B](
+        method: Method,
+        entity: RequestEntity[A],
+        response: Response[B]
+    ): CallbackDocs =
+      new CallbackDocs(
+        method,
+        SomeRequestEntity(entity),
+        SomeResponse(response),
+        None
+      )
+
+    @deprecated(
+      "Use `CallbackDocs(...).withRequestDocs(docs)` instead of `CallbackDocs(..., requestDocs = docs)`",
+      "1.0.0"
+    )
     def apply[A, B](
         method: Method,
         entity: RequestEntity[A],
@@ -120,10 +264,11 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     ): CallbackDocs =
       new CallbackDocs(
         method,
-        new SomeRequestEntity { type T = A; def value = entity },
-        new SomeResponse { type T = B; def value = response },
+        SomeRequestEntity(entity),
+        SomeResponse(response),
         requestDocs
       )
+
   }
 
 }

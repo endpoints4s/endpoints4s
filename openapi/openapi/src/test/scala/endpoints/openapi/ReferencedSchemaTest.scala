@@ -60,7 +60,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     val listBooks = endpoint(
       get(path / "books"),
       ok(jsonResponse[List[Book]], Some("Books list")),
-      docs = EndpointDocs(tags = List("Books"))
+      docs = EndpointDocs().withTags(List("Books"))
     )
 
     val postBook =
@@ -70,7 +70,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         ok(jsonResponse(Enum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs(tags = List("Books"))
+        endpointDocs = EndpointDocs().withTags(List("Books"))
       )
   }
 
