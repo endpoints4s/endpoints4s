@@ -23,7 +23,7 @@ object EndpointsSettings {
       "-Ywarn-numeric-widen"
     ) ++
       (CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => Seq("-Xsource:2.14")
+        case Some((2, n)) if n >= 13 => Seq()
         case _ =>
           Seq(
             "-Yno-adapted-args",
