@@ -86,7 +86,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *
     * Values of type `RequestEntity[A]` can be constructed by using the operations
     * [[emptyRequest]] or [[textRequest]]. Additional types of request entities
-    * are provided by other algebra modules, such as [[JsonEntities]] or [[ChunkedEntities]].
+    * are provided by other algebra modules, such as [[endpoints.algebra.JsonEntities JsonEntities]]
+    * or [[endpoints.algebra.ChunkedEntities ChunkedEntities]].
     *
     *   - Server interpreters raise an error if they can’t parse the incoming
     *     request entity as a value of type `A`. By default,
