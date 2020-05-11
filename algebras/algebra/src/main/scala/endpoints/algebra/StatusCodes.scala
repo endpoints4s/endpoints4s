@@ -47,6 +47,12 @@ trait StatusCodes {
   /** @group operations */
   def NotFound: StatusCode
 
+  /** @group operations */
+  def PayloadTooLarge: StatusCode
+
+  /** @group operations */
+  def TooManyRequests: StatusCode
+
   // 5xx Server Error
   /**
     * @note You should use the `internalServerError` constructor provided by the

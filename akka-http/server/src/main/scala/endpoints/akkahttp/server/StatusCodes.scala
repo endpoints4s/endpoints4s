@@ -24,6 +24,8 @@ trait StatusCodes extends algebra.StatusCodes {
   def Unauthorized = AkkaStatusCodes.Unauthorized
   def Forbidden = AkkaStatusCodes.Forbidden
   def NotFound = AkkaStatusCodes.NotFound
+  def PayloadTooLarge = AkkaStatusCodes.PayloadTooLarge
+  def TooManyRequests = AkkaStatusCodes.TooManyRequests
 
   def InternalServerError = AkkaStatusCodes.InternalServerError
   def NotImplemented = AkkaStatusCodes.NotImplemented

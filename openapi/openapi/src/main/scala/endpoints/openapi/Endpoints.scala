@@ -143,9 +143,9 @@ trait EndpointsWithCustomErrors
               case (urlPattern, callback) =>
                 val method = callback.method.toString.toLowerCase
                 val requestBody =
-                  RequestBody(callback.requestDocs, callback.entity)
+                  RequestBody(callback.requestDocs, callback.entity.value)
                 val responses =
-                  callback.response
+                  callback.response.value
                     .map(r =>
                       r.status.toString() -> Response(
                         r.documentation,

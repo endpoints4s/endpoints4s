@@ -20,6 +20,8 @@ trait StatusCodes extends algebra.StatusCodes {
   def Unauthorized = Http4sStatus.Unauthorized
   def Forbidden = Http4sStatus.Forbidden
   def NotFound = Http4sStatus.NotFound
+  def PayloadTooLarge = Http4sStatus.PayloadTooLarge
+  def TooManyRequests = Http4sStatus.TooManyRequests
   def InternalServerError = Http4sStatus.InternalServerError
   def NotImplemented = Http4sStatus.NotImplemented
 }

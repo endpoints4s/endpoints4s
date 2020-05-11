@@ -11,7 +11,10 @@ val `json-schema` =
       `scala 2.12 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency,
-      libraryDependencies += "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.5",
+      libraryDependencies ++= Seq(
+        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
+        "org.scalacheck" %%% "scalacheck" % "1.14.3"
+      ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
