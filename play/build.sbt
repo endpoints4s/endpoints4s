@@ -47,6 +47,6 @@ val `play-client` =
     )
     .dependsOn(
       `algebra-jvm` % "test->test;compile->compile",
-      `algebra-circe-jvm` % "compile->test;test->test"
+      `algebra-circe-jvm` % "test->compile;test->test"
     )
     .dependsOn(`openapi-jvm`)

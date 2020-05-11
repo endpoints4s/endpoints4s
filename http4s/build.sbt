@@ -35,4 +35,4 @@ val `http4s-client` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
-    .dependsOn(`algebra-circe-jvm` % "compile->test;test->test")
+    .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
