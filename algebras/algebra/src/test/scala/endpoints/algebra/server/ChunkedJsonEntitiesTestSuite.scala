@@ -74,7 +74,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
       ) { port =>
         val request = HttpRequest(uri = s"http://localhost:$port/notifications")
         whenReady(sendAndDecodeJsonChunks(request)(serverApi.counterCodec)) {
-          case (response, chunks) =>
+          case (_, chunks) =>
             assert(chunks.size == expectedItems.size)
             assert(
               chunks

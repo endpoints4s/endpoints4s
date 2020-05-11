@@ -29,7 +29,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     *
     * Values of type [[ResponseEntity]] can be constructed by using the operations
     * [[emptyResponse]] or [[textResponse]]. Additional types of response entities are
-    * provided by other algebra modules, such as [[JsonEntities]] or [[ChunkedEntities]].
+    * provided by other algebra modules, such as [[endpoints.algebra.JsonEntities JsonEntities]]
+    * or [[endpoints.algebra.ChunkedEntities ChunkedEntities]].
     *
     * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
     *       class

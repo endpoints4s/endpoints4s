@@ -37,16 +37,16 @@ jobs:
   include:
 
     - stage: test
-      scala: 2.12.10
+      scala: 2.12.11
       script: sbt ++$TRAVIS_SCALA_VERSION test
     - stage: test
-      scala: 2.13.1
+      scala: 2.13.2
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
 
     - stage: coverage and code formatting
       if: tag is blank
       script:
-        - sbt scalafmtCheck ++2.12.10 coverage test coverageReport coverageAggregate
+        - sbt scalafmtCheck ++2.12.11 coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
 
     - stage: publish
@@ -58,7 +58,7 @@ jobs:
         - chmod 600 ci/travis-key
         - eval "$(ssh-agent -s)"
         - ssh-add ci/travis-key
-        - sbt "++ 2.12.10 publishSigned" "++ 2.13.1 publishSigned" sonatypeReleaseAll "++ 2.13.1 manual/makeSite" manual/ghpagesPushSite
+        - sbt "++ 2.12.11 publishSigned" "++ 2.13.2 publishSigned" sonatypeReleaseAll "++ 2.13.2 manual/makeSite" manual/ghpagesPushSite
 
 env:
   global:

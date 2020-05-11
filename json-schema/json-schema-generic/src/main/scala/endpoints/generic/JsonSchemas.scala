@@ -19,7 +19,7 @@ import shapeless.{
   Witness
 }
 
-import scala.annotation.implicitNotFound
+import scala.annotation.{implicitNotFound, nowarn}
 import scala.reflect.ClassTag
 
 /**
@@ -76,7 +76,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       with GenericTitles {
 
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
-      (docs: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
+      (_: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
 
     implicit def singletonCoproduct[L <: Symbol, A](
         implicit
@@ -242,6 +242,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       ): GenericSchemaName[A] =
         new GenericSchemaName(Some(ann().value))
 
+      @nowarn("cat=unused-params")
       implicit def annotatedUnnamed[A](
           implicit ann: Annotation[unnamed, A]
       ): GenericSchemaName[A] =
@@ -368,6 +369,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   // Summons a `Generic.Aux[T, A]` from a tuple type `T` to an arbitrary
   // type `A` that has the same generic representation as the tuple type `T`
+  @nowarn("cat=unused-params")
   implicit def shapelessGenericFromTuple[A, T, L <: HList](
       implicit
       tup: Tupler.Aux[L, T],
