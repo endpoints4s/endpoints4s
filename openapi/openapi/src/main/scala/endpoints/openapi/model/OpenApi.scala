@@ -525,24 +525,134 @@ object Operation {
 
 }
 
-case class SecurityRequirement(
-    name: String,
-    scheme: SecurityScheme,
-    scopes: List[String] = Nil
-)
-
-case class RequestBody(
-    description: Option[String],
-    content: Map[String, MediaType]
+class SecurityRequirement(
+    val name: String,
+    val scheme: SecurityScheme,
+    val scopes: List[String] = Nil
 ) {
-  assert(content.nonEmpty)
+
+  override def toString: String =
+    s"SecurityRequirement($name, $scheme, $scopes)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: SecurityRequirement =>
+        name == that.name && scheme == that.scheme && scopes == that.scopes
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(name, scheme, scopes)
+
+  private[this] def copy(
+      name: String = name,
+      scheme: SecurityScheme = scheme,
+      scopes: List[String] = scopes
+  ): SecurityRequirement =
+    new SecurityRequirement(name, scheme, scopes)
+
+  def withName(name: String): SecurityRequirement = copy(name = name)
+
+  def withScheme(scheme: SecurityScheme): SecurityRequirement =
+    copy(scheme = scheme)
+
+  def withScopes(scopes: List[String]): SecurityRequirement =
+    copy(scopes = scopes)
 }
 
-case class Response(
-    description: String,
-    headers: Map[String, ResponseHeader],
-    content: Map[String, MediaType]
-)
+object SecurityRequirement {
+
+  def apply(
+      name: String,
+      scheme: SecurityScheme,
+      scopes: List[String] = Nil
+  ): SecurityRequirement =
+    new SecurityRequirement(name, scheme, scopes)
+}
+
+class RequestBody(
+    val description: Option[String],
+    val content: Map[String, MediaType]
+) {
+  assert(content.nonEmpty)
+
+  override def toString: String =
+    s"RequestBody($description, $content)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: RequestBody =>
+        description == that.description && content == that.content
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(description, content)
+
+  private[this] def copy(
+      description: Option[String] = description,
+      content: Map[String, MediaType] = content
+  ): RequestBody =
+    new RequestBody(description, content)
+
+  def withDescription(description: Option[String]): RequestBody =
+    copy(description = description)
+
+  def withContent(content: Map[String, MediaType]): RequestBody =
+    copy(content = content)
+}
+
+object RequestBody {
+
+  def apply(description: Option[String], content: Map[String, MediaType]) =
+    new RequestBody(description, content)
+
+}
+
+class Response(
+    val description: String,
+    val headers: Map[String, ResponseHeader],
+    val content: Map[String, MediaType]
+) {
+
+  override def toString: String =
+    s"Response($description, $headers, $content)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Response =>
+        description == that.description && headers == that.headers && content == that.content
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(description, headers, content)
+
+  private[this] def copy(
+      description: String = description,
+      headers: Map[String, ResponseHeader] = headers,
+      content: Map[String, MediaType] = content
+  ): Response =
+    new Response(description, headers, content)
+
+  def withDescription(description: String): Response =
+    copy(description = description)
+  def withHeaders(headers: Map[String, ResponseHeader]): Response =
+    copy(headers = headers)
+  def withContent(content: Map[String, MediaType]): Response =
+    copy(content = content)
+}
+
+object Response {
+
+  def apply(
+      description: String,
+      headers: Map[String, ResponseHeader],
+      content: Map[String, MediaType]
+  ): Response =
+    new Response(description, headers, content)
+
+}
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
 case class ResponseHeader(
