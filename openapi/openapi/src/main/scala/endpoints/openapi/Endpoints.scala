@@ -59,7 +59,7 @@ trait EndpointsWithCustomErrors
     ): DocumentedEndpoint = {
       copy(item = PathItem(item.operations.map {
         case (verb, operation) =>
-          verb -> operation.copy(security = securityRequirements.toList)
+          verb -> operation.withSecurity(securityRequirements.toList)
       }))
     }
   }

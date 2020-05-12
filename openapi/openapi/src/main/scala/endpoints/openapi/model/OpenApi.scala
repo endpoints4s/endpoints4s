@@ -1,5 +1,6 @@
 package endpoints.openapi.model
 
+import endpoints.Hashing
 import endpoints.algebra.Encoder
 
 import scala.collection.mutable
@@ -15,6 +16,15 @@ class OpenApi private (
 
   override def toString =
     s"OpenApi($info, $paths, $components)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: OpenApi =>
+        info == that.info && paths == that.paths && components == that.components
+      case _ => false
+    }
+
+  override def hashCode(): Int = Hashing.hash(info, paths, components)
 
   private[this] def copy(
       info: Info = info,
@@ -292,31 +302,228 @@ object OpenApi {
 
 }
 
-case class Info(
-    title: String,
-    version: String
-)
+class Info private (
+    val title: String,
+    val version: String
+) extends Serializable {
 
-case class PathItem(
-    operations: Map[String, Operation]
-)
+  override def toString: String =
+    s"Info($title, $version)"
 
-case class Components(
-    schemas: Map[String, Schema],
-    securitySchemes: Map[String, SecurityScheme]
-)
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Info => title == that.title && version == that.version
+      case _          => false
+    }
 
-case class Operation(
-    summary: Option[String],
-    description: Option[String],
-    parameters: List[Parameter],
-    requestBody: Option[RequestBody],
-    responses: Map[String, Response],
-    tags: List[String],
-    security: List[SecurityRequirement],
-    callbacks: Map[String, Map[String, PathItem]],
-    deprecated: Boolean
-)
+  override def hashCode(): Int =
+    Hashing.hash(title, version)
+
+  private[this] def copy(
+      title: String = title,
+      version: String = version
+  ): Info =
+    new Info(title, version)
+
+  def withTitle(title: String): Info =
+    copy(title = title)
+
+  def withVersion(version: String): Info =
+    copy(version = version)
+
+}
+
+object Info {
+
+  def apply(title: String, version: String): Info =
+    new Info(title, version)
+
+}
+
+class PathItem(
+    val operations: Map[String, Operation]
+) {
+
+  override def toString =
+    s"PathItem($operations)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: PathItem => operations == that.operations
+      case _              => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(operations)
+
+  def withOperations(operations: Map[String, Operation]): PathItem =
+    PathItem(operations)
+
+}
+
+object PathItem {
+
+  def apply(operations: Map[String, Operation]): PathItem =
+    new PathItem(operations)
+
+}
+
+class Components(
+    val schemas: Map[String, Schema],
+    val securitySchemes: Map[String, SecurityScheme]
+) {
+
+  override def toString: String =
+    s"Components($schemas, $securitySchemes)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Components =>
+        schemas == that.schemas && securitySchemes == that.securitySchemes
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(schemas, securitySchemes)
+
+  private[this] def copy(
+      schemas: Map[String, Schema] = schemas,
+      securitySchemes: Map[String, SecurityScheme] = securitySchemes
+  ) = new Components(schemas, securitySchemes)
+
+  def withSchemas(schemas: Map[String, Schema]): Components =
+    copy(schemas = schemas)
+
+  def withSecuritySchemas(
+      securitySchemes: Map[String, SecurityScheme]
+  ): Components =
+    copy(securitySchemes = securitySchemes)
+
+}
+
+object Components {
+
+  def apply(
+      schemas: Map[String, Schema],
+      securitySchemes: Map[String, SecurityScheme]
+  ): Components =
+    new Components(schemas, securitySchemes)
+
+}
+
+class Operation(
+    val summary: Option[String],
+    val description: Option[String],
+    val parameters: List[Parameter],
+    val requestBody: Option[RequestBody],
+    val responses: Map[String, Response],
+    val tags: List[String],
+    val security: List[SecurityRequirement],
+    val callbacks: Map[String, Map[String, PathItem]],
+    val deprecated: Boolean
+) {
+
+  override def toString: String =
+    s"Operation($summary, $description, $parameters, $requestBody, $responses, $tags, $security, $callbacks, $deprecated)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Operation =>
+        summary == that.summary && description == that.description && parameters == that.parameters &&
+          requestBody == that.requestBody && responses == that.responses && tags == that.tags &&
+          security == that.security && callbacks == that.callbacks && deprecated == that.deprecated
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(
+      summary,
+      description,
+      parameters,
+      requestBody,
+      responses,
+      tags,
+      security,
+      callbacks,
+      deprecated
+    )
+
+  private[this] def copy(
+      summary: Option[String] = summary,
+      description: Option[String] = description,
+      parameters: List[Parameter] = parameters,
+      requestBody: Option[RequestBody] = requestBody,
+      responses: Map[String, Response] = responses,
+      tags: List[String] = tags,
+      security: List[SecurityRequirement] = security,
+      callbacks: Map[String, Map[String, PathItem]] = callbacks,
+      deprecated: Boolean = deprecated
+  ): Operation =
+    Operation(
+      summary,
+      description,
+      parameters,
+      requestBody,
+      responses,
+      tags,
+      security,
+      callbacks,
+      deprecated
+    )
+
+  def withSummary(summary: Option[String]): Operation =
+    copy(summary = summary)
+
+  def withDescription(description: Option[String]): Operation =
+    copy(description = description)
+
+  def withParameters(parameters: List[Parameter]): Operation =
+    copy(parameters = parameters)
+
+  def withRequestBody(requestBody: Option[RequestBody]): Operation =
+    copy(requestBody = requestBody)
+
+  def withResponses(responses: Map[String, Response]): Operation =
+    copy(responses = responses)
+
+  def withTags(tags: List[String]): Operation =
+    copy(tags = tags)
+
+  def withSecurity(security: List[SecurityRequirement]): Operation =
+    copy(security = security)
+
+  def withCallbacks(callbacks: Map[String, Map[String, PathItem]]): Operation =
+    copy(callbacks = callbacks)
+
+  def withDeprecated(deprecated: Boolean): Operation =
+    copy(deprecated = deprecated)
+}
+
+object Operation {
+
+  def apply(
+      summary: Option[String],
+      description: Option[String],
+      parameters: List[Parameter],
+      requestBody: Option[RequestBody],
+      responses: Map[String, Response],
+      tags: List[String],
+      security: List[SecurityRequirement],
+      callbacks: Map[String, Map[String, PathItem]],
+      deprecated: Boolean
+  ): Operation =
+    new Operation(
+      summary,
+      description,
+      parameters,
+      requestBody,
+      responses,
+      tags,
+      security,
+      callbacks,
+      deprecated
+    )
+
+}
 
 case class SecurityRequirement(
     name: String,
@@ -375,22 +582,23 @@ sealed trait Schema {
     * @return The same schema with its description overridden by the given `description`,
     *         or stay unchanged if this one is empty.
     */
-  def withDefinedDescription(description: Option[String]): Schema = this match {
-    case s: Schema.Object =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.Array =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.Enum =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.Primitive =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.OneOf =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.AllOf =>
-      s.copy(description = description.orElse(s.description))
-    case s: Schema.Reference =>
-      s.copy(description = description.orElse(s.description))
-  }
+  def withDefinedDescription(description: Option[String]): Schema =
+    this match {
+      case s: Schema.Object =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.Array =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.Enum =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.Primitive =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.OneOf =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.AllOf =>
+        s.copy(description = description.orElse(s.description))
+      case s: Schema.Reference =>
+        s.copy(description = description.orElse(s.description))
+    }
 }
 
 object Schema {
@@ -441,6 +649,7 @@ object Schema {
   ) extends Schema
 
   sealed trait Alternatives
+
   case class DiscriminatedAlternatives(
       discriminatorFieldName: String,
       alternatives: List[(String, Schema)]
@@ -464,6 +673,7 @@ object Schema {
   ) extends Schema
 
   object Reference {
+
     def toRefPath(name: String): String =
       s"#/components/schemas/$name"
   }
@@ -487,12 +697,13 @@ case class SecurityScheme(
 
 object SecurityScheme {
 
-  def httpBasic: SecurityScheme = SecurityScheme(
-    `type` = "http",
-    description = Some("Http Basic Authentication"),
-    name = None,
-    in = None,
-    scheme = Some("basic"),
-    bearerFormat = None
-  )
+  def httpBasic: SecurityScheme =
+    SecurityScheme(
+      `type` = "http",
+      description = Some("Http Basic Authentication"),
+      name = None,
+      in = None,
+      scheme = Some("basic"),
+      bearerFormat = None
+    )
 }
