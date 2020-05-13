@@ -551,7 +551,8 @@ class SecurityRequirement(
   ): SecurityRequirement =
     new SecurityRequirement(name, scheme, scopes)
 
-  def withName(name: String): SecurityRequirement = copy(name = name)
+  def withName(name: String): SecurityRequirement =
+    copy(name = name)
 
   def withScheme(scheme: SecurityScheme): SecurityRequirement =
     copy(scheme = scheme)
@@ -637,8 +638,10 @@ class Response(
 
   def withDescription(description: String): Response =
     copy(description = description)
+
   def withHeaders(headers: Map[String, ResponseHeader]): Response =
     copy(headers = headers)
+
   def withContent(content: Map[String, MediaType]): Response =
     copy(content = content)
 }
@@ -655,19 +658,112 @@ object Response {
 }
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
-case class ResponseHeader(
-    required: Boolean,
-    description: Option[String],
-    schema: Schema
-)
+class ResponseHeader(
+    val required: Boolean,
+    val description: Option[String],
+    val schema: Schema
+) {
 
-case class Parameter(
-    name: String,
-    in: In,
-    required: Boolean,
-    description: Option[String],
-    schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
-)
+  override def toString: String =
+    s"ResponseHeader($required, $description, $schema)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: ResponseHeader =>
+        required == that.required && description == that.description && schema == that.schema
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(required, description, schema)
+
+  private def copy(
+      required: Boolean = required,
+      description: Option[String] = description,
+      schema: Schema = schema
+  ): ResponseHeader =
+    new ResponseHeader(required, description, schema)
+
+  def withRequired(required: Boolean): ResponseHeader =
+    copy(required = required)
+
+  def withDescription(description: Option[String]): ResponseHeader =
+    copy(description = description)
+
+  def withSchema(schema: Schema): ResponseHeader =
+    copy(schema = schema)
+
+
+}
+
+object ResponseHeader {
+
+  def apply(
+      required: Boolean,
+      description: Option[String],
+      schema: Schema
+  ): ResponseHeader =
+    new ResponseHeader(required, description, schema)
+
+}
+
+class Parameter(
+    val name: String,
+    val in: In,
+    val required: Boolean,
+    val description: Option[String],
+    val schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
+) {
+
+  override def toString: String =
+    s"Parameter($name, $in, $required, $description, $schema)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Parameter =>
+        name == that.name && in == that.in && required == that.required &&
+          description == that.description && schema == that.schema
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(name, in, required, description, schema)
+
+  private[this] def copy(
+      name: String = name,
+      in: In = in,
+      required: Boolean = required,
+      description: Option[String] = description,
+      schema: Schema = schema
+  ): Parameter =
+    new Parameter(name, in, required, description, schema)
+
+  def withName(name: String): Parameter =
+    copy(name = name)
+
+  def withIn(in: In): Parameter =
+    copy(in = in)
+
+  def withDescription(description: Option[String]): Parameter =
+    copy(description = description)
+
+  def withSchema(schema: Schema): Parameter =
+    copy(schema = schema)
+
+}
+
+object Parameter {
+
+  def apply(
+      name: String,
+      in: In,
+      required: Boolean,
+      description: Option[String],
+      schema: Schema
+  ): Parameter =
+    new Parameter(name, in, required, description, schema)
+
+}
 
 sealed trait In
 
@@ -681,7 +777,28 @@ object In {
   val values: Seq[In] = Query :: Path :: Header :: Cookie :: Nil
 }
 
-case class MediaType(schema: Option[Schema])
+class MediaType(val schema: Option[Schema]) {
+
+  override def toString: String =
+    s"Mediatype($schema)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: MediaType => schema == that.schema
+      case _               => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(schema)
+
+  def withSchema(schema: Option[Schema]): MediaType = new MediaType(schema)
+}
+
+object MediaType {
+
+  def apply(schema: Option[Schema]): MediaType = new MediaType(schema)
+
+}
 
 sealed trait Schema {
   def description: Option[String]
