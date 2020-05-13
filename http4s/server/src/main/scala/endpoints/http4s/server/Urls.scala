@@ -200,7 +200,7 @@ trait Urls extends algebra.Urls with StatusCodes {
         case (validA, segments2) =>
           second.decode(segments2).map {
             case (validB, segments3) =>
-              (validA zip validB, segments3)
+              (validA.zip(validB)(tupler), segments3)
           }
       }
   }
@@ -222,7 +222,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       implicit tupler: Tupler[A, B]
   ): Url[tupler.Out] = new Url[tupler.Out] {
     def decodeUrl(uri: Uri): Option[Validated[tupler.Out]] =
-      pathExtractor(path, uri).map(_.zip(qs(uri.multiParams)))
+      pathExtractor(path, uri).map(_.zip(qs(uri.multiParams))(tupler))
   }
 
   private def pathExtractor[A](

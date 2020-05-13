@@ -26,7 +26,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   /**
     * The JSON codecs used to produce some parts of the documentation.
     */
-  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
+  final lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
     new endpoints.ujson.JsonSchemas {
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName

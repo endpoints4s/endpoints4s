@@ -8,7 +8,7 @@ val `sttp-client` =
     .in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       name := "endpoints-sttp-client",
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp" %% "core" % sttpVersion,

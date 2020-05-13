@@ -308,7 +308,7 @@ trait EndpointsWithCustomErrors
       if (http4sRequest.method == method) {
         url
           .decodeUrl(http4sRequest.uri)
-          .map(_.zip(headers(http4sRequest.headers)))
+          .map[Validated[(U, H)]](_.zip(headers(http4sRequest.headers)))
           .map {
             case Valid(urlAndHeaders) => entity(urlAndHeaders)(http4sRequest)
             case inv: Invalid         => Effect.pure(Left(handleClientErrors(inv)))

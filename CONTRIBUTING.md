@@ -17,24 +17,23 @@ sbt-assets/                 Sbt settings to help handling assets
 
 ## Cheat sheet
 
-### Compile the project
+### Compile the project with the default Scala version
 
 ~~~ sh
-$ sbt +compile
+$ sbt compile
 ~~~
 
 ### Run the tests
 
 ~~~ sh
-$ sbt +test
+$ sbt test
 ~~~
 
-or for faster feedback loop:
+Or, for a specific Scala version:
 
 ~~~ sh
-$ sbt "++ 2.11.12 test"
-$ sbt "++ 2.12.10 test"
-$ sbt "++ 2.13.1 test"
+$ sbt "++ 2.12.11 test"
+$ sbt "++ 2.13.2 test"
 ~~~
 
 ### Format source code
@@ -62,7 +61,7 @@ $ sbt manual/ghpagesPushSite
 ### Run the examples 
 
 ~~~ sh
-++ 2.12.4 example-basic-play-server/run
+++ 2.13.2 example-basic-play-server/run
 ~~~
 
 ## Working with mill
