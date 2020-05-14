@@ -22,6 +22,7 @@ trait JsonEntitiesFromSchemasTestSuite[
                 "age" -> ujson.Num(42)
               )
           }
+          ()
       }
     }
 
@@ -34,6 +35,7 @@ trait JsonEntitiesFromSchemasTestSuite[
             case (response, entity) =>
               assert(response.status.intValue() == 404)
           }
+          ()
       }
     }
   }
@@ -110,6 +112,7 @@ trait JsonEntitiesFromSchemasTestSuite[
               "age" -> ujson.Num(55)
             )
         }
+        ()
       }
 
     }

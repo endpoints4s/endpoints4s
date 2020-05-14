@@ -30,8 +30,8 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
       def apply(a: A) =
         new js.Promise[B]((resolve, error) => {
           performXhr(request, response, a)(
-            _.fold(exn => error(exn.getMessage), b => resolve(b)),
-            xhr => error(xhr.responseText)
+            _.fold(exn => error(exn.getMessage), b => resolve(b)): Unit,
+            xhr => error(xhr.responseText): Unit
           )
         })
     }

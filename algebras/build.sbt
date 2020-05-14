@@ -8,15 +8,15 @@ val algebra =
     .in(file("algebra"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`,
       name := "endpoints-algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
-        "org.scalatest" %%% "scalatest" % scalaTestVersion % Test,
-        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test,
-        "com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test,
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test,
-        "com.lihaoyi" %% "ujson" % ujsonVersion % Test
+        ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOnLocalCrossProjectsWithScope(
@@ -32,11 +32,11 @@ val `algebra-circe` =
     .in(file("algebra-circe"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`,
       name := "endpoints-algebra-circe",
       libraryDependencies ++= Seq(
-        "io.circe" %%% "circe-parser" % circeVersion,
-        "io.circe" %%% "circe-generic" % circeVersion % Test
+        ("io.circe" %%% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value),
+        ("io.circe" %%% "circe-generic" % circeVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
@@ -50,9 +50,9 @@ val `algebra-playjson` =
     .in(file("algebra-playjson"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`,
       name := "endpoints-algebra-playjson",
-      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
 

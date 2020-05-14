@@ -26,7 +26,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   /**
     * The JSON codecs used to produce some parts of the documentation.
     */
-  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
+  final lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
     new endpoints.ujson.JsonSchemas {
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName
@@ -544,8 +544,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       * "schemas": {
       *   "Pet": {
       *     "oneOf": [
-      *       { "$ref": "#/components/schemas/Cat" },
-      *       { "$ref": "#/components/schemas/Lizard" }
+      *       { "\$ref": "#/components/schemas/Cat" },
+      *       { "\$ref": "#/components/schemas/Lizard" }
       *     ],
       *     "discriminator": {
       *       "propertyName": "type",
@@ -607,8 +607,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       * "schemas": {
       *   "Pet": {
       *     "oneOf": [
-      *       { "$ref": "#/components/schemas/Cat" },
-      *       { "$ref": "#/components/schemas/Lizard" }
+      *       { "\$ref": "#/components/schemas/Cat" },
+      *       { "\$ref": "#/components/schemas/Lizard" }
       *     ],
       *     "discriminator": {
       *       "propertyName": "type",
@@ -621,7 +621,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       *
       *   "Cat": {
       *     "allOf": [
-      *       { "$ref": "#/components/schemas/Pet" },
+      *       { "\$ref": "#/components/schemas/Pet" },
       *       {
       *         "type": "object",
       *         "properties": {
@@ -643,7 +643,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       *
       *   "Lizard": {
       *     "allOf": [
-      *       { "$ref": "#/components/schemas/Pet" },
+      *       { "\$ref": "#/components/schemas/Pet" },
       *       {
       *         "type": "object",
       *         "properties": {

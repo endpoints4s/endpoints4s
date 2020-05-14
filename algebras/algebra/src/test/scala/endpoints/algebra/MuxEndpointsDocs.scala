@@ -1,5 +1,8 @@
 package endpoints.algebra
 
+import scala.annotation.nowarn
+
+@nowarn("cat=unchecked")
 trait MuxEndpointsDocs extends MuxEndpoints with JsonEntities {
 
   // Pretend that we use some JSON lib

@@ -23,8 +23,8 @@ trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
     ): js.Thenable[req.Response] = {
       new js.Promise[req.Response]((resolve, error) => {
         muxPerformXhr(request, response, req)(
-          _.fold(exn => error(exn.getMessage), resp => resolve(resp)),
-          xhr => error(xhr.responseText)
+          _.fold(exn => error(exn.getMessage), resp => resolve(resp)): Unit,
+          xhr => error(xhr.responseText): Unit
         )
       })
     }

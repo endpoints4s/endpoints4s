@@ -135,7 +135,7 @@ trait EndpointsWithCustomErrors
     effect.map(effect.fromEither(url.encodeUrl(urlP)))(uri =>
       entity(
         bodyP,
-        headers(headersP, Http4sRequest(method, Uri.resolve(host, uri)))
+        headers(headersP, Http4sRequest(method, host.withPath(host.path + uri)))
       )
     )
   }

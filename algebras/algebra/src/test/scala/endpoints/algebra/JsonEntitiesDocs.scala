@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import scala.annotation.nowarn
+
 trait JsonEntitiesDocs extends JsonEntities {
 
   type Error = String
@@ -41,6 +43,6 @@ trait JsonEntitiesDocs extends JsonEntities {
           case Right(user) => Some(user)
         }(_.toRight(()))
     //#response-xmap
-  }
+  }: @nowarn("cat=unused-locals")
 
 }

@@ -35,7 +35,12 @@ trait BasicAuthentication
       url,
       entity,
       requestDocs,
-      headers
+      headers.xmap(h => tuplerHCred(h, Credentials("", "")))(t =>
+        tuplerHCred.unapply(t)._1
+      )
+    )(
+      tuplerUE,
+      tuplerUEHCred
     ) // Documentation about authentication is done below by overriding authenticatedEndpoint
 
   override def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](
@@ -63,7 +68,7 @@ trait BasicAuthentication
         unauthenticatedDocs,
         requestDocs,
         endpointDocs
-      )
+      )(tuplerUE, tuplerHCred, tuplerUEHCred)
       .withSecurity(
         SecurityRequirement(
           basicAuthenticationSchemeName,
