@@ -1,14 +1,21 @@
 package endpoints.algebra.server
 
+import java.time.LocalDate
 import java.util.UUID
 
 import akka.http.scaladsl.model.HttpMethods.{DELETE, PUT}
 import akka.http.scaladsl.model.headers.{
   ETag,
+  RawHeader,
   `Access-Control-Allow-Origin`,
   `Last-Modified`
 }
-import akka.http.scaladsl.model.{DateTime, HttpRequest}
+import akka.http.scaladsl.model.{
+  DateTime,
+  HttpMethods,
+  HttpRequest,
+  StatusCodes
+}
 import endpoints.{Invalid, Valid}
 
 trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
@@ -460,6 +467,110 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
             assert(response.header[`Access-Control-Allow-Origin`].isEmpty)
             ()
         }
+      }
+    }
+
+    "decode transformed request headers" in {
+      serveEndpoint(xmapHeadersEndpoint, "ignored") { port =>
+        val validRequest =
+          HttpRequest(uri = s"http://localhost:$port/xmapHeadersEndpoint")
+            .withHeaders(RawHeader("C", "42"))
+        whenReady(sendAndDecodeEntityAsText(validRequest)) {
+          case (response, _) =>
+            assert(response.status == StatusCodes.OK)
+        }
+        val invalidRequest =
+          HttpRequest(uri = s"http://localhost:$port/xmapHeadersEndpoint")
+            .withHeaders(RawHeader("C", "forty-two"))
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.BadRequest)
+            assert(entity == """["Invalid integer: forty-two"]""")
+        }
+        ()
+      }
+    }
+
+    "decode transformed request entities" in {
+      serveEndpoint(xmapReqBodyEndpoint, "ignored") { port =>
+        val validRequest =
+          HttpRequest(
+            uri = s"http://localhost:$port/xmapReqBodyEndpoint",
+            method = HttpMethods.POST
+          ).withEntity(LocalDate.now().format(dateTimeFormatter))
+        whenReady(sendAndDecodeEntityAsText(validRequest)) {
+          case (response, _) =>
+            assert(response.status == StatusCodes.OK)
+        }
+        val invalidRequest =
+          HttpRequest(
+            uri = s"http://localhost:$port/xmapReqBodyEndpoint",
+            method = HttpMethods.POST
+          ).withEntity("not a date")
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.BadRequest)
+            assert(entity == """["Invalid date value 'not a date'"]""")
+        }
+        ()
+      }
+    }
+
+    "decode transformed request" in {
+      serveEndpoint(endpointWithTransformedRequest, ()) { port =>
+        val validRequest =
+          HttpRequest(uri = s"http://localhost:$port/transformed-request?n=9")
+            .withHeaders(RawHeader("Accept", "text/html"))
+        whenReady(sendAndDecodeEntityAsText(validRequest)) {
+          case (response, _) =>
+            assert(response.status == StatusCodes.OK)
+        }
+        val invalidRequest =
+          HttpRequest(uri = s"http://localhost:$port/transformed-request?n=10")
+            .withHeaders(RawHeader("Accept", "text/html"))
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.BadRequest)
+            assert(
+              entity == """["Invalid combination of request header and query string parameter"]"""
+            )
+        }
+        ()
+      }
+    }
+
+    "encode transformed response entities" in {
+      val entity = StringWrapper("foo")
+      serveEndpoint(
+        serverApi.endpointWithTransformedResponseEntity,
+        entity
+      ) { port =>
+        val request =
+          HttpRequest(uri =
+            s"http://localhost:$port/transformed-response-entity"
+          )
+        whenReady(sendAndDecodeEntityAsText(request)) {
+          case (_, responseEntity) =>
+            assert(responseEntity == entity.str)
+        }
+        ()
+      }
+    }
+
+    "encode transformed response" in {
+      val resp = TransformedResponse("foo", "\"42\"")
+      serveEndpoint(
+        serverApi.endpointWithTransformedResponse,
+        resp
+      ) { port =>
+        val request =
+          HttpRequest(uri = s"http://localhost:$port/transformed-response")
+        whenReady(sendAndDecodeEntityAsText(request)) {
+          case (response, responseEntity) =>
+            assert(responseEntity == resp.entity)
+            assert(response.headers[ETag].contains(ETag("42")))
+        }
+        ()
       }
     }
 

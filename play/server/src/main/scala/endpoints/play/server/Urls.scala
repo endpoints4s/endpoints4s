@@ -73,7 +73,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   }
   //#segment
 
-  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -118,7 +119,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
 
-  implicit lazy val queryStringPartialInvFunctor
+  implicit lazy val queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
@@ -175,7 +176,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     def encode(name: String, a: A): Map[String, Seq[String]]
   }
 
-  implicit lazy val queryStringParamPartialInvFunctor
+  implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -364,7 +365,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           case (validA, segments2) =>
             second.decode(segments2).map {
               case (validB, segments3) =>
-                (validA.zip(validB), segments3)
+                (validA.zip(validB)(tupler), segments3)
             }
         }
       def encode(ab: tupler.Out) = {
@@ -384,7 +385,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     def encodeUrl(a: A): String
   }
 
-  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit lazy val urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],
@@ -409,7 +410,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     new Url[tupler.Out] {
 
       def decodeUrl(req: RequestHeader): Option[Validated[tupler.Out]] =
-        pathExtractor(path, req).map(_.zip(qs.decode(req.queryString)))
+        pathExtractor(path, req).map(_.zip(qs.decode(req.queryString))(tupler))
 
       def encodeUrl(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)

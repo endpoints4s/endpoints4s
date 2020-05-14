@@ -10,7 +10,7 @@ class JsonSchemasTest extends AnyFreeSpec {
       extends algebra.JsonSchemasFixtures
       with circe.JsonSchemas
 
-  import JsonSchemasCodec.{User, Foo, Bar}
+  import JsonSchemasCodec.{User, Foo, Bar, Qux}
 
   "case class" in {
     val userJson =
@@ -51,6 +51,46 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     assert(
       Foo.schema.decoder
+        .decodeJson(wrongJson)
+        .swap
+        .exists(
+          _ == DecodingFailure("No decoder for discriminator 'Unknown'!", Nil)
+        )
+    )
+  }
+
+  "sealed trait tagged merge" in {
+    val barJson =
+      Json.obj(
+        "type" -> Json.fromString("Bar"),
+        "s" -> Json.fromString("foo")
+      )
+    val bar = Bar("foo")
+    assert(
+      Foo.alternativeSchemaForMerge.decoder.decodeJson(barJson).exists(_ == bar)
+    )
+    assert(Foo.alternativeSchemaForMerge.encoder.apply(bar) == barJson)
+
+    val quxJson = Json.obj("type" -> Json.fromString("Qux"))
+    assert(
+      Foo.alternativeSchemaForMerge.decoder.decodeJson(quxJson).exists(_ == Qux)
+    )
+    assert(Foo.alternativeSchemaForMerge.encoder(Qux) == quxJson)
+
+    assert(
+      Foo.alternativeSchemaForMerge.decoder
+        .decodeJson(Json.obj())
+        .swap
+        .exists(
+          _ == DecodingFailure("Missing type discriminator field 'type'!", Nil)
+        )
+    )
+    val wrongJson = Json.obj(
+      "type" -> Json.fromString("Unknown"),
+      "s" -> Json.fromString("foo")
+    )
+    assert(
+      Foo.alternativeSchemaForMerge.decoder
         .decodeJson(wrongJson)
         .swap
         .exists(

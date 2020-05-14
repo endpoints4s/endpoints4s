@@ -8,10 +8,10 @@ lazy val openapi =
     .in(file("openapi"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`,
       name := "endpoints-openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
-      libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion
+      libraryDependencies += ("com.lihaoyi" %%% "ujson" % ujsonVersion).withDottyCompat(scalaVersion.value)
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjectsWithScope(

@@ -14,6 +14,10 @@ import scala.collection.compat._
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
   *
+  * The encoding of the schemas of sealed traits (obtained with the operation
+  * `orElse` or via generic derivation) can be configured by overriding
+  * [[JsonSchemas.coproductEncoding]].
+  *
   * @group interpreters
   */
 trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
@@ -22,7 +26,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   /**
     * The JSON codecs used to produce some parts of the documentation.
     */
-  lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
+  final lazy val ujsonSchemas: endpoints.ujson.JsonSchemas =
     new endpoints.ujson.JsonSchemas {
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName
@@ -48,7 +52,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ) extends JsonSchema[A](ujsonSchema, docs)
 
   sealed trait DocumentedJsonSchema {
+    def description: Option[String]
     def example: Option[ujson.Value]
+    def title: Option[String]
   }
 
   object DocumentedJsonSchema {
@@ -57,7 +63,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         fields: List[Field],
         additionalProperties: Option[DocumentedJsonSchema] = None,
         name: Option[String] = None,
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
     case class Field(
         name: String,
@@ -70,13 +78,17 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         alternatives: List[(String, DocumentedRecord)],
         name: Option[String] = None,
         discriminatorName: String = defaultDiscriminatorName,
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
 
     case class Primitive(
         name: String,
         format: Option[String] = None,
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
 
     /**
@@ -84,31 +96,39 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       */
     case class Array(
         schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]],
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
 
     case class DocumentedEnum(
         elementType: DocumentedJsonSchema,
         values: List[ujson.Value],
         name: Option[String],
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
-    sealed trait LazySchema extends DocumentedJsonSchema {
+    sealed abstract class LazySchema extends DocumentedJsonSchema {
       def value: DocumentedJsonSchema
     }
     object LazySchema {
       def apply(s: => DocumentedJsonSchema): LazySchema =
         new LazySchema {
           lazy val value: DocumentedJsonSchema = s
+          def description: Option[String] = value.description
           def example: Option[ujson.Value] = value.example
+          def title: Option[String] = value.title
         }
     }
 
     case class OneOf(
         alternatives: List[DocumentedJsonSchema],
-        example: Option[ujson.Value] = None
+        description: Option[String] = None,
+        example: Option[ujson.Value] = None,
+        title: Option[String] = None
     ) extends DocumentedJsonSchema
   }
 
@@ -252,6 +272,39 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       DocumentedRecord(recordA.docs.fields ++ recordB.docs.fields)
     )
 
+  def withExampleRecord[A](
+      record: Record[A],
+      example: A
+  ): Record[A] = {
+    val exampleJson = record.ujsonSchema.codec.encode(example)
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(example = Some(exampleJson))
+    )
+  }
+
+  def withExampleTagged[A](
+      tagged: Tagged[A],
+      example: A
+  ): Tagged[A] = {
+    val exampleJson = tagged.ujsonSchema.codec.encode(example)
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(example = Some(exampleJson))
+    )
+  }
+
+  def withExampleEnum[A](
+      enumeration: Enum[A],
+      example: A
+  ): Enum[A] = {
+    val exampleJson = enumeration.ujsonSchema.codec.encode(example)
+    new Enum[A](
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(example = Some(exampleJson))
+    )
+  }
+
   def withExampleJsonSchema[A](
       schema: JsonSchema[A],
       example: A
@@ -273,6 +326,100 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
+  def withTitleRecord[A](
+      record: Record[A],
+      title: String
+  ): Record[A] =
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(title = Some(title))
+    )
+
+  def withTitleTagged[A](
+      tagged: Tagged[A],
+      title: String
+  ): Tagged[A] =
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(title = Some(title))
+    )
+
+  def withTitleEnum[A](
+      enumeration: Enum[A],
+      title: String
+  ): Enum[A] =
+    new Enum[A](
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(title = Some(title))
+    )
+
+  def withTitleJsonSchema[A](
+      schema: JsonSchema[A],
+      title: String
+  ): JsonSchema[A] = {
+    def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
+      djs match {
+        case s: DocumentedRecord => s.copy(title = Some(title))
+        case s: DocumentedCoProd => s.copy(title = Some(title))
+        case s: Primitive        => s.copy(title = Some(title))
+        case s: Array            => s.copy(title = Some(title))
+        case s: DocumentedEnum   => s.copy(title = Some(title))
+        case s: LazySchema       => LazySchema(updatedDocs(s.value))
+        case s: OneOf            => s.copy(title = Some(title))
+      }
+    new JsonSchema(
+      schema.ujsonSchema,
+      updatedDocs(schema.docs)
+    )
+  }
+
+  def withDescriptionRecord[A](
+      record: Record[A],
+      description: String
+  ): Record[A] =
+    new Record[A](
+      record.ujsonSchema,
+      record.docs.copy(description = Some(description))
+    )
+
+  def withDescriptionTagged[A](
+      tagged: Tagged[A],
+      description: String
+  ): Tagged[A] =
+    new Tagged[A](
+      tagged.ujsonSchema,
+      tagged.docs.copy(description = Some(description))
+    )
+
+  def withDescriptionEnum[A](
+      enumeration: Enum[A],
+      description: String
+  ): Enum[A] =
+    new Enum[A](
+      enumeration.ujsonSchema,
+      enumeration.docs.copy(description = Some(description))
+    )
+
+  def withDescriptionJsonSchema[A](
+      schema: JsonSchema[A],
+      description: String
+  ): JsonSchema[A] = {
+    def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
+      djs match {
+        case s: DocumentedRecord => s.copy(description = Some(description))
+        case s: DocumentedCoProd => s.copy(description = Some(description))
+        case s: Primitive        => s.copy(description = Some(description))
+        case s: Array            => s.copy(description = Some(description))
+        case s: DocumentedEnum   => s.copy(description = Some(description))
+        case s: LazySchema       => LazySchema(updatedDocs(s.value))
+        case s: OneOf            => s.copy(description = Some(description))
+      }
+    new JsonSchema(
+      schema.ujsonSchema,
+      updatedDocs(schema.docs)
+    )
+  }
+
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],
       schemaB: JsonSchema[B]
@@ -282,19 +429,28 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         .orFallbackToJsonSchema(schemaA.ujsonSchema, schemaB.ujsonSchema),
       (schemaA.docs, schemaB.docs) match {
         case (
-            OneOf(alternatives1, maybeExample1),
-            OneOf(alternatives2, maybeExample2)
+            OneOf(alternatives1, _, maybeExample1, _),
+            OneOf(alternatives2, _, maybeExample2, _)
             ) =>
           OneOf(
             alternatives1 ++ alternatives2,
-            maybeExample1.orElse(maybeExample2)
+            example = maybeExample1.orElse(maybeExample2)
           )
-        case (OneOf(alternatives, maybeExample), schema) =>
-          OneOf(alternatives :+ schema, maybeExample.orElse(schema.example))
-        case (schema, OneOf(alternatives, maybeExample)) =>
-          OneOf(schema +: alternatives, schema.example.orElse(maybeExample))
+        case (OneOf(alternatives, _, maybeExample, _), schema) =>
+          OneOf(
+            alternatives :+ schema,
+            example = maybeExample.orElse(schema.example)
+          )
+        case (schema, OneOf(alternatives, _, maybeExample, _)) =>
+          OneOf(
+            schema +: alternatives,
+            example = schema.example.orElse(maybeExample)
+          )
         case (schema1, schema2) =>
-          OneOf(List(schema1, schema2), schema1.example.orElse(schema2.example))
+          OneOf(
+            List(schema1, schema2),
+            example = schema1.example.orElse(schema2.example)
+          )
       }
     )
   }
@@ -359,6 +515,168 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       )
     )
 
+  sealed trait CoproductEncoding
+
+  /**
+    * This object contains the options for how to encode coproduct JSON schemas.
+    *
+    * The following Scala coproduct is the candidate example. Each encoding
+    * option includes the schema that it would generate for that example.
+    *
+    * {{{
+    * sealed trait Pet
+    * case class Cat(name: String) extends Pet
+    * case class Lizard(lovesRocks: Boolean) extends Pet
+    * }}}
+    */
+  object CoproductEncoding {
+
+    /** Strategy defining the base type schema in terms of `oneOf` and the
+      * variant schemas. The variants themselves don't refer to the base type,
+      * but they do include the discriminator field.
+      *
+      *  - simpler looking schemas in Swagger UI
+      *  - some OpenAPI clients don't handle `oneOf` properly
+      *
+      * Using the `Pet` example above, this strategy yields the following:
+      *
+      * {{{
+      * "schemas": {
+      *   "Pet": {
+      *     "oneOf": [
+      *       { "\$ref": "#/components/schemas/Cat" },
+      *       { "\$ref": "#/components/schemas/Lizard" }
+      *     ],
+      *     "discriminator": {
+      *       "propertyName": "type",
+      *       "mapping": {
+      *         "Cat": "#/components/schemas/Cat",
+      *         "Lizard": "#/components/schemas/Lizard"
+      *       }
+      *     }
+      *   },
+      *
+      *   "Cat": {
+      *     "type": "object",
+      *     "properties": {
+      *       "type": {
+      *         "type": "string",
+      *         "enum": [ "Cat" ]
+      *       },
+      *       "name": {
+      *         "type": "string"
+      *       }
+      *     },
+      *     "required": [
+      *       "type",
+      *       "name"
+      *     ]
+      *   },
+      *
+      *   "Lizard": {
+      *     "type": "object",
+      *     "properties": {
+      *       "type": {
+      *         "type": "string",
+      *         "enum": [ "Lizard" ]
+      *       },
+      *       "lovesRocks": {
+      *         "type": "boolean"
+      *       }
+      *     },
+      *     "required": [
+      *       "type",
+      *       "lovesRocks"
+      *     ]
+      *   }
+      * }
+      * }}}
+      */
+    case object OneOf extends CoproductEncoding
+
+    /** Strategy that extends [[OneOf]] so that each variant also refers back
+      * to the base type schema using `allOf`. This approach is sometimes
+      * referred to in OpenAPI 3 as a way to model polymorphism.
+      *
+      *  - compatible with OpenAPI clients that don't handle `oneOf` properly
+      *  - more complex schemas in Swagger UI
+      *
+      * Using the `Pet` example above, this strategy yields the following:
+      *
+      * {{{
+      * "schemas": {
+      *   "Pet": {
+      *     "oneOf": [
+      *       { "\$ref": "#/components/schemas/Cat" },
+      *       { "\$ref": "#/components/schemas/Lizard" }
+      *     ],
+      *     "discriminator": {
+      *       "propertyName": "type",
+      *       "mapping": {
+      *         "Cat": "#/components/schemas/Cat",
+      *         "Lizard": "#/components/schemas/Lizard"
+      *       }
+      *     }
+      *   },
+      *
+      *   "Cat": {
+      *     "allOf": [
+      *       { "\$ref": "#/components/schemas/Pet" },
+      *       {
+      *         "type": "object",
+      *         "properties": {
+      *           "type": {
+      *             "type": "string",
+      *             "enum": [ "Cat" ]
+      *           },
+      *           "name": {
+      *             "type": "string"
+      *           }
+      *         },
+      *         "required": [
+      *           "type",
+      *           "name"
+      *         ]
+      *       }
+      *     ]
+      *   },
+      *
+      *   "Lizard": {
+      *     "allOf": [
+      *       { "\$ref": "#/components/schemas/Pet" },
+      *       {
+      *         "type": "object",
+      *         "properties": {
+      *           "type": {
+      *             "type": "string",
+      *             "enum": [ "Lizard" ]
+      *           },
+      *           "lovesRocks": {
+      *             "type": "boolean"
+      *           }
+      *         },
+      *         "required": [
+      *           "type",
+      *           "lovesRocks"
+      *         ]
+      *       }
+      *     ]
+      *   }
+      * }
+      * }}}
+      */
+    case object OneOfWithBaseRef extends CoproductEncoding
+  }
+
+  /**
+    * Override this method to customize the strategy used to encode the JSON
+    * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
+    *
+    * @see [[JsonSchemas.CoproductEncoding$]]
+    *
+    */
+  def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
+
   /** Convert the internal representation of a JSON schema into the public OpenAPI AST */
   def toSchema(jsonSchema: DocumentedJsonSchema): Schema =
     toSchema(jsonSchema, None, Set.empty)
@@ -369,7 +687,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       referencedSchemas: Set[String]
   ): Schema = {
     documentedCodec match {
-      case record @ DocumentedRecord(_, _, Some(name), _) =>
+      case record @ DocumentedRecord(_, _, Some(name), _, _, _) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else
           Schema.Reference(
@@ -379,9 +697,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             ),
             None
           )
-      case record @ DocumentedRecord(_, _, None, _) =>
+      case record @ DocumentedRecord(_, _, None, _, _, _) =>
         expandRecordSchema(record, coprodBase, referencedSchemas)
-      case coprod @ DocumentedCoProd(_, Some(name), _, _) =>
+      case coprod @ DocumentedCoProd(_, Some(name), _, _, _, _) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else
           Schema.Reference(
@@ -389,27 +707,36 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             Some(expandCoproductSchema(coprod, referencedSchemas + name)),
             None
           )
-      case coprod @ DocumentedCoProd(_, None, _, _) =>
+      case coprod @ DocumentedCoProd(_, None, _, _, _, _) =>
         expandCoproductSchema(coprod, referencedSchemas)
-      case Primitive(name, format, example) =>
-        Schema.Primitive(name, format, None, example)
-      case Array(Left(elementType), example) =>
+      case Primitive(name, format, description, example, title) =>
+        Schema.Primitive(name, format, description, example, title)
+      case Array(Left(elementType), description, example, title) =>
         Schema.Array(
           Left(toSchema(elementType, coprodBase, referencedSchemas)),
-          None,
-          example
+          description,
+          example,
+          title
         )
-      case Array(Right(elementTypes), example) =>
+      case Array(Right(elementTypes), description, example, title) =>
         Schema.Array(
           Right(
             elementTypes.map(elementType =>
               toSchema(elementType, coprodBase, referencedSchemas)
             )
           ),
-          None,
-          example
+          description,
+          example,
+          title
         )
-      case DocumentedEnum(elementType, values, Some(name), example) =>
+      case DocumentedEnum(
+          elementType,
+          values,
+          Some(name),
+          description,
+          example,
+          title
+          ) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else
           Schema.Reference(
@@ -418,26 +745,40 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
               Schema.Enum(
                 toSchema(elementType, coprodBase, referencedSchemas + name),
                 values,
-                None,
-                example
+                description,
+                example,
+                title
               )
             ),
             None
           )
-      case DocumentedEnum(elementType, values, None, example) =>
+      case DocumentedEnum(
+          elementType,
+          values,
+          None,
+          description,
+          example,
+          title
+          ) =>
         Schema.Enum(
           toSchema(elementType, coprodBase, referencedSchemas),
           values,
-          None,
-          example
+          description,
+          example,
+          title
         )
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)
-      case OneOf(alternatives, example) =>
+      case OneOf(alternatives, description, example, title) =>
         val alternativeSchemas = alternatives.map(alternative =>
           toSchema(alternative, coprodBase, referencedSchemas)
         )
-        Schema.OneOf(EnumeratedAlternatives(alternativeSchemas), None, example)
+        Schema.OneOf(
+          EnumeratedAlternatives(alternativeSchemas),
+          description,
+          example,
+          title
+        )
     }
   }
 
@@ -460,39 +801,56 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       record.additionalProperties.map(toSchema(_, None, referencedSchemas))
 
     coprodBase.fold[Schema] {
-      Schema.Object(fieldsSchema, additionalProperties, None, record.example)
+      Schema.Object(
+        fieldsSchema,
+        additionalProperties,
+        record.description,
+        record.example,
+        record.title
+      )
     } {
       case (tag, coprod) =>
         val discriminatorField =
           Schema.Property(
             coprod.discriminatorName,
             Schema
-              .Enum(Schema.simpleString, List(tag), None, Some(ujson.Str(tag))),
+              .Enum(
+                Schema.simpleString,
+                List(tag),
+                None,
+                Some(ujson.Str(tag)),
+                None
+              ),
             isRequired = true,
             description = None
           )
 
-        coprod.name.fold[Schema] {
-          Schema.Object(
-            discriminatorField :: fieldsSchema,
-            additionalProperties,
-            None,
-            record.example
-          )
-        } { coproductName =>
-          Schema.AllOf(
-            schemas = List(
-              Schema.Reference(coproductName, None, None),
-              Schema.Object(
-                discriminatorField :: fieldsSchema,
-                additionalProperties,
-                None,
-                None
-              )
-            ),
-            description = None,
-            record.example
-          )
+        (coprod.name, coproductEncoding) match {
+          case (Some(coproductName), CoproductEncoding.OneOfWithBaseRef) =>
+            Schema.AllOf(
+              schemas = List(
+                Schema.Reference(coproductName, None, None),
+                Schema.Object(
+                  discriminatorField :: fieldsSchema,
+                  additionalProperties,
+                  None,
+                  None,
+                  None
+                )
+              ),
+              record.description,
+              record.example,
+              record.title
+            )
+
+          case _ =>
+            Schema.Object(
+              discriminatorField :: fieldsSchema,
+              additionalProperties,
+              record.description,
+              record.example,
+              record.title
+            )
         }
     }
   }
@@ -508,8 +866,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       }
     Schema.OneOf(
       DiscriminatedAlternatives(coprod.discriminatorName, alternativesSchemas),
-      None,
-      coprod.example
+      coprod.description,
+      coprod.example,
+      coprod.title
     )
   }
 

@@ -31,6 +31,9 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   /**
     * Information carried by an HTTP endpoint
     *
+    * Values of type [[Endpoint]] can be constructed by using the operation
+    * [[endpoint]].
+    *
     * @tparam A Information carried by the request
     * @tparam B Information carried by the response
     * @group types
@@ -38,7 +41,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   type Endpoint[A, B]
 
   /**
-    * HTTP endpoint.
+    * Define an HTTP endpoint
     *
     * @param request  Request
     * @param response Response
@@ -77,11 +80,50 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param entity   Contents of the callback message
     * @param response Expected response
     */
-  case class CallbackDocs(
+  case class CallbackDocs private (
       method: Method,
-      entity: RequestEntity[_],
-      response: Response[_],
-      requestDocs: Documentation = None
+      entity: CallbackDocs.SomeRequestEntity,
+      response: CallbackDocs.SomeResponse,
+      requestDocs: Documentation
   )
+
+  object CallbackDocs {
+
+    /**
+      * A wrapper type for a [[RequestEntity]] whose carried information is unknown.
+      *
+      * This wrapper type is necessary because Scala 3 does not support writing `RequestEntity[_]`.
+      */
+    trait SomeRequestEntity {
+      type T
+      def value: RequestEntity[T]
+    }
+
+    /**
+      * A wrapper type for a [[Response]] whose carried information is unknown.
+      *
+      * This wrapper type is necessary because Scala 3 does not support writing `Response[_]`
+      */
+    trait SomeResponse {
+      type T
+      def value: Response[T]
+    }
+
+    /**
+      * Convenience constructor that wraps the `entity` and `response` parameters.
+      */
+    def apply[A, B](
+        method: Method,
+        entity: RequestEntity[A],
+        response: Response[B],
+        requestDocs: Documentation = None
+    ): CallbackDocs =
+      new CallbackDocs(
+        method,
+        new SomeRequestEntity { type T = A; def value = entity },
+        new SomeResponse { type T = B; def value = response },
+        requestDocs
+      )
+  }
 
 }

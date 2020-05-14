@@ -216,6 +216,36 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "sealed trait tagged merge" in {
+    sealed trait Shape
+    case class Circle(r: Double) extends Shape
+    case class Rect(w: Int, h: Int) extends Shape
+
+    val circleSchema = field[Double]("r")
+      .tagged("Circle")
+      .xmap(Circle)(_.r)
+
+    val rectSchema = (field[Int]("w") zip field[Int]("h"))
+      .tagged("Rect")
+      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+
+    val schema = circleSchema orElseMerge rectSchema
+    testRoundtrip(
+      schema,
+      Json.obj("type" -> JsString("Circle"), "r" -> JsNumber(2.0)),
+      Circle(2.0)
+    )
+    testRoundtrip(
+      schema,
+      Json.obj(
+        "type" -> JsString("Rect"),
+        "w" -> JsNumber(3),
+        "h" -> JsNumber(4)
+      ),
+      Rect(3, 4)
+    )
+  }
+
   "sealed trait with xmap and tagged swapped" in {
     sealed trait Shape
     case class Circle(r: Double) extends Shape
@@ -376,7 +406,8 @@ class JsonSchemasTest extends AnyFreeSpec {
     val jsResult = jsonSchema.reads.reads(json)
     assert(jsResult.isError)
 
-    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.left.get
+    val errorMessages: scala.collection.Seq[String] = jsResult.asEither.swap
+      .getOrElse(fail("Expected failure"))
       .flatMap(_._2)
       .flatMap(_.messages) // ignoring JsPath
     assert(errorMessages.head == expectedError)

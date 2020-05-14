@@ -1,6 +1,6 @@
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.2")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.0.1")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.33")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
@@ -19,9 +19,9 @@ addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.2")
 
-addSbtPlugin(
-  "com.heroku" % "sbt-heroku" % "2.1.4"
-) // Used by the example-documented project
+//addSbtPlugin(
+//  "com.heroku" % "sbt-heroku" % "2.1.4"
+//) // Used by the example-documented project
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
@@ -33,3 +33,5 @@ lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 val build = project.in(file(".")).dependsOn(`sbt-assets`)
 
 ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
+
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.4.1")

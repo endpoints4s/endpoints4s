@@ -1,5 +1,7 @@
 package endpoints.algebra
 
+import scala.annotation.nowarn
+
 trait JsonSchemasDocs extends JsonSchemas {
 
   locally {
@@ -12,7 +14,7 @@ trait JsonSchemasDocs extends JsonSchemas {
         field[Double]("height")
     ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
     //#record-schema
-  }
+  }: @nowarn("cat=unused-locals")
 
   //#sum-type
   sealed trait Shape
@@ -58,7 +60,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     implicit lazy val statusSchema: JsonSchema[Status] =
       stringEnumeration[Status](Seq(Active, Inactive, Obsolete))(_.toString)
     //#enum-status-schema
-  }
+  }: @nowarn("cat=unused-locals")
 
   //#recursive
   case class Recursive(next: Option[Recursive])
@@ -72,10 +74,10 @@ trait JsonSchemasDocs extends JsonSchemas {
   type Coordinates = (Double, Double) // (Longitude, Latitude)
   case class Point(coordinates: Coordinates)
 
-  implicit val pointSchema: JsonSchema[Point] =
-    field[Coordinates]("coordinates")
-      .tagged("Point")
-      .xmap(Point(_))(_.coordinates)
+  implicit val pointSchema: JsonSchema[Point] = (
+    field("type")(literal("Point")) zip
+      field[Coordinates]("coordinates")
+  ).xmap(Point(_))(_.coordinates)
   //#tuple
 
   locally {
@@ -86,6 +88,7 @@ trait JsonSchemasDocs extends JsonSchemas {
         field[Double]("height")
     ).xmap(Rectangle.tupled)(rect => (rect.width, rect.height))
       .withExample(Rectangle(10, 20))
+      .withDescription("A rectangle shape")
     //#with-example
-  }
+  }: @nowarn("cat=unused-locals")
 }

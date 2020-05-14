@@ -19,6 +19,8 @@ trait StatusCodes extends endpoints.algebra.StatusCodes {
   def Unauthorized = 401
   def Forbidden = 403
   def NotFound = 404
+  def PayloadTooLarge = 413
+  def TooManyRequests = 429
 
   def InternalServerError = 500
   def NotImplemented = 501

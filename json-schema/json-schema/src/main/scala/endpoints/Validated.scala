@@ -72,7 +72,7 @@ sealed trait Validated[+A] {
 }
 
 /** A valid value of type `A` */
-case class Valid[A](value: A) extends Validated[A]
+case class Valid[+A](value: A) extends Validated[A]
 
 /** A list of validation errors */
 case class Invalid(errors: Seq[String]) extends Validated[Nothing]

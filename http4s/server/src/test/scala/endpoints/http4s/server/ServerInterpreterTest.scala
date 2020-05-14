@@ -49,13 +49,10 @@ class ServerInterpreterTest
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
-      BlazeServerBuilder[IO].bindHttp(port, "localhost").withHttpApp(httpApp)
-    val fiber = server.resource.use(_ => IO.never).start.unsafeRunSync()
-    try {
-      runTests(port)
-    } finally {
-      fiber.cancel.unsafeRunSync()
-    }
+      BlazeServerBuilder[IO](ExecutionContext.global)
+        .bindHttp(port, "localhost")
+        .withHttpApp(httpApp)
+    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
   }
 
 }

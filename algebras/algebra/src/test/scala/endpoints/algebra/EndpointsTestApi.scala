@@ -4,7 +4,9 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.util.UUID
 
-import endpoints.{Invalid, Valid, algebra}
+import endpoints.{Invalid, Valid, Validated, algebra}
+
+import scala.util.Try
 
 trait EndpointsTestApi extends algebra.Endpoints {
 
@@ -75,24 +77,29 @@ trait EndpointsTestApi extends algebra.Endpoints {
     ok(textResponse)
   )
 
-  val headers2 = requestHeader("C").xmap(_.toInt)(_.toString)
+  val headers2 = requestHeader("C").xmapPartial(s =>
+    Validated.fromTry(Try(s.toInt)).mapErrors(_ => Seq(s"Invalid integer: $s"))
+  )(_.toString())
   val xmapHeadersEndpoint = endpoint(
     get(path / "xmapHeadersEndpoint", headers = headers2),
     ok(textResponse)
   )
 
   val url1 = (path / "xmapUrlEndpoint" / segment[Long](): Url[Long])
-    .xmap(_.toString)(_.toLong)
+    .xmap(_.toString())(_.toLong)
   val xmapUrlEndpoint = endpoint(
     get(url1),
     ok(textResponse)
   )
 
   val dateTimeFormatter = DateTimeFormatter.ISO_DATE
-  val reqBody1 =
-    textRequest.xmap(s => LocalDate.parse(s, dateTimeFormatter))(d =>
-      dateTimeFormatter.format(d)
+  val reqBody1 = textRequest.xmapWithCodec(
+    Codec.parseStringCatchingExceptions(
+      `type` = "date",
+      parse = LocalDate.parse(_, dateTimeFormatter),
+      print = dateTimeFormatter.format(_)
     )
+  )
   val xmapReqBodyEndpoint = endpoint(
     post(path / "xmapReqBodyEndpoint", reqBody1),
     ok(textResponse)
@@ -123,12 +130,8 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val cacheHeaders: ResponseHeaders[Cache] =
     (responseHeader("ETag") ++ responseHeader("Last-Modified"))
-      .xmapPartial {
-        case (etag, lastModified) =>
-          val validDate =
-            if (lastModified.contains("GMT")) Valid(lastModified)
-            else Invalid("Invalid date")
-          validDate.map(Cache(etag, _))
+      .xmap {
+        case (etag, lastModified) => Cache(etag, lastModified)
       }(cache => (cache.etag, cache.lastModified))
 
   val versionedResource = endpoint(
@@ -139,6 +142,44 @@ trait EndpointsTestApi extends algebra.Endpoints {
   val endpointWithOptionalResponseHeader = endpoint(
     get(path / "maybe-cors-enabled"),
     ok(textResponse, headers = optResponseHeader("Access-Control-Allow-Origin"))
+  )
+
+  val transformedRequest =
+    get(
+      url = path / "transformed-request" /? qs[Int]("n"),
+      headers = requestHeader("Accept")
+    ).xmapPartial {
+      case (queryParam, headerValue) =>
+        if (headerValue.length == queryParam) Valid((queryParam, headerValue))
+        else
+          Invalid(
+            "Invalid combination of request header and query string parameter"
+          )
+    }(identity)
+
+  val endpointWithTransformedRequest = endpoint(
+    transformedRequest,
+    ok(emptyResponse)
+  )
+
+  case class StringWrapper(str: String)
+
+  val transformedResponseEntity =
+    textResponse.xmap(StringWrapper)(_.str)
+
+  val endpointWithTransformedResponseEntity = endpoint(
+    get(path / "transformed-response-entity"),
+    ok(transformedResponseEntity)
+  )
+
+  case class TransformedResponse(entity: String, etag: String)
+
+  val endpointWithTransformedResponse = endpoint(
+    get(path / "transformed-response"),
+    ok(
+      entity = textResponse,
+      headers = responseHeader("ETag")
+    ).xmap(TransformedResponse.tupled)(r => (r.entity, r.etag))
   )
 
 }

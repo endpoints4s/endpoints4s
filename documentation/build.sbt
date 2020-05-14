@@ -98,8 +98,8 @@ val manual =
       },
       (Paradox / paradoxProperties) ++= Map(
         "version" -> version.value,
-        "scaladoc.base_url" -> s"/${(packageDoc / siteSubdirName).value}",
-        "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/tree/${version.value}"
+        "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
+        "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/tree/v${version.value}"
       ),
       packageDoc / siteSubdirName := "api",
       addMappingsToSiteDir(
@@ -130,7 +130,7 @@ val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -149,7 +149,7 @@ val `example-quickstart-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       noPublishSettings,
-      `scala 2.12 to latest`
+      `scala 2.12 to 2.13`
     )
     .dependsOn(`example-quickstart-endpoints-js`, `xhr-client`)
 
@@ -158,7 +158,7 @@ val `example-quickstart-server` =
     .in(file("examples/quickstart/server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.9.1",
         scalaTestDependency
@@ -179,7 +179,7 @@ val `example-basic-shared` = {
   ).crossType(CrossType.Pure)
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       macroParadiseDependency,
       (sourceGenerators in Compile) += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -220,7 +220,7 @@ val `example-basic-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       scalaJSUseMainModuleInitializer := true,
@@ -233,7 +233,7 @@ val `example-basic-play-server` =
     .in(file("examples/basic/play-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile))
         .map(_.data)
         .value,
@@ -253,7 +253,7 @@ val `example-basic-akkahttp-server` =
     .in(file("examples/basic/akkahttp-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       publishArtifact := false
     )
     .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)
@@ -264,7 +264,7 @@ val `example-cqrs-public-endpoints` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .jsSettings(
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false
@@ -288,7 +288,7 @@ val `example-cqrs-web-client` =
     .enablePlugins(ScalaJSPlugin)
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
@@ -307,7 +307,7 @@ val `example-cqrs-public-server` =
     .in(file("examples/cqrs/public-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile))
         .map(_.data)
         .value,
@@ -338,7 +338,7 @@ lazy val `example-cqrs-commands-endpoints` =
     .in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.9.1",
         "io.circe" %% "circe-generic" % circeVersion
@@ -352,7 +352,7 @@ val `example-cqrs-commands` =
     .in(file("examples/cqrs/commands"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.14.3" % Test,
         scalaTestDependency
@@ -365,7 +365,7 @@ val `example-cqrs-commands` =
 lazy val `example-cqrs-queries-endpoints` =
   project
     .in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .dependsOn(
       `algebra-circe-jvm`,
       `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */
@@ -375,7 +375,7 @@ lazy val `example-cqrs-queries-endpoints` =
 val `example-cqrs-queries` =
   project
     .in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .dependsOn(`play-server-circe`, `play-client`)
     .dependsOn(
       `example-cqrs-queries-endpoints`,
@@ -386,7 +386,7 @@ val `example-cqrs-queries` =
 val `example-cqrs` =
   project
     .in(file("examples/cqrs/infra"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
@@ -403,19 +403,22 @@ val `example-cqrs` =
 val `example-documented` =
   project
     .in(file("examples/documented"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
-      herokuAppName in Compile := "documented-counter",
-      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
-      herokuSkipSubProjects in Compile := false,
-      herokuProcessTypes in Compile := Map(
-        "web" -> ("java -Dhttp.port=$PORT -jar " ++ (crossTarget.value / s"${name.value}-assembly-${version.value}.jar")
-          .relativeTo(baseDirectory.value)
-          .get
-          .toString)
-      ),
+// Temporary: the sbt-heroku plugin seems to conflict with sbt-dotty
+//      herokuAppName in Compile := "documented-counter",
+//      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
+//      herokuSkipSubProjects in Compile := false,
+//      herokuProcessTypes in Compile := Map(
+//        "web" -> ("java -Dhttp.port=$PORT -jar " ++ (crossTarget.value / s"${name.value}-assembly-${version.value}.jar")
+//          .relativeTo(baseDirectory.value)
+//          .get
+//          .toString)
+//      ),
       assemblyMergeStrategy in assembly := {
         case x if x.endsWith("io.netty.versions.properties") =>
+          MergeStrategy.first
+        case x if x.endsWith("module-info.class") =>
           MergeStrategy.first
         case x =>
           val oldStrategy = (assemblyMergeStrategy in assembly).value
@@ -436,7 +439,7 @@ val `example-documented` =
 val `example-authentication` =
   project
     .in(file("examples/authentication"))
-    .settings(noPublishSettings, `scala 2.12 to latest`)
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
         "com.pauldijou" %% "jwt-play" % "4.3.0",
@@ -450,7 +453,7 @@ val `example-basic-http4s-server` =
     .in(file("examples/basic/http4s-server"))
     .settings(
       commonSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to 2.13`,
       publishArtifact := false,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,

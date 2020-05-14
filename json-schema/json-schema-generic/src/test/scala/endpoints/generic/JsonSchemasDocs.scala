@@ -1,5 +1,7 @@
 package endpoints.generic
 
+import scala.annotation.nowarn
+
 trait JsonSchemasDocs extends JsonSchemas {
 
   sealed trait Shape
@@ -17,11 +19,12 @@ trait JsonSchemasDocs extends JsonSchemas {
         field[Double]("height")
     ).as[Rectangle]
     //#explicit-schema
-  }
+  }: @nowarn("cat=unused-locals")
 
   locally {
     //#documented-generic-schema
     @discriminator("kind")
+    @title("Geometric shape")
     @name("ShapeSchema")
     sealed trait Shape
 
@@ -29,6 +32,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     case class Circle(radius: Double) extends Shape
 
     @name("RectangleSchema")
+    @docs("A quadrilateral with four right angles")
     case class Rectangle(
         @docs("Rectangle width") width: Double,
         height: Double

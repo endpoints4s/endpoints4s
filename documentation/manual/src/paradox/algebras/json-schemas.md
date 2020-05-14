@@ -68,15 +68,27 @@ be `tagged` with a unique name. Then, the `orElse` operation combines the altern
 single schema that accepts one of them.
 
 The result of the `tagged` operation is a `Tagged[A]` schema. This subtype of `JsonSchema[A]` models a
-schema that accepts one of several alternative schemas. It provides the `orElse` operation.
+schema that accepts one of several alternative schemas. It provides the `orElse` operation and
+adds a discriminator field to the schema.
 
 The `orElse` operation turns the `Tagged[Circle]` and `Tagged[Rectangle]` values into
-a `Record[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
-`Record[Shape]` by using `xmap`.
+a `Tagged[Either[Circle, Rectangle]]`, which is then, in this example, transformed into a
+`Tagged[Shape]` by using `xmap`.
 
-By default, the discriminator field is named `type`, but you can use another field name either by
-overriding the `defaultDiscriminatorName` method of the algebra, or by wrapping the `Tagged` schema
-in a `withDiscriminator` call specifying the field name to use.
+By default, the discriminator field used to distinguish between tagged alternatives is named
+`type`, but you can use another field name either by overriding the `defaultDiscriminatorName`
+method of the algebra, or by calling the `withDiscriminator` operation and specifying the
+field name to use.
+
+Instead of using `orElse` you can also make use of the `orElseMerge` operation. This is similar to
+`orElse`, but requires alternatives to share a parent. In the above example, this requirement is met since both
+`Circle` and `Rectangle` extend `Shape`. The `orElseMerge` operation turns the `Tagged[Circle]` and
+`Tagged[Rectangle]` values into a `Tagged[Shape]` without any mapping. Note, however, that `orElseMerge`
+uses `ClassTag` under the hood, and thus requires both alternatives to have distinct types after erasure.
+Our example is valid because `Rectangle` and `Shape` are distinct classes, but consider a type
+`Resource[A]`: then the types `Resource[Rectangle]` and `Resource[Circle]` have the same erased type
+(`Resource[_]`), making them indistinguishable by the `orElseMerge` operation. See also the documentation
+of [`isInstanceOf`](https://www.scala-lang.org/api/current/scala/Any.html#isInstanceOf[T0]:Boolean).
 
 ### Refining schemas
 
@@ -148,17 +160,11 @@ failure messages. You should generally prefer using `orElse` on “tagged” sch
 Schema descriptions can include documentation information which is used by documentation
 interpreters such as the @ref[OpenAPI](../interpreters/openapi.md) interpreter. We have already
 seen in the first section that object fields could be documented with a description.
-This section shows two other features related to schemas documentation.
+This section shows other features related to schemas documentation.
 
-You can give names to schemas. These names are used by the OpenAPI interpreter to group
-the schema definitions at one place, and then reference each schema by its name (see the
-[Swagger “Components Section” documentation](https://swagger.io/docs/specification/components/)).
-
-Use the `named` method to give a name to a `Record`, a `Tagged`, or an `Enum` schema.
-
-You can also include examples of values for a schema (see the
-[Swagger “Adding Examples” documentation](https://swagger.io/docs/specification/adding-examples/)).
-This is done by using the `withExample` operation:
+You can include a description and an example of value for a schema (see the
+[Swagger “Adding Examples” documentation](https://swagger.io/docs/specification/adding-examples/)),
+with the operations `withDescription` and `withExample`, respectively:
 
 @@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints/algebra/JsonSchemasDocs.scala) { #with-example }
 
@@ -180,9 +186,26 @@ following JSON document:
     }
   },
   "required": ["width","height"],
+  "description": "A rectangle shape",
   "example": { "width": 10, "height": 20 }
 }
 ~~~
+
+The encoding of sealed traits in OpenAPI can be configured by overriding the `coproductEncoding`
+method in the OpenAPI interpreter. By default, the OpenAPI interpreter will encode variants of
+sealed traits in the same way that they would be encoded if they were standalone records. However,
+it is sometimes useful to include in each variants' schema a reference to the base type schema.
+The @scaladoc[API documentation](endpoints.openapi.JsonSchemas) has more details.
+
+You can give names to schemas. These names are used by the OpenAPI interpreter to group
+the schema definitions at one place, and then reference each schema by its name (see the
+[Swagger “Components Section” documentation](https://swagger.io/docs/specification/components/)).
+
+Use the `named` method to give a name to a `Record`, a `Tagged`, or an `Enum` schema.
+
+@@@ warning
+Note that schema names [must be valid URLs](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.3.md#relative-references-in-urls).
+@@@
 
 ## Generic derivation of JSON schemas (based on Shapeless) 
 
@@ -215,13 +238,15 @@ type. The rules for deriving the schema are the following:
   type has a `width` required property of type `integer`),
 - each case class field of type `Option[A]` for some type `A` has a corresponding
   optional JSON object property of the same name and type,
-- documentation specific to case class fields can be defined by annotating the fields
-  with the `@docs` annotation,
+- descriptions can be set for case class fields, case classes, or sealed traits
+  by annotating these things with the `@docs` annotation,
 - for sealed traits, the discriminator field name can be defined by the `@discriminator`
   annotation, otherwise the `defaultDiscriminatorName` value is used,
 - the schema is named by the `@name` annotation, if present, or by invoking the
   `classTagToSchemaName` operation with the `ClassTag` of the type for which the schema
-  is derived.
+  is derived. If you wish to avoid naming the schema, use the `@unnamed` annotation
+  (unnamed schemas get inlined in their OpenAPI documentation).
+- the schema title is set with the `@title` annotation, if present
 
 Here is an example that illustrates how to configure the generic schema derivation process:
 

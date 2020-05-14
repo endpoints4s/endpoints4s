@@ -238,6 +238,88 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "two tagged choices using orElseMerged" in {
+    sealed trait Shape
+    case class Circle(r: Double) extends Shape
+    case class Rect(w: Int, h: Int) extends Shape
+
+    val circleSchema = field[Double]("r")
+      .tagged("Circle")
+      .xmap(Circle)(_.r)
+
+    val rectSchema = (field[Int]("w") zip field[Int]("h"))
+      .tagged("Rect")
+      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+
+    val schema = circleSchema orElseMerge rectSchema
+    checkRoundTrip(
+      schema,
+      ujson.Obj("type" -> ujson.Str("Circle"), "r" -> ujson.Num(2.3)),
+      Circle(2.3)
+    )
+    checkRoundTrip(
+      schema,
+      ujson.Obj(
+        "type" -> ujson.Str("Rect"),
+        "w" -> ujson.Num(1),
+        "h" -> ujson.Num(2)
+      ),
+      Rect(1, 2)
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Arr(),
+      "Invalid JSON object: []" :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("s" -> ujson.Str("string")),
+      "Missing type discriminator property 'type': {\"s\":\"string\"}" :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("type" -> ujson.Str("B"), "s" -> ujson.Str("string")),
+      "Invalid type discriminator: 'B'" :: Nil
+    )
+    checkDecodingFailure(
+      schema,
+      ujson.Obj("type" -> ujson.Str("Circle"), "s" -> ujson.Num(1.2)),
+      "Missing property 'r' in JSON object: {\"type\":\"Circle\",\"s\":1.2}" :: Nil
+    )
+  }
+
+  "two tagged choices with a custom discriminator using orElseMerged" in {
+    sealed trait Shape
+    case class Circle(r: Double) extends Shape
+    case class Rect(w: Int, h: Int) extends Shape
+
+    val circleSchema = field[Double]("r")
+      .tagged("Circle")
+      .xmap(Circle)(_.r)
+
+    val rectSchema = (field[Int]("w") zip field[Int]("h"))
+      .tagged("Rect")
+      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+
+    val schema =
+      (circleSchema orElseMerge rectSchema).withDiscriminator("shape")
+
+    checkRoundTrip(
+      schema,
+      ujson.Obj("shape" -> ujson.Str("Circle"), "r" -> ujson.Num(2.3)),
+      Circle(2.3)
+    )
+    checkRoundTrip(
+      schema,
+      ujson.Obj(
+        "shape" -> ujson.Str("Rect"),
+        "w" -> ujson.Num(1),
+        "h" -> ujson.Num(2)
+      ),
+      Rect(1, 2)
+    )
+  }
+
   "enum" in {
     checkRoundTrip(
       Enum.colorSchema,
@@ -328,10 +410,11 @@ class JsonSchemasTest extends AnyFreeSpec {
   ): Unit = {
     schema.codec.decode(json) match {
       case Valid(decoded)  => assert(decoded == expected)
-      case Invalid(errors) => fail(errors.toString)
+      case Invalid(errors) => fail(errors.toString())
     }
     val encoded = schema.codec.encode(expected)
     assert(encoded == json)
+    ()
   }
 
   def checkDecodingFailure[A](
@@ -340,8 +423,10 @@ class JsonSchemasTest extends AnyFreeSpec {
       expectedErrors: Seq[String]
   ): Unit =
     schema.codec.decode(json) match {
-      case Valid(_)        => fail("Expected decoding failure")
-      case Invalid(errors) => assert(errors == expectedErrors)
+      case Valid(_) => fail("Expected decoding failure")
+      case Invalid(errors) =>
+        assert(errors == expectedErrors)
+        ()
     }
 
 }

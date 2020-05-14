@@ -1,7 +1,9 @@
 package endpoints.algebra
 
 import scala.util.{Failure, Success, Try}
+import scala.annotation.nowarn
 
+@nowarn("cat=other-pure-statement")
 trait EndpointsDocs extends Endpoints {
 
   locally {
@@ -12,7 +14,7 @@ trait EndpointsDocs extends Endpoints {
     val someResource: Endpoint[Unit, String] =
       endpoint(get(path / "some-resource"), ok(textResponse))
     //#construction
-  }
+  }: @nowarn("cat=unused-locals")
 
   //#with-docs
   endpoint(
@@ -33,23 +35,22 @@ trait EndpointsDocs extends Endpoints {
   //#convenient-get
 
   //#urls
-  path // the root path “/”
-  path / "users" // “/users”
-  path / "users" / segment[Long]() // “/users/1234”, “/users/5678”, …
-  path / "assets" / remainingSegments() // “/assets/images/logo.png”
-  path / "articles" /? qs[Int](
-    "page"
-  ) // “/articles?page=2”, “/articles?page=5”, …
-  // Optional parameter
-  path / "articles" /? qs[Option[Int]](
-    "page"
-  ) // “/articles”, “/articles?page=2”, …
-  // Repeated parameter
-  path / "articles" /? qs[List[String]](
-    "kinds"
-  ) // “/articles?kinds=garden&kinds=woodworking”, …
-  // Several parameters
-  path /? (qs[String]("q") & qs[String]("lang")) // “/?q=foo&lang=en”, …
+  // the root path: “/”
+  path
+  // static segment: “/users”
+  path / "users"
+  // path parameter: “/users/1234”, “/users/5678”, …
+  path / "users" / segment[Long]()
+  // path parameter: “/assets/images/logo.png”
+  path / "assets" / remainingSegments()
+  // query parameter: “/articles?page=2”, “/articles?page=5”, …
+  path / "articles" /? qs[Int]("page")
+  // optional parameter: “/articles”, “/articles?page=2”, …
+  path / "articles" /? qs[Option[Int]]("page")
+  // repeated parameter: “/articles?kinds=garden&kinds=woodworking”, …
+  path / "articles" /? qs[List[String]]("kinds")
+  // several parameters: “/?q=foo&lang=en”, …
+  path /? (qs[String]("q") & qs[String]("lang"))
   //#urls
 
   //#urls-with-docs
@@ -88,6 +89,7 @@ trait EndpointsDocs extends Endpoints {
   //#xmap-partial
   import java.time.LocalDate
   import endpoints.{Invalid, Valid}
+
   implicit def localDateSegment(
       implicit string: Segment[String]
   ): Segment[LocalDate] =

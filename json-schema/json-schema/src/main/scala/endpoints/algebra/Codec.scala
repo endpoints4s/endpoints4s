@@ -1,6 +1,7 @@
 package endpoints.algebra
 
-import endpoints.Validated
+import java.util.UUID
+import endpoints.{Valid, Invalid, Validated}
 
 /**
   * A way to decode a `From` value into a `To` value.
@@ -22,7 +23,6 @@ object Decoder {
       ab: Decoder[A, B]
   )(bc: Decoder[B, C]): Decoder[A, C] =
     from => ab.decode(from).flatMap(bc.decode)
-
 }
 
 /**
@@ -41,7 +41,6 @@ object Encoder {
       ab: Encoder[A, B]
   )(bc: Encoder[B, C]): Encoder[A, C] =
     from => bc.encode(ab.encode(from))
-
 }
 
 /**
@@ -68,4 +67,39 @@ object Codec {
       Decoder.sequentially(ab)(bc)
     )
 
+  /** Produce a codec to/from a string. If the parsing function fails, the
+    * decoding output is an [[Invalid]] with a message mentioning the type name.
+    *
+    * @param type name of the type being decoded
+    * @param parse parsing function to use, with exceptions turned into [[Invalid]]
+    * @param print printing function to use, not supposed to throw exceptions
+    */
+  def parseStringCatchingExceptions[A](
+      `type`: String,
+      parse: String => A,
+      print: A => String = (x: A) => x.toString()
+  ): Codec[String, A] = new Codec[String, A] {
+    def encode(x: A): String = print(x)
+    def decode(str: String): Validated[A] =
+      try { Valid(parse(str)) }
+      catch { case _: Throwable => Invalid(s"Invalid ${`type`} value '$str'") }
+  }
+
+  val uuidCodec: Codec[String, UUID] =
+    parseStringCatchingExceptions("UUID", UUID.fromString)
+
+  val intCodec: Codec[String, Int] =
+    parseStringCatchingExceptions("integer", _.toInt)
+
+  val longCodec: Codec[String, Long] =
+    parseStringCatchingExceptions("integer", _.toLong)
+
+  val doubleCodec: Codec[String, Double] =
+    parseStringCatchingExceptions("number", _.toDouble)
+
+  val booleanCodec: Codec[String, Boolean] =
+    parseStringCatchingExceptions("boolean", {
+      case "true" | "1"  => true
+      case "false" | "0" => false
+    })
 }

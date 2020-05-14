@@ -130,6 +130,7 @@ object Main {
         playComponents
       ).routes
     }
+    ()
   }
 
   //#main-only

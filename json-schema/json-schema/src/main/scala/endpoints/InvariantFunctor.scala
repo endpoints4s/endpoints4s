@@ -12,6 +12,7 @@ trait InvariantFunctor[F[_]] {
   def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B]
 }
 
+/** Provides extensions methods for values of type [[InvariantFunctor]] */
 trait InvariantFunctorSyntax {
 
   /**
@@ -49,10 +50,22 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
     */
   def xmapPartial[A, B](fa: F[A], f: A => Validated[B], g: B => A): F[B]
+
+  /**
+    * Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
+    *
+    * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
+    *
+    * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
+    */
+  final def xmapWithCodec[A, B](fa: F[A], codec: algebra.Codec[A, B]): F[B] =
+    xmapPartial(fa, codec.decode, codec.encode)
+
   def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] =
     xmapPartial[A, B](fa, a => Valid(f(a)), g)
 }
 
+/** Provides extension methods for values of type [[PartialInvariantFunctor]] */
 trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
   implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(
       implicit ev: PartialInvariantFunctor[F]
@@ -68,5 +81,15 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
       */
     def xmapPartial[B](f: A => Validated[B])(g: B => A): F[B] =
       ev.xmapPartial(fa, f, g)
+
+    /**
+      * Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
+      *
+      * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
+      *
+      * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
+      */
+    def xmapWithCodec[B](codec: algebra.Codec[A, B]): F[B] =
+      ev.xmapWithCodec(fa, codec)
   }
 }

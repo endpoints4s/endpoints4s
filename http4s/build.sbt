@@ -10,13 +10,29 @@ val `http4s-server` =
     .in(file("server"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`,
       name := "endpoints-http4s-server",
       libraryDependencies ++= Seq(
-        "org.http4s" %%% "http4s-core" % http4sVersion,
-        "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test
+        ("org.http4s" %% "http4s-core" % http4sVersion).withDottyCompat(scalaVersion.value),
+        ("org.http4s" %% "http4s-dsl" % http4sVersion).withDottyCompat(scalaVersion.value),
+        ("org.http4s" %% "http4s-blaze-server" % http4sVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
+
+val `http4s-client` =
+  project
+    .in(file("client"))
+    .settings(
+      publishSettings,
+      `scala 2.12 to dotty`,
+      name := "endpoints-http4s-client",
+      libraryDependencies ++= Seq(
+        ("org.http4s" %% "http4s-client" % http4sVersion).withDottyCompat(scalaVersion.value),
+        ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).withDottyCompat(scalaVersion.value)
+      )
+    )
+    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`openapi-jvm`)
+    .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")

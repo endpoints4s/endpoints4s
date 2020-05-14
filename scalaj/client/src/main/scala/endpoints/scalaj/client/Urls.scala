@@ -34,7 +34,7 @@ trait Urls extends algebra.Urls {
 
   class Url[A](val toReq: A => HttpRequest)
 
-  implicit lazy val queryStringPartialInvFunctor
+  implicit lazy val queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
@@ -44,7 +44,7 @@ trait Urls extends algebra.Urls {
       ): QueryString[B] = fa compose g
     }
 
-  implicit lazy val queryStringParamPartialInvFunctor
+  implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -65,7 +65,8 @@ trait Urls extends algebra.Urls {
     }
   }
 
-  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -128,7 +129,7 @@ trait Urls extends algebra.Urls {
     })
   }
 
-  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit lazy val urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],

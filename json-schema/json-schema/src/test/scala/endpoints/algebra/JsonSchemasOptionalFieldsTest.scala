@@ -1,7 +1,5 @@
 package endpoints.algebra
 
-import java.util.UUID
-
 import endpoints.{Invalid, Valid, Validated}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -100,7 +98,7 @@ trait JsonSchemasOptionalFieldsTest
     val decoded = decodeJson(schema, json)
     decoded match {
       case Valid(n)        => assert(n == 1)
-      case Invalid(errors) => fail(errors.toString)
+      case Invalid(errors) => fail(errors.toString())
     }
     val encoded = encodeJson(schema, 1)
     assert(encoded == Json.obj("relevant" -> Json.num(1)))
@@ -109,7 +107,7 @@ trait JsonSchemasOptionalFieldsTest
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =
     decodeJson(schema, json) match {
       case Valid(a) =>
-        assert(encodeJson(schema, a) == json)
+        assert(a == decoded && encodeJson(schema, a) == json)
       case Invalid(errors) =>
         fail(errors.mkString(". "))
     }

@@ -22,6 +22,8 @@ class ExamplesTest extends AnyWordSpec with Matchers {
         ujson.Obj("foo" -> ujson.Num(1), "bar" -> ujson.Num(2))
       )
       checkExample(pairSchema)(ujson.Arr(ujson.Num(42), ujson.Str("foo")))
+      checkExample(hexSchema)(ujson.Str("deadbeef"))
+      checkExample(fallbackSchema)(ujson.Num(1))
     }
 
   }
@@ -51,6 +53,13 @@ class ExamplesTest extends AnyWordSpec with Matchers {
     val pairSchema =
       implicitly[JsonSchema[(Int, String)]].withExample((42, "foo"))
 
+    val hexSchema =
+      stringJsonSchema(Some("hex")).withExample("deadbeef")
+
+    val fallbackSchema =
+      defaultStringJsonSchema
+        .orFallbackTo(longJsonSchema)
+        .withExample(Right(1L))
   }
 
   trait Fixtures

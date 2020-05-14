@@ -58,25 +58,35 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
   ): Request[Out] =
     DocumentedRequest(method, url, headers, docs, entity)
 
-  implicit lazy val reqEntityInvFunctor
-      : endpoints.InvariantFunctor[RequestEntity] =
-    new InvariantFunctor[RequestEntity] {
-      def xmap[From, To](
+  implicit def requestPartialInvariantFunctor
+      : PartialInvariantFunctor[Request] =
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](
+          fa: Request[A],
+          f: A => Validated[B],
+          g: B => A
+      ): Request[B] = fa
+    }
+
+  implicit lazy val requestEntityPartialInvariantFunctor
+      : endpoints.PartialInvariantFunctor[RequestEntity] =
+    new PartialInvariantFunctor[RequestEntity] {
+      def xmapPartial[From, To](
           x: RequestEntity[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): RequestEntity[To] = x
     }
-  implicit lazy val reqHeadersInvFunctor
-      : endpoints.InvariantFunctor[RequestHeaders] =
-    new InvariantFunctor[RequestHeaders] {
-      def xmap[From, To](
+  implicit lazy val requestHeadersPartialInvariantFunctor
+      : endpoints.PartialInvariantFunctor[RequestHeaders] =
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[From, To](
           x: RequestHeaders[From],
-          map: From => To,
+          map: From => Validated[To],
           contramap: To => From
       ): RequestHeaders[To] = x
     }
-  implicit lazy val reqHeadersSemigroupal
+  implicit lazy val requestHeadersSemigroupal
       : endpoints.Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
       def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(

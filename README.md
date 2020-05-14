@@ -14,7 +14,7 @@ See the [documentation](http://julienrf.github.io/endpoints) to learn more.
 
 ~~~
 $ sbt
-> ++2.12.8
+> ++2.13.2
 > <example>/reStart
 ~~~
 
@@ -32,6 +32,10 @@ See the [open issues](https://github.com/julienrf/endpoints/issues).
 ## Sponsors
 
 [Bestmile](https://bestmile.com) supports engineering work on the project.
+
+## Support
+
+[JetBrains](https://www.jetbrains.com/?from=scala-endpoints) offers one Open Source license.
 
 ## License
 

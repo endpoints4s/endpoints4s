@@ -9,7 +9,7 @@ import scala.collection.compat._
 /**
   * An interpreter for [[endpoints.algebra.JsonSchemas]] that produces a circe codec.
   */
-trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
+trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
   trait JsonSchema[A] {
     def encoder: Encoder[A]
@@ -168,13 +168,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
-  def namedRecord[A](schema: Record[A], name: String): Record[A] = schema
-  def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] = schema
-  def namedEnum[A](schema: Enum[A], name: String): Enum[A] = schema
-
   private def lazySchema[A](
-      schema: => JsonSchema[A],
-      name: String
+      schema: => JsonSchema[A]
   ): JsonSchema[A] = {
     // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
     lazy val evaluatedSchema = schema
@@ -187,9 +182,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
-    lazySchema(schema, name)
+    lazySchema(schema)
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
-    lazySchema(schema, name)
+    lazySchema(schema)
 
   def emptyRecord: Record[Unit] =
     Record(
@@ -285,11 +280,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       recordA.decoder.product(recordB.decoder).map { case (a, b) => t(a, b) }
     Record(encoder, decoder)
   }
-
-  def withExampleJsonSchema[A](
-      schema: JsonSchema[A],
-      example: A
-  ): JsonSchema[A] = schema
 
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],

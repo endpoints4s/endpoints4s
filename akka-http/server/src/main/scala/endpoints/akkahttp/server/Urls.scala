@@ -76,7 +76,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     def validate(params: Map[String, List[String]]): Validated[T]
   }
 
-  implicit lazy val queryStringPartialInvFunctor
+  implicit lazy val queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
@@ -99,7 +99,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     */
   type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Validated[T]
 
-  implicit lazy val queryStringParamPartialInvFunctor
+  implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -120,7 +120,8 @@ trait Urls extends algebra.Urls with StatusCodes {
     def validate(s: String): Validated[A]
   }
 
-  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -141,7 +142,7 @@ trait Urls extends algebra.Urls with StatusCodes {
   ): Url[tupler.Out] = {
     (segments: List[String], query: Map[String, List[String]]) =>
       path.validate(segments).flatMap {
-        case (validA, Nil) => Some(validA.zip(qs.validate(query)))
+        case (validA, Nil) => Some(validA.zip(qs.validate(query))(tupler))
         case (_, _)        => None
       }
   }
@@ -201,7 +202,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     first.validate(params).zip(second.validate(params))
   }
 
-  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit lazy val urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],
@@ -270,7 +271,7 @@ trait Urls extends algebra.Urls with StatusCodes {
         case (validA, p2) =>
           second.validate(p2).map {
             case (validB, p3) =>
-              (validA.zip(validB), p3)
+              (validA.zip(validB)(tupler), p3)
           }
       }
     }

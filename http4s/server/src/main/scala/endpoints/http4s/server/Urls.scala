@@ -98,7 +98,7 @@ trait Urls extends algebra.Urls with StatusCodes {
             .map(_.result())
       }
 
-  implicit def queryStringParamPartialInvFunctor
+  implicit def queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -115,7 +115,8 @@ trait Urls extends algebra.Urls with StatusCodes {
       Validated.fromOption(maybeValue)("Missing value")
     }
 
-  implicit def segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit def segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -199,12 +200,12 @@ trait Urls extends algebra.Urls with StatusCodes {
         case (validA, segments2) =>
           second.decode(segments2).map {
             case (validB, segments3) =>
-              (validA zip validB, segments3)
+              (validA.zip(validB)(tupler), segments3)
           }
       }
   }
 
-  implicit def urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit def urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],
@@ -221,7 +222,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       implicit tupler: Tupler[A, B]
   ): Url[tupler.Out] = new Url[tupler.Out] {
     def decodeUrl(uri: Uri): Option[Validated[tupler.Out]] =
-      pathExtractor(path, uri).map(_.zip(qs(uri.multiParams)))
+      pathExtractor(path, uri).map(_.zip(qs(uri.multiParams))(tupler))
   }
 
   private def pathExtractor[A](
@@ -240,7 +241,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     }
   }
 
-  implicit def queryStringPartialInvFunctor
+  implicit def queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](

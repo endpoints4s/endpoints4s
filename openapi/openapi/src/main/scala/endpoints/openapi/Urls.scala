@@ -64,11 +64,16 @@ trait Urls extends algebra.Urls {
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     DocumentedQueryStringParam(
-      Schema.Array(Left(param.schema), description = None, example = None),
+      Schema.Array(
+        Left(param.schema),
+        description = None,
+        example = None,
+        title = None
+      ),
       isRequired = false
     )
 
-  implicit lazy val queryStringPartialInvFunctor
+  implicit lazy val queryStringPartialInvariantFunctor
       : PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
@@ -78,7 +83,7 @@ trait Urls extends algebra.Urls {
       ): QueryString[B] = fa
     }
 
-  implicit lazy val queryStringParamPartialInvFunctor
+  implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
@@ -108,7 +113,8 @@ trait Urls extends algebra.Urls {
 
   type Segment[A] = Schema
 
-  implicit lazy val segmentPartialInvFunctor: PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor
+      : PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -170,7 +176,7 @@ trait Urls extends algebra.Urls {
 
   type Url[A] = DocumentedUrl
 
-  implicit lazy val urlPartialInvFunctor: PartialInvariantFunctor[Url] =
+  implicit lazy val urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
       def xmapPartial[A, B](
           fa: Url[A],
