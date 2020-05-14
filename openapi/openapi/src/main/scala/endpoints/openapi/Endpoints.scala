@@ -217,15 +217,17 @@ trait EndpointsWithCustomErrors
       schema: Schema
   ): Seq[Schema.Reference] =
     schema match {
-      case Schema.Object(properties, additionalProperties, _, _, _) =>
-        properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
-          additionalProperties.toList.flatMap(captureReferencedSchemasRec)
-      case Schema.Array(Left(elementType), _, _, _) =>
-        captureReferencedSchemasRec(elementType)
-      case Schema.Array(Right(elementTypes), _, _, _) =>
-        elementTypes.flatMap(captureReferencedSchemasRec)
-      case Schema.Enum(elementType, _, _, _, _) =>
-        captureReferencedSchemasRec(elementType)
+      case obj: Schema.Object =>
+        obj.properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
+          obj.additionalProperties.toList.flatMap(captureReferencedSchemasRec)
+      case array: Schema.Array =>
+        array.elementType match {
+          case Left(elementType) => captureReferencedSchemasRec(elementType)
+          case Right(elementTypes) =>
+            elementTypes.flatMap(captureReferencedSchemasRec)
+        }
+      case enum: Schema.Enum =>
+        captureReferencedSchemasRec(enum.elementType)
       case Schema.Primitive(_, _, _, _, _) =>
         Nil
       case Schema.OneOf(alternatives, _, _, _) =>

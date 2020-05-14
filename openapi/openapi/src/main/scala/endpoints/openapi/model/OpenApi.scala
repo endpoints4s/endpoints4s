@@ -58,15 +58,15 @@ object OpenApi {
   private[openapi] def schemaJson(schema: Schema): ujson.Obj = {
     val fields = mutable.LinkedHashMap.empty[String, ujson.Value]
     schema match {
-      case Schema.Primitive(name, format, _, _, _) =>
-        fields += "type" -> ujson.Str(name)
-        format.foreach(s => fields += "format" -> ujson.Str(s))
-      case Schema.Object(properties, additionalProperties, _, _, _) =>
+      case primitive: Schema.Primitive =>
+        fields += "type" -> ujson.Str(primitive.name)
+        primitive.format.foreach(s => fields += "format" -> ujson.Str(s))
+      case obj: Schema.Object =>
         fields ++= List(
           "type" -> "object",
           "properties" -> new ujson.Obj(
             mutable.LinkedHashMap(
-              properties.map(p =>
+              obj.properties.map(p =>
                 p.name -> schemaJson(
                   p.schema.withDefinedDescription(p.description)
                 )
@@ -74,15 +74,15 @@ object OpenApi {
             )
           )
         )
-        val required = properties.filter(_.isRequired).map(_.name)
+        val required = obj.properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
           fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
         }
-        additionalProperties.foreach(p =>
+        obj.additionalProperties.foreach(p =>
           fields += "additionalProperties" -> schemaJson(p)
         )
-      case Schema.Array(elementType, _, _, _) =>
-        val itemsSchema = elementType match {
+      case array: Schema.Array =>
+        val itemsSchema = array.elementType match {
           case Left(value)  => schemaJson(value)
           case Right(value) => ujson.Arr(value.map(schemaJson): _*)
         }
@@ -90,9 +90,11 @@ object OpenApi {
           "type" -> "array",
           "items" -> itemsSchema
         )
-      case Schema.Enum(elementType, values, description, _, _) =>
-        fields ++= schemaJson(elementType.withDefinedDescription(description)).value
-        fields += "enum" -> ujson.Arr(values: _*)
+      case enum: Schema.Enum =>
+        fields ++= schemaJson(
+          enum.elementType.withDefinedDescription(enum.description)
+        ).value
+        fields += "enum" -> ujson.Arr(enum.values: _*)
       case Schema.OneOf(alternatives, _, _, _) =>
         fields ++=
           (alternatives match {
@@ -693,7 +695,6 @@ class ResponseHeader(
   def withSchema(schema: Schema): ResponseHeader =
     copy(schema = schema)
 
-
 }
 
 object ResponseHeader {
@@ -812,11 +813,11 @@ sealed trait Schema {
   def withDefinedDescription(description: Option[String]): Schema =
     this match {
       case s: Schema.Object =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.Array =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.Enum =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.Primitive =>
         s.copy(description = description.orElse(s.description))
       case s: Schema.OneOf =>
@@ -830,28 +831,185 @@ sealed trait Schema {
 
 object Schema {
 
-  case class Object(
-      properties: List[Property],
-      additionalProperties: Option[Schema],
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+  class Object(
+      val properties: List[Property],
+      val additionalProperties: Option[Schema],
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
 
-  case class Array(
-      elementType: Either[Schema, List[Schema]],
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+    override def toString: String =
+      s"Object($properties, $additionalProperties, $description, $example, $title)"
 
-  case class Enum(
-      elementType: Schema,
-      values: List[ujson.Value],
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Object =>
+          properties == that.properties && additionalProperties == that.additionalProperties &&
+            description == that.description && example == that.example &&
+            title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(
+        properties,
+        additionalProperties,
+        description,
+        example,
+        title
+      )
+
+    private[this] def copy(
+        properties: List[Property] = properties,
+        additionalProperties: Option[Schema] = additionalProperties,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): Object =
+      new Object(properties, additionalProperties, description, example, title)
+
+    def withProperty(properties: List[Property]): Object =
+      copy(properties = properties)
+
+    def withAdditionalProperties(additionalProperties: Option[Schema]): Object =
+      copy(additionalProperties = additionalProperties)
+
+    def withDescription(description: Option[String]): Object =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): Object =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): Object =
+      copy(title = title)
+  }
+
+  object Object {
+
+    def apply(
+        properties: List[Property],
+        additionalProperties: Option[Schema],
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): Object =
+      new Object(properties, additionalProperties, description, example, title)
+
+  }
+
+  class Array(
+      val elementType: Either[Schema, List[Schema]],
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
+
+    override def toString: String =
+      s"Array($elementType, $description, $example, $title)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Array =>
+          elementType == that.elementType && description == that.description && example == that.example && title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(elementType, description, example, title)
+
+    private[this] def copy(
+        elementType: Either[Schema, List[Schema]] = elementType,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): Array =
+      new Array(elementType, description, example, title)
+
+    def withElementType(elementType: Either[Schema, List[Schema]]): Array =
+      copy(elementType = elementType)
+
+    def withDescription(description: Option[String]): Array =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): Array =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): Array =
+      copy(title = title)
+
+  }
+
+  object Array {
+
+    def apply(
+        elementType: Either[Schema, List[Schema]],
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): Array =
+      new Array(elementType, description, example, title)
+
+  }
+
+  class Enum(
+      val elementType: Schema,
+      val values: List[ujson.Value],
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
+
+    override def toString: String =
+      s"Enum($elementType, $values, $description, $example, $title)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Enum =>
+          elementType == that.elementType && values == that.values && description == that.description &&
+            example == that.example && title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(elementType, values, description, example, title)
+
+    private[this] def copy(
+        elementType: Schema = elementType,
+        values: List[ujson.Value] = values,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): Enum =
+      new Enum(elementType, values, description, example, title)
+
+    def withElementType(elementType: Schema): Enum =
+      copy(elementType = elementType)
+
+    def withValues(values: List[ujson.Value]): Enum =
+      copy(values = values)
+
+    def withDescription(description: Option[String]): Enum =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): Enum =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): Enum =
+      copy(title = title)
+  }
+
+  object Enum {
+
+    def apply(
+        elementType: Schema,
+        values: List[ujson.Value],
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): Enum = new Enum(elementType, values, description, example, title)
+
+  }
 
   case class Property(
       name: String,
