@@ -222,20 +222,22 @@ trait EndpointsWithCustomErrors
           obj.additionalProperties.toList.flatMap(captureReferencedSchemasRec)
       case array: Schema.Array =>
         array.elementType match {
-          case Left(elementType) => captureReferencedSchemasRec(elementType)
+          case Left(elementType) =>
+            captureReferencedSchemasRec(elementType)
           case Right(elementTypes) =>
             elementTypes.flatMap(captureReferencedSchemasRec)
         }
       case enum: Schema.Enum =>
         captureReferencedSchemasRec(enum.elementType)
-      case Schema.Primitive(_, _, _, _, _) =>
+      case _: Schema.Primitive =>
         Nil
-      case Schema.OneOf(alternatives, _, _, _) =>
+      case oneOf: Schema.OneOf =>
         val alternativeSchemas =
-          alternatives match {
+          oneOf.alternatives match {
             case Schema.DiscriminatedAlternatives(_, alternatives) =>
               alternatives.map(_._2)
-            case Schema.EnumeratedAlternatives(alternatives) => alternatives
+            case Schema.EnumeratedAlternatives(alternatives) =>
+              alternatives
           }
         alternativeSchemas.flatMap(captureReferencedSchemasRec)
       case Schema.AllOf(schemas, _, _, _) =>

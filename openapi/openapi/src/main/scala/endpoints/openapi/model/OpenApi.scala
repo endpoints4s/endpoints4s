@@ -95,9 +95,9 @@ object OpenApi {
           enum.elementType.withDefinedDescription(enum.description)
         ).value
         fields += "enum" -> ujson.Arr(enum.values: _*)
-      case Schema.OneOf(alternatives, _, _, _) =>
+      case oneOf: Schema.OneOf =>
         fields ++=
-          (alternatives match {
+          (oneOf.alternatives match {
             case Schema.DiscriminatedAlternatives(
                 discriminatorFieldName,
                 alternatives
@@ -819,9 +819,9 @@ sealed trait Schema {
       case s: Schema.Enum =>
         s.withDescription(description.orElse(s.description))
       case s: Schema.Primitive =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.OneOf =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.AllOf =>
         s.copy(description = description.orElse(s.description))
       case s: Schema.Reference =>
@@ -1011,27 +1011,173 @@ object Schema {
 
   }
 
-  case class Property(
-      name: String,
-      schema: Schema,
-      isRequired: Boolean,
-      description: Option[String]
-  )
+  class Property(
+      val name: String,
+      val schema: Schema,
+      val isRequired: Boolean,
+      val description: Option[String]
+  ) {
 
-  case class Primitive(
-      name: String,
-      format: Option[String],
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+    override def toString: String =
+      s"Property($name, $schema, $isRequired, $description)"
 
-  case class OneOf(
-      alternatives: Alternatives,
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Property =>
+          name == that.name && schema == that.schema && isRequired == that.isRequired &&
+            description == that.description
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(name, schema, isRequired, description)
+
+    private[this] def copy(
+        name: String = name,
+        schema: Schema = schema,
+        isRequired: Boolean = isRequired,
+        description: Option[String] = description
+    ): Property =
+      new Property(name, schema, isRequired, description)
+
+    def withName(name: String): Property =
+      copy(name = name)
+
+    def withSchema(schema: Schema): Property =
+      copy(schema = schema)
+
+    def withIsRequired(isRequired: Boolean): Property =
+      copy(isRequired = isRequired)
+
+    def withDescription(description: Option[String]): Property =
+      copy(description = description)
+  }
+
+  object Property {
+
+    def apply(
+        name: String,
+        schema: Schema,
+        isRequired: Boolean,
+        description: Option[String]
+    ): Property = new Property(name, schema, isRequired, description)
+
+  }
+
+  class Primitive(
+      val name: String,
+      val format: Option[String],
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
+
+    override def toString: String =
+      s"Primitive($name, $format, $description, $example, $title)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Primitive =>
+          name == that.name && format == that.format && description == that.description &&
+            example == that.example && title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(name, format, description, example, title)
+
+    private[this] def copy(
+        name: String = name,
+        format: Option[String] = format,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): Primitive =
+      new Primitive(name, format, description, example, title)
+
+    def withName(name: String): Primitive =
+      copy(name = name)
+
+    def withFormat(format: Option[String]): Primitive =
+      copy(format = format)
+
+    def withDescription(description: Option[String]): Primitive =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): Primitive =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): Primitive =
+      copy(title = title)
+
+  }
+
+  object Primitive {
+
+    def apply(
+        name: String,
+        format: Option[String],
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): Primitive =
+      new Primitive(name, format, description, example, title)
+
+  }
+
+  class OneOf(
+      val alternatives: Alternatives,
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
+
+    override def toString: String =
+      s"OneOf($alternatives, $description, $example, $title)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: OneOf =>
+          alternatives == that.alternatives && description == that.description &&
+            example == that.example && title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(alternatives, description, example, title)
+
+    private[this] def copy(
+        alternatives: Alternatives = alternatives,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): OneOf =
+      new OneOf(alternatives, description, example, title)
+
+    def withAlternatives(alternatives: Alternatives): OneOf =
+      copy(alternatives = alternatives)
+
+    def withDescription(description: Option[String]): OneOf =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): OneOf =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): OneOf =
+      copy(title = title)
+
+  }
+
+  object OneOf {
+
+    def apply(
+        alternatives: Alternatives,
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): OneOf = new OneOf(alternatives, description, example, title)
+
+  }
 
   sealed trait Alternatives
 
