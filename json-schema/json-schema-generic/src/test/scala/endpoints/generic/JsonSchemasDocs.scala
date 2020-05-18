@@ -1,5 +1,7 @@
 package endpoints.generic
 
+import scala.annotation.nowarn
+
 trait JsonSchemasDocs extends JsonSchemas {
 
   sealed trait Shape
@@ -17,7 +19,7 @@ trait JsonSchemasDocs extends JsonSchemas {
         field[Double]("height")
     ).as[Rectangle]
     //#explicit-schema
-  }
+  }: @nowarn("cat=unused-locals")
 
   locally {
     //#documented-generic-schema

@@ -487,6 +487,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
             assert(response.status == StatusCodes.BadRequest)
             assert(entity == """["Invalid integer: forty-two"]""")
         }
+        ()
       }
     }
 
@@ -511,6 +512,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
             assert(response.status == StatusCodes.BadRequest)
             assert(entity == """["Invalid date value 'not a date'"]""")
         }
+        ()
       }
     }
 
@@ -533,6 +535,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
               entity == """["Invalid combination of request header and query string parameter"]"""
             )
         }
+        ()
       }
     }
 
@@ -550,6 +553,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
           case (_, responseEntity) =>
             assert(responseEntity == entity.str)
         }
+        ()
       }
     }
 
@@ -566,6 +570,7 @@ trait EndpointsTestSuite[T <: endpoints.algebra.EndpointsTestApi]
             assert(responseEntity == resp.entity)
             assert(response.headers[ETag].contains(ETag("42")))
         }
+        ()
       }
     }
 

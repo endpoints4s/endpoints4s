@@ -6,14 +6,15 @@ val `json-schema` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema"))
+    .jsSettings(`scala 2.12 to 2.13`)
+    .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
       name := "endpoints-algebra-json-schema",
       addScalaTestCrossDependency,
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6",
-        "org.scalacheck" %%% "scalacheck" % "1.14.3"
+        ("org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6").withDottyCompat(scalaVersion.value),
+        ("org.scalacheck" %%% "scalacheck" % "1.14.3").withDottyCompat(scalaVersion.value)
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
@@ -28,9 +29,9 @@ lazy val `json-schema-generic` =
     .in(file("json-schema-generic"))
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
+      `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "endpoints-json-schema-generic",
-      libraryDependencies += "com.chuusai" %%% "shapeless" % "2.3.3",
+      libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.3").withDottyCompat(scalaVersion.value),
       addScalaTestCrossDependency,
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
     )
@@ -44,9 +45,10 @@ lazy val `json-schema-circe` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema-circe"))
+    .jsSettings(`scala 2.12 to 2.13`)
+    .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
       name := "endpoints-json-schema-circe",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
@@ -66,11 +68,12 @@ lazy val `json-schema-playjson` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema-playjson"))
+    .jsSettings(`scala 2.12 to 2.13`)
+    .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      `scala 2.12 to latest`,
       name := "endpoints-json-schema-playjson",
-      libraryDependencies += "com.typesafe.play" %%% "play-json" % playjsonVersion,
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)

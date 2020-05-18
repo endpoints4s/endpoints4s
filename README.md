@@ -14,7 +14,7 @@ See the [documentation](http://julienrf.github.io/endpoints) to learn more.
 
 ~~~
 $ sbt
-> ++2.12.8
+> ++2.13.2
 > <example>/reStart
 ~~~
 

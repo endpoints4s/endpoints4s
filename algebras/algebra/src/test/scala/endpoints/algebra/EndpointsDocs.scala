@@ -1,7 +1,9 @@
 package endpoints.algebra
 
 import scala.util.{Failure, Success, Try}
+import scala.annotation.nowarn
 
+@nowarn("cat=other-pure-statement")
 trait EndpointsDocs extends Endpoints {
 
   locally {
@@ -12,7 +14,7 @@ trait EndpointsDocs extends Endpoints {
     val someResource: Endpoint[Unit, String] =
       endpoint(get(path / "some-resource"), ok(textResponse))
     //#construction
-  }
+  }: @nowarn("cat=unused-locals")
 
   //#with-docs
   endpoint(
