@@ -128,7 +128,9 @@ object OpenApi {
       case allOf: Schema.AllOf =>
         fields += "allOf" -> ujson.Arr(allOf.schemas.map(schemaJson): _*)
       case reference: Schema.Reference =>
-        fields += "$ref" -> ujson.Str(Schema.Reference.toRefPath(reference.name))
+        fields += "$ref" -> ujson.Str(
+          Schema.Reference.toRefPath(reference.name)
+        )
     }
     for (description <- schema.description) {
       fields += "description" -> ujson.Str(description)
@@ -568,6 +570,16 @@ class SecurityRequirement private (
 
 object SecurityRequirement {
 
+  def apply(
+      name: String,
+      scheme: SecurityScheme
+  ): SecurityRequirement =
+    new SecurityRequirement(name, scheme, Nil)
+
+  @deprecated(
+    "Use `SecurityRequirement().withScopes(...)` instead of `SecurityRequirement(scopes = ...)`",
+    "1.0.0"
+  )
   def apply(
       name: String,
       scheme: SecurityScheme,
