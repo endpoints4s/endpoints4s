@@ -101,8 +101,6 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             None
           )
         ),
-        None,
-        None,
         None
       )
     Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
@@ -126,8 +124,6 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             title = None
           )
         ),
-        None,
-        None,
         None
       )
     val expectedSchema =

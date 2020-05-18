@@ -45,8 +45,6 @@ class ChunkedEntitiesTest extends AnyWordSpec {
                             None
                           )
                         ),
-                        None,
-                        None,
                         None
                       )
                     )
@@ -69,8 +67,6 @@ class ChunkedEntitiesTest extends AnyWordSpec {
                             None
                           )
                         ),
-                        None,
-                        None,
                         None
                       )
                     )
