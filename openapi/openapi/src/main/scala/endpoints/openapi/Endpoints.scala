@@ -234,14 +234,14 @@ trait EndpointsWithCustomErrors
       case oneOf: Schema.OneOf =>
         val alternativeSchemas =
           oneOf.alternatives match {
-            case Schema.DiscriminatedAlternatives(_, alternatives) =>
-              alternatives.map(_._2)
-            case Schema.EnumeratedAlternatives(alternatives) =>
-              alternatives
+            case discAlternatives: Schema.DiscriminatedAlternatives =>
+              discAlternatives.alternatives.map(_._2)
+            case enumAlternatives: Schema.EnumeratedAlternatives =>
+              enumAlternatives.alternatives
           }
         alternativeSchemas.flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas, _, _, _) =>
-        schemas.flatMap {
+      case allOf: Schema.AllOf =>
+        allOf.schemas.flatMap {
           case _: Schema.Reference => Nil
           case s                   => captureReferencedSchemasRec(s)
         }

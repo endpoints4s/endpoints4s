@@ -98,32 +98,29 @@ object OpenApi {
       case oneOf: Schema.OneOf =>
         fields ++=
           (oneOf.alternatives match {
-            case Schema.DiscriminatedAlternatives(
-                discriminatorFieldName,
-                alternatives
-                ) =>
+            case discAlternatives: Schema.DiscriminatedAlternatives =>
               val mappingFields: mutable.LinkedHashMap[String, ujson.Value] =
-                mutable.LinkedHashMap(alternatives.collect {
+                mutable.LinkedHashMap(discAlternatives.alternatives.collect {
                   case (tag, ref: Schema.Reference) =>
                     tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
                 }: _*)
               val discFields = mutable.LinkedHashMap.empty[String, ujson.Value]
-              discFields += "propertyName" -> ujson.Str(discriminatorFieldName)
+              discFields += "propertyName" -> ujson.Str(discAlternatives.discriminatorFieldName)
               if (mappingFields.nonEmpty) {
                 discFields += "mapping" -> new ujson.Obj(mappingFields)
               }
               List(
                 "oneOf" -> ujson
-                  .Arr(alternatives.map(kv => schemaJson(kv._2)): _*),
+                  .Arr(discAlternatives.alternatives.map(kv => schemaJson(kv._2)): _*),
                 "discriminator" -> ujson.Obj(discFields)
               )
-            case Schema.EnumeratedAlternatives(alternatives) =>
+            case enumAlternatives: Schema.EnumeratedAlternatives =>
               List(
-                "oneOf" -> ujson.Arr(alternatives.map(schemaJson): _*)
+                "oneOf" -> ujson.Arr(enumAlternatives.alternatives.map(schemaJson): _*)
               )
           })
-      case Schema.AllOf(schemas, _, _, _) =>
-        fields += "allOf" -> ujson.Arr(schemas.map(schemaJson): _*)
+      case allOf: Schema.AllOf =>
+        fields += "allOf" -> ujson.Arr(allOf.schemas.map(schemaJson): _*)
       case Schema.Reference(name, _, _, _, _) =>
         fields += "$ref" -> ujson.Str(Schema.Reference.toRefPath(name))
     }
@@ -342,7 +339,7 @@ object Info {
 
 }
 
-class PathItem(
+class PathItem private(
     val operations: Map[String, Operation]
 ) {
 
@@ -370,7 +367,7 @@ object PathItem {
 
 }
 
-class Components(
+class Components private(
     val schemas: Map[String, Schema],
     val securitySchemes: Map[String, SecurityScheme]
 ) {
@@ -413,7 +410,7 @@ object Components {
 
 }
 
-class Operation(
+class Operation private(
     val summary: Option[String],
     val description: Option[String],
     val parameters: List[Parameter],
@@ -527,10 +524,10 @@ object Operation {
 
 }
 
-class SecurityRequirement(
+class SecurityRequirement private(
     val name: String,
     val scheme: SecurityScheme,
-    val scopes: List[String] = Nil
+    val scopes: List[String]
 ) {
 
   override def toString: String =
@@ -573,7 +570,7 @@ object SecurityRequirement {
     new SecurityRequirement(name, scheme, scopes)
 }
 
-class RequestBody(
+class RequestBody private(
     val description: Option[String],
     val content: Map[String, MediaType]
 ) {
@@ -612,7 +609,7 @@ object RequestBody {
 
 }
 
-class Response(
+class Response private(
     val description: String,
     val headers: Map[String, ResponseHeader],
     val content: Map[String, MediaType]
@@ -660,7 +657,7 @@ object Response {
 }
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
-class ResponseHeader(
+class ResponseHeader private(
     val required: Boolean,
     val description: Option[String],
     val schema: Schema
@@ -708,7 +705,7 @@ object ResponseHeader {
 
 }
 
-class Parameter(
+class Parameter private(
     val name: String,
     val in: In,
     val required: Boolean,
@@ -778,7 +775,7 @@ object In {
   val values: Seq[In] = Query :: Path :: Header :: Cookie :: Nil
 }
 
-class MediaType(val schema: Option[Schema]) {
+class MediaType private(val schema: Option[Schema]) {
 
   override def toString: String =
     s"Mediatype($schema)"
@@ -823,7 +820,7 @@ sealed trait Schema {
       case s: Schema.OneOf =>
         s.withDescription(description.orElse(s.description))
       case s: Schema.AllOf =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
       case s: Schema.Reference =>
         s.copy(description = description.orElse(s.description))
     }
@@ -831,7 +828,7 @@ sealed trait Schema {
 
 object Schema {
 
-  class Object(
+  class Object private(
       val properties: List[Property],
       val additionalProperties: Option[Schema],
       val description: Option[String],
@@ -898,7 +895,7 @@ object Schema {
 
   }
 
-  class Array(
+  class Array private(
       val elementType: Either[Schema, List[Schema]],
       val description: Option[String],
       val example: Option[ujson.Value],
@@ -952,7 +949,7 @@ object Schema {
 
   }
 
-  class Enum(
+  class Enum private(
       val elementType: Schema,
       val values: List[ujson.Value],
       val description: Option[String],
@@ -1011,7 +1008,7 @@ object Schema {
 
   }
 
-  class Property(
+  class Property private(
       val name: String,
       val schema: Schema,
       val isRequired: Boolean,
@@ -1064,7 +1061,7 @@ object Schema {
 
   }
 
-  class Primitive(
+  class Primitive private(
       val name: String,
       val format: Option[String],
       val description: Option[String],
@@ -1125,7 +1122,7 @@ object Schema {
 
   }
 
-  class OneOf(
+  class OneOf private(
       val alternatives: Alternatives,
       val description: Option[String],
       val example: Option[ujson.Value],
@@ -1181,19 +1178,130 @@ object Schema {
 
   sealed trait Alternatives
 
-  case class DiscriminatedAlternatives(
-      discriminatorFieldName: String,
-      alternatives: List[(String, Schema)]
-  ) extends Alternatives
-  case class EnumeratedAlternatives(alternatives: List[Schema])
-      extends Alternatives
+  class DiscriminatedAlternatives private(
+      val discriminatorFieldName: String,
+      val alternatives: List[(String, Schema)]
+  ) extends Alternatives {
 
-  case class AllOf(
-      schemas: List[Schema],
-      description: Option[String],
-      example: Option[ujson.Value],
-      title: Option[String]
-  ) extends Schema
+    override def toString: String =
+      s"DiscriminatedAlternatives($discriminatorFieldName, $alternatives)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: DiscriminatedAlternatives =>
+          discriminatorFieldName == that.discriminatorFieldName && alternatives == that.alternatives
+        case _ =>
+          false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(discriminatorFieldName, alternatives)
+
+    private[this] def copy(
+        discriminatorFieldName: String = discriminatorFieldName,
+        alternatives: List[(String, Schema)] = alternatives
+    ): DiscriminatedAlternatives =
+      new DiscriminatedAlternatives(discriminatorFieldName, alternatives)
+
+    def withDiscriminatorFieldName(
+        discriminiatorFieldName: String
+    ): DiscriminatedAlternatives =
+      copy(discriminatorFieldName = discriminiatorFieldName)
+
+    def withAlternatives(
+        alternatives: List[(String, Schema)]
+    ): DiscriminatedAlternatives =
+      copy(alternatives = alternatives)
+  }
+
+  object DiscriminatedAlternatives {
+
+    def apply(
+        discriminatorFieldName: String,
+        alternatives: List[(String, Schema)]
+    ): DiscriminatedAlternatives =
+      new DiscriminatedAlternatives(discriminatorFieldName, alternatives)
+
+  }
+
+  class EnumeratedAlternatives private(val alternatives: List[Schema])
+      extends Alternatives {
+    override def toString: String =
+      s"EnumeratedAlternatives($alternatives)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: EnumeratedAlternatives => alternatives == that.alternatives
+        case _                            => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(alternatives)
+
+    def withAlternatives(alternatives: List[Schema]): EnumeratedAlternatives =
+      new EnumeratedAlternatives(alternatives)
+  }
+
+  object EnumeratedAlternatives {
+
+    def apply(alternatives: List[Schema]): EnumeratedAlternatives =
+      new EnumeratedAlternatives(alternatives)
+
+  }
+
+  class AllOf private(
+      val schemas: List[Schema],
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String]
+  ) extends Schema {
+
+    override def toString: String =
+      s"AllOf($schemas, $description, $example, $title)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: AllOf =>
+          schemas == that.schemas && description == that.description &&
+            example == that.example && title == that.title
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(schemas, description, example, title)
+
+    private[this] def copy(
+        schemas: List[Schema] = schemas,
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title
+    ): AllOf =
+      new AllOf(schemas, description, example, title)
+
+    def withSchemas(schemas: List[Schema]): AllOf =
+      copy(schemas = schemas)
+
+    def withDescription(description: Option[String]): AllOf =
+      copy(description = description)
+
+    def withExample(example: Option[ujson.Value]): AllOf =
+      copy(example = example)
+
+    def withTitle(title: Option[String]): AllOf =
+      copy(title = title)
+
+  }
+
+  object AllOf {
+
+    def apply(
+        schemas: List[Schema],
+        description: Option[String],
+        example: Option[ujson.Value],
+        title: Option[String]
+    ): AllOf = new AllOf(schemas, description, example, title)
+
+  }
 
   case class Reference(
       name: String,
