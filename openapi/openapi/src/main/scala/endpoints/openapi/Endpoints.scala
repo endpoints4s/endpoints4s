@@ -209,7 +209,7 @@ trait EndpointsWithCustomErrors
     } yield recSchema
 
     allReferencedSchemas.collect {
-      case Schema.Reference(name, Some(original), _, _, _) => name -> original
+      case ref: Schema.Reference if ref.original.isDefined => ref.name -> ref.original.get
     }.toMap
   }
 

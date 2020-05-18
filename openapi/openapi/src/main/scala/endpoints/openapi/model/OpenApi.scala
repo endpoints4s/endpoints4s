@@ -105,24 +105,30 @@ object OpenApi {
                     tag -> ujson.Str(Schema.Reference.toRefPath(ref.name))
                 }: _*)
               val discFields = mutable.LinkedHashMap.empty[String, ujson.Value]
-              discFields += "propertyName" -> ujson.Str(discAlternatives.discriminatorFieldName)
+              discFields += "propertyName" -> ujson.Str(
+                discAlternatives.discriminatorFieldName
+              )
               if (mappingFields.nonEmpty) {
                 discFields += "mapping" -> new ujson.Obj(mappingFields)
               }
               List(
                 "oneOf" -> ujson
-                  .Arr(discAlternatives.alternatives.map(kv => schemaJson(kv._2)): _*),
+                  .Arr(
+                    discAlternatives.alternatives
+                      .map(kv => schemaJson(kv._2)): _*
+                  ),
                 "discriminator" -> ujson.Obj(discFields)
               )
             case enumAlternatives: Schema.EnumeratedAlternatives =>
               List(
-                "oneOf" -> ujson.Arr(enumAlternatives.alternatives.map(schemaJson): _*)
+                "oneOf" -> ujson
+                  .Arr(enumAlternatives.alternatives.map(schemaJson): _*)
               )
           })
       case allOf: Schema.AllOf =>
         fields += "allOf" -> ujson.Arr(allOf.schemas.map(schemaJson): _*)
-      case Schema.Reference(name, _, _, _, _) =>
-        fields += "$ref" -> ujson.Str(Schema.Reference.toRefPath(name))
+      case reference: Schema.Reference =>
+        fields += "$ref" -> ujson.Str(Schema.Reference.toRefPath(reference.name))
     }
     for (description <- schema.description) {
       fields += "description" -> ujson.Str(description)
@@ -339,7 +345,7 @@ object Info {
 
 }
 
-class PathItem private(
+class PathItem private (
     val operations: Map[String, Operation]
 ) {
 
@@ -367,7 +373,7 @@ object PathItem {
 
 }
 
-class Components private(
+class Components private (
     val schemas: Map[String, Schema],
     val securitySchemes: Map[String, SecurityScheme]
 ) {
@@ -410,7 +416,7 @@ object Components {
 
 }
 
-class Operation private(
+class Operation private (
     val summary: Option[String],
     val description: Option[String],
     val parameters: List[Parameter],
@@ -524,7 +530,7 @@ object Operation {
 
 }
 
-class SecurityRequirement private(
+class SecurityRequirement private (
     val name: String,
     val scheme: SecurityScheme,
     val scopes: List[String]
@@ -570,7 +576,7 @@ object SecurityRequirement {
     new SecurityRequirement(name, scheme, scopes)
 }
 
-class RequestBody private(
+class RequestBody private (
     val description: Option[String],
     val content: Map[String, MediaType]
 ) {
@@ -609,7 +615,7 @@ object RequestBody {
 
 }
 
-class Response private(
+class Response private (
     val description: String,
     val headers: Map[String, ResponseHeader],
     val content: Map[String, MediaType]
@@ -657,7 +663,7 @@ object Response {
 }
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
-class ResponseHeader private(
+class ResponseHeader private (
     val required: Boolean,
     val description: Option[String],
     val schema: Schema
@@ -705,7 +711,7 @@ object ResponseHeader {
 
 }
 
-class Parameter private(
+class Parameter private (
     val name: String,
     val in: In,
     val required: Boolean,
@@ -775,7 +781,7 @@ object In {
   val values: Seq[In] = Query :: Path :: Header :: Cookie :: Nil
 }
 
-class MediaType private(val schema: Option[Schema]) {
+class MediaType private (val schema: Option[Schema]) {
 
   override def toString: String =
     s"Mediatype($schema)"
@@ -822,13 +828,13 @@ sealed trait Schema {
       case s: Schema.AllOf =>
         s.withDescription(description.orElse(s.description))
       case s: Schema.Reference =>
-        s.copy(description = description.orElse(s.description))
+        s.withDescription(description.orElse(s.description))
     }
 }
 
 object Schema {
 
-  class Object private(
+  class Object private (
       val properties: List[Property],
       val additionalProperties: Option[Schema],
       val description: Option[String],
@@ -895,7 +901,7 @@ object Schema {
 
   }
 
-  class Array private(
+  class Array private (
       val elementType: Either[Schema, List[Schema]],
       val description: Option[String],
       val example: Option[ujson.Value],
@@ -949,7 +955,7 @@ object Schema {
 
   }
 
-  class Enum private(
+  class Enum private (
       val elementType: Schema,
       val values: List[ujson.Value],
       val description: Option[String],
@@ -1008,7 +1014,7 @@ object Schema {
 
   }
 
-  class Property private(
+  class Property private (
       val name: String,
       val schema: Schema,
       val isRequired: Boolean,
@@ -1061,7 +1067,7 @@ object Schema {
 
   }
 
-  class Primitive private(
+  class Primitive private (
       val name: String,
       val format: Option[String],
       val description: Option[String],
@@ -1122,7 +1128,7 @@ object Schema {
 
   }
 
-  class OneOf private(
+  class OneOf private (
       val alternatives: Alternatives,
       val description: Option[String],
       val example: Option[ujson.Value],
@@ -1178,7 +1184,7 @@ object Schema {
 
   sealed trait Alternatives
 
-  class DiscriminatedAlternatives private(
+  class DiscriminatedAlternatives private (
       val discriminatorFieldName: String,
       val alternatives: List[(String, Schema)]
   ) extends Alternatives {
@@ -1224,7 +1230,7 @@ object Schema {
 
   }
 
-  class EnumeratedAlternatives private(val alternatives: List[Schema])
+  class EnumeratedAlternatives private (val alternatives: List[Schema])
       extends Alternatives {
     override def toString: String =
       s"EnumeratedAlternatives($alternatives)"
@@ -1249,7 +1255,7 @@ object Schema {
 
   }
 
-  class AllOf private(
+  class AllOf private (
       val schemas: List[Schema],
       val description: Option[String],
       val example: Option[ujson.Value],
@@ -1303,15 +1309,49 @@ object Schema {
 
   }
 
-  case class Reference(
-      name: String,
-      original: Option[Schema],
-      description: Option[String],
-      override val example: None.type = None, // Reference objects can’t have examples
-      override val title: None.type = None // Reference objects can’t have a title
-  ) extends Schema
+  class Reference private (
+      val name: String,
+      val original: Option[Schema],
+      val description: Option[String]
+  ) extends Schema {
+    override val example
+        : None.type = None // Reference objects can’t have examples
+    override val title: None.type = None // Reference objects can’t have a title
+
+    override def toString: String =
+      s"Reference($name, $original, $description)"
+
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: Reference =>
+          name == that.name && original == that.original && description == that.description
+        case _ => false
+      }
+
+    override def hashCode(): Int =
+      Hashing.hash(name, original, description, example, title)
+
+    private[this] def copy(
+        name: String = name,
+        original: Option[Schema] = original,
+        description: Option[String] = description
+    ) = new Reference(name, original, description)
+
+    def withName(name: String): Reference = copy(name = name)
+    def withOriginal(original: Option[Schema]): Reference =
+      copy(original = original)
+    def withDescription(description: Option[String]): Reference =
+      copy(description = description)
+
+  }
 
   object Reference {
+
+    def apply(
+        name: String,
+        original: Option[Schema],
+        description: Option[String]
+    ): Reference = new Reference(name, original, description)
 
     def toRefPath(name: String): String =
       s"#/components/schemas/$name"
@@ -1325,16 +1365,70 @@ object Schema {
 
 }
 
-case class SecurityScheme(
-    `type`: String, // TODO This should be a sealed trait, the `type` field should only exist in the JSON representation
-    description: Option[String],
-    name: Option[String],
-    in: Option[String], // TODO Create a typed enumeration
-    scheme: Option[String],
-    bearerFormat: Option[String]
-)
+class SecurityScheme private (
+    val `type`: String, // TODO This should be a sealed trait, the `type` field should only exist in the JSON representation
+    val description: Option[String],
+    val name: Option[String],
+    val in: Option[String], // TODO Create a typed enumeration
+    val scheme: Option[String],
+    val bearerFormat: Option[String]
+) {
+
+  override def toString: String =
+    s"SecurityScheme(${`type`}, $description, $name, $in, $scheme, $bearerFormat)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: SecurityScheme =>
+        `type` == that.`type` && description == that.description && name == that.name &&
+          in == that.in && scheme == that.scheme && bearerFormat == that.bearerFormat
+      case _ =>
+        false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(`type`, description, name, in, scheme, bearerFormat)
+
+  private[this] def copy(
+      `type`: String = `type`,
+      description: Option[String] = description,
+      name: Option[String] = name,
+      in: Option[String] = in,
+      scheme: Option[String] = scheme,
+      bearerFormat: Option[String] = bearerFormat
+  ) = new SecurityScheme(`type`, description, name, in, scheme, bearerFormat)
+
+  def withType(tpe: String): SecurityScheme =
+    copy(`type` = tpe)
+
+  def withDescription(description: Option[String]): SecurityScheme =
+    copy(description = description)
+
+  def withName(name: Option[String]): SecurityScheme =
+    copy(name = name)
+
+  def withIn(in: Option[String]): SecurityScheme =
+    copy(in = in)
+
+  def withScheme(scheme: Option[String]): SecurityScheme =
+    copy(scheme = scheme)
+
+  def withBearerFormat(bearerFormat: Option[String]): SecurityScheme =
+    copy(bearerFormat = bearerFormat)
+
+}
 
 object SecurityScheme {
+
+  def apply(
+      `type`: String,
+      description: Option[String],
+      name: Option[String],
+      in: Option[String],
+      scheme: Option[String],
+      bearerFormat: Option[String]
+  ): SecurityScheme =
+    new SecurityScheme(`type`, description, name, in, scheme, bearerFormat)
 
   def httpBasic: SecurityScheme =
     SecurityScheme(
