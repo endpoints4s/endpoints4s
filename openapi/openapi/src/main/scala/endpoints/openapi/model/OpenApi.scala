@@ -90,11 +90,11 @@ object OpenApi {
           "type" -> "array",
           "items" -> itemsSchema
         )
-      case enum: Schema.Enum =>
+      case enm: Schema.Enum =>
         fields ++= schemaJson(
-          enum.elementType.withDefinedDescription(enum.description)
+          enm.elementType.withDefinedDescription(enm.description)
         ).value
-        fields += "enum" -> ujson.Arr(enum.values: _*)
+        fields += "enum" -> ujson.Arr(enm.values: _*)
       case oneOf: Schema.OneOf =>
         fields ++=
           (oneOf.alternatives match {

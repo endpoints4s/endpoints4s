@@ -227,8 +227,8 @@ trait EndpointsWithCustomErrors
           case Right(elementTypes) =>
             elementTypes.flatMap(captureReferencedSchemasRec)
         }
-      case enum: Schema.Enum =>
-        captureReferencedSchemasRec(enum.elementType)
+      case enm: Schema.Enum =>
+        captureReferencedSchemasRec(enm.elementType)
       case _: Schema.Primitive =>
         Nil
       case oneOf: Schema.OneOf =>
