@@ -9,7 +9,7 @@ object HashingTest extends Properties("Hashing") {
     val oneValue =
       (x == y) == (Hashing.hash(x) == Hashing.hash(y))
     val twoValues =
-      ((x, s) == (y, t)) == (Hashing.hash(x, s) == Hashing.hash(y, t))
+      ((x, s) == ((y, t))) == (Hashing.hash(x, s) == Hashing.hash(y, t))
     oneValue && twoValues
   }
 
