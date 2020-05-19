@@ -2,6 +2,8 @@ package endpoints.algebra
 
 import endpoints.Hashing
 
+import scala.annotation.nowarn
+
 /**
   * Algebra interface for describing endpoints made of requests and responses.
   *
@@ -74,6 +76,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     override def toString =
       s"EndpointDocs($summary, $description, $tags, $callbacks, $deprecated)"
 
+    @nowarn("cat=unchecked")
     override def equals(other: Any): Boolean = other match {
       case that: EndpointDocs =>
         summary == that.summary &&
@@ -165,6 +168,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     override def toString =
       s"CallbackDocs($method, $entity, $response, $requestDocs)"
 
+    @nowarn("cat=unchecked")
     override def equals(other: Any): Boolean = other match {
       case that: CallbackDocs =>
         method == that.method &&
