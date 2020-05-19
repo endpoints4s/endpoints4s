@@ -1,5 +1,7 @@
 package endpoints.openapi.model
 
+import java.io.Serializable
+
 import endpoints.Hashing
 import endpoints.algebra.Encoder
 
@@ -8,7 +10,7 @@ import scala.collection.mutable
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   */
-class OpenApi private (
+final class OpenApi private (
     val info: Info,
     val paths: Map[String, PathItem],
     val components: Components
@@ -309,7 +311,7 @@ object OpenApi {
 
 }
 
-class Info private (
+final class Info private (
     val title: String,
     val version: String
 ) extends Serializable {
@@ -347,9 +349,9 @@ object Info {
 
 }
 
-class PathItem private (
+final class PathItem private (
     val operations: Map[String, Operation]
-) {
+) extends Serializable {
 
   override def toString =
     s"PathItem($operations)"
@@ -375,10 +377,10 @@ object PathItem {
 
 }
 
-class Components private (
+final class Components private (
     val schemas: Map[String, Schema],
     val securitySchemes: Map[String, SecurityScheme]
-) {
+) extends Serializable {
 
   override def toString: String =
     s"Components($schemas, $securitySchemes)"
@@ -418,7 +420,7 @@ object Components {
 
 }
 
-class Operation private (
+final class Operation private (
     val summary: Option[String],
     val description: Option[String],
     val parameters: List[Parameter],
@@ -428,7 +430,7 @@ class Operation private (
     val security: List[SecurityRequirement],
     val callbacks: Map[String, Map[String, PathItem]],
     val deprecated: Boolean
-) {
+) extends Serializable {
 
   override def toString: String =
     s"Operation($summary, $description, $parameters, $requestBody, $responses, $tags, $security, $callbacks, $deprecated)"
@@ -532,11 +534,11 @@ object Operation {
 
 }
 
-class SecurityRequirement private (
+final class SecurityRequirement private (
     val name: String,
     val scheme: SecurityScheme,
     val scopes: List[String]
-) {
+) extends Serializable {
 
   override def toString: String =
     s"SecurityRequirement($name, $scheme, $scopes)"
@@ -588,10 +590,10 @@ object SecurityRequirement {
     new SecurityRequirement(name, scheme, scopes)
 }
 
-class RequestBody private (
+final class RequestBody private (
     val description: Option[String],
     val content: Map[String, MediaType]
-) {
+) extends Serializable {
   assert(content.nonEmpty)
 
   override def toString: String =
@@ -627,11 +629,11 @@ object RequestBody {
 
 }
 
-class Response private (
+final class Response private (
     val description: String,
     val headers: Map[String, ResponseHeader],
     val content: Map[String, MediaType]
-) {
+) extends Serializable {
 
   override def toString: String =
     s"Response($description, $headers, $content)"
@@ -675,11 +677,11 @@ object Response {
 }
 
 // Note: request headers don’t need a dedicated class because they are modeled as `Parameter`s
-class ResponseHeader private (
+final class ResponseHeader private (
     val required: Boolean,
     val description: Option[String],
     val schema: Schema
-) {
+) extends Serializable {
 
   override def toString: String =
     s"ResponseHeader($required, $description, $schema)"
@@ -723,13 +725,13 @@ object ResponseHeader {
 
 }
 
-class Parameter private (
+final class Parameter private (
     val name: String,
     val in: In,
     val required: Boolean,
     val description: Option[String],
     val schema: Schema // not specified in openapi spec but swagger-editor breaks without it for path parameters
-) {
+) extends Serializable {
 
   override def toString: String =
     s"Parameter($name, $in, $required, $description, $schema)"
@@ -793,7 +795,8 @@ object In {
   val values: Seq[In] = Query :: Path :: Header :: Cookie :: Nil
 }
 
-class MediaType private (val schema: Option[Schema]) {
+final class MediaType private (val schema: Option[Schema])
+    extends Serializable {
 
   override def toString: String =
     s"Mediatype($schema)"
@@ -846,13 +849,14 @@ sealed trait Schema {
 
 object Schema {
 
-  class Object private (
+  final class Object private (
       val properties: List[Property],
       val additionalProperties: Option[Schema],
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"Object($properties, $additionalProperties, $description, $example, $title)"
@@ -913,12 +917,13 @@ object Schema {
 
   }
 
-  class Array private (
+  final class Array private (
       val elementType: Either[Schema, List[Schema]],
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"Array($elementType, $description, $example, $title)"
@@ -967,13 +972,14 @@ object Schema {
 
   }
 
-  class Enum private (
+  final class Enum private (
       val elementType: Schema,
       val values: List[ujson.Value],
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"Enum($elementType, $values, $description, $example, $title)"
@@ -1026,12 +1032,12 @@ object Schema {
 
   }
 
-  class Property private (
+  final class Property private (
       val name: String,
       val schema: Schema,
       val isRequired: Boolean,
       val description: Option[String]
-  ) {
+  ) extends Serializable {
 
     override def toString: String =
       s"Property($name, $schema, $isRequired, $description)"
@@ -1079,13 +1085,14 @@ object Schema {
 
   }
 
-  class Primitive private (
+  final class Primitive private (
       val name: String,
       val format: Option[String],
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"Primitive($name, $format, $description, $example, $title)"
@@ -1140,12 +1147,13 @@ object Schema {
 
   }
 
-  class OneOf private (
+  final class OneOf private (
       val alternatives: Alternatives,
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"OneOf($alternatives, $description, $example, $title)"
@@ -1196,10 +1204,11 @@ object Schema {
 
   sealed trait Alternatives
 
-  class DiscriminatedAlternatives private (
+  final class DiscriminatedAlternatives private (
       val discriminatorFieldName: String,
       val alternatives: List[(String, Schema)]
-  ) extends Alternatives {
+  ) extends Alternatives
+      with Serializable {
 
     override def toString: String =
       s"DiscriminatedAlternatives($discriminatorFieldName, $alternatives)"
@@ -1242,8 +1251,11 @@ object Schema {
 
   }
 
-  class EnumeratedAlternatives private (val alternatives: List[Schema])
-      extends Alternatives {
+  final class EnumeratedAlternatives private (
+      val alternatives: List[Schema]
+  ) extends Alternatives
+      with Serializable {
+
     override def toString: String =
       s"EnumeratedAlternatives($alternatives)"
 
@@ -1267,12 +1279,13 @@ object Schema {
 
   }
 
-  class AllOf private (
+  final class AllOf private (
       val schemas: List[Schema],
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
 
     override def toString: String =
       s"AllOf($schemas, $description, $example, $title)"
@@ -1321,11 +1334,13 @@ object Schema {
 
   }
 
-  class Reference private (
+  final class Reference private (
       val name: String,
       val original: Option[Schema],
       val description: Option[String]
-  ) extends Schema {
+  ) extends Schema
+      with Serializable {
+
     override val example
         : None.type = None // Reference objects can’t have examples
     override val title: None.type = None // Reference objects can’t have a title
@@ -1377,14 +1392,14 @@ object Schema {
 
 }
 
-class SecurityScheme private (
+final class SecurityScheme private (
     val `type`: String, // TODO This should be a sealed trait, the `type` field should only exist in the JSON representation
     val description: Option[String],
     val name: Option[String],
     val in: Option[String], // TODO Create a typed enumeration
     val scheme: Option[String],
     val bearerFormat: Option[String]
-) {
+) extends Serializable {
 
   override def toString: String =
     s"SecurityScheme(${`type`}, $description, $name, $in, $scheme, $bearerFormat)"
