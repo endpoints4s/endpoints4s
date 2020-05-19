@@ -54,6 +54,7 @@ object EndpointsSettings {
           Seq()
       }
     },
+    Compile / doc / scalacOptions += "-nowarn", // See https://github.com/scala/bug/issues/12007
     // Remove scala-compiler dependency automatically added by the sbt-heroku plugin
     libraryDependencies -= "org.scala-lang" % "scala-compiler" % scalaVersion.value % Runtime
   )

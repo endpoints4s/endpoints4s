@@ -59,7 +59,7 @@ trait EndpointsWithCustomErrors
     ): DocumentedEndpoint = {
       copy(item = PathItem(item.operations.map {
         case (verb, operation) =>
-          verb -> operation.copy(security = securityRequirements.toList)
+          verb -> operation.withSecurity(securityRequirements.toList)
       }))
     }
   }
@@ -209,7 +209,8 @@ trait EndpointsWithCustomErrors
     } yield recSchema
 
     allReferencedSchemas.collect {
-      case Schema.Reference(name, Some(original), _, _, _) => name -> original
+      case ref: Schema.Reference if ref.original.isDefined =>
+        ref.name -> ref.original.get
     }.toMap
   }
 
@@ -217,27 +218,31 @@ trait EndpointsWithCustomErrors
       schema: Schema
   ): Seq[Schema.Reference] =
     schema match {
-      case Schema.Object(properties, additionalProperties, _, _, _) =>
-        properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
-          additionalProperties.toList.flatMap(captureReferencedSchemasRec)
-      case Schema.Array(Left(elementType), _, _, _) =>
-        captureReferencedSchemasRec(elementType)
-      case Schema.Array(Right(elementTypes), _, _, _) =>
-        elementTypes.flatMap(captureReferencedSchemasRec)
-      case Schema.Enum(elementType, _, _, _, _) =>
-        captureReferencedSchemasRec(elementType)
-      case Schema.Primitive(_, _, _, _, _) =>
+      case obj: Schema.Object =>
+        obj.properties.map(_.schema).flatMap(captureReferencedSchemasRec) ++
+          obj.additionalProperties.toList.flatMap(captureReferencedSchemasRec)
+      case array: Schema.Array =>
+        array.elementType match {
+          case Left(elementType) =>
+            captureReferencedSchemasRec(elementType)
+          case Right(elementTypes) =>
+            elementTypes.flatMap(captureReferencedSchemasRec)
+        }
+      case enm: Schema.Enum =>
+        captureReferencedSchemasRec(enm.elementType)
+      case _: Schema.Primitive =>
         Nil
-      case Schema.OneOf(alternatives, _, _, _) =>
+      case oneOf: Schema.OneOf =>
         val alternativeSchemas =
-          alternatives match {
-            case Schema.DiscriminatedAlternatives(_, alternatives) =>
-              alternatives.map(_._2)
-            case Schema.EnumeratedAlternatives(alternatives) => alternatives
+          oneOf.alternatives match {
+            case discAlternatives: Schema.DiscriminatedAlternatives =>
+              discAlternatives.alternatives.map(_._2)
+            case enumAlternatives: Schema.EnumeratedAlternatives =>
+              enumAlternatives.alternatives
           }
         alternativeSchemas.flatMap(captureReferencedSchemasRec)
-      case Schema.AllOf(schemas, _, _, _) =>
-        schemas.flatMap {
+      case allOf: Schema.AllOf =>
+        allOf.schemas.flatMap {
           case _: Schema.Reference => Nil
           case s                   => captureReferencedSchemasRec(s)
         }
