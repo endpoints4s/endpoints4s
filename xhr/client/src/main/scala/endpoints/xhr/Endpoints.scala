@@ -302,9 +302,7 @@ trait EndpointsWithCustomErrors
     * A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
     */
-  abstract class Endpoint[A, B](request: Request[A]) {
-    def apply(a: A): Result[B]
-
+  abstract class Endpoint[A, B](request: Request[A]) extends (A => Result[B]) {
     def href(a: A): String = request.href(a)
   }
 
