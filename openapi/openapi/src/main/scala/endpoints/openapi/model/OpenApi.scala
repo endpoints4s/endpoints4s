@@ -337,7 +337,7 @@ final class Info private (
     }
 
   override def hashCode(): Int =
-    Hashing.hash(title, version)
+    Hashing.hash(title, version, description)
 
   private[this] def copy(
       title: String = title,
