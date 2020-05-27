@@ -168,6 +168,18 @@ object OpenApi {
     new ujson.Obj(fields)
   }
 
+  private def infoJson(info: Info): ujson.Obj = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] =
+      mutable.LinkedHashMap(
+        "title" -> ujson.Str(info.title),
+        "version" -> ujson.Str(info.version)
+      )
+    info.description.foreach(description =>
+      fields += "description" -> ujson.Str(description)
+    )
+    ujson.Obj(fields)
+  }
+
   private def componentsJson(components: Components): ujson.Obj =
     ujson.Obj(
       "schemas" -> mapJson(components.schemas)(schemaJson),
@@ -293,10 +305,7 @@ object OpenApi {
       val fields: mutable.LinkedHashMap[String, ujson.Value] =
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
-          "info" -> ujson.Obj(
-            "title" -> ujson.Str(openApi.info.title),
-            "version" -> ujson.Str(openApi.info.version)
-          ),
+          "info" -> infoJson(openApi.info),
           "paths" -> pathsJson(openApi.paths)
         )
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
@@ -313,16 +322,18 @@ object OpenApi {
 
 final class Info private (
     val title: String,
-    val version: String
+    val version: String,
+    val description: Option[String]
 ) extends Serializable {
 
   override def toString: String =
-    s"Info($title, $version)"
+    s"Info($title, $version, $description)"
 
   override def equals(other: Any): Boolean =
     other match {
-      case that: Info => title == that.title && version == that.version
-      case _          => false
+      case that: Info =>
+        title == that.title && version == that.version && description == that.description
+      case _ => false
     }
 
   override def hashCode(): Int =
@@ -330,9 +341,10 @@ final class Info private (
 
   private[this] def copy(
       title: String = title,
-      version: String = version
+      version: String = version,
+      description: Option[String] = description
   ): Info =
-    new Info(title, version)
+    new Info(title, version, description)
 
   def withTitle(title: String): Info =
     copy(title = title)
@@ -340,12 +352,15 @@ final class Info private (
   def withVersion(version: String): Info =
     copy(version = version)
 
+  def withDescription(description: Option[String]): Info =
+    copy(description = description)
+
 }
 
 object Info {
 
   def apply(title: String, version: String): Info =
-    new Info(title, version)
+    new Info(title, version, None)
 
 }
 
