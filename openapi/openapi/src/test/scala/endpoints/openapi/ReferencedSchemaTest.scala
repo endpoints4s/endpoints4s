@@ -36,7 +36,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
     def openApiDocument: OpenApi =
       openApi(
-        Info(title = "TestFixturesOpenApi", version = "0.0.0")
+        Info(title = "TestFixturesOpenApi", version = "0.0.0").withDescription(Some("This is a top level description."))
       )(Fixtures.listBooks, Fixtures.postBook)
   }
 
@@ -81,7 +81,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |  "openapi" : "3.0.0",
         |  "info" : {
         |    "title" : "TestFixturesOpenApi",
-        |    "version" : "0.0.0"
+        |    "version" : "0.0.0",
+        |    "description": "This is a top level description."
         |  },
         |  "paths" : {
         |    "/books" : {
