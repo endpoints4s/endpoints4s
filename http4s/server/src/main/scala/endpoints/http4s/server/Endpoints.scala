@@ -277,7 +277,7 @@ trait EndpointsWithCustomErrors
   def textRequest: RequestEntity[String] =
     req =>
       EntityDecoder
-        .decodeBy(http4s.MediaType.text.plain) { msg: http4s.Media[Effect] =>
+        .decodeBy(http4s.MediaType.text.plain) { (msg: http4s.Media[Effect]) =>
           http4s.DecodeResult.success(EntityDecoder.decodeString(msg))
         }
         .decode(req, strict = true)
