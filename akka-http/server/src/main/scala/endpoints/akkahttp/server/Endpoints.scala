@@ -6,7 +6,7 @@ import akka.http.scaladsl.marshalling.{
   ToResponseMarshaller
 }
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{HttpEntity, HttpHeader}
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader, MediaTypes}
 import akka.http.scaladsl.server.{
   Directive1,
   Directives,
@@ -115,8 +115,10 @@ trait EndpointsWithCustomErrors
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
   def textRequest: RequestEntity[String] = {
-    val um: FromRequestUnmarshaller[String] = implicitly
-    Directives.entity[String](um)
+    implicit val um: FromEntityUnmarshaller[String] =
+      Unmarshaller.stringUnmarshaller
+        .forContentTypes(MediaTypes.`text/plain`)
+    Directives.entity[String](implicitly)
   }
 
   implicit lazy val requestEntityPartialInvariantFunctor

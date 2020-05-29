@@ -2,6 +2,7 @@ package endpoints.akkahttp.server
 
 import akka.http.scaladsl.model.ContentTypes
 import akka.http.scaladsl.model.StatusCodes.{BadRequest, OK}
+import akka.http.scaladsl.server.UnsupportedRequestContentTypeRejection
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import endpoints.algebra.User
 import endpoints.generic
@@ -86,10 +87,23 @@ class EndpointsJsonSchemaTest
         )
       }
 
+      // Valid URL and invalid entity (3)
+      Put("/user/42").withEntity(
+        ContentTypes.`text/plain(UTF-8)`,
+        "{\"name\":\"Alice\",\"age\":true}"
+      ) ~> testRoutes.updateUser ~> check {
+        handled shouldBe false
+        rejection shouldBe UnsupportedRequestContentTypeRejection(
+          supported = Set(ContentTypes.`application/json`),
+          contentType = Some(ContentTypes.`text/plain(UTF-8)`)
+        )
+      }
+
       // Valid URL and entity
       request("/user/42", "{\"name\":\"Alice\",\"age\":55}") ~> testRoutes.updateUser ~> check {
         handled shouldBe true
         status shouldBe OK
+        contentType shouldBe ContentTypes.`application/json`
         ujson.read(responseAs[String]) shouldBe ujson.Obj(
           "name" -> ujson.Str("Alice"),
           "age" -> ujson.Num(55)

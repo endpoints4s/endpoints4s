@@ -113,6 +113,14 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /**
     * Request with a `String` body.
+    *
+    *   - Server interpreters accept requests with content-type `text/plain` and
+    *     reject requests with an incorrect content-type.
+    *   - Server interpreters will use the character encoding set in the
+    *     content-type header to determine how the text is decoded.
+    *   - Client interpreters supply content-type `text/plain` with an explicit
+    *     character encoding
+    *
     * @group operations
     */
   def textRequest: RequestEntity[String]

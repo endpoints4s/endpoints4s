@@ -6,9 +6,14 @@ import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
 import endpoints.algebra.client.{
   BasicAuthTestSuite,
   JsonFromCodecTestSuite,
+  TextEntitiesTestSuite,
   EndpointsTestSuite
 }
-import endpoints.algebra.{BasicAuthenticationTestApi, EndpointsTestApi}
+import endpoints.algebra.{
+  BasicAuthenticationTestApi,
+  EndpointsTestApi,
+  TextEntitiesTestApi
+}
 import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,11 +26,13 @@ class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
     with BasicAuthenticationTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
+    with TextEntitiesTestApi
 
 class EndpointsTestSync
     extends EndpointsTestSuite[TestClient[Try]]
     with BasicAuthTestSuite[TestClient[Try]]
-    with JsonFromCodecTestSuite[TestClient[Try]] {
+    with JsonFromCodecTestSuite[TestClient[Try]]
+    with TextEntitiesTestSuite[TestClient[Try]] {
 
   val backend = TryHttpURLConnectionBackend()
 
@@ -41,12 +48,14 @@ class EndpointsTestSync
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  textEntitiesTestSuite()
 }
 
 class EndpointsTestAkka
     extends EndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
-    with JsonFromCodecTestSuite[TestClient[Future]] {
+    with JsonFromCodecTestSuite[TestClient[Future]]
+    with TextEntitiesTestSuite[TestClient[Future]] {
 
   import ExecutionContext.Implicits.global
 
@@ -63,6 +72,7 @@ class EndpointsTestAkka
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  textEntitiesTestSuite()
 
   override def afterAll(): Unit = {
     backend.close()

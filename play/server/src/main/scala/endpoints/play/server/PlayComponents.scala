@@ -1,7 +1,7 @@
 package endpoints.play.server
 
 import play.api.BuiltInComponents
-import play.api.http.FileMimeTypes
+import play.api.http.{FileMimeTypes, HttpErrorHandler}
 import play.api.mvc.{DefaultActionBuilder, PlayBodyParsers}
 
 import scala.concurrent.ExecutionContext
@@ -11,6 +11,7 @@ import scala.concurrent.ExecutionContext
   */
 trait PlayComponents {
   def playBodyParsers: PlayBodyParsers
+  def httpErrorHandler: HttpErrorHandler
   def defaultActionBuilder: DefaultActionBuilder
   def fileMimeTypes: FileMimeTypes
   implicit def executionContext: ExecutionContext
@@ -36,6 +37,8 @@ object PlayComponents {
   ): PlayComponents =
     new PlayComponents {
       def playBodyParsers: PlayBodyParsers = builtInComponents.playBodyParsers
+      def httpErrorHandler: HttpErrorHandler =
+        builtInComponents.httpErrorHandler
       def defaultActionBuilder: DefaultActionBuilder =
         builtInComponents.defaultActionBuilder
       def fileMimeTypes: FileMimeTypes = builtInComponents.fileMimeTypes

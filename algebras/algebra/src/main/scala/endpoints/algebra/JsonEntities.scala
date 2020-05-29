@@ -28,8 +28,15 @@ trait JsonEntities extends EndpointsWithCustomErrors {
     * @group types */
   type JsonResponse[A]
 
-  /** Defines a `RequestEntity[A]` given an implicit `JsonRequest[A]`
-    * @group operations */
+  /**
+    * Request with a JSON body, given an implicit `JsonRequest[A]`
+    *
+    *   - Server interpreters accept requests with content-type `application/json` and
+    *     reject requests with an incorrect content-type.
+    *   - Client interpreters supply content-type `application/json`
+    *
+    * @group operations
+    */
   def jsonRequest[A: JsonRequest]: RequestEntity[A]
 
   /** Defines a `Response[A]` given an implicit `JsonResponse[A]`

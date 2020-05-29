@@ -10,3 +10,4 @@ class EndpointsTestApi
     with algebra.EndpointsTestApi
     with algebra.BasicAuthenticationTestApi
     with algebra.JsonEntitiesFromSchemasTestApi
+    with algebra.TextEntitiesTestApi
