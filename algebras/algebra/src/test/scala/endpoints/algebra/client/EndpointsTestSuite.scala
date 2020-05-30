@@ -319,6 +319,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         import client._
         encodeUrl(path / "foo" / segment[String]())("bar/baz") shouldEqual "/foo/bar%2Fbaz"
         encodeUrl(path / segment[String]())("bar/baz") shouldEqual "/bar%2Fbaz"
+        encodeUrl(path / segment[String]())("bar baz") shouldEqual "/bar%20baz"
         encodeUrl(path / segment[String]() / "baz")("bar") shouldEqual "/bar/baz"
         encodeUrl(path / segment[Int]())(42) shouldEqual "/42"
         encodeUrl(path / segment[Long]())(42L) shouldEqual "/42"
