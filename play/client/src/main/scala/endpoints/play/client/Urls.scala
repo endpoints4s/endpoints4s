@@ -99,8 +99,8 @@ trait Urls extends algebra.Urls {
       ): Segment[B] = (b: B) => fa.encode(g(b))
     }
 
-  implicit lazy val stringSegment: Segment[String] = (s: String) =>
-    URLEncoder.encode(s, utf8Name)
+  implicit lazy val stringSegment: Segment[String] =
+    Urls.encodeSegment(_)
 
   trait Path[A] extends Url[A]
 
@@ -155,4 +155,33 @@ trait Urls extends algebra.Urls {
       ): Url[B] = (b: B) => fa.encode(g(b))
     }
 
+}
+
+private object Urls {
+  val noEncodeChars = "-_.~:@!$&'()*+,;=".toCharArray().sorted
+  val hexChars = "0123456789ABCDEF".toCharArray()
+
+  def shouldEncode(c: Char): Boolean =
+    if ((c >= 'a' && c <= 'z') ||
+        (c >= 'A' && c <= 'Z') ||
+        (c >= '0' && c <= '9') ||
+        java.util.Arrays.binarySearch(noEncodeChars, c) >= 0) false
+    else true
+
+  def encodeSegment(s: String): String = {
+    val in = UTF_8.encode(s)
+    val out = new StringBuilder(in.remaining() * 3)
+    while (in.hasRemaining) {
+      val c = in.get.toChar
+      if (shouldEncode(c)) {
+        out
+          .append('%')
+          .append(hexChars((c >> 4) & 0xF))
+          .append(hexChars(c & 0xF))
+      } else {
+        out.append(c)
+      }
+    }
+    out.result()
+  }
 }

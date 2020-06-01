@@ -3,6 +3,7 @@ package endpoints.akkahttp.client
 import scala.collection.compat.Factory
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
+import akka.http.scaladsl.model.Uri
 
 import endpoints.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints.algebra.Documentation
@@ -84,7 +85,7 @@ trait Urls extends algebra.Urls {
     URLEncoder.encode(s, utf8Name) :: Nil
 
   trait Segment[A] {
-    def encode(a: A): String
+    def encode(a: A): Uri.Path
   }
 
   implicit lazy val segmentPartialInvariantFunctor
@@ -98,7 +99,7 @@ trait Urls extends algebra.Urls {
     }
 
   implicit lazy val stringSegment: Segment[String] = (s: String) =>
-    URLEncoder.encode(s, utf8Name)
+    Uri.Path.Segment(s, Uri.Path.Empty)
 
   trait Path[A] extends Url[A]
 
@@ -115,7 +116,7 @@ trait Urls extends algebra.Urls {
 
   def segment[A](name: String, docs: Documentation)(
       implicit s: Segment[A]
-  ): Path[A] = a => s.encode(a)
+  ): Path[A] = a => s.encode(a).toString()
 
   def remainingSegments(name: String, docs: Documentation): Path[String] =
     s => s
