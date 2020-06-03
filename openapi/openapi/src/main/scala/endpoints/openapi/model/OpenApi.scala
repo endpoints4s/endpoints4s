@@ -9,6 +9,7 @@ import scala.collection.mutable
 
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
+  * @throws java.lang.IllegalArgumentException on creation if the tags are inconsistent with each other.
   */
 final class OpenApi private (
     val info: Info,
@@ -27,6 +28,8 @@ final class OpenApi private (
     }
 
   override def hashCode(): Int = Hashing.hash(info, paths, components)
+
+  val tags: List[Tag] = OpenApi.extractTags(paths)
 
   private[this] def copy(
       info: Info = info,
@@ -332,15 +335,14 @@ object OpenApi {
 
   private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
     openApi => {
-      val tags = extractTags(openApi.paths)
       val fields: mutable.LinkedHashMap[String, ujson.Value] =
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
           "info" -> infoJson(openApi.info),
           "paths" -> pathsJson(openApi.paths),
         )
-      if (tags.nonEmpty) {
-       fields += "tags" -> ujson.Arr(tags.map(tagJson): _*)
+      if (openApi.tags.nonEmpty) {
+       fields += "tags" -> ujson.Arr(openApi.tags.map(tagJson): _*)
       }
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)

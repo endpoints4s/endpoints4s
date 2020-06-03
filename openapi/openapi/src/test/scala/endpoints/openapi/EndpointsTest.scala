@@ -1,7 +1,7 @@
 package endpoints.openapi
 
 import endpoints.algebra
-import endpoints.algebra.Tag
+import endpoints.algebra.{ExternalDocumentationObject, Tag}
 import org.scalatest.OptionValues
 import endpoints.openapi.model._
 import org.scalatest.matchers.should.Matchers
@@ -186,17 +186,23 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       Fixtures.documentation
         .paths("/foo")
         .operations("get")
-        .tags shouldEqual List(Tag("foo"))
+        .tags shouldEqual List(Fixtures.fooTag)
       Fixtures.documentation
         .paths("/foo")
         .operations("post")
-        .tags shouldEqual List("bar", "bxx").map(Tag(_))
+        .tags shouldEqual List(Fixtures.barTag, Fixtures.bxxTag)
       Fixtures.documentation.paths
         .find(_._1.startsWith("/baz"))
         .get
         ._2
         .operations("get")
-        .tags shouldEqual List("baz", "bxx").map(Tag(_))
+        .tags shouldEqual List(Fixtures.bazTag, Fixtures.bxxTag)
+    }
+
+    "should disallow inconsistent tags" in {
+      assertThrows[IllegalArgumentException] {
+        Fixtures.invalidTagsDocumentation
+      }
     }
   }
 
@@ -293,23 +299,28 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
 trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
-  // TODO: extended Tags test
+  val fooTag = Tag("foo")
+  val barTag = Tag("bar").withDescription(Some("This is a bar."))
+  val bazTag = Tag("baz").withExternalDocs(Some(ExternalDocumentationObject("my@url.com")))
+  val bxxTag = Tag("bxx").withExternalDocs(Some(ExternalDocumentationObject("my@url.com").withDescription(Some("my@url.com contains the official documentation."))))
+
   val foo = endpoint(
     get(path / "foo"),
     ok(emptyResponse, Some("Foo response")),
-    docs = EndpointDocs().withTags(List(Tag("foo")))
+    docs = EndpointDocs().withTags(List(fooTag))
   )
 
   val bar = endpoint(
     post(path / "foo", emptyRequest),
     ok(emptyResponse, Some("Bar response")),
-    docs = EndpointDocs().withTags(List("bar", "bxx").map(Tag(_)))
+    docs = EndpointDocs().withTags(List(barTag, bxxTag)
+  )
   )
 
   val baz = endpoint(
     get(path / "baz" / segment[Int]("quux")),
     ok(emptyResponse, Some("Baz response")),
-    docs = EndpointDocs().withTags(List("baz", "bxx").map(Tag(_)))
+    docs = EndpointDocs().withTags(List(bazTag, bxxTag))
   )
 
   val textRequestEndp = endpoint(
@@ -324,6 +335,12 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
       textRequest
     ),
     ok(emptyResponse)
+  )
+
+  val invalidTagsEndpoint = endpoint(
+    get(path / "invalid"),
+    ok(emptyResponse, Some("Some response")),
+    docs = EndpointDocs().withTags(List(bazTag, bazTag.withDescription(Some("Inconsistent description"))))
   )
 
   val quux = endpoint(
@@ -365,6 +382,10 @@ object Fixtures
     with Endpoints
     with JsonEntitiesFromSchemas
     with ChunkedEntities {
+
+  // throws an exception, thus a def instead of a val
+  def invalidTagsDocumentation =
+    openApi(Info("Test API", "1.0.0"))(invalidTagsEndpoint)
 
   val documentation =
     openApi(Info("Test API", "1.0.0"))(
