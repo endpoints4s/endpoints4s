@@ -4,7 +4,6 @@ import java.io.Serializable
 
 import endpoints.Hashing
 import endpoints.algebra.{Encoder, ExternalDocumentationObject, Tag}
-
 import scala.collection.mutable
 
 /**
@@ -345,9 +344,8 @@ object OpenApi {
           "paths" -> pathsJson(openApi.paths)
         )
       if (openApi.tags.nonEmpty) {
-        fields += "tags" -> new ujson.Arr(
-          openApi.tags.map(tag => tagJson(tag)).to(mutable.ArrayBuffer)
-        )
+        val tagsAsJson = openApi.tags.map(tag => tagJson(tag)).toList
+        fields += "tags" -> ujson.Arr(tagsAsJson: _*)
       }
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)
@@ -376,8 +374,8 @@ object OpenApi {
     }
 
     // Note that tags without any additional information will still be shown. However there is no
-    // reason to add these tags to the root since tags with only names can and will be defined
-    // at the moment they will be used in the endpoint descriptions themselves.
+    // reason to add these tags to the root since tags with only names can and will be defined at
+    // the moment they will be used in the endpoint descriptions themselves.
     allTags
       .filter(tag => tag.description.nonEmpty || tag.externalDocs.nonEmpty)
       .toSet
