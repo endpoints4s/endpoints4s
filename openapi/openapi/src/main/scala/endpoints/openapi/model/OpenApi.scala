@@ -3,13 +3,14 @@ package endpoints.openapi.model
 import java.io.Serializable
 
 import endpoints.Hashing
-import endpoints.algebra.Encoder
-
+import endpoints.algebra.{Encoder, ExternalDocumentationObject, Tag}
 import scala.collection.mutable
 
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
+  * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
+@throws(classOf[IllegalArgumentException])
 final class OpenApi private (
     val info: Info,
     val paths: Map[String, PathItem],
@@ -27,6 +28,8 @@ final class OpenApi private (
     }
 
   override def hashCode(): Int = Hashing.hash(info, paths, components)
+
+  val tags: Set[Tag] = OpenApi.extractTags(paths)
 
   private[this] def copy(
       info: Info = info,
@@ -239,7 +242,9 @@ object OpenApi {
       fields += "requestBody" -> requestBodyJson(requestBody)
     }
     if (operation.tags.nonEmpty) {
-      fields += "tags" -> ujson.Arr(operation.tags.map(ujson.Str): _*)
+      fields += "tags" -> ujson.Arr(
+        operation.tags.map(tag => ujson.Str(tag.name)): _*
+      )
     }
     if (operation.security.nonEmpty) {
       fields += "security" -> ujson.Arr(
@@ -288,6 +293,36 @@ object OpenApi {
     new ujson.Obj(fields)
   }
 
+  private def tagJson(tag: Tag): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] =
+      mutable.LinkedHashMap(
+        "name" -> ujson.Str(tag.name)
+      )
+
+    if (tag.description.nonEmpty) {
+      fields += "description" -> tag.description.get
+    }
+    if (tag.externalDocs.nonEmpty) {
+      fields += "externalDocs" -> externalDocumentationObjectJson(
+        tag.externalDocs.get
+      )
+    }
+    new ujson.Obj(fields)
+  }
+
+  private def externalDocumentationObjectJson(
+      externalDoc: ExternalDocumentationObject
+  ): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] =
+      mutable.LinkedHashMap(
+        "url" -> ujson.Str(externalDoc.url)
+      )
+
+    if (externalDoc.description.nonEmpty)
+      fields += "description" -> externalDoc.description.get
+    new ujson.Obj(fields)
+  }
+
   private def securityRequirementJson(
       securityRequirement: SecurityRequirement
   ): ujson.Value =
@@ -308,11 +343,43 @@ object OpenApi {
           "info" -> infoJson(openApi.info),
           "paths" -> pathsJson(openApi.paths)
         )
+      if (openApi.tags.nonEmpty) {
+        val tagsAsJson = openApi.tags.map(tag => tagJson(tag)).toList
+        fields += "tags" -> ujson.Arr(tagsAsJson: _*)
+      }
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)
       }
       new ujson.Obj(fields)
     }
+
+  private def extractTags(paths: Map[String, PathItem]): Set[Tag] = {
+    val allTags = paths.flatMap {
+      case (_, pathItem) =>
+        pathItem.operations.map {
+          case (_, operation) =>
+            operation.tags
+        }
+    }.flatten
+
+    val tagsByName = allTags.groupBy(_.name)
+    tagsByName.foreach {
+      case (_, listOfTags) =>
+        val set = listOfTags.toSet
+        if (set.size > 1) {
+          throw new IllegalArgumentException(
+            s"Found tags with the same name but different values: $set"
+          )
+        }
+    }
+
+    // Note that tags without any additional information will still be shown. However there is no
+    // reason to add these tags to the root since tags with only names can and will be defined at
+    // the moment they will be used in the endpoint descriptions themselves.
+    allTags
+      .filter(tag => tag.description.nonEmpty || tag.externalDocs.nonEmpty)
+      .toSet
+  }
 
   implicit val stringEncoder: Encoder[OpenApi, String] =
     openApi =>
@@ -441,7 +508,7 @@ final class Operation private (
     val parameters: List[Parameter],
     val requestBody: Option[RequestBody],
     val responses: Map[String, Response],
-    val tags: List[String],
+    val tags: List[Tag],
     val security: List[SecurityRequirement],
     val callbacks: Map[String, Map[String, PathItem]],
     val deprecated: Boolean
@@ -477,7 +544,7 @@ final class Operation private (
       parameters: List[Parameter] = parameters,
       requestBody: Option[RequestBody] = requestBody,
       responses: Map[String, Response] = responses,
-      tags: List[String] = tags,
+      tags: List[Tag] = tags,
       security: List[SecurityRequirement] = security,
       callbacks: Map[String, Map[String, PathItem]] = callbacks,
       deprecated: Boolean = deprecated
@@ -509,7 +576,7 @@ final class Operation private (
   def withResponses(responses: Map[String, Response]): Operation =
     copy(responses = responses)
 
-  def withTags(tags: List[String]): Operation =
+  def withTags(tags: List[Tag]): Operation =
     copy(tags = tags)
 
   def withSecurity(security: List[SecurityRequirement]): Operation =
@@ -530,7 +597,7 @@ object Operation {
       parameters: List[Parameter],
       requestBody: Option[RequestBody],
       responses: Map[String, Response],
-      tags: List[String],
+      tags: List[Tag],
       security: List[SecurityRequirement],
       callbacks: Map[String, Map[String, PathItem]],
       deprecated: Boolean
@@ -1380,8 +1447,10 @@ object Schema {
     ) = new Reference(name, original, description)
 
     def withName(name: String): Reference = copy(name = name)
+
     def withOriginal(original: Option[Schema]): Reference =
       copy(original = original)
+
     def withDescription(description: Option[String]): Reference =
       copy(description = description)
 

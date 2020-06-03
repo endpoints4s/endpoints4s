@@ -2,6 +2,7 @@ package endpoints.openapi
 
 import java.util.UUID
 
+import endpoints.algebra.{ExternalDocumentationObject, Tag}
 import endpoints.generic.discriminator
 import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
@@ -57,10 +58,14 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 
+    val bookTag = Tag("Books")
+      .withDescription(Some("A book is something you can read."))
+      .withExternalDocs(Some(ExternalDocumentationObject("moreinfo@books.nl").withDescription(Some("The official website about books."))))
+
     val listBooks = endpoint(
       get(path / "books"),
       ok(jsonResponse[List[Book]], Some("Books list")),
-      docs = EndpointDocs().withTags(List("Books"))
+      docs = EndpointDocs().withTags(List(bookTag))
     )
 
     val postBook =
@@ -70,7 +75,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         ok(jsonResponse(Enum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs().withTags(List("Books"))
+        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
       )
   }
 
@@ -171,7 +176,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          }
         |        },
         |        "tags" : [
-        |          "Books"
+        |          "Books",
+        |          "Another tag"
         |        ],
         |        "security" : [
         |          {
@@ -182,6 +188,16 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |      }
         |    }
         |  },
+        |  "tags": [
+        |    {
+        |      "name":"Books",
+        |      "description":"A book is something you can read.",
+        |      "externalDocs": {
+        |        "url":"moreinfo@books.nl",
+        |        "description":"The official website about books."
+        |      }
+        |    }
+        |  ],
         |  "components" : {
         |    "schemas" : {
         |      "Color" : {
@@ -302,8 +318,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |}""".stripMargin
 
     "be documented" in {
-      ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument)) shouldBe ujson
-        .read(expectedSchema)
+      val actual = ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument))
+      actual shouldBe ujson.read(expectedSchema)
     }
 
   }
