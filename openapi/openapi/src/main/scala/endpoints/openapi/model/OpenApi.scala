@@ -9,8 +9,9 @@ import scala.collection.mutable
 
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
-  * @throws java.lang.IllegalArgumentException on creation if several tags have the same name but not the same other attributes.
+  * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
+@throws(classOf[IllegalArgumentException])
 final class OpenApi private (
     val info: Info,
     val paths: Map[String, PathItem],
@@ -29,7 +30,7 @@ final class OpenApi private (
 
   override def hashCode(): Int = Hashing.hash(info, paths, components)
 
-  val tags: List[Tag] = OpenApi.extractTags(paths)
+  val tags: Set[Tag] = OpenApi.extractTags(paths)
 
   private[this] def copy(
       info: Info = info,
@@ -242,7 +243,9 @@ object OpenApi {
       fields += "requestBody" -> requestBodyJson(requestBody)
     }
     if (operation.tags.nonEmpty) {
-      fields += "tags" -> ujson.Arr(operation.tags.map(tag => ujson.Str(tag.name)): _*)
+      fields += "tags" -> ujson.Arr(
+        operation.tags.map(tag => ujson.Str(tag.name)): _*
+      )
     }
     if (operation.security.nonEmpty) {
       fields += "security" -> ujson.Arr(
@@ -339,10 +342,12 @@ object OpenApi {
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
           "info" -> infoJson(openApi.info),
-          "paths" -> pathsJson(openApi.paths),
+          "paths" -> pathsJson(openApi.paths)
         )
       if (openApi.tags.nonEmpty) {
-       fields += "tags" -> ujson.Arr(openApi.tags.map(tagJson): _*)
+        fields += "tags" -> new ujson.Arr(
+          openApi.tags.map(tag => tagJson(tag)).to(mutable.ArrayBuffer)
+        )
       }
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)
@@ -350,21 +355,32 @@ object OpenApi {
       new ujson.Obj(fields)
     }
 
-  private def extractTags(paths: Map[String, PathItem]): List[Tag] = {
-    val allTags = paths.flatMap { case (_, pathItem) =>
-      pathItem.operations.map { case (_, operation) =>
-        operation.tags
-      }
+  private def extractTags(paths: Map[String, PathItem]): Set[Tag] = {
+    val allTags = paths.flatMap {
+      case (_, pathItem) =>
+        pathItem.operations.map {
+          case (_, operation) =>
+            operation.tags
+        }
     }.flatten
 
     val tagsByName = allTags.groupBy(_.name)
-    tagsByName.foreach { case (_, listOfTags) =>
-      val set = listOfTags.toSet
-      if (set.size > 1) {
-        throw new IllegalArgumentException(s"Found tags with the same name but different values: $set")
-      }
+    tagsByName.foreach {
+      case (_, listOfTags) =>
+        val set = listOfTags.toSet
+        if (set.size > 1) {
+          throw new IllegalArgumentException(
+            s"Found tags with the same name but different values: $set"
+          )
+        }
     }
-    allTags.filter(tag => tag.description.nonEmpty || tag.externalDocs.nonEmpty).toSet.toList
+
+    // Note that tags without any additional information will still be shown. However there is no
+    // reason to add these tags to the root since tags with only names can and will be defined
+    // at the moment they will be used in the endpoint descriptions themselves.
+    allTags
+      .filter(tag => tag.description.nonEmpty || tag.externalDocs.nonEmpty)
+      .toSet
   }
 
   implicit val stringEncoder: Encoder[OpenApi, String] =

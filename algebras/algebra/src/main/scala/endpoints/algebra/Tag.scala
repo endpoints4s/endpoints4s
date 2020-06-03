@@ -2,11 +2,14 @@ package endpoints.algebra
 
 import endpoints.Hashing
 
-class Tag private (
+/**
+  * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#tagObject]]
+  */
+final class Tag private (
     val name: String,
     val description: Option[String],
     val externalDocs: Option[ExternalDocumentationObject]
-) {
+) extends Serializable {
 
   override def toString =
     s"Tag($name, $description, $externalDocs)"
@@ -40,16 +43,21 @@ class Tag private (
 
 object Tag {
 
-  def apply(
-      name: String
-  ) = new Tag(name, None, None)
+  /**
+    * Creates a new Tag without a description and external documentation object.  Use
+    * Tag(..).withDescription(..).withExternalDocs(..) to add those attributes.
+    */
+  def apply(name: String) = new Tag(name, None, None)
 
 }
 
-class ExternalDocumentationObject private (
+/**
+  * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#externalDocumentationObject]]
+  */
+final class ExternalDocumentationObject private (
     val url: String,
     val description: Option[String]
-) {
+) extends Serializable {
 
   override def toString: String =
     s"ExternalDocumentationObject($url, $description)"
@@ -75,7 +83,9 @@ class ExternalDocumentationObject private (
 
 object ExternalDocumentationObject {
 
-  def apply(
-      url: String
-  ) = new ExternalDocumentationObject(url, None)
+  /**
+    * This creates an ExternalDocumentationObject without a description. Use
+    * ExternalDocumentationObject(..).withDescription(..) to add a description.
+    */
+  def apply(url: String) = new ExternalDocumentationObject(url, None)
 }
