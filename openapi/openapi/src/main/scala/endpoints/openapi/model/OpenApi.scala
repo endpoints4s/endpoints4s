@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 /**
   * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
-  * @throws java.lang.IllegalArgumentException on creation if the tags are inconsistent with each other.
+  * @throws java.lang.IllegalArgumentException on creation if several tags have the same name but not the same other attributes.
   */
 final class OpenApi private (
     val info: Info,
