@@ -68,7 +68,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   final class EndpointDocs private (
       val summary: Documentation,
       val description: Documentation,
-      val tags: List[String],
+      val tags: List[Tag],
       val callbacks: Map[String, CallbacksDocs],
       val deprecated: Boolean
   ) extends Serializable {
@@ -93,7 +93,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     private[this] def copy(
         summary: Documentation = summary,
         description: Documentation = description,
-        tags: List[String] = tags,
+        tags: List[Tag] = tags,
         callbacks: Map[String, CallbacksDocs] = callbacks,
         deprecated: Boolean = deprecated
     ): EndpointDocs =
@@ -105,7 +105,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     def withDescription(description: Documentation): EndpointDocs =
       copy(description = description)
 
-    def withTags(tags: List[String]): EndpointDocs =
+    def withTags(tags: List[Tag]): EndpointDocs =
       copy(tags = tags)
 
     def withCallbacks(callbacks: Map[String, CallbacksDocs]): EndpointDocs =
@@ -143,7 +143,13 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         callbacks: Map[String, CallbacksDocs] = Map.empty,
         deprecated: Boolean = false
     ): EndpointDocs =
-      new EndpointDocs(summary, description, tags, callbacks, deprecated)
+      new EndpointDocs(
+        summary,
+        description,
+        tags.map(Tag(_)),
+        callbacks,
+        deprecated
+      )
 
   }
 

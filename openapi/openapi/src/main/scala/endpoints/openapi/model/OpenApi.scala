@@ -3,7 +3,7 @@ package endpoints.openapi.model
 import java.io.Serializable
 
 import endpoints.Hashing
-import endpoints.algebra.Encoder
+import endpoints.algebra.{Encoder, ExternalDocumentationObject, Tag}
 
 import scala.collection.mutable
 
@@ -239,7 +239,7 @@ object OpenApi {
       fields += "requestBody" -> requestBodyJson(requestBody)
     }
     if (operation.tags.nonEmpty) {
-      fields += "tags" -> ujson.Arr(operation.tags.map(ujson.Str): _*)
+      fields += "tags" -> ujson.Arr(operation.tags.map(tagJson): _*)
     }
     if (operation.security.nonEmpty) {
       fields += "security" -> ujson.Arr(
@@ -285,6 +285,36 @@ object OpenApi {
     body.description.foreach { description =>
       fields += "description" -> ujson.Str(description)
     }
+    new ujson.Obj(fields)
+  }
+
+  private def tagJson(tag: Tag): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] =
+      mutable.LinkedHashMap(
+        "name" -> ujson.Str(tag.name)
+      )
+
+    if (tag.description.nonEmpty) {
+      fields += "description" -> tag.description.get
+    }
+    if (tag.externalDocs.nonEmpty) {
+      fields += "externalDocs" -> externalDocumentationObjectJson(
+        tag.externalDocs.get
+      )
+    }
+    new ujson.Obj(fields)
+  }
+
+  private def externalDocumentationObjectJson(
+      externalDoc: ExternalDocumentationObject
+  ): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] =
+      mutable.LinkedHashMap(
+        "url" -> ujson.Str(externalDoc.url)
+      )
+
+    if (externalDoc.description.nonEmpty)
+      fields += "description" -> externalDoc.description.get
     new ujson.Obj(fields)
   }
 
@@ -441,7 +471,7 @@ final class Operation private (
     val parameters: List[Parameter],
     val requestBody: Option[RequestBody],
     val responses: Map[String, Response],
-    val tags: List[String],
+    val tags: List[Tag],
     val security: List[SecurityRequirement],
     val callbacks: Map[String, Map[String, PathItem]],
     val deprecated: Boolean
@@ -477,7 +507,7 @@ final class Operation private (
       parameters: List[Parameter] = parameters,
       requestBody: Option[RequestBody] = requestBody,
       responses: Map[String, Response] = responses,
-      tags: List[String] = tags,
+      tags: List[Tag] = tags,
       security: List[SecurityRequirement] = security,
       callbacks: Map[String, Map[String, PathItem]] = callbacks,
       deprecated: Boolean = deprecated
@@ -509,7 +539,7 @@ final class Operation private (
   def withResponses(responses: Map[String, Response]): Operation =
     copy(responses = responses)
 
-  def withTags(tags: List[String]): Operation =
+  def withTags(tags: List[Tag]): Operation =
     copy(tags = tags)
 
   def withSecurity(security: List[SecurityRequirement]): Operation =
@@ -530,7 +560,7 @@ object Operation {
       parameters: List[Parameter],
       requestBody: Option[RequestBody],
       responses: Map[String, Response],
-      tags: List[String],
+      tags: List[Tag],
       security: List[SecurityRequirement],
       callbacks: Map[String, Map[String, PathItem]],
       deprecated: Boolean
@@ -1380,8 +1410,10 @@ object Schema {
     ) = new Reference(name, original, description)
 
     def withName(name: String): Reference = copy(name = name)
+
     def withOriginal(original: Option[Schema]): Reference =
       copy(original = original)
+
     def withDescription(description: Option[String]): Reference =
       copy(description = description)
 

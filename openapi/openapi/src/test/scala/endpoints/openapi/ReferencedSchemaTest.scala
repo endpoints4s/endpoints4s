@@ -2,6 +2,7 @@ package endpoints.openapi
 
 import java.util.UUID
 
+import endpoints.algebra.Tag
 import endpoints.generic.discriminator
 import endpoints.openapi.model._
 import endpoints.{algebra, generic, openapi}
@@ -60,7 +61,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     val listBooks = endpoint(
       get(path / "books"),
       ok(jsonResponse[List[Book]], Some("Books list")),
-      docs = EndpointDocs().withTags(List("Books"))
+      docs = EndpointDocs().withTags(List(Tag("Books")))
     )
 
     val postBook =
@@ -70,7 +71,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         ok(jsonResponse(Enum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs().withTags(List("Books"))
+        endpointDocs = EndpointDocs().withTags(List(Tag("Books")))
       )
   }
 
@@ -123,7 +124,9 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          }
         |        },
         |        "tags" : [
-        |          "Books"
+        |          {
+        |            "name": "Books"
+        |          }
         |        ]
         |      },
         |      "post" : {
@@ -171,7 +174,9 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          }
         |        },
         |        "tags" : [
-        |          "Books"
+        |          {
+        |            "name": "Books"
+        |          }
         |        ],
         |        "security" : [
         |          {

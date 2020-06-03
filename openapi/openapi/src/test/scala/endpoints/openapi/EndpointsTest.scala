@@ -1,6 +1,7 @@
 package endpoints.openapi
 
 import endpoints.algebra
+import endpoints.algebra.Tag
 import org.scalatest.OptionValues
 import endpoints.openapi.model._
 import org.scalatest.matchers.should.Matchers
@@ -185,17 +186,17 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       Fixtures.documentation
         .paths("/foo")
         .operations("get")
-        .tags shouldEqual List("foo")
+        .tags shouldEqual List(Tag("foo"))
       Fixtures.documentation
         .paths("/foo")
         .operations("post")
-        .tags shouldEqual List("bar", "bxx")
+        .tags shouldEqual List("bar", "bxx").map(Tag(_))
       Fixtures.documentation.paths
         .find(_._1.startsWith("/baz"))
         .get
         ._2
         .operations("get")
-        .tags shouldEqual List("baz", "bxx")
+        .tags shouldEqual List("baz", "bxx").map(Tag(_))
     }
   }
 
@@ -295,19 +296,19 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val foo = endpoint(
     get(path / "foo"),
     ok(emptyResponse, Some("Foo response")),
-    docs = EndpointDocs().withTags(List("foo"))
+    docs = EndpointDocs().withTags(List(Tag("foo")))
   )
 
   val bar = endpoint(
     post(path / "foo", emptyRequest),
     ok(emptyResponse, Some("Bar response")),
-    docs = EndpointDocs().withTags(List("bar", "bxx"))
+    docs = EndpointDocs().withTags(List("bar", "bxx").map(Tag(_)))
   )
 
   val baz = endpoint(
     get(path / "baz" / segment[Int]("quux")),
     ok(emptyResponse, Some("Baz response")),
-    docs = EndpointDocs().withTags(List("baz", "bxx"))
+    docs = EndpointDocs().withTags(List("baz", "bxx").map(Tag(_)))
   )
 
   val textRequestEndp = endpoint(
