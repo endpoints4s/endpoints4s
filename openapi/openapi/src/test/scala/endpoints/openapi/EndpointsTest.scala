@@ -293,6 +293,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
 trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
+  // TODO: extended Tags test
   val foo = endpoint(
     get(path / "foo"),
     ok(emptyResponse, Some("Foo response")),

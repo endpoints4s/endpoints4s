@@ -239,7 +239,7 @@ object OpenApi {
       fields += "requestBody" -> requestBodyJson(requestBody)
     }
     if (operation.tags.nonEmpty) {
-      fields += "tags" -> ujson.Arr(operation.tags.map(tagJson): _*)
+      fields += "tags" -> ujson.Arr(operation.tags.map(tag => ujson.Str(tag.name)): _*)
     }
     if (operation.security.nonEmpty) {
       fields += "security" -> ujson.Arr(
@@ -332,17 +332,38 @@ object OpenApi {
 
   private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
     openApi => {
+      val tags = extractTags(openApi.paths)
       val fields: mutable.LinkedHashMap[String, ujson.Value] =
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
           "info" -> infoJson(openApi.info),
-          "paths" -> pathsJson(openApi.paths)
+          "paths" -> pathsJson(openApi.paths),
         )
+      if (tags.nonEmpty) {
+       fields += "tags" -> ujson.Arr(tags.map(tagJson): _*)
+      }
       if (openApi.components.schemas.nonEmpty || openApi.components.securitySchemes.nonEmpty) {
         fields += "components" -> componentsJson(openApi.components)
       }
       new ujson.Obj(fields)
     }
+
+  private def extractTags(paths: Map[String, PathItem]): List[Tag] = {
+    val allTags = paths.flatMap { case (_, pathItem) =>
+      pathItem.operations.map { case (_, operation) =>
+        operation.tags
+      }
+    }.flatten
+
+    val tagsByName = allTags.groupBy(_.name)
+    tagsByName.foreach { case (_, listOfTags) =>
+      val set = listOfTags.toSet
+      if (set.size > 1) {
+        throw new IllegalArgumentException(s"Found tags with the same name but different values: $set")
+      }
+    }
+    allTags.filter(tag => tag.description.nonEmpty || tag.externalDocs.nonEmpty).toSet.toList
+  }
 
   implicit val stringEncoder: Encoder[OpenApi, String] =
     openApi =>
