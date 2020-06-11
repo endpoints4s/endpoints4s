@@ -130,11 +130,8 @@ val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
     .jvmSettings(coverageEnabled := true)
     .dependsOnLocalCrossProjects("algebra", "json-schema-generic")
 
@@ -145,9 +142,8 @@ val `example-quickstart-client` =
   project
     .in(file("examples/quickstart/client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false,
       noPublishSettings,
       `scala 2.12 to 2.13`
     )
@@ -191,10 +187,7 @@ val `example-basic-shared` = {
       }.taskValue,
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(
       coverageEnabled := false, // TODO Enable coverage when we add more tests
       (resourceGenerators in Compile) += Def.task {
@@ -218,11 +211,10 @@ val `example-basic-client` =
   project
     .in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false,
       scalaJSUseMainModuleInitializer := true,
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
     )
@@ -265,10 +257,7 @@ val `example-cqrs-public-endpoints` =
     .crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(coverageEnabled := true)
     .settings(
       libraryDependencies ++= Seq(
@@ -282,55 +271,54 @@ val `example-cqrs-public-endpoints-jvm` = `example-cqrs-public-endpoints`.jvm
 val `example-cqrs-public-endpoints-js` = `example-cqrs-public-endpoints`.js
 
 // web-client, *uses* the public endpoints’ definitions
-//val `example-cqrs-web-client` =
-//  project
-//    .in(file("examples/cqrs/web-client"))
-//    .enablePlugins(ScalaJSPlugin)
-//    .settings(
-//      noPublishSettings,
-//      `scala 2.12 to 2.13`,
-//      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-//      coverageEnabled := false,
-//      libraryDependencies ++= Seq(
-//        "in.nvilla" %%% "monadic-html" % "0.4.0",
-//        "org.julienrf" %%% "faithful-cats" % "2.0.0",
-//        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
-//      ),
-//      scalaJSUseMainModuleInitializer := true
-//    )
-//    .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
-//    .dependsOn(`example-cqrs-public-endpoints-js`)
+val `example-cqrs-web-client` =
+  project
+    .in(file("examples/cqrs/web-client"))
+    .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
+    .settings(
+      noPublishSettings,
+      `scala 2.12 to 2.13`,
+      libraryDependencies ++= Seq(
+        "com.raquo" %%% "laminar" % "0.9.1",
+        "org.julienrf" %%% "faithful-cats" % "2.0.0",
+        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+      ),
+      scalaJSUseMainModuleInitializer := true
+    )
+    .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
+    .dependsOn(`example-cqrs-public-endpoints-js`)
 
 // public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
-//val `example-cqrs-public-server` =
-//  project
-//    .in(file("examples/cqrs/public-server"))
-//    .settings(
-//      noPublishSettings,
-//      `scala 2.12 to 2.13`,
-//      unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile))
-//        .map(_.data)
-//        .value,
-//      (sourceGenerators in Compile) += Def
-//        .task {
-//          assets.AssetsTasks.generateDigests(
-//            baseDirectory =
-//              (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
-//            targetDirectory = (sourceManaged in Compile).value,
-//            generatedObjectName = "BootstrapDigests",
-//            generatedPackage = Some("cqrs.publicserver"),
-//            assetsPath = identity
-//          )
-//        }
-//        .dependsOn(fastOptJS in Compile in `example-cqrs-web-client`)
-//        .taskValue
-//    )
-//    .dependsOn(`play-server-circe`, `play-client`, `openapi-jvm`)
-//    .dependsOn(
-//      `example-cqrs-public-endpoints-jvm`,
-//      `example-cqrs-commands-endpoints`,
-//      `example-cqrs-queries-endpoints`
-//    )
+val `example-cqrs-public-server` =
+  project
+    .in(file("examples/cqrs/public-server"))
+    .settings(
+      noPublishSettings,
+      `scala 2.12 to 2.13`,
+      unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile))
+        .map(_.data)
+        .value,
+      (sourceGenerators in Compile) += Def
+        .task {
+          assets.AssetsTasks.generateDigests(
+            baseDirectory =
+              (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
+            targetDirectory = (sourceManaged in Compile).value,
+            generatedObjectName = "BootstrapDigests",
+            generatedPackage = Some("cqrs.publicserver"),
+            assetsPath = identity
+          )
+        }
+        .dependsOn(fastOptJS in Compile in `example-cqrs-web-client`)
+        .taskValue
+    )
+    .dependsOn(`play-server-circe`, `play-client`, `openapi-jvm`)
+    .dependsOn(
+      `example-cqrs-public-endpoints-jvm`,
+      `example-cqrs-commands-endpoints`,
+      `example-cqrs-queries-endpoints`
+    )
 
 // commands endpoints definitions
 lazy val `example-cqrs-commands-endpoints` =
@@ -383,22 +371,22 @@ val `example-cqrs-queries` =
     )
 
 // this one exists only for the sake of simplifying the infrastructure: it runs all the HTTP services
-//val `example-cqrs` =
-//  project
-//    .in(file("examples/cqrs/infra"))
-//    .settings(noPublishSettings, `scala 2.12 to 2.13`)
-//    .settings(
-//      cancelable in Global := true,
-//      libraryDependencies ++= Seq(
-//        "org.scalacheck" %% "scalacheck" % "1.14.3" % Test,
-//        scalaTestDependency
-//      )
-//    )
-//    .dependsOn(
-//      `example-cqrs-queries`,
-//      `example-cqrs-commands`,
-//      `example-cqrs-public-server`
-//    )
+val `example-cqrs` =
+  project
+    .in(file("examples/cqrs/infra"))
+    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(
+      cancelable in Global := true,
+      libraryDependencies ++= Seq(
+        "org.scalacheck" %% "scalacheck" % "1.14.3" % Test,
+        scalaTestDependency
+      )
+    )
+    .dependsOn(
+      `example-cqrs-queries`,
+      `example-cqrs-commands`,
+      `example-cqrs-public-server`
+    )
 
 val `example-documented` =
   project
