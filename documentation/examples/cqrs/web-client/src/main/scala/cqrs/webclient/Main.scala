@@ -70,10 +70,12 @@ object Main {
     val app = article(
       h1("Meters"),
       p(
-        input(`type` := "text",
-              placeholder := "New meter name",
-              idAttr := newMeterId,
-              required := true),
+        input(
+          `type` := "text",
+          placeholder := "New meter name",
+          idAttr := newMeterId,
+          required := true
+        ),
         button(onClick.map(_ => ()) --> onNewMeterClicked, "Create")
       ),
       child <-- metersVar.signal.map { meters =>
@@ -100,9 +102,11 @@ object Main {
                             )
                         }
                       ),
-                      input(placeholder := "New Value",
-                            required := true,
-                            idAttr := s"value-${meter.id.toString}"),
+                      input(
+                        placeholder := "New Value",
+                        required := true,
+                        idAttr := s"value-${meter.id.toString}"
+                      ),
                       button(
                         onClick.mapTo(meter) --> onAddValueClicked,
                         "Add"
