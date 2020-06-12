@@ -46,7 +46,7 @@ object Main {
       }
     }
 
-    def onAddValueClicked: Observer[Meter] = Observer { meter =>
+    val onAddValueClicked: Observer[Meter] = Observer { meter =>
       val input = dom.document
         .getElementById(s"value-${meter.id.toString}")
         .asInstanceOf[HTMLInputElement]
@@ -71,19 +71,19 @@ object Main {
       h1("Meters"),
       p(
         input(
-          `type` := "text",
+          tpe := "text",
           placeholder := "New meter name",
           idAttr := newMeterId,
           required := true
         ),
-        button(onClick.map(_ => ()) --> onNewMeterClicked, "Create")
+        button(onClick.mapTo(()) --> onNewMeterClicked, "Create")
       ),
       child <-- metersVar.signal.map { meters =>
         if (meters.isEmpty) {
           p("No meters yet!")
         } else {
           div(
-            meters.toSeq.map {
+            meters.toSeq.sortBy(_._2.label).map {
               case (_, meter) =>
                 section(
                   h2(meter.label),
@@ -114,7 +114,6 @@ object Main {
                     )
                   )
                 )
-
             }
           )
         }
