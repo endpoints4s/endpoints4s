@@ -1,6 +1,5 @@
 import sbt._
 import sbt.Keys._
-
 import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 
@@ -111,7 +110,8 @@ object EndpointsSettings {
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =
-    libraryDependencies += scalaTestDependency.withDottyCompat(scalaVersion.value)
+    libraryDependencies += scalaTestDependency.withDottyCompat(
+      scalaVersion.value)
   val macroParadiseDependency = Seq(
     scalacOptions in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {

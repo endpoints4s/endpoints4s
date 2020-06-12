@@ -22,6 +22,7 @@ val algebra =
     .dependsOnLocalCrossProjectsWithScope(
       "json-schema" -> "test->test;compile->compile"
     )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
@@ -40,6 +41,7 @@ val `algebra-circe` =
       )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
@@ -55,6 +57,7 @@ val `algebra-playjson` =
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-playjson-js` = `algebra-playjson`.js
 val `algebra-playjson-jvm` = `algebra-playjson`.jvm

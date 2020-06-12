@@ -19,6 +19,7 @@ lazy val openapi =
       "json-schema" -> "test->test;compile->compile",
       "json-schema-generic" -> "test->test"
     )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 lazy val `openapi-js` = openapi.js
 lazy val `openapi-jvm` = openapi.jvm
