@@ -285,6 +285,16 @@ trait EndpointsWithCustomErrors
         .rethrowT
         .map(Right(_))
 
+  def choiceRequestEntity[A, B](
+    requestEntityA: RequestEntity[A],
+    requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] =
+    req => {
+      def decodedA = requestEntityA(req).map(_.map(Left(_): Either[A,B]))
+      def decodedB = requestEntityB(req).map(_.map(Right(_): Either[A,B]))
+      decodedA.orElse(decodedB)
+    }
+
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
       method: Method,
       url: Url[UrlP],

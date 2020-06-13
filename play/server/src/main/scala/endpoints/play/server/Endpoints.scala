@@ -2,15 +2,8 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import play.api.http.{HttpEntity, Writeable}
-import endpoints.{
-  Invalid,
-  PartialInvariantFunctor,
-  Semigroupal,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints.{Invalid, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import play.api.http.Status.UNSUPPORTED_MEDIA_TYPE
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{Handler => PlayHandler, _}
@@ -125,10 +118,10 @@ trait EndpointsWithCustomErrors
   trait Request[A] {
 
     /**
-      * Extracts a `BodyParser[A]` from an incoming request. That is
+      * Extracts a `RequestEntity[A]` from an incoming request. That is
       * a way to extract an `A` from an incoming request.
       */
-    def decode: RequestExtractor[BodyParser[A]]
+    def decode: RequestExtractor[RequestEntity[A]]
 
     /**
       * Reverse routing.
@@ -147,10 +140,11 @@ trait EndpointsWithCustomErrors
           g: B => A
       ): Request[B] =
         new Request[B] {
-          def decode: RequestExtractor[BodyParser[B]] =
+          def decode: RequestExtractor[RequestEntity[B]] =
             functorRequestExtractor.fmap(
               fa.decode,
-              (bodyParser: BodyParser[A]) => bodyParser.xmapPartial(f)(g)
+              (requestEntity: RequestEntity[A]) =>
+                requestEntity.xmapPartial(f)(g)
             )
           def encode(b: B): Call = fa.encode(g(b))
         }
@@ -161,7 +155,7 @@ trait EndpointsWithCustomErrors
       def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] = {
         val transformedRequest = requestPartialInvariantFunctor.xmap(m, f1, f2)
         new Request[B] {
-          def decode: RequestExtractor[BodyParser[B]] =
+          def decode: RequestExtractor[RequestEntity[B]] =
             transformedRequest.decode
           def encode(b: B): Call = transformedRequest.encode(b)
         }
@@ -197,13 +191,18 @@ trait EndpointsWithCustomErrors
       * @param toB Function defining how to get a `BodyParser[B]` from the extracted `A`
       * @param toA Function defining how to get back an `A` from the `B`.
       */
-    def toRequest[B](toB: A => BodyParser[B])(toA: B => A): Request[B] =
+    def toRequest[B](toB: A => RequestEntity[B])(toA: B => A): Request[B] =
       new Request[B] {
-        def decode: RequestExtractor[BodyParser[B]] =
+        def decode: RequestExtractor[RequestEntity[B]] =
           request =>
             parent.decode(request).map {
               case inv: Invalid =>
-                BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
+                _ =>
+                  Some(
+                    BodyParser(_ =>
+                      Accumulator.done(Left(handleClientErrors(inv)))
+                    )
+                  )
               case Valid(a) => toB(a)
             }
         def encode(b: B): Call = parent.encode(toA(b))
@@ -211,27 +210,47 @@ trait EndpointsWithCustomErrors
   }
 
   /** Decodes a request entity */
-  type RequestEntity[A] = BodyParser[A]
+  type RequestEntity[A] = RequestHeader => Option[BodyParser[A]]
 
-  lazy val emptyRequest: BodyParser[Unit] =
-    BodyParser(_ => Accumulator.done(Right(())))
+  lazy val emptyRequest: RequestEntity[Unit] =
+    _ => Some(BodyParser(_ => Accumulator.done(Right(()))))
 
-  lazy val textRequest: BodyParser[String] = playComponents.playBodyParsers.text
+  lazy val textRequest: RequestEntity[String] =
+    headers => {
+      if (headers.contentType.exists(_.equalsIgnoreCase("text/plain"))) {
+        Some(playComponents.playBodyParsers.tolerantText)
+      } else {
+        None
+      }
+    }
+
+  def choiceRequestEntity[A, B](
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] =
+    headers => {
+      val maybeBodyParserA = requestEntityA(headers).map(_.map(Left(_)))
+      val maybeBodyBarserB = requestEntityB(headers).map(_.map(Right(_)))
+      maybeBodyParserA.orElse(maybeBodyBarserB)
+    }
 
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
-          f: BodyParser[From],
+          f: RequestEntity[From],
           map: From => Validated[To],
           contramap: To => From
-      ): BodyParser[To] =
-        f.validate(from =>
-          map(from) match {
-            case Valid(value)     => Right(value)
-            case invalid: Invalid => Left(handleClientErrors(invalid))
-          }
-        )
+      ): RequestEntity[To] =
+        headers =>
+          f(headers).map(
+            _.validate(from =>
+              map(from) match {
+                case Valid(value)     => Right(value)
+                case invalid: Invalid => Left(handleClientErrors(invalid))
+              }
+            )
+          )
     }
 
   protected def extractMethodUrlAndHeaders[A, B](
@@ -269,7 +288,11 @@ trait EndpointsWithCustomErrors
   ): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
       .toRequest {
-        case (a, c) => entity.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
+        case (a, c) =>
+          headers =>
+            entity(headers).map(
+              _.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
+            )
       } { abc =>
         val (ab, c) = tuplerABC.unapply(abc)
         val (a, _) = tuplerAB.unapply(ab)
@@ -442,16 +465,22 @@ trait EndpointsWithCustomErrors
       try {
         endpoint.request
           .decode(header)
-          .map { bodyParser =>
+          .map { requestEntity =>
             EssentialAction { headers =>
               try {
-                val action =
-                  playComponents.defaultActionBuilder.async(bodyParser) {
-                    request =>
-                      service(request.body).map { b => endpoint.response(b) }
-                  }
-                action(headers).recover {
-                  case NonFatal(t) => handleServerError(t)
+                requestEntity(headers) match {
+                  case Some(bodyParser) =>
+                    val action =
+                      playComponents.defaultActionBuilder.async(bodyParser) {
+                        request =>
+                          service(request.body).map { b => endpoint.response(b) }
+                      }
+                    action(headers).recover {
+                      case NonFatal(t) => handleServerError(t)
+                    }
+                  // Unable to handle request entity
+                  case None =>
+                    Accumulator.done(playComponents.httpErrorHandler.onClientError(headers, UNSUPPORTED_MEDIA_TYPE))
                 }
               } catch {
                 case NonFatal(t) => Accumulator.done(handleServerError(t))

@@ -59,18 +59,19 @@ trait BasicAuthentication
       url,
       headers ++ basicAuthenticationHeader
     ).toRequest[Out] {
-      case (_, (_, None)) =>
-        BodyParser(_ =>
-          Accumulator.done(
-            Left(
-              Results.Unauthorized.withHeaders(
-                HeaderNames.WWW_AUTHENTICATE -> "Basic realm=Realm"
+      case (_, (_, None /* credentials */)) =>
+        _ =>
+          Some(BodyParser(_ =>
+            Accumulator.done(
+              Left(
+                Results.Unauthorized.withHeaders(
+                  HeaderNames.WWW_AUTHENTICATE -> "Basic realm=Realm"
+                )
               )
             )
-          )
-        )
+          ))
       case (u, (h, Some(credentials))) =>
-        entity.map(e => tuplerUEHC(tuplerUE(u, e), tuplerHC(h, credentials)))
+        headers => entity(headers).map(_.map(e => tuplerUEHC(tuplerUE(u, e), tuplerHC(h, credentials))))
     } { out =>
       val (ue, hc) = tuplerUEHC.unapply(out)
       val (u, _) = tuplerUE.unapply(ue)

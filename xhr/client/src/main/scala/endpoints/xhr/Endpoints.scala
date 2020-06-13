@@ -132,6 +132,12 @@ trait EndpointsWithCustomErrors
     body
   }
 
+  def choiceRequestEntity[A, B](
+    requestEntityA: RequestEntity[A],
+    requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] = (eitherAB, xhr) =>
+    eitherAB.fold(requestEntityA(_, xhr), requestEntityB(_, xhr))
+
   implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

@@ -105,6 +105,12 @@ trait EndpointsWithCustomErrors
   override def textRequest: RequestEntity[String] =
     (value, req) => req.withEntity(value)
 
+  override def choiceRequestEntity[A, B](
+    requestEntityA: RequestEntity[A],
+    requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] = (eitherAB, req) =>
+    eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+
   type Request[A] = A => Effect[Http4sRequest[Effect]]
 
   implicit def requestPartialInvariantFunctor

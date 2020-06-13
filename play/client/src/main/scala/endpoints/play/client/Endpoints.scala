@@ -123,6 +123,12 @@ trait EndpointsWithCustomErrors
   lazy val textRequest: (String, WSRequest) => WSRequest =
     (body, req) => req.withBody(body)
 
+  def choiceRequestEntity[A, B](
+    requestEntityA: RequestEntity[A],
+    requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] = (eitherAB, req) =>
+    eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+
   implicit lazy val requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

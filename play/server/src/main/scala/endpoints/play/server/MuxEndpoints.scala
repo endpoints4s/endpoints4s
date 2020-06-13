@@ -2,6 +2,7 @@ package endpoints.play.server
 
 import endpoints.{Invalid, Valid, algebra}
 import endpoints.algebra.{Decoder, Encoder, MuxRequest}
+import play.api.http.Status.UNSUPPORTED_MEDIA_TYPE
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{EssentialAction, Result}
 
@@ -46,23 +47,29 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
     ): ToPlayHandler =
       header =>
         try {
-          request.decode(header).map { bodyParser =>
+          request.decode(header).map { requestEntity =>
             EssentialAction { headers =>
               try {
-                val action =
-                  playComponents.defaultActionBuilder.async(bodyParser) {
-                    request =>
-                      decoder.decode(request.body) match {
-                        case Valid(value) =>
-                          handler(
-                            value.asInstanceOf[Req { type Response = Resp }]
-                          ).map(resp => response(encoder.encode(resp)))
-                        case inv: Invalid =>
-                          Future.successful(handleClientErrors(inv))
+                requestEntity(headers) match {
+                  case Some(bodyParser) =>
+                    val action =
+                      playComponents.defaultActionBuilder.async(bodyParser) {
+                        request =>
+                          decoder.decode(request.body) match {
+                            case Valid(value) =>
+                              handler(
+                                value.asInstanceOf[Req { type Response = Resp }]
+                              ).map(resp => response(encoder.encode(resp)))
+                            case inv: Invalid =>
+                              Future.successful(handleClientErrors(inv))
+                          }
                       }
-                  }
-                action(headers).recover {
-                  case NonFatal(t) => handleServerError(t)
+                    action(headers).recover {
+                      case NonFatal(t) => handleServerError(t)
+                    }
+                  // Unable to handle request entity
+                  case None =>
+                    Accumulator.done(playComponents.httpErrorHandler.onClientError(headers, UNSUPPORTED_MEDIA_TYPE))
                 }
               } catch {
                 case NonFatal(t) => Accumulator.done(handleServerError(t))

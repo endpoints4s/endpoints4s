@@ -125,6 +125,29 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     */
   def textRequest: RequestEntity[String]
 
+  def choiceRequestEntity[A, B](
+    requestEntityA: RequestEntity[A],
+    requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]]
+
+  implicit class RequestEntitySyntax[A](requestEntity: RequestEntity[A]) {
+
+    /**
+      * If the entity does not seem enc/decodable as an [[A]], try decoding as a [[B]] using otherRequestEntity
+      * @note If the Entity may be enc/decodable as an [[A]], it will be. This is particularly important when
+      *       [[requestEntity]] is akka-server's [[textRequest]], which will match and decode any text-serializable
+      *       entity, regardless of Content-Type
+      * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+      *       [[endpoints.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+      * @see [[SumTypedRequestEntity#choiceRequestEntity]]
+      * @param otherRequestEntity A [[RequestEntity]] to use to enc/decode a [[B]]
+      * @tparam B what to attempt as an enc/decoding target if not an [[A]]
+      * @return a [[RequestEntity]][Either[A, B]]
+      */
+    def orElse[B](otherRequestEntity: RequestEntity[B]): RequestEntity[Either[A, B]] =
+      choiceRequestEntity(requestEntity, otherRequestEntity)
+  }
+
   /**
     * Request for given parameters
     *

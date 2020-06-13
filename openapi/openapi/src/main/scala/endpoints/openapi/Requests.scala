@@ -46,6 +46,12 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
     "text/plain" -> MediaType(Some(Schema.simpleString))
   )
 
+  def choiceRequestEntity[A, B](
+    requestEntityA: Map[String, MediaType],
+    requestEntityB: Map[String, MediaType]
+  ): Map[String, MediaType] =
+    requestEntityB ++ requestEntityA
+
   def request[A, B, C, AB, Out](
       method: Method,
       url: Url[A],

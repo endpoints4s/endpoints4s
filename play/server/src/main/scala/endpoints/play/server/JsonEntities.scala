@@ -4,9 +4,8 @@ import akka.util.ByteString
 import endpoints.algebra
 import endpoints.algebra.{Decoder, Encoder, Codec}
 import endpoints.Invalid
-import play.api.mvc.{BodyParser, RequestHeader}
-import play.api.http.{ContentTypes, Status, Writeable}
-import play.api.libs.streams.Accumulator
+import play.api.mvc.RequestHeader
+import play.api.http.{ContentTypes, Writeable}
 
 /**
   * Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests
@@ -72,8 +71,8 @@ private object JsonEntities {
 
   def decodeRequest[A](
       endpoints: EndpointsWithCustomErrors
-  )(decoder: Decoder[String, A]): BodyParser[A] = new BodyParser[A] {
-    def apply(request: RequestHeader) = {
+  )(decoder: Decoder[String, A]): endpoints.RequestEntity[A] =
+    (request: RequestHeader) => {
       if (request.contentType.exists(_.equalsIgnoreCase("application/json"))) {
         val decodeJson = (bs: ByteString) =>
           decoder
@@ -82,22 +81,14 @@ private object JsonEntities {
             .left
             .map(errs => endpoints.handleClientErrors(Invalid(errs)))
 
-        endpoints.playComponents.playBodyParsers.byteString
-          .validate(decodeJson)(endpoints.playComponents.executionContext)
-          .apply(request)
+        val bodyParser =
+          endpoints.playComponents.playBodyParsers.byteString
+            .validate(decodeJson)(endpoints.playComponents.executionContext)
+        Some(bodyParser)
       } else {
-        Accumulator.done {
-          endpoints.playComponents.httpErrorHandler
-            .onClientError(
-              request,
-              Status.UNSUPPORTED_MEDIA_TYPE,
-              "Expecting application/json body"
-            )
-            .map(Left(_))(endpoints.playComponents.executionContext)
-        }
+        None
       }
     }
-  }
 
   def encodeResponse[A](encoder: Encoder[A, String]): Writeable[A] =
     Writeable(a => ByteString(encoder.encode(a)), Some(ContentTypes.JSON))
