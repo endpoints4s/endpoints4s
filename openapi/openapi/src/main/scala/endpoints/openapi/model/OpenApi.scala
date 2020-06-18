@@ -227,9 +227,7 @@ object OpenApi {
     val fields = mutable.LinkedHashMap[String, ujson.Value](
       "responses" -> mapJson(operation.responses)(responseJson)
     )
-    operation.id.foreach { id =>
-      fields += "operationId" -> ujson.Str(id)
-    }
+    operation.id.foreach { id => fields += "operationId" -> ujson.Str(id) }
     operation.summary.foreach { summary =>
       fields += "summary" -> ujson.Str(summary)
     }

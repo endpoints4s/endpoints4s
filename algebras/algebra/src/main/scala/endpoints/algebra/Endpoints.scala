@@ -89,7 +89,14 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     }
 
     override def hashCode(): Int =
-      Hashing.hash(operationId, summary, description, tags, callbacks, deprecated)
+      Hashing.hash(
+        operationId,
+        summary,
+        description,
+        tags,
+        callbacks,
+        deprecated
+      )
 
     private[this] def copy(
         operationId: Option[String] = operationId,
@@ -99,7 +106,14 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         callbacks: Map[String, CallbacksDocs] = callbacks,
         deprecated: Boolean = deprecated
     ): EndpointDocs =
-      new EndpointDocs(operationId, summary, description, tags, callbacks, deprecated)
+      new EndpointDocs(
+        operationId,
+        summary,
+        description,
+        tags,
+        callbacks,
+        deprecated
+      )
 
     def withOperationId(id: String): EndpointDocs =
       copy(operationId = Some(id))
