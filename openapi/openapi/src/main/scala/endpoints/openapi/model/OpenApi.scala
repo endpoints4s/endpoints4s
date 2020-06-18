@@ -227,6 +227,9 @@ object OpenApi {
     val fields = mutable.LinkedHashMap[String, ujson.Value](
       "responses" -> mapJson(operation.responses)(responseJson)
     )
+    operation.id.foreach { id =>
+      fields += "operationId" -> ujson.Str(id)
+    }
     operation.summary.foreach { summary =>
       fields += "summary" -> ujson.Str(summary)
     }
@@ -503,6 +506,7 @@ object Components {
 }
 
 final class Operation private (
+    val id: Option[String],
     val summary: Option[String],
     val description: Option[String],
     val parameters: List[Parameter],
@@ -515,18 +519,19 @@ final class Operation private (
 ) extends Serializable {
 
   override def toString: String =
-    s"Operation($summary, $description, $parameters, $requestBody, $responses, $tags, $security, $callbacks, $deprecated)"
+    s"Operation($id, $summary, $description, $parameters, $requestBody, $responses, $tags, $security, $callbacks, $deprecated)"
 
   override def equals(other: Any): Boolean =
     other match {
       case that: Operation =>
-        summary == that.summary && description == that.description && parameters == that.parameters &&
+        id == that.id && summary == that.summary && description == that.description && parameters == that.parameters &&
           requestBody == that.requestBody && responses == that.responses && tags == that.tags &&
           security == that.security && callbacks == that.callbacks && deprecated == that.deprecated
     }
 
   override def hashCode(): Int =
     Hashing.hash(
+      id,
       summary,
       description,
       parameters,
@@ -539,6 +544,7 @@ final class Operation private (
     )
 
   private[this] def copy(
+      id: Option[String] = id,
       summary: Option[String] = summary,
       description: Option[String] = description,
       parameters: List[Parameter] = parameters,
@@ -550,6 +556,7 @@ final class Operation private (
       deprecated: Boolean = deprecated
   ): Operation =
     Operation(
+      id,
       summary,
       description,
       parameters,
@@ -560,6 +567,9 @@ final class Operation private (
       callbacks,
       deprecated
     )
+
+  def withId(id: String): Operation =
+    copy(id = Some(id))
 
   def withSummary(summary: Option[String]): Operation =
     copy(summary = summary)
@@ -592,6 +602,7 @@ final class Operation private (
 object Operation {
 
   def apply(
+      id: Option[String],
       summary: Option[String],
       description: Option[String],
       parameters: List[Parameter],
@@ -603,6 +614,7 @@ object Operation {
       deprecated: Boolean
   ): Operation =
     new Operation(
+      id,
       summary,
       description,
       parameters,
