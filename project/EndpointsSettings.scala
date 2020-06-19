@@ -119,7 +119,7 @@ object EndpointsSettings {
   val http4sVersion = "0.21.4"
   val ujsonVersion = "1.1.0"
 
-  val scalaTestVersion = "3.1.2"
+  val scalaTestVersion = "3.2.0"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =
