@@ -2,7 +2,15 @@ package endpoints.play.server
 
 import endpoints.algebra.Documentation
 import play.api.http.{HttpEntity, Writeable}
-import endpoints.{Invalid, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import endpoints.{
+  Invalid,
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Valid,
+  Validated,
+  algebra
+}
 import play.api.http.Status.UNSUPPORTED_MEDIA_TYPE
 import play.api.libs.functional.InvariantFunctor
 import play.api.libs.streams.Accumulator
@@ -473,14 +481,19 @@ trait EndpointsWithCustomErrors
                     val action =
                       playComponents.defaultActionBuilder.async(bodyParser) {
                         request =>
-                          service(request.body).map { b => endpoint.response(b) }
+                          service(request.body).map { b =>
+                            endpoint.response(b)
+                          }
                       }
                     action(headers).recover {
                       case NonFatal(t) => handleServerError(t)
                     }
                   // Unable to handle request entity
                   case None =>
-                    Accumulator.done(playComponents.httpErrorHandler.onClientError(headers, UNSUPPORTED_MEDIA_TYPE))
+                    Accumulator.done(
+                      playComponents.httpErrorHandler
+                        .onClientError(headers, UNSUPPORTED_MEDIA_TYPE)
+                    )
                 }
               } catch {
                 case NonFatal(t) => Accumulator.done(handleServerError(t))

@@ -47,8 +47,8 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
   )
 
   def choiceRequestEntity[A, B](
-    requestEntityA: Map[String, MediaType],
-    requestEntityB: Map[String, MediaType]
+      requestEntityA: Map[String, MediaType],
+      requestEntityB: Map[String, MediaType]
   ): Map[String, MediaType] =
     requestEntityB ++ requestEntityA
 

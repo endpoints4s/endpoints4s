@@ -24,6 +24,7 @@ class ServerInterpreterTest
     with algebra.server.BasicAuthenticationTestSuite[EndpointsCodecsTestApi]
     with algebra.server.ChunkedJsonEntitiesTestSuite[EndpointsCodecsTestApi]
     with algebra.server.TextEntitiesTestSuite[EndpointsCodecsTestApi]
+    with algebra.server.SumTypedEntitiesTestSuite[EndpointsCodecsTestApi]
     with ScalatestRouteTest {
 
   val serverApi = new EndpointsCodecsTestApi

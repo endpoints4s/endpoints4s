@@ -17,6 +17,7 @@ class TestClient(address: String, wsClient: WSClient)(
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.TextEntitiesTestApi
+    with algebra.SumTypedEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodecs
 
@@ -24,6 +25,7 @@ class EndpointsTest
     extends client.EndpointsTestSuite[TestClient]
     with client.BasicAuthTestSuite[TestClient]
     with client.JsonFromCodecTestSuite[TestClient]
+    with client.SumTypedEntitiesTestSuite[TestClient]
     with client.TextEntitiesTestSuite[TestClient] {
 
   import ExecutionContext.Implicits.global
@@ -42,6 +44,7 @@ class EndpointsTest
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  sumTypedRequestsTestSuite()
   textEntitiesTestSuite()
 
   override def afterAll(): Unit = {

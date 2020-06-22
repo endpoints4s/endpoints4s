@@ -10,6 +10,7 @@ class EndpointsCodecsTestApi
     with algebra.ChunkedJsonEntitiesTestApi
     with algebra.circe.ChunkedJsonEntitiesTestApi
     with algebra.BasicAuthenticationTestApi
+    with algebra.SumTypedEntitiesTestApi
     with JsonEntitiesFromCodecs
     with ChunkedJsonEntities
     with BasicAuthentication

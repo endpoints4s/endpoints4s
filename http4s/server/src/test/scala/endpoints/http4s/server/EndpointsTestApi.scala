@@ -11,3 +11,7 @@ class EndpointsTestApi
     with algebra.BasicAuthenticationTestApi
     with algebra.JsonEntitiesFromSchemasTestApi
     with algebra.TextEntitiesTestApi
+    with algebra.SumTypedEntitiesTestApi {
+
+  implicit def userCodec = userJsonSchema
+}

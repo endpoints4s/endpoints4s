@@ -9,6 +9,7 @@ import endpoints.algebra.server.{
   DecodedUrl,
   EndpointsTestSuite,
   JsonEntitiesFromSchemasTestSuite,
+  SumTypedEntitiesTestSuite,
   TextEntitiesTestSuite
 }
 import org.http4s.server.Router
@@ -22,7 +23,8 @@ class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
-    with TextEntitiesTestSuite[EndpointsTestApi] {
+    with TextEntitiesTestSuite[EndpointsTestApi]
+    with SumTypedEntitiesTestSuite[EndpointsTestApi] {
 
   val serverApi = new EndpointsTestApi()
 

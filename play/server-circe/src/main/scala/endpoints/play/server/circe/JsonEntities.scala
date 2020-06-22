@@ -40,7 +40,10 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
             .left
             .map(Show[ParsingFailure].show)
             .flatMap { json =>
-              CirceDecoder[A].decodeJson(json).left.map(Show[DecodingFailure].show)
+              CirceDecoder[A]
+                .decodeJson(json)
+                .left
+                .map(Show[DecodingFailure].show)
             }
             .left
             .map(error => handleClientErrors(Invalid(error)))

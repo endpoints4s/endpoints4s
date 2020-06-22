@@ -20,13 +20,15 @@ class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
     with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
+    with algebra.SumTypedEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodecs
 
 class Http4sClientEndpointsJsonSchemaTest
     extends client.EndpointsTestSuite[TestJsonSchemaClient[IO]]
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
-    with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]] {
+    with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
+    with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
   implicit val ctx: ContextShift[IO] = IO.contextShift(global)
 

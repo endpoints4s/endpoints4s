@@ -122,8 +122,8 @@ trait EndpointsWithCustomErrors
   }
 
   def choiceRequestEntity[A, B](
-    requestEntityA: Directive1[A],
-    requestEntityB: Directive1[B]
+      requestEntityA: Directive1[A],
+      requestEntityB: Directive1[B]
   ): Directive1[Either[A, B]] = {
     val requestEntityAAsEither = requestEntityA.map(Left(_): Either[A, B])
     val requestEntityBAsEither = requestEntityB.map(Right(_): Either[A, B])

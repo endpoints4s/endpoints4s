@@ -69,7 +69,10 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
                     }
                   // Unable to handle request entity
                   case None =>
-                    Accumulator.done(playComponents.httpErrorHandler.onClientError(headers, UNSUPPORTED_MEDIA_TYPE))
+                    Accumulator.done(
+                      playComponents.httpErrorHandler
+                        .onClientError(headers, UNSUPPORTED_MEDIA_TYPE)
+                    )
                 }
               } catch {
                 case NonFatal(t) => Accumulator.done(handleServerError(t))

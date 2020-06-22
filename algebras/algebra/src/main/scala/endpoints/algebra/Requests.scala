@@ -125,26 +125,38 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     */
   def textRequest: RequestEntity[String]
 
+  /**
+    * Alternative between two possible request entities, differentiated by the
+    * `Content-Type` header
+    *
+    * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+    *       [[endpoints.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+    *
+    * Server interpreters accept either of the request entities
+    * Client interpreters provide one of the two request entities
+    * Documentation interpreters list all possible content types and their entities
+    */
   def choiceRequestEntity[A, B](
-    requestEntityA: RequestEntity[A],
-    requestEntityB: RequestEntity[B]
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]]
 
   implicit class RequestEntitySyntax[A](requestEntity: RequestEntity[A]) {
 
     /**
-      * If the entity does not seem enc/decodable as an [[A]], try decoding as a [[B]] using otherRequestEntity
-      * @note If the Entity may be enc/decodable as an [[A]], it will be. This is particularly important when
-      *       [[requestEntity]] is akka-server's [[textRequest]], which will match and decode any text-serializable
-      *       entity, regardless of Content-Type
+      * Alternative between two possible request entities, differentiated by the
+      * `Content-Type` header
+      *
       * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
       *       [[endpoints.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
-      * @see [[SumTypedRequestEntity#choiceRequestEntity]]
-      * @param otherRequestEntity A [[RequestEntity]] to use to enc/decode a [[B]]
-      * @tparam B what to attempt as an enc/decoding target if not an [[A]]
-      * @return a [[RequestEntity]][Either[A, B]]
+      *
+      * Server interpreters accept either of the request entities
+      * Client interpreters provide one of the two request entities
+      * Documentation interpreters list all possible content types and their entities
       */
-    def orElse[B](otherRequestEntity: RequestEntity[B]): RequestEntity[Either[A, B]] =
+    final def orElse[B](
+        otherRequestEntity: RequestEntity[B]
+    ): RequestEntity[Either[A, B]] =
       choiceRequestEntity(requestEntity, otherRequestEntity)
   }
 

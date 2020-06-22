@@ -135,10 +135,11 @@ trait EndpointsWithCustomErrors
     (body, request) => request.copy(entity = HttpEntity(body))
 
   def choiceRequestEntity[A, B](
-    requestEntityA: RequestEntity[A],
-    requestEntityB: RequestEntity[B]
-  ): RequestEntity[Either[A, B]] = (eitherAB, req) =>
-    eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] =
+    (eitherAB, req) =>
+      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
 
   def request[A, B, C, AB, Out](
       method: Method,

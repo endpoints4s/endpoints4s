@@ -258,7 +258,8 @@ trait ServerAuthentication extends Authentication with server.Endpoints {
     extractMethodUrlAndHeaders(method, url, authenticationTokenRequestHeaders)
       .toRequest[UET] {
         case (_, None) =>
-          _ => Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
+          _ =>
+            Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
         case (u, Some(token)) =>
           hdrs => entity(hdrs).map(_.map(e => tuplerUET(tuplerUE(u, e), token)))
       } { uet =>
