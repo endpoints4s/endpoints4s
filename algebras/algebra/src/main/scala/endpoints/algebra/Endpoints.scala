@@ -59,6 +59,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   ): Endpoint[A, B]
 
   /**
+    * @param operationId A unique identifier which identifies this operation
     * @param summary     Short description
     * @param description Detailed description
     * @param tags        OpenAPI tags
@@ -75,12 +76,13 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   ) extends Serializable {
 
     override def toString =
-      s"EndpointDocs($summary, $description, $tags, $callbacks, $deprecated)"
+      s"EndpointDocs($operationId, $summary, $description, $tags, $callbacks, $deprecated)"
 
     @nowarn("cat=unchecked")
     override def equals(other: Any): Boolean = other match {
       case that: EndpointDocs =>
-        summary == that.summary &&
+        operationId == that.operationId &&
+          summary == that.summary &&
           description == that.description &&
           tags == that.tags &&
           callbacks == that.callbacks &&
@@ -115,8 +117,8 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         deprecated
       )
 
-    def withOperationId(id: String): EndpointDocs =
-      copy(operationId = Some(id))
+    def withOperationId(operationId: Option[String]): EndpointDocs =
+      copy(operationId = operationId)
 
     def withSummary(summary: Documentation): EndpointDocs =
       copy(summary = summary)
@@ -156,7 +158,6 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       "1.0.0"
     )
     def apply(
-        operationId: Option[String] = None,
         summary: Documentation = None,
         description: Documentation = None,
         tags: List[String] = Nil,
@@ -164,7 +165,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         deprecated: Boolean = false
     ): EndpointDocs =
       new EndpointDocs(
-        operationId,
+        None,
         summary,
         description,
         tags.map(Tag(_)),
