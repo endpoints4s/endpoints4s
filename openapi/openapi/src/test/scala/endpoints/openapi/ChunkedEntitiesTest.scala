@@ -13,6 +13,7 @@ class ChunkedEntitiesTest extends AnyWordSpec {
           "get" -> Operation(
             None,
             None,
+            None,
             List(
               Parameter(
                 "file",

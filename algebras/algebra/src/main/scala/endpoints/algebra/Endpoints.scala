@@ -59,6 +59,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   ): Endpoint[A, B]
 
   /**
+    * @param operationId A unique identifier which identifies this operation
     * @param summary     Short description
     * @param description Detailed description
     * @param tags        OpenAPI tags
@@ -66,6 +67,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     * @param deprecated  Indicates whether this endpoint is deprecated or not
     */
   final class EndpointDocs private (
+      val operationId: Option[String],
       val summary: Documentation,
       val description: Documentation,
       val tags: List[Tag],
@@ -74,12 +76,13 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   ) extends Serializable {
 
     override def toString =
-      s"EndpointDocs($summary, $description, $tags, $callbacks, $deprecated)"
+      s"EndpointDocs($operationId, $summary, $description, $tags, $callbacks, $deprecated)"
 
     @nowarn("cat=unchecked")
     override def equals(other: Any): Boolean = other match {
       case that: EndpointDocs =>
-        summary == that.summary &&
+        operationId == that.operationId &&
+          summary == that.summary &&
           description == that.description &&
           tags == that.tags &&
           callbacks == that.callbacks &&
@@ -88,16 +91,34 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     }
 
     override def hashCode(): Int =
-      Hashing.hash(summary, description, tags, callbacks, deprecated)
+      Hashing.hash(
+        operationId,
+        summary,
+        description,
+        tags,
+        callbacks,
+        deprecated
+      )
 
     private[this] def copy(
+        operationId: Option[String] = operationId,
         summary: Documentation = summary,
         description: Documentation = description,
         tags: List[Tag] = tags,
         callbacks: Map[String, CallbacksDocs] = callbacks,
         deprecated: Boolean = deprecated
     ): EndpointDocs =
-      new EndpointDocs(summary, description, tags, callbacks, deprecated)
+      new EndpointDocs(
+        operationId,
+        summary,
+        description,
+        tags,
+        callbacks,
+        deprecated
+      )
+
+    def withOperationId(operationId: Option[String]): EndpointDocs =
+      copy(operationId = operationId)
 
     def withSummary(summary: Documentation): EndpointDocs =
       copy(summary = summary)
@@ -130,7 +151,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       * }}}
       */
     def apply(): EndpointDocs =
-      new EndpointDocs(None, None, Nil, Map.empty, false)
+      new EndpointDocs(None, None, None, Nil, Map.empty, false)
 
     @deprecated(
       "Use `EndpointDocs().withXxx(...)` instead of `EndpointDocs(xxx = ...)`",
@@ -144,6 +165,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         deprecated: Boolean = false
     ): EndpointDocs =
       new EndpointDocs(
+        None,
         summary,
         description,
         tags.map(Tag(_)),

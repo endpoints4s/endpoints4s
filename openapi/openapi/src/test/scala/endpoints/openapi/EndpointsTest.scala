@@ -181,6 +181,22 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     }
   }
 
+  "Operation documentation" should {
+    "be set according to provided operationId" in {
+      Fixtures.documentation
+        .paths("/foo")
+        .operations("get")
+        .operationId shouldEqual Some("foo")
+    }
+
+    "not have any operationId set" in {
+      Fixtures.documentation
+        .paths("/foo")
+        .operations("post")
+        .operationId shouldEqual None
+    }
+  }
+
   "Tags documentation" should {
     "be set according to provided tags" in {
       Fixtures.documentation
@@ -307,7 +323,7 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val foo = endpoint(
     get(path / "foo"),
     ok(emptyResponse, Some("Foo response")),
-    docs = EndpointDocs().withTags(List(fooTag))
+    docs = EndpointDocs().withTags(List(fooTag)).withOperationId(Some("foo"))
   )
 
   val bar = endpoint(

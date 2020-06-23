@@ -129,6 +129,7 @@ trait EndpointsWithCustomErrors
         .toMap
     val operation =
       Operation(
+        docs.operationId,
         docs.summary,
         docs.description,
         parameters,
@@ -156,6 +157,7 @@ trait EndpointsWithCustomErrors
                     .toMap
                 val callbackOperation =
                   Operation(
+                    None,
                     None,
                     None,
                     Nil,
