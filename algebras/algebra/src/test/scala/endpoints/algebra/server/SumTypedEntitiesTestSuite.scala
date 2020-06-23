@@ -49,6 +49,23 @@ trait SumTypedEntitiesTestSuite[
       }
     }
 
+    "handle `application/json` content-type requests with malformed bodies" in {
+      serveIdentityEndpoint(serverApi.sumTypedEndpoint) { port =>
+        val request =
+          HttpRequest(HttpMethods.POST, s"http://localhost:$port/user-or-name")
+            .withEntity(
+              ContentTypes.`application/json`,
+              "{\"name\":\"Alice\"}"
+            )
+        whenReady(sendAndDecodeEntityAsText(request)) {
+          case (response, entity) =>
+            assert(response.status.intValue() == 400)
+        }
+        ()
+      }
+
+    }
+
     "not handle `application/x-www-form-urlencoded` content-type requests" in {
       serveIdentityEndpoint(serverApi.sumTypedEndpoint) { port =>
         val request =
@@ -65,5 +82,4 @@ trait SumTypedEntitiesTestSuite[
       }
     }
   }
-
 }

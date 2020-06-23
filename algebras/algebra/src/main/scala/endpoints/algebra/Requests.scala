@@ -95,7 +95,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *     in a JSON array. Refer to the documentation of your server interpreter
     *     to customize this behavior.
     *
-    * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
+    *       [[RequestEntitySyntax]] classes.
     * @group types */
   type RequestEntity[A]
 
