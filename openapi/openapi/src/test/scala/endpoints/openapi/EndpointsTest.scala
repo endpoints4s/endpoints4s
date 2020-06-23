@@ -181,7 +181,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     }
   }
 
-  "Operation documeation" should {
+  "Operation documentation" should {
     "be set according to provided operationId" in {
       Fixtures.documentation
         .paths("/foo")
