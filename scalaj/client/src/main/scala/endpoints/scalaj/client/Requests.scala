@@ -76,6 +76,13 @@ trait Requests extends algebra.Requests with Urls with Methods {
         .header("content-type", s"text/plain; charset=${req.charset}")
         .postData(body)
 
+  def choiceRequestEntity[A, B](
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] =
+    (eitherAB, req) =>
+      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

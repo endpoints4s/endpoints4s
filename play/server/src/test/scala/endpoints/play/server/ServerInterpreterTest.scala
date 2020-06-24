@@ -9,6 +9,7 @@ import endpoints.algebra.server.{
   DecodedUrl,
   EndpointsTestSuite,
   ChunkedJsonEntitiesTestSuite,
+  SumTypedEntitiesTestSuite,
   TextEntitiesTestSuite
 }
 import play.api.Mode
@@ -26,6 +27,7 @@ class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with ChunkedJsonEntitiesTestSuite[EndpointsTestApi]
+    with SumTypedEntitiesTestSuite[EndpointsTestApi]
     with TextEntitiesTestSuite[EndpointsTestApi] {
 
   val serverApi: EndpointsTestApi = {

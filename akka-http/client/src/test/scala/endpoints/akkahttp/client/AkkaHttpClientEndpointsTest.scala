@@ -19,6 +19,7 @@ class TestClient(settings: EndpointsSettings)(
     with algebra.BasicAuthenticationTestApi
     with algebra.TextEntitiesTestApi
     with algebra.JsonFromCodecTestApi
+    with algebra.SumTypedEntitiesTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
     with JsonEntitiesFromCodecs
     with algebra.circe.JsonEntitiesFromCodecs
@@ -31,6 +32,7 @@ class AkkaHttpClientEndpointsTest
     with algebra.client.BasicAuthTestSuite[TestClient]
     with algebra.client.JsonFromCodecTestSuite[TestClient]
     with algebra.client.TextEntitiesTestSuite[TestClient]
+    with algebra.client.SumTypedEntitiesTestSuite[TestClient]
     with algebra.client.ChunkedJsonEntitiesTestSuite[TestClient] {
 
   implicit val system = ActorSystem()
@@ -77,6 +79,7 @@ class AkkaHttpClientEndpointsTest
   basicAuthSuite()
   jsonFromCodecTestSuite()
   textEntitiesTestSuite()
+  sumTypedRequestsTestSuite()
 
   override def afterAll(): Unit = {
     TestKit.shutdownActorSystem(system)

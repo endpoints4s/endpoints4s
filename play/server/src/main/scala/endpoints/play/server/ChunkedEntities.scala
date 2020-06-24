@@ -34,8 +34,8 @@ trait ChunkedEntities
 
   private[server] def chunkedRequestEntity[A](
       fromByteString: ByteString => Either[Throwable, A]
-  ): RequestEntity[Chunks[A]] = {
-    BodyParser.apply { _ =>
+  ): RequestEntity[Chunks[A]] = _ => {
+    Some(BodyParser.apply { _ =>
       Accumulator.source[ByteString].map { byteStrings =>
         val source: Source[A, _] =
           byteStrings.map(fromByteString).flatMapConcat {
@@ -44,7 +44,7 @@ trait ChunkedEntities
           }
         Right(source)
       }
-    }
+    })
   }
 
   private[server] def chunkedResponseEntity[A](

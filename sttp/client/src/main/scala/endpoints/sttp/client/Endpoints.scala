@@ -127,6 +127,13 @@ trait EndpointsWithCustomErrors[R[_]]
     case (bodyValue, request) => request.body(bodyValue)
   }
 
+  def choiceRequestEntity[A, B](
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]] =
+    (eitherAB, req) =>
+      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+
   implicit def requestEntityPartialInvariantFunctor
       : PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {

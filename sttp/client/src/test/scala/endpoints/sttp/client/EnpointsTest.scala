@@ -7,11 +7,13 @@ import endpoints.algebra.client.{
   BasicAuthTestSuite,
   JsonFromCodecTestSuite,
   TextEntitiesTestSuite,
+  SumTypedEntitiesTestSuite,
   EndpointsTestSuite
 }
 import endpoints.algebra.{
   BasicAuthenticationTestApi,
   EndpointsTestApi,
+  SumTypedEntitiesTestApi,
   TextEntitiesTestApi
 }
 import endpoints.algebra.playjson.JsonFromPlayJsonCodecTestApi
@@ -26,12 +28,14 @@ class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
     with BasicAuthenticationTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
+    with SumTypedEntitiesTestApi
     with TextEntitiesTestApi
 
 class EndpointsTestSync
     extends EndpointsTestSuite[TestClient[Try]]
     with BasicAuthTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]]
+    with SumTypedEntitiesTestSuite[TestClient[Try]]
     with TextEntitiesTestSuite[TestClient[Try]] {
 
   val backend = TryHttpURLConnectionBackend()
@@ -48,6 +52,7 @@ class EndpointsTestSync
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  sumTypedRequestsTestSuite()
   textEntitiesTestSuite()
 }
 
@@ -55,6 +60,7 @@ class EndpointsTestAkka
     extends EndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
     with JsonFromCodecTestSuite[TestClient[Future]]
+    with SumTypedEntitiesTestSuite[TestClient[Future]]
     with TextEntitiesTestSuite[TestClient[Future]] {
 
   import ExecutionContext.Implicits.global
@@ -72,6 +78,7 @@ class EndpointsTestAkka
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  sumTypedRequestsTestSuite()
   textEntitiesTestSuite()
 
   override def afterAll(): Unit = {

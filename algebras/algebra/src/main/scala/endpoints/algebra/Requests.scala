@@ -95,7 +95,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *     in a JSON array. Refer to the documentation of your server interpreter
     *     to customize this behavior.
     *
-    * @note  This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
+    *       [[RequestEntitySyntax]] classes.
     * @group types */
   type RequestEntity[A]
 
@@ -124,6 +125,41 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * @group operations
     */
   def textRequest: RequestEntity[String]
+
+  /**
+    * Alternative between two possible request entities, differentiated by the
+    * `Content-Type` header
+    *
+    * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+    *       [[endpoints.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+    *
+    * Server interpreters accept either of the request entities
+    * Client interpreters provide one of the two request entities
+    * Documentation interpreters list all possible content types and their entities
+    */
+  def choiceRequestEntity[A, B](
+      requestEntityA: RequestEntity[A],
+      requestEntityB: RequestEntity[B]
+  ): RequestEntity[Either[A, B]]
+
+  implicit class RequestEntitySyntax[A](requestEntity: RequestEntity[A]) {
+
+    /**
+      * Alternative between two possible request entities, differentiated by the
+      * `Content-Type` header
+      *
+      * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+      *       [[endpoints.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+      *
+      * Server interpreters accept either of the request entities
+      * Client interpreters provide one of the two request entities
+      * Documentation interpreters list all possible content types and their entities
+      */
+    final def orElse[B](
+        otherRequestEntity: RequestEntity[B]
+    ): RequestEntity[Either[A, B]] =
+      choiceRequestEntity(requestEntity, otherRequestEntity)
+  }
 
   /**
     * Request for given parameters
