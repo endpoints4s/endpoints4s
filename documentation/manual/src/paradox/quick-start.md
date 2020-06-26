@@ -59,8 +59,8 @@ val server =
 @@@
 
 The `shared` project uses the
-@ref[`endpoints-json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas)
-in addition to the required algebra interface @ref[`endpoints-algebra`](algebras/endpoints.md),
+@ref[`json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas)
+in addition to the required algebra interface @ref[`algebra`](algebras/endpoints.md),
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
 

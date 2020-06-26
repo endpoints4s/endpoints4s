@@ -33,7 +33,7 @@ class QueriesService(
   // --- internals
 
   //#event-log-client
-  import endpoints.play.client.{JsonEntitiesFromCodecs, Endpoints}
+  import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
 
   /** Client for the event log */
   private object eventLog

@@ -1,6 +1,6 @@
-package endpoints.generic
+package endpoints4s.generic
 
-import endpoints.algebra
+import endpoints4s.algebra
 
 trait FakeTuplesSchemas extends algebra.TuplesSchemas { this: algebra.JsonSchemas =>
 

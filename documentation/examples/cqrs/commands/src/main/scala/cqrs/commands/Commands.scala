@@ -1,7 +1,7 @@
 package cqrs.commands
 
 //#server
-import endpoints.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
+import endpoints4s.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
 import play.api.routing.Router
 
 class Commands(val playComponents: PlayComponents)

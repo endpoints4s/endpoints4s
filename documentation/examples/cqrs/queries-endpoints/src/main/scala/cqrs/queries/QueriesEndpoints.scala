@@ -2,7 +2,7 @@ package cqrs.queries
 
 import java.util.UUID
 
-import endpoints.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
+import endpoints4s.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 

@@ -50,7 +50,7 @@ and `JsonEntitiesFromCodecs`.
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.algebra.JsonEntities)
+@scaladoc[API documentation](endpoints4s.algebra.JsonEntities)
 
 The following diagram shows the relations between the three aforementioned algebras,
 `JsonEntities`, `JsonEntitiesFromCodecs`, and `JsonEntitiesFromSchemas`, and their
@@ -70,7 +70,7 @@ define an endpoint taking in its request entity a JSON document
 for creating an user, and returning in its response entity the
 created user:
 
-@@snip [JsonEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/JsonEntitiesDocs.scala) { #json-entities }
+@@snip [JsonEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/JsonEntitiesDocs.scala) { #json-entities }
 
 The `jsonRequest[A]` constructor defines a JSON request entity containing
 a value of type `A`, provided that there exists an implicit `JsonRequest[A]`
@@ -108,21 +108,21 @@ type to a JSON encoder for `A`.
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.algebra.JsonEntitiesFromSchemas)
+@scaladoc[API documentation](endpoints4s.algebra.JsonEntitiesFromSchemas)
 
 This algebra merges the `JsonEntities` algebra and the
 @ref[`JsonSchemas` algebra](json-schemas.md) and aligns both the
 `JsonRequest[A]` and `JsonResponse[A]` types to be `JsonCodec[A]`, which is itself
 defined to the `JsonSchema[A]` type provided by the `JsonSchemas` algebra:
 
-@@snip [JsonEntities.scala](/algebras/algebra/src/main/scala/endpoints/algebra/JsonEntities.scala) { #type-carrier }
+@@snip [JsonEntities.scala](/algebras/algebra/src/main/scala/endpoints4s/algebra/JsonEntities.scala) { #type-carrier }
 
 This means that you have to define such a `JsonSchema[A]` implicit value (as explained in
 the `JsonSchemas` documentation) for each type `A` that you want to carry as a JSON entity.
 
-These schemas can then be interpreted as documentation (by applying the `endpoints.openapi.JsonEntitiesFromSchemas`
+These schemas can then be interpreted as documentation (by applying the `endpoints4s.openapi.JsonEntitiesFromSchemas`
 interpreter), or codecs (by applying a corresponding interpreter for your client or server, e.g.
-`endpoints.akkahttp.server.JsonEntitiesFromSchemas` to use an Akka HTTP server).
+`endpoints4s.akkahttp.server.JsonEntitiesFromSchemas` to use an Akka HTTP server).
 
 ## `JsonEntitiesFromCodecs`
 
@@ -132,32 +132,32 @@ interpreter), or codecs (by applying a corresponding interpreter for your client
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.algebra.JsonEntitiesFromCodecs)
+@scaladoc[API documentation](endpoints4s.algebra.JsonEntitiesFromCodecs)
 
 In case you don’t need to document the JSON schemas of your request and response entities, the
 `JsonEntitiesFromCodecs` family of algebras is the preferred approach. These algebras fix both
 the `JsonRequest` and `JsonResponse` types to a same (abstract) `JsonCodec` type:
 
-@@snip [JsonEntities.scala](/algebras/algebra/src/main/scala/endpoints/algebra/JsonEntities.scala) { #json-codec-type }
+@@snip [JsonEntities.scala](/algebras/algebra/src/main/scala/endpoints4s/algebra/JsonEntities.scala) { #json-codec-type }
 
 By using the same codec type for both types ensures that the encoding and decoding
 are consistent.
 
 Generally, you want to use a `JsonEntitiesFromCodecs` algebra that fixes this `JsonCodec` type to
-a concrete type. An example is @scaladoc[`endpoints.algebra.playjson.JsonEntitiesFromCodecs`](endpoints.algebra.playjson.JsonEntitiesFromCodecs),
+a concrete type. An example is @scaladoc[`endpoints4s.algebra.playjson.JsonEntitiesFromCodecs`](endpoints4s.algebra.playjson.JsonEntitiesFromCodecs),
 which aligns the `JsonCodec` type with Play’s `Format` type:
 
-@@snip [JsonEntitiesFromCodecs.scala](/algebras/algebra-playjson/src/main/scala/endpoints/algebra/playjson/JsonEntitiesFromCodecs.scala) { #type-carrier }
+@@snip [JsonEntitiesFromCodecs.scala](/algebras/algebra-playjson/src/main/scala/endpoints4s/algebra/playjson/JsonEntitiesFromCodecs.scala) { #type-carrier }
 
-The Circe analoguous is @scaladoc[`endpoints.algebra.circe.JsonEntitiesFromCodecs`](endpoints.algebra.circe.JsonEntitiesFromCodecs).
+The Circe analogous is @scaladoc[`endpoints4s.algebra.circe.JsonEntitiesFromCodecs`](endpoints4s.algebra.circe.JsonEntitiesFromCodecs).
 
 These algebras are provided by the following dependencies:
 
 @@@vars
 ~~~ scala
-// Provides endpoints.algebra.circe.JsonEntitiesFromCodecs
+// Provides endpoints4s.algebra.circe.JsonEntitiesFromCodecs
 "org.endpoints4s" %% "algebra-circe" % "$version$"
-// Provides endpoints.algebra.playjson.JsonEntitiesFromCodecs
+// Provides endpoints4s.algebra.playjson.JsonEntitiesFromCodecs
 "org.endpoints4s" %% "algebra-playjson" % "$version$"
 ~~~
 @@@
@@ -165,5 +165,5 @@ These algebras are provided by the following dependencies:
 To interpret endpoints defined with such algebras, apply any interpreter named
 `JsonEntitiesFromCodecs` that matches your
 @ref[family](../algebras-and-interpreters.md#interpreters) of interpreters. For instance,
-if you use interpreters from the `endpoints.xhr` package (ie. the Scala.js web
-interpreters), you should use the `endpoints.xhr.JsonEntitiesFromCodecs` interpreter.
+if you use interpreters from the `endpoints4s.xhr` package (ie. the Scala.js web
+interpreters), you should use the `endpoints4s.xhr.JsonEntitiesFromCodecs` interpreter.

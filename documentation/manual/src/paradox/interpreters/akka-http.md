@@ -10,36 +10,36 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.akkahttp.client.index)
+@scaladoc[API documentation](endpoints4s.akkahttp.client.index)
 
 ### `Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function
 from `A` to `Future[B]`:
 
-@@snip [Endpoints.scala](/akka-http/client/src/main/scala/endpoints/akkahttp/client/Endpoints.scala) { #endpoint-type }
+@@snip [Endpoints.scala](/akka-http/client/src/main/scala/endpoints4s/akkahttp/client/Endpoints.scala) { #endpoint-type }
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows:
 
-@@snip [EndpointsDocs.scala](/akka-http/client/src/test/scala/endpoints/akkahttp/client/EndpointsDocs.scala) { #invocation }
+@@snip [EndpointsDocs.scala](/akka-http/client/src/test/scala/endpoints4s/akkahttp/client/EndpointsDocs.scala) { #invocation }
 
 ### `ChunkedEntities`
 
 The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.scaladsl.Source[A, _]`:
 
-@@snip [ChunkedEntities.scala](/akka-http/client/src/main/scala/endpoints/akkahttp/client/ChunkedEntities.scala) { #stream-type }
+@@snip [ChunkedEntities.scala](/akka-http/client/src/main/scala/endpoints4s/akkahttp/client/ChunkedEntities.scala) { #stream-type }
 
 This means that, given the following endpoint definition:
 
-@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
 
 It can be invoked as follows:
 
-@@snip [ChunkedEntitiesDocs.scala](/akka-http/client/src/test/scala/endpoints/akkahttp/client/ChunkedEntitiesDocs.scala) { #invocation }
+@@snip [ChunkedEntitiesDocs.scala](/akka-http/client/src/test/scala/endpoints4s/akkahttp/client/ChunkedEntitiesDocs.scala) { #invocation }
 
 ## Server
 
@@ -49,7 +49,7 @@ It can be invoked as follows:
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.akkahttp.server.index)
+@scaladoc[API documentation](endpoints4s.akkahttp.server.index)
 
 ### `Endpoints`
 
@@ -59,11 +59,11 @@ that can be integrated to your Akka HTTP application.
 
 For instance, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be implemented as follows:
 
-@@snip [EndpointsDocs.scala](/akka-http/server/src/test/scala/endpoints/akkahttp/server/EndpointsDocs.scala) { #implementation }
+@@snip [EndpointsDocs.scala](/akka-http/server/src/test/scala/endpoints4s/akkahttp/server/EndpointsDocs.scala) { #implementation }
 
 Alternatively, there is also a method `implementedByAsync` that takes an implementing function
 returning a `Future[B]`.
@@ -74,11 +74,11 @@ The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.sca
 
 For instance, given the following chunked endpoint definition:
 
-@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
 
 It can be implemented as follows:
 
-@@snip [ChunkedEntitiesDocs.scala](/akka-http/server/src/test/scala/endpoints/akkahttp/server/ChunkedEntitiesDocs.scala) { #implementation }
+@@snip [ChunkedEntitiesDocs.scala](/akka-http/server/src/test/scala/endpoints4s/akkahttp/server/ChunkedEntitiesDocs.scala) { #implementation }
 
 ### Error handling
 
@@ -96,11 +96,11 @@ having a `handleNotFound` clause.
 
 In that case, endpoints4s returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
-@scaladoc[handleClientErrors](endpoints.akkahttp.server.Urls) method.
+@scaladoc[handleClientErrors](endpoints4s.akkahttp.server.Urls) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
 encoding the response, endpoints4s returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
-@scaladoc[handleServerError](endpoints.akkahttp.server.Endpoints) method.
+@scaladoc[handleServerError](endpoints4s.akkahttp.server.Endpoints) method.

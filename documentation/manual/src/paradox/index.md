@@ -59,13 +59,13 @@ The library currently supports the following backends:
 - Have a look at the @ref[quick start](quick-start.md) guide to understand
   in a few minutes what the library does and how to setup a project ;
 - Check out the @ref[use cases](use-cases.md) to know the typical problems that endpoints4s addresses ;
-- Browse the @scaladoc[API documentation](endpoints.index) or the
+- Browse the @scaladoc[API documentation](endpoints4s.index) or the
   [samples](https://github.com/endpoints4s/endpoints4s/tree/master/documentation/examples) ;
 - Meet the community in the [gitter room](https://gitter.im/endpoints4s/endpoints4s).
 
 ## Contributing
 
-See the [Github repository](https://github.com/julienrf/endpoints).
+See the [Github repository](https://github.com/endpoints4s/endpoints4s).
 
 ## Sponsors
 

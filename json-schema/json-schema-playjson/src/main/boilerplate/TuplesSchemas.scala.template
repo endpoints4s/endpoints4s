@@ -1,6 +1,6 @@
-package endpoints.playjson
+package endpoints4s.playjson
 
-import endpoints.algebra
+import endpoints4s.algebra
 import play.api.libs.json.{Reads, Writes}
 
 /**
