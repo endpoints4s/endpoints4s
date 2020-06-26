@@ -57,7 +57,8 @@ import scala.util.{Failure, Success, Try}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends endpoints4s.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs
+    extends endpoints4s.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = Format[A]

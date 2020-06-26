@@ -14,7 +14,9 @@ trait BuiltInErrors extends algebra.BuiltInErrors {
       val playCodec = implicitly[play.api.mvc.Codec]
       Writeable(
         (invalid: Invalid) =>
-          playCodec.encode(endpoints4s.ujson.codecs.invalidCodec.encode(invalid)),
+          playCodec.encode(
+            endpoints4s.ujson.codecs.invalidCodec.encode(invalid)
+          ),
         Some(ContentTypes.JSON)
       )
     })

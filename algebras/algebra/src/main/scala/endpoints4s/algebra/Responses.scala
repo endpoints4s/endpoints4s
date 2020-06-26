@@ -1,6 +1,11 @@
 package endpoints4s.algebra
 
-import endpoints4s.{InvariantFunctor, InvariantFunctorSyntax, Semigroupal, Tupler}
+import endpoints4s.{
+  InvariantFunctor,
+  InvariantFunctorSyntax,
+  Semigroupal,
+  Tupler
+}
 
 /**
   * @group algebras
@@ -179,7 +184,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /**
     * Bad Request (400) response, with an entity of type `ClientErrors`.
- *
+    *
     * @see [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
     * @group operations
     */
@@ -194,7 +199,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /**
     * Internal Server Error (500) response, with an entity of type `ServerError`.
- *
+    *
     * @see [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
     * @group operations
     */

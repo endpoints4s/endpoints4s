@@ -2,7 +2,10 @@ package endpoints4s.scalaj.client
 
 import endpoints4s.algebra
 import endpoints4s.algebra.circe
-import endpoints4s.algebra.client.{JsonFromCodecTestSuite, TextEntitiesTestSuite}
+import endpoints4s.algebra.client.{
+  JsonFromCodecTestSuite,
+  TextEntitiesTestSuite
+}
 
 import scala.concurrent.{ExecutionContext, Future}
 

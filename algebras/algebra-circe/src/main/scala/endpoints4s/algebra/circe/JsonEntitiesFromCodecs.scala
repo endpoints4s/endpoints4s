@@ -65,7 +65,8 @@ import io.circe.{
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs extends endpoints4s.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs
+    extends endpoints4s.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = CirceCodec[A]

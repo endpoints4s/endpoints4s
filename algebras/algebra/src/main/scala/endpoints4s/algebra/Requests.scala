@@ -30,7 +30,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *   - Client interpreters supply no specific headers
     *
     * Use `description` of [[endpoints4s.algebra.Endpoints#endpoint]] to document empty headers.
- *
+    *
     * @group operations
     */
   def emptyRequestHeaders: RequestHeaders[Unit]
@@ -109,7 +109,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   /**
     * Empty request -- request without a body.
     * Use `description` of [[endpoints4s.algebra.Endpoints#endpoint]] to document an empty body.
- *
+    *
     * @group operations
     */
   def emptyRequest: RequestEntity[Unit]
@@ -135,9 +135,9 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
     *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
     *
-    *       Server interpreters accept either of the request entities
-    *       Client interpreters provide one of the two request entities
-    *       Documentation interpreters list all possible content types and their entities
+    *   - Server interpreters accept either of the request entities
+    *   - Client interpreters provide one of the two request entities
+    *   - Documentation interpreters list all possible content types and their entities
     */
   def choiceRequestEntity[A, B](
       requestEntityA: RequestEntity[A],
@@ -153,9 +153,9 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
       *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
       *
-      *       Server interpreters accept either of the request entities
-      *       Client interpreters provide one of the two request entities
-      *       Documentation interpreters list all possible content types and their entities
+      *   - Server interpreters accept either of the request entities
+      *   - Client interpreters provide one of the two request entities
+      *   - Documentation interpreters list all possible content types and their entities
       */
     final def orElse[B](
         otherRequestEntity: RequestEntity[B]

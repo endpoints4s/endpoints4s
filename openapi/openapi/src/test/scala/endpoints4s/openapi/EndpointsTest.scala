@@ -317,8 +317,15 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
   val fooTag = Tag("foo")
   val barTag = Tag("bar").withDescription(Some("This is a bar."))
-  val bazTag = Tag("baz").withExternalDocs(Some(ExternalDocumentationObject("my@url.com")))
-  val bxxTag = Tag("bxx").withExternalDocs(Some(ExternalDocumentationObject("my@url.com").withDescription(Some("my@url.com contains the official documentation."))))
+  val bazTag =
+    Tag("baz").withExternalDocs(Some(ExternalDocumentationObject("my@url.com")))
+  val bxxTag = Tag("bxx").withExternalDocs(
+    Some(
+      ExternalDocumentationObject("my@url.com").withDescription(
+        Some("my@url.com contains the official documentation.")
+      )
+    )
+  )
 
   val foo = endpoint(
     get(path / "foo"),
@@ -329,8 +336,7 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val bar = endpoint(
     post(path / "foo", emptyRequest),
     ok(emptyResponse, Some("Bar response")),
-    docs = EndpointDocs().withTags(List(barTag, bxxTag)
-  )
+    docs = EndpointDocs().withTags(List(barTag, bxxTag))
   )
 
   val baz = endpoint(
@@ -356,7 +362,9 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
   val invalidTagsEndpoint = endpoint(
     get(path / "invalid"),
     ok(emptyResponse, Some("Some response")),
-    docs = EndpointDocs().withTags(List(bazTag, bazTag.withDescription(Some("Inconsistent description"))))
+    docs = EndpointDocs().withTags(
+      List(bazTag, bazTag.withDescription(Some("Inconsistent description")))
+    )
   )
 
   val quux = endpoint(

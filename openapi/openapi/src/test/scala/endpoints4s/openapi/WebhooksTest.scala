@@ -22,15 +22,17 @@ class WebhooksTest extends AnyWordSpec with Matchers {
       post(path / "subscribe" /? qs[String]("callbackURL"), emptyRequest),
       ok(emptyResponse),
       docs = EndpointDocs()
-        .withCallbacks(Map(
-          "message" -> Map(
-            "{$request.query.callbackURL}" -> CallbackDocs(
-              Post,
-              jsonRequest[Message],
-              ok(emptyResponse)
+        .withCallbacks(
+          Map(
+            "message" -> Map(
+              "{$request.query.callbackURL}" -> CallbackDocs(
+                Post,
+                jsonRequest[Message],
+                ok(emptyResponse)
+              )
             )
           )
-        ))
+        )
     )
 
   }

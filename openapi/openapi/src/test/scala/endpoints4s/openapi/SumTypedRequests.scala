@@ -22,7 +22,7 @@ class SumTypedRequests extends AnyWordSpec with Matchers {
       with algebra.JsonEntitiesFromSchemas
       with algebra.JsonSchemasFixtures {
 
-    import User._  // Extra help for Scala 2.12 to find User json schema
+    import User._ // Extra help for Scala 2.12 to find User json schema
 
     def sumTypedEndpoint = endpoint[Either[User, String], Unit](
       post(path / "user-or-name", jsonRequest[User].orElse(textRequest)),

@@ -37,7 +37,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
     def openApiDocument: OpenApi =
       openApi(
-        Info(title = "TestFixturesOpenApi", version = "0.0.0").withDescription(Some("This is a top level description."))
+        Info(title = "TestFixturesOpenApi", version = "0.0.0")
+          .withDescription(Some("This is a top level description."))
       )(Fixtures.listBooks, Fixtures.postBook)
   }
 
@@ -60,7 +61,12 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
     val bookTag = Tag("Books")
       .withDescription(Some("A book is something you can read."))
-      .withExternalDocs(Some(ExternalDocumentationObject("moreinfo@books.nl").withDescription(Some("The official website about books."))))
+      .withExternalDocs(
+        Some(
+          ExternalDocumentationObject("moreinfo@books.nl")
+            .withDescription(Some("The official website about books."))
+        )
+      )
 
     val listBooks = endpoint(
       get(path / "books"),
@@ -75,7 +81,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         ok(jsonResponse(Enum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
+        endpointDocs =
+          EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
       )
   }
 
@@ -318,7 +325,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |}""".stripMargin
 
     "be documented" in {
-      val actual = ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument))
+      val actual =
+        ujson.read(OpenApi.stringEncoder.encode(Fixtures.openApiDocument))
       actual shouldBe ujson.read(expectedSchema)
     }
 
