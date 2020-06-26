@@ -6,7 +6,7 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-akka-http-client" % "$version$"
+"org.endpoints4s" %% "akka-http-client" % "$version$"
 ~~~
 @@@
 
@@ -45,7 +45,7 @@ It can be invoked as follows:
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-akka-http-server" % "$version$"
+"org.endpoints4s" %% "akka-http-server" % "$version$"
 ~~~
 @@@
 
@@ -88,19 +88,19 @@ an exception is thrown.
 
 #### The incoming request doesn’t match any endpoint
 
-In that case, the routes constructed by *endpoints* can’t do anything. You have to deal with such
+In that case, the routes constructed by endpoints4s can’t do anything. You have to deal with such
 errors in the usual Akka HTTP way: by using an implicit `akka.http.scaladsl.server.RejectionHandler`
 having a `handleNotFound` clause.
 
 #### The incoming request is invalid
 
-In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
+In that case, endpoints4s returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
 @scaladoc[handleClientErrors](endpoints.akkahttp.server.Urls) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
-encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
+encoding the response, endpoints4s returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
 @scaladoc[handleServerError](endpoints.akkahttp.server.Endpoints) method.

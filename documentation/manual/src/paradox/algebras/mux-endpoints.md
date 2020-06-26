@@ -5,7 +5,7 @@ requests and responses.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 

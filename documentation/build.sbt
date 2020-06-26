@@ -45,7 +45,7 @@ val apiDoc =
         "-diagrams",
         "-groups",
         "-doc-source-url",
-        s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
+        s"https://github.com/endpoints4s/endpoints4s/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath",
         (baseDirectory in ThisBuild).value.absolutePath
       ),
@@ -85,7 +85,7 @@ val manual =
       noPublishSettings,
       `scala 2.13`,
       coverageEnabled := false,
-      git.remoteRepo := (ThisBuild / sonatypeProjectHosting).value.get.scmUrl,
+      git.remoteRepo := "scm:git:git@github.com:endpoints4s/endpoints4s.github.io.git",
       ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
       Paradox / paradoxMaterialTheme := {
         val theme = (Paradox / paradoxMaterialTheme).value

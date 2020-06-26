@@ -10,7 +10,7 @@ val `json-schema` =
     .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      name := "endpoints-algebra-json-schema",
+      name := "algebra-json-schema",
       addScalaTestCrossDependency,
       libraryDependencies ++= Seq(
         ("org.scala-lang.modules" %%% "scala-collection-compat" % "2.1.6").withDottyCompat(scalaVersion.value),
@@ -30,7 +30,7 @@ lazy val `json-schema-generic` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
-      name := "endpoints-json-schema-generic",
+      name := "json-schema-generic",
       libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.3").withDottyCompat(scalaVersion.value),
       addScalaTestCrossDependency,
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
@@ -49,7 +49,7 @@ lazy val `json-schema-circe` =
     .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      name := "endpoints-json-schema-circe",
+      name := "json-schema-circe",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
@@ -72,7 +72,7 @@ lazy val `json-schema-playjson` =
     .jvmSettings(`scala 2.12 to dotty`)
     .settings(
       publishSettings,
-      name := "endpoints-json-schema-playjson",
+      name := "json-schema-playjson",
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )

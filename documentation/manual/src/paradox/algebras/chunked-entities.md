@@ -7,7 +7,7 @@ responses are streamed using the “chunked transfer-encoding” supported by HT
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 
@@ -31,7 +31,7 @@ which is supported by most HTTP 1.1 clients and servers.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 

@@ -4,7 +4,7 @@ This algebra provides vocabulary to define endpoints serving static assets.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 

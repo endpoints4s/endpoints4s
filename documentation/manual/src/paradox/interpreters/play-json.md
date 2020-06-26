@@ -4,7 +4,7 @@ Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes 
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-json-schema-playjson" % "$version$"
+"org.endpoints4s" %% "json-schema-playjson" % "$version$"
 ~~~
 @@@
 

@@ -4,7 +4,7 @@ Client interpreter backed by [scalaj-http](https://github.com/scalaj/scalaj-http
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-scalaj-client" % "$version$"
+"org.endpoints4s" %% "scalaj-client" % "$version$"
 ~~~
 @@@
 

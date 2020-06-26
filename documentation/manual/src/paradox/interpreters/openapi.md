@@ -2,7 +2,7 @@
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-openapi" % "$version$"
+"org.endpoints4s" %% "openapi" % "$version$"
 ~~~
 @@@
 

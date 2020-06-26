@@ -6,7 +6,7 @@ Client and server backed by [Play framework](https://www.playframework.com/).
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-play-client" % "$version$"
+"org.endpoints4s" %% "play-client" % "$version$"
 ~~~
 @@@
 
@@ -29,7 +29,7 @@ It can be invoked as follows:
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-play-server" % "$version$"
+"org.endpoints4s" %% "play-server" % "$version$"
 ~~~
 @@@
 
@@ -74,18 +74,18 @@ an exception is thrown.
 
 #### The incoming request doesn’t match any endpoint
 
-In that case, the router constructed by *endpoints* can’t do anything. You have to deal with such
+In that case, the router constructed by endpoints4s can’t do anything. You have to deal with such
 errors in the usual Play way: by using a custom `play.api.http.HttpErrorHandler`.
 
 #### The incoming request is invalid
 
-In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
+In that case, endpoints4s returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
 @scaladoc[handleClientErrors](endpoints.play.server.Urls) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
-encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
+encoding the response, endpoints4s returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
 @scaladoc[handleServerError](endpoints.play.server.Endpoints) method.

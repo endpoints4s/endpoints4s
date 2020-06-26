@@ -4,7 +4,7 @@ Client backed by [sttp](https://github.com/softwaremill/sttp).
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-sttp-client" % "$version$"
+"org.endpoints4s" %% "sttp-client" % "$version$"
 ~~~
 @@@
 

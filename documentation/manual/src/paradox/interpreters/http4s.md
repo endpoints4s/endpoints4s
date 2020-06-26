@@ -6,7 +6,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-http4s-client" % "$version$"
+"org.endpoints4s" %% "http4s-client" % "$version$"
 ~~~
 @@@
 
@@ -31,7 +31,7 @@ It can be invoked as follows using `IO`:
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-http4s-server" % "$version$"
+"org.endpoints4s" %% "http4s-server" % "$version$"
 ~~~
 @@@
 
@@ -62,19 +62,19 @@ an exception is thrown.
 
 #### The incoming request doesn’t match any endpoint
 
-In that case, the router constructed by *endpoints* can’t do anything. You have to deal with such
+In that case, the router constructed by endpoints4s can’t do anything. You have to deal with such
 errors in the usual http4s way (usually, by adding a `.orNotFound` call to your application
 services).
 
 #### The incoming request is invalid
 
-In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
+In that case, endpoints4s returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
 @scaladoc[handleClientErrors](endpoints.http4s.server.EndpointsWithCustomErrors) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
-encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
+encoding the response, endpoints4s returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
 @scaladoc[handleServerError](endpoints.http4s.server.EndpointsWithCustomErrors) method.

@@ -4,7 +4,7 @@ Web client using `XMLHttpRequest`.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %%% "endpoints-xhr-client" % "$version$"
+"org.endpoints4s" %%% "xhr-client" % "$version$"
 ~~~
 @@@
 
@@ -33,6 +33,6 @@ an additional dependency (which, in turn, depends on the
 @@@vars
 ~~~ scala
 // Provides endpoints.xhr.client.faithful.Endpoints
-"org.julienrf" %%% "endpoints-xhr-client-faithful" % "$version$"
+"org.endpoints4s" %%% "xhr-client-faithful" % "$version$"
 ~~~
 @@@

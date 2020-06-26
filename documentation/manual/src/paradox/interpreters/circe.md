@@ -4,7 +4,7 @@ Builds [Circe](http://circe.github.io/circe/) codecs out of JSON schema definiti
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-json-schema-circe" % "$version$"
+"org.endpoints4s" %% "json-schema-circe" % "$version$"
 ~~~
 @@@
 

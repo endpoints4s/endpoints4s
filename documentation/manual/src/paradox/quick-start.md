@@ -1,6 +1,6 @@
 # Quick start
 
-The central idea of the *endpoints* library is that you first define an abstract
+The central idea of endpoints4s is that you first define an abstract
 description of your HTTP endpoints and then the library provides:
 
 - a server implementation decoding requests and building responses,
@@ -34,9 +34,9 @@ In this example you will use the following dependencies:
 val shared =
   crossProject(JSPlatform, JVMPlatform).crossType(CrossType.Pure).settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %%% "endpoints-algebra" % "$version$",
+      "org.endpoints4s" %%% "algebra" % "$version$",
       // optional, see explanation below
-      "org.julienrf" %%% "endpoints-json-schema-generic" % "$version$"
+      "org.endpoints4s" %%% "json-schema-generic" % "$version$"
     )
   )
 
@@ -45,13 +45,13 @@ val sharedJVM = shared.jvm
 
 val client =
   project.enablePlugins(ScalaJSPlugin).settings(
-    libraryDependencies += "org.julienrf" %%% "endpoints-xhr-client" % "$version$"
+    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "$version$"
   ).dependsOn(sharedJS)
 
 val server =
   project.settings(
     libraryDependencies ++= Seq(
-      "org.julienrf" %% "endpoints-akka-http-server" % "$version$",
+      "org.endpoints4s" %% "akka-http-server" % "$version$",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
   ).dependsOn(sharedJVM)
@@ -98,7 +98,7 @@ And also:
 @@snip [Usage.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/Usage.scala) { #increment }
 
 As you can see, invoking an endpoint consists of calling a function on the `CounterClient` object.
-The *endpoints* library then builds an HTTP request (according to the endpoint description), sends
+endpoints4s then builds an HTTP request (according to the endpoint description), sends
 it to the server, and eventually decodes the HTTP response (according to the endpoint description).
 
 ## Server implementation
@@ -111,11 +111,11 @@ that uses Akka HTTP under the hood. Create the following `CounterServer` class i
 
 @@snip [CounterServer.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala) { #relevant-code }
 
-The `routes` value produced by the *endpoints* library is a `Route` value directly
+The `routes` value produced by endpoints4s is a `Route` value directly
 usable by Akka HTTP. The last section shows how to setup an Akka HTTP server that
 uses these routes.
 
-The routes implementations provided by *endpoints* decode the incoming HTTP requests, call the corresponding logic
+The routes implementations provided by endpoints4s decode the incoming HTTP requests, call the corresponding logic
 (here, incrementing the counter or getting its current value), and build the HTTP responses.
 
 ## Documentation generation

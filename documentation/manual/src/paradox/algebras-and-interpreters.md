@@ -18,7 +18,7 @@
 * [Play JSON codecs](interpreters/play-json.md)
 @@@
 
-In *endpoints*, we call “algebra interfaces” (or just **algebras**) the
+In endpoints4s, we call “algebra interfaces” (or just **algebras**) the
 traits that provide methods for constructing and combining descriptions
 of endpoints. You can find more details about the design of these
 algebras in the @ref[Design in a nutshell](design.md) page.

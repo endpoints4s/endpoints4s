@@ -6,14 +6,14 @@ This algebra provides vocabulary to define JSON schemas of data types.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra-json-schema" % "$version$"
+"org.endpoints4s" %% "algebra-json-schema" % "$version$"
 ~~~
 @@@
 
 @scaladoc[API documentation](endpoints.algebra.JsonSchemas)
 
 @@@note
-This module is dependency-free, it can be used independently of *endpoints*
+This module is dependency-free, it can be used independently of endpoints4s
 to define JSON schemas and interpret them as actual encoder, decoders or
 documentation.
 @@@
@@ -214,7 +214,7 @@ for algebraic data type definitions (sealed traits and case classes).
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-json-schema-generic" % "$version$"
+"org.endpoints4s" %% "json-schema-generic" % "$version$"
 ~~~
 @@@
 
@@ -271,4 +271,4 @@ as a third-party module:
 [endpoints-json-schemas-macros](https://github.com/scalalandio/endpoints-json-schemas-macros).
 
 Please see the README of that project for more information on how to use it
-and its differences with the module provided by *endpoints*.
+and its differences with the module provided by endpoints4s.

@@ -46,7 +46,7 @@ and `JsonEntitiesFromCodecs`.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 
@@ -104,7 +104,7 @@ type to a JSON encoder for `A`.
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 
@@ -128,7 +128,7 @@ interpreter), or codecs (by applying a corresponding interpreter for your client
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-algebra" % "$version$"
+"org.endpoints4s" %% "algebra" % "$version$"
 ~~~
 @@@
 
@@ -156,9 +156,9 @@ These algebras are provided by the following dependencies:
 @@@vars
 ~~~ scala
 // Provides endpoints.algebra.circe.JsonEntitiesFromCodecs
-"org.julienrf" %% "endpoints-algebra-circe" % "$version$"
+"org.endpoints4s" %% "algebra-circe" % "$version$"
 // Provides endpoints.algebra.playjson.JsonEntitiesFromCodecs
-"org.julienrf" %% "endpoints-algebra-playjson" % "$version$"
+"org.endpoints4s" %% "algebra-playjson" % "$version$"
 ~~~
 @@@
 
