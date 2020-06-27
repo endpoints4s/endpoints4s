@@ -2,7 +2,7 @@ package endpoints4s
 package sttp.client
 
 import com.softwaremill.sttp
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.algebra.MuxRequest
 
 /**
   * @group interpreters

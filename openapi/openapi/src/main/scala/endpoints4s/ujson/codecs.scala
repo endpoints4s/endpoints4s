@@ -1,7 +1,6 @@
 package endpoints4s.ujson
 
-import endpoints4s.{Invalid, Validated, openapi}
-import endpoints4s.algebra.Codec
+import endpoints4s.{Codec, Invalid, Validated, openapi}
 import ujson.StringRenderer
 
 /** Utility objects internally used by ''endpoints''. */

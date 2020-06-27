@@ -1,7 +1,7 @@
 package endpoints4s
 package akkahttp.client
 
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.algebra.MuxRequest
 
 import scala.concurrent.Future
 

@@ -58,7 +58,7 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     *
     * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
     */
-  final def xmapWithCodec[A, B](fa: F[A], codec: algebra.Codec[A, B]): F[B] =
+  final def xmapWithCodec[A, B](fa: F[A], codec: Codec[A, B]): F[B] =
     xmapPartial(fa, codec.decode, codec.encode)
 
   def xmap[A, B](fa: F[A], f: A => B, g: B => A): F[B] =
@@ -89,7 +89,7 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
       *
       * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
       */
-    def xmapWithCodec[B](codec: algebra.Codec[A, B]): F[B] =
+    def xmapWithCodec[B](codec: Codec[A, B]): F[B] =
       ev.xmapWithCodec(fa, codec)
   }
 }

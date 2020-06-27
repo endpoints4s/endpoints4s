@@ -10,7 +10,8 @@ import akka.http.scaladsl.model.{
 }
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
-import endpoints4s.algebra.{ChunkedJsonEntitiesTestApi, Codec}
+import endpoints4s.Codec
+import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal

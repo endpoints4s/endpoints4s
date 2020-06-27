@@ -1,6 +1,7 @@
 package endpoints4s.xhr
 
 import endpoints4s.{
+  Decoder,
   Invalid,
   InvariantFunctor,
   PartialInvariantFunctor,
@@ -10,7 +11,7 @@ import endpoints4s.{
   Validated,
   algebra
 }
-import endpoints4s.algebra.{Decoder, Documentation}
+import endpoints4s.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js

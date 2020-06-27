@@ -1,6 +1,9 @@
 package endpoints4s.ujson
 
 import endpoints4s.{
+  Codec,
+  Decoder,
+  Encoder,
   Invalid,
   PartialInvariantFunctor,
   Tupler,
@@ -8,7 +11,6 @@ import endpoints4s.{
   Validated,
   algebra
 }
-import endpoints4s.algebra.{Codec, Decoder, Encoder}
 
 import scala.collection.compat._
 import scala.collection.mutable

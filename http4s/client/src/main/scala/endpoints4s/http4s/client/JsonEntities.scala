@@ -1,7 +1,7 @@
 package endpoints4s.http4s.client
 
 import cats.implicits._
-import endpoints4s.algebra.Codec
+import endpoints4s.Codec
 
 trait JsonEntitiesFromCodecs
     extends EndpointsWithCustomErrors

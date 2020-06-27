@@ -1,7 +1,7 @@
 package endpoints4s
 package play.client
 
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.algebra.MuxRequest
 import endpoints4s.play.client.Endpoints.futureFromEither
 
 import scala.concurrent.Future

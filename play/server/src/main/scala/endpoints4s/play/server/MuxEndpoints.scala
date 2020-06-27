@@ -1,7 +1,7 @@
 package endpoints4s.play.server
 
-import endpoints4s.{Invalid, Valid, algebra}
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.{Decoder, Encoder, Invalid, Valid, algebra}
+import endpoints4s.algebra.MuxRequest
 import play.api.http.Status.UNSUPPORTED_MEDIA_TYPE
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{EssentialAction, Result}

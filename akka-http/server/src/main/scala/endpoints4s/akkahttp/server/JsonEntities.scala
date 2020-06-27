@@ -8,8 +8,7 @@ import akka.http.scaladsl.unmarshalling.{
   FromRequestUnmarshaller,
   Unmarshaller
 }
-import endpoints4s.algebra.{Codec, Decoder, Encoder}
-import endpoints4s.{Invalid, Valid, Validated, algebra}
+import endpoints4s.{Codec, Decoder, Encoder, Invalid, Valid, Validated, algebra}
 
 /**
   * Interpreter for [[algebra.JsonEntities]]
@@ -69,7 +68,7 @@ trait JsonEntitiesFromSchemas
 
 /**
   * Interpreter for [[endpoints4s.algebra.JsonEntities]] that decodes JSON entities with a
-  * [[endpoints4s.algebra.Decoder]] and encodes JSON entities with an [[endpoints4s.algebra.Encoder]].
+  * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
   *
   * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
   * you only need an encoder to build responses, or a decoder to decode requests.

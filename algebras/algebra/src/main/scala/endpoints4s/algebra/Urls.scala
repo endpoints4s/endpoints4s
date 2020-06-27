@@ -3,6 +3,7 @@ package endpoints4s.algebra
 import java.util.UUID
 
 import endpoints4s.{
+  Codec,
   PartialInvariantFunctor,
   PartialInvariantFunctorSyntax,
   Tupler

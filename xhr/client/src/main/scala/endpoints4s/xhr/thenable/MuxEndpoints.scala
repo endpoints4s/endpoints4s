@@ -1,7 +1,7 @@
 package endpoints4s.xhr.thenable
 
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
-import endpoints4s.xhr
+import endpoints4s.algebra.MuxRequest
+import endpoints4s.{Decoder, Encoder, xhr}
 
 import scala.scalajs.js
 

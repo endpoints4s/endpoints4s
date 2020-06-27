@@ -1,7 +1,7 @@
 package endpoints4s.xhr
 
-import endpoints4s.algebra
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.{Decoder, Encoder, algebra}
+import endpoints4s.algebra.MuxRequest
 import org.scalajs.dom.XMLHttpRequest
 
 /**

@@ -2,8 +2,9 @@ package endpoints4s.openapi.model
 
 import java.io.Serializable
 
-import endpoints4s.Hashing
-import endpoints4s.algebra.{Encoder, ExternalDocumentationObject, Tag}
+import endpoints4s.{Encoder, Hashing}
+import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
+
 import scala.collection.mutable
 
 /**

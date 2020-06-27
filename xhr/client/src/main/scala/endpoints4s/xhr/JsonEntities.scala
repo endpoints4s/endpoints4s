@@ -1,7 +1,6 @@
 package endpoints4s.xhr
 
-import endpoints4s.algebra
-import endpoints4s.algebra.Codec
+import endpoints4s.{Codec, algebra}
 import org.scalajs.dom.XMLHttpRequest
 
 /**

@@ -4,7 +4,7 @@ import java.time.format.DateTimeFormatter
 import java.time.LocalDate
 import java.util.UUID
 
-import endpoints4s.{Invalid, Valid, Validated, algebra}
+import endpoints4s.{Codec, Invalid, Valid, Validated, algebra}
 
 import scala.util.Try
 

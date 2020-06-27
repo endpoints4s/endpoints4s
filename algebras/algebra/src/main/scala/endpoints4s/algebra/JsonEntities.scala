@@ -1,5 +1,7 @@
 package endpoints4s.algebra
 
+import endpoints4s.Codec
+
 /**
   * Algebra interface for describing JSON entities in requests and responses.
   *

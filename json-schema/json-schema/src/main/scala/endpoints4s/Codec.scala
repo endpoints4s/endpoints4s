@@ -1,7 +1,6 @@
-package endpoints4s.algebra
+package endpoints4s
 
 import java.util.UUID
-import endpoints4s.{Valid, Invalid, Validated}
 
 /**
   * A way to decode a `From` value into a `To` value.

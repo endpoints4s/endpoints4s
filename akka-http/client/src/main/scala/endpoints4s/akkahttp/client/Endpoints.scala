@@ -9,8 +9,9 @@ import akka.http.scaladsl.model.{
   Uri
 }
 import akka.stream.Materializer
-import endpoints4s.algebra.{Decoder, Documentation}
+import endpoints4s.algebra.Documentation
 import endpoints4s.{
+  Decoder,
   Invalid,
   InvariantFunctor,
   PartialInvariantFunctor,

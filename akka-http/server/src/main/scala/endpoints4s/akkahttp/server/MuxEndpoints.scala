@@ -2,7 +2,7 @@ package endpoints4s
 package akkahttp.server
 
 import akka.http.scaladsl.server.{Directives, Route}
-import endpoints4s.algebra.{Decoder, Encoder, MuxRequest}
+import endpoints4s.algebra.MuxRequest
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

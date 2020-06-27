@@ -1,8 +1,7 @@
 package endpoints4s.algebra.circe
 
 import cats.Show
-import endpoints4s.{Invalid, Valid, Validated}
-import endpoints4s.algebra.{Codec, Decoder, Encoder}
+import endpoints4s.{Codec, Decoder, Encoder, Invalid, Valid, Validated}
 import io.circe.{
   DecodingFailure,
   Json,

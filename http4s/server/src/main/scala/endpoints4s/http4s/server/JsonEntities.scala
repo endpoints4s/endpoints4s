@@ -1,12 +1,11 @@
 package endpoints4s.http4s.server
 
 import cats.implicits._
-import endpoints4s.algebra.Codec
-import endpoints4s.{Invalid, Valid, algebra}
+import endpoints4s.{Codec, Invalid, Valid, algebra}
 import fs2.Chunk
 import org.http4s
 import org.http4s.headers.`Content-Type`
-import org.http4s.{EntityEncoder, EntityDecoder, MediaType}
+import org.http4s.{EntityDecoder, EntityEncoder, MediaType}
 
 /**
   * Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests

@@ -3,6 +3,7 @@ package endpoints4s.sttp.client
 import java.net.URI
 
 import endpoints4s.{
+  Codec,
   Invalid,
   InvariantFunctor,
   PartialInvariantFunctor,
@@ -12,7 +13,7 @@ import endpoints4s.{
   Validated,
   algebra
 }
-import endpoints4s.algebra.{Codec, Documentation}
+import endpoints4s.algebra.Documentation
 import com.softwaremill.sttp
 
 /**

@@ -1,9 +1,7 @@
 package endpoints4s.play.server
 
 import akka.util.ByteString
-import endpoints4s.algebra
-import endpoints4s.algebra.{Decoder, Encoder, Codec}
-import endpoints4s.Invalid
+import endpoints4s.{Codec, Decoder, Encoder, Invalid, algebra}
 import play.api.mvc.RequestHeader
 import play.api.http.{ContentTypes, Writeable}
 
@@ -43,7 +41,7 @@ trait JsonEntitiesFromSchemas
 
 /**
   * Interpreter for [[algebra.JsonEntities]] that decodes JSON entities with a
-  * [[algebra.Decoder]] and encodes JSON entities with an [[algebra.Encoder]].
+  * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
   *
   * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
   * you only need an encoder to build responses, or a decoder to decode requests.

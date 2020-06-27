@@ -1,7 +1,6 @@
 package endpoints4s.algebra.playjson
 
-import endpoints4s.{Invalid, Valid, Validated}
-import endpoints4s.algebra.Codec
+import endpoints4s.{Codec, Invalid, Valid, Validated}
 import play.api.libs.json.{Format, JsPath, Json, JsonValidationError}
 
 import scala.util.{Failure, Success, Try}
