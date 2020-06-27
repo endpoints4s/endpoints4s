@@ -7,7 +7,7 @@ import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 object EndpointsSettings {
 
   val commonSettings = Seq(
-    organization := "org.julienrf",
+    organization := "org.endpoints4s",
     // Scala 2.x vs 3.x
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -80,25 +80,13 @@ object EndpointsSettings {
           <url>http://julien.richard-foy.fr</url>
         </developer>
       </developers>,
-    scalacOptions in (Compile, doc) ++= Seq(
-      "-doc-source-url",
-      s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
-      "-sourcepath",
-      baseDirectory.in(LocalRootProject).value.getAbsolutePath
-    ),
     apiURL := Some(
-      url(s"http://julienrf.github.io/endpoints/api/${version.value}/")
+      url(s"http://endpoints4s.github.io/api")
     ),
     autoAPIMappings := true,
-    homepage := Some(url(s"https://github.com/julienrf/endpoints")),
+    homepage := Some(url(s"https://github.com/endpoints4s/endpoints4s")),
     licenses := Seq(
       "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
-    ),
-    scmInfo := Some(
-      ScmInfo(
-        url(s"https://github.com/julienrf/endpoints"),
-        s"scm:git:git@github.com:julienrf/endpoints.git"
-      )
     )
   )
 

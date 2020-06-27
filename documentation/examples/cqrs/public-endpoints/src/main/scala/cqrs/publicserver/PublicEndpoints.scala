@@ -15,7 +15,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
   */
 // TODO User authentication
 //#public-endpoints
-import endpoints.algebra.{circe, Endpoints}
+import endpoints4s.algebra.{circe, Endpoints}
 
 trait PublicEndpoints extends Endpoints with circe.JsonEntitiesFromCodecs {
 

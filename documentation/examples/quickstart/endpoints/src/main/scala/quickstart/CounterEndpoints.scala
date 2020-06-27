@@ -2,7 +2,7 @@ package quickstart
 
 //#relevant-code
 //#get-endpoint-definition
-import endpoints.{algebra, generic}
+import endpoints4s.{algebra, generic}
 
 //#get-endpoint-definition
 /**

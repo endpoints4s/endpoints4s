@@ -1,6 +1,6 @@
 package cqrs.publicserver
 
-import endpoints.play.client.{JsonEntitiesFromCodecs, Endpoints}
+import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
 import cqrs.commands.CommandsEndpoints
 import play.api.libs.ws.WSClient
 

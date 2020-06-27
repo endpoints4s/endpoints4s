@@ -13,16 +13,16 @@ Here is an example of endpoint description:
 @@snip [CounterEndpoints.scala](/documentation/examples/quickstart/endpoints/src/main/scala/quickstart/CounterEndpoints.scala) { #get-endpoint-definition }
 
 Endpoint descriptions are defined in terms of operations (e.g., `endpoint`, `get`, `path`, `ok`, etc.)
-provided by traits living in the @scaladoc[`endpoints.algebra` package](endpoints.algebra.index).
+provided by traits living in the @scaladoc[`endpoints4s.algebra` package](endpoints4s.algebra.index).
 These operations are all **abstract**. Furthermore, their return **types** are also abstract. Their
 purpose is only to define the **rules** for constructing and combining parts of HTTP endpoint
 descriptions. This is why they are called “algebra interfaces”, or just **algebras**.
 
 For instance, consider the following truncated version of the
-@scaladoc[`Endpoints` algebra](endpoints.algebra.Endpoints):
+@scaladoc[`Endpoints` algebra](endpoints4s.algebra.Endpoints):
 
 ~~~ scala
-package endpoints.algebra
+package endpoints4s.algebra
 
 trait Endpoints {
   /** A request that uses the method GET and the given URL */
@@ -52,9 +52,9 @@ do so by fixing their type members and implementing their methods accordingly. F
 semantics given to `Request[A]` by the Scala.js client interpreter:
 
 ~~~ scala
-package endpoints.xhr
+package endpoints4s.xhr
 
-trait Endpoints extends endpoints.algebra.Endpoints {
+trait Endpoints extends endpoints4s.algebra.Endpoints {
   type Request[A] = js.Function1[A, XMLHttpRequest]
 }
 ~~~
@@ -65,14 +65,14 @@ has the semantics of a function that builds an `XMLHttpRequest` out of an `A` va
 Here is the semantics given by the Play-based server interpreter:
 
 ~~~ scala
-package endpoints.play.server
+package endpoints4s.play.server
 
-trait Endpoints extends endpoints.algebra.Endpoints {
+trait Endpoints extends endpoints4s.algebra.Endpoints {
   type Request[A] = RequestHeader => Option[BodyParser[A]]
 }
 ~~~
 
-The aim of the `endpoints.play.server.Endpoints` trait is to provide a Play router for a given set of HTTP endpoints. So,
+The aim of the `endpoints4s.play.server.Endpoints` trait is to provide a Play router for a given set of HTTP endpoints. So,
 a `Request[A]` is a function that checks if an incoming request matches this endpoint, and in such
 a case it returns a `BodyParser[A]` that decodes a value of type `A` from the request.
 
@@ -80,7 +80,7 @@ As you can see, each interpreter brings its own **concrete semantic type** for `
 interpreters typically fix the `Request[A]` type to a function that *takes* an `A` as parameter. Conversely,
 server interpreters typically fix the `Request[A]` type to a function that *returns* an `A`. Can you guess
 what documentation interpreters do with this type parameter `A`? You can see the answer
-@scaladoc[here](endpoints.openapi.Requests#Request[A]=Requests.this.DocumentedRequest). It is
+@scaladoc[here](endpoints4s.openapi.Requests#Request[A]=Requests.this.DocumentedRequest). It is
 discarded because this type `A` models the information that is carried by an actual request, at run-time,
 but the documentation is static (so, there is no `A` value to deal with).
 

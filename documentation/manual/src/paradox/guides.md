@@ -13,10 +13,10 @@ You might have seen implicit `Tupler` parameters in the type signature
 of some algebra operations. The @ref[Tupler](guides/tupler.md) guide explains
 what it is used for.
 
-## Extending *endpoints* with application-specific concepts
+## Extending endpoints4s with application-specific concepts
 
 When you have application-specific aspects of your communication endpoints
-that are not covered by *endpoints* you can extend the algebras and their
+that are not covered by endpoints4s you can extend the algebras and their
 interpreters to include them.
 
 Typically, each application has its own way of dealing with authentication.
