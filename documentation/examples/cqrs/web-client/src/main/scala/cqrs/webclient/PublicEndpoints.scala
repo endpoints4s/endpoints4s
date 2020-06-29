@@ -1,6 +1,6 @@
 package cqrs.webclient
 
-import endpoints.xhr
+import endpoints4s.xhr
 
 object PublicEndpoints
     extends cqrs.publicserver.PublicEndpoints

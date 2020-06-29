@@ -1,8 +1,8 @@
 package quickstart
 
 //#relevant-code
-import endpoints.openapi
-import endpoints.openapi.model.{Info, OpenApi}
+import endpoints4s.openapi
+import endpoints4s.openapi.model.{Info, OpenApi}
 
 /**
   * Generates OpenAPI documentation for the endpoints described in the `CounterEndpoints` trait.

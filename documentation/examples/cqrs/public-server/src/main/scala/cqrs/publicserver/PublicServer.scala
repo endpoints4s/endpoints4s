@@ -7,7 +7,11 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
+import endpoints4s.play.server.{
+  Endpoints,
+  JsonEntitiesFromCodecs,
+  PlayComponents
+}
 
 import scala.concurrent.Future
 

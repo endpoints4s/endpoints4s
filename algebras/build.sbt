@@ -9,7 +9,7 @@ val algebra =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra",
+      name := "algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
         ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).withDottyCompat(scalaVersion.value),
@@ -33,7 +33,7 @@ val `algebra-circe` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra-circe",
+      name := "algebra-circe",
       libraryDependencies ++= Seq(
         ("io.circe" %%% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value),
         ("io.circe" %%% "circe-generic" % circeVersion % Test).withDottyCompat(scalaVersion.value)
@@ -51,7 +51,7 @@ val `algebra-playjson` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra-playjson",
+      name := "algebra-playjson",
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")

@@ -20,7 +20,7 @@ resources. This can be summarized by the following diagram:
 
 ![authentication-flow](authentication-flow.svg)
 
-We want to enrich the *endpoints* algebras with new vocabulary describing the login
+We want to enrich the endpoints4s algebras with new vocabulary describing the login
 endpoint as well as the protected endpoints.
 
 ## Login endpoint
@@ -109,7 +109,7 @@ that the API key is invalid.
 What have we learnt so far?
 
 We are only halfway trough this document but the first sections already
-showed the key aspects of enriching the *endpoints* library for
+showed the key aspects of enriching endpoints4s for
 application-specific needs:
 
 1. We have **enriched** the existing algebras with another algebra,
@@ -131,7 +131,7 @@ These relationships are illustrated by the following diagram:
 
 ![interactions](/interactions.svg)
 
-The traits provided by *endpoints* are shown in gray.
+The traits provided by endpoints4s are shown in gray.
 
 ### Client interpreter
 
@@ -158,7 +158,7 @@ In case of failure, this method returns an exception that
 will be eventually thrown by the base client interpreter. One could
 argue that we should model the fact that decoding the response can
 fail by returning an `Option` instead of throwing an exception.
-However, the philosophy of *endpoints* is that client and
+However, the philosophy of endpoints4s is that client and
 server interpreters implement a same HTTP protocol, therefore we
 expect (and assume) the interpreters to be consistent together.
 Thus, we assume that  don’t need to surface that kind of failures

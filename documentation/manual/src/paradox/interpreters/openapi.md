@@ -2,11 +2,11 @@
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-openapi" % "$version$"
+"org.endpoints4s" %% "openapi" % "$version$"
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.openapi.index)
+@scaladoc[API documentation](endpoints4s.openapi.index)
 
 This family of interpreters produces static documentation for endpoint definitions,
 in the form of an [OpenAPI document](https://www.openapis.org/).
@@ -19,17 +19,17 @@ to generate an OpenAPI document.
 
 Given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #documented-endpoint-definition }
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #documented-endpoint-definition }
 
 It can be documented as follows:
 
-@@snip [EndpointsDocs.scala](/openapi/openapi/src/test/scala/endpoints/openapi/EndpointsDocs.scala) { #documentation }
+@@snip [EndpointsDocs.scala](/openapi/openapi/src/test/scala/endpoints4s/openapi/EndpointsDocs.scala) { #documentation }
 
-The value returned by the `openApi` method has type `endpoints.openapi.models.OpenApi`,
+The value returned by the `openApi` method has type `endpoints4s.openapi.models.OpenApi`,
 which is an abstract model for OpenAPI documents. You can encode it into JSON by using the
 `OpenApi.stringEncoder` encoder. 
 
-@@snip [EndpointsDocs.scala](/openapi/openapi/src/test/scala/endpoints/openapi/EndpointsDocs.scala) { #documentation-asjson }
+@@snip [EndpointsDocs.scala](/openapi/openapi/src/test/scala/endpoints4s/openapi/EndpointsDocs.scala) { #documentation-asjson }
 
 In case the endpoint that serves the documentation is itself defined using _endpoints_,
 you can use the `JsonEntitiesFromEncoderAndDecoder` interpreter to define an endpoint

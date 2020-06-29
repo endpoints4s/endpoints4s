@@ -6,8 +6,8 @@ import _root_.play.api.routing.sird._
 import _root_.play.api.routing.Router
 import _root_.play.core.server.DefaultNettyServerComponents
 import controllers.{AssetsBuilder, AssetsConfiguration, DefaultAssetsMetadata}
-import endpoints.openapi.model.OpenApi
-import endpoints.play.server.PlayComponents
+import endpoints4s.openapi.model.OpenApi
+import endpoints4s.play.server.PlayComponents
 import sample.play.server.DocumentedApi
 
 object Server extends App with Results with DefaultNettyServerComponents {

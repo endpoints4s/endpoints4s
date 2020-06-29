@@ -1,4 +1,4 @@
-package endpoints.algebra
+package endpoints4s.algebra
 
 /**
   * Generated trait that provides `JsonSchema` constructors for tuples from 2 to 22 elements.

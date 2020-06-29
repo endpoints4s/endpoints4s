@@ -9,7 +9,7 @@ import cqrs.infra.PlayService
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.publicserver.{BootstrapEndpoints, PublicEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints.play.client.{Endpoints, JsonEntitiesFromCodecs}
+import endpoints4s.play.client.{Endpoints, JsonEntitiesFromCodecs}
 import org.scalatest.BeforeAndAfterAll
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}

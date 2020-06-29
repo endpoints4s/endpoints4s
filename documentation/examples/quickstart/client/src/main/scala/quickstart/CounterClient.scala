@@ -1,7 +1,7 @@
 package quickstart
 
 //#relevant-code
-import endpoints.xhr
+import endpoints4s.xhr
 
 /**
   * Defines an HTTP client for the endpoints described in the `CounterEndpoints` trait.

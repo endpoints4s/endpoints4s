@@ -1,7 +1,7 @@
 package sample
 
 import cats.effect.IO
-import endpoints.http4s.server.{
+import endpoints4s.http4s.server.{
   BasicAuthentication,
   Endpoints,
   JsonEntitiesFromCodecs

@@ -6,36 +6,36 @@ Client and server backed by [http4s](http://http4s.org).
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-http4s-client" % "$version$"
+"org.endpoints4s" %% "http4s-client" % "$version$"
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.http4s.client.index)
+@scaladoc[API documentation](endpoints4s.http4s.client.index)
 
 ### `Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a `Kleisli[Effect, A, B]` aka a function
 from `A` to `Effect[B]`, where `Effect[_]` can be any type constructor `F[_]` with a valid `cats.effect.Sync` instance (e.g. `cats.effect.IO` or `monix.eval.Task`) :
 
-@@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints/http4s/client/Endpoints.scala) { #endpoint-type }
+@@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows using `IO`:
 
-@@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints/http4s/client/EndpointsDocs.scala) { #invocation }
+@@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints4s/http4s/client/EndpointsDocs.scala) { #invocation }
 
 ## Server
 
 @@@vars
 ~~~ scala
-"org.julienrf" %% "endpoints-http4s-server" % "$version$"
+"org.endpoints4s" %% "http4s-server" % "$version$"
 ~~~
 @@@
 
-@scaladoc[API documentation](endpoints.http4s.server.index)
+@scaladoc[API documentation](endpoints4s.http4s.server.index)
 
 ### `Endpoints`
 
@@ -45,11 +45,11 @@ value that can be integrated to your http4s application.
 
 For instance, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be implemented as follows:
 
-@@snip [EndpointsDocs.scala](/http4s/server/src/test/scala/endpoints/http4s/server/EndpointsDocs.scala) { #implementation }
+@@snip [EndpointsDocs.scala](/http4s/server/src/test/scala/endpoints4s/http4s/server/EndpointsDocs.scala) { #implementation }
 
 The result is a regular value of type `org.http4s.HttpRoute[IO]` that can be integrated in your application like
 any other http4s service.
@@ -62,19 +62,19 @@ an exception is thrown.
 
 #### The incoming request doesn’t match any endpoint
 
-In that case, the router constructed by *endpoints* can’t do anything. You have to deal with such
+In that case, the router constructed by endpoints4s can’t do anything. You have to deal with such
 errors in the usual http4s way (usually, by adding a `.orNotFound` call to your application
 services).
 
 #### The incoming request is invalid
 
-In that case, *endpoints* returns a “Bad Request” (400) response reporting all the errors in a
+In that case, endpoints4s returns a “Bad Request” (400) response reporting all the errors in a
 JSON array. You can change this behavior by overriding the
-@scaladoc[handleClientErrors](endpoints.http4s.server.EndpointsWithCustomErrors) method.
+@scaladoc[handleClientErrors](endpoints4s.http4s.server.EndpointsWithCustomErrors) method.
 
 #### An exception is thrown
 
 If an exception is thrown during request decoding, or when running the business logic, or when
-encoding the response, *endpoints* returns an “Internal Server Error” (500) response reporting
+encoding the response, endpoints4s returns an “Internal Server Error” (500) response reporting
 the error in a JSON array. You can change this behavior by overriding the
-@scaladoc[handleServerError](endpoints.http4s.server.EndpointsWithCustomErrors) method.
+@scaladoc[handleServerError](endpoints4s.http4s.server.EndpointsWithCustomErrors) method.

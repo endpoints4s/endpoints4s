@@ -1,7 +1,7 @@
 package sample.play.server
 
-import endpoints.play
-import endpoints.play.server.PlayComponents
+import endpoints4s.play
+import endpoints4s.play.server.PlayComponents
 import sample.algebra.Item
 
 class DocumentedApi(val playComponents: PlayComponents)
