@@ -25,7 +25,7 @@ trait JsonEntitiesFromCodecs
     req =>
       http4s.EntityDecoder
         .decodeBy(MediaType.application.json) { (msg: http4s.Media[Effect]) =>
-          http4s.DecodeResult.success(EntityDecoder.decodeString(msg))
+          http4s.DecodeResult.success(EntityDecoder.decodeText(msg))
         }
         .decode(req, strict = true)
         .leftWiden[Throwable]
