@@ -16,7 +16,10 @@ val `play-server` =
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-netty-server" % playVersion).withDottyCompat(scalaVersion.value),
         ("com.typesafe.play" %% "play-test" % playVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value)
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value),
+        // Override Akka dependencies because our tests use 2.6.6
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -42,7 +45,10 @@ val `play-client` =
       `scala 2.12 to dotty`,
       name := "play-client",
       libraryDependencies ++= Seq(
-        ("com.typesafe.play" %% "play-ahc-ws" % playVersion).withDottyCompat(scalaVersion.value)
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion).withDottyCompat(scalaVersion.value),
+        // Override Akka dependencies because our tests use 2.6.6
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(
