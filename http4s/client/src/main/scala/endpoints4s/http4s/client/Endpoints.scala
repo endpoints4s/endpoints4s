@@ -257,9 +257,9 @@ trait EndpointsWithCustomErrors
   ): Endpoint[A, B] =
     Kleisli { a =>
       request(a).flatMap { req =>
-        client.run(req).use(res =>
-          decodeResponse(response, res).flatMap(_.apply(res))
-        )
+        client
+          .run(req)
+          .use(res => decodeResponse(response, res).flatMap(_.apply(res)))
       }
     }
 
