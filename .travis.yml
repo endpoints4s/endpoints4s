@@ -43,7 +43,7 @@ jobs:
       scala: 2.13.2
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
-      scala: 0.25.0-bin-20200511-5fb865b-NIGHTLY
+      scala: 0.25.0-RC2
       script: sbt "++ $TRAVIS_SCALA_VERSION ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
 
     - stage: coverage and code formatting
