@@ -8,15 +8,18 @@ package endpoints4s.algebra
 trait Assets extends EndpointsWithCustomErrors {
 
   /** An HTTP request to retrieve an asset
-    * @group types */
+    * @group types
+    */
   type AssetRequest
 
   /** The path of the asset
-    * @group types */
+    * @group types
+    */
   type AssetPath
 
   /** An HTTP response containing an asset
-    * @group types */
+    * @group types
+    */
   type AssetResponse
 
   /**
@@ -51,7 +54,8 @@ trait Assets extends EndpointsWithCustomErrors {
   ): Endpoint[AssetRequest, AssetResponse]
 
   /** The digests of the assets
-    * @group operations */
+    * @group operations
+    */
   def digests: Map[String, String]
 
 }

@@ -53,10 +53,11 @@ object Codec {
 
   def fromEncoderAndDecoder[E, D](
       encoder: Encoder[D, E]
-  )(decoder: Decoder[E, D]): Codec[E, D] = new Codec[E, D] {
-    def decode(from: E): Validated[D] = decoder.decode(from)
-    def encode(from: D): E = encoder.encode(from)
-  }
+  )(decoder: Decoder[E, D]): Codec[E, D] =
+    new Codec[E, D] {
+      def decode(from: E): Validated[D] = decoder.decode(from)
+      def encode(from: D): E = encoder.encode(from)
+    }
 
   /** Combines two codecs, sequentially, by feeding the input of the second one with
     * the output of the first one
@@ -77,12 +78,13 @@ object Codec {
       `type`: String,
       parse: String => A,
       print: A => String = (x: A) => x.toString()
-  ): Codec[String, A] = new Codec[String, A] {
-    def encode(x: A): String = print(x)
-    def decode(str: String): Validated[A] =
-      try { Valid(parse(str)) }
-      catch { case _: Throwable => Invalid(s"Invalid ${`type`} value '$str'") }
-  }
+  ): Codec[String, A] =
+    new Codec[String, A] {
+      def encode(x: A): String = print(x)
+      def decode(str: String): Validated[A] =
+        try { Valid(parse(str)) }
+        catch { case _: Throwable => Invalid(s"Invalid ${`type`} value '$str'") }
+    }
 
   val uuidCodec: Codec[String, UUID] =
     parseStringCatchingExceptions("UUID", UUID.fromString)
@@ -97,8 +99,11 @@ object Codec {
     parseStringCatchingExceptions("number", _.toDouble)
 
   val booleanCodec: Codec[String, Boolean] =
-    parseStringCatchingExceptions("boolean", {
-      case "true" | "1"  => true
-      case "false" | "0" => false
-    })
+    parseStringCatchingExceptions(
+      "boolean",
+      {
+        case "true" | "1"  => true
+        case "false" | "0" => false
+      }
+    )
 }

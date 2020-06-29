@@ -9,9 +9,7 @@ import org.scalajs.dom.XMLHttpRequest
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends EndpointsWithCustomErrors
-    with algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.JsonEntitiesFromCodecs {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]) =
     (a: A, xhr: XMLHttpRequest) => {

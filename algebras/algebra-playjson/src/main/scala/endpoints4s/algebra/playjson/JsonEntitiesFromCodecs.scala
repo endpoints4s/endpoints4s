@@ -56,43 +56,43 @@ import scala.util.{Failure, Success, Try}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends endpoints4s.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs extends endpoints4s.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = Format[A]
 //#type-carrier
 
-  def stringCodec[A: Format]: Codec[String, A] = new Codec[String, A] {
+  def stringCodec[A: Format]: Codec[String, A] =
+    new Codec[String, A] {
 
-    def decode(from: String): Validated[A] =
-      (Try(Json.parse(from)) match {
-        case Failure(_) => Left(Invalid("Unable to parse entity as JSON"))
-        case Success(a) => Right(a)
-      }).flatMap { json =>
-        def showErrors(
-            errors: collection.Seq[
-              (JsPath, collection.Seq[JsonValidationError])
-            ]
-        ): Invalid =
-          Invalid(
-            (
-              for {
-                (path, pathErrors) <- errors.iterator
-                error <- pathErrors
-              } yield s"${error.message} for ${path.toJsonString}"
-            ).toSeq
-          )
-        Json
-          .fromJson[A](json)
-          .asEither
-          .left
-          .map(showErrors)
-          .map(Valid(_))
-      }.merge
+      def decode(from: String): Validated[A] =
+        (Try(Json.parse(from)) match {
+          case Failure(_) => Left(Invalid("Unable to parse entity as JSON"))
+          case Success(a) => Right(a)
+        }).flatMap { json =>
+          def showErrors(
+              errors: collection.Seq[
+                (JsPath, collection.Seq[JsonValidationError])
+              ]
+          ): Invalid =
+            Invalid(
+              (
+                for {
+                  (path, pathErrors) <- errors.iterator
+                  error <- pathErrors
+                } yield s"${error.message} for ${path.toJsonString}"
+              ).toSeq
+            )
+          Json
+            .fromJson[A](json)
+            .asEither
+            .left
+            .map(showErrors)
+            .map(Valid(_))
+        }.merge
 
-    def encode(from: A): String = Json.stringify(Json.toJson(from))
+      def encode(from: A): String = Json.stringify(Json.toJson(from))
 
-  }
+    }
 
 }

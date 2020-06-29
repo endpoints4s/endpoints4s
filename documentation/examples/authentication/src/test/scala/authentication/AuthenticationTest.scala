@@ -46,50 +46,56 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
     }
     "invalid authenticated request gets rejected" in {
       for {
-        response <- wsClient
-          .url(uri("/some-resource"))
-          .withHttpHeaders(HeaderNames.AUTHORIZATION -> "lol")
-          .get()
+        response <-
+          wsClient
+            .url(uri("/some-resource"))
+            .withHttpHeaders(HeaderNames.AUTHORIZATION -> "lol")
+            .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
     "invalid json token gets rejected" in {
       val token =
         """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"""
       for {
-        response <- wsClient
-          .url(uri("/some-resource"))
-          .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
-          .get()
+        response <-
+          wsClient
+            .url(uri("/some-resource"))
+            .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
+            .get()
       } yield assert(response.status == Status.UNAUTHORIZED)
     }
     "wrong login is rejected" in {
       for {
-        loginResponse <- wsClient
-          .url(uri("/login"))
-          .withQueryStringParameters("apiKey" -> "unknown")
-          .get()
+        loginResponse <-
+          wsClient
+            .url(uri("/login"))
+            .withQueryStringParameters("apiKey" -> "unknown")
+            .get()
       } yield assert(loginResponse.status == Status.BAD_REQUEST)
     }
     "login gives a valid json token" in {
       for {
-        loginResponse <- wsClient
-          .url(uri("/login"))
-          .withQueryStringParameters("apiKey" -> "foobar")
-          .get()
-        token = loginResponse
-          .headers(HeaderNames.AUTHORIZATION)
-          .head
-          .drop("Bearer ".length)
+        loginResponse <-
+          wsClient
+            .url(uri("/login"))
+            .withQueryStringParameters("apiKey" -> "foobar")
+            .get()
+        token =
+          loginResponse
+            .headers(HeaderNames.AUTHORIZATION)
+            .head
+            .drop("Bearer ".length)
         _ = {
           assert(loginResponse.status == Status.OK)
           val jwtSession = JwtSession.deserialize(token)
           val user = jwtSession.getAs[UserInfo]("user").get
           assert(user == UserInfo("Alice"))
         }
-        response <- wsClient
-          .url(uri("/some-resource"))
-          .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
-          .get()
+        response <-
+          wsClient
+            .url(uri("/some-resource"))
+            .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
+            .get()
       } yield assert(response.status == Status.OK)
     }
     //#login-test-client

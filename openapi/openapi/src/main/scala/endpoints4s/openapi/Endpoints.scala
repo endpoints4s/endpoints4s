@@ -9,10 +9,7 @@ import endpoints4s.openapi.model._
   *
   * @group interpreters
   */
-trait Endpoints
-    extends algebra.Endpoints
-    with EndpointsWithCustomErrors
-    with BuiltInErrors
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
 /**
   * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints.
@@ -35,9 +32,12 @@ trait EndpointsWithCustomErrors
         .groupBy(_.path)
         .map {
           case (k, es) =>
-            (k, es.tail.foldLeft(PathItem(es.head.item.operations)) {
-              (item, e2) => PathItem(item.operations ++ e2.item.operations)
-            })
+            (
+              k,
+              es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
+                PathItem(item.operations ++ e2.item.operations)
+              }
+            )
         }
     val components = Components(
       schemas = captureSchemas(endpoints),
@@ -92,9 +92,7 @@ trait EndpointsWithCustomErrors
     }
     val pathParams = correctPathSegments.collect { case Right(param) => param }
     val parameters =
-      pathParams.map(p =>
-        Parameter(p.name, In.Path, p.required, p.description, p.schema)
-      ) ++
+      pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
         request.url.queryParameters.map(p =>
           Parameter(p.name, In.Query, p.required, p.description, p.schema)
         ) ++
@@ -203,8 +201,9 @@ trait EndpointsWithCustomErrors
       responseSchemas = for {
         (_, response) <- operation.responses.toSeq
         (_, mediaType) <- response.content.toSeq
-        schema <- mediaType.schema.toIterable ++ response.headers.values
-          .map(_.schema)
+        schema <-
+          mediaType.schema.toIterable ++ response.headers.values
+            .map(_.schema)
       } yield schema
       schema <- requestBodySchema ++ responseSchemas ++ operationParametersSchemas
       recSchema <- captureReferencedSchemasRec(schema)

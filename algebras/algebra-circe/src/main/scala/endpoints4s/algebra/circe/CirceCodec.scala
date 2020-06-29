@@ -20,8 +20,8 @@ object CirceCodec {
 
   @inline def apply[A](implicit codec: CirceCodec[A]): CirceCodec[A] = codec
 
-  implicit def fromEncoderAndDecoder[A](
-      implicit enc: CirceEncoder[A],
+  implicit def fromEncoderAndDecoder[A](implicit
+      enc: CirceEncoder[A],
       dec: CirceDecoder[A]
   ): CirceCodec[A] =
     new CirceCodec[A] {

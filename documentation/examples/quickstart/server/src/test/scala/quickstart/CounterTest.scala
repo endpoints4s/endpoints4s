@@ -4,13 +4,7 @@ import java.net.ServerSocket
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{
-  ContentTypes,
-  HttpEntity,
-  HttpMethods,
-  HttpRequest,
-  StatusCodes
-}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import org.scalatest.BeforeAndAfterAll
 

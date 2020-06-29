@@ -24,8 +24,7 @@ trait BasicAuthentication
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
@@ -35,9 +34,7 @@ trait BasicAuthentication
       url,
       entity,
       requestDocs,
-      headers.xmap(h => tuplerHCred(h, Credentials("", "")))(t =>
-        tuplerHCred.unapply(t)._1
-      )
+      headers.xmap(h => tuplerHCred(h, Credentials("", "")))(t => tuplerHCred.unapply(t)._1)
     )(
       tuplerUE,
       tuplerUEHCred
@@ -52,8 +49,7 @@ trait BasicAuthentication
       unauthenticatedDocs: Documentation = None,
       requestDocs: Documentation = None,
       endpointDocs: EndpointDocs = EndpointDocs()
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]

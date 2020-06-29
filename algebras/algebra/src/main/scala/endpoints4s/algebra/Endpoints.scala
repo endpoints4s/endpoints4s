@@ -79,16 +79,17 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       s"EndpointDocs($operationId, $summary, $description, $tags, $callbacks, $deprecated)"
 
     @nowarn("cat=unchecked")
-    override def equals(other: Any): Boolean = other match {
-      case that: EndpointDocs =>
-        operationId == that.operationId &&
-          summary == that.summary &&
-          description == that.description &&
-          tags == that.tags &&
-          callbacks == that.callbacks &&
-          deprecated == that.deprecated
-      case _ => false
-    }
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: EndpointDocs =>
+          operationId == that.operationId &&
+            summary == that.summary &&
+            description == that.description &&
+            tags == that.tags &&
+            callbacks == that.callbacks &&
+            deprecated == that.deprecated
+        case _ => false
+      }
 
     override def hashCode(): Int =
       Hashing.hash(
@@ -197,14 +198,15 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       s"CallbackDocs($method, $entity, $response, $requestDocs)"
 
     @nowarn("cat=unchecked")
-    override def equals(other: Any): Boolean = other match {
-      case that: CallbackDocs =>
-        method == that.method &&
-          entity == that.entity &&
-          response == that.response &&
-          requestDocs == that.requestDocs
-      case _ => false
-    }
+    override def equals(other: Any): Boolean =
+      other match {
+        case that: CallbackDocs =>
+          method == that.method &&
+            entity == that.entity &&
+            response == that.response &&
+            requestDocs == that.requestDocs
+        case _ => false
+      }
 
     override def hashCode(): Int =
       Hashing.hash(method, entity, response, requestDocs)

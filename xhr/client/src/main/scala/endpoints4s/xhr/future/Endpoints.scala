@@ -30,9 +30,12 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
       def apply(a: A) = {
         val promise = Promise[B]()
         performXhr(request, response, a)(
-          _.fold(exn => { promise.failure(exn); () }, b => {
-            promise.success(b); ()
-          }),
+          _.fold(
+            exn => { promise.failure(exn); () },
+            b => {
+              promise.success(b); ()
+            }
+          ),
           xhr => { promise.failure(new Exception(xhr.responseText)); () }
         )
         promise.future

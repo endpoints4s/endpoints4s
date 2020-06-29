@@ -20,20 +20,17 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
       response: Response[Transport]
   ) {
 
-    def implementedBy(handler: MuxHandler[Req, Resp])(
-        implicit
+    def implementedBy(handler: MuxHandler[Req, Resp])(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): Route = handleAsync(req => Future.successful(handler(req)))
 
-    def implementedByAsync(handler: MuxHandlerAsync[Req, Resp])(
-        implicit
+    def implementedByAsync(handler: MuxHandlerAsync[Req, Resp])(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): Route = handleAsync(req => handler(req))
 
-    private def handleAsync(handler: Req { type Response = Resp } => Future[Resp])(
-        implicit
+    private def handleAsync(handler: Req { type Response = Resp } => Future[Resp])(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): Route =

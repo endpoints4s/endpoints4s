@@ -16,8 +16,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     def decoder: Decoder[A]
   }
 
-  implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -40,18 +39,18 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     def apply[A](_encoder: Encoder[A], _decoder: Decoder[A]): JsonSchema[A] =
       new JsonSchema[A] { def encoder = _encoder; def decoder = _decoder }
 
-    implicit def toCirceCodec[A](
-        implicit jsonSchema: JsonSchema[A]
+    implicit def toCirceCodec[A](implicit
+        jsonSchema: JsonSchema[A]
     ): CirceCodec[A] =
       CirceCodec.fromEncoderAndDecoder(jsonSchema.encoder, jsonSchema.decoder)
 
-    implicit def toCirceEncoder[A](
-        implicit jsonSchema: JsonSchema[A]
+    implicit def toCirceEncoder[A](implicit
+        jsonSchema: JsonSchema[A]
     ): Encoder[A] =
       jsonSchema.encoder
 
-    implicit def toCirceDecoder[A](
-        implicit jsonSchema: JsonSchema[A]
+    implicit def toCirceDecoder[A](implicit
+        jsonSchema: JsonSchema[A]
     ): Decoder[A] =
       jsonSchema.decoder
   }
@@ -70,8 +69,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     implicit def toCirceCodec[A](implicit record: Record[A]): CirceCodec[A] =
       CirceCodec.fromEncoderAndDecoder(record.encoder, record.decoder)
 
-    implicit def toCirceObjectEncoder[A](
-        implicit record: Record[A]
+    implicit def toCirceObjectEncoder[A](implicit
+        record: Record[A]
     ): Encoder.AsObject[A] =
       record.encoder
 
@@ -201,20 +200,16 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       }
     )
 
-  def field[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def field[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[A] =
     Record(
-      io.circe.Encoder.AsObject.instance[A](a =>
-        JsonObject.singleton(name, tpe.encoder.apply(a))
-      ),
-      io.circe.Decoder.instance[A](cursor =>
-        tpe.decoder.tryDecode(cursor.downField(name))
-      )
+      io.circe.Encoder.AsObject.instance[A](a => JsonObject.singleton(name, tpe.encoder.apply(a))),
+      io.circe.Decoder.instance[A](cursor => tpe.decoder.tryDecode(cursor.downField(name)))
     )
 
-  def optField[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def optField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[Option[A]] =
     Record(
       io.circe.Encoder.AsObject.instance[Option[A]](maybeA =>
@@ -250,10 +245,11 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       taggedB: Tagged[B]
   ): Tagged[Either[A, B]] =
     new Tagged[Either[A, B]] {
-      def taggedEncoded(aOrB: Either[A, B]) = aOrB match {
-        case Left(a)  => taggedA.taggedEncoded(a)
-        case Right(b) => taggedB.taggedEncoded(b)
-      }
+      def taggedEncoded(aOrB: Either[A, B]) =
+        aOrB match {
+          case Left(a)  => taggedA.taggedEncoded(a)
+          case Right(b) => taggedB.taggedEncoded(b)
+        }
       def taggedDecoder(tag: String) =
         taggedA
           .taggedDecoder(tag)
@@ -261,8 +257,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           .orElse(taggedB.taggedDecoder(tag).map(_.map[Either[A, B]](Right(_))))
     }
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
-      implicit t: Tupler[A, B]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
+      t: Tupler[A, B]
   ): Record[t.Out] = {
     val encoder =
       io.circe.Encoder.AsObject.instance[t.Out] { o =>
@@ -322,8 +318,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   implicit def byteJsonSchema: JsonSchema[Byte] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](
-      implicit jsonSchema: JsonSchema[A],
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+      jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =
     JsonSchema(
@@ -331,8 +327,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       io.circe.Decoder.decodeIterable[A, C](jsonSchema.decoder, factory)
     )
 
-  implicit def mapJsonSchema[A](
-      implicit jsonSchema: JsonSchema[A]
+  implicit def mapJsonSchema[A](implicit
+      jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]] =
     JsonSchema(
       io.circe.Encoder.encodeMap[String, A](implicitly, jsonSchema.encoder),

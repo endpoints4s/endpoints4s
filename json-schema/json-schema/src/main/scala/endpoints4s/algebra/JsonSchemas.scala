@@ -2,12 +2,7 @@ package endpoints4s.algebra
 
 import java.util.UUID
 
-import endpoints4s.{
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Tupler,
-  Validated
-}
+import endpoints4s.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
 
 import scala.collection.compat._
 import scala.reflect.ClassTag
@@ -275,8 +270,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  def field[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def field[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[A]
 
   /** The JSON schema of a record with a single optional field `name` of type `A`
@@ -290,8 +285,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  def optField[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def optField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[Option[A]]
 
   /** Tags a schema for type `A` with the given tag name */
@@ -338,8 +333,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     }
 
   /** The JSON schema of a record merging the fields of the two given records */
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
-      implicit t: Tupler[A, B]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
+      t: Tupler[A, B]
   ): Record[t.Out]
 
   /** Include an example value within the given record JSON schema */
@@ -494,8 +489,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
-  final implicit class RecordOps[A](recordA: Record[A])
-      extends JsonSchemaDocumentationOps[A] {
+  final implicit class RecordOps[A](recordA: Record[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Record[A]
 
     /** Merge the fields of `recordA` with the fields of `recordB`
@@ -551,8 +545,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class TaggedOps[A](taggedA: Tagged[A])
-      extends JsonSchemaDocumentationOps[A] {
+  final implicit class TaggedOps[A](taggedA: Tagged[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Tagged[A]
 
     /** Define a schema that alternatively accepts `taggedA` or `taggedB`
@@ -628,8 +621,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class EnumOps[A](enumA: Enum[A])
-      extends JsonSchemaDocumentationOps[A] {
+  final implicit class EnumOps[A](enumA: Enum[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Enum[A]
 
     /**
@@ -721,8 +713,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for sequences
     * @group operations
     */
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](
-      implicit
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]]
@@ -730,8 +721,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for maps with string keys
     * @group operations
     */
-  implicit def mapJsonSchema[A](
-      implicit jsonSchema: JsonSchema[A]
+  implicit def mapJsonSchema[A](implicit
+      jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]]
 
 }

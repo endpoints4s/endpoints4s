@@ -24,8 +24,7 @@ trait BasicAuthentication
       )
     )
 
-  private[endpoints4s] def basicAuthenticationHeader
-      : RequestHeaders[Option[Credentials]] =
+  private[endpoints4s] def basicAuthenticationHeader: RequestHeaders[Option[Credentials]] =
     headers =>
       Valid(
         headers
@@ -45,8 +44,7 @@ trait BasicAuthentication
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation = None
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHC: Tupler.Aux[H, Credentials, HC],
       tuplerUEHC: Tupler.Aux[UE, HC, Out]

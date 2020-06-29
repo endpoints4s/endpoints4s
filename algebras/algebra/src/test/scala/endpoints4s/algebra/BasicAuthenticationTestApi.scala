@@ -2,9 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s.algebra
 
-trait BasicAuthenticationTestApi
-    extends EndpointsTestApi
-    with algebra.BasicAuthentication {
+trait BasicAuthenticationTestApi extends EndpointsTestApi with algebra.BasicAuthentication {
 
   val protectedEndpoint = authenticatedEndpoint(
     Get,

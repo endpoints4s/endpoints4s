@@ -1,13 +1,7 @@
 package endpoints4s.akkahttp.server
 
 import akka.http.scaladsl.marshalling.Marshaller
-import akka.http.scaladsl.model.{
-  ContentType,
-  ContentTypes,
-  HttpEntity,
-  HttpRequest,
-  MessageEntity
-}
+import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, MessageEntity}
 import akka.http.scaladsl.server.Directives
 import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.stream.scaladsl.Source
@@ -21,9 +15,7 @@ import scala.concurrent.Future
   *
   * @group interpreters
   */
-trait ChunkedEntities
-    extends algebra.ChunkedEntities
-    with EndpointsWithCustomErrors {
+trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomErrors {
 
   type Chunks[A] = Source[A, _]
 
@@ -60,10 +52,9 @@ trait ChunkedEntities
       contentType: ContentType,
       toByteString: A => ByteString
   ): ResponseEntity[Chunks[A]] =
-    Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) {
-      as =>
-        val byteStrings = as.map(toByteString)
-        HttpEntity.Chunked.fromData(contentType, byteStrings)
+    Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) { as =>
+      val byteStrings = as.map(toByteString)
+      HttpEntity.Chunked.fromData(contentType, byteStrings)
     }
 
 }
@@ -78,8 +69,8 @@ trait ChunkedJsonEntities
     with ChunkedEntities
     with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedRequestEntity { byteString =>
@@ -92,8 +83,8 @@ trait ChunkedJsonEntities
     }
   }
 
-  def jsonChunksResponse[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedResponseEntity(

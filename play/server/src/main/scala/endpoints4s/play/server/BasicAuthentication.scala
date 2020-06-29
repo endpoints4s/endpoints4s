@@ -13,9 +13,7 @@ import play.api.mvc.{BodyParser, Results}
 /**
   * @group interpreters
   */
-trait BasicAuthentication
-    extends algebra.BasicAuthentication
-    with EndpointsWithCustomErrors {
+trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   import playComponents.executionContext
 
@@ -23,8 +21,7 @@ trait BasicAuthentication
     * Extracts the credentials from the request headers.
     * In case of absence of credentials, returns an `Unauthorized` result.
     */
-  private lazy val basicAuthenticationHeader
-      : RequestHeaders[Option[Credentials]] =
+  private lazy val basicAuthenticationHeader: RequestHeaders[Option[Credentials]] =
     headers =>
       Valid(
         headers
@@ -48,8 +45,7 @@ trait BasicAuthentication
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHC: Tupler.Aux[H, Credentials, HC],
       tuplerUEHC: Tupler.Aux[UE, HC, Out]

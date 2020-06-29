@@ -3,8 +3,7 @@ package endpoints4s.algebra.client
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints4s.algebra.{Address, JsonFromCodecTestApi, User}
 
-trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi]
-    extends ClientTestBase[T] {
+trait JsonFromCodecTestSuite[T <: JsonFromCodecTestApi] extends ClientTestBase[T] {
 
   def jsonFromCodecTestSuite() = {
 

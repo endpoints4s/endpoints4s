@@ -51,7 +51,6 @@ import scala.reflect.ClassTag
   *     ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
   *   }
   * }}}
-  *
   */
 trait JsonSchemas extends algebra.JsonSchemas {
 
@@ -78,8 +77,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (_: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
 
-    implicit def singletonCoproduct[L <: Symbol, A](
-        implicit
+    implicit def singletonCoproduct[L <: Symbol, A](implicit
         labelSingleton: Witness.Aux[L],
         recordA: GenericRecord[A]
     ): GenericTagged[FieldType[L, A] :+: CNil] =
@@ -97,8 +95,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
   trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority {
     this: GenericJsonSchema.type =>
 
-    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](
-        implicit
+    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
         labelHead: Witness.Aux[L],
         jsonSchemaHead: JsonSchema[H],
         jsonSchemaTail: DocumentedGenericRecord[T, DT]
@@ -112,8 +109,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
             }(ht => (ht.head, ht.tail))
       }
 
-    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](
-        implicit
+    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
         labelHead: Witness.Aux[L],
         jsonSchemaHead: JsonSchema[H],
         jsonSchemaTail: DocumentedGenericRecord[T, DT]
@@ -127,8 +123,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
             }(ht => (ht.head, ht.tail))
       }
 
-    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](
-        implicit
+    implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
         labelHead: Witness.Aux[L],
         recordHead: GenericRecord[H],
         taggedTail: GenericTagged[T]
@@ -159,8 +154,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
         "`implicitly[JsonSchema[T]]`.\n" +
         "If type ${A} is a sealed trait, use `genericTagged` or `genericJsonSchema` instead."
     )
-    class GenericRecord[A](val jsonSchema: Record[A])
-        extends GenericJsonSchema[A]
+    class GenericRecord[A](val jsonSchema: Record[A]) extends GenericJsonSchema[A]
 
     @implicitNotFound(
       "Unable to derive an instance of JsonSchema[${A}].\n" +
@@ -170,15 +164,13 @@ trait JsonSchemas extends algebra.JsonSchemas {
         "`implicitly[JsonSchema[T]]`.\n" +
         "If type ${A} is a case class, use `genericRecord` or `genericJsonSchema` instead."
     )
-    class GenericTagged[A](val jsonSchema: Tagged[A])
-        extends GenericJsonSchema[A]
+    class GenericTagged[A](val jsonSchema: Tagged[A]) extends GenericJsonSchema[A]
 
     trait DocumentedGenericRecord[A, D <: HList] {
       def record(docs: D): Record[A]
     }
 
-    implicit def recordGeneric[A, R, D <: HList](
-        implicit
+    implicit def recordGeneric[A, R, D <: HList](implicit
         gen: LabelledGeneric.Aux[A, R],
         docOpt: GenericDescription[A],
         docAnns: Annotations.Aux[docs, A, D],
@@ -193,8 +185,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       new GenericRecord[A](titleA)
     }
 
-    implicit def taggedGeneric[A, R](
-        implicit
+    implicit def taggedGeneric[A, R](implicit
         gen: LabelledGeneric.Aux[A, R],
         docOpt: GenericDescription[A],
         titleOpt: GenericTitle[A],
@@ -216,10 +207,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
     class GenericDiscriminatorName[A](val name: String)
 
-    object GenericDiscriminatorName
-        extends GenericDiscriminatorNameLowPriority {
-      implicit def annotated[A](
-          implicit ann: Annotation[discriminator, A]
+    object GenericDiscriminatorName extends GenericDiscriminatorNameLowPriority {
+      implicit def annotated[A](implicit
+          ann: Annotation[discriminator, A]
       ): GenericDiscriminatorName[A] =
         new GenericDiscriminatorName(ann().name)
     }
@@ -237,21 +227,21 @@ trait JsonSchemas extends algebra.JsonSchemas {
     class GenericSchemaName[A](val value: Option[String])
 
     object GenericSchemaName extends GenericSchemaNameLowPriority {
-      implicit def annotatedName[A](
-          implicit ann: Annotation[name, A]
+      implicit def annotatedName[A](implicit
+          ann: Annotation[name, A]
       ): GenericSchemaName[A] =
         new GenericSchemaName(Some(ann().value))
 
       @nowarn("cat=unused-params")
-      implicit def annotatedUnnamed[A](
-          implicit ann: Annotation[unnamed, A]
+      implicit def annotatedUnnamed[A](implicit
+          ann: Annotation[unnamed, A]
       ): GenericSchemaName[A] =
         new GenericSchemaName(None)
     }
 
     trait GenericSchemaNameLowPriority {
-      implicit def fromClassTag[A](
-          implicit ct: ClassTag[A]
+      implicit def fromClassTag[A](implicit
+          ct: ClassTag[A]
       ): GenericSchemaName[A] =
         new GenericSchemaName(Some(classTagToSchemaName(ct)))
     }
@@ -264,8 +254,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     class GenericDescription[A](val description: Option[String])
 
     object GenericDescription extends GenericDescriptionLowPriority {
-      implicit def annotated[A](
-          implicit ann: Annotation[docs, A]
+      implicit def annotated[A](implicit
+          ann: Annotation[docs, A]
       ): GenericDescription[A] =
         new GenericDescription(Some(ann().text))
     }
@@ -282,8 +272,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     class GenericTitle[A](val title: Option[String])
 
     object GenericTitle extends GenericTitleLowPriority {
-      implicit def annotated[A](
-          implicit ann: Annotation[title, A]
+      implicit def annotated[A](implicit
+          ann: Annotation[title, A]
       ): GenericTitle[A] =
         new GenericTitle(Some(ann().value))
     }
@@ -318,8 +308,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * @see [[genericRecord]] for details on how schemas are derived for case classes
     * @see [[genericTagged]] for details on how schemas are derived for sealed traits
     */
-  def genericJsonSchema[A](
-      implicit genJsonSchema: GenericJsonSchema[A]
+  def genericJsonSchema[A](implicit
+      genJsonSchema: GenericJsonSchema[A]
   ): JsonSchema[A] =
     genJsonSchema.jsonSchema
 
@@ -336,8 +326,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *   - has a name, computed from a `ClassTag[A]` by the [[classTagToSchemaName]]
     *     operation.
     */
-  def genericRecord[A](
-      implicit genRecord: GenericJsonSchema.GenericRecord[A]
+  def genericRecord[A](implicit
+      genRecord: GenericJsonSchema.GenericRecord[A]
   ): Record[A] =
     genRecord.jsonSchema
 
@@ -352,8 +342,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *   - each alternative is discriminated by the name (not qualified) of the
     *     case class.
     */
-  def genericTagged[A](
-      implicit genTagged: GenericJsonSchema.GenericTagged[A]
+  def genericTagged[A](implicit
+      genTagged: GenericJsonSchema.GenericTagged[A]
   ): Tagged[A] =
     genTagged.jsonSchema
 
@@ -370,8 +360,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
   // Summons a `Generic.Aux[T, A]` from a tuple type `T` to an arbitrary
   // type `A` that has the same generic representation as the tuple type `T`
   @nowarn("cat=unused-params")
-  implicit def shapelessGenericFromTuple[A, T, L <: HList](
-      implicit
+  implicit def shapelessGenericFromTuple[A, T, L <: HList](implicit
       tup: Tupler.Aux[L, T],
       genT: Generic.Aux[T, L],
       genA: Generic.Aux[A, L]

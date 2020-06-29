@@ -8,9 +8,7 @@ import org.scalajs.dom.window.btoa
 /**
   * @group interpreters
   */
-trait BasicAuthentication
-    extends algebra.BasicAuthentication
-    with EndpointsWithCustomErrors {
+trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   private[endpoints4s] def authenticatedRequest[U, E, H, UE, HCred, Out](
       method: Method,
@@ -18,19 +16,17 @@ trait BasicAuthentication
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Request[Out] = {
-    val basicAuthenticationHeader: RequestHeaders[Credentials] = {
-      (credentials, xhr) =>
-        xhr.setRequestHeader(
-          "Authorization",
-          "Basic " + btoa(credentials.username + ":" + credentials.password)
-        )
-        ()
+    val basicAuthenticationHeader: RequestHeaders[Credentials] = { (credentials, xhr) =>
+      xhr.setRequestHeader(
+        "Authorization",
+        "Basic " + btoa(credentials.username + ":" + credentials.password)
+      )
+      ()
     }
     request(
       method,

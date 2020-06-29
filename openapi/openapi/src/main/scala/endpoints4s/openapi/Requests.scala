@@ -58,14 +58,13 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
       entity: RequestEntity[B] = emptyRequest,
       docs: Documentation = None,
       headers: RequestHeaders[C] = emptyRequestHeaders
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     DocumentedRequest(method, url, headers, docs, entity)
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -92,11 +91,10 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
           contramap: To => From
       ): RequestHeaders[To] = x
     }
-  implicit lazy val requestHeadersSemigroupal
-      : endpoints4s.Semigroupal[RequestHeaders] =
+  implicit lazy val requestHeadersSemigroupal: endpoints4s.Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
         DocumentedHeaders(fa.value ++ fb.value)
     }

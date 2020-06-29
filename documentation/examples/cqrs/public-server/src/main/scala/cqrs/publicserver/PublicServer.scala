@@ -7,11 +7,7 @@ import play.api.libs.ws.WSClient
 import play.api.routing.{Router => PlayRouter}
 import cats.instances.option._
 import cats.instances.future._
-import endpoints4s.play.server.{
-  Endpoints,
-  JsonEntitiesFromCodecs,
-  PlayComponents
-}
+import endpoints4s.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
 
 import scala.concurrent.Future
 
@@ -73,10 +69,11 @@ class PublicServer(
             maybeEvent <- commandsClient.command(
               AddRecord(id, addData.date, addData.value)
             )
-            findMeter = (evt: StoredEvent) =>
-              queriesClient
-                .query(FindById(id, after = Some(evt.timestamp)))
-                .map(_.value)
+            findMeter =
+              (evt: StoredEvent) =>
+                queriesClient
+                  .query(FindById(id, after = Some(evt.timestamp)))
+                  .map(_.value)
             maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
             meter <- maybeMeter.fold[Future[Meter]](
               Future.failed(new NoSuchElementException)

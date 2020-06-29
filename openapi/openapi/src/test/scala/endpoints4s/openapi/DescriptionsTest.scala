@@ -59,10 +59,7 @@ class DescriptionsTest extends AnyWordSpec with Matchers {
         .withDescription("a foo or 1 or 4")
   }
 
-  trait Fixtures
-      extends FixturesAlg
-      with openapi.Endpoints
-      with openapi.JsonEntitiesFromSchemas {
+  trait Fixtures extends FixturesAlg with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     def checkDescription[A](schema: JsonSchema[A])(description: String) = {
       assert(

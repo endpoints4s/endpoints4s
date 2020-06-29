@@ -27,10 +27,7 @@ import scala.scalajs.js
   *
   * @group interpreters
   */
-trait Endpoints
-    extends algebra.Endpoints
-    with EndpointsWithCustomErrors
-    with BuiltInErrors
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
 /**
   * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
@@ -63,11 +60,9 @@ trait EndpointsWithCustomErrors
       name: String,
       docs: endpoints4s.algebra.Documentation
   ): RequestHeaders[Option[String]] =
-    (valueOpt, xhr) =>
-      valueOpt.foreach(value => xhr.setRequestHeader(name, value))
+    (valueOpt, xhr) => valueOpt.foreach(value => xhr.setRequestHeader(name, value))
 
-  implicit lazy val requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit lazy val requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       override def xmapPartial[From, To](
           f: js.Function2[From, XMLHttpRequest, Unit],
@@ -82,8 +77,8 @@ trait EndpointsWithCustomErrors
       override def product[A, B](
           fa: js.Function2[A, XMLHttpRequest, Unit],
           fb: js.Function2[B, XMLHttpRequest, Unit]
-      )(
-          implicit tupler: Tupler[A, B]
+      )(implicit
+          tupler: Tupler[A, B]
       ): js.Function2[tupler.Out, XMLHttpRequest, Unit] =
         (out, xhr) => {
           val (a, b) = tupler.unapply(out)
@@ -104,8 +99,7 @@ trait EndpointsWithCustomErrors
     def href(a: A): String
   }
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -137,11 +131,9 @@ trait EndpointsWithCustomErrors
       requestEntityA: RequestEntity[A],
       requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]] =
-    (eitherAB, xhr) =>
-      eitherAB.fold(requestEntityA(_, xhr), requestEntityB(_, xhr))
+    (eitherAB, xhr) => eitherAB.fold(requestEntityA(_, xhr), requestEntityB(_, xhr))
 
-  implicit lazy val requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit lazy val requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
           f: js.Function2[From, XMLHttpRequest, js.Any],
@@ -157,8 +149,8 @@ trait EndpointsWithCustomErrors
       entity: RequestEntity[B],
       docs: Documentation,
       headers: RequestHeaders[C]
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     new Request[Out] {
@@ -202,8 +194,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = js.Function1[XMLHttpRequest, Either[Throwable, A]]
 
-  implicit def responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -223,8 +214,8 @@ trait EndpointsWithCustomErrors
   )(f: A => Either[Throwable, B]): ResponseEntity[B] =
     xhr => entity(xhr).flatMap(f)
 
-  def stringCodecResponse[A](
-      implicit codec: Decoder[String, A]
+  def stringCodecResponse[A](implicit
+      codec: Decoder[String, A]
   ): ResponseEntity[A] =
     xhr =>
       codec
@@ -245,14 +236,13 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -284,8 +274,7 @@ trait EndpointsWithCustomErrors
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     xhr =>

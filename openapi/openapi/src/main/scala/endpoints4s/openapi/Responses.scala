@@ -36,8 +36,7 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] = fa
     }
 
-  implicit lazy val responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit lazy val responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -56,8 +55,7 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B]
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     DocumentedResponse(statusCode, docs.getOrElse(""), headers, entity) :: Nil
@@ -70,14 +68,13 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ) =
         DocumentedHeaders(fa.value ++ fb.value)
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],

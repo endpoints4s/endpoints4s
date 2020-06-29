@@ -18,8 +18,7 @@ trait MuxEndpoints extends algebra.Endpoints {
   ) {
     def apply(
         req: Req
-    )(
-        implicit
+    )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): Future[req.Response] =

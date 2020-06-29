@@ -63,9 +63,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   "case class with two fields" in {
     case class TestClass(i: Int, s: String)
     val jsonSchemaTestClass = (field[Int]("i") zip field[String]("s"))
-      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test =>
-        (test.i, test.s)
-      )
+      .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s))
 
     testRoundtrip(
       jsonSchemaTestClass,

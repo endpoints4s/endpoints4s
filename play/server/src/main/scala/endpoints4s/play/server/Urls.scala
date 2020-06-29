@@ -3,14 +3,7 @@ package endpoints4s.play.server
 import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
 
-import endpoints4s.{
-  Invalid,
-  PartialInvariantFunctor,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import play.api.libs.functional.{Applicative, Functor}
 import play.api.mvc.{RequestHeader, Result}
@@ -73,8 +66,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   }
   //#segment
 
-  implicit lazy val segmentPartialInvariantFunctor
-      : PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -119,8 +111,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
 
-  implicit lazy val queryStringPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryString] =
+  implicit lazy val queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
           fa: QueryString[A],
@@ -144,8 +135,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         }
     }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): QueryString[tupler.Out] =
     new QueryString[tupler.Out] {
       def decode(qs: Map[String, Seq[String]]) =
@@ -156,8 +147,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       }
     }
 
-  def qs[A](name: String, docs: Documentation)(
-      implicit value: QueryStringParam[A]
+  def qs[A](name: String, docs: Documentation)(implicit
+      value: QueryStringParam[A]
   ) =
     new QueryString[A] {
       def decode(qs: Map[String, Seq[String]]) =
@@ -203,8 +194,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         }
     }
 
-  implicit def optionalQueryStringParam[A](
-      implicit param: QueryStringParam[A]
+  implicit def optionalQueryStringParam[A](implicit
+      param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =
     new QueryStringParam[Option[A]] {
       def decode(
@@ -219,8 +210,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         maybeA.fold(Map.empty[String, Seq[String]])(param.encode(name, _))
     }
 
-  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
-      implicit param: QueryStringParam[A],
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
+      param: QueryStringParam[A],
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     new QueryStringParam[CC[A]] {
@@ -230,18 +221,17 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           case Some(vs) =>
             // ''traverse'' the list of decoded values
             vs.foldLeft[Validated[mutable.Builder[A, CC[A]]]](
-                Valid(factory.newBuilder)
-              ) {
-                case (inv: Invalid, v) =>
-                  // Pretend that this was the query string and delegate to the `A` query string param
-                  param
-                    .decode(name, Map(name -> (v :: Nil)))
-                    .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
-                case (Valid(b), v) =>
-                  // Pretend that this was the query string and delegate to the `A` query string param
-                  param.decode(name, Map(name -> (v :: Nil))).map(b += _)
-              }
-              .map(_.result())
+              Valid(factory.newBuilder)
+            ) {
+              case (inv: Invalid, v) =>
+                // Pretend that this was the query string and delegate to the `A` query string param
+                param
+                  .decode(name, Map(name -> (v :: Nil)))
+                  .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
+              case (Valid(b), v) =>
+                // Pretend that this was the query string and delegate to the `A` query string param
+                param.decode(name, Map(name -> (v :: Nil))).map(b += _)
+            }.map(_.result())
         }
       def encode(name: String, as: CC[A]): Map[String, Seq[String]] =
         if (as.isEmpty) Map.empty
@@ -318,8 +308,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       def encode(unit: Unit): String = segment
     }
 
-  def segment[A](name: String, docs: Documentation)(
-      implicit A: Segment[A]
+  def segment[A](name: String, docs: Documentation)(implicit
+      A: Segment[A]
   ): Path[A] =
     new Path[A] {
       def decode(segments: List[String]) = {
@@ -328,9 +318,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
             val validatedA =
               A.decode(head)
                 .mapErrors(
-                  _.map(error =>
-                    s"$error for segment${if (name.isEmpty) "" else s" '$name'"}"
-                  )
+                  _.map(error => s"$error for segment${if (name.isEmpty) "" else s" '$name'"}")
                 )
             Some((validatedA, tail))
           case Nil => None
@@ -356,8 +344,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         s // NO URL-encoding because the segments must already be URL-encoded
     }
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
+      tupler: Tupler[A, B]
   ): Path[tupler.Out] =
     new Path[tupler.Out] {
       def decode(segments: List[String]) =
@@ -391,11 +379,12 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           fa: Url[A],
           f: A => Validated[B],
           g: B => A
-      ): Url[B] = new Url[B] {
-        def decodeUrl(req: RequestHeader): Option[Validated[B]] =
-          fa.decodeUrl(req).map(_.flatMap(f))
-        def encodeUrl(b: B): String = fa.encodeUrl(g(b))
-      }
+      ): Url[B] =
+        new Url[B] {
+          def decodeUrl(req: RequestHeader): Option[Validated[B]] =
+            fa.decodeUrl(req).map(_.flatMap(f))
+          def encodeUrl(b: B): String = fa.encodeUrl(g(b))
+        }
       override def xmap[A, B](fa: Url[A], f: A => B, g: B => A): Url[B] =
         new Url[B] {
           def decodeUrl(req: RequestHeader): Option[Validated[B]] =
@@ -404,8 +393,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         }
     }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): Url[tupler.Out] =
     new Url[tupler.Out] {
 

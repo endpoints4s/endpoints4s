@@ -9,9 +9,7 @@ class WebhooksTest extends AnyWordSpec with Matchers {
 
   case class Message(value: String)
 
-  trait Webhooks
-      extends algebra.Endpoints
-      with algebra.JsonEntitiesFromSchemas {
+  trait Webhooks extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
 
     implicit lazy val messageSchema: JsonSchema[Message] =
       field[String]("message")

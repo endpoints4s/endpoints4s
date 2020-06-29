@@ -1,12 +1,6 @@
 package endpoints4s.scalaj.client
 
-import endpoints4s.{
-  PartialInvariantFunctor,
-  Semigroupal,
-  Tupler,
-  Validated,
-  algebra
-}
+import endpoints4s.{PartialInvariantFunctor, Semigroupal, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import scalaj.http.HttpRequest
 
@@ -19,8 +13,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
 
   type Request[A] = A => HttpRequest
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -45,8 +38,7 @@ trait Requests extends algebra.Requests with Urls with Methods {
   ): Option[String] => Seq[(String, String)] =
     valueOpt => valueOpt.map(v => name -> v).toSeq
 
-  implicit def requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit def requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[From, To](
           f: RequestHeaders[From],
@@ -80,11 +72,9 @@ trait Requests extends algebra.Requests with Urls with Methods {
       requestEntityA: RequestEntity[A],
       requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]] =
-    (eitherAB, req) =>
-      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+    (eitherAB, req) => eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
 
-  implicit def requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[A, B](
           fa: RequestEntity[A],
@@ -100,8 +90,8 @@ trait Requests extends algebra.Requests with Urls with Methods {
       entity: RequestEntity[E] = emptyRequest,
       docs: Documentation = None,
       headers: RequestHeaders[H] = emptyRequestHeaders
-  )(
-      implicit tuplerUE: Tupler.Aux[U, E, UE],
+  )(implicit
+      tuplerUE: Tupler.Aux[U, E, UE],
       tuplerUEH: Tupler.Aux[UE, H, Out]
   ): Request[Out] =
     (ueh) => {

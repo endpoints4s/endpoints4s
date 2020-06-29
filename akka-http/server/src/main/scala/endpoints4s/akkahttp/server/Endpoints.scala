@@ -1,19 +1,9 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.marshalling.{
-  Marshaller,
-  ToEntityMarshaller,
-  ToResponseMarshaller
-}
+import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpEntity, HttpHeader, MediaTypes}
-import akka.http.scaladsl.server.{
-  Directive1,
-  Directives,
-  ExceptionHandler,
-  Route,
-  StandardRoute
-}
+import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints4s.algebra.Documentation
 import endpoints4s.{
@@ -37,10 +27,7 @@ import scala.util.{Failure, Success}
   *
   * @group interpreters
   */
-trait Endpoints
-    extends algebra.Endpoints
-    with EndpointsWithCustomErrors
-    with BuiltInErrors
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
@@ -74,8 +61,7 @@ trait EndpointsWithCustomErrors
         fa compose g
     }
 
-  implicit lazy val responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit lazy val responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -108,8 +94,7 @@ trait EndpointsWithCustomErrors
       REQUESTS
   ************************* */
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     directive1InvFunctor
 
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
@@ -131,8 +116,7 @@ trait EndpointsWithCustomErrors
     requestEntityAAsEither | requestEntityBAsEither
   }
 
-  implicit lazy val requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit lazy val requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     directive1InvFunctor
 
   /* ************************
@@ -150,13 +134,12 @@ trait EndpointsWithCustomErrors
       docs: Documentation
   ): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
 
-  implicit lazy val requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit lazy val requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     directive1InvFunctor
   implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-      override def product[A, B](fa: Directive1[A], fb: Directive1[B])(
-          implicit tupler: Tupler[A, B]
+      override def product[A, B](fa: Directive1[A], fb: Directive1[B])(implicit
+          tupler: Tupler[A, B]
       ): Directive1[tupler.Out] = joinDirectives(fa, fb)
     }
 
@@ -166,8 +149,8 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         out => {
           val (a, b) = tupler.unapply(out)
@@ -175,8 +158,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -212,8 +194,7 @@ trait EndpointsWithCustomErrors
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     r => {
@@ -238,8 +219,8 @@ trait EndpointsWithCustomErrors
       entity: RequestEntity[B] = emptyRequest,
       docs: Documentation = None,
       headers: RequestHeaders[C] = emptyRequestHeaders
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))

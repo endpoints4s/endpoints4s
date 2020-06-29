@@ -23,14 +23,13 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         def reads: Reads[A] = _reads
         def writes: Writes[A] = _writes
       }
-    implicit def toPlayJsonFormat[A](
-        implicit jsonSchema: JsonSchema[A]
+    implicit def toPlayJsonFormat[A](implicit
+        jsonSchema: JsonSchema[A]
     ): Format[A] =
       Format(jsonSchema.reads, jsonSchema.writes)
   }
 
-  implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -126,26 +125,27 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def emptyRecord: Record[Unit] =
     Record(
       new Reads[Unit] {
-        def reads(json: JsValue): JsResult[Unit] = json match {
-          case JsObject(_) => JsSuccess(())
-          case _           => JsError(s"Invalid JSON object: $json")
-        }
+        def reads(json: JsValue): JsResult[Unit] =
+          json match {
+            case JsObject(_) => JsSuccess(())
+            case _           => JsError(s"Invalid JSON object: $json")
+          }
       },
       new OWrites[Unit] {
         def writes(o: Unit): JsObject = Json.obj()
       }
     )
 
-  def field[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def field[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[A] =
     Record(
       (__ \ name).read(tpe.reads),
       (__ \ name).write(tpe.writes)
     )
 
-  def optField[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def optField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[Option[A]] =
     Record(
       (__ \ name).readNullable(tpe.reads),
@@ -193,8 +193,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   implicit def byteJsonSchema: JsonSchema[Byte] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](
-      implicit jsonSchema: JsonSchema[A],
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+      jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =
     JsonSchema[C[A]](
@@ -202,25 +202,26 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       Writes.iterableWrites2[A, C[A]](implicitly, jsonSchema.writes)
     )
 
-  implicit def mapJsonSchema[A](
-      implicit jsonSchema: JsonSchema[A]
+  implicit def mapJsonSchema[A](implicit
+      jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]] =
     JsonSchema(
       Reads.mapReads(jsonSchema.reads),
       Writes.genericMapWrites(jsonSchema.writes)
     )
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
-      implicit t: Tupler[A, B]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
+      t: Tupler[A, B]
   ): Record[t.Out] = {
     val reads = (recordA.reads and recordB.reads).tupled.map {
       case (a, b) => t(a, b)
     }
     val writes = new OWrites[t.Out] {
-      override def writes(o: t.Out): JsObject = t.unapply(o) match {
-        case (a, b) =>
-          recordA.writes.writes(a) deepMerge recordB.writes.writes(b)
-      }
+      override def writes(o: t.Out): JsObject =
+        t.unapply(o) match {
+          case (a, b) =>
+            recordA.writes.writes(a) deepMerge recordB.writes.writes(b)
+        }
     }
     Record(reads, writes)
   }
@@ -247,12 +248,13 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         JsError(s"expected JSON object for tagged type, but found: $json")
     }
 
-    final def writes: OWrites[A] = new OWrites[A] {
-      override def writes(a: A): JsObject = {
-        val (tag, json) = tagAndJson(a)
-        json + (discriminator -> JsString(tag))
+    final def writes: OWrites[A] =
+      new OWrites[A] {
+        override def writes(a: A): JsObject = {
+          val (tag, json) = tagAndJson(a)
+          json + (discriminator -> JsString(tag))
+        }
       }
-    }
   }
 
   implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
@@ -304,15 +306,17 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def choiceTagged[A, B](
       taggedA: Tagged[A],
       taggedB: Tagged[B]
-  ): Tagged[Either[A, B]] = new Tagged[Either[A, B]] {
-    def tagAndJson(aOrB: Either[A, B]): (String, JsObject) = aOrB match {
-      case Left(a)  => taggedA.tagAndJson(a)
-      case Right(b) => taggedB.tagAndJson(b)
-    }
+  ): Tagged[Either[A, B]] =
+    new Tagged[Either[A, B]] {
+      def tagAndJson(aOrB: Either[A, B]): (String, JsObject) =
+        aOrB match {
+          case Left(a)  => taggedA.tagAndJson(a)
+          case Right(b) => taggedB.tagAndJson(b)
+        }
 
-    def findReads(tagName: String): Option[Reads[Either[A, B]]] =
-      taggedA.findReads(tagName).map(_.map[Either[A, B]](Left(_))) orElse
-        taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
-  }
+      def findReads(tagName: String): Option[Reads[Either[A, B]]] =
+        taggedA.findReads(tagName).map(_.map[Either[A, B]](Left(_))) orElse
+          taggedB.findReads(tagName).map(_.map[Either[A, B]](Right(_)))
+    }
 
 }

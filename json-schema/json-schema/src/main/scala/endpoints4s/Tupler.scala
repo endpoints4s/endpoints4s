@@ -44,11 +44,12 @@ object Tupler extends Tupler5
 trait Tupler1 {
   type Aux[A, B, Out0] = Tupler[A, B] { type Out = Out0 }
 
-  implicit def ab[A, B]: Aux[A, B, (A, B)] = new Tupler[A, B] {
-    type Out = (A, B)
-    def apply(a: A, b: B): (A, B) = (a, b)
-    def unapply(out: (A, B)): (A, B) = out
-  }
+  implicit def ab[A, B]: Aux[A, B, (A, B)] =
+    new Tupler[A, B] {
+      type Out = (A, B)
+      def apply(a: A, b: B): (A, B) = (a, b)
+      def unapply(out: (A, B)): (A, B) = out
+    }
 
 }
 
@@ -89,8 +90,7 @@ trait Tupler3 extends Tupler2 {
       }
     }
 
-  implicit def tupler1And4[A, B, C, D, E]
-      : Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
+  implicit def tupler1And4[A, B, C, D, E]: Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
     new Tupler[A, (B, C, D, E)] {
       type Out = (A, B, C, D, E)
       def apply(a: A, bcde: (B, C, D, E)): (A, B, C, D, E) =
@@ -117,20 +117,22 @@ trait Tupler3 extends Tupler2 {
 
 trait Tupler4 extends Tupler3 with TuplerAppend {
 
-  implicit def leftUnit[A]: Aux[Unit, A, A] = new Tupler[Unit, A] {
-    type Out = A
-    def apply(a: Unit, b: A): A = b
-    def unapply(out: Out): (Unit, A) = ((), out)
-  }
+  implicit def leftUnit[A]: Aux[Unit, A, A] =
+    new Tupler[Unit, A] {
+      type Out = A
+      def apply(a: Unit, b: A): A = b
+      def unapply(out: Out): (Unit, A) = ((), out)
+    }
 
 }
 
 trait Tupler5 extends Tupler4 {
 
-  implicit def rightUnit[A]: Aux[A, Unit, A] = new Tupler[A, Unit] {
-    type Out = A
-    def apply(a: A, b: Unit): A = a
-    def unapply(out: Out): (A, Unit) = (out, ())
-  }
+  implicit def rightUnit[A]: Aux[A, Unit, A] =
+    new Tupler[A, Unit] {
+      type Out = A
+      def apply(a: A, b: Unit): A = a
+      def unapply(out: Out): (A, Unit) = (out, ())
+    }
 
 }

@@ -5,9 +5,7 @@ import endpoints4s.algebra
 import endpoints4s.algebra.JsonStreamingExample
 import scala.concurrent.duration.DurationInt
 
-trait ChunkedEntitiesDocs
-    extends algebra.ChunkedEntitiesDocs
-    with ChunkedEntities {
+trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
 
   //#implementation
   import akka.stream.scaladsl.FileIO

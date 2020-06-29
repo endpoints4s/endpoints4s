@@ -15,11 +15,7 @@ import endpoints4s.algebra.server.{
 import play.api.Mode
 import play.api.routing.Router
 import play.api.test.FakeRequest
-import play.core.server.{
-  DefaultNettyServerComponents,
-  NettyServer,
-  ServerConfig
-}
+import play.core.server.{DefaultNettyServerComponents, NettyServer, ServerConfig}
 
 import scala.concurrent.Future
 

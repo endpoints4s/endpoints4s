@@ -64,8 +64,7 @@ import io.circe.{
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends endpoints4s.algebra.JsonEntitiesFromCodecs {
+trait JsonEntitiesFromCodecs extends endpoints4s.algebra.JsonEntitiesFromCodecs {
 
 //#type-carrier
   type JsonCodec[A] = CirceCodec[A]
@@ -89,8 +88,8 @@ trait JsonEntitiesFromCodecs
 
     }
 
-  implicit def circeDecoderToDecoder[A](
-      implicit decoder: CirceDecoder[A]
+  implicit def circeDecoderToDecoder[A](implicit
+      decoder: CirceDecoder[A]
   ): Decoder[Json, A] =
     new Decoder[Json, A] {
       def decode(from: Json): Validated[A] =
@@ -102,8 +101,8 @@ trait JsonEntitiesFromCodecs
           )
     }
 
-  implicit def circeEncoderToEncoder[A](
-      implicit encoder: CirceEncoder[A]
+  implicit def circeEncoderToEncoder[A](implicit
+      encoder: CirceEncoder[A]
   ): Encoder[A, Json] =
     new Encoder[A, Json] {
       def encode(from: A): Json = encoder(from)

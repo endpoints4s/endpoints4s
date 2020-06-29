@@ -22,8 +22,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   ) {
     def implementedBy(
         handler: MuxHandler[Req, Resp]
-    )(
-        implicit
+    )(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
@@ -31,8 +30,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
     def implementedByAsync(
         handler: MuxHandlerAsync[Req, Resp]
-    )(
-        implicit
+    )(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
@@ -40,8 +38,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
     def toPlayHandler(
         handler: Req { type Response = Resp } => Future[Resp]
-    )(
-        implicit
+    )(implicit
         decoder: Decoder[Transport, Req],
         encoder: Encoder[Resp, Transport]
     ): ToPlayHandler =
@@ -53,16 +50,15 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
                 requestEntity(headers) match {
                   case Some(bodyParser) =>
                     val action =
-                      playComponents.defaultActionBuilder.async(bodyParser) {
-                        request =>
-                          decoder.decode(request.body) match {
-                            case Valid(value) =>
-                              handler(
-                                value.asInstanceOf[Req { type Response = Resp }]
-                              ).map(resp => response(encoder.encode(resp)))
-                            case inv: Invalid =>
-                              Future.successful(handleClientErrors(inv))
-                          }
+                      playComponents.defaultActionBuilder.async(bodyParser) { request =>
+                        decoder.decode(request.body) match {
+                          case Valid(value) =>
+                            handler(
+                              value.asInstanceOf[Req { type Response = Resp }]
+                            ).map(resp => response(encoder.encode(resp)))
+                          case inv: Invalid =>
+                            Future.successful(handleClientErrors(inv))
+                        }
                       }
                     action(headers).recover {
                       case NonFatal(t) => handleServerError(t)

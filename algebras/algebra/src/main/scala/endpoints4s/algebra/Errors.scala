@@ -40,19 +40,23 @@ trait Errors { this: Responses =>
   type ServerError
 
   /** Convert the endpoints4s internal client error type into the [[ClientErrors]] type
-    * @group operations */
+    * @group operations
+    */
   def invalidToClientErrors(invalid: Invalid): ClientErrors
 
   /** Convert the [[ClientErrors]] type into the endpoints4s internal client error type
-    * @group operations */
+    * @group operations
+    */
   def clientErrorsToInvalid(clientErrors: ClientErrors): Invalid
 
   /** Convert the endpoints4s internal server error type into the [[ServerError]] type
-    * @group operations */
+    * @group operations
+    */
   def throwableToServerError(throwable: Throwable): ServerError
 
   /** Convert the [[ServerError]] type into the endpoints4s internal server error type
-    * @group operations */
+    * @group operations
+    */
   def serverErrorToThrowable(serverError: ServerError): Throwable
 
   /**

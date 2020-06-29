@@ -12,9 +12,7 @@ import play.api.mvc.BodyParser
   *
   * @group interpreters
   */
-trait ChunkedEntities
-    extends EndpointsWithCustomErrors
-    with algebra.ChunkedEntities {
+trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEntities {
 
   import playComponents.executionContext
 
@@ -34,18 +32,19 @@ trait ChunkedEntities
 
   private[server] def chunkedRequestEntity[A](
       fromByteString: ByteString => Either[Throwable, A]
-  ): RequestEntity[Chunks[A]] = _ => {
-    Some(BodyParser.apply { _ =>
-      Accumulator.source[ByteString].map { byteStrings =>
-        val source: Source[A, _] =
-          byteStrings.map(fromByteString).flatMapConcat {
-            case Left(error)  => Source.failed(error)
-            case Right(value) => Source.single(value)
-          }
-        Right(source)
-      }
-    })
-  }
+  ): RequestEntity[Chunks[A]] =
+    _ => {
+      Some(BodyParser.apply { _ =>
+        Accumulator.source[ByteString].map { byteStrings =>
+          val source: Source[A, _] =
+            byteStrings.map(fromByteString).flatMapConcat {
+              case Left(error)  => Source.failed(error)
+              case Right(value) => Source.single(value)
+            }
+          Right(source)
+        }
+      })
+    }
 
   private[server] def chunkedResponseEntity[A](
       contentType: String,
@@ -68,8 +67,8 @@ trait ChunkedJsonEntities
     with algebra.ChunkedJsonEntities
     with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedRequestEntity { byteString =>
@@ -82,8 +81,8 @@ trait ChunkedJsonEntities
     }
   }
 
-  def jsonChunksResponse[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedResponseEntity(ContentTypes.JSON, a => ByteString(encoder.encode(a)))

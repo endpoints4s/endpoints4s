@@ -14,10 +14,7 @@ class EndpointsJsonSchemaTestApi
     with generic.JsonSchemas
     with JsonEntitiesFromSchemas
 
-class EndpointsJsonSchemaTest
-    extends AnyWordSpec
-    with Matchers
-    with ScalatestRouteTest {
+class EndpointsJsonSchemaTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
 
   object testRoutes extends EndpointsJsonSchemaTestApi {
 

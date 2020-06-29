@@ -1,8 +1,6 @@
 package endpoints4s.algebra
 
-trait JsonEntitiesFromSchemasTestApi
-    extends EndpointsTestApi
-    with JsonEntitiesFromSchemas {
+trait JsonEntitiesFromSchemasTestApi extends EndpointsTestApi with JsonEntitiesFromSchemas {
 
   implicit val userJsonSchema: JsonSchema[User] = {
     field[String]("name") zip

@@ -26,8 +26,8 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   * @group interpreters
   */
-class Endpoints(val host: String, val wsClient: WSClient)(
-    implicit val executionContext: ExecutionContext
+class Endpoints(val host: String, val wsClient: WSClient)(implicit
+    val executionContext: ExecutionContext
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors
     with BuiltInErrors
@@ -55,8 +55,7 @@ trait EndpointsWithCustomErrors
   type RequestHeaders[A] = (A, WSRequest) => WSRequest
 
   /** Does not modify the request */
-  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, wsRequest) =>
-    wsRequest
+  lazy val emptyRequestHeaders: RequestHeaders[Unit] = (_, wsRequest) => wsRequest
 
   def requestHeader(
       name: String,
@@ -72,8 +71,7 @@ trait EndpointsWithCustomErrors
     case (None, req)        => req
   }
 
-  implicit lazy val requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit lazy val requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       def xmapPartial[A, B](
           fa: RequestHeaders[A],
@@ -100,8 +98,7 @@ trait EndpointsWithCustomErrors
     */
   type Request[A] = A => Future[WSResponse]
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -127,11 +124,9 @@ trait EndpointsWithCustomErrors
       requestEntityA: RequestEntity[A],
       requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]] =
-    (eitherAB, req) =>
-      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+    (eitherAB, req) => eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
 
-  implicit lazy val requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit lazy val requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[A, B](
           fa: RequestEntity[A],
@@ -147,8 +142,8 @@ trait EndpointsWithCustomErrors
       entity: RequestEntity[B],
       docs: Documentation,
       headers: RequestHeaders[C]
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     (abc: Out) => {
@@ -176,8 +171,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = WSResponse => Either[Throwable, A]
 
-  implicit def responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -209,14 +203,13 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -248,8 +241,7 @@ trait EndpointsWithCustomErrors
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     (status, httpHeaders) =>

@@ -9,10 +9,7 @@ import endpoints4s.openapi.model._
   *
   * @group interpreters
   */
-trait Assets
-    extends algebra.Assets
-    with EndpointsWithCustomErrors
-    with StatusCodes {
+trait Assets extends algebra.Assets with EndpointsWithCustomErrors with StatusCodes {
 
   type AssetRequest = Nothing
   type AssetPath = Nothing

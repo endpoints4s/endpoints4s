@@ -73,8 +73,7 @@ trait EndpointsWithCustomErrors[R[_]]
     case (None, request)        => request
   }
 
-  implicit lazy val requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit lazy val requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
       override def xmapPartial[From, To](
           f: RequestHeaders[From],
@@ -89,8 +88,8 @@ trait EndpointsWithCustomErrors[R[_]]
       override def product[A, B](
           fa: (A, SttpRequest) => SttpRequest,
           fb: (B, SttpRequest) => SttpRequest
-      )(
-          implicit tupler: Tupler[A, B]
+      )(implicit
+          tupler: Tupler[A, B]
       ): (tupler.Out, SttpRequest) => SttpRequest =
         (ab, request) => {
           val (a, b) = tupler.unapply(ab)
@@ -103,8 +102,7 @@ trait EndpointsWithCustomErrors[R[_]]
     */
   type Request[A] = A => SttpRequest
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -131,11 +129,9 @@ trait EndpointsWithCustomErrors[R[_]]
       requestEntityA: RequestEntity[A],
       requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]] =
-    (eitherAB, req) =>
-      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+    (eitherAB, req) => eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
 
-  implicit def requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       override def xmapPartial[From, To](
           f: RequestEntity[From],
@@ -151,8 +147,8 @@ trait EndpointsWithCustomErrors[R[_]]
       entity: RequestEntity[B],
       docs: Documentation,
       headers: RequestHeaders[C]
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     (abc: Out) => {
@@ -189,8 +185,7 @@ trait EndpointsWithCustomErrors[R[_]]
     def decodeEntity(response: sttp.Response[String]): R[A]
   }
 
-  implicit def responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -209,19 +204,21 @@ trait EndpointsWithCustomErrors[R[_]]
     }
 
   /** Successfully decodes no information from a response */
-  def emptyResponse: ResponseEntity[Unit] = new ResponseEntity[Unit] {
-    def decodeEntity(response: sttp.Response[String]) =
-      backend.responseMonad.unit(())
-  }
+  def emptyResponse: ResponseEntity[Unit] =
+    new ResponseEntity[Unit] {
+      def decodeEntity(response: sttp.Response[String]) =
+        backend.responseMonad.unit(())
+    }
 
   /** Successfully decodes string information from a response */
-  def textResponse: ResponseEntity[String] = new ResponseEntity[String] {
-    def decodeEntity(response: sttp.Response[String]): R[String] =
-      backend.responseMonad.unit(response.body.merge)
-  }
+  def textResponse: ResponseEntity[String] =
+    new ResponseEntity[String] {
+      def decodeEntity(response: sttp.Response[String]): R[String] =
+        backend.responseMonad.unit(response.body.merge)
+    }
 
-  def stringCodecResponse[A](
-      implicit codec: Codec[String, A]
+  def stringCodecResponse[A](implicit
+      codec: Codec[String, A]
   ): ResponseEntity[A] =
     sttpResponse =>
       codec.decode(sttpResponse.body.merge) match {
@@ -234,14 +231,13 @@ trait EndpointsWithCustomErrors[R[_]]
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -273,8 +269,7 @@ trait EndpointsWithCustomErrors[R[_]]
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B]
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, Res]
   ): Response[Res] = {
     new Response[Res] {

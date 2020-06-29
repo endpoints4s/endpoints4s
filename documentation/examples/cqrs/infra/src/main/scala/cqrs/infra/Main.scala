@@ -71,8 +71,7 @@ object Main extends App {
 
 }
 
-abstract class PlayService(val port: Int, mode: Mode)
-    extends DefaultNettyServerComponents {
+abstract class PlayService(val port: Int, mode: Mode) extends DefaultNettyServerComponents {
   override lazy val serverConfig = ServerConfig(port = Some(port), mode = mode)
   lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
 }

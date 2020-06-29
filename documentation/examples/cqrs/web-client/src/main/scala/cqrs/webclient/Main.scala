@@ -44,35 +44,34 @@ object Main {
             metersVar.update(_ + (createdMeter.id -> createdMeter))
             input.value = ""
           }
-          .handleError(error =>
-            dom.window.alert(s"Unable to create the meter (error is $error)")
-          )
+          .handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))
         ()
       }
     }
 
-    def onAddValueClicked(meter: Meter): Event => Unit = _ => {
-      val input = dom.document
-        .getElementById(s"value-${meter.id.toString}")
-        .asInstanceOf[HTMLInputElement]
-      val value = input.value.trim
-      if (value.isEmpty) dom.window.alert("Please type a value to add")
-      else {
-        Try(BigDecimal(value)).toOption match {
-          case None => dom.window.alert("Unable to parse the value as a number")
-          case Some(decimal) =>
-            PublicEndpoints
-              .addRecord((meter.id, AddRecord(Instant.now(), decimal)))
-              .map { updatedMeter =>
-                metersVar.update(_ + (updatedMeter.id -> updatedMeter))
-              }
-              .handleError(error =>
-                dom.window.alert(s"Unable to add the value (error is $error)")
-              )
-            ()
+    def onAddValueClicked(meter: Meter): Event => Unit =
+      _ => {
+        val input = dom.document
+          .getElementById(s"value-${meter.id.toString}")
+          .asInstanceOf[HTMLInputElement]
+        val value = input.value.trim
+        if (value.isEmpty) dom.window.alert("Please type a value to add")
+        else {
+          Try(BigDecimal(value)).toOption match {
+            case None => dom.window.alert("Unable to parse the value as a number")
+            case Some(decimal) =>
+              PublicEndpoints
+                .addRecord((meter.id, AddRecord(Instant.now(), decimal)))
+                .map { updatedMeter =>
+                  metersVar.update(_ + (updatedMeter.id -> updatedMeter))
+                }
+                .handleError(error =>
+                  dom.window.alert(s"Unable to add the value (error is $error)")
+                )
+              ()
+          }
         }
       }
-    }
 
     val app =
       <article>

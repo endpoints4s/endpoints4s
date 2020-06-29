@@ -16,8 +16,7 @@ import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
-    extends EndpointsTestSuite[T] {
+trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends EndpointsTestSuite[T] {
 
   def serveStreamedEndpoint[Resp](
       endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
@@ -43,8 +42,8 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
     }
   }
 
-  def sendAndDecodeJsonChunks[A](request: HttpRequest)(
-      implicit codec: serverApi.JsonCodec[A]
+  def sendAndDecodeJsonChunks[A](request: HttpRequest)(implicit
+      codec: serverApi.JsonCodec[A]
   ): Future[(HttpResponse, Seq[Either[Throwable, A]])] = {
     val jsonCodec: Codec[String, A] = serverApi.stringCodec(codec)
     httpClient.singleRequest(request).flatMap { response =>

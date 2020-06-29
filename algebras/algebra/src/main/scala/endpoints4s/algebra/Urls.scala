@@ -2,12 +2,7 @@ package endpoints4s.algebra
 
 import java.util.UUID
 
-import endpoints4s.{
-  Codec,
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Tupler
-}
+import endpoints4s.{Codec, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
 import scala.collection.compat.Factory
 
@@ -66,12 +61,13 @@ trait Urls extends PartialInvariantFunctorSyntax {
   type QueryString[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryString]
+    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    */
+  implicit def queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString]
 
   /** Extension methods on [[QueryString]].
-    * @group operations */
+    * @group operations
+    */
   implicit class QueryStringSyntax[A](first: QueryString[A]) {
 
     /**
@@ -92,8 +88,8 @@ trait Urls extends PartialInvariantFunctorSyntax {
   }
 
   /** Concatenates two `QueryString`s */
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): QueryString[tupler.Out]
 
   /**
@@ -111,8 +107,8 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @tparam A Type of the value carried by the parameter
     * @group operations
     */
-  def qs[A](name: String, docs: Documentation = None)(
-      implicit value: QueryStringParam[A]
+  def qs[A](name: String, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
   ): QueryString[A]
 
   /**
@@ -130,8 +126,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  implicit def optionalQueryStringParam[A: QueryStringParam]
-      : QueryStringParam[Option[A]]
+  implicit def optionalQueryStringParam[A: QueryStringParam]: QueryStringParam[Option[A]]
 
   /**
     * Support query string parameters with multiple values:
@@ -165,36 +160,42 @@ trait Urls extends PartialInvariantFunctorSyntax {
   type QueryStringParam[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
-  implicit def queryStringParamPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryStringParam]
+    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    */
+  implicit def queryStringParamPartialInvariantFunctor: PartialInvariantFunctor[QueryStringParam]
 
   /** Ability to define `String` query string parameters
-    * @group operations */
+    * @group operations
+    */
   implicit def stringQueryString: QueryStringParam[String]
 
   /** Ability to define `UUID` query string parameters
-    * @group operations */
+    * @group operations
+    */
   implicit def uuidQueryString: QueryStringParam[UUID] =
     stringQueryString.xmapWithCodec(Codec.uuidCodec)
 
   /** Ability to define `Int` query string parameters
-    * @group operations */
+    * @group operations
+    */
   implicit def intQueryString: QueryStringParam[Int] =
     stringQueryString.xmapWithCodec(Codec.intCodec)
 
   /** Query string parameter containing a `Long` value
-    * @group operations */
+    * @group operations
+    */
   implicit def longQueryString: QueryStringParam[Long] =
     stringQueryString.xmapWithCodec(Codec.longCodec)
 
   /** Query string parameter containing a `Boolean` value
-    * @group operations */
+    * @group operations
+    */
   implicit def booleanQueryString: QueryStringParam[Boolean] =
     stringQueryString.xmapWithCodec(Codec.booleanCodec)
 
   /** Codec for query string parameters of type `Double`
-    * @group operations */
+    * @group operations
+    */
   implicit def doubleQueryString: QueryStringParam[Double] =
     stringQueryString.xmapWithCodec(Codec.doubleCodec)
 
@@ -212,7 +213,8 @@ trait Urls extends PartialInvariantFunctorSyntax {
   type Segment[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
+    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    */
   implicit def segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment]
 
   /** Path segment codec for type `String`
@@ -224,17 +226,20 @@ trait Urls extends PartialInvariantFunctorSyntax {
   implicit def stringSegment: Segment[String]
 
   /** Path segment codec for type `UUID`
-    * @group operations */
+    * @group operations
+    */
   implicit def uuidSegment: Segment[UUID] =
     stringSegment.xmapWithCodec(Codec.uuidCodec)
 
   /** Path segment codec for type `Int`
-    * @group operations */
+    * @group operations
+    */
   implicit def intSegment: Segment[Int] =
     stringSegment.xmapWithCodec(Codec.intCodec)
 
   /** Path segment codec for type `Long`
-    * @group operations */
+    * @group operations
+    */
   implicit def longSegment: Segment[Long] =
     stringSegment.xmapWithCodec(Codec.longCodec)
 
@@ -261,19 +266,23 @@ trait Urls extends PartialInvariantFunctorSyntax {
     *
     * @note  This type has implicit methods provided by the [[PathOps]],
     *        [[InvariantFunctorSyntax]], and the [[PartialInvariantFunctorSyntax]] classes.
-    * @group types */
+    * @group types
+    */
   type Path[A] <: Url[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
+    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    */
   implicit def pathPartialInvariantFunctor: PartialInvariantFunctor[Path]
 
   /** Implicit conversion to get rid of intellij errors when defining paths. Effectively should not be called.
-    * @see [[https://youtrack.jetbrains.com/issue/SCL-16284]] */
+    * @see [[https://youtrack.jetbrains.com/issue/SCL-16284]]
+    */
   private[endpoints4s] implicit def dummyPathToUrl[A](p: Path[A]): Url[A] = p
 
   /** Convenient methods for [[Path]]s.
-    * @group operations */
+    * @group operations
+    */
   implicit class PathOps[A](first: Path[A]) {
 
     /** Chains this path with the `second` constant path segment */
@@ -281,36 +290,39 @@ trait Urls extends PartialInvariantFunctorSyntax {
       chainPaths(first, staticPathSegment(second))
 
     /** Chains this path with the `second` path segment */
-    final def /[B](second: Path[B])(
-        implicit tupler: Tupler[A, B]
+    final def /[B](second: Path[B])(implicit
+        tupler: Tupler[A, B]
     ): Path[tupler.Out] = chainPaths(first, second)
 
     /** Chains this path with the given [[QueryString]] */
-    final def /?[B](qs: QueryString[B])(
-        implicit tupler: Tupler[A, B]
+    final def /?[B](qs: QueryString[B])(implicit
+        tupler: Tupler[A, B]
     ): Url[tupler.Out] = urlWithQueryString(first, qs)
   }
 
   /** A path segment whose value is the given `segment`
-    * @group operations */
+    * @group operations
+    */
   def staticPathSegment(segment: String): Path[Unit]
 
   /** A path segment carrying an `A` information
-    * @group operations */
-  def segment[A](name: String = "", docs: Documentation = None)(
-      implicit s: Segment[A]
+    * @group operations
+    */
+  def segment[A](name: String = "", docs: Documentation = None)(implicit
+      s: Segment[A]
   ): Path[A]
 
   /** The remaining segments of the path. The `String` value carried by this `Path` is still URL-encoded.
-    * @group operations */
+    * @group operations
+    */
   def remainingSegments(
       name: String = "",
       docs: Documentation = None
   ): Path[String] // TODO Make it impossible to chain it with another path (ie, `path / remainingSegments() / "foo"` should not compile)
 
   /** Chains the two paths */
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
+      tupler: Tupler[A, B]
   ): Path[tupler.Out]
 
   /**
@@ -349,12 +361,13 @@ trait Urls extends PartialInvariantFunctorSyntax {
   type Url[A]
 
   /** Provides `xmap` and `xmapPartial` operations
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]] */
+    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    */
   implicit def urlPartialInvariantFunctor: PartialInvariantFunctor[Url]
 
   /** Builds an URL from the given path and query string */
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): Url[tupler.Out]
 
 }

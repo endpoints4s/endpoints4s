@@ -134,8 +134,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(
-          x => x.getMessage shouldBe "Unexpected response status: 501"
+        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x =>
+          x.getMessage shouldBe "Unexpected response status: 501"
         )
         whenReady(
           call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed
@@ -152,8 +152,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(
-          x => x.getMessage shouldBe "Unable to process your request"
+        whenReady(call(client.smokeEndpoint, ("userId", "name1", 18)).failed)(x =>
+          x.getMessage shouldBe "Unable to process your request"
         )
         whenReady(
           call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18)).failed
@@ -173,9 +173,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.joinedHeadersEndpoint, ("a", "b")))(x =>
-          x shouldEqual (response)
-        )
+        whenReady(call(client.joinedHeadersEndpoint, ("a", "b")))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped headers" in {
@@ -190,9 +188,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.xmapHeadersEndpoint, 11))(x =>
-          x shouldEqual (response)
-        )
+        whenReady(call(client.xmapHeadersEndpoint, 11))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped url" in {
@@ -206,9 +202,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.xmapUrlEndpoint, "11"))(x =>
-          x shouldEqual (response)
-        )
+        whenReady(call(client.xmapUrlEndpoint, "11"))(x => x shouldEqual (response))
       }
 
       "properly handle xmaped request entites" in {
@@ -225,9 +219,7 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.xmapReqBodyEndpoint, date))(x =>
-          x shouldEqual (response)
-        )
+        whenReady(call(client.xmapReqBodyEndpoint, date))(x => x shouldEqual (response))
       }
 
       "in case of optional response" should {
@@ -324,7 +316,9 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         encodeUrl(path / segment[Int]())(42) shouldEqual "/42"
         encodeUrl(path / segment[Long]())(42L) shouldEqual "/42"
         encodeUrl(path / segment[Double]())(42.0) shouldEqual "/42.0"
-        encodeUrl(path / "foo" / remainingSegments())("bar%2Fbaz/quux") shouldEqual "/foo/bar%2Fbaz/quux"
+        encodeUrl(path / "foo" / remainingSegments())(
+          "bar%2Fbaz/quux"
+        ) shouldEqual "/foo/bar%2Fbaz/quux"
 
         val evenNumber = segment[Int]().xmapPartial {
           case x if x % 2 == 0 => Valid(x)
@@ -348,9 +342,15 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             } { location => (location.longitude, location.latitude) }
           //#xmap
 
-          encodeUrl(path /? locationQueryString)(Location(12.0, 32.9)) shouldEqual "?lon=12.0&lat=32.9"
-          encodeUrl(path /? locationQueryString)(Location(-12.0, 32.9)) shouldEqual "?lon=-12.0&lat=32.9"
-          encodeUrl(path /? locationQueryString)(Location(Math.PI, -32.9)) shouldEqual s"?lon=${Math.PI}&lat=-32.9"
+          encodeUrl(path /? locationQueryString)(
+            Location(12.0, 32.9)
+          ) shouldEqual "?lon=12.0&lat=32.9"
+          encodeUrl(path /? locationQueryString)(
+            Location(-12.0, 32.9)
+          ) shouldEqual "?lon=-12.0&lat=32.9"
+          encodeUrl(path /? locationQueryString)(
+            Location(Math.PI, -32.9)
+          ) shouldEqual s"?lon=${Math.PI}&lat=-32.9"
         }
 
         "xmapPartial blogids" in {

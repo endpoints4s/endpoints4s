@@ -20,7 +20,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *
     * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
     *        and [[PartialInvariantFunctorSyntax]] classes.
-    * @group types */
+    * @group types
+    */
   type RequestHeaders[A]
 
   /** Ignore headers
@@ -56,13 +57,14 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): RequestHeaders[Option[String]]
 
   /** Provides `++` operation.
-    * @see [[SemigroupalSyntax]] */
+    * @see [[SemigroupalSyntax]]
+    */
   implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]] */
-  implicit def requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders]
+    * @see [[PartialInvariantFunctorSyntax]]
+    */
+  implicit def requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders]
 
   /** Information carried by a whole request (headers and entity)
     *
@@ -76,11 +78,13 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *     to customize this behavior.
     *
     * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
-    * @group types */
+    * @group types
+    */
   type Request[A]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]] */
+    * @see [[PartialInvariantFunctorSyntax]]
+    */
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request]
 
   /** Information carried by request entity
@@ -98,13 +102,14 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *
     * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
     *       [[RequestEntitySyntax]] classes.
-    * @group types */
+    * @group types
+    */
   type RequestEntity[A]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]] */
-  implicit def requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity]
+    * @see [[PartialInvariantFunctorSyntax]]
+    */
+  implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity]
 
   /**
     * Empty request -- request without a body.
@@ -183,8 +188,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       entity: RequestEntity[BodyP] = emptyRequest,
       docs: Documentation = None,
       headers: RequestHeaders[HeadersP] = emptyRequestHeaders
-  )(
-      implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
+  )(implicit
+      tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out]
 
@@ -215,8 +220,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       entity: RequestEntity[BodyP],
       docs: Documentation = None,
       headers: RequestHeaders[HeadersP] = emptyRequestHeaders
-  )(
-      implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
+  )(implicit
+      tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] =
     request(Post, url, entity, docs, headers)
@@ -234,8 +239,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       entity: RequestEntity[BodyP],
       docs: Documentation = None,
       headers: RequestHeaders[HeadersP] = emptyRequestHeaders
-  )(
-      implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
+  )(implicit
+      tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] =
     request(Put, url, entity, docs, headers)
@@ -267,8 +272,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       entity: RequestEntity[BodyP],
       docs: Documentation = None,
       headers: RequestHeaders[HeadersP] = emptyRequestHeaders
-  )(
-      implicit tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
+  )(implicit
+      tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] =
     request(Patch, url, entity, docs, headers)

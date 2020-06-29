@@ -67,8 +67,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
   type Enum[A] = JsonSchema[A]
 
-  implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -144,8 +143,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     val encoder = _ => ujson.Obj()
   }
 
-  def field[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def field[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[A] =
     new Record[A] {
       val decoder = {
@@ -160,8 +159,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = value => ujson.Obj(name -> tpe.encoder.encode(value))
     }
 
-  def optField[A](name: String, documentation: Option[String] = None)(
-      implicit tpe: JsonSchema[A]
+  def optField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
   ): Record[Option[A]] =
     new Record[Option[A]] {
       val decoder = {
@@ -174,10 +173,11 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         case json => Invalid(s"Invalid JSON object: $json")
       }
       val encoder = new Encoder[Option[A], ujson.Obj] {
-        def encode(maybeValue: Option[A]) = maybeValue match {
-          case None        => ujson.Obj()
-          case Some(value) => ujson.Obj(name -> tpe.codec.encode(value))
-        }
+        def encode(maybeValue: Option[A]) =
+          maybeValue match {
+            case None        => ujson.Obj()
+            case Some(value) => ujson.Obj(name -> tpe.codec.encode(value))
+          }
       }
     }
 
@@ -211,15 +211,16 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           taggedB
             .findDecoder(tag)
             .map(Decoder.sequentially(_)(b => Valid(Right(b))))
-      def tagAndObj(value: Either[A, B]) = value match {
-        case Left(a)  => taggedA.tagAndObj(a)
-        case Right(b) => taggedB.tagAndObj(b)
-      }
+      def tagAndObj(value: Either[A, B]) =
+        value match {
+          case Left(a)  => taggedA.tagAndObj(a)
+          case Right(b) => taggedB.tagAndObj(b)
+        }
     }
   }
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
-      implicit t: Tupler[A, B]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
+      t: Tupler[A, B]
   ): Record[t.Out] =
     new Record[t.Out] {
       val decoder = (json: ujson.Value) =>
@@ -264,24 +265,27 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = ujson.Str(_)
     }
 
-  implicit def intJsonSchema: JsonSchema[Int] = new JsonSchema[Int] {
-    val decoder = {
-      case ujson.Num(x) if x.isValidInt => Valid(x.toInt)
-      case json                         => Invalid(s"Invalid integer value: $json")
+  implicit def intJsonSchema: JsonSchema[Int] =
+    new JsonSchema[Int] {
+      val decoder = {
+        case ujson.Num(x) if x.isValidInt => Valid(x.toInt)
+        case json                         => Invalid(s"Invalid integer value: $json")
+      }
+      val encoder = n => ujson.Num(n.toDouble)
     }
-    val encoder = n => ujson.Num(n.toDouble)
-  }
 
-  implicit def longJsonSchema: JsonSchema[Long] = new JsonSchema[Long] {
-    val decoder = {
-      case json @ ujson.Num(x) =>
-        val y = BigDecimal(x) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
-        if (y.isValidLong) Valid(y.toLong)
-        else Invalid(s"Invalid integer value: $json")
-      case json => Invalid(s"Invalid number value: $json")
+  implicit def longJsonSchema: JsonSchema[Long] =
+    new JsonSchema[Long] {
+      val decoder = {
+        case json @ ujson.Num(x) =>
+          val y =
+            BigDecimal(x) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
+          if (y.isValidLong) Valid(y.toLong)
+          else Invalid(s"Invalid integer value: $json")
+        case json => Invalid(s"Invalid number value: $json")
+      }
+      val encoder = n => ujson.Num(n.toDouble)
     }
-    val encoder = n => ujson.Num(n.toDouble)
-  }
 
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] =
     new JsonSchema[BigDecimal] {
@@ -292,21 +296,23 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = x => ujson.Num(x.doubleValue)
     }
 
-  implicit def floatJsonSchema: JsonSchema[Float] = new JsonSchema[Float] {
-    val decoder = {
-      case ujson.Num(x) => Valid(x.toFloat)
-      case json         => Invalid(s"Invalid number value: $json")
+  implicit def floatJsonSchema: JsonSchema[Float] =
+    new JsonSchema[Float] {
+      val decoder = {
+        case ujson.Num(x) => Valid(x.toFloat)
+        case json         => Invalid(s"Invalid number value: $json")
+      }
+      val encoder = x => ujson.Num(x.toDouble)
     }
-    val encoder = x => ujson.Num(x.toDouble)
-  }
 
-  implicit def doubleJsonSchema: JsonSchema[Double] = new JsonSchema[Double] {
-    val decoder = {
-      case ujson.Num(x) => Valid(x)
-      case json         => Invalid(s"Invalid number value: $json")
+  implicit def doubleJsonSchema: JsonSchema[Double] =
+    new JsonSchema[Double] {
+      val decoder = {
+        case ujson.Num(x) => Valid(x)
+        case json         => Invalid(s"Invalid number value: $json")
+      }
+      val encoder = ujson.Num(_)
     }
-    val encoder = ujson.Num(_)
-  }
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] =
     new JsonSchema[Boolean] {
@@ -317,38 +323,39 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = ujson.Bool(_)
     }
 
-  implicit def byteJsonSchema: JsonSchema[Byte] = new JsonSchema[Byte] {
-    val decoder = {
-      case ujson.Num(x) if x.isValidByte => Valid(x.toByte)
-      case json                          => Invalid(s"Invalid byte value: $json")
+  implicit def byteJsonSchema: JsonSchema[Byte] =
+    new JsonSchema[Byte] {
+      val decoder = {
+        case ujson.Num(x) if x.isValidByte => Valid(x.toByte)
+        case json                          => Invalid(s"Invalid byte value: $json")
+      }
+      val encoder = b => ujson.Num(b.toDouble)
     }
-    val encoder = b => ujson.Num(b.toDouble)
-  }
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](
-      implicit
+  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
-  ): JsonSchema[C[A]] = new JsonSchema[C[A]] {
-    val decoder = {
-      case ujson.Arr(items) =>
-        val builder = factory.newBuilder
-        builder.sizeHint(items)
-        items
-          .map(jsonSchema.decoder.decode)
-          .foldLeft[Validated[collection.mutable.Builder[A, C[A]]]](
-            Valid(builder)
-          ) {
-            case (acc, value) => acc.zip(value).map { case (b, a) => b += a }
-          }
-          .map(_.result())
-      case json => Invalid(s"Invalid JSON array: $json")
+  ): JsonSchema[C[A]] =
+    new JsonSchema[C[A]] {
+      val decoder = {
+        case ujson.Arr(items) =>
+          val builder = factory.newBuilder
+          builder.sizeHint(items)
+          items
+            .map(jsonSchema.decoder.decode)
+            .foldLeft[Validated[collection.mutable.Builder[A, C[A]]]](
+              Valid(builder)
+            ) {
+              case (acc, value) => acc.zip(value).map { case (b, a) => b += a }
+            }
+            .map(_.result())
+        case json => Invalid(s"Invalid JSON array: $json")
+      }
+      val encoder = as => ujson.Arr(as.map(jsonSchema.codec.encode): _*)
     }
-    val encoder = as => ujson.Arr(as.map(jsonSchema.codec.encode): _*)
-  }
 
-  implicit def mapJsonSchema[A](
-      implicit jsonSchema: JsonSchema[A]
+  implicit def mapJsonSchema[A](implicit
+      jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]] =
     new JsonSchema[Map[String, A]] {
       val decoder = {

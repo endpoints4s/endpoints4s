@@ -12,8 +12,7 @@ import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 import scala.concurrent.Future
 import scala.concurrent.duration.DurationInt
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
-    extends ClientTestBase[T] {
+trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends ClientTestBase[T] {
 
   val streamingClient: T
 
@@ -21,23 +20,16 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
   val streamingPort: Int = findOpenPort
 
   def serving[A](route: Route)(thunk: => Unit): Unit = {
-    whenReady(Http().bindAndHandle(route, "localhost", streamingPort)) {
-      binding =>
-        try {
-          thunk
-        } finally {
-          whenReady(binding.terminate(10.seconds))(_ => ())
-        }
+    whenReady(Http().bindAndHandle(route, "localhost", streamingPort)) { binding =>
+      try {
+        thunk
+      } finally {
+        whenReady(binding.terminate(10.seconds))(_ => ())
+      }
     }
   }
 
-  import streamingClient.{
-    Counter,
-    Endpoint,
-    Chunks,
-    streamedEndpointTest,
-    uploadEndpointTest
-  }
+  import streamingClient.{Counter, Endpoint, Chunks, streamedEndpointTest, uploadEndpointTest}
 
   /**
     * Calls the endpoint and accumulates the messages sent by the server.

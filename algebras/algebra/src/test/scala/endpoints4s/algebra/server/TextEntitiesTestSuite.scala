@@ -10,8 +10,7 @@ import akka.http.scaladsl.model.{
   MediaTypes
 }
 
-trait TextEntitiesTestSuite[T <: TextEntitiesTestApi]
-    extends ServerTestBase[T] {
+trait TextEntitiesTestSuite[T <: TextEntitiesTestApi] extends ServerTestBase[T] {
 
   "TextEntities" should {
     "accept `text/plain` requests with UTF-8 encoding" in {

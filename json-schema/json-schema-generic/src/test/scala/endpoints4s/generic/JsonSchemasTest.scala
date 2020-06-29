@@ -84,13 +84,13 @@ class JsonSchemasTest extends AnyFreeSpec {
     def emptyRecord: String =
       "%"
 
-    def field[A](name: String, docs: Option[String])(
-        implicit tpe: String
+    def field[A](name: String, docs: Option[String])(implicit
+        tpe: String
     ): String =
       s"$name:$tpe${docs.fold("")(doc => s"{$doc}")}"
 
-    def optField[A](name: String, docs: Option[String])(
-        implicit tpe: String
+    def optField[A](name: String, docs: Option[String])(implicit
+        tpe: String
     ): String =
       s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
 
@@ -106,8 +106,8 @@ class JsonSchemasTest extends AnyFreeSpec {
     def choiceTagged[A, B](taggedA: String, taggedB: String): String =
       s"$taggedA|$taggedB"
 
-    def zipRecords[A, B](recordA: String, recordB: String)(
-        implicit t: Tupler[A, B]
+    def zipRecords[A, B](recordA: String, recordB: String)(implicit
+        t: Tupler[A, B]
     ): String =
       s"$recordA,$recordB"
 
@@ -216,14 +216,12 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     lazy val byteJsonSchema: String = "byte"
 
-    def arrayJsonSchema[C[X] <: Seq[X], A](
-        implicit
+    def arrayJsonSchema[C[X] <: Seq[X], A](implicit
         jsonSchema: String,
         factory: Factory[A, C[A]]
     ): String = s"[$jsonSchema]"
 
-    def mapJsonSchema[A](
-        implicit
+    def mapJsonSchema[A](implicit
         jsonSchema: String
     ): String = s"{$jsonSchema}"
   }

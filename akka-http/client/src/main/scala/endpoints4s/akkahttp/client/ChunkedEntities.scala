@@ -12,9 +12,7 @@ import scala.concurrent.Future
   *
   * @group interpreters
   */
-trait ChunkedEntities
-    extends algebra.ChunkedEntities
-    with EndpointsWithCustomErrors {
+trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomErrors {
 
   //#stream-type
   type Chunks[A] = akka.stream.scaladsl.Source[A, _]
@@ -67,8 +65,8 @@ trait ChunkedJsonEntities
     with ChunkedEntities
     with JsonEntitiesFromCodecs {
 
-  def jsonChunksRequest[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedRequestEntity(
@@ -77,8 +75,8 @@ trait ChunkedJsonEntities
     )
   }
 
-  def jsonChunksResponse[A](
-      implicit codec: JsonCodec[A]
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedResponseEntity { byteString =>

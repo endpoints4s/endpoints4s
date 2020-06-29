@@ -31,9 +31,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with ScalatestRouteTest {
       smokeEndpoint.implementedBy(_ => sys.error("Sorry."))
 
     val smokeEndpointAsyncRoute =
-      smokeEndpoint.implementedByAsync(_ =>
-        Future.failed(new Exception("Sorry."))
-      )
+      smokeEndpoint.implementedByAsync(_ => Future.failed(new Exception("Sorry.")))
 
   }
 
