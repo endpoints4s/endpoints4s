@@ -7,7 +7,7 @@ val `xhr-client` =
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
-      name := "endpoints-xhr-client",
+      name := "xhr-client",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
@@ -25,7 +25,7 @@ val `xhr-client-faithful` =
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
-      name := "endpoints-xhr-client-faithful",
+      name := "xhr-client-faithful",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "org.julienrf" %%% "faithful" % "2.0.0"
@@ -39,7 +39,7 @@ val `xhr-client-circe` =
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
-      name := "endpoints-xhr-client-circe",
+      name := "xhr-client-circe",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
