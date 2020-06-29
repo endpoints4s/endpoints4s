@@ -18,8 +18,6 @@ trait BuiltInErrors extends algebra.BuiltInErrors {
 
   def serverErrorResponseEntity: ResponseEntity[Throwable] =
     res =>
-      clientErrorsResponseEntity(res).map(invalid =>
-        new Throwable(invalid.errors.mkString(", "))
-      )
+      clientErrorsResponseEntity(res).map(invalid => new Throwable(invalid.errors.mkString(", ")))
 
 }

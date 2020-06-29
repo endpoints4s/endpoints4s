@@ -32,13 +32,13 @@ trait Urls extends algebra.Urls {
       schema: Schema
   )
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): QueryString[tupler.Out] =
     DocumentedQueryString(first.parameters ++ second.parameters)
 
-  def qs[A](name: String, docs: Documentation)(
-      implicit value: QueryStringParam[A]
+  def qs[A](name: String, docs: Documentation)(implicit
+      value: QueryStringParam[A]
   ): QueryString[A] =
     DocumentedQueryString(
       List(
@@ -54,13 +54,13 @@ trait Urls extends algebra.Urls {
   case class DocumentedQueryStringParam(schema: Schema, isRequired: Boolean)
   type QueryStringParam[A] = DocumentedQueryStringParam
 
-  implicit def optionalQueryStringParam[A](
-      implicit param: QueryStringParam[A]
+  implicit def optionalQueryStringParam[A](implicit
+      param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =
     param.copy(isRequired = false)
 
-  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
-      implicit param: QueryStringParam[A],
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
+      param: QueryStringParam[A],
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     DocumentedQueryStringParam(
@@ -73,8 +73,7 @@ trait Urls extends algebra.Urls {
       isRequired = false
     )
 
-  implicit lazy val queryStringPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryString] =
+  implicit lazy val queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
           fa: QueryString[A],
@@ -113,8 +112,7 @@ trait Urls extends algebra.Urls {
 
   type Segment[A] = Schema
 
-  implicit lazy val segmentPartialInvariantFunctor
-      : PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -147,16 +145,16 @@ trait Urls extends algebra.Urls {
   def staticPathSegment(segment: String): Path[Unit] =
     DocumentedUrl(Left(segment) :: Nil, Nil)
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
+      tupler: Tupler[A, B]
   ): Path[tupler.Out] =
     DocumentedUrl(
       first.path ++ second.path,
       first.queryParameters ++ second.queryParameters // (In practice this should be empty…)
     )
 
-  def segment[A](name: String, docs: Documentation)(
-      implicit A: Segment[A]
+  def segment[A](name: String, docs: Documentation)(implicit
+      A: Segment[A]
   ): Path[A] = {
     DocumentedUrl(
       Right(DocumentedParameter(name, required = true, docs, A)) :: Nil,
@@ -194,8 +192,8 @@ trait Urls extends algebra.Urls {
       queryParameters: List[DocumentedParameter]
   )
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): Url[tupler.Out] =
     path.copy(queryParameters = path.queryParameters ++ qs.parameters)
 

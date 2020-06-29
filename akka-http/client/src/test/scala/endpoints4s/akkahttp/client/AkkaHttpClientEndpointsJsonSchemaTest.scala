@@ -4,18 +4,13 @@ import akka.actor.ActorSystem
 import akka.stream.Materializer
 import akka.testkit.TestKit
 import endpoints4s.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
-import endpoints4s.algebra.{
-  Address,
-  BasicAuthenticationTestApi,
-  JsonTestApi,
-  User
-}
+import endpoints4s.algebra.{Address, BasicAuthenticationTestApi, JsonTestApi, User}
 import endpoints4s.generic
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestJsonSchemaClient(settings: EndpointsSettings)(
-    implicit EC: ExecutionContext,
+class TestJsonSchemaClient(settings: EndpointsSettings)(implicit
+    EC: ExecutionContext,
     M: Materializer
 ) extends Endpoints(settings)
     with BasicAuthentication

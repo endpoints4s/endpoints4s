@@ -4,9 +4,7 @@ import akka.http.scaladsl.server.Route
 import endpoints4s.algebra
 import endpoints4s.algebra.JsonStreamingExample
 
-trait ChunkedEntitiesDocs
-    extends algebra.ChunkedEntitiesDocs
-    with ChunkedEntities {
+trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
 
   //#implementation
   import java.nio.file.Paths

@@ -285,11 +285,10 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       length = 15
       // Property names are random
       keys = List.fill(length)(Random.nextString(10))
-      schema = keys
-        .foldLeft[Record[_]](emptyRecord)((schema, key) =>
-          schema.zip(field[Int](key))
-        )
-        .named("Resource")
+      schema =
+        keys
+          .foldLeft[Record[_]](emptyRecord)((schema, key) => schema.zip(field[Int](key)))
+          .named("Resource")
       item = endpoint(
         get(path): Request[Unit],
         ok(jsonResponse(schema)): Response[Record[_]]
@@ -297,16 +296,15 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       docs = openApi(Info("test", "0.0.0"))(item)
       json = ujson.read(OpenApi.stringEncoder.encode(docs))
     } {
-      json("components")("schemas")("Resource")("properties").obj.toList shouldBe (
-        keys.map(key =>
-          (
-            key,
-            ujson.Obj(
-              "type" -> ujson.Str("integer"),
-              "format" -> ujson.Str("int32")
-            )
+      json("components")("schemas")("Resource")("properties").obj.toList shouldBe (keys.map(key =>
+        (
+          key,
+          ujson.Obj(
+            "type" -> ujson.Str("integer"),
+            "format" -> ujson.Str("int32")
           )
         )
+      )
       )
     }
   }

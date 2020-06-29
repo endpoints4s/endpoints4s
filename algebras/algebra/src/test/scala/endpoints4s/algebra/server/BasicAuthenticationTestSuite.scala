@@ -1,14 +1,10 @@
 package endpoints4s.algebra.server
 
 import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
-import akka.http.scaladsl.model.headers.{
-  BasicHttpCredentials,
-  `WWW-Authenticate`
-}
+import akka.http.scaladsl.model.headers.{BasicHttpCredentials, `WWW-Authenticate`}
 import endpoints4s.algebra.BasicAuthenticationTestApi
 
-trait BasicAuthenticationTestSuite[T <: BasicAuthenticationTestApi]
-    extends EndpointsTestSuite[T] {
+trait BasicAuthenticationTestSuite[T <: BasicAuthenticationTestApi] extends EndpointsTestSuite[T] {
 
   "BasicAuthentication" should {
 
@@ -42,15 +38,14 @@ trait BasicAuthenticationTestSuite[T <: BasicAuthenticationTestApi]
     }
 
     "reject unauthenticated requests with invalid parameters before handling authorization" in {
-      serveEndpoint(serverApi.protectedEndpointWithParameter, Some("Hello!")) {
-        port =>
-          val request = HttpRequest(uri = s"http://localhost:$port/users/foo")
-          whenReady(sendAndDecodeEntityAsText(request)) {
-            case (response, entity) =>
-              response.status shouldBe StatusCodes.BadRequest
-              entity shouldBe "[\"Invalid integer value 'foo' for segment 'id'\"]"
-              ()
-          }
+      serveEndpoint(serverApi.protectedEndpointWithParameter, Some("Hello!")) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/users/foo")
+        whenReady(sendAndDecodeEntityAsText(request)) {
+          case (response, entity) =>
+            response.status shouldBe StatusCodes.BadRequest
+            entity shouldBe "[\"Invalid integer value 'foo' for segment 'id'\"]"
+            ()
+        }
       }
     }
 

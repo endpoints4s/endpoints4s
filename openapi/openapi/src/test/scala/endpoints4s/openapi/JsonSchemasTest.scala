@@ -5,9 +5,7 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasTest extends AnyFreeSpec {
 
-  object DocumentedJsonSchemas
-      extends algebra.JsonSchemasFixtures
-      with JsonSchemas
+  object DocumentedJsonSchemas extends algebra.JsonSchemasFixtures with JsonSchemas
 
   import DocumentedJsonSchemas.DocumentedJsonSchema._
 
@@ -118,12 +116,12 @@ class JsonSchemasTest extends AnyFreeSpec {
   "recursive" in {
     DocumentedJsonSchemas.recursiveSchema.docs match {
       case DocumentedRecord(
-          List(Field("next", tpe, true, None)),
-          None,
-          None,
-          None,
-          None,
-          None
+            List(Field("next", tpe, true, None)),
+            None,
+            None,
+            None,
+            None,
+            None
           ) =>
         assert(tpe.isInstanceOf[LazySchema])
       case _ =>

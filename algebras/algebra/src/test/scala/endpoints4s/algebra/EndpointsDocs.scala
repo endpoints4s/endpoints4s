@@ -90,8 +90,8 @@ trait EndpointsDocs extends Endpoints {
   import java.time.LocalDate
   import endpoints4s.{Invalid, Valid}
 
-  implicit def localDateSegment(
-      implicit string: Segment[String]
+  implicit def localDateSegment(implicit
+      string: Segment[String]
   ): Segment[LocalDate] =
     string.xmapPartial { s =>
       Try(LocalDate.parse(s)) match {

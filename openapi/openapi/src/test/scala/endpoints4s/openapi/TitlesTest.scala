@@ -56,10 +56,7 @@ class TitlesTest extends AnyWordSpec with Matchers {
         .withTitle("fallback literals")
   }
 
-  trait Fixtures
-      extends FixturesAlg
-      with openapi.Endpoints
-      with openapi.JsonEntitiesFromSchemas {
+  trait Fixtures extends FixturesAlg with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     def checkTitle[A](schema: JsonSchema[A])(title: String) = {
       assert(

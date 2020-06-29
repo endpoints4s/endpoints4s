@@ -9,18 +9,15 @@ import endpoints4s.{Codec, algebra}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends algebra.JsonEntitiesFromCodecs
-    with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
 
-  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = {
-    (a, req) =>
-      req.copy(entity =
-        HttpEntity(
-          ContentTypes.`application/json`,
-          stringCodec(codec).encode(a)
-        )
+  def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, req) =>
+    req.copy(entity =
+      HttpEntity(
+        ContentTypes.`application/json`,
+        stringCodec(codec).encode(a)
       )
+    )
   }
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =

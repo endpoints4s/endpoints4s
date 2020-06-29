@@ -4,14 +4,7 @@ import java.net.{URLDecoder, URLEncoder}
 import java.nio.charset.StandardCharsets.UTF_8
 
 import endpoints4s.algebra.Documentation
-import endpoints4s.{
-  Invalid,
-  PartialInvariantFunctor,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 import org.http4s
 import org.http4s.Uri
 
@@ -52,21 +45,21 @@ trait Urls extends algebra.Urls with StatusCodes {
   }
 
   /** Concatenates two `QueryString`s */
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): QueryString[tupler.Out] =
     map => first(map).zip(second(map))
 
-  def qs[A](name: String, docs: Documentation = None)(
-      implicit value: QueryStringParam[A]
+  def qs[A](name: String, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
   ): QueryString[A] =
     params =>
       value
         .decode(name, params)
         .mapErrors(_.map(error => s"$error for query parameter '$name'"))
 
-  implicit def optionalQueryStringParam[A](
-      implicit param: QueryStringParam[A]
+  implicit def optionalQueryStringParam[A](implicit
+      param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =
     (name, params) =>
       params.get(name) match {
@@ -74,8 +67,8 @@ trait Urls extends algebra.Urls with StatusCodes {
         case Some(_) => param.decode(name, params).map(Some(_))
       }
 
-  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
-      implicit param: QueryStringParam[A],
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
+      param: QueryStringParam[A],
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     (name: String, qs: Map[String, Seq[String]]) =>
@@ -84,22 +77,20 @@ trait Urls extends algebra.Urls with StatusCodes {
         case Some(vs) =>
           // ''traverse'' the list of decoded values
           vs.foldLeft[Validated[mutable.Builder[A, CC[A]]]](
-              Valid(factory.newBuilder)
-            ) {
-              case (inv: Invalid, v) =>
-                // Pretend that this was the query string and delegate to the `A` query string param
-                param
-                  .decode(name, Map(name -> (v :: Nil)))
-                  .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
-              case (Valid(b), v) =>
-                // Pretend that this was the query string and delegate to the `A` query string param
-                param.decode(name, Map(name -> (v :: Nil))).map(b += _)
-            }
-            .map(_.result())
+            Valid(factory.newBuilder)
+          ) {
+            case (inv: Invalid, v) =>
+              // Pretend that this was the query string and delegate to the `A` query string param
+              param
+                .decode(name, Map(name -> (v :: Nil)))
+                .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
+            case (Valid(b), v) =>
+              // Pretend that this was the query string and delegate to the `A` query string param
+              param.decode(name, Map(name -> (v :: Nil))).map(b += _)
+          }.map(_.result())
       }
 
-  implicit def queryStringParamPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryStringParam] =
+  implicit def queryStringParamPartialInvariantFunctor: PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
       def xmapPartial[A, B](
           fa: QueryStringParam[A],
@@ -115,8 +106,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       Validated.fromOption(maybeValue)("Missing value")
     }
 
-  implicit def segmentPartialInvariantFunctor
-      : PartialInvariantFunctor[Segment] =
+  implicit def segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -143,32 +133,32 @@ trait Urls extends algebra.Urls with StatusCodes {
         }
     }
 
-  def staticPathSegment(segment: String): Path[Unit] = new Path[Unit] {
-    def decode(paths: List[String]): Option[(Validated[Unit], List[String])] =
-      paths match {
-        case s :: ss if s == segment => Some((Valid(()), ss))
-        case _                       => None
-      }
-  }
+  def staticPathSegment(segment: String): Path[Unit] =
+    new Path[Unit] {
+      def decode(paths: List[String]): Option[(Validated[Unit], List[String])] =
+        paths match {
+          case s :: ss if s == segment => Some((Valid(()), ss))
+          case _                       => None
+        }
+    }
 
-  def segment[A](name: String = "", docs: Documentation = None)(
-      implicit A: Segment[A]
-  ): Path[A] = new Path[A] {
-    def decode(segments: List[String]): Option[(Validated[A], List[String])] = {
-      segments match {
-        case head :: tail =>
-          val validatedA =
-            A.decode(head)
-              .mapErrors(
-                _.map(error =>
-                  s"$error for segment${if (name.isEmpty) "" else s" '$name'"}"
+  def segment[A](name: String = "", docs: Documentation = None)(implicit
+      A: Segment[A]
+  ): Path[A] =
+    new Path[A] {
+      def decode(segments: List[String]): Option[(Validated[A], List[String])] = {
+        segments match {
+          case head :: tail =>
+            val validatedA =
+              A.decode(head)
+                .mapErrors(
+                  _.map(error => s"$error for segment${if (name.isEmpty) "" else s" '$name'"}")
                 )
-              )
-          Some((validatedA, tail))
-        case Nil => None
+            Some((validatedA, tail))
+          case Nil => None
+        }
       }
     }
-  }
 
   implicit def stringSegment: Segment[String] = Valid(_)
 
@@ -190,20 +180,21 @@ trait Urls extends algebra.Urls with StatusCodes {
           )
     }
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]
-  ): Path[tupler.Out] = new Path[tupler.Out] {
-    def decode(
-        segments: List[String]
-    ): Option[(Validated[tupler.Out], List[String])] =
-      first.decode(segments).flatMap {
-        case (validA, segments2) =>
-          second.decode(segments2).map {
-            case (validB, segments3) =>
-              (validA.zip(validB)(tupler), segments3)
-          }
-      }
-  }
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
+      tupler: Tupler[A, B]
+  ): Path[tupler.Out] =
+    new Path[tupler.Out] {
+      def decode(
+          segments: List[String]
+      ): Option[(Validated[tupler.Out], List[String])] =
+        first.decode(segments).flatMap {
+          case (validA, segments2) =>
+            second.decode(segments2).map {
+              case (validB, segments3) =>
+                (validA.zip(validB)(tupler), segments3)
+            }
+        }
+    }
 
   implicit def urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
     new PartialInvariantFunctor[Url] {
@@ -211,19 +202,21 @@ trait Urls extends algebra.Urls with StatusCodes {
           fa: Url[A],
           f: A => Validated[B],
           g: B => A
-      ): Url[B] = new Url[B] {
-        def decodeUrl(uri: Uri): Option[Validated[B]] =
-          fa.decodeUrl(uri).map(_.flatMap(f))
-      }
+      ): Url[B] =
+        new Url[B] {
+          def decodeUrl(uri: Uri): Option[Validated[B]] =
+            fa.decodeUrl(uri).map(_.flatMap(f))
+        }
     }
 
   /** Builds an URL from the given path and query string */
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]
-  ): Url[tupler.Out] = new Url[tupler.Out] {
-    def decodeUrl(uri: Uri): Option[Validated[tupler.Out]] =
-      pathExtractor(path, uri).map(_.zip(qs(uri.multiParams))(tupler))
-  }
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit
+      tupler: Tupler[A, B]
+  ): Url[tupler.Out] =
+    new Url[tupler.Out] {
+      def decodeUrl(uri: Uri): Option[Validated[tupler.Out]] =
+        pathExtractor(path, uri).map(_.zip(qs(uri.multiParams))(tupler))
+    }
 
   private def pathExtractor[A](
       path: Path[A],
@@ -241,8 +234,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     }
   }
 
-  implicit def queryStringPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryString] =
+  implicit def queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
           fa: Params => Validated[A],

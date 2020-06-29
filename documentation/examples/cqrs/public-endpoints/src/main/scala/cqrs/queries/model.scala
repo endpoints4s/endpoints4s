@@ -20,14 +20,10 @@ case class Meter(
 
 object Meter {
 
-  implicit def decodeSortedMap[A: Decoder: Ordering, B: Decoder]
-      : Decoder[SortedMap[A, B]] =
-    Decoder[Seq[(A, B)]].map(entries =>
-      (SortedMap.newBuilder[A, B] ++= entries).result()
-    )
+  implicit def decodeSortedMap[A: Decoder: Ordering, B: Decoder]: Decoder[SortedMap[A, B]] =
+    Decoder[Seq[(A, B)]].map(entries => (SortedMap.newBuilder[A, B] ++= entries).result())
 
-  implicit def encodeSortedMap[A: Encoder, B: Encoder]
-      : Encoder[SortedMap[A, B]] =
+  implicit def encodeSortedMap[A: Encoder, B: Encoder]: Encoder[SortedMap[A, B]] =
     Encoder.encodeList[(A, B)].contramap[SortedMap[A, B]](_.toList)
 
   implicit val decoder: Decoder[Meter] = deriveDecoder

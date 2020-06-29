@@ -1,15 +1,7 @@
 package endpoints4s.scalaj.client
 
 import scalaj.http.HttpResponse
-import endpoints4s.{
-  Invalid,
-  InvariantFunctor,
-  Semigroupal,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{Invalid, InvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.Documentation
 
 /**
@@ -32,8 +24,7 @@ trait Responses extends algebra.Responses with StatusCodes {
 
   type ResponseEntity[A] = String => Either[Throwable, A]
 
-  implicit def responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -53,14 +44,13 @@ trait Responses extends algebra.Responses with StatusCodes {
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -92,8 +82,7 @@ trait Responses extends algebra.Responses with StatusCodes {
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     response =>

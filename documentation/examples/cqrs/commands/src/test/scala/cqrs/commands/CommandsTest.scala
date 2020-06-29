@@ -17,9 +17,8 @@ import org.scalatest.freespec.AsyncFreeSpec
 class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
   private val server =
-    NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test)) {
-      components =>
-        new Commands(PlayComponents.fromBuiltInComponents(components)).routes
+    NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test)) { components =>
+      new Commands(PlayComponents.fromBuiltInComponents(components)).routes
     }
   val app = server.applicationProvider.get.get
   import app.materializer
@@ -52,25 +51,27 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     "create a meter and add readings to it" in {
       for {
         maybeCreatedEvent <- client.command(CreateMeter("water"))
-        id <- maybeCreatedEvent
-          .collect { case StoredEvent(_, MeterCreated(id, _)) => id }
-          .fold[Future[UUID]](Future.failed(new NoSuchElementException))(
-            Future.successful
-          )
+        id <-
+          maybeCreatedEvent
+            .collect { case StoredEvent(_, MeterCreated(id, _)) => id }
+            .fold[Future[UUID]](Future.failed(new NoSuchElementException))(
+              Future.successful
+            )
         maybeAddedEvent <- client.command(
           AddRecord(id, arbitraryDate, arbitraryValue)
         )
-        _ <- maybeAddedEvent
-          .collect {
-            case StoredEvent(
-                _,
-                RecordAdded(`id`, `arbitraryDate`, `arbitraryValue`)
-                ) =>
-              ()
-          }
-          .fold[Future[Unit]](Future.failed(new NoSuchElementException))(
-            Future.successful
-          )
+        _ <-
+          maybeAddedEvent
+            .collect {
+              case StoredEvent(
+                    _,
+                    RecordAdded(`id`, `arbitraryDate`, `arbitraryValue`)
+                  ) =>
+                ()
+            }
+            .fold[Future[Unit]](Future.failed(new NoSuchElementException))(
+              Future.successful
+            )
       } yield assert(true)
     }
   }

@@ -97,8 +97,8 @@ class QueriesService(
 
     //#invocation
     val eventuallyUpdatedState: Future[State] =
-      eventLog.events(maybeLastEventTimestamp).map {
-        (newEvents: Seq[StoredEvent]) => atomicallyApplyEvents(newEvents)
+      eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
+        atomicallyApplyEvents(newEvents)
       }
     //#invocation
     eventuallyUpdatedState

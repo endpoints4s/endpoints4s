@@ -13,9 +13,7 @@ import org.http4s.{EntityDecoder, EntityEncoder, MediaType}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends algebra.JsonEntitiesFromCodecs
-    with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
 
   /* Setting `strict = true` means that this won't accept requests that are
    * missing their Content-Type header. However, if we use `strict = false`,
@@ -40,9 +38,7 @@ trait JsonEntitiesFromCodecs
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
     EntityEncoder[Effect, Chunk[Byte]]
-      .contramap[A](value =>
-        Chunk.bytes(stringCodec(codec).encode(value).getBytes())
-      )
+      .contramap[A](value => Chunk.bytes(stringCodec(codec).encode(value).getBytes()))
       .withContentType(`Content-Type`(MediaType.application.json))
 
 }

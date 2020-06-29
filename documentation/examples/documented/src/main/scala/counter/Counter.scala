@@ -121,9 +121,7 @@ class CounterServer(val playComponents: PlayComponents)
 object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
-    val playConfig = ServerConfig(port =
-      sys.props.get("http.port").map(_.toInt).orElse(Some(9000))
-    )
+    val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
     NettyServer.fromRouterWithComponents(playConfig) { components =>
       val playComponents = PlayComponents.fromBuiltInComponents(components)
       new CounterServer(playComponents).routes orElse new DocumentationServer(

@@ -16,8 +16,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   )(
       onload: Either[Throwable, req.Response] => Unit,
       onError: XMLHttpRequest => Unit
-  )(
-      implicit
+  )(implicit
       encoder: Encoder[Req, Transport],
       decoder: Decoder[Transport, Resp]
   ): Unit =

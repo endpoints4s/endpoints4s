@@ -11,9 +11,7 @@ import play.api.http.{ContentTypes, Writeable}
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends algebra.JsonEntitiesFromCodecs
-    with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
     JsonEntities.decodeRequest(this)(stringCodec(codec))

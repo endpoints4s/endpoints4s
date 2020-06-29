@@ -15,23 +15,22 @@ trait MuxEndpoints[R[_]] extends algebra.Endpoints {
       response: Response[Transport]
   ) {
 
-    def apply(req: Req)(
-        implicit encoder: Encoder[Req, Transport],
+    def apply(req: Req)(implicit
+        encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): R[req.Response] = {
       val sttpRequest: sttp.Request[String, Nothing] =
         request(encoder.encode(req)).response(sttp.asString)
       val result = self.backend.send(sttpRequest)
       self.backend.responseMonad.flatMap(result) { res =>
-        self.backend.responseMonad.flatMap(decodeResponse(response, res)) {
-          transport =>
-            decoder.decode(transport) match {
-              case Valid(r) =>
-                self.backend.responseMonad.unit(r.asInstanceOf[req.Response])
-              case Invalid(errors) =>
-                self.backend.responseMonad
-                  .error(new Exception(errors.mkString(". ")))
-            }
+        self.backend.responseMonad.flatMap(decodeResponse(response, res)) { transport =>
+          decoder.decode(transport) match {
+            case Valid(r) =>
+              self.backend.responseMonad.unit(r.asInstanceOf[req.Response])
+            case Invalid(errors) =>
+              self.backend.responseMonad
+                .error(new Exception(errors.mkString(". ")))
+          }
         }
       }
     }

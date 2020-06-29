@@ -10,8 +10,8 @@ import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-class TestClient(settings: EndpointsSettings)(
-    implicit EC: ExecutionContext,
+class TestClient(settings: EndpointsSettings)(implicit
+    EC: ExecutionContext,
     M: Materializer
 ) extends Endpoints(settings)
     with BasicAuthentication

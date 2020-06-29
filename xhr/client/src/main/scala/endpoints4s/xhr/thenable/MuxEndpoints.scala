@@ -16,8 +16,7 @@ trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
   ) {
     def apply(
         req: Req
-    )(
-        implicit
+    )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): js.Thenable[req.Response] = {

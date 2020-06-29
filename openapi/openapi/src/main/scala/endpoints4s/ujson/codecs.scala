@@ -15,15 +15,14 @@ object codecs {
   }
 
   val stringJson: Codec[String, ujson.Value] =
-    Codec.fromEncoderAndDecoder((json: ujson.Value) =>
-      json.transform(StringRenderer()).toString
-    )(from =>
-      Validated.fromEither(
-        util.control.Exception.nonFatalCatch
-          .either(ujson.read(from))
-          .left
-          .map(_ => "Invalid JSON document" :: Nil)
-      )
+    Codec.fromEncoderAndDecoder((json: ujson.Value) => json.transform(StringRenderer()).toString)(
+      from =>
+        Validated.fromEither(
+          util.control.Exception.nonFatalCatch
+            .either(ujson.read(from))
+            .left
+            .map(_ => "Invalid JSON document" :: Nil)
+        )
     )
 
   val invalidCodec: Codec[String, Invalid] =

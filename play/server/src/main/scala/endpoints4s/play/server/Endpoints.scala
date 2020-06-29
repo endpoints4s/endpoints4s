@@ -52,10 +52,7 @@ import scala.util.control.NonFatal
   *
   * @group interpreters
   */
-trait Endpoints
-    extends algebra.Endpoints
-    with EndpointsWithCustomErrors
-    with BuiltInErrors
+trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
 /**
   * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
@@ -112,8 +109,8 @@ trait EndpointsWithCustomErrors
 
   implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
         headers => fa(headers).zip(fb(headers))
     }
@@ -139,8 +136,7 @@ trait EndpointsWithCustomErrors
     def encode(a: A): Call
   }
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -151,8 +147,7 @@ trait EndpointsWithCustomErrors
           def decode: RequestExtractor[RequestEntity[B]] =
             functorRequestExtractor.fmap(
               fa.decode,
-              (requestEntity: RequestEntity[A]) =>
-                requestEntity.xmapPartial(f)(g)
+              (requestEntity: RequestEntity[A]) => requestEntity.xmapPartial(f)(g)
             )
           def encode(b: B): Call = fa.encode(g(b))
         }
@@ -207,9 +202,7 @@ trait EndpointsWithCustomErrors
               case inv: Invalid =>
                 _ =>
                   Some(
-                    BodyParser(_ =>
-                      Accumulator.done(Left(handleClientErrors(inv)))
-                    )
+                    BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
                   )
               case Valid(a) => toB(a)
             }
@@ -242,8 +235,7 @@ trait EndpointsWithCustomErrors
       maybeBodyParserA.orElse(maybeBodyBarserB)
     }
 
-  implicit def requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
           f: RequestEntity[From],
@@ -290,8 +282,8 @@ trait EndpointsWithCustomErrors
       entity: RequestEntity[B],
       docs: Documentation,
       headers: RequestHeaders[C]
-  )(
-      implicit tuplerAB: Tupler.Aux[A, B, AB],
+  )(implicit
+      tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
@@ -312,8 +304,7 @@ trait EndpointsWithCustomErrors
     */
   type Response[A] = A => Result
 
-  implicit lazy val responseInvariantFunctor
-      : endpoints4s.InvariantFunctor[Response] =
+  implicit lazy val responseInvariantFunctor: endpoints4s.InvariantFunctor[Response] =
     new endpoints4s.InvariantFunctor[Response] {
       def xmap[A, B](
           fa: Response[A],
@@ -325,8 +316,7 @@ trait EndpointsWithCustomErrors
 
   type ResponseEntity[A] = A => HttpEntity
 
-  implicit lazy val responseEntityInvariantFunctor
-      : endpoints4s.InvariantFunctor[ResponseEntity] =
+  implicit lazy val responseEntityInvariantFunctor: endpoints4s.InvariantFunctor[ResponseEntity] =
     new endpoints4s.InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -360,8 +350,8 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      def product[A, B](fa: ResponseHeaders[A], fb: ResponseHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): ResponseHeaders[tupler.Out] =
         out => {
           val (a, b) = tupler.unapply(out)
@@ -369,8 +359,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : endpoints4s.InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: endpoints4s.InvariantFunctor[ResponseHeaders] =
     new endpoints4s.InvariantFunctor[ResponseHeaders] {
       def xmap[A, B](
           fa: ResponseHeaders[A],
@@ -401,8 +390,7 @@ trait EndpointsWithCustomErrors
       entity: ResponseEntity[A],
       docs: Documentation = None,
       headers: ResponseHeaders[B]
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[A, B, R]
   ): Response[R] =
     r => {
@@ -479,11 +467,10 @@ trait EndpointsWithCustomErrors
                 requestEntity(headers) match {
                   case Some(bodyParser) =>
                     val action =
-                      playComponents.defaultActionBuilder.async(bodyParser) {
-                        request =>
-                          service(request.body).map { b =>
-                            endpoint.response(b)
-                          }
+                      playComponents.defaultActionBuilder.async(bodyParser) { request =>
+                        service(request.body).map { b =>
+                          endpoint.response(b)
+                        }
                       }
                     action(headers).recover {
                       case NonFatal(t) => handleServerError(t)

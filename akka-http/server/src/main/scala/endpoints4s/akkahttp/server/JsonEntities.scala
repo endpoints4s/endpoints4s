@@ -38,9 +38,7 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
   *
   * @group interpreters
   */
-trait JsonEntitiesFromCodecs
-    extends algebra.JsonEntitiesFromCodecs
-    with EndpointsWithCustomErrors {
+trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
     JsonEntities.decodeJsonRequest(this)(stringCodec(codec))

@@ -6,14 +6,7 @@ import java.nio.charset.StandardCharsets.UTF_8
 import scala.collection.compat._
 import akka.http.scaladsl.server._
 import endpoints4s.algebra.Documentation
-import endpoints4s.{
-  Invalid,
-  PartialInvariantFunctor,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 
 import scala.collection.mutable
 
@@ -49,8 +42,7 @@ trait Urls extends algebra.Urls with StatusCodes {
             case (validA, ss) => (validA.flatMap(f), ss)
           }
       override def xmap[A, B](fa: Path[A], f: A => B, g: B => A): Path[B] =
-        segments =>
-          fa.validate(segments).map { case (validA, ss) => (validA.map(f), ss) }
+        segments => fa.validate(segments).map { case (validA, ss) => (validA.map(f), ss) }
     }
 
   trait Url[A] {
@@ -76,8 +68,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     def validate(params: Map[String, List[String]]): Validated[T]
   }
 
-  implicit lazy val queryStringPartialInvariantFunctor
-      : PartialInvariantFunctor[QueryString] =
+  implicit lazy val queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       def xmapPartial[A, B](
           fa: QueryString[A],
@@ -120,8 +111,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     def validate(s: String): Validated[A]
   }
 
-  implicit lazy val segmentPartialInvariantFunctor
-      : PartialInvariantFunctor[Segment] =
+  implicit lazy val segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
       def xmapPartial[A, B](
           fa: Segment[A],
@@ -137,14 +127,13 @@ trait Urls extends algebra.Urls with StatusCodes {
         s => fa.validate(s).map(f)
     }
 
-  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(
-      implicit tupler: Tupler[A, B]
-  ): Url[tupler.Out] = {
-    (segments: List[String], query: Map[String, List[String]]) =>
-      path.validate(segments).flatMap {
-        case (validA, Nil) => Some(validA.zip(qs.validate(query))(tupler))
-        case (_, _)        => None
-      }
+  def urlWithQueryString[A, B](path: Path[A], qs: QueryString[B])(implicit
+      tupler: Tupler[A, B]
+  ): Url[tupler.Out] = { (segments: List[String], query: Map[String, List[String]]) =>
+    path.validate(segments).flatMap {
+      case (validA, Nil) => Some(validA.zip(qs.validate(query))(tupler))
+      case (_, _)        => None
+    }
   }
 
   //***************
@@ -157,16 +146,16 @@ trait Urls extends algebra.Urls with StatusCodes {
       Validated.fromOption(maybeValue)("Missing value")
     }
 
-  def qs[A](name: String, docs: Documentation)(
-      implicit param: QueryStringParam[A]
+  def qs[A](name: String, docs: Documentation)(implicit
+      param: QueryStringParam[A]
   ): QueryString[A] = { kvs =>
     param(name, kvs).mapErrors(
       _.map(error => s"$error for query parameter '$name'")
     )
   }
 
-  implicit def optionalQueryStringParam[A](
-      implicit param: QueryStringParam[A]
+  implicit def optionalQueryStringParam[A](implicit
+      param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =
     (name, qs) =>
       qs.get(name) match {
@@ -174,8 +163,8 @@ trait Urls extends algebra.Urls with StatusCodes {
         case Some(_) => param(name, qs).map(Some(_))
       }
 
-  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](
-      implicit param: QueryStringParam[A],
+  implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
+      param: QueryStringParam[A],
       factory: Factory[A, CC[A]]
   ): QueryStringParam[CC[A]] =
     (name, qs) =>
@@ -183,21 +172,20 @@ trait Urls extends algebra.Urls with StatusCodes {
         case None => Valid(factory.newBuilder.result())
         case Some(vs) =>
           vs.foldLeft[Validated[mutable.Builder[A, CC[A]]]](
-              Valid(factory.newBuilder)
-            ) {
-              case (inv: Invalid, v) =>
-                // Pretend that this was the query string and delegate to the `A` query string param
-                param(name, Map(name -> (v :: Nil)))
-                  .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
-              case (Valid(b), v) =>
-                // Pretend that this was the query string and delegate to the `A` query string param
-                param(name, Map(name -> (v :: Nil))).map(b += _)
-            }
-            .map(_.result())
+            Valid(factory.newBuilder)
+          ) {
+            case (inv: Invalid, v) =>
+              // Pretend that this was the query string and delegate to the `A` query string param
+              param(name, Map(name -> (v :: Nil)))
+                .fold(_ => inv, errors => Invalid(inv.errors ++ errors))
+            case (Valid(b), v) =>
+              // Pretend that this was the query string and delegate to the `A` query string param
+              param(name, Map(name -> (v :: Nil))).map(b += _)
+          }.map(_.result())
       }
 
-  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(
-      implicit tupler: Tupler[A, B]
+  def combineQueryStrings[A, B](first: QueryString[A], second: QueryString[B])(implicit
+      tupler: Tupler[A, B]
   ): QueryString[tupler.Out] = { (params: Map[String, List[String]]) =>
     first.validate(params).zip(second.validate(params))
   }
@@ -208,9 +196,8 @@ trait Urls extends algebra.Urls with StatusCodes {
           fa: Url[A],
           f: A => Validated[B],
           g: B => A
-      ): Url[B] = {
-        (segments: List[String], query: Map[String, List[String]]) =>
-          fa.validateUrl(segments, query).map(_.flatMap(f))
+      ): Url[B] = { (segments: List[String], query: Map[String, List[String]]) =>
+        fa.validateUrl(segments, query).map(_.flatMap(f))
       }
       override def xmap[A, B](fa: Url[A], f: A => B, g: B => A): Url[B] = {
         (segments: List[String], query: Map[String, List[String]]) =>
@@ -224,33 +211,30 @@ trait Urls extends algebra.Urls with StatusCodes {
 
   implicit def stringSegment: Segment[String] = Valid(_)
 
-  def segment[A](name: String, docs: Documentation)(
-      implicit s: Segment[A]
+  def segment[A](name: String, docs: Documentation)(implicit
+      s: Segment[A]
   ): Path[A] = {
     case head :: tail =>
       val validatedA =
         s.validate(head)
           .mapErrors(
-            _.map(error =>
-              s"$error for segment${if (name.isEmpty) "" else s" '$name'"}"
-            )
+            _.map(error => s"$error for segment${if (name.isEmpty) "" else s" '$name'"}")
           )
       Some((validatedA, tail))
     case Nil => None
   }
 
-  def remainingSegments(name: String, docs: Documentation): Path[String] = {
-    segments =>
-      if (segments.isEmpty) None
-      else
-        Some(
-          (
-            Valid(
-              segments.map(URLEncoder.encode(_, UTF_8.name())).mkString("/")
-            ),
-            Nil
-          )
+  def remainingSegments(name: String, docs: Documentation): Path[String] = { segments =>
+    if (segments.isEmpty) None
+    else
+      Some(
+        (
+          Valid(
+            segments.map(URLEncoder.encode(_, UTF_8.name())).mkString("/")
+          ),
+          Nil
         )
+      )
   }
 
   def staticPathSegment(segment: String): Path[Unit] = { segments =>
@@ -263,8 +247,8 @@ trait Urls extends algebra.Urls with StatusCodes {
     }
   }
 
-  def chainPaths[A, B](first: Path[A], second: Path[B])(
-      implicit tupler: Tupler[A, B]
+  def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
+      tupler: Tupler[A, B]
   ): Path[tupler.Out] =
     (p1: List[String]) => {
       first.validate(p1).flatMap {

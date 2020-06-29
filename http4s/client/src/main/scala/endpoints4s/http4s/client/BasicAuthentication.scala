@@ -18,8 +18,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication {
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]

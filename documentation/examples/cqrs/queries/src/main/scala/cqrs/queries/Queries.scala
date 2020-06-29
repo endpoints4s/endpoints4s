@@ -1,11 +1,6 @@
 package cqrs.queries
 
-import endpoints4s.play.server.{
-  BuiltInErrors,
-  JsonEntitiesFromCodecs,
-  MuxEndpoints,
-  PlayComponents
-}
+import endpoints4s.play.server.{BuiltInErrors, JsonEntitiesFromCodecs, MuxEndpoints, PlayComponents}
 import play.api.routing.Router
 
 import scala.concurrent.Future

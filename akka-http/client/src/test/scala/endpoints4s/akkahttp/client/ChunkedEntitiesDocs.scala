@@ -2,9 +2,8 @@ package endpoints4s.akkahttp.client
 
 import endpoints4s.algebra
 
-trait ChunkedEntitiesDocs
-    extends algebra.ChunkedEntitiesDocs
-    with ChunkedEntities { this: Endpoints =>
+trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
+  this: Endpoints =>
 
   //#invocation
   import akka.stream.scaladsl.Source

@@ -19,8 +19,8 @@ trait InvariantFunctorSyntax {
     * Extension methods for values of type `F[A]` for which there is an implicit
     * `InvariantFunctor[F]` instance.
     */
-  implicit class InvariantFunctorSyntax[A, F[_]](val fa: F[A])(
-      implicit ev: InvariantFunctor[F]
+  implicit class InvariantFunctorSyntax[A, F[_]](val fa: F[A])(implicit
+      ev: InvariantFunctor[F]
   ) {
 
     /**
@@ -67,8 +67,8 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
 
 /** Provides extension methods for values of type [[PartialInvariantFunctor]] */
 trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
-  implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(
-      implicit ev: PartialInvariantFunctor[F]
+  implicit class PartialInvariantFunctorSyntax[A, F[_]](val fa: F[A])(implicit
+      ev: PartialInvariantFunctor[F]
   ) {
 
     /**

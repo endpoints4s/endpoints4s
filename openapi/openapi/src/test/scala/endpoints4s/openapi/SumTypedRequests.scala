@@ -24,26 +24,26 @@ class SumTypedRequests extends AnyWordSpec with Matchers {
 
     import User._ // Extra help for Scala 2.12 to find User json schema
 
-    def sumTypedEndpoint = endpoint[Either[User, String], Unit](
-      post(path / "user-or-name", jsonRequest[User].orElse(textRequest)),
-      ok(emptyResponse)
-    )
+    def sumTypedEndpoint =
+      endpoint[Either[User, String], Unit](
+        post(path / "user-or-name", jsonRequest[User].orElse(textRequest)),
+        ok(emptyResponse)
+      )
 
-    def onlyTextEndpoint = endpoint[String, Unit](
-      post(path / "name", textRequest),
-      ok(emptyResponse)
-    )
+    def onlyTextEndpoint =
+      endpoint[String, Unit](
+        post(path / "name", textRequest),
+        ok(emptyResponse)
+      )
 
-    def onlyJsonEndpoint = endpoint[User, Unit](
-      post(path / "user", jsonRequest[User]),
-      ok(emptyResponse)
-    )
+    def onlyJsonEndpoint =
+      endpoint[User, Unit](
+        post(path / "user", jsonRequest[User]),
+        ok(emptyResponse)
+      )
   }
 
-  trait Fixtures
-      extends FixtureAlg
-      with openapi.Endpoints
-      with openapi.JsonEntitiesFromSchemas {
+  trait Fixtures extends FixtureAlg with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     def checkRequestContentTypes[A](
         endpoint: DocumentedEndpoint

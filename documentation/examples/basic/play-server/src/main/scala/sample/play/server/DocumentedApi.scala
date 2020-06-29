@@ -13,9 +13,7 @@ class DocumentedApi(val playComponents: PlayComponents)
   lazy val routes = routesFromEndpoints(
     item.implementedBy(id => if (id == "123abc") Some(Item("foo")) else None),
     items.implementedBy(category => Item("foo") :: Item("bar") :: Nil),
-    admin.implementedBy(credentials =>
-      if (credentials.password == "password") Some(()) else None
-    )
+    admin.implementedBy(credentials => if (credentials.password == "password") Some(()) else None)
   )
 
 }

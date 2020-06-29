@@ -48,8 +48,7 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
       entity: RequestEntity[E],
       headers: RequestHeaders[H],
       requestDocs: Documentation
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
@@ -68,8 +67,7 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
       unauthenticatedDocs: Documentation = None,
       requestDocs: Documentation = None,
       endpointDocs: EndpointDocs = EndpointDocs()
-  )(
-      implicit
+  )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]

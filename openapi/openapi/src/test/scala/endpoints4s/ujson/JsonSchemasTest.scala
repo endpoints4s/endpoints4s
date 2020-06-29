@@ -7,9 +7,7 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasTest extends AnyFreeSpec {
 
-  object JsonSchemasCodec
-      extends algebra.JsonSchemasFixtures
-      with endpoints4s.ujson.JsonSchemas
+  object JsonSchemasCodec extends algebra.JsonSchemasFixtures with endpoints4s.ujson.JsonSchemas
   import JsonSchemasCodec._
 
   "invalid records" in {
@@ -120,9 +118,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class TestClass(i: Int, s: String)
     checkRoundTrip(
       (field[Int]("i") zip field[String]("s"))
-        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test =>
-          (test.i, test.s)
-        ),
+        .xmap[TestClass](tuple => TestClass(tuple._1, tuple._2))(test => (test.i, test.s)),
       ujson.Obj("i" -> ujson.Num(1), "s" -> ujson.Str("one")),
       TestClass(1, "one")
     )

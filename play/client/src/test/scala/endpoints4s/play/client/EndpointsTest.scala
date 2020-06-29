@@ -8,8 +8,8 @@ import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class TestClient(address: String, wsClient: WSClient)(
-    implicit EC: ExecutionContext
+class TestClient(address: String, wsClient: WSClient)(implicit
+    EC: ExecutionContext
 ) extends Endpoints(address, wsClient)
     with BasicAuthentication
     with JsonEntitiesFromCodecs

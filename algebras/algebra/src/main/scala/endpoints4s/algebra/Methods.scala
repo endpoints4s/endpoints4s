@@ -12,7 +12,8 @@ package endpoints4s.algebra
 trait Methods {
 
   /** HTTP Method
-    * @group types */
+    * @group types
+    */
   type Method
 
   /** @group operations */

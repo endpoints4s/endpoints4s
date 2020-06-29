@@ -3,10 +3,7 @@ package endpoints4s.openapi
 import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.Schema
-import endpoints4s.openapi.model.Schema.{
-  DiscriminatedAlternatives,
-  EnumeratedAlternatives
-}
+import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
 
 import scala.collection.compat._
 
@@ -132,8 +129,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     ) extends DocumentedJsonSchema
   }
 
-  implicit def jsonSchemaPartialInvFunctor
-      : PartialInvariantFunctor[JsonSchema] =
+  implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
       def xmapPartial[A, B](
           fa: JsonSchema[A],
@@ -223,16 +219,16 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   def emptyRecord: Record[Unit] =
     new Record(ujsonSchemas.emptyRecord, DocumentedRecord(Nil))
 
-  def field[A](name: String, docs: Documentation)(
-      implicit tpe: JsonSchema[A]
+  def field[A](name: String, docs: Documentation)(implicit
+      tpe: JsonSchema[A]
   ): Record[A] =
     new Record(
       ujsonSchemas.field(name, docs)(tpe.ujsonSchema),
       DocumentedRecord(Field(name, tpe.docs, isOptional = false, docs) :: Nil)
     )
 
-  def optField[A](name: String, docs: Documentation)(
-      implicit tpe: JsonSchema[A]
+  def optField[A](name: String, docs: Documentation)(implicit
+      tpe: JsonSchema[A]
   ): Record[Option[A]] =
     new Record(
       ujsonSchemas.optField(name, docs)(tpe.ujsonSchema),
@@ -264,8 +260,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       DocumentedCoProd(taggedA.docs.alternatives ++ taggedB.docs.alternatives)
     )
 
-  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(
-      implicit t: Tupler[A, B]
+  def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
+      t: Tupler[A, B]
   ): Record[t.Out] =
     new Record(
       ujsonSchemas.zipRecords(recordA.ujsonSchema, recordB.ujsonSchema),
@@ -429,8 +425,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         .orFallbackToJsonSchema(schemaA.ujsonSchema, schemaB.ujsonSchema),
       (schemaA.docs, schemaB.docs) match {
         case (
-            OneOf(alternatives1, _, maybeExample1, _),
-            OneOf(alternatives2, _, maybeExample2, _)
+              OneOf(alternatives1, _, maybeExample1, _),
+              OneOf(alternatives2, _, maybeExample2, _)
             ) =>
           OneOf(
             alternatives1 ++ alternatives2,
@@ -494,8 +490,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   lazy val byteJsonSchema: JsonSchema[Byte] =
     new JsonSchema(ujsonSchemas.byteJsonSchema, Primitive("integer"))
 
-  def arrayJsonSchema[C[X] <: Seq[X], A](
-      implicit
+  def arrayJsonSchema[C[X] <: Seq[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =
@@ -504,8 +499,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Array(Left(jsonSchema.docs))
     )
 
-  def mapJsonSchema[A](
-      implicit jsonSchema: JsonSchema[A]
+  def mapJsonSchema[A](implicit
+      jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]] =
     new JsonSchema(
       ujsonSchemas.mapJsonSchema(jsonSchema.ujsonSchema),
@@ -673,7 +668,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
     *
     * @see [[JsonSchemas.CoproductEncoding$]]
-    *
     */
   def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
 
@@ -721,21 +715,19 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       case Array(Right(elementTypes), description, example, title) =>
         Schema.Array(
           Right(
-            elementTypes.map(elementType =>
-              toSchema(elementType, coprodBase, referencedSchemas)
-            )
+            elementTypes.map(elementType => toSchema(elementType, coprodBase, referencedSchemas))
           ),
           description,
           example,
           title
         )
       case DocumentedEnum(
-          elementType,
-          values,
-          Some(name),
-          description,
-          example,
-          title
+            elementType,
+            values,
+            Some(name),
+            description,
+            example,
+            title
           ) =>
         if (referencedSchemas(name)) Schema.Reference(name, None, None)
         else
@@ -753,12 +745,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             None
           )
       case DocumentedEnum(
-          elementType,
-          values,
-          None,
-          description,
-          example,
-          title
+            elementType,
+            values,
+            None,
+            description,
+            example,
+            title
           ) =>
         Schema.Enum(
           toSchema(elementType, coprodBase, referencedSchemas),
@@ -770,9 +762,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       case lzy: LazySchema =>
         toSchema(lzy.value, coprodBase, referencedSchemas)
       case OneOf(alternatives, description, example, title) =>
-        val alternativeSchemas = alternatives.map(alternative =>
-          toSchema(alternative, coprodBase, referencedSchemas)
-        )
+        val alternativeSchemas =
+          alternatives.map(alternative => toSchema(alternative, coprodBase, referencedSchemas))
         Schema.OneOf(
           EnumeratedAlternatives(alternativeSchemas),
           description,

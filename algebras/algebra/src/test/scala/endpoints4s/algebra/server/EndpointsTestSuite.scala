@@ -10,16 +10,10 @@ import akka.http.scaladsl.model.headers.{
   `Access-Control-Allow-Origin`,
   `Last-Modified`
 }
-import akka.http.scaladsl.model.{
-  DateTime,
-  HttpMethods,
-  HttpRequest,
-  StatusCodes
-}
+import akka.http.scaladsl.model.{DateTime, HttpMethods, HttpRequest, StatusCodes}
 import endpoints4s.{Invalid, Valid}
 
-trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi]
-    extends ServerTestBase[T] {
+trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends ServerTestBase[T] {
 
   import DecodedUrl._
   import serverApi.{segment => s, _}
@@ -319,9 +313,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi]
       val mockedResponse = "interpretedServerResponse"
 
       serveEndpoint(serverApi.UUIDEndpoint, mockedResponse) { port =>
-        val request = HttpRequest(uri =
-          s"http://localhost:$port/user/$uuid/description?name=name1&age=18"
-        )
+        val request =
+          HttpRequest(uri = s"http://localhost:$port/user/$uuid/description?name=name1&age=18")
         whenReady(sendAndDecodeEntityAsText(request)) {
           case (response, entity) =>
             assert(entity == mockedResponse)
@@ -360,9 +353,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi]
       val mockedResponse = "interpretedServerResponse"
 
       serveEndpoint(serverApi.smokeEndpoint, mockedResponse) { port =>
-        val request = HttpRequest(uri =
-          s"http://localhost:$port/user/userId/description?name=name1&age=18"
-        )
+        val request =
+          HttpRequest(uri = s"http://localhost:$port/user/userId/description?name=name1&age=18")
         whenReady(sendAndDecodeEntityAsText(request)) {
           case (response, entity) =>
             assert(entity == mockedResponse)
@@ -396,9 +388,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi]
 
     "Handle exceptions by default" in {
       serveEndpoint(serverApi.smokeEndpoint, sys.error("Sorry.")) { port =>
-        val request = HttpRequest(uri =
-          s"http://localhost:$port/user/foo/description?name=a&age=1"
-        )
+        val request = HttpRequest(uri = s"http://localhost:$port/user/foo/description?name=a&age=1")
         whenReady(sendAndDecodeEntityAsText(request)) {
           case (response, entity) =>
             assert(response.status.intValue() == 500)
@@ -546,9 +536,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi]
         entity
       ) { port =>
         val request =
-          HttpRequest(uri =
-            s"http://localhost:$port/transformed-response-entity"
-          )
+          HttpRequest(uri = s"http://localhost:$port/transformed-response-entity")
         whenReady(sendAndDecodeEntityAsText(request)) {
           case (_, responseEntity) =>
             assert(responseEntity == entity.str)

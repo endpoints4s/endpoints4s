@@ -6,9 +6,7 @@ import org.scalatest.freespec.AnyFreeSpec
 /**
   * Tests that must be run on all [[JsonSchemas]] interpreters.
   */
-trait JsonSchemasOptionalFieldsTest
-    extends AnyFreeSpec
-    with JsonSchemasFixtures {
+trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures {
 
   // Abstract over concrete JSON library (such as circe, Play JSON, or ujson)
   trait Json {

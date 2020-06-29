@@ -3,8 +3,7 @@ package endpoints4s.algebra.client
 import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints4s.algebra.TextEntitiesTestApi
 
-trait TextEntitiesTestSuite[T <: TextEntitiesTestApi]
-    extends ClientTestBase[T] {
+trait TextEntitiesTestSuite[T <: TextEntitiesTestApi] extends ClientTestBase[T] {
 
   def textEntitiesTestSuite() = {
 

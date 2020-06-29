@@ -1,9 +1,6 @@
 package endpoints4s.akkahttp.client
 
-import akka.http.scaladsl.model.{
-  StatusCode => AkkaStatusCode,
-  StatusCodes => AkkaStatusCodes
-}
+import akka.http.scaladsl.model.{StatusCode => AkkaStatusCode, StatusCodes => AkkaStatusCodes}
 import endpoints4s.algebra
 
 /**

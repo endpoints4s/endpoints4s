@@ -19,8 +19,6 @@ trait BuiltInErrors extends algebra.BuiltInErrors {
     }
 
   def serverErrorResponseEntity: ResponseEntity[Throwable] =
-    clientErrorsResponseEntity.compose(throwable =>
-      Invalid(throwable.getMessage)
-    )
+    clientErrorsResponseEntity.compose(throwable => Invalid(throwable.getMessage))
 
 }

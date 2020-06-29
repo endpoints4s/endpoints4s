@@ -22,8 +22,8 @@ trait AkkaHttpRequestExecutor {
 }
 
 object AkkaHttpRequestExecutor {
-  def cachedHostConnectionPool(host: String, port: Int)(
-      implicit system: ActorSystem,
+  def cachedHostConnectionPool(host: String, port: Int)(implicit
+      system: ActorSystem,
       materializer: Materializer
   ): AkkaHttpRequestExecutor =
     default(Http().cachedHostConnectionPool[Int](host, port))

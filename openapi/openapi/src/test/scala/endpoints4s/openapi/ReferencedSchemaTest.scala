@@ -81,8 +81,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         ok(jsonResponse(Enum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
-        endpointDocs =
-          EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
+        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
       )
   }
 

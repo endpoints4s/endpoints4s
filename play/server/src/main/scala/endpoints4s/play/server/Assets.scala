@@ -118,15 +118,14 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
           case Nil => None
         }
       def encode(s: AssetPath) =
-        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))(
-          (segment, path) => s"${stringPath.encode(segment)}/$path"
+        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))((segment, path) =>
+          s"${stringPath.encode(segment)}/$path"
         )
     }
   }
 
   private lazy val gzipSupport: RequestHeaders[Boolean] =
-    headers =>
-      Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
+    headers => Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
 
   /**
     * An endpoint for serving assets.
@@ -144,8 +143,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
         .inmap( // TODO remove this boilerplate using play-products
           request(Get, url, headers = gzipSupport),
           (t: (AssetPath, Boolean)) => AssetRequest(t._1, t._2),
-          (assetRequest: AssetRequest) =>
-            (assetRequest.assetPath, assetRequest.isGzipSupported)
+          (assetRequest: AssetRequest) => (assetRequest.assetPath, assetRequest.isGzipSupported)
         )
 
     endpoint(req, assetResponse)

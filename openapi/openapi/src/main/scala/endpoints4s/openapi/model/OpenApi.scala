@@ -84,9 +84,7 @@ object OpenApi {
         if (required.nonEmpty) {
           fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
         }
-        obj.additionalProperties.foreach(p =>
-          fields += "additionalProperties" -> schemaJson(p)
-        )
+        obj.additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
       case array: Schema.Array =>
         val itemsSchema = array.elementType match {
           case Left(value)  => schemaJson(value)
@@ -178,9 +176,7 @@ object OpenApi {
         "title" -> ujson.Str(info.title),
         "version" -> ujson.Str(info.version)
       )
-    info.description.foreach(description =>
-      fields += "description" -> ujson.Str(description)
-    )
+    info.description.foreach(description => fields += "description" -> ujson.Str(description))
     ujson.Obj(fields)
   }
 
@@ -386,8 +382,7 @@ object OpenApi {
   }
 
   implicit val stringEncoder: Encoder[OpenApi, String] =
-    openApi =>
-      jsonEncoder.encode(openApi).transform(ujson.StringRenderer()).toString
+    openApi => jsonEncoder.encode(openApi).transform(ujson.StringRenderer()).toString
 
 }
 
@@ -890,8 +885,7 @@ object In {
   val values: Seq[In] = Query :: Path :: Header :: Cookie :: Nil
 }
 
-final class MediaType private (val schema: Option[Schema])
-    extends Serializable {
+final class MediaType private (val schema: Option[Schema]) extends Serializable {
 
   override def toString: String =
     s"Mediatype($schema)"
@@ -1436,8 +1430,7 @@ object Schema {
   ) extends Schema
       with Serializable {
 
-    override val example
-        : None.type = None // Reference objects can’t have examples
+    override val example: None.type = None // Reference objects can’t have examples
     override val title: None.type = None // Reference objects can’t have a title
 
     override def toString: String =

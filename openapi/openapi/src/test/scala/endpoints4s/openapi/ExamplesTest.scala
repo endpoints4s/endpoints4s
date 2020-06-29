@@ -62,10 +62,7 @@ class ExamplesTest extends AnyWordSpec with Matchers {
         .withExample(Right(1L))
   }
 
-  trait Fixtures
-      extends FixturesAlg
-      with openapi.Endpoints
-      with openapi.JsonEntitiesFromSchemas {
+  trait Fixtures extends FixturesAlg with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
     def checkExample[A](schema: JsonSchema[A])(example: ujson.Value) = {
       assert(OpenApi.schemaJson(toSchema(schema.docs))("example") == example)

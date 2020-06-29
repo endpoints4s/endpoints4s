@@ -62,8 +62,8 @@ trait EndpointsWithCustomErrors
   implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
 
-      override def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(
-          implicit tupler: Tupler[A, B]
+      override def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
+          tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
         (out, req) => {
           val (a, b) = tupler.unapply(out)
@@ -72,8 +72,7 @@ trait EndpointsWithCustomErrors
 
     }
 
-  implicit def requestHeadersPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestHeaders] =
+  implicit def requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
 
       override def xmapPartial[A, B](
@@ -87,8 +86,7 @@ trait EndpointsWithCustomErrors
 
   type RequestEntity[A] = (A, Http4sRequest[Effect]) => Http4sRequest[Effect]
 
-  implicit def requestEntityPartialInvariantFunctor
-      : PartialInvariantFunctor[RequestEntity] =
+  implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
 
       override def xmapPartial[A, B](
@@ -109,13 +107,11 @@ trait EndpointsWithCustomErrors
       requestEntityA: RequestEntity[A],
       requestEntityB: RequestEntity[B]
   ): RequestEntity[Either[A, B]] =
-    (eitherAB, req) =>
-      eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
+    (eitherAB, req) => eitherAB.fold(requestEntityA(_, req), requestEntityB(_, req))
 
   type Request[A] = A => Effect[Http4sRequest[Effect]]
 
-  implicit def requestPartialInvariantFunctor
-      : PartialInvariantFunctor[Request] =
+  implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
           fa: Request[A],
@@ -131,8 +127,7 @@ trait EndpointsWithCustomErrors
       entity: RequestEntity[BodyP],
       docs: endpoints4s.algebra.Documentation,
       headers: RequestHeaders[HeadersP]
-  )(
-      implicit
+  )(implicit
       tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] = { out =>
@@ -163,8 +158,7 @@ trait EndpointsWithCustomErrors
 
     }
 
-  implicit def responseEntityInvariantFunctor
-      : InvariantFunctor[ResponseEntity] =
+  implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
       def xmap[A, B](
           fa: ResponseEntity[A],
@@ -191,8 +185,7 @@ trait EndpointsWithCustomErrors
 
     }
 
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders] =
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
 
       override def xmap[A, B](

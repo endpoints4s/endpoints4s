@@ -11,31 +11,29 @@ trait JsonEntitiesFromSchemasTestSuite[
   "Single segment route" should {
 
     "match single segment request" in {
-      serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) {
-        port =>
-          val request = HttpRequest(uri = s"http://localhost:$port/user")
-          whenReady(sendAndDecodeEntityAsText(request)) {
-            case (response, entity) =>
-              assert(response.status.intValue() == 200)
-              ujson.read(entity) shouldEqual ujson.Obj(
-                "name" -> ujson.Str("Alice"),
-                "age" -> ujson.Num(42)
-              )
-          }
-          ()
+      serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/user")
+        whenReady(sendAndDecodeEntityAsText(request)) {
+          case (response, entity) =>
+            assert(response.status.intValue() == 200)
+            ujson.read(entity) shouldEqual ujson.Obj(
+              "name" -> ujson.Str("Alice"),
+              "age" -> ujson.Num(42)
+            )
+        }
+        ()
       }
     }
 
     "leave GET requests to other paths unhandled" in {
-      serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) {
-        port =>
-          val request =
-            HttpRequest(uri = s"http://localhost:$port/user/profile")
-          whenReady(send(request)) {
-            case (response, entity) =>
-              assert(response.status.intValue() == 404)
-          }
-          ()
+      serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) { port =>
+        val request =
+          HttpRequest(uri = s"http://localhost:$port/user/profile")
+        whenReady(send(request)) {
+          case (response, entity) =>
+            assert(response.status.intValue() == 404)
+        }
+        ()
       }
     }
   }

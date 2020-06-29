@@ -1,11 +1,6 @@
 package endpoints4s.algebra
 
-import endpoints4s.{
-  InvariantFunctor,
-  InvariantFunctorSyntax,
-  Semigroupal,
-  Tupler
-}
+import endpoints4s.{InvariantFunctor, InvariantFunctorSyntax, Semigroupal, Tupler}
 
 /**
   * @group algebras
@@ -86,8 +81,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     * Provides `xmap` operation.
     * @see [[InvariantFunctorSyntax]]
     */
-  implicit def responseHeadersInvariantFunctor
-      : InvariantFunctor[ResponseHeaders]
+  implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders]
 
   /**
     * No particular response header.
@@ -191,8 +185,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
   final def badRequest[A, R](
       docs: Documentation = None,
       headers: ResponseHeaders[A] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[ClientErrors, A, R]
   ): Response[R] =
     response(BadRequest, clientErrorsResponseEntity, docs, headers)
@@ -206,8 +199,7 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
   final def internalServerError[A, R](
       docs: Documentation = None,
       headers: ResponseHeaders[A] = emptyResponseHeaders
-  )(
-      implicit
+  )(implicit
       tupler: Tupler.Aux[ServerError, A, R]
   ): Response[R] =
     response(InternalServerError, serverErrorResponseEntity, docs, headers)

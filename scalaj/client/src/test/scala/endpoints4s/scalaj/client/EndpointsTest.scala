@@ -12,9 +12,7 @@ class TestClient(val address: String)
     with Endpoints
     with BasicAuthentication
 
-class EndpointsTest
-    extends EndpointsTestSuite[TestClient]
-    with BasicAuthTestSuite[TestClient] {
+class EndpointsTest extends EndpointsTestSuite[TestClient] with BasicAuthTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
