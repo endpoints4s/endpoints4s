@@ -12,4 +12,4 @@ for Scala projects:
 
 ## Release Notes
 
-See [on GitHub](https://github.com/julienrf/endpoints/releases).
+See [on GitHub](https://github.com/endpoints4s/endpoints4s/releases).

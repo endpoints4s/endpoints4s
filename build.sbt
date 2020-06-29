@@ -27,5 +27,5 @@ publishTo in ThisBuild := sonatypePublishTo.value
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 ThisBuild / sonatypeProjectHosting := Some(
-  GitHubHosting("julienrf", "endpoints", "julien.richard-foy@epfl.ch")
+  GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )

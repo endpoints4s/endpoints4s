@@ -1,6 +1,6 @@
-package endpoints.openapi
+package endpoints4s.openapi
 
-import endpoints.algebra
+import endpoints4s.algebra
 
 /**
   * @group interpreters

@@ -7,7 +7,7 @@ import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 object EndpointsSettings {
 
   val commonSettings = Seq(
-    organization := "org.julienrf",
+    organization := "org.endpoints4s",
     // Scala 2.x vs 3.x
     scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
@@ -68,7 +68,7 @@ object EndpointsSettings {
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.2",
-    crossScalaVersions := Seq("2.13.2", "0.25.0-bin-20200511-5fb865b-NIGHTLY", "2.12.11")
+    crossScalaVersions := Seq("2.13.2", "0.25.0-RC2", "2.12.11")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -80,25 +80,13 @@ object EndpointsSettings {
           <url>http://julien.richard-foy.fr</url>
         </developer>
       </developers>,
-    scalacOptions in (Compile, doc) ++= Seq(
-      "-doc-source-url",
-      s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
-      "-sourcepath",
-      baseDirectory.in(LocalRootProject).value.getAbsolutePath
-    ),
     apiURL := Some(
-      url(s"http://julienrf.github.io/endpoints/api/${version.value}/")
+      url(s"http://endpoints4s.github.io/api")
     ),
     autoAPIMappings := true,
-    homepage := Some(url(s"https://github.com/julienrf/endpoints")),
+    homepage := Some(url(s"https://github.com/endpoints4s/endpoints4s")),
     licenses := Seq(
       "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
-    ),
-    scmInfo := Some(
-      ScmInfo(
-        url(s"https://github.com/julienrf/endpoints"),
-        s"scm:git:git@github.com:julienrf/endpoints.git"
-      )
     )
   )
 
@@ -116,10 +104,10 @@ object EndpointsSettings {
   val sttpVersion = "1.7.2"
   val akkaActorVersion = "2.6.6"
   val akkaHttpVersion = "10.1.12"
-  val http4sVersion = "0.21.4"
+  val http4sVersion = "0.21.5"
   val ujsonVersion = "1.1.0"
 
-  val scalaTestVersion = "3.1.2"
+  val scalaTestVersion = "3.2.0"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =

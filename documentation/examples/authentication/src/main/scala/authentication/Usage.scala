@@ -1,15 +1,15 @@
 package authentication
 
 //#login-endpoint
-import endpoints.algebra
+import endpoints4s.algebra
 
 //#login-endpoint
 //#login-implementation
-import endpoints.play.server
+import endpoints4s.play.server
 
 //#login-implementation
-import endpoints.play.client
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.client
+import endpoints4s.play.server.PlayComponents
 import play.api.Configuration
 import play.api.libs.ws.WSClient
 

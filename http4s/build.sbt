@@ -11,7 +11,7 @@ val `http4s-server` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-http4s-server",
+      name := "http4s-server",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-core" % http4sVersion).withDottyCompat(scalaVersion.value),
         ("org.http4s" %% "http4s-dsl" % http4sVersion).withDottyCompat(scalaVersion.value),
@@ -27,7 +27,7 @@ val `http4s-client` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-http4s-client",
+      name := "http4s-client",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).withDottyCompat(scalaVersion.value),
         ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).withDottyCompat(scalaVersion.value)

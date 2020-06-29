@@ -1,6 +1,6 @@
 package authentication
 
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.server.PlayComponents
 import org.scalatest.BeforeAndAfterAll
 import pdi.jwt.JwtSession
 import play.api.{Configuration, Mode}

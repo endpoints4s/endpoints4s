@@ -3,7 +3,7 @@ package cqrs.infra
 import cqrs.commands.Commands
 import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.server.PlayComponents
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.api.routing.Router

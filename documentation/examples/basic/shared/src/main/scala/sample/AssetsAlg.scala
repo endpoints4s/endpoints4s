@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.algebra._
+import endpoints4s.algebra._
 
 trait AssetsAlg extends Endpoints with Assets {
 

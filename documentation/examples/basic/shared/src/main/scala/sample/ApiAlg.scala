@@ -1,7 +1,7 @@
 package sample
 
-import endpoints.algebra.BasicAuthentication.Credentials
-import endpoints.algebra._
+import endpoints4s.algebra.BasicAuthentication.Credentials
+import endpoints4s.algebra._
 import io.circe.generic.JsonCodec
 
 trait ApiAlg

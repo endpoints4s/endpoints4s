@@ -4,8 +4,8 @@ import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
 import org.scalatest.BeforeAndAfterAll
-import endpoints.play.client.{Endpoints, JsonEntitiesFromCodecs}
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.client.{Endpoints, JsonEntitiesFromCodecs}
+import endpoints4s.play.server.PlayComponents
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.core.server.{NettyServer, ServerConfig}
