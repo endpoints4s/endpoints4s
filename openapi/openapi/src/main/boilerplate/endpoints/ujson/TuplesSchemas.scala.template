@@ -1,6 +1,6 @@
-package endpoints.ujson
+package endpoints4s.ujson
 
-import endpoints.{ algebra, Invalid }
+import endpoints4s.{ algebra, Invalid }
 
 /**
   * @group interpreters

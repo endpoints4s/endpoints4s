@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.xhr._
+import endpoints4s.xhr._
 
 object Api
     extends ApiAlg

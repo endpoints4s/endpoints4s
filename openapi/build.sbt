@@ -9,7 +9,7 @@ lazy val openapi =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-openapi",
+      name := "openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
       libraryDependencies += ("com.lihaoyi" %%% "ujson" % ujsonVersion).withDottyCompat(scalaVersion.value)
     )

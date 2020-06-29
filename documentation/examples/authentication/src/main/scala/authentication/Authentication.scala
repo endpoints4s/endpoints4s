@@ -2,25 +2,25 @@ package authentication
 
 import java.time.Clock
 
-import endpoints.Valid
+import endpoints4s.Valid
 import play.api.libs.streams.Accumulator
 import play.api.mvc.BodyParser
 //#enriched-algebra
-import endpoints.algebra
+import endpoints4s.algebra
 
 //#enriched-algebra
 
 //#server-interpreter
-import endpoints.play.server
+import endpoints4s.play.server
 import pdi.jwt.JwtSession
 import pdi.jwt.JwtSession.RichResult
 
 //#server-interpreter
 //#client-interpreter
-import endpoints.play.client
+import endpoints4s.play.client
 
 //#client-interpreter
-import endpoints.Tupler
+import endpoints4s.Tupler
 import play.api.Configuration
 import play.api.http.{HeaderNames, Status}
 import play.api.libs.json.{OFormat, __}
@@ -258,9 +258,10 @@ trait ServerAuthentication extends Authentication with server.Endpoints {
     extractMethodUrlAndHeaders(method, url, authenticationTokenRequestHeaders)
       .toRequest[UET] {
         case (_, None) =>
-          BodyParser(_ => Accumulator.done(Left(Results.Unauthorized)))
+          _ =>
+            Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
         case (u, Some(token)) =>
-          entity.map(e => tuplerUET(tuplerUE(u, e), token))
+          hdrs => entity(hdrs).map(_.map(e => tuplerUET(tuplerUE(u, e), token)))
       } { uet =>
         val (ue, t) = tuplerUET.unapply(uet)
         val (u, _) = tuplerUE.unapply(ue)

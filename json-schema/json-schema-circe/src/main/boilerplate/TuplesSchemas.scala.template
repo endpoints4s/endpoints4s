@@ -1,6 +1,6 @@
-package endpoints.circe
+package endpoints4s.circe
 
-import endpoints.algebra
+import endpoints4s.algebra
 import io.circe.{Encoder, Decoder}
 
 /**

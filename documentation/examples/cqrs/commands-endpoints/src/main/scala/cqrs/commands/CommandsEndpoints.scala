@@ -7,8 +7,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 //#endpoints
-import endpoints.algebra.Endpoints
-import endpoints.algebra.circe.JsonEntitiesFromCodecs
+import endpoints4s.algebra.Endpoints
+import endpoints4s.algebra.circe.JsonEntitiesFromCodecs
 
 trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 

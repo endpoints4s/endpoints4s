@@ -1,6 +1,6 @@
 # `Tupler`
 
-This guide explains why we use implicit @scaladoc[`Tupler`](endpoints.Tupler) parameters
+This guide explains why we use implicit @scaladoc[`Tupler`](endpoints4s.Tupler) parameters
 in the signature of some algebra operations and how it works.
 
 ## Motivation
@@ -58,7 +58,7 @@ The `Tupler[A, B]` type takes two type parameters `A` and `B`
 and defines an abstract type member `Out`. This `Out` type defines
 the “useful” form of tupling `A` and `B`.
 
-@@snip [Tupler.scala](/json-schema/json-schema/src/main/scala/endpoints/Tupler.scala) { #definition }
+@@snip [Tupler.scala](/json-schema/json-schema/src/main/scala/endpoints4s/Tupler.scala) { #definition }
 
 Algebra operations that want to tuple types `A` and `B` take as
 parameter an implicit `tupler: Tupler[A, B]` and return a

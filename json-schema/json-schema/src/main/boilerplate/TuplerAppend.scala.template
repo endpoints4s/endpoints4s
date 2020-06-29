@@ -1,4 +1,4 @@
-package endpoints
+package endpoints4s
 
 /**
   * Generated trait that provides [[Tupler]] instances for appending to

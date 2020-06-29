@@ -1,6 +1,6 @@
 package cqrs.queries
 
-import endpoints.play.server.{
+import endpoints4s.play.server.{
   BuiltInErrors,
   JsonEntitiesFromCodecs,
   MuxEndpoints,
@@ -22,7 +22,7 @@ class Queries(service: QueriesService, val playComponents: PlayComponents)
   import playComponents.executionContext
 
   //#multiplexed-impl
-  import endpoints.play.server.MuxHandlerAsync
+  import endpoints4s.play.server.MuxHandlerAsync
 
   val routes: Router.Routes = routesFromEndpoints(
     query.implementedByAsync(new MuxHandlerAsync[QueryReq, QueryResp] {

@@ -3,7 +3,7 @@ package quickstart
 //#relevant-code
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import endpoints.akkahttp.server
+import endpoints4s.akkahttp.server
 
 import scala.concurrent.stm.Ref
 

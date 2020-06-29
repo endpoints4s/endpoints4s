@@ -1,14 +1,14 @@
 # endpoints 
 
-[![Gitter](https://badges.gitter.im/.svg)](https://gitter.im/julienrf/endpoints)
-[![codecov.io](http://codecov.io/github/julienrf/endpoints/coverage.svg?branch=master)](http://codecov.io/github/julienrf/endpoints?branch=master)
-[![Build Status](https://travis-ci.org/julienrf/endpoints.svg?branch=master)](https://travis-ci.org/julienrf/endpoints)
+[![Gitter](https://badges.gitter.im/.svg)](https://gitter.im/endpoints4s/endpoints4s)
+[![codecov.io](http://codecov.io/github/endpoints4s/endpoints4s/coverage.svg?branch=master)](http://codecov.io/github/endpoints4s/endpoints4s?branch=master)
+[![Build Status](https://travis-ci.org/endpoints4s/endpoints4s.svg?branch=master)](https://travis-ci.org/endpoints4s/endpoints4s)
 
 
-*endpoints* is a Scala library for defining communication protocols over HTTP between
+endpoints4s is a Scala library for defining communication protocols over HTTP between
 applications.
 
-See the [documentation](http://julienrf.github.io/endpoints) to learn more.
+See the [documentation](http://endpoints4s.github.io) to learn more.
 
 ## Running the Examples
 
@@ -27,7 +27,7 @@ And then browse http://localhost:9000.
 
 ## Contributing
 
-See the [open issues](https://github.com/julienrf/endpoints/issues).
+See the [open issues](https://github.com/endpoints4s/endpoints4s/issues).
 
 ## Sponsors
 
