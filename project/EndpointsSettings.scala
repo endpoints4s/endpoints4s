@@ -1,6 +1,5 @@
 import sbt._
 import sbt.Keys._
-
 import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 
@@ -99,7 +98,7 @@ object EndpointsSettings {
   // --- Common dependencies
 
   val circeVersion = "0.13.0"
-  val playjsonVersion = "2.8.1"
+  val playjsonVersion = "2.9.0"
   val playVersion = "2.8.2"
   val sttpVersion = "1.7.2"
   val akkaActorVersion = "2.6.3"
@@ -111,7 +110,8 @@ object EndpointsSettings {
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =
-    libraryDependencies += scalaTestDependency.withDottyCompat(scalaVersion.value)
+    libraryDependencies += scalaTestDependency.withDottyCompat(
+      scalaVersion.value)
   val macroParadiseDependency = Seq(
     scalacOptions in Compile ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {

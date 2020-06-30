@@ -19,6 +19,7 @@ val `json-schema` =
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
@@ -36,6 +37,7 @@ lazy val `json-schema-generic` =
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjects("json-schema")
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
@@ -53,6 +55,7 @@ lazy val `json-schema-circe` =
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects(
       "algebra-circe"
@@ -77,6 +80,7 @@ lazy val `json-schema-playjson` =
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjectsWithScope(
       "json-schema" -> "test->test;compile->compile"
     )

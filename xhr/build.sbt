@@ -4,6 +4,7 @@ val `xhr-client` =
   project
     .in(file("client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
@@ -22,6 +23,7 @@ val `xhr-client-faithful` =
   project
     .in(file("client-faithful"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
@@ -36,6 +38,7 @@ val `xhr-client-circe` =
   project
     .in(file("client-circe"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
