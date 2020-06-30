@@ -81,7 +81,11 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
 
   type ResponseHeaders[A] = A => http4s.Headers
 
-  case class Endpoint[A, B](request: Request[A], response: Response[B], operationId: Option[String]) {
+  case class Endpoint[A, B](
+      request: Request[A],
+      response: Response[B],
+      operationId: Option[String]
+  ) {
     def implementedBy(
         implementation: A => B
     ): PartialFunction[http4s.Request[Effect], Effect[
