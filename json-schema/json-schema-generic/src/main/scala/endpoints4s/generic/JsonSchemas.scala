@@ -284,6 +284,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
     }
   }
 
+  val useSimpleName: Boolean = false
+
   /**
     * Compute a schema name (used for documentation) based on a `ClassTag`.
     * The provided implementation uses the fully qualified name of the class.
@@ -292,11 +294,15 @@ trait JsonSchemas extends algebra.JsonSchemas {
     * You can override this method to use a custom logic.
     */
   def classTagToSchemaName(ct: ClassTag[_]): String = {
-    val jvmName = ct.runtimeClass.getName
-    // name fix for case objects
-    val name =
-      if (jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
-    name.replace('$', '.')
+    def fullyQualifiedName = {
+      val jvmName = ct.runtimeClass.getName
+      // name fix for case objects
+      val name =
+        if (jvmName.nonEmpty && jvmName.last == '$') jvmName.init else jvmName
+      name.replace('$', '.')
+    }
+
+    if(useSimpleName) ct.runtimeClass.getSimpleName else fullyQualifiedName
   }
 
   /** Derives a `JsonSchema[A]` for a type `A`.
