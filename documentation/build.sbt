@@ -85,7 +85,8 @@ val manual =
       noPublishSettings,
       `scala 2.13`,
       coverageEnabled := false,
-      git.remoteRepo := "scm:git:git@github.com:endpoints4s/endpoints4s.github.io.git",
+      git.remoteRepo := "git@github.com:endpoints4s/endpoints4s.github.io.git",
+      ghpagesBranch := "master",
       ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
       Paradox / paradoxMaterialTheme := {
         val theme = (Paradox / paradoxMaterialTheme).value
