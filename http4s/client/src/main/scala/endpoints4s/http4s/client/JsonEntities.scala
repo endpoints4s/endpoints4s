@@ -10,9 +10,10 @@ trait JsonEntitiesFromCodecs
     with endpoints4s.algebra.JsonEntitiesFromCodecs {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] =
-    (a, request) => request
-      .withEntity(stringCodec(codec).encode(a))
-      .withContentType(`Content-Type`(MediaType.application.json))
+    (a, request) =>
+      request
+        .withEntity(stringCodec(codec).encode(a))
+        .withContentType(`Content-Type`(MediaType.application.json))
 
   def jsonResponse[A](implicit codec: JsonCodec[A]): ResponseEntity[A] =
     _.as[String].flatMap(body =>
