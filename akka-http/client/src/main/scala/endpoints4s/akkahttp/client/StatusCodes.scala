@@ -51,7 +51,7 @@ trait StatusCodes extends algebra.StatusCodes {
   def TooManyRequests = AkkaStatusCodes.TooManyRequests
   def RequestHeaderFieldsTooLarge = AkkaStatusCodes.RequestHeaderFieldsTooLarge
   def UnavailableForLegalReasons = AkkaStatusCodes.UnavailableForLegalReasons
-  
+
   def InternalServerError = AkkaStatusCodes.InternalServerError
   def NotImplemented = AkkaStatusCodes.NotImplemented
 

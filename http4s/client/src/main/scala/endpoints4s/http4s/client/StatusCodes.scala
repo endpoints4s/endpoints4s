@@ -51,7 +51,7 @@ trait StatusCodes extends algebra.StatusCodes {
   def TooManyRequests = Http4sStatus.TooManyRequests
   def RequestHeaderFieldsTooLarge = Http4sStatus.RequestHeaderFieldsTooLarge
   def UnavailableForLegalReasons = Http4sStatus.UnavailableForLegalReasons
-  
+
   def InternalServerError = Http4sStatus.InternalServerError
   def NotImplemented = Http4sStatus.NotImplemented
 }

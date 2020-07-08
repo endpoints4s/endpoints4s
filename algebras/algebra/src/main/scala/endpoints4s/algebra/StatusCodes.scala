@@ -46,7 +46,6 @@ trait StatusCodes {
 
   /** @group operations */
   def IMUsed: StatusCode
-  
 
   // 4xx Client Error
   /**
