@@ -8,7 +8,7 @@ package counter
 
 import java.util.concurrent.atomic.AtomicInteger
 
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.server.PlayComponents
 import play.core.server.{NettyServer, ServerConfig}
 
 // Our domain model just contains a counter value
@@ -25,7 +25,7 @@ object Operation {
 
 // Description of the HTTP API
 //#documented-endpoints
-import endpoints.{algebra, generic}
+import endpoints4s.{algebra, generic}
 
 trait CounterEndpoints
     extends algebra.Endpoints
@@ -72,8 +72,8 @@ trait CounterEndpoints
 //#documented-endpoints
 
 // OpenAPI documentation for the HTTP API described in `CounterEndpoints`
-import endpoints.openapi
-import endpoints.openapi.model.{Info, OpenApi}
+import endpoints4s.openapi
+import endpoints4s.openapi.model.{Info, OpenApi}
 
 object CounterDocumentation
     extends CounterEndpoints
@@ -87,7 +87,7 @@ object CounterDocumentation
 }
 
 // Implementation of the HTTP API and its business logic
-import endpoints.play
+import endpoints4s.play
 
 class CounterServer(val playComponents: PlayComponents)
     extends CounterEndpoints
@@ -121,9 +121,7 @@ class CounterServer(val playComponents: PlayComponents)
 object Main {
   // JVM entry point that starts the HTTP server
   def main(args: Array[String]): Unit = {
-    val playConfig = ServerConfig(port =
-      sys.props.get("http.port").map(_.toInt).orElse(Some(9000))
-    )
+    val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
     NettyServer.fromRouterWithComponents(playConfig) { components =>
       val playComponents = PlayComponents.fromBuiltInComponents(components)
       new CounterServer(playComponents).routes orElse new DocumentationServer(

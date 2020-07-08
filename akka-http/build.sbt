@@ -14,7 +14,7 @@ val `akka-http-client` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-akka-http-client",
+      name := "akka-http-client",
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).withDottyCompat(scalaVersion.value),
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).withDottyCompat(scalaVersion.value),
@@ -34,7 +34,7 @@ val `akka-http-server` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-akka-http-server",
+      name := "akka-http-server",
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).withDottyCompat(scalaVersion.value),
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).withDottyCompat(scalaVersion.value),

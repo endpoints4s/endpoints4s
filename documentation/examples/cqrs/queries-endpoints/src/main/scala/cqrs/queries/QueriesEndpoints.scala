@@ -2,7 +2,7 @@ package cqrs.queries
 
 import java.util.UUID
 
-import endpoints.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
+import endpoints4s.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
@@ -15,10 +15,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
   *    entity gives way more details about failures than status codes.
   */
 //#mux-endpoint
-trait QueriesEndpoints
-    extends MuxEndpoints
-    with BuiltInErrors
-    with circe.JsonEntitiesFromCodecs {
+trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEntitiesFromCodecs {
 
   val query: MuxEndpoint[QueryReq, QueryResp, Json] = {
     val request = post(path / "query", jsonRequest[Json])

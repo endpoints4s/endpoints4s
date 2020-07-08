@@ -33,7 +33,7 @@ class QueriesService(
   // --- internals
 
   //#event-log-client
-  import endpoints.play.client.{JsonEntitiesFromCodecs, Endpoints}
+  import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
 
   /** Client for the event log */
   private object eventLog
@@ -97,8 +97,8 @@ class QueriesService(
 
     //#invocation
     val eventuallyUpdatedState: Future[State] =
-      eventLog.events(maybeLastEventTimestamp).map {
-        (newEvents: Seq[StoredEvent]) => atomicallyApplyEvents(newEvents)
+      eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
+        atomicallyApplyEvents(newEvents)
       }
     //#invocation
     eventuallyUpdatedState

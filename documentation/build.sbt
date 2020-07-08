@@ -45,7 +45,7 @@ val apiDoc =
         "-diagrams",
         "-groups",
         "-doc-source-url",
-        s"https://github.com/julienrf/endpoints/blob/v${version.value}€{FILE_PATH}.scala",
+        s"https://github.com/endpoints4s/endpoints4s/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath",
         (baseDirectory in ThisBuild).value.absolutePath
       ),
@@ -85,7 +85,8 @@ val manual =
       noPublishSettings,
       `scala 2.13`,
       coverageEnabled := false,
-      git.remoteRepo := (ThisBuild / sonatypeProjectHosting).value.get.scmUrl,
+      git.remoteRepo := "git@github.com:endpoints4s/endpoints4s.github.io.git",
+      ghpagesBranch := "master",
       ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
       Paradox / paradoxMaterialTheme := {
         val theme = (Paradox / paradoxMaterialTheme).value
@@ -130,11 +131,8 @@ val `example-quickstart-endpoints` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
     .jvmSettings(coverageEnabled := true)
     .dependsOnLocalCrossProjects("algebra", "json-schema-generic")
 
@@ -145,9 +143,8 @@ val `example-quickstart-client` =
   project
     .in(file("examples/quickstart/client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false,
       noPublishSettings,
       `scala 2.12 to 2.13`
     )
@@ -191,10 +188,7 @@ val `example-basic-shared` = {
       }.taskValue,
       libraryDependencies += "io.circe" %%% "circe-generic" % circeVersion
     )
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(
       coverageEnabled := false, // TODO Enable coverage when we add more tests
       (resourceGenerators in Compile) += Def.task {
@@ -218,11 +212,10 @@ val `example-basic-client` =
   project
     .in(file("examples/basic/client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false,
       scalaJSUseMainModuleInitializer := true,
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
     )
@@ -265,10 +258,7 @@ val `example-cqrs-public-endpoints` =
     .crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
-    .jsSettings(
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false
-    )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(coverageEnabled := true)
     .settings(
       libraryDependencies ++= Seq(
@@ -286,13 +276,12 @@ val `example-cqrs-web-client` =
   project
     .in(file("examples/cqrs/web-client"))
     .enablePlugins(ScalaJSPlugin)
+    .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
-      coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "in.nvilla" %%% "monadic-html" % "0.4.0",
+        "com.raquo" %%% "laminar" % "0.9.1",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
       ),

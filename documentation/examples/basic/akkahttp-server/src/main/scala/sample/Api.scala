@@ -1,15 +1,11 @@
 package sample
 
-import endpoints.akkahttp.server._
+import endpoints4s.akkahttp.server._
 
 import scala.concurrent.Future
 import scala.util.Random
 
-object Api
-    extends ApiAlg
-    with Endpoints
-    with JsonEntitiesFromCodecs
-    with BasicAuthentication {
+object Api extends ApiAlg with Endpoints with JsonEntitiesFromCodecs with BasicAuthentication {
 
   import akka.http.scaladsl.server.Directives._
 

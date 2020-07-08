@@ -3,7 +3,7 @@ package cqrs.infra
 import cqrs.commands.Commands
 import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints.play.server.PlayComponents
+import endpoints4s.play.server.PlayComponents
 import play.api.Mode
 import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.api.routing.Router
@@ -71,8 +71,7 @@ object Main extends App {
 
 }
 
-abstract class PlayService(val port: Int, mode: Mode)
-    extends DefaultNettyServerComponents {
+abstract class PlayService(val port: Int, mode: Mode) extends DefaultNettyServerComponents {
   override lazy val serverConfig = ServerConfig(port = Some(port), mode = mode)
   lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
 }

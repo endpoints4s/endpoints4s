@@ -1,6 +1,6 @@
 package sample
 
-import endpoints.play.server._
+import endpoints4s.play.server._
 
 import scala.concurrent.Future
 import scala.util.Random
@@ -15,9 +15,7 @@ class Api(val playComponents: PlayComponents)
 
   val routes = routesFromEndpoints(
     index.implementedBy { case (name, age, _) => User(name, age) },
-    action.implementedBy(param =>
-      ActionResult(index.call(("Julien", 30, "a&b+c")).url)
-    ),
+    action.implementedBy(param => ActionResult(index.call(("Julien", 30, "a&b+c")).url)),
     actionFut.implementedByAsync(param =>
       Future.successful(ActionResult(index.call(("Julien", 30, "future")).url))
     ),

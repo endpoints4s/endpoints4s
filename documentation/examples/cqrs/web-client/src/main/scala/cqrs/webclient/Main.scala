@@ -2,17 +2,14 @@ package cqrs.webclient
 
 import java.time.Instant
 import java.util.UUID
-
+import com.raquo.laminar.api.L._
 import cats.implicits._
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
-import mhtml.{Var, mount}
 import org.scalajs.dom
 import faithful.cats.Instances._
 import cqrs.queries.Meter
 import faithful.Future
-import org.scalajs.dom.Event
 import org.scalajs.dom.raw.HTMLInputElement
-
 import scala.util.Try
 
 object Main {
@@ -22,13 +19,13 @@ object Main {
   def main(args: Array[String]): Unit = {
     //#list-meters-invocation
     PublicEndpoints.listMeters(()).map { fetchedMeters =>
-      metersVar := fetchedMeters.map(meter => meter.id -> meter).toMap
+      metersVar.set(fetchedMeters.map(meter => meter.id -> meter).toMap)
     }
     //#list-meters-invocation
 
     val newMeterId = UUID.randomUUID().toString
 
-    val onNewMeterClicked: Event => Unit = _ => {
+    val onNewMeterClicked: Observer[Unit] = Observer { _ =>
       val input =
         dom.document.getElementById(newMeterId).asInstanceOf[HTMLInputElement]
       val name = input.value.trim
@@ -44,14 +41,12 @@ object Main {
             metersVar.update(_ + (createdMeter.id -> createdMeter))
             input.value = ""
           }
-          .handleError(error =>
-            dom.window.alert(s"Unable to create the meter (error is $error)")
-          )
+          .handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))
         ()
       }
     }
 
-    def onAddValueClicked(meter: Meter): Event => Unit = _ => {
+    val onAddValueClicked: Observer[Meter] = Observer { meter =>
       val input = dom.document
         .getElementById(s"value-${meter.id.toString}")
         .asInstanceOf[HTMLInputElement]
@@ -66,61 +61,66 @@ object Main {
               .map { updatedMeter =>
                 metersVar.update(_ + (updatedMeter.id -> updatedMeter))
               }
-              .handleError(error =>
-                dom.window.alert(s"Unable to add the value (error is $error)")
-              )
+              .handleError(error => dom.window.alert(s"Unable to add the value (error is $error)"))
             ()
         }
       }
     }
 
-    val app =
-      <article>
-        <h1>Meters</h1>
-        <p>
-          <input type="text" placeholder="New meter name" id={newMeterId} required="required" />
-          <button onclick={onNewMeterClicked}>Create</button>
-        </p>
-        {
-        metersVar.map { meters =>
-          if (meters.isEmpty) {
-            <p>No meters yet!</p>
-          } else {
-            <div>
-                {
-              meters.toSeq.map {
-                case (_, meter) =>
-                  <section>
-                      <h2>{meter.label}</h2>
-                      <p>
-                        <table>
-                          <thead>
-                            <th>Time</th><th>Value</th>
-                          </thead>
-                          <tbody>
-                            {
-                    meter.timeSeries.toSeq.map {
-                      case (instant, value) =>
-                        <tr><td>{instant.toString()}</td><td>{value.toString()}</td></tr>
-                    }
-                  }
-                          </tbody>
-                        </table>
-                        <input placeholder="New value" required="required" id={
-                    s"value-${meter.id.toString}"
-                  } />
-                        <button onclick={onAddValueClicked(meter)}>Add</button>
-                      </p>
-                    </section>
-              }
+    val app = article(
+      h1("Meters"),
+      p(
+        input(
+          tpe := "text",
+          placeholder := "New meter name",
+          idAttr := newMeterId,
+          required := true
+        ),
+        button(onClick.mapTo(()) --> onNewMeterClicked, "Create")
+      ),
+      child <-- metersVar.signal.map { meters =>
+        if (meters.isEmpty) {
+          p("No meters yet!")
+        } else {
+          div(
+            meters.toSeq.sortBy(_._2.label).map {
+              case (_, meter) =>
+                section(
+                  h2(meter.label),
+                  p(
+                    table(
+                      thead(
+                        th("Time"),
+                        th("Value")
+                      ),
+                      tbody(
+                        meter.timeSeries.toSeq.map {
+                          case (instant, value) =>
+                            tr(
+                              td(instant.toString),
+                              td(value.toString())
+                            )
+                        }
+                      ),
+                      input(
+                        placeholder := "New Value",
+                        required := true,
+                        idAttr := s"value-${meter.id.toString}"
+                      ),
+                      button(
+                        onClick.mapTo(meter) --> onAddValueClicked,
+                        "Add"
+                      )
+                    )
+                  )
+                )
             }
-              </div>
-          }
+          )
         }
       }
-      </article>
+    )
 
-    mount(dom.document.body, app)
+    render(dom.document.body, app)
     ()
   }
 }

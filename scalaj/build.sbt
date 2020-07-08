@@ -10,7 +10,7 @@ val `scalaj-client` =
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
-      name := "endpoints-scalaj-client",
+      name := "scalaj-client",
       libraryDependencies ++= Seq(
         "org.scalaj" %% "scalaj-http" % "2.4.2"
       )

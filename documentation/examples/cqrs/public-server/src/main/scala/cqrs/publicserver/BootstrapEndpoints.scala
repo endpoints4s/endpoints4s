@@ -1,7 +1,7 @@
 package cqrs.publicserver
 
-import endpoints.openapi.model.OpenApi
-import endpoints.play.server.{
+import endpoints4s.openapi.model.OpenApi
+import endpoints4s.play.server.{
   Assets,
   Endpoints,
   JsonEntitiesFromEncodersAndDecoders,

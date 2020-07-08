@@ -1,6 +1,6 @@
 package quickstart
 
-import endpoints.xhr
+import endpoints4s.xhr
 
 import scala.concurrent.Future
 

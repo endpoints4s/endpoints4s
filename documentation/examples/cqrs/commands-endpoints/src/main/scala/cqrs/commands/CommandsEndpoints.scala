@@ -7,8 +7,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 
 //#endpoints
-import endpoints.algebra.Endpoints
-import endpoints.algebra.circe.JsonEntitiesFromCodecs
+import endpoints4s.algebra.Endpoints
+import endpoints4s.algebra.circe.JsonEntitiesFromCodecs
 
 trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 
@@ -59,8 +59,7 @@ sealed trait UpdateCommand extends Command {
 case class CreateMeter(label: String) extends CreationCommand
 
 /** Add a record for an existing meter */
-case class AddRecord(meterId: UUID, date: Instant, value: BigDecimal)
-    extends UpdateCommand
+case class AddRecord(meterId: UUID, date: Instant, value: BigDecimal) extends UpdateCommand
 
 object Command {
   implicit val decoder: Decoder[Command] = deriveDecoder

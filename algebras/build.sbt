@@ -9,7 +9,7 @@ val algebra =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra",
+      name := "algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
         ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).withDottyCompat(scalaVersion.value),
@@ -22,6 +22,7 @@ val algebra =
     .dependsOnLocalCrossProjectsWithScope(
       "json-schema" -> "test->test;compile->compile"
     )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
@@ -33,13 +34,14 @@ val `algebra-circe` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra-circe",
+      name := "algebra-circe",
       libraryDependencies ++= Seq(
         ("io.circe" %%% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value),
         ("io.circe" %%% "circe-generic" % circeVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
@@ -51,10 +53,11 @@ val `algebra-playjson` =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "endpoints-algebra-playjson",
+      name := "algebra-playjson",
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-playjson-js` = `algebra-playjson`.js
 val `algebra-playjson-jvm` = `algebra-playjson`.jvm
