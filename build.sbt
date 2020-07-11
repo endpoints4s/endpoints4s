@@ -29,3 +29,12 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
+
+ThisBuild / compatibilityRules ++= Seq(
+  "org.typelevel" %%% "cats*" % "semver",
+  "co.fs2" %%% "fs2*" % "semver",
+  "com.typesafe.play" %%% "play-json" % "semver",
+  "com.typesafe.play" %%% "play-functional" % "semver"
+)
+
+ThisBuild / compatibilityIgnored += "joda-time" % "joda-time"

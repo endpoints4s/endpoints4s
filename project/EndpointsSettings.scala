@@ -2,6 +2,7 @@ import sbt._
 import sbt.Keys._
 import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
+import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport.mimaPreviousArtifacts
 
 object EndpointsSettings {
 
@@ -92,7 +93,8 @@ object EndpointsSettings {
   val noPublishSettings = commonSettings ++ Seq(
     publishArtifact := false,
     publish := { () },
-    publishLocal := { () }
+    publishLocal := { () },
+    mimaPreviousArtifacts := Set.empty
   )
 
   // --- Common dependencies
