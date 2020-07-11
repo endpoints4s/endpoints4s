@@ -441,7 +441,7 @@ val `example-basic-http4s-server` =
   project
     .in(file("examples/basic/http4s-server"))
     .settings(
-      commonSettings,
+      noPublishSettings,
       `scala 2.12 to 2.13`,
       publishArtifact := false,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
