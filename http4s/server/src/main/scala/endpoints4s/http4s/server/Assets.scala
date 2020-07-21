@@ -5,7 +5,7 @@ import java.net.URL
 import cats.effect.{Blocker, ContextShift}
 import cats.implicits._
 import endpoints4s.algebra.Documentation
-import endpoints4s.{Invalid, Valid, algebra}
+import endpoints4s.{Valid, algebra}
 import fs2.io._
 import org.http4s.headers._
 import org.http4s._
@@ -19,7 +19,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       ifModifiedSince: Option[HttpDate]
   )
 
-  case class AssetPath(path: Seq[String], digest: String, name: String)
+  case class AssetPath(path: Seq[String], digest: Option[String], name: String)
 
   sealed trait AssetResponse
   object AssetResponse {
@@ -37,23 +37,45 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   override def assetSegments(
       name: String,
       docs: Documentation
-  ): Path[AssetPath] =
-    (segments: List[String]) =>
-      segments.reverse match {
-        case s :: p =>
-          val i = s.lastIndexOf('-')
-          if (i > 0) {
-            val (name, digest) = s.splitAt(i)
-            Some((Valid(AssetPath(p.reverse, digest.drop(1), name)), Nil))
-          } else Some((Invalid("Invalid asset segments"), Nil))
-        case Nil => None
-      }
+  ): Path[AssetPath] = {
+    case p :+ s =>
+      val i = s.lastIndexOf('-')
+      val assetPath =
+        if (i > 0) {
+          val (name, digest) = s.splitAt(i)
+          AssetPath(p, Some(digest.drop(1)), name)
+        } else AssetPath(p, None, s)
+      Some((Valid(assetPath), Nil))
+    case Nil => None
+  }
 
   private lazy val gzipSupport: RequestHeaders[Boolean] =
     headers => Valid(headers.get(`Accept-Encoding`).exists(_.satisfiedBy(ContentCoding.gzip)))
 
   private lazy val ifModifiedSince: RequestHeaders[Option[HttpDate]] =
     headers => Valid(headers.get(`If-Modified-Since`).map(_.date))
+
+  private val assetResponse: Response[AssetResponse] = {
+    case AssetResponse.NotFound                    => Response(NotFound)
+    case AssetResponse.Found(_, _, _, _, _, false) => Response(NotModified)
+    case AssetResponse.Found(data, length, lastModified, mediaType, isGzipped, true) =>
+      val lastModifiedHeader = lastModified.map(`Last-Modified`(_))
+      val contentTypeHeader = mediaType.map(`Content-Type`(_))
+      val contentCodingHeader =
+        if (isGzipped) Some(`Content-Encoding`(ContentCoding.gzip)) else None
+      val contentLengthHeader =
+        `Content-Length`.fromLong(length).getOrElse(`Transfer-Encoding`(TransferCoding.chunked))
+
+      val headers = Headers(
+        contentLengthHeader :: List(
+          contentTypeHeader,
+          contentCodingHeader,
+          lastModifiedHeader
+        ).flatten
+      )
+
+      Response(headers = headers, body = data)
+  }
 
   override def assetsEndpoint(
       url: Url[AssetPath],
@@ -76,52 +98,30 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     endpoint(assetRequest, assetResponse)
   }
 
-  private val assetResponse: Response[AssetResponse] = {
-    case AssetResponse.NotFound                    => Response(NotFound)
-    case AssetResponse.Found(_, _, _, _, _, false) => Response(NotModified)
-    case AssetResponse.Found(data, length, lastModified, mediaType, isGzipped, true) =>
-      val lastModifiedHeader = lastModified.map(`Last-Modified`(_))
-      val contentTypeHeader = mediaType.map(`Content-Type`(_))
-      val contentCodingHeader =
-        if (isGzipped) Some(`Content-Encoding`(ContentCoding.gzip)) else None
-      val contentLengthHeader =
-        `Content-Length`.fromLong(length).getOrElse(`Transfer-Encoding`(TransferCoding.chunked))
-
-      val headers = Headers(
-        contentLengthHeader :: List(
-          contentTypeHeader,
-          contentCodingHeader,
-          lastModifiedHeader
-        ).flatten
-      )
-
-      Response(
-        headers = headers,
-        body = data
-      )
-
-  }
-
-  private def toUrl(
+  private def toResourceUrl(
       pathPrefix: Option[String],
       assetRequest: AssetRequest
   ): Option[(URL, Boolean)] = {
-    val assetInfo = assetRequest.assetPath
+    val assetPath = assetRequest.assetPath
     val path =
-      if (assetInfo.path.nonEmpty)
-        assetInfo.path.mkString("", "/", s"/${assetInfo.name}")
-      else assetInfo.name
-    val hasDigest = digests.get(path).contains(assetInfo.digest)
-
+      if (assetPath.path.nonEmpty)
+        assetPath.path.mkString("", "/", s"/${assetPath.name}")
+      else assetPath.name
     lazy val resourcePath = pathPrefix.getOrElse("") ++ s"/$path"
-    def nonGzippedAsset = Option(getClass.getResource(resourcePath)).map((_, false))
 
-    if (hasDigest && assetRequest.isGzipSupported)
-      Option(getClass.getResource(s"$resourcePath.gz"))
-        .map((_, true))
-        .orElse(nonGzippedAsset)
-    else if (hasDigest) nonGzippedAsset
-    else None
+    def nonGzippedResourceUrl = Option(getClass.getResource(resourcePath)).map((_, false))
+    def gzippedResourceUrl = Option(getClass.getResource(s"$resourcePath.gz")).map((_, true))
+    def resourceUrl =
+      if (assetRequest.isGzipSupported) gzippedResourceUrl.orElse(nonGzippedResourceUrl)
+      else nonGzippedResourceUrl
+
+    def hasDigest(digest: String) = digests.get(path).contains(digest)
+
+    assetPath.digest match {
+      case None                                => resourceUrl
+      case Some(digest) if (hasDigest(digest)) => resourceUrl
+      case Some(digest)                        => None
+    }
   }
 
   private def toMediaType(name: String): Option[MediaType] =
@@ -135,18 +135,18 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       blocker: Blocker
   )(implicit cs: ContextShift[Effect]): AssetRequest => AssetResponse =
     assetRequest =>
-      toUrl(pathPrefix, assetRequest)
+      toResourceUrl(pathPrefix, assetRequest)
         .map {
           case (url, isGzipped) =>
-            val urlConn = url.openConnection
+            val urlConnection = url.openConnection
 
             val ifModifiedSince = assetRequest.ifModifiedSince
-            val lastModified = HttpDate.fromEpochSecond(urlConn.getLastModified / 1000).toOption
+            val lastModified =
+              HttpDate.fromEpochSecond(urlConnection.getLastModified / 1000).toOption
             val expired = (ifModifiedSince, lastModified).mapN(_ < _).getOrElse(true)
-            val contentLength = urlConn.getContentLengthLong
+            val contentLength = urlConnection.getContentLengthLong
             val mediaType = toMediaType(assetRequest.assetPath.name)
-            val data =
-              readInputStream[Effect](Effect.delay(url.openStream), DefaultBufferSize, blocker)
+            val data = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker)
 
             AssetResponse.Found(
               data,
