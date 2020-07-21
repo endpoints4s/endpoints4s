@@ -42,17 +42,17 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       val i = s.lastIndexOf('-')
       val assetPath =
         if (i > 0) {
-          val (name, digest) = s.splitAt(i)
-          AssetPath(p, Some(digest.drop(1)), name)
+          val (resourceName, digest) = s.splitAt(i)
+          AssetPath(p, Some(digest.drop(1)), resourceName)
         } else AssetPath(p, None, s)
       Some((Valid(assetPath), Nil))
     case Nil => None
   }
 
-  private lazy val gzipSupport: RequestHeaders[Boolean] =
+  private val gzipSupport: RequestHeaders[Boolean] =
     headers => Valid(headers.get(`Accept-Encoding`).exists(_.satisfiedBy(ContentCoding.gzip)))
 
-  private lazy val ifModifiedSince: RequestHeaders[Option[HttpDate]] =
+  private val ifModifiedSince: RequestHeaders[Option[HttpDate]] =
     headers => Valid(headers.get(`If-Modified-Since`).map(_.date))
 
   private val assetResponse: Response[AssetResponse] = {
@@ -130,9 +130,15 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       case i  => MediaType.forExtension(name.substring(i + 1))
     }
 
+  /**
+    * @param pathPrefix Prefix to use to look up the resources in the classpath (like '/assets'). You
+    *                   most probably never want to publish all your classpath resources.
+    * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
+    *         looking for the requested asset in the classpath resources.
+    */
   def assetsResources(
-      pathPrefix: Option[String] = None,
-      blocker: Blocker
+      blocker: Blocker,
+      pathPrefix: Option[String] = None
   )(implicit cs: ContextShift[Effect]): AssetRequest => AssetResponse =
     assetRequest =>
       toResourceUrl(pathPrefix, assetRequest)

@@ -47,6 +47,10 @@ trait StatusCodes {
   /** @group operations */
   def IMUsed: StatusCode = unsupportedInterpreter("1.1.0")
 
+  // 3xx Redirection
+  /** @group operations */
+  def NotModified: StatusCode
+
   // 4xx Client Error
   /**
     * @note You should use the `badRequest` constructor provided by the [[endpoints4s.algebra.Responses]]
