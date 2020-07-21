@@ -54,4 +54,5 @@ trait StatusCodes extends algebra.StatusCodes {
 
   def InternalServerError = Http4sStatus.InternalServerError
   def NotImplemented = Http4sStatus.NotImplemented
+  def NotModified = Http4sStatus.NotModified
 }
