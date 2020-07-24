@@ -460,7 +460,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       }
     }
 
-    "reject request with missing headers" in {
+    "reject requests with missing headers" in {
       serveEndpoint(joinedHeadersEndpoint, "success") { port =>
         val noHeadersRequest =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")

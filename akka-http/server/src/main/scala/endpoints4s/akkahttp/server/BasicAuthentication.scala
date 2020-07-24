@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.headers.{
 }
 import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes => AkkaStatusCodes}
 import akka.http.scaladsl.server.{Directive, Directive1, Directives}
-import endpoints4s.{Tupler, algebra}
+import endpoints4s.{Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 
@@ -28,27 +28,41 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Request[Out] = {
-    val extractCredentials: HttpHeader => Option[Credentials] = {
-      case Authorization(BasicHttpCredentials(username, password)) =>
-        Some(Credentials(username, password))
-      case _ => None
-    }
+    val authHeader: RequestHeaders[Option[Credentials]] =
+      httpHeaders =>
+        Valid(
+          httpHeaders.header[Authorization].flatMap {
+            case Authorization(BasicHttpCredentials(username, password)) =>
+              Some(Credentials(username, password))
+            case _ => None
+          }
+        )
 
-    val authHeader: Directive1[Credentials] =
-      Directives.optionalHeaderValue(extractCredentials).flatMap {
-        case Some(credentials) => Directives.provide(credentials)
-        case None =>
-          Directive[Tuple1[Credentials]] { _ => //inner is ignored
-            Directives.complete(
-              HttpResponse(
-                AkkaStatusCodes.Unauthorized,
-                collection.immutable.Seq[HttpHeader](
-                  `WWW-Authenticate`(HttpChallenges.basic("Realm"))
+    val headersDirective: Directive1[HCred] =
+      // First, handle regular header validation
+      directive1InvFunctor
+        .xmapPartial[Validated[(H, Option[Credentials])], (H, Option[Credentials])](
+          Directives.extractRequest.map((headers ++ authHeader).decode),
+          validated => validated,
+          headersAndCredentials => Valid(headersAndCredentials)
+        )
+        .flatMap {
+          // Then, check that credentials are present
+          case (h, Some(credentials)) =>
+            Directives.provide(tuplerHCred(h, credentials))
+          case (_, None) =>
+            Directive[Tuple1[HCred]] { _ => //inner is ignored
+              Directives.complete(
+                HttpResponse(
+                  AkkaStatusCodes.Unauthorized,
+                  collection.immutable.Seq[HttpHeader](
+                    `WWW-Authenticate`(HttpChallenges.basic("Realm"))
+                  )
                 )
               )
-            )
-          }
-      }
+            }
+        }
+
     joinDirectives(
       joinDirectives(
         joinDirectives(
@@ -57,7 +71,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
         ),
         entity
       ),
-      headers ++ authHeader
+      headersDirective
     )
   }
 

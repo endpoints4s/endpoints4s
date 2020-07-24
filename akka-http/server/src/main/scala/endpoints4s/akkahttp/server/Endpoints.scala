@@ -2,7 +2,7 @@ package endpoints4s.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{HttpEntity, HttpHeader, MediaTypes}
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes}
 import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints4s.algebra.Documentation
@@ -39,7 +39,9 @@ trait EndpointsWithCustomErrors
     with Methods
     with StatusCodes {
 
-  type RequestHeaders[A] = Directive1[A]
+  trait RequestHeaders[A] {
+    def decode(httpRequest: HttpRequest): Validated[A]
+  }
 
   type Request[A] = Directive1[A]
 
@@ -124,23 +126,40 @@ trait EndpointsWithCustomErrors
   ************************* */
 
   def emptyRequestHeaders: RequestHeaders[Unit] =
-    convToDirective1(Directives.pass)
+    _ => Valid(())
 
   def requestHeader(name: String, docs: Documentation): RequestHeaders[String] =
-    Directives.headerValueByName(name)
+    httpRequest =>
+      httpRequest.headers.find(_.lowercaseName() == name.toLowerCase) match {
+        case Some(header) => Valid(header.value())
+        case None         => Invalid(s"Missing header $name")
+      }
 
   def optRequestHeader(
       name: String,
       docs: Documentation
-  ): RequestHeaders[Option[String]] = Directives.optionalHeaderValueByName(name)
+  ): RequestHeaders[Option[String]] =
+    httpRequest =>
+      httpRequest.headers.find(_.lowercaseName() == name.toLowerCase) match {
+        case Some(header) => Valid(Some(header.value()))
+        case None         => Valid(None)
+      }
 
   implicit lazy val requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
-    directive1InvFunctor
+    new PartialInvariantFunctor[RequestHeaders] {
+      def xmapPartial[A, B](
+          fa: RequestHeaders[A],
+          f: A => Validated[B],
+          g: B => A
+      ): RequestHeaders[B] =
+        headers => fa.decode(headers).flatMap(f)
+    }
   implicit lazy val requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-      override def product[A, B](fa: Directive1[A], fb: Directive1[B])(implicit
+      def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
           tupler: Tupler[A, B]
-      ): Directive1[tupler.Out] = joinDirectives(fa, fb)
+      ): RequestHeaders[tupler.Out] =
+        (httpRequest: HttpRequest) => fa.decode(httpRequest).zip(fb.decode(httpRequest))(tupler)
     }
 
   /* ************************
@@ -224,7 +243,13 @@ trait EndpointsWithCustomErrors
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] = {
     val methodDirective = convToDirective1(Directives.method(method))
-    val matchDirective = methodDirective & url.directive & headers
+    val headersDirective: Directive1[C] =
+      directive1InvFunctor.xmapPartial[Validated[C], C](
+        Directives.extractRequest.map(headers.decode),
+        validatedC => validatedC,
+        c => Valid(c)
+      )
+    val matchDirective = methodDirective & url.directive & headersDirective
     matchDirective.tflatMap {
       case (_, a, c) =>
         entity.map(b => tuplerABC(tuplerAB(a, b), c))
