@@ -460,6 +460,35 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       }
     }
 
+    "reject request with missing headers" in {
+      serveEndpoint(joinedHeadersEndpoint, "success") { port =>
+        val noHeadersRequest =
+          HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
+        whenReady(sendAndDecodeEntityAsText(noHeadersRequest)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.BadRequest)
+            assert(entity == """["Missing header A","Missing header B"]""")
+        }
+        val oneHeader =
+          HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
+              .withHeaders(RawHeader("A", "foo"))
+        whenReady(sendAndDecodeEntityAsText(oneHeader)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.BadRequest)
+            assert(entity == """["Missing header B"]""")
+        }
+        val twoHeaders =
+          HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
+              .withHeaders(RawHeader("A", "foo"), RawHeader("B", "foo"))
+        whenReady(sendAndDecodeEntityAsText(twoHeaders)) {
+          case (response, entity) =>
+            assert(response.status == StatusCodes.OK)
+            assert(entity == "success")
+        }
+        ()
+      }
+    }
+
     "decode transformed request headers" in {
       serveEndpoint(xmapHeadersEndpoint, "ignored") { port =>
         val validRequest =
