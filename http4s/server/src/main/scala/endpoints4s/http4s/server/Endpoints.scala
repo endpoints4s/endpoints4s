@@ -360,8 +360,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
           tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
-        headers =>
-          fa(headers).zip(fb(headers))
+        headers => fa(headers).zip(fb(headers))
     }
 
   /**

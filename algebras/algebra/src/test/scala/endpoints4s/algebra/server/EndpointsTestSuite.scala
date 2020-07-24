@@ -471,7 +471,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         }
         val oneHeader =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
-              .withHeaders(RawHeader("A", "foo"))
+            .withHeaders(RawHeader("A", "foo"))
         whenReady(sendAndDecodeEntityAsText(oneHeader)) {
           case (response, entity) =>
             assert(response.status == StatusCodes.BadRequest)
@@ -479,7 +479,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         }
         val twoHeaders =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
-              .withHeaders(RawHeader("A", "foo"), RawHeader("B", "foo"))
+            .withHeaders(RawHeader("A", "foo"), RawHeader("B", "foo"))
         whenReady(sendAndDecodeEntityAsText(twoHeaders)) {
           case (response, entity) =>
             assert(response.status == StatusCodes.OK)
