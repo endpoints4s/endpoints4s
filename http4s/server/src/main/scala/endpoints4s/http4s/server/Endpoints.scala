@@ -361,8 +361,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
           tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
         headers =>
-          fa(headers)
-            .flatMap(a => fb(headers).map(b => tupler(a, b)))
+          fa(headers).zip(fb(headers))
     }
 
   /**
