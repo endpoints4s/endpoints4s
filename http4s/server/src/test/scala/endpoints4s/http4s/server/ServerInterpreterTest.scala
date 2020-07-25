@@ -18,15 +18,21 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
+import endpoints4s.algebra.server.AssetsTestSuite
+import cats.effect.Blocker
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
     with TextEntitiesTestSuite[EndpointsTestApi]
-    with SumTypedEntitiesTestSuite[EndpointsTestApi] {
+    with SumTypedEntitiesTestSuite[EndpointsTestApi]
+    with AssetsTestSuite[EndpointsTestApi] {
 
-  val serverApi = new EndpointsTestApi()
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+
+  val serverApi = new EndpointsTestApi(Map.empty)
 
   def decodeUrl[A](url: serverApi.Url[A])(rawValue: String): DecodedUrl[A] = {
     val uri =
@@ -42,31 +48,40 @@ class ServerInterpreterTest
   private def serveGeneralEndpoint[Req, Resp](
       endpoint: serverApi.Endpoint[Req, Resp],
       request2response: Req => Resp
-  )(runTests: Int => Unit): Unit = {
+  )(runTests: Int => Unit): IO[Unit] = {
     val port = {
       val socket = new ServerSocket(0)
       try socket.getLocalPort
       finally if (socket != null) socket.close()
     }
-    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-    implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+
     val service = HttpRoutes.of[IO](endpoint.implementedBy(request2response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
       BlazeServerBuilder[IO](ExecutionContext.global)
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
-    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
+    server.resource.use(_ => IO(runTests(port)))
   }
+
+  def serveAssetsEndpointFromPath(
+      endpoint: serverApi.Endpoint[serverApi.AssetRequest, serverApi.AssetResponse],
+      pathPrefix: Option[String]
+  )(runTests: Int => Unit): Unit =
+    Blocker[IO]
+      .use(blocker =>
+        serveGeneralEndpoint(endpoint, serverApi.assetsResources(blocker, pathPrefix))(runTests)
+      )
+      .unsafeRunSync()
 
   def serveEndpoint[Resp](
       endpoint: serverApi.Endpoint[_, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit =
-    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
+    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests).unsafeRunSync()
 
   def serveIdentityEndpoint[Resp](
       endpoint: serverApi.Endpoint[Resp, Resp]
   )(runTests: Int => Unit): Unit =
-    serveGeneralEndpoint(endpoint, identity[Resp])(runTests)
+    serveGeneralEndpoint(endpoint, identity[Resp])(runTests).unsafeRunSync()
 }
