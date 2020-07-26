@@ -246,7 +246,7 @@ trait EndpointsWithCustomErrors
     val headersDirective: Directive1[C] =
       directive1InvFunctor.xmapPartial[Validated[C], C](
         Directives.extractRequest.map(headers.decode),
-        validatedC => validatedC,
+        identity,
         c => Valid(c)
       )
     val matchDirective = methodDirective & url.directive & headersDirective

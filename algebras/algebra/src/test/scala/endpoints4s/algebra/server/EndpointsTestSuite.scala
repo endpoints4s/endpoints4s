@@ -460,8 +460,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       }
     }
 
-    "reject requests with missing headers" in {
-      serveEndpoint(joinedHeadersEndpoint, "success") { port =>
+    "reject requests with two missing headers" in {
+      serveEndpoint(joinedHeadersEndpoint, "ignored") { port =>
         val noHeadersRequest =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
         whenReady(sendAndDecodeEntityAsText(noHeadersRequest)) {
@@ -469,6 +469,12 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
             assert(response.status == StatusCodes.BadRequest)
             assert(entity == """["Missing header A","Missing header B"]""")
         }
+        ()
+      }
+    }
+
+    "reject requests with one missing header" in {
+      serveEndpoint(joinedHeadersEndpoint, "ignored") { port =>
         val oneHeader =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
             .withHeaders(RawHeader("A", "foo"))
@@ -477,6 +483,12 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
             assert(response.status == StatusCodes.BadRequest)
             assert(entity == """["Missing header B"]""")
         }
+        ()
+      }
+    }
+
+    "accept requests with the required headers" in {
+      serveEndpoint(joinedHeadersEndpoint, "success") { port =>
         val twoHeaders =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
             .withHeaders(RawHeader("A", "foo"), RawHeader("B", "foo"))
