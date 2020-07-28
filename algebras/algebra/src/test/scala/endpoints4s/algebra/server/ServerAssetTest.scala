@@ -2,11 +2,11 @@ package endpoints4s.algebra.server
 
 import endpoints4s.algebra
 
-trait ServerAssetTest[T <: algebra.Endpoints with algebra.Assets] extends ServerTestBase[T] {
+trait ServerAssetTest[T <: algebra.Endpoints with algebra.ServerAssets] extends ServerTestBase[T] {
 
-  def serveAssetsEndpointFromPath(
+  def serveAssetsEndpoint(
       endpoint: serverApi.Endpoint[serverApi.AssetRequest, serverApi.AssetResponse],
-      pathPrefix: Option[String]
+      response: => serverApi.AssetResponse
   )(runTests: Int => Unit): Unit
 
 }

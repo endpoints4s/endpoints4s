@@ -3,14 +3,13 @@ package endpoints4s.http4s.server
 import java.net.URL
 
 import cats.effect.{Blocker, ContextShift}
-import cats.implicits._
 import endpoints4s.algebra.Documentation
 import endpoints4s.{Valid, algebra}
 import fs2.io._
 import org.http4s.headers._
 import org.http4s._
 
-trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
+trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
   val DefaultBufferSize = 10240
 
   case class AssetRequest(
@@ -30,11 +29,34 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
         lastModified: Option[HttpDate],
         mediaType: Option[MediaType],
         isGzipped: Boolean,
-        expired: Boolean
+        isExpired: Boolean
     ) extends AssetResponse
   }
 
-  override def assetSegments(
+  type AssetContent = fs2.Stream[Effect, Byte]
+
+  def notFoundAssetResponse = AssetResponse.NotFound
+
+  def foundAssetResponse(
+      content: AssetContent,
+      contentLength: Long,
+      fileName: String,
+      isGzipped: Boolean,
+      isExpired: Boolean,
+      lastModifiedSeconds: Long
+  ) =
+    AssetResponse.Found(
+      content,
+      contentLength,
+      HttpDate.fromEpochSecond(lastModifiedSeconds).toOption,
+      toMediaType(fileName),
+      isGzipped,
+      isExpired
+    )
+
+  def noopAssetContent = fs2.Stream.empty
+
+  def assetSegments(
       name: String,
       docs: Documentation
   ): Path[AssetPath] = {
@@ -77,7 +99,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       Response(headers = headers, body = data)
   }
 
-  override def assetsEndpoint(
+  def assetsEndpoint(
       url: Url[AssetPath],
       docs: Documentation,
       notFoundDocs: Documentation
@@ -146,22 +168,20 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
           case (url, isGzipped) =>
             val urlConnection = url.openConnection
 
-            val ifModifiedSince = assetRequest.ifModifiedSince
-            val lastModified =
-              HttpDate.fromEpochSecond(urlConnection.getLastModified / 1000).toOption
-            val expired = (ifModifiedSince, lastModified).mapN(_ < _).getOrElse(true)
-            val contentLength = urlConnection.getContentLengthLong
-            val mediaType = toMediaType(assetRequest.assetPath.name)
-            val data = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker)
+            val ifModifiedSinceSeconds = assetRequest.ifModifiedSince.map(_.epochSecond)
+            val lastModifiedSeconds = urlConnection.getLastModified / 1000
+            val isExpired =
+              ifModifiedSinceSeconds.map(_ < lastModifiedSeconds).getOrElse(true)
 
-            AssetResponse.Found(
-              data,
-              contentLength,
-              lastModified,
-              mediaType,
-              isGzipped,
-              expired
+            foundAssetResponse(
+              content = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker),
+              contentLength = urlConnection.getContentLengthLong,
+              fileName = assetRequest.assetPath.name,
+              isGzipped = isGzipped,
+              isExpired = isExpired,
+              lastModifiedSeconds = lastModifiedSeconds
             )
         }
-        .getOrElse(AssetResponse.NotFound)
+        .getOrElse(notFoundAssetResponse)
+
 }

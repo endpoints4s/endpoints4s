@@ -27,7 +27,8 @@ class ServerInterpreterTest
     with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
     with TextEntitiesTestSuite[EndpointsTestApi]
     with SumTypedEntitiesTestSuite[EndpointsTestApi]
-    with AssetsTestSuite[EndpointsTestApi] {
+    with AssetsTestSuite[EndpointsTestApi]
+    with AssetsResourcesTest {
 
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
@@ -48,7 +49,7 @@ class ServerInterpreterTest
   private def serveGeneralEndpoint[Req, Resp](
       endpoint: serverApi.Endpoint[Req, Resp],
       request2response: Req => Resp
-  )(runTests: Int => Unit): IO[Unit] = {
+  )(runTests: Int => Unit): Unit = {
     val port = {
       val socket = new ServerSocket(0)
       try socket.getLocalPort
@@ -61,27 +62,31 @@ class ServerInterpreterTest
       BlazeServerBuilder[IO](ExecutionContext.global)
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
-    server.resource.use(_ => IO(runTests(port)))
+    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
   }
 
-  def serveAssetsEndpointFromPath(
-      endpoint: serverApi.Endpoint[serverApi.AssetRequest, serverApi.AssetResponse],
-      pathPrefix: Option[String]
-  )(runTests: Int => Unit): Unit =
+  def assetsResources(pathPrefix: Option[String]) =
     Blocker[IO]
-      .use(blocker =>
-        serveGeneralEndpoint(endpoint, serverApi.assetsResources(blocker, pathPrefix))(runTests)
-      )
+      .use(blocker => serverApi.Effect.point(serverApi.assetsResources(blocker, pathPrefix)))
       .unsafeRunSync()
+
+  def serveAssetsEndpoint(
+      endpoint: serverApi.Endpoint[
+        serverApi.AssetRequest,
+        serverApi.AssetResponse
+      ],
+      response: => serverApi.AssetResponse
+  )(runTests: Int => Unit): Unit =
+    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
 
   def serveEndpoint[Resp](
       endpoint: serverApi.Endpoint[_, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit =
-    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests).unsafeRunSync()
+    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
 
   def serveIdentityEndpoint[Resp](
       endpoint: serverApi.Endpoint[Resp, Resp]
   )(runTests: Int => Unit): Unit =
-    serveGeneralEndpoint(endpoint, identity[Resp])(runTests).unsafeRunSync()
+    serveGeneralEndpoint(endpoint, identity[Resp])(runTests)
 }
