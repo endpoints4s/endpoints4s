@@ -56,16 +56,16 @@ jobs:
         - sbt scalafmtCheck ++2.12.11 coverage test coverageReport coverageAggregate
         - bash <(curl -s https://codecov.io/bash)
 
-    - stage: publish
-      if: tag =~ ^v
-      script:
-        - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in ci/secrets.tar.enc -out ci/secrets.tar -d
-        - tar xvf ci/secrets.tar
-        - echo $PGP_PASSPHRASE | gpg --passphrase-fd 0 --batch --yes --import ci/secring.asc
-        - chmod 600 ci/travis-key
-        - eval "$(ssh-agent -s)"
-        - ssh-add ci/travis-key
-        - sbt "++ 2.12.11 publishSigned" "++ 2.13.2 publishSigned" sonatypeReleaseAll "++ 2.13.2 manual/makeSite" manual/ghpagesPushSite
+#    - stage: publish
+#      if: tag =~ ^v
+#      script:
+#        - openssl aes-256-cbc -K $encrypted_6d2e0e4487f6_key -iv $encrypted_6d2e0e4487f6_iv -in ci/secrets.tar.enc -out ci/secrets.tar -d
+#        - tar xvf ci/secrets.tar
+#        - echo $PGP_PASSPHRASE | gpg --passphrase-fd 0 --batch --yes --import ci/secring.asc
+#        - chmod 600 ci/travis-key
+#        - eval "$(ssh-agent -s)"
+#        - ssh-add ci/travis-key
+#        - sbt "++ 2.12.11 publishSigned" "++ 2.13.2 publishSigned" sonatypeReleaseAll "++ 2.13.2 manual/makeSite" manual/ghpagesPushSite
 
 env:
   global:
