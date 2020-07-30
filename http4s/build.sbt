@@ -5,8 +5,6 @@ val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
-val http4sInterpretersVersion = "2.0.0"
-
 val `http4s-server` =
   project
     .in(file("server"))
@@ -14,7 +12,7 @@ val `http4s-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      version := http4sInterpretersVersion,
+      version := "2.0.0",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-core" % http4sVersion).withDottyCompat(scalaVersion.value),
         ("org.http4s" %% "http4s-dsl" % http4sVersion).withDottyCompat(scalaVersion.value),
@@ -31,7 +29,6 @@ val `http4s-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-client",
-      version := http4sInterpretersVersion,
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).withDottyCompat(scalaVersion.value),
         ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).withDottyCompat(scalaVersion.value)

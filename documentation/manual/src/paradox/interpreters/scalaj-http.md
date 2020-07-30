@@ -2,11 +2,7 @@
 
 Client interpreter backed by [scalaj-http](https://github.com/scalaj/scalaj-http).
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "scalaj-client" % "$version$"
-~~~
-@@@
+@coordinates[scalaj-client]
 
 @scaladoc[API documentation](endpoints4s.scalaj.client.index)
 

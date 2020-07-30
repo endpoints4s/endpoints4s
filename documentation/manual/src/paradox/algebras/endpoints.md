@@ -3,11 +3,7 @@
 This algebra, at the top of the hierarchy, provides the base vocabulary to
 describe HTTP endpoints, requests and responses.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.Endpoints)
 

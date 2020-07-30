@@ -4,11 +4,7 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 
 ## Client
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "akka-http-client" % "$version$"
-~~~
-@@@
+@coordinates[akka-http-client]
 
 @scaladoc[API documentation](endpoints4s.akkahttp.client.index)
 
@@ -43,11 +39,7 @@ It can be invoked as follows:
 
 ## Server
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "akka-http-server" % "$version$"
-~~~
-@@@
+@coordinates[akka-http-server]
 
 @scaladoc[API documentation](endpoints4s.akkahttp.server.index)
 

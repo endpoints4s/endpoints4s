@@ -3,11 +3,7 @@
 This algebra provides vocabulary to define endpoints multiplexing several
 requests and responses.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.MuxEndpoints)
 

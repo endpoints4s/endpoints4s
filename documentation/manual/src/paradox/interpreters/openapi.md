@@ -1,10 +1,6 @@
 # OpenAPI
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "openapi" % "$version$"
-~~~
-@@@
+@coordinates[openapi]
 
 @scaladoc[API documentation](endpoints4s.openapi.index)
 

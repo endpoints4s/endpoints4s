@@ -2,11 +2,7 @@
 
 Web client using `XMLHttpRequest`.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %%% "xhr-client" % "$version$"
-~~~
-@@@
+@coordinates[xhr-client] { platform=js }
 
 @scaladoc[API documentation](endpoints4s.xhr.index)
 
@@ -30,9 +26,4 @@ the `Result[A]` type to `faithful.Future[A]`. This interpreter requires
 an additional dependency (which, in turn, depends on the
 [faithful](https://github.com/julienrf/faithful) library):
 
-@@@vars
-~~~ scala
-// Provides endpoints4s.xhr.client.faithful.Endpoints
-"org.endpoints4s" %%% "xhr-client-faithful" % "$version$"
-~~~
-@@@
+@coordinates[xhr-client-faithful] { platform=js }

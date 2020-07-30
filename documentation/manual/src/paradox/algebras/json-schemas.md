@@ -4,11 +4,7 @@
 
 This algebra provides vocabulary to define JSON schemas of data types.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra-json-schema" % "$version$"
-~~~
-@@@
+@coordinates[algebra-json-schema]
 
 @scaladoc[API documentation](endpoints4s.algebra.JsonSchemas)
 
@@ -212,11 +208,7 @@ Note that schema names [must be valid URLs](https://github.com/OAI/OpenAPI-Speci
 The module presented in this section uses Shapeless to generically derive JSON schemas
 for algebraic data type definitions (sealed traits and case classes).
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "json-schema-generic" % "$version$"
-~~~
-@@@
+@coordinates[json-schema-generic]
 
 @scaladoc[API documentation](endpoints4s.generic.JsonSchemas)
 

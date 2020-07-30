@@ -5,11 +5,7 @@
 This algebra provides vocabulary to describe endpoints whose requests or
 responses are streamed using the “chunked transfer-encoding” supported by HTTP1.1.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.ChunkedEntities)
 
@@ -29,11 +25,7 @@ which is supported by most HTTP 1.1 clients and servers.
 
 ## `ChunkedJsonEntities`
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.ChunkedJsonEntities)
 

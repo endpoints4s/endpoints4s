@@ -3,6 +3,7 @@ import LocalCrossProject._
 import sbtcrossproject.CrossProject
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 import xerial.sbt.Sonatype.GitHubHosting
+import com.lightbend.paradox.markdown.Writer
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
@@ -98,10 +99,12 @@ val manual =
           .withCustomStylesheet("snippets.css")
       },
       (Paradox / paradoxProperties) ++= Map(
-        "version" -> version.value,
+        "version"           -> version.value,
+        "akka-http-version" -> (`akka-http-server` / version).value,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
-        "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/tree/v${version.value}"
+        "github.base_url"   -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
       ),
+      paradoxDirectives += ((_: Writer.Context) => org.endpoints4s.paradox.coordinates.CoordinatesDirective),
       packageDoc / siteSubdirName := "api",
       addMappingsToSiteDir(
         apiDoc / ScalaUnidoc / packageDoc / mappings,

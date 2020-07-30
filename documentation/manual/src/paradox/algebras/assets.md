@@ -2,11 +2,7 @@
 
 This algebra provides vocabulary to define endpoints serving static assets.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.Assets)
 

@@ -4,11 +4,7 @@ Client and server backed by [Play framework](https://www.playframework.com/).
 
 ## Client
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "play-client" % "$version$"
-~~~
-@@@
+@coordinates[play-client]
 
 @scaladoc[API documentation](endpoints4s.play.client.index)
 
@@ -27,11 +23,7 @@ It can be invoked as follows:
 
 ## Server
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "play-server" % "$version$"
-~~~
-@@@
+@coordinates[play-server]
 
 @scaladoc[API documentation](endpoints4s.play.server.index)
 

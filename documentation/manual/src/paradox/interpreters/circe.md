@@ -2,11 +2,7 @@
 
 Builds [Circe](http://circe.github.io/circe/) codecs out of JSON schema definitions.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "json-schema-circe" % "$version$"
-~~~
-@@@
+@coordinates[json-schema-circe]
 
 @scaladoc[API documentation](endpoints4s.circe.JsonSchemas)
 

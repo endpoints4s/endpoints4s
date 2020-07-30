@@ -44,11 +44,7 @@ and `JsonEntitiesFromCodecs`.
 
 ## The `JsonEntities` algebras
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.JsonEntities)
 
@@ -102,11 +98,7 @@ type to a JSON encoder for `A`.
 
 ## `JsonEntitiesFromSchemas`
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.JsonEntitiesFromSchemas)
 
@@ -126,11 +118,7 @@ interpreter), or codecs (by applying a corresponding interpreter for your client
 
 ## `JsonEntitiesFromCodecs`
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "algebra" % "$version$"
-~~~
-@@@
+@coordinates[algebra]
 
 @scaladoc[API documentation](endpoints4s.algebra.JsonEntitiesFromCodecs)
 
@@ -151,16 +139,9 @@ which aligns the `JsonCodec` type with Play’s `Format` type:
 
 The Circe analogous is @scaladoc[`endpoints4s.algebra.circe.JsonEntitiesFromCodecs`](endpoints4s.algebra.circe.JsonEntitiesFromCodecs).
 
-These algebras are provided by the following dependencies:
+These algebras are provided by the following artifacts:
 
-@@@vars
-~~~ scala
-// Provides endpoints4s.algebra.circe.JsonEntitiesFromCodecs
-"org.endpoints4s" %% "algebra-circe" % "$version$"
-// Provides endpoints4s.algebra.playjson.JsonEntitiesFromCodecs
-"org.endpoints4s" %% "algebra-playjson" % "$version$"
-~~~
-@@@
+@coordinates[algebra-circe] @coordinates[algebra-playjson]
 
 To interpret endpoints defined with such algebras, apply any interpreter named
 `JsonEntitiesFromCodecs` that matches your

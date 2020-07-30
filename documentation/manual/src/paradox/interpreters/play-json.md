@@ -2,11 +2,7 @@
 
 Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions.
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "json-schema-playjson" % "$version$"
-~~~
-@@@
+@coordinates[json-schema-playjson]
 
 @scaladoc[API documentation](endpoints4s.playjson.JsonSchemas)
 

@@ -2,11 +2,7 @@
 
 Client backed by [sttp](https://github.com/softwaremill/sttp).
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "sttp-client" % "$version$"
-~~~
-@@@
+@coordinates[sttp-client]
 
 @scaladoc[API documentation](endpoints4s.sttp.client.index)
 

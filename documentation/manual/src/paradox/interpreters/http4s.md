@@ -4,11 +4,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 ## Client
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "http4s-client" % "$version$"
-~~~
-@@@
+@coordinates[http4s-client]
 
 @scaladoc[API documentation](endpoints4s.http4s.client.index)
 
@@ -29,11 +25,7 @@ It can be invoked as follows using `IO`:
 
 ## Server
 
-@@@vars
-~~~ scala
-"org.endpoints4s" %% "http4s-server" % "$version$"
-~~~
-@@@
+@coordinates[http4s-server]
 
 @scaladoc[API documentation](endpoints4s.http4s.server.index)
 
