@@ -1,4 +1,6 @@
-package endpoints4s.algebra
+package endpoints4s.algebra.server
+
+import endpoints4s.algebra.Assets
 
 trait ServerAssets extends Assets {
 

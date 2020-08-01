@@ -13,7 +13,7 @@ import play.mvc.Http.HeaderNames
   *
   * @group interpreters
   */
-trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
+trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /**
     * @param assetPath Path of the requested asset
@@ -100,29 +100,6 @@ trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
       contentType: Option[String],
       isGzipped: Boolean
   ) extends AssetResponse
-
-  def notFoundAssetResponse = AssetNotFound
-
-  type AssetContent = Source[ByteString, _]
-
-  def foundAssetResponse(
-      content: AssetContent,
-      contentLength: Long,
-      fileName: String,
-      isGzipped: Boolean,
-      isExpired: Boolean,
-      lastModifiedSeconds: Long
-  ) =
-    Found(
-      content,
-      Some(contentLength),
-      playComponents.fileMimeTypes
-        .forFileName(fileName)
-        .orElse(Some(ContentTypes.BINARY)),
-      isGzipped
-    )
-
-  override def noopAssetContent = Source.empty
 
   /**
     * Decodes and encodes an [[AssetPath]] into a URL path.
@@ -222,17 +199,17 @@ trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
         maybeAsset
           .map {
             case (stream, isGzipped) =>
-              foundAssetResponse(
-                content = StreamConverters.fromInputStream(() => stream),
-                contentLength = stream.available().toLong,
-                fileName = assetInfo.name,
-                isGzipped = isGzipped,
-                isExpired = true,
-                lastModifiedSeconds = 0
+              Found(
+                StreamConverters.fromInputStream(() => stream),
+                Some(stream.available().toLong),
+                playComponents.fileMimeTypes
+                  .forFileName(assetInfo.name)
+                  .orElse(Some(ContentTypes.BINARY)),
+                isGzipped
               )
           }
-          .getOrElse(notFoundAssetResponse)
-      } else notFoundAssetResponse
+          .getOrElse(AssetNotFound)
+      } else AssetNotFound
     }
 
 }

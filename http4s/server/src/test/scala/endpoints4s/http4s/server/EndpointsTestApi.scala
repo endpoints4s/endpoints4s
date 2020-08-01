@@ -17,4 +17,10 @@ class EndpointsTestApi(
     with algebra.SumTypedEntitiesTestApi {
 
   implicit def userCodec = userJsonSchema
+
+  type AssetContent = fs2.Stream[Effect, Byte]
+
+  def noopAssetContent: fs2.Stream[Effect, Byte] = fs2.Stream.empty
+
+  def notFoundAssetResponse: AssetResponse = AssetResponse.NotFound
 }

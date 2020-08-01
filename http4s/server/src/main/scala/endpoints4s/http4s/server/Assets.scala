@@ -9,7 +9,7 @@ import fs2.io._
 import org.http4s.headers._
 import org.http4s._
 
-trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
+trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   val DefaultBufferSize = 10240
 
   case class AssetRequest(
@@ -33,12 +33,8 @@ trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
     ) extends AssetResponse
   }
 
-  type AssetContent = fs2.Stream[Effect, Byte]
-
-  def notFoundAssetResponse = AssetResponse.NotFound
-
   def foundAssetResponse(
-      content: AssetContent,
+      content: fs2.Stream[Effect, Byte],
       contentLength: Long,
       fileName: String,
       isGzipped: Boolean,
@@ -53,8 +49,6 @@ trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
       isGzipped,
       isExpired
     )
-
-  def noopAssetContent = fs2.Stream.empty
 
   def assetSegments(
       name: String,
@@ -182,6 +176,6 @@ trait Assets extends algebra.ServerAssets with EndpointsWithCustomErrors {
               lastModifiedSeconds = lastModifiedSeconds
             )
         }
-        .getOrElse(notFoundAssetResponse)
+        .getOrElse(AssetResponse.NotFound)
 
 }
