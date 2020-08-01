@@ -7,6 +7,7 @@ import akka.http.scaladsl.model.DateTime
 import akka.http.scaladsl.model.ContentType
 import akka.http.scaladsl.model.MediaTypes
 import akka.http.scaladsl.model.headers.HttpEncodings
+
 trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAssetTest[T] {
 
   "Assets interpreter" should {

@@ -33,7 +33,7 @@ class ServerInterpreterTest
   implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
   implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
-  val serverApi = new EndpointsTestApi(Map.empty)
+  val serverApi = new EndpointsTestApi
 
   def decodeUrl[A](url: serverApi.Url[A])(rawValue: String): DecodedUrl[A] = {
     val uri =

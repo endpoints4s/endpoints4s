@@ -12,6 +12,9 @@ import org.http4s._
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   val DefaultBufferSize = 10240
 
+  // Digests are unsupported.
+  def digests: Map[String, String] = Map.empty
+
   case class AssetRequest(
       assetPath: AssetPath,
       isGzipSupported: Boolean,

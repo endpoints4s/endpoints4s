@@ -3,9 +3,8 @@ package endpoints4s.http4s.server
 import cats.effect.IO
 import endpoints4s.algebra
 
-class EndpointsTestApi(
-    val digests: Map[String, String]
-) extends Endpoints[IO]
+class EndpointsTestApi
+    extends Endpoints[IO]
     with BasicAuthentication
     with JsonEntitiesFromSchemas
     with Assets
