@@ -18,7 +18,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       ifModifiedSince: Option[HttpDate]
   )
 
-  case class AssetPath(path: Seq[String], digest: Option[String], name: String)
+  case class AssetPath(path: Seq[String], name: String)
 
   sealed trait AssetResponse
   object AssetResponse {
@@ -55,13 +55,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       docs: Documentation
   ): Path[AssetPath] = {
     case p :+ s =>
-      val i = s.lastIndexOf('-')
-      val assetPath =
-        if (i > 0) {
-          val (resourceName, digest) = s.splitAt(i)
-          AssetPath(p, Some(digest.drop(1)), resourceName)
-        } else AssetPath(p, None, s)
-      Some((Valid(assetPath), Nil))
+      Some((Valid(AssetPath(p, s)), Nil))
     case Nil => None
   }
 
@@ -127,17 +121,9 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
     def nonGzippedResourceUrl = Option(getClass.getResource(resourcePath)).map((_, false))
     def gzippedResourceUrl = Option(getClass.getResource(s"$resourcePath.gz")).map((_, true))
-    def resourceUrl =
-      if (assetRequest.isGzipSupported) gzippedResourceUrl.orElse(nonGzippedResourceUrl)
-      else nonGzippedResourceUrl
 
-    def hasDigest(digest: String) = digests.get(path).contains(digest)
-
-    assetPath.digest match {
-      case None                                => resourceUrl
-      case Some(digest) if (hasDigest(digest)) => resourceUrl
-      case Some(digest)                        => None
-    }
+    if (assetRequest.isGzipSupported) gzippedResourceUrl.orElse(nonGzippedResourceUrl)
+    else nonGzippedResourceUrl
   }
 
   private def toMediaType(name: String): Option[MediaType] =

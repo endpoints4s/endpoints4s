@@ -13,7 +13,7 @@ trait AssetsResourcesTest {
 
     "respond Found for existing asset" in {
       val request = serverApi.AssetRequest(
-        serverApi.AssetPath(Seq(), None, "asset1.txt"),
+        serverApi.AssetPath(Seq(), "asset1.txt"),
         false,
         None
       )
@@ -24,7 +24,7 @@ trait AssetsResourcesTest {
 
     "respond NotFound for non-existing asset" in {
       val request = serverApi.AssetRequest(
-        serverApi.AssetPath(Seq(), None, "asset-non-existing.txt"),
+        serverApi.AssetPath(Seq(), "asset-non-existing.txt"),
         false,
         None
       )
@@ -35,7 +35,7 @@ trait AssetsResourcesTest {
 
     "evaluate If-Modified-Since header (rfc7232)" in {
       val request = serverApi.AssetRequest(
-        serverApi.AssetPath(Seq(), None, "asset1.txt"),
+        serverApi.AssetPath(Seq(), "asset1.txt"),
         false,
         Some(HttpDate.MaxValue)
       )
