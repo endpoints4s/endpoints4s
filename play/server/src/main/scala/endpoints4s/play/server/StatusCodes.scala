@@ -21,7 +21,7 @@ trait StatusCodes extends algebra.StatusCodes {
   override def AlreadyReported = Results.Status(208)
   override def IMUsed = Results.Status(226)
 
-  def NotModified = Results.Status(304)
+  override def NotModified = Results.Status(304)
 
   def BadRequest = Results.BadRequest
   def Unauthorized = Results.Unauthorized

@@ -23,7 +23,7 @@ trait StatusCodes extends algebra.StatusCodes {
   override def AlreadyReported = Http4sStatus.AlreadyReported
   override def IMUsed = Http4sStatus.IMUsed
 
-  def NotModified = Http4sStatus.NotModified
+  override def NotModified = Http4sStatus.NotModified
   def BadRequest = Http4sStatus.BadRequest
   def Unauthorized = Http4sStatus.Unauthorized
   override def PaymentRequired = Http4sStatus.PaymentRequired

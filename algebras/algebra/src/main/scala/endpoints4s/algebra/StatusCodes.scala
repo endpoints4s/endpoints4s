@@ -49,7 +49,7 @@ trait StatusCodes {
 
   // 3xx Redirection
   /** @group operations */
-  def NotModified: StatusCode
+  def NotModified: StatusCode = unsupportedInterpreter("1.2.0")
 
   // 4xx Client Error
   /**
