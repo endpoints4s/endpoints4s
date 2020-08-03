@@ -20,6 +20,8 @@ trait StatusCodes extends algebra.StatusCodes {
   override def AlreadyReported = 208
   override def IMUsed = 226
 
+  override def NotModified = 304
+
   def BadRequest = 400
   def Unauthorized = 401
   override def PaymentRequired = 402

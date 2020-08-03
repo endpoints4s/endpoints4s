@@ -23,6 +23,8 @@ trait StatusCodes extends algebra.StatusCodes {
   override def AlreadyReported = AkkaStatusCodes.AlreadyReported
   override def IMUsed = AkkaStatusCodes.IMUsed
 
+  override def NotModified = AkkaStatusCodes.NotModified
+
   def BadRequest = AkkaStatusCodes.BadRequest
   def Unauthorized = AkkaStatusCodes.Unauthorized
   override def PaymentRequired = AkkaStatusCodes.PaymentRequired

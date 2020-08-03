@@ -18,15 +18,22 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
+import endpoints4s.algebra.server.AssetsTestSuite
+import cats.effect.Blocker
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
     with TextEntitiesTestSuite[EndpointsTestApi]
-    with SumTypedEntitiesTestSuite[EndpointsTestApi] {
+    with SumTypedEntitiesTestSuite[EndpointsTestApi]
+    with AssetsTestSuite[EndpointsTestApi]
+    with AssetsResourcesTest {
 
-  val serverApi = new EndpointsTestApi()
+  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
+  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+
+  val serverApi = new EndpointsTestApi
 
   def decodeUrl[A](url: serverApi.Url[A])(rawValue: String): DecodedUrl[A] = {
     val uri =
@@ -48,8 +55,7 @@ class ServerInterpreterTest
       try socket.getLocalPort
       finally if (socket != null) socket.close()
     }
-    implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-    implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
+
     val service = HttpRoutes.of[IO](endpoint.implementedBy(request2response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
@@ -58,6 +64,20 @@ class ServerInterpreterTest
         .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
   }
+
+  def assetsResources(pathPrefix: Option[String]) =
+    Blocker[IO]
+      .use(blocker => serverApi.Effect.point(serverApi.assetsResources(blocker, pathPrefix)))
+      .unsafeRunSync()
+
+  def serveAssetsEndpoint(
+      endpoint: serverApi.Endpoint[
+        serverApi.AssetRequest,
+        serverApi.AssetResponse
+      ],
+      response: => serverApi.AssetResponse
+  )(runTests: Int => Unit): Unit =
+    serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
 
   def serveEndpoint[Resp](
       endpoint: serverApi.Endpoint[_, Resp],
