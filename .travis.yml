@@ -45,8 +45,7 @@ jobs:
     - stage: test
       scala: 0.26.0-RC1
       script: sbt "++ $TRAVIS_SCALA_VERSION ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
-
-    - stage: binary compatibility
+    - stage: test
       script:
         - sbt compatibilityCheck
 
