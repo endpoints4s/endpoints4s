@@ -28,11 +28,11 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
         .decode(req, strict = true)
         .leftWiden[Throwable]
         .rethrowT
-        .map { value =>
+        .flatMap { value =>
           stringCodec(codec)
             .decode(value) match {
-            case Valid(a)     => Right(a)
-            case inv: Invalid => Left(handleClientErrors(inv))
+            case Valid(a)     => Effect.pure(Right(a))
+            case inv: Invalid => handleClientErrorsEffect(inv).map(Left.apply)
           }
         }
 
