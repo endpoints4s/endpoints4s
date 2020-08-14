@@ -32,7 +32,7 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
           stringCodec(codec)
             .decode(value) match {
             case Valid(a)     => Effect.pure(Right(a))
-            case inv: Invalid => handleClientErrorsEffect(inv).map(Left.apply)
+            case inv: Invalid => handleClientErrors(inv).map(Left.apply)
           }
         }
 
