@@ -20,7 +20,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
   val streamingPort: Int = findOpenPort
 
   def serving[A](route: Route)(thunk: => Unit): Unit = {
-    whenReady(Http().bindAndHandle(route, "localhost", streamingPort)) { binding =>
+    whenReady(Http().newServerAt("localhost", streamingPort).bindFlow(route)) { binding =>
       try {
         thunk
       } finally {

@@ -18,7 +18,7 @@ class CounterTest extends AsyncFreeSpec with BeforeAndAfterAll {
   val routes = CounterServer.routes ~ DocumentationServer.routes
   val interface = "0.0.0.0"
   val port = findOpenPort()
-  val server = Http().bindAndHandle(routes, interface, port)
+  val server = Http().newServerAt(interface, port).bindFlow(routes)
 
   override protected def afterAll(): Unit = {
     Await.result(

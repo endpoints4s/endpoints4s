@@ -8,7 +8,7 @@ import akka.http.scaladsl.server.Directives._
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("server-system")
   val routes = CounterServer.routes ~ DocumentationServer.routes
-  Http().bindAndHandle(routes, "0.0.0.0", 8000)
+  Http().newServerAt("0.0.0.0", 8000).bindFlow(routes)
 }
 
 // Additional route for serving the OpenAPI documentation
