@@ -284,7 +284,7 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.9.2",
+        "com.raquo" %%% "laminar" % "0.10.2",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
       ),
