@@ -12,7 +12,7 @@ import endpoints4s.{Codec, algebra}
 trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with EndpointsWithCustomErrors {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]): RequestEntity[A] = { (a, req) =>
-    req.copy(entity =
+    req.withEntity(
       HttpEntity(
         ContentTypes.`application/json`,
         stringCodec(codec).encode(a)

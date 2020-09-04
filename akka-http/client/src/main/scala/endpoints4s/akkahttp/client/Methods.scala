@@ -9,15 +9,15 @@ import endpoints4s.algebra
 trait Methods extends algebra.Methods {
   type Method = HttpRequest => HttpRequest
 
-  def Get = _.copy(method = HttpMethods.GET)
+  def Get = _.withMethod(HttpMethods.GET)
 
-  def Post = _.copy(method = HttpMethods.POST)
+  def Post = _.withMethod(HttpMethods.POST)
 
-  def Put = _.copy(method = HttpMethods.PUT)
+  def Put = _.withMethod(HttpMethods.PUT)
 
-  def Delete = _.copy(method = HttpMethods.DELETE)
+  def Delete = _.withMethod(HttpMethods.DELETE)
 
-  def Options = _.copy(method = HttpMethods.OPTIONS)
+  def Options = _.withMethod(HttpMethods.OPTIONS)
 
-  def Patch = _.copy(method = HttpMethods.PATCH)
+  def Patch = _.withMethod(HttpMethods.PATCH)
 }

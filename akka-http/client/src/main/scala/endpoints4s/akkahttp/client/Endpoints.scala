@@ -123,7 +123,7 @@ trait EndpointsWithCustomErrors
   lazy val emptyRequest: RequestEntity[Unit] = (_, req) => req
 
   lazy val textRequest: (String, HttpRequest) => HttpRequest =
-    (body, request) => request.copy(entity = HttpEntity(body))
+    (body, request) => request.withEntity(HttpEntity(body))
 
   def choiceRequestEntity[A, B](
       requestEntityA: RequestEntity[A],
