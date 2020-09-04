@@ -34,7 +34,8 @@ ThisBuild / compatibilityRules ++= Seq(
   "org.typelevel" %%% "cats*" % "semver",
   "co.fs2" %%% "fs2*" % "semver",
   "com.typesafe.play" %%% "play-json" % "semver",
-  "com.typesafe.play" %%% "play-functional" % "semver"
+  "com.typesafe.play" %%% "play-functional" % "semver",
+  "com.typesafe.akka" %% "akka*" % "semver"
 )
 
 ThisBuild / compatibilityIgnored += "joda-time" % "joda-time"
