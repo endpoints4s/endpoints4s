@@ -36,7 +36,7 @@ class ServerInterpreterTest
       finally if (socket != null) socket.close()
     }
     val serverBinding: Future[Http.ServerBinding] =
-      Http().bindAndHandle(route, "localhost", port)
+      Http().newServerAt("localhost", port).bindFlow(route)
 
     Await.result(serverBinding, 10.seconds)
     try {

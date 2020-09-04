@@ -35,6 +35,7 @@ ThisBuild / compatibilityRules ++= Seq(
   "co.fs2" %%% "fs2*" % "semver",
   "com.typesafe.play" %%% "play-json" % "semver",
   "com.typesafe.play" %%% "play-functional" % "semver",
+  "com.typesafe.akka" %% "akka*" % "semver",
   "org.scala-js" % "scalajs-dom_sjs1_2.13" % "semver" // See https://github.com/scalacenter/sbt-version-policy/issues/33
 )
 
