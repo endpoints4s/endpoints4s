@@ -107,16 +107,16 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
                 try {
                   implementation(a)
                     .map(response)
-                    .recover {
+                    .recoverWith {
                       case NonFatal(t) => handleServerError(t)
                     }
                 } catch {
-                  case NonFatal(t) => handleServerError(t).pure[Effect]
+                  case NonFatal(t) => handleServerError(t)
                 }
               case Left(errorResponse) => errorResponse.pure[Effect]
             })
         } catch {
-          case NonFatal(t) => Some(handleServerError(t).pure[Effect])
+          case NonFatal(t) => Some(handleServerError(t))
         }
       }
       Function.unlift(handler)
@@ -258,10 +258,14 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       ): Request[B] =
         Function.unlift(http4sRequest =>
           fa.lift(http4sRequest)
-            .map(_.map(_.flatMap(f(_) match {
-              case Valid(value)     => Right(value)
-              case invalid: Invalid => Left(handleClientErrors(invalid))
-            })))
+            .map(_.flatMap {
+              case Left(response) => Effect.pure(response.asLeft)
+              case Right(a) =>
+                f(a) match {
+                  case Valid(value)     => Effect.pure(value.asRight)
+                  case invalid: Invalid => handleClientErrors(invalid).map(_.asLeft)
+                }
+            })
         )
     }
 
@@ -324,7 +328,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
           .map[Validated[(U, H)]](_.zip(headers(http4sRequest.headers)))
           .map {
             case Valid(urlAndHeaders) => entity(urlAndHeaders)(http4sRequest)
-            case inv: Invalid         => Effect.pure(Left(handleClientErrors(inv)))
+            case inv: Invalid         => handleClientErrors(inv).map(_.asLeft)
           }
       } else None
     }
@@ -338,10 +342,15 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
           contramap: To => From
       ): RequestEntity[To] =
         body =>
-          f(body).map(_.flatMap(map(_) match {
-            case Valid(value)     => Right(value)
-            case invalid: Invalid => Left(handleClientErrors(invalid))
-          }))
+          f(body).flatMap {
+            case Left(response) => Effect.pure(response.asLeft[To])
+            case Right(from) =>
+              map(from) match {
+                case Valid(response)  => Effect.pure(response.asRight)
+                case invalid: Invalid => handleClientErrors(invalid).map(_.asLeft)
+              }
+          }
+
     }
 
   implicit def requestHeadersPartialInvariantFunctor
@@ -371,8 +380,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     *
     * This method can be overridden to customize the error reporting logic.
     */
-  def handleClientErrors(invalid: Invalid): http4s.Response[Effect] =
-    clientErrorsResponse(invalidToClientErrors(invalid))
+  def handleClientErrors(invalid: Invalid): Effect[http4s.Response[Effect]] =
+    Effect.pure(clientErrorsResponse(invalidToClientErrors(invalid)))
 
   /**
     * This method is called by ''endpoints'' when an exception is thrown during
@@ -383,7 +392,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     *
     * This method can be overridden to customize the error reporting logic.
     */
-  def handleServerError(throwable: Throwable): http4s.Response[Effect] =
-    serverErrorResponse(throwableToServerError(throwable))
+  def handleServerError(throwable: Throwable): Effect[http4s.Response[Effect]] =
+    Effect.pure(serverErrorResponse(throwableToServerError(throwable)))
 
 }

@@ -10,3 +10,8 @@ node_modules/
 .vscode/
 
 project/metals.sbt
+
+#direnv, niv and lorri
+.envrc
+shell.nix
+nix
