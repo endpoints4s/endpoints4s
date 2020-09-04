@@ -16,7 +16,11 @@ val `play-server` =
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-netty-server" % playVersion).withDottyCompat(scalaVersion.value),
         ("com.typesafe.play" %% "play-test" % playVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value)
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value),
+        // Override transitive dependencies of Play
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
