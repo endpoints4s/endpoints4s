@@ -38,8 +38,8 @@ trait Urls extends algebra.Urls with StatusCodes {
           g: B => A
       ): Path[B] =
         segments =>
-          fa.validate(segments).map {
-            case (validA, ss) => (validA.flatMap(f), ss)
+          fa.validate(segments).map { case (validA, ss) =>
+            (validA.flatMap(f), ss)
           }
       override def xmap[A, B](fa: Path[A], f: A => B, g: B => A): Path[B] =
         segments => fa.validate(segments).map { case (validA, ss) => (validA.map(f), ss) }
@@ -53,13 +53,12 @@ trait Urls extends algebra.Urls with StatusCodes {
 
     final def directive: Directive1[A] = {
       (Directives.path(Directives.Segments) & Directives.parameterMultiMap)
-        .tflatMap {
-          case (segments, query) =>
-            validateUrl(segments, query) match {
-              case None               => Directives.reject
-              case Some(inv: Invalid) => handleClientErrors(inv)
-              case Some(Valid(a))     => Directives.provide(a)
-            }
+        .tflatMap { case (segments, query) =>
+          validateUrl(segments, query) match {
+            case None               => Directives.reject
+            case Some(inv: Invalid) => handleClientErrors(inv)
+            case Some(Valid(a))     => Directives.provide(a)
+          }
         }
     }
   }
@@ -251,12 +250,10 @@ trait Urls extends algebra.Urls with StatusCodes {
       tupler: Tupler[A, B]
   ): Path[tupler.Out] =
     (p1: List[String]) => {
-      first.validate(p1).flatMap {
-        case (validA, p2) =>
-          second.validate(p2).map {
-            case (validB, p3) =>
-              (validA.zip(validB)(tupler), p3)
-          }
+      first.validate(p1).flatMap { case (validA, p2) =>
+        second.validate(p2).map { case (validB, p3) =>
+          (validA.zip(validB)(tupler), p3)
+        }
       }
     }
 
@@ -268,11 +265,10 @@ trait Urls extends algebra.Urls with StatusCodes {
       dir2: Directive1[T2]
   )(implicit tupler: Tupler[T1, T2]): Directive1[tupler.Out] = {
     Directive[Tuple1[tupler.Out]] { inner =>
-      dir1.tapply {
-        case Tuple1(prefix) =>
-          dir2.tapply {
-            case Tuple1(suffix) => inner(Tuple1(tupler(prefix, suffix)))
-          }
+      dir1.tapply { case Tuple1(prefix) =>
+        dir2.tapply { case Tuple1(suffix) =>
+          inner(Tuple1(tupler(prefix, suffix)))
+        }
       }
     }
   }

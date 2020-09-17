@@ -799,50 +799,49 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         record.example,
         record.title
       )
-    } {
-      case (tag, coprod) =>
-        val discriminatorField =
-          Schema.Property(
-            coprod.discriminatorName,
-            Schema
-              .Enum(
-                Schema.simpleString,
-                List(tag),
+    } { case (tag, coprod) =>
+      val discriminatorField =
+        Schema.Property(
+          coprod.discriminatorName,
+          Schema
+            .Enum(
+              Schema.simpleString,
+              List(tag),
+              None,
+              Some(ujson.Str(tag)),
+              None
+            ),
+          isRequired = true,
+          description = None
+        )
+
+      (coprod.name, coproductEncoding) match {
+        case (Some(coproductName), CoproductEncoding.OneOfWithBaseRef) =>
+          Schema.AllOf(
+            schemas = List(
+              Schema.Reference(coproductName, None, None),
+              Schema.Object(
+                discriminatorField :: fieldsSchema,
+                additionalProperties,
                 None,
-                Some(ujson.Str(tag)),
+                None,
                 None
-              ),
-            isRequired = true,
-            description = None
+              )
+            ),
+            record.description,
+            record.example,
+            record.title
           )
 
-        (coprod.name, coproductEncoding) match {
-          case (Some(coproductName), CoproductEncoding.OneOfWithBaseRef) =>
-            Schema.AllOf(
-              schemas = List(
-                Schema.Reference(coproductName, None, None),
-                Schema.Object(
-                  discriminatorField :: fieldsSchema,
-                  additionalProperties,
-                  None,
-                  None,
-                  None
-                )
-              ),
-              record.description,
-              record.example,
-              record.title
-            )
-
-          case _ =>
-            Schema.Object(
-              discriminatorField :: fieldsSchema,
-              additionalProperties,
-              record.description,
-              record.example,
-              record.title
-            )
-        }
+        case _ =>
+          Schema.Object(
+            discriminatorField :: fieldsSchema,
+            additionalProperties,
+            record.description,
+            record.example,
+            record.title
+          )
+      }
     }
   }
 
@@ -851,9 +850,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       referencedSchemas: Set[String]
   ): Schema = {
     val alternativesSchemas =
-      coprod.alternatives.map {
-        case (tag, record) =>
-          tag -> toSchema(record, Some(tag -> coprod), referencedSchemas)
+      coprod.alternatives.map { case (tag, record) =>
+        tag -> toSchema(record, Some(tag -> coprod), referencedSchemas)
       }
     Schema.OneOf(
       DiscriminatedAlternatives(coprod.discriminatorName, alternativesSchemas),

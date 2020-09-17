@@ -281,8 +281,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           def decode(
               segments: List[String]
           ): Option[(Validated[B], List[String])] =
-            fa.decode(segments).map {
-              case (validA, rs) => (validA.flatMap(f), rs)
+            fa.decode(segments).map { case (validA, rs) =>
+              (validA.flatMap(f), rs)
             }
           def encode(b: B): String = fa.encode(g(b))
         }
@@ -349,12 +349,10 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
   ): Path[tupler.Out] =
     new Path[tupler.Out] {
       def decode(segments: List[String]) =
-        first.decode(segments).flatMap {
-          case (validA, segments2) =>
-            second.decode(segments2).map {
-              case (validB, segments3) =>
-                (validA.zip(validB)(tupler), segments3)
-            }
+        first.decode(segments).flatMap { case (validA, segments2) =>
+          second.decode(segments2).map { case (validB, segments3) =>
+            (validA.zip(validB)(tupler), segments3)
+          }
         }
       def encode(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)

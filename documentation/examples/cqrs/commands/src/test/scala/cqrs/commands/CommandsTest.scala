@@ -43,8 +43,8 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
 
     "create a new meter" in {
       client.command(CreateMeter("electricity")).map { maybeEvent =>
-        assert(maybeEvent.collect {
-          case StoredEvent(_, MeterCreated(_, "electricity")) => ()
+        assert(maybeEvent.collect { case StoredEvent(_, MeterCreated(_, "electricity")) =>
+          ()
         }.nonEmpty)
       }
     }

@@ -23,10 +23,9 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
     }
@@ -36,10 +35,9 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 404)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 404)
+          ()
         }
       }
     }
@@ -57,12 +55,11 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(
-              response.entity.contentLengthOption.contains(contentLength)
-            )
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(
+            response.entity.contentLengthOption.contains(contentLength)
+          )
+          ()
         }
       }
     }
@@ -79,18 +76,17 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(
-              response
-                .header[`Content-Type`]
-                .contains(
-                  `Content-Type`(
-                    ContentType.WithMissingCharset(MediaTypes.`text/plain`)
-                  )
+        whenReady(send(request)) { case (response, entity) =>
+          assert(
+            response
+              .header[`Content-Type`]
+              .contains(
+                `Content-Type`(
+                  ContentType.WithMissingCharset(MediaTypes.`text/plain`)
                 )
-            )
-            ()
+              )
+          )
+          ()
         }
       }
     }
@@ -108,14 +104,13 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
 
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(
-              response
-                .header[`Content-Encoding`]
-                .contains(`Content-Encoding`(HttpEncodings.gzip))
-            )
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(
+            response
+              .header[`Content-Encoding`]
+              .contains(`Content-Encoding`(HttpEncodings.gzip))
+          )
+          ()
         }
       }
     }
@@ -132,10 +127,9 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 304)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 304)
+          ()
         }
       }
     }
@@ -153,14 +147,13 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(
-              response
-                .header[`Last-Modified`]
-                .contains(`Last-Modified`(DateTime(lastModifiedSeconds * 1000)))
-            )
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(
+            response
+              .header[`Last-Modified`]
+              .contains(`Last-Modified`(DateTime(lastModifiedSeconds * 1000)))
+          )
+          ()
         }
       }
     }

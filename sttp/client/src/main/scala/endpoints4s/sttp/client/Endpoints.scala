@@ -117,12 +117,12 @@ trait EndpointsWithCustomErrors[R[_]]
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = {
-    case (_, req) => req
+  lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) =>
+    req
   }
 
-  lazy val textRequest: RequestEntity[String] = {
-    case (bodyValue, request) => request.body(bodyValue)
+  lazy val textRequest: RequestEntity[String] = { case (bodyValue, request) =>
+    request.body(bodyValue)
   }
 
   def choiceRequestEntity[A, B](
@@ -275,8 +275,8 @@ trait EndpointsWithCustomErrors[R[_]]
     new Response[Res] {
       def decodeResponse(response: sttp.Response[String]) = {
         if (response.code == statusCode) {
-          val headersMap = response.headers.iterator.map {
-            case (k, v) => (k.toLowerCase, v)
+          val headersMap = response.headers.iterator.map { case (k, v) =>
+            (k.toLowerCase, v)
           }.toMap
           headers(headersMap) match {
             case Valid(b) =>

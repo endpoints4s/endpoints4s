@@ -107,8 +107,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
                 try {
                   implementation(a)
                     .map(response)
-                    .recoverWith {
-                      case NonFatal(t) => handleServerError(t)
+                    .recoverWith { case NonFatal(t) =>
+                      handleServerError(t)
                     }
                 } catch {
                   case NonFatal(t) => handleServerError(t)
@@ -306,12 +306,11 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       tuplerUB: Tupler.Aux[UrlP, BodyP, UrlAndBodyPTupled],
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] =
-    extractUrlAndHeaders(method, url, headers) {
-      case (u, h) =>
-        http4sRequest =>
-          entity(http4sRequest).map(
-            _.map(body => tuplerUBH(tuplerUB(u, body), h))
-          )
+    extractUrlAndHeaders(method, url, headers) { case (u, h) =>
+      http4sRequest =>
+        entity(http4sRequest).map(
+          _.map(body => tuplerUBH(tuplerUB(u, body), h))
+        )
     }
 
   private[server] def extractUrlAndHeaders[U, H, E](

@@ -250,9 +250,8 @@ trait EndpointsWithCustomErrors
         c => Valid(c)
       )
     val matchDirective = methodDirective & url.directive & headersDirective
-    matchDirective.tflatMap {
-      case (_, a, c) =>
-        entity.map(b => tuplerABC(tuplerAB(a, b), c))
+    matchDirective.tflatMap { case (_, a, c) =>
+      entity.map(b => tuplerABC(tuplerAB(a, b), c))
     }
   }
 

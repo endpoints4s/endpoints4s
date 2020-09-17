@@ -20,15 +20,14 @@ trait TextEntitiesTestSuite[T <: TextEntitiesTestApi] extends ServerTestBase[T] 
           uri = s"http://localhost:$port/text",
           entity = HttpEntity(ContentTypes.`text/plain(UTF-8)`, "Oekraïene")
         )
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            assert(
-              response.entity.contentType.mediaType == MediaTypes.`text/plain`
-            )
-            assert(response.entity.contentType.charsetOption.nonEmpty)
-            assert(decodeEntityAsText(response, entity) == "Oekraïene")
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          assert(
+            response.entity.contentType.mediaType == MediaTypes.`text/plain`
+          )
+          assert(response.entity.contentType.charsetOption.nonEmpty)
+          assert(decodeEntityAsText(response, entity) == "Oekraïene")
+          ()
         }
       }
     }
@@ -43,15 +42,14 @@ trait TextEntitiesTestSuite[T <: TextEntitiesTestApi] extends ServerTestBase[T] 
             "Oekraïene"
           )
         )
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            assert(
-              response.entity.contentType.mediaType == MediaTypes.`text/plain`
-            )
-            assert(response.entity.contentType.charsetOption.nonEmpty)
-            assert(decodeEntityAsText(response, entity) == "Oekraïene")
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          assert(
+            response.entity.contentType.mediaType == MediaTypes.`text/plain`
+          )
+          assert(response.entity.contentType.charsetOption.nonEmpty)
+          assert(decodeEntityAsText(response, entity) == "Oekraïene")
+          ()
         }
       }
     }
@@ -67,10 +65,9 @@ trait TextEntitiesTestSuite[T <: TextEntitiesTestApi] extends ServerTestBase[T] 
             "var x = 'Oekraïene'"
           )
         )
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 415)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 415)
+          ()
         }
       }
     }

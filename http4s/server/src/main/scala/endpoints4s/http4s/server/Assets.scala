@@ -147,23 +147,22 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   )(implicit cs: ContextShift[Effect]): AssetRequest => AssetResponse =
     assetRequest =>
       toResourceUrl(pathPrefix, assetRequest)
-        .map {
-          case (url, isGzipped) =>
-            val urlConnection = url.openConnection
+        .map { case (url, isGzipped) =>
+          val urlConnection = url.openConnection
 
-            val ifModifiedSinceSeconds = assetRequest.ifModifiedSince.map(_.epochSecond)
-            val lastModifiedSeconds = urlConnection.getLastModified / 1000
-            val isExpired =
-              ifModifiedSinceSeconds.map(_ < lastModifiedSeconds).getOrElse(true)
+          val ifModifiedSinceSeconds = assetRequest.ifModifiedSince.map(_.epochSecond)
+          val lastModifiedSeconds = urlConnection.getLastModified / 1000
+          val isExpired =
+            ifModifiedSinceSeconds.map(_ < lastModifiedSeconds).getOrElse(true)
 
-            foundAssetResponse(
-              content = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker),
-              contentLength = urlConnection.getContentLengthLong,
-              fileName = assetRequest.assetPath.name,
-              isGzipped = isGzipped,
-              isExpired = isExpired,
-              lastModifiedSeconds = lastModifiedSeconds
-            )
+          foundAssetResponse(
+            content = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker),
+            contentLength = urlConnection.getContentLengthLong,
+            fileName = assetRequest.assetPath.name,
+            isGzipped = isGzipped,
+            isExpired = isExpired,
+            lastModifiedSeconds = lastModifiedSeconds
+          )
         }
         .getOrElse(AssetResponse.NotFound)
 

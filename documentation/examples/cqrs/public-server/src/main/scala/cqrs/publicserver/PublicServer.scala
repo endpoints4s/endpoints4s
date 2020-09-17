@@ -49,13 +49,12 @@ class PublicServer(
         for {
           maybeEvent <- eventuallyMaybeEvent
           maybeMeter <- Traverse[Option].flatSequence(
-            maybeEvent.collect {
-              case StoredEvent(t, MeterCreated(id, _)) =>
-                //#invocation-find-by-id
-                val maybeMeter: Future[MaybeResource] =
-                  queriesClient.query(FindById(id, after = Some(t)))
-                //#invocation-find-by-id
-                maybeMeter.map(_.value)
+            maybeEvent.collect { case StoredEvent(t, MeterCreated(id, _)) =>
+              //#invocation-find-by-id
+              val maybeMeter: Future[MaybeResource] =
+                queriesClient.query(FindById(id, after = Some(t)))
+              //#invocation-find-by-id
+              maybeMeter.map(_.value)
             }
           )
           meter <- maybeMeter.fold[Future[Meter]](
@@ -63,22 +62,21 @@ class PublicServer(
           )(Future.successful)
         } yield meter
       },
-      addRecord.implementedByAsync {
-        case (id, addData) =>
-          for {
-            maybeEvent <- commandsClient.command(
-              AddRecord(id, addData.date, addData.value)
-            )
-            findMeter =
-              (evt: StoredEvent) =>
-                queriesClient
-                  .query(FindById(id, after = Some(evt.timestamp)))
-                  .map(_.value)
-            maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
-            meter <- maybeMeter.fold[Future[Meter]](
-              Future.failed(new NoSuchElementException)
-            )(Future.successful)
-          } yield meter
+      addRecord.implementedByAsync { case (id, addData) =>
+        for {
+          maybeEvent <- commandsClient.command(
+            AddRecord(id, addData.date, addData.value)
+          )
+          findMeter =
+            (evt: StoredEvent) =>
+              queriesClient
+                .query(FindById(id, after = Some(evt.timestamp)))
+                .map(_.value)
+          maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
+          meter <- maybeMeter.fold[Future[Meter]](
+            Future.failed(new NoSuchElementException)
+          )(Future.successful)
+        } yield meter
       }
     )
 

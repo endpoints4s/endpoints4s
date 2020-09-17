@@ -30,14 +30,13 @@ trait EndpointsWithCustomErrors
     val items =
       endpoints
         .groupBy(_.path)
-        .map {
-          case (k, es) =>
-            (
-              k,
-              es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
-                PathItem(item.operations ++ e2.item.operations)
-              }
-            )
+        .map { case (k, es) =>
+          (
+            k,
+            es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
+              PathItem(item.operations ++ e2.item.operations)
+            }
+          )
         }
     val components = Components(
       schemas = captureSchemas(endpoints),
@@ -57,9 +56,8 @@ trait EndpointsWithCustomErrors
     def withSecurity(
         securityRequirements: SecurityRequirement*
     ): DocumentedEndpoint = {
-      copy(item = PathItem(item.operations.map {
-        case (verb, operation) =>
-          verb -> operation.withSecurity(securityRequirements.toList)
+      copy(item = PathItem(item.operations.map { case (verb, operation) =>
+        verb -> operation.withSecurity(securityRequirements.toList)
       }))
     }
   }
@@ -136,39 +134,37 @@ trait EndpointsWithCustomErrors
         responses,
         docs.tags,
         security = Nil, // might be refined later by specific interpreters
-        docs.callbacks.map {
-          case (event, callbacks) =>
-            val items = callbacks.map {
-              case (urlPattern, callback) =>
-                val method = callback.method.toString.toLowerCase
-                val requestBody =
-                  RequestBody(callback.requestDocs, callback.entity.value)
-                val responses =
-                  callback.response.value
-                    .map(r =>
-                      r.status.toString() -> Response(
-                        r.documentation,
-                        responseHeaders(r.headers),
-                        r.content
-                      )
-                    )
-                    .toMap
-                val callbackOperation =
-                  Operation(
-                    None,
-                    None,
-                    None,
-                    Nil,
-                    Some(requestBody),
-                    responses,
-                    Nil,
-                    Nil,
-                    Map.empty,
-                    deprecated = false
+        docs.callbacks.map { case (event, callbacks) =>
+          val items = callbacks.map { case (urlPattern, callback) =>
+            val method = callback.method.toString.toLowerCase
+            val requestBody =
+              RequestBody(callback.requestDocs, callback.entity.value)
+            val responses =
+              callback.response.value
+                .map(r =>
+                  r.status.toString() -> Response(
+                    r.documentation,
+                    responseHeaders(r.headers),
+                    r.content
                   )
-                (urlPattern, PathItem(Map(method -> callbackOperation)))
-            }
-            (event, items)
+                )
+                .toMap
+            val callbackOperation =
+              Operation(
+                None,
+                None,
+                None,
+                Nil,
+                Some(requestBody),
+                responses,
+                Nil,
+                Nil,
+                Map.empty,
+                deprecated = false
+              )
+            (urlPattern, PathItem(Map(method -> callbackOperation)))
+          }
+          (event, items)
         },
         docs.deprecated
       )

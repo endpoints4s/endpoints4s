@@ -73,18 +73,16 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
         Source(expectedItems)
       ) { port =>
         val request = HttpRequest(uri = s"http://localhost:$port/notifications")
-        whenReady(sendAndDecodeJsonChunks(request)(serverApi.counterCodec)) {
-          case (_, chunks) =>
-            assert(chunks.size == expectedItems.size)
-            assert(
-              chunks
-                .zip(expectedItems)
-                .forall {
-                  case (received, expected) =>
-                    received.toOption.contains(expected)
-                }
-            )
-            ()
+        whenReady(sendAndDecodeJsonChunks(request)(serverApi.counterCodec)) { case (_, chunks) =>
+          assert(chunks.size == expectedItems.size)
+          assert(
+            chunks
+              .zip(expectedItems)
+              .forall { case (received, expected) =>
+                received.toOption.contains(expected)
+              }
+          )
+          ()
         }
       }
     }
@@ -129,10 +127,9 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
             requestItems.map(ByteString(_))
           )
         )
-        whenReady(send(request)) {
-          case (_, byteString) =>
-            assert(byteString.utf8String == "List(1, 2, 3);List(4, 5, 6)")
-            ()
+        whenReady(send(request)) { case (_, byteString) =>
+          assert(byteString.utf8String == "List(1, 2, 3);List(4, 5, 6)")
+          ()
         }
       }
     }
@@ -157,13 +154,12 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
             )
           )
         )
-        whenReady(send(request)) {
-          case (response, byteString) =>
-            assert(response.status == StatusCodes.OK)
-            assert(
-              byteString.utf8String == "Right(Counter(1));Left(java.lang.Throwable: DecodingFailure at .value: Int)"
-            )
-            ()
+        whenReady(send(request)) { case (response, byteString) =>
+          assert(response.status == StatusCodes.OK)
+          assert(
+            byteString.utf8String == "Right(Counter(1));Left(java.lang.Throwable: DecodingFailure at .value: Int)"
+          )
+          ()
         }
       }
     }

@@ -113,8 +113,8 @@ trait EndpointsWithCustomErrors
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
-  lazy val emptyRequest: RequestEntity[Unit] = {
-    case (_, req) => req
+  lazy val emptyRequest: RequestEntity[Unit] = { case (_, req) =>
+    req
   }
 
   lazy val textRequest: (String, WSRequest) => WSRequest =

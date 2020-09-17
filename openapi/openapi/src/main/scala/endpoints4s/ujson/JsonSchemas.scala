@@ -345,8 +345,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
             .map(jsonSchema.decoder.decode)
             .foldLeft[Validated[collection.mutable.Builder[A, C[A]]]](
               Valid(builder)
-            ) {
-              case (acc, value) => acc.zip(value).map { case (b, a) => b += a }
+            ) { case (acc, value) =>
+              acc.zip(value).map { case (b, a) => b += a }
             }
             .map(_.result())
         case json => Invalid(s"Invalid JSON array: $json")
@@ -363,24 +363,22 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           val builder = Map.newBuilder[String, A]
           builder.sizeHint(items)
           items
-            .map {
-              case (name, value) =>
-                jsonSchema.decoder.decode(value).map((name, _))
+            .map { case (name, value) =>
+              jsonSchema.decoder.decode(value).map((name, _))
             }
             .foldLeft[Validated[
               collection.mutable.Builder[(String, A), Map[String, A]]
-            ]](Valid(builder)) {
-              case (acc, value) =>
-                acc.zip(value).map {
-                  case (b, name, value) => b += name -> value
-                }
+            ]](Valid(builder)) { case (acc, value) =>
+              acc.zip(value).map { case (b, name, value) =>
+                b += name -> value
+              }
             }
             .map(_.result())
         case json => Invalid(s"Invalid JSON object: $json")
       }
       val encoder = map => {
-        new ujson.Obj(mutable.LinkedHashMap(map.map {
-          case (k, v) => (k, jsonSchema.codec.encode(v))
+        new ujson.Obj(mutable.LinkedHashMap(map.map { case (k, v) =>
+          (k, jsonSchema.codec.encode(v))
         }.toSeq: _*))
       }
     }

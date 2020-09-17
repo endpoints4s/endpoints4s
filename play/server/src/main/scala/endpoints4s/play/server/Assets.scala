@@ -197,16 +197,15 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
           }
         }
         maybeAsset
-          .map {
-            case (stream, isGzipped) =>
-              Found(
-                StreamConverters.fromInputStream(() => stream),
-                Some(stream.available().toLong),
-                playComponents.fileMimeTypes
-                  .forFileName(assetInfo.name)
-                  .orElse(Some(ContentTypes.BINARY)),
-                isGzipped
-              )
+          .map { case (stream, isGzipped) =>
+            Found(
+              StreamConverters.fromInputStream(() => stream),
+              Some(stream.available().toLong),
+              playComponents.fileMimeTypes
+                .forFileName(assetInfo.name)
+                .orElse(Some(ContentTypes.BINARY)),
+              isGzipped
+            )
           }
           .getOrElse(AssetNotFound)
       } else AssetNotFound

@@ -127,8 +127,8 @@ trait Urls extends algebra.Urls with StatusCodes {
           def decode(
               paths: List[String]
           ): Option[(Validated[B], List[String])] =
-            fa.decode(paths).map {
-              case (validA, rs) => (validA.flatMap(f), rs)
+            fa.decode(paths).map { case (validA, rs) =>
+              (validA.flatMap(f), rs)
             }
         }
     }
@@ -187,12 +187,10 @@ trait Urls extends algebra.Urls with StatusCodes {
       def decode(
           segments: List[String]
       ): Option[(Validated[tupler.Out], List[String])] =
-        first.decode(segments).flatMap {
-          case (validA, segments2) =>
-            second.decode(segments2).map {
-              case (validB, segments3) =>
-                (validA.zip(validB)(tupler), segments3)
-            }
+        first.decode(segments).flatMap { case (validA, segments2) =>
+          second.decode(segments2).map { case (validB, segments3) =>
+            (validA.zip(validB)(tupler), segments3)
+          }
         }
     }
 
