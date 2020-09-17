@@ -198,8 +198,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
 
       val locationQueryString =
         (qs[Double]("lon") & qs[Double]("lat"))
-          .xmap[Location] {
-            case (lon, lat) => Location(lon, lat)
+          .xmap[Location] { case (lon, lat) =>
+            Location(lon, lat)
           } { location => (location.longitude, location.latitude) }
       val locationUrl = path /? locationQueryString
 
@@ -315,22 +315,20 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       serveEndpoint(serverApi.UUIDEndpoint, mockedResponse) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/user/$uuid/description?name=name1&age=18")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(entity == mockedResponse)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(entity == mockedResponse)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
 
       serveEndpoint(serverApi.putUUIDEndpoint, ()) { port =>
         val request =
           HttpRequest(method = PUT, uri = s"http://localhost:$port/user/$uuid")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(entity.isEmpty)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(entity.isEmpty)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
 
@@ -339,11 +337,10 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
           method = DELETE,
           uri = s"http://localhost:$port/user/$uuid"
         )
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(entity.isEmpty)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(entity.isEmpty)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
     }
@@ -355,33 +352,30 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       serveEndpoint(serverApi.smokeEndpoint, mockedResponse) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/user/userId/description?name=name1&age=18")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(entity == mockedResponse)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(entity == mockedResponse)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
 
       serveEndpoint(serverApi.putEndpoint, ()) { port =>
         val request =
           HttpRequest(method = PUT, uri = s"http://localhost:$port/user/foo123")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(entity.isEmpty)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(entity.isEmpty)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
 
       serveEndpoint(serverApi.deleteEndpoint, ()) { port =>
         val request =
           HttpRequest(method = DELETE, s"http://localhost:$port/user/foo123")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(entity.isEmpty)
-            assert(response.status.intValue() == 200)
-            ()
+        whenReady(send(request)) { case (response, entity) =>
+          assert(entity.isEmpty)
+          assert(response.status.intValue() == 200)
+          ()
         }
       }
     }
@@ -389,11 +383,10 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
     "Handle exceptions by default" in {
       serveEndpoint(serverApi.smokeEndpoint, sys.error("Sorry.")) { port =>
         val request = HttpRequest(uri = s"http://localhost:$port/user/foo/description?name=a&age=1")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 500)
-            assert(entity == "[\"Sorry.\"]")
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 500)
+          assert(entity == "[\"Sorry.\"]")
+          ()
         }
       }
     }
@@ -407,16 +400,15 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       serveEndpoint(serverApi.versionedResource, (entity, cache)) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/versioned-resource")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, responseEntity) =>
-            assert(responseEntity == entity)
-            assert(response.header[ETag].contains(ETag(etag)))
-            assert(
-              response
-                .header[`Last-Modified`]
-                .contains(`Last-Modified`(lastModified))
-            )
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(response.header[ETag].contains(ETag(etag)))
+          assert(
+            response
+              .header[`Last-Modified`]
+              .contains(`Last-Modified`(lastModified))
+          )
+          ()
         }
       }
     }
@@ -430,15 +422,14 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       ) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/maybe-cors-enabled")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, responseEntity) =>
-            assert(responseEntity == entity)
-            assert(
-              response
-                .header[`Access-Control-Allow-Origin`]
-                .contains(`Access-Control-Allow-Origin`.*)
-            )
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(
+            response
+              .header[`Access-Control-Allow-Origin`]
+              .contains(`Access-Control-Allow-Origin`.*)
+          )
+          ()
         }
       }
     }
@@ -451,11 +442,10 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       ) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/maybe-cors-enabled")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, responseEntity) =>
-            assert(responseEntity == entity)
-            assert(response.header[`Access-Control-Allow-Origin`].isEmpty)
-            ()
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == entity)
+          assert(response.header[`Access-Control-Allow-Origin`].isEmpty)
+          ()
         }
       }
     }
@@ -464,10 +454,9 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       serveEndpoint(joinedHeadersEndpoint, "ignored") { port =>
         val noHeadersRequest =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
-        whenReady(sendAndDecodeEntityAsText(noHeadersRequest)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.BadRequest)
-            assert(entity == """["Missing header A","Missing header B"]""")
+        whenReady(sendAndDecodeEntityAsText(noHeadersRequest)) { case (response, entity) =>
+          assert(response.status == StatusCodes.BadRequest)
+          assert(entity == """["Missing header A","Missing header B"]""")
         }
         ()
       }
@@ -478,10 +467,9 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         val oneHeader =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
             .withHeaders(RawHeader("A", "foo"))
-        whenReady(sendAndDecodeEntityAsText(oneHeader)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.BadRequest)
-            assert(entity == """["Missing header B"]""")
+        whenReady(sendAndDecodeEntityAsText(oneHeader)) { case (response, entity) =>
+          assert(response.status == StatusCodes.BadRequest)
+          assert(entity == """["Missing header B"]""")
         }
         ()
       }
@@ -492,10 +480,9 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         val twoHeaders =
           HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
             .withHeaders(RawHeader("A", "foo"), RawHeader("B", "foo"))
-        whenReady(sendAndDecodeEntityAsText(twoHeaders)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.OK)
-            assert(entity == "success")
+        whenReady(sendAndDecodeEntityAsText(twoHeaders)) { case (response, entity) =>
+          assert(response.status == StatusCodes.OK)
+          assert(entity == "success")
         }
         ()
       }
@@ -506,17 +493,15 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         val validRequest =
           HttpRequest(uri = s"http://localhost:$port/xmapHeadersEndpoint")
             .withHeaders(RawHeader("C", "42"))
-        whenReady(sendAndDecodeEntityAsText(validRequest)) {
-          case (response, _) =>
-            assert(response.status == StatusCodes.OK)
+        whenReady(sendAndDecodeEntityAsText(validRequest)) { case (response, _) =>
+          assert(response.status == StatusCodes.OK)
         }
         val invalidRequest =
           HttpRequest(uri = s"http://localhost:$port/xmapHeadersEndpoint")
             .withHeaders(RawHeader("C", "forty-two"))
-        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.BadRequest)
-            assert(entity == """["Invalid integer: forty-two"]""")
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) { case (response, entity) =>
+          assert(response.status == StatusCodes.BadRequest)
+          assert(entity == """["Invalid integer: forty-two"]""")
         }
         ()
       }
@@ -529,19 +514,17 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
             uri = s"http://localhost:$port/xmapReqBodyEndpoint",
             method = HttpMethods.POST
           ).withEntity(LocalDate.now().format(dateTimeFormatter))
-        whenReady(sendAndDecodeEntityAsText(validRequest)) {
-          case (response, _) =>
-            assert(response.status == StatusCodes.OK)
+        whenReady(sendAndDecodeEntityAsText(validRequest)) { case (response, _) =>
+          assert(response.status == StatusCodes.OK)
         }
         val invalidRequest =
           HttpRequest(
             uri = s"http://localhost:$port/xmapReqBodyEndpoint",
             method = HttpMethods.POST
           ).withEntity("not a date")
-        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.BadRequest)
-            assert(entity == """["Invalid date value 'not a date'"]""")
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) { case (response, entity) =>
+          assert(response.status == StatusCodes.BadRequest)
+          assert(entity == """["Invalid date value 'not a date'"]""")
         }
         ()
       }
@@ -552,19 +535,17 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         val validRequest =
           HttpRequest(uri = s"http://localhost:$port/transformed-request?n=9")
             .withHeaders(RawHeader("Accept", "text/html"))
-        whenReady(sendAndDecodeEntityAsText(validRequest)) {
-          case (response, _) =>
-            assert(response.status == StatusCodes.OK)
+        whenReady(sendAndDecodeEntityAsText(validRequest)) { case (response, _) =>
+          assert(response.status == StatusCodes.OK)
         }
         val invalidRequest =
           HttpRequest(uri = s"http://localhost:$port/transformed-request?n=10")
             .withHeaders(RawHeader("Accept", "text/html"))
-        whenReady(sendAndDecodeEntityAsText(invalidRequest)) {
-          case (response, entity) =>
-            assert(response.status == StatusCodes.BadRequest)
-            assert(
-              entity == """["Invalid combination of request header and query string parameter"]"""
-            )
+        whenReady(sendAndDecodeEntityAsText(invalidRequest)) { case (response, entity) =>
+          assert(response.status == StatusCodes.BadRequest)
+          assert(
+            entity == """["Invalid combination of request header and query string parameter"]"""
+          )
         }
         ()
       }
@@ -578,9 +559,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       ) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/transformed-response-entity")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (_, responseEntity) =>
-            assert(responseEntity == entity.str)
+        whenReady(sendAndDecodeEntityAsText(request)) { case (_, responseEntity) =>
+          assert(responseEntity == entity.str)
         }
         ()
       }
@@ -594,10 +574,9 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       ) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/transformed-response")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, responseEntity) =>
-            assert(responseEntity == resp.entity)
-            assert(response.headers[ETag].contains(ETag("42")))
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, responseEntity) =>
+          assert(responseEntity == resp.entity)
+          assert(response.headers[ETag].contains(ETag("42")))
         }
         ()
       }

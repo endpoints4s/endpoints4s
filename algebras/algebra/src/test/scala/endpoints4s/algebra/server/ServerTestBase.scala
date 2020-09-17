@@ -62,9 +62,8 @@ trait ServerTestBase[T <: algebra.Endpoints]
   def sendAndDecodeEntityAsText(
       request: HttpRequest
   ): Future[(HttpResponse, String)] = {
-    send(request).map {
-      case (response, entity) =>
-        (response, decodeEntityAsText(response, entity))
+    send(request).map { case (response, entity) =>
+      (response, decodeEntityAsText(response, entity))
     }
   }
 

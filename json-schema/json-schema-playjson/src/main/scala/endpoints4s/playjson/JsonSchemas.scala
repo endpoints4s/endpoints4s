@@ -213,8 +213,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def zipRecords[A, B](recordA: Record[A], recordB: Record[B])(implicit
       t: Tupler[A, B]
   ): Record[t.Out] = {
-    val reads = (recordA.reads and recordB.reads).tupled.map {
-      case (a, b) => t(a, b)
+    val reads = (recordA.reads and recordB.reads).tupled.map { case (a, b) =>
+      t(a, b)
     }
     val writes = new OWrites[t.Out] {
       override def writes(o: t.Out): JsObject =

@@ -104,8 +104,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
         def record(docs: DH :: DT) =
           (field(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail
             .record(docs.tail))
-            .xmap[FieldType[L, H] :: T] {
-              case (h, t) => shapelessField[L](h) :: t
+            .xmap[FieldType[L, H] :: T] { case (h, t) =>
+              shapelessField[L](h) :: t
             }(ht => (ht.head, ht.tail))
       }
 
@@ -118,8 +118,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
         def record(docs: DH :: DT) =
           (optField(labelHead.value.name, docs.head.map(_.text))(jsonSchemaHead) zip jsonSchemaTail
             .record(docs.tail))
-            .xmap[FieldType[L, Option[H]] :: T] {
-              case (h, t) => shapelessField[L](h) :: t
+            .xmap[FieldType[L, Option[H]] :: T] { case (h, t) =>
+              shapelessField[L](h) :: t
             }(ht => (ht.head, ht.tail))
       }
 

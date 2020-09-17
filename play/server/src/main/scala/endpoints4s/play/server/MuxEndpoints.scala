@@ -60,8 +60,8 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
                             Future.successful(handleClientErrors(inv))
                         }
                       }
-                    action(headers).recover {
-                      case NonFatal(t) => handleServerError(t)
+                    action(headers).recover { case NonFatal(t) =>
+                      handleServerError(t)
                     }
                   // Unable to handle request entity
                   case None =>

@@ -337,8 +337,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
 
           //#xmap
           val locationQueryString: QueryString[Location] =
-            (qs[Double]("lon") & qs[Double]("lat")).xmap {
-              case (lon, lat) => Location(lon, lat)
+            (qs[Double]("lon") & qs[Double]("lat")).xmap { case (lon, lat) =>
+              Location(lon, lat)
             } { location => (location.longitude, location.latitude) }
           //#xmap
 
@@ -394,13 +394,12 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.versionedResource, ())) {
-          case (entity, cache) =>
-            assert(entity == response)
-            assert(
-              cache.etag.startsWith(etag.dropRight(1))
-            ) // Some http client add a “--gzip” suffix
-            assert(cache.lastModified == lastModified)
+        whenReady(call(client.versionedResource, ())) { case (entity, cache) =>
+          assert(entity == response)
+          assert(
+            cache.etag.startsWith(etag.dropRight(1))
+          ) // Some http client add a “--gzip” suffix
+          assert(cache.lastModified == lastModified)
         }
       }
 
@@ -417,9 +416,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.endpointWithOptionalResponseHeader, ())) {
-          case (entity, header) =>
-            (entity, header) shouldEqual ((response, Some(origin)))
+        whenReady(call(client.endpointWithOptionalResponseHeader, ())) { case (entity, header) =>
+          (entity, header) shouldEqual ((response, Some(origin)))
         }
       }
 
@@ -434,9 +432,8 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
             )
         )
 
-        whenReady(call(client.endpointWithOptionalResponseHeader, ())) {
-          case (entity, header) =>
-            (entity, header) shouldEqual ((response, None))
+        whenReady(call(client.endpointWithOptionalResponseHeader, ())) { case (entity, header) =>
+          (entity, header) shouldEqual ((response, None))
         }
       }
 

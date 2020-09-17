@@ -130,8 +130,8 @@ trait EndpointsTestApi extends algebra.Endpoints {
 
   val cacheHeaders: ResponseHeaders[Cache] =
     (responseHeader("ETag") ++ responseHeader("Last-Modified"))
-      .xmap {
-        case (etag, lastModified) => Cache(etag, lastModified)
+      .xmap { case (etag, lastModified) =>
+        Cache(etag, lastModified)
       }(cache => (cache.etag, cache.lastModified))
 
   val versionedResource = endpoint(
@@ -148,13 +148,12 @@ trait EndpointsTestApi extends algebra.Endpoints {
     get(
       url = path / "transformed-request" /? qs[Int]("n"),
       headers = requestHeader("Accept")
-    ).xmapPartial {
-      case (queryParam, headerValue) =>
-        if (headerValue.length == queryParam) Valid((queryParam, headerValue))
-        else
-          Invalid(
-            "Invalid combination of request header and query string parameter"
-          )
+    ).xmapPartial { case (queryParam, headerValue) =>
+      if (headerValue.length == queryParam) Valid((queryParam, headerValue))
+      else
+        Invalid(
+          "Invalid combination of request header and query string parameter"
+        )
     }(identity)
 
   val endpointWithTransformedRequest = endpoint(

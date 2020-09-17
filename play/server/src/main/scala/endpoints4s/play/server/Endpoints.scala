@@ -287,12 +287,11 @@ trait EndpointsWithCustomErrors
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
     extractMethodUrlAndHeaders(method, url, headers)
-      .toRequest {
-        case (a, c) =>
-          headers =>
-            entity(headers).map(
-              _.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
-            )
+      .toRequest { case (a, c) =>
+        headers =>
+          entity(headers).map(
+            _.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
+          )
       } { abc =>
         val (ab, c) = tuplerABC.unapply(abc)
         val (a, _) = tuplerAB.unapply(ab)
@@ -472,8 +471,8 @@ trait EndpointsWithCustomErrors
                           endpoint.response(b)
                         }
                       }
-                    action(headers).recover {
-                      case NonFatal(t) => handleServerError(t)
+                    action(headers).recover { case NonFatal(t) =>
+                      handleServerError(t)
                     }
                   // Unable to handle request entity
                   case None =>

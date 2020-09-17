@@ -16,10 +16,9 @@ trait FixturesAlgebra extends endpoints4s.algebra.Endpoints {
     post(
       path / "baz",
       emptyRequest,
-      headers =
-        requestHeader("quuz") ++ requestHeader("corge") ++ optRequestHeader(
-          "grault"
-        )
+      headers = requestHeader("quuz") ++ requestHeader("corge") ++ optRequestHeader(
+        "grault"
+      )
     ),
     ok(emptyResponse)
   )

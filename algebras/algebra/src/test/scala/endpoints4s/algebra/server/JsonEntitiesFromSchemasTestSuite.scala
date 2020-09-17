@@ -13,13 +13,12 @@ trait JsonEntitiesFromSchemasTestSuite[
     "match single segment request" in {
       serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) { port =>
         val request = HttpRequest(uri = s"http://localhost:$port/user")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            ujson.read(entity) shouldEqual ujson.Obj(
-              "name" -> ujson.Str("Alice"),
-              "age" -> ujson.Num(42)
-            )
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          ujson.read(entity) shouldEqual ujson.Obj(
+            "name" -> ujson.Str("Alice"),
+            "age" -> ujson.Num(42)
+          )
         }
         ()
       }
@@ -29,9 +28,8 @@ trait JsonEntitiesFromSchemasTestSuite[
       serveEndpoint(serverApi.singleStaticGetSegment, User("Alice", 42)) { port =>
         val request =
           HttpRequest(uri = s"http://localhost:$port/user/profile")
-        whenReady(send(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 404)
+        whenReady(send(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 404)
         }
         ()
       }
@@ -54,12 +52,11 @@ trait JsonEntitiesFromSchemasTestSuite[
               "{\"name\":\"Alice\",\"age\":true}"
             )
           )
-        ) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 400)
-            ujson.read(entity) shouldBe ujson.Arr(
-              ujson.Str("Invalid integer value 'foo' for segment 'id'")
-            )
+        ) { case (response, entity) =>
+          assert(response.status.intValue() == 400)
+          ujson.read(entity) shouldBe ujson.Arr(
+            ujson.Str("Invalid integer value 'foo' for segment 'id'")
+          )
         }
 
         // Valid URL and invalid entity
@@ -70,12 +67,11 @@ trait JsonEntitiesFromSchemasTestSuite[
               "something that is not JSON"
             )
           )
-        ) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 400)
-            ujson.read(entity) shouldBe ujson.Arr(
-              ujson.Str("Invalid JSON document")
-            )
+        ) { case (response, entity) =>
+          assert(response.status.intValue() == 400)
+          ujson.read(entity) shouldBe ujson.Arr(
+            ujson.Str("Invalid JSON document")
+          )
         }
 
         // Valid URL and invalid entity (2)
@@ -86,12 +82,11 @@ trait JsonEntitiesFromSchemasTestSuite[
               "{\"name\":\"Alice\",\"age\":true}"
             )
           )
-        ) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 400)
-            ujson.read(entity) shouldBe ujson.Arr(
-              ujson.Str("Invalid integer value: true")
-            )
+        ) { case (response, entity) =>
+          assert(response.status.intValue() == 400)
+          ujson.read(entity) shouldBe ujson.Arr(
+            ujson.Str("Invalid integer value: true")
+          )
         }
 
         // Valid URL and invalid entity (3)
@@ -103,9 +98,8 @@ trait JsonEntitiesFromSchemasTestSuite[
                 "{\"name\":\"Alice\",\"age\":55}"
               )
           )
-        ) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 415)
+        ) { case (response, entity) =>
+          assert(response.status.intValue() == 415)
         }
 
         // Valid URL and entity
@@ -116,16 +110,15 @@ trait JsonEntitiesFromSchemasTestSuite[
               "{\"name\":\"Alice\",\"age\":55}"
             )
           )
-        ) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            assert(
-              response.entity.contentType == ContentTypes.`application/json`
-            )
-            ujson.read(entity) shouldBe ujson.Obj(
-              "name" -> ujson.Str("Alice"),
-              "age" -> ujson.Num(55)
-            )
+        ) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          assert(
+            response.entity.contentType == ContentTypes.`application/json`
+          )
+          ujson.read(entity) shouldBe ujson.Obj(
+            "name" -> ujson.Str("Alice"),
+            "age" -> ujson.Num(55)
+          )
         }
         ()
       }

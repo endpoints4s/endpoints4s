@@ -57,8 +57,8 @@ object OpenApi {
     new OpenApi(info, paths, components)
 
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
-    new ujson.Obj(mutable.LinkedHashMap(map.iterator.map {
-      case (k, v) => (k, f(v))
+    new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) =>
+      (k, f(v))
     }.toSeq: _*))
 
   private[openapi] def schemaJson(schema: Schema): ujson.Obj = {
@@ -354,23 +354,20 @@ object OpenApi {
     }
 
   private def extractTags(paths: Map[String, PathItem]): Set[Tag] = {
-    val allTags = paths.flatMap {
-      case (_, pathItem) =>
-        pathItem.operations.map {
-          case (_, operation) =>
-            operation.tags
-        }
+    val allTags = paths.flatMap { case (_, pathItem) =>
+      pathItem.operations.map { case (_, operation) =>
+        operation.tags
+      }
     }.flatten
 
     val tagsByName = allTags.groupBy(_.name)
-    tagsByName.foreach {
-      case (_, listOfTags) =>
-        val set = listOfTags.toSet
-        if (set.size > 1) {
-          throw new IllegalArgumentException(
-            s"Found tags with the same name but different values: $set"
-          )
-        }
+    tagsByName.foreach { case (_, listOfTags) =>
+      val set = listOfTags.toSet
+      if (set.size > 1) {
+        throw new IllegalArgumentException(
+          s"Found tags with the same name but different values: $set"
+        )
+      }
     }
 
     // Note that tags without any additional information will still be shown. However there is no

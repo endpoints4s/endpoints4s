@@ -14,13 +14,12 @@ trait SumTypedEntitiesTestSuite[
         val request =
           HttpRequest(HttpMethods.POST, s"http://localhost:$port/user-or-name")
             .withEntity(ContentTypes.`text/plain(UTF-8)`, "Alice")
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            assert(
-              response.entity.contentType == ContentTypes.`text/plain(UTF-8)`
-            )
-            entity shouldEqual "Alice"
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          assert(
+            response.entity.contentType == ContentTypes.`text/plain(UTF-8)`
+          )
+          entity shouldEqual "Alice"
         }
         ()
       }
@@ -34,16 +33,15 @@ trait SumTypedEntitiesTestSuite[
               ContentTypes.`application/json`,
               "{\"name\":\"Alice\",\"age\":42}"
             )
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 200)
-            assert(
-              response.entity.contentType == ContentTypes.`application/json`
-            )
-            ujson.read(entity) shouldEqual ujson.Obj(
-              "name" -> ujson.Str("Alice"),
-              "age" -> ujson.Num(42)
-            )
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 200)
+          assert(
+            response.entity.contentType == ContentTypes.`application/json`
+          )
+          ujson.read(entity) shouldEqual ujson.Obj(
+            "name" -> ujson.Str("Alice"),
+            "age" -> ujson.Num(42)
+          )
         }
         ()
       }
@@ -57,9 +55,8 @@ trait SumTypedEntitiesTestSuite[
               ContentTypes.`application/json`,
               "{\"name\":\"Alice\"}"
             )
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, entity) =>
-            assert(response.status.intValue() == 400)
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          assert(response.status.intValue() == 400)
         }
         ()
       }
@@ -74,9 +71,8 @@ trait SumTypedEntitiesTestSuite[
               ContentTypes.`application/x-www-form-urlencoded`,
               "name=Alice&age=42"
             )
-        whenReady(sendAndDecodeEntityAsText(request)) {
-          case (response, _) =>
-            assert(response.status.intValue() == 415)
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, _) =>
+          assert(response.status.intValue() == 415)
         }
         ()
       }

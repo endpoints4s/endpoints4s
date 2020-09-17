@@ -83,37 +83,35 @@ object Main {
           p("No meters yet!")
         } else {
           div(
-            meters.toSeq.sortBy(_._2.label).map {
-              case (_, meter) =>
-                section(
-                  h2(meter.label),
-                  p(
-                    table(
-                      thead(
-                        th("Time"),
-                        th("Value")
-                      ),
-                      tbody(
-                        meter.timeSeries.toSeq.map {
-                          case (instant, value) =>
-                            tr(
-                              td(instant.toString),
-                              td(value.toString())
-                            )
-                        }
-                      ),
-                      input(
-                        placeholder := "New Value",
-                        required := true,
-                        idAttr := s"value-${meter.id.toString}"
-                      ),
-                      button(
-                        onClick.mapTo(meter) --> onAddValueClicked,
-                        "Add"
-                      )
+            meters.toSeq.sortBy(_._2.label).map { case (_, meter) =>
+              section(
+                h2(meter.label),
+                p(
+                  table(
+                    thead(
+                      th("Time"),
+                      th("Value")
+                    ),
+                    tbody(
+                      meter.timeSeries.toSeq.map { case (instant, value) =>
+                        tr(
+                          td(instant.toString),
+                          td(value.toString())
+                        )
+                      }
+                    ),
+                    input(
+                      placeholder := "New Value",
+                      required := true,
+                      idAttr := s"value-${meter.id.toString}"
+                    ),
+                    button(
+                      onClick.mapTo(meter) --> onAddValueClicked,
+                      "Add"
                     )
                   )
                 )
+              )
             }
           )
         }
