@@ -36,7 +36,8 @@ ThisBuild / compatibilityRules ++= Seq(
   "com.typesafe.play" %%% "play-json" % "semver",
   "com.typesafe.play" %%% "play-functional" % "semver",
   "com.typesafe.akka" %% "akka*" % "semver",
-  "org.scala-js" % "scalajs-*" % "semver"
+  "org.scala-js" % "scalajs-*" % "semver",
+  "org.scala-lang.modules" %% "*" % "semver"
 )
 
 ThisBuild / compatibilityIgnored += "joda-time" % "joda-time"
