@@ -230,6 +230,9 @@ type. The rules for deriving the schema are the following:
   type has a `width` required property of type `integer`),
 - each case class field of type `Option[A]` for some type `A` has a corresponding
   optional JSON object property of the same name and type,
+- each case class field with a default value has a corresponding optional JSON
+  object property of the same name and type (decoders produce the default value
+  when the property is missing),
 - descriptions can be set for case class fields, case classes, or sealed traits
   by annotating these things with the `@docs` annotation,
 - for sealed traits, the discriminator field name can be defined by the `@discriminator`
@@ -238,7 +241,7 @@ type. The rules for deriving the schema are the following:
   `classTagToSchemaName` operation with the `ClassTag` of the type for which the schema
   is derived. If you wish to avoid naming the schema, use the `@unnamed` annotation
   (unnamed schemas get inlined in their OpenAPI documentation).
-- the schema title is set with the `@title` annotation, if present
+- the schema title is set with the `@title` annotation, if present.
 
 Here is an example that illustrates how to configure the generic schema derivation process:
 

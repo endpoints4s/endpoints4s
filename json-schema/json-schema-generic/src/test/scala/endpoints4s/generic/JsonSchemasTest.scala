@@ -74,6 +74,10 @@ class JsonSchemasTest extends AnyFreeSpec {
       genericJsonSchema[Shape]
     }
     //#custom-schema
+
+    case class CaseClassWithDefaultValue(x: Int, s: String = "hello")
+    val caseClassWithDefaultValueSchema: JsonSchema[CaseClassWithDefaultValue] = genericJsonSchema
+
   }
 
   object FakeAlgebraJsonSchemas
@@ -276,6 +280,12 @@ class JsonSchemasTest extends AnyFreeSpec {
     val expectedSchema =
       s"'$ns.Shape'!(diameter:number@Circle|'$ns.Rectangle'!(width:number,height:number,%)@Rectangle)#type"
     assert(FakeAlgebraJsonSchemas.shapeSchema == expectedSchema)
+  }
+
+  "case class parameter default values" in {
+    // Note that `s:string?` is optional
+    val expectedSchema = s"'$ns.CaseClassWithDefaultValue'!(x:integer,s:string?,%)"
+    assert(FakeAlgebraJsonSchemas.caseClassWithDefaultValueSchema == expectedSchema)
   }
 
 }
