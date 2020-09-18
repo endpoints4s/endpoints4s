@@ -256,6 +256,14 @@ transforming JSON schema definitions, instead of `xmap`:
 
 @@snip [JsonSchemasDocs.scala](/json-schema/json-schema-generic/src/test/scala/endpoints4s/generic/JsonSchemasDocs.scala) { #explicit-schema }
 
+### Mixing hand-written and derived schemas
+
+The generic derivation mechanism for sealed traits derives a schema for each case class
+extending the trait. Sometimes, you want to use a custom schema for one of the case classes.
+You can achieve this by providing an implicit `GenericRecord` instance for your case class:
+
+@@snip [JsonSchemasDocs.scala](/json-schema/json-schema-generic/src/test/scala/endpoints4s/generic/JsonSchemasTest.scala) { #custom-schema }
+
 ## Generic derivation of JSON schemas (based on macros)
 
 An alternative to the module presented in the preceding section is provided

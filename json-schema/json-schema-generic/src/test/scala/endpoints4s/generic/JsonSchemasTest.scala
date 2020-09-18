@@ -55,6 +55,25 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Point3(x: Int, y: Int, z: Int)
     val schemaPoint3 =
       (field[Int]("x") zip field[Int]("y") zip field[Int]("z")).as[Point3]
+
+    //#custom-schema
+    sealed trait Shape
+    case class Circle(radius: Double) extends Shape
+    case class Rectangle(width: Double, height: Double) extends Shape
+
+    implicit val shapeSchema: JsonSchema[Shape] = {
+      // For some reason, our JSON representation uses a `diameter`
+      // rather than a `radius`
+      val circleSchema: Record[Circle] =
+        field[Double]("diameter")
+          .xmap(diameter => Circle(diameter / 2))(circle => circle.radius * 2)
+      implicit val circleGenericRecord: GenericJsonSchema.GenericRecord[Circle] =
+        new GenericJsonSchema.GenericRecord(circleSchema)
+      // The generic schema for `Shape` will synthesize the schema for `Rectangle`,
+      // but it will use the implicitly provided `GenericRecord[Circle]` for `Circle.
+      genericJsonSchema[Shape]
+    }
+    //#custom-schema
   }
 
   object FakeAlgebraJsonSchemas
@@ -251,6 +270,12 @@ class JsonSchemasTest extends AnyFreeSpec {
       s"'DocC'!(%){recordDocC}@DocC"
     ).mkString("|")})#$$type{traitDoc}"
     assert(FakeAlgebraJsonSchemas.Doc.schema == expectedSchema)
+  }
+
+  "custom schema" in {
+    val expectedSchema =
+      s"'$ns.Shape'!(diameter:number@Circle|'$ns.Rectangle'!(width:number,height:number,%)@Rectangle)#type"
+    assert(FakeAlgebraJsonSchemas.shapeSchema == expectedSchema)
   }
 
 }
