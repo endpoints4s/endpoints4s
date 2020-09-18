@@ -38,7 +38,9 @@ jobs:
 
     - stage: test
       scala: 2.12.11
-      script: sbt ++$TRAVIS_SCALA_VERSION test
+      script:
+        - sbt ++$TRAVIS_SCALA_VERSION coverage test coverageReport coverageAggregate
+        - bash <(curl -s https://codecov.io/bash)
     - stage: test
       scala: 2.13.2
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
@@ -46,14 +48,7 @@ jobs:
       scala: 0.26.0-RC1
       script: sbt "++ $TRAVIS_SCALA_VERSION ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
     - stage: test
-      script:
-        - sbt compatibilityCheck
-
-    - stage: coverage and code formatting
-      if: tag is blank
-      script:
-        - sbt scalafmtCheck ++2.12.11 coverage test coverageReport coverageAggregate
-        - bash <(curl -s https://codecov.io/bash)
+      script: sbt compatibilityCheck scalafmtCheck
 
 #    - stage: publish
 #      if: tag =~ ^v
