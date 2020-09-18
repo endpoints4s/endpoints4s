@@ -137,7 +137,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     * Alternative between two possible request entities, differentiated by the
     * `Content-Type` header
     *
-    * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+    * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
     *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
     *
     *   - Server interpreters accept either of the request entities
@@ -155,7 +155,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       * Alternative between two possible request entities, differentiated by the
       * `Content-Type` header
       *
-      * @note If [[A]] and [[B]] are both JSON-encoded and use disjoint schemas, use
+      * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
       *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
       *
       *   - Server interpreters accept either of the request entities

@@ -19,7 +19,6 @@ object EndpointsSettings {
             "UTF-8",
             "-unchecked",
             "-language:implicitConversions",
-            "-Xlint",
             "-Ywarn-dead-code",
             "-Ywarn-numeric-widen",
             "-Ywarn-value-discard"
@@ -40,10 +39,11 @@ object EndpointsSettings {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 13 =>
           Seq(
-            "-Xlint:adapted-args,nullary-unit,inaccessible,nullary-override,infer-any,missing-interpolator,doc-detached,private-shadow,type-parameter-shadow,poly-implicit-overload,option-implicit,delayedinit-select,package-object-classes,stars-align,constant,unused,nonlocal-return,implicit-not-found,serial,valpattern,eta-zero,eta-sam,deprecation"
+            "-Xlint:adapted-args,nullary-unit,inaccessible,infer-any,missing-interpolator,doc-detached,private-shadow,type-parameter-shadow,poly-implicit-overload,option-implicit,delayedinit-select,package-object-classes,stars-align,constant,unused,nonlocal-return,implicit-not-found,serial,valpattern,eta-zero,eta-sam,deprecation"
           ) ++ (if (insideCI.value) Seq("-Xfatal-warnings") else Nil)
         case Some((2, _)) =>
           Seq(
+            "-Xlint",
             "-Yno-adapted-args",
             "-Ywarn-unused-import",
             "-Xexperimental",
@@ -54,21 +54,20 @@ object EndpointsSettings {
           Seq()
       }
     },
-    Compile / doc / scalacOptions += "-nowarn", // See https://github.com/scala/bug/issues/12007
     // Remove scala-compiler dependency automatically added by the sbt-heroku plugin
     libraryDependencies -= "org.scala-lang" % "scala-compiler" % scalaVersion.value % Runtime
   )
   val `scala 2.13` = Seq(
-    scalaVersion := "2.13.2",
-    crossScalaVersions := Seq("2.13.2")
+    scalaVersion := "2.13.3",
+    crossScalaVersions := Seq("2.13.3")
   )
   val `scala 2.12 to 2.13` = Seq(
-    scalaVersion := "2.13.2",
-    crossScalaVersions := Seq("2.13.2", "2.12.11")
+    scalaVersion := "2.13.3",
+    crossScalaVersions := Seq("2.13.3", "2.12.12")
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.2",
-    crossScalaVersions := Seq("2.13.2", "0.26.0-RC1", "2.12.11")
+    crossScalaVersions := Seq("2.13.3", "0.27.0-RC1", "2.12.12")
   )
 
   val publishSettings = commonSettings ++ Seq(
