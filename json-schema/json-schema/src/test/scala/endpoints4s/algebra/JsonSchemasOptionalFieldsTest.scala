@@ -102,6 +102,31 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
     assert(encoded == Json.obj("relevant" -> Json.num(1)))
   }
 
+  "encoding and decoding optional field with default value, when field is present" in {
+    val schema = optFieldWithDefault[Int]("value", 42)
+    checkRoundTrip(
+      schema,
+      Json.obj("value" -> Json.num(1)),
+      1
+    )
+  }
+
+  "decoding optional field with default value fallbacks to default value when absent" in {
+    val schema = optFieldWithDefault[Int]("value", 42)
+    assert(decodeJson(schema, Json.obj()) == Valid(42))
+  }
+
+  "encoding optional field with default value always emits the field" in {
+    val schema = optFieldWithDefault[Int]("value", 42)
+    assert(encodeJson(schema, 42) == Json.obj("value" -> Json.num(42)))
+  }
+
+  "decoding optional field with default value fails if field if present but invalid" in {
+    val schema = optFieldWithDefault[Int]("value", 42)
+    val invalidJson = Json.obj("value" -> Json.str("one"))
+    assert(decodeJson(schema, invalidJson).isInstanceOf[Invalid])
+  }
+
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =
     decodeJson(schema, json) match {
       case Valid(a) =>
