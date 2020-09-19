@@ -10,6 +10,7 @@ import shapeless.{
   Annotations,
   CNil,
   Coproduct,
+  Default,
   Generic,
   HList,
   HNil,
@@ -74,8 +75,12 @@ trait JsonSchemas extends algebra.JsonSchemas {
       with GenericDescriptions
       with GenericTitles {
 
-    implicit def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
+    @deprecated("Replaced by `genericEmptyRecord`", "1.2.0")
+    def emptyRecordCase: DocumentedGenericRecord[HNil, HNil] =
       (_: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
+
+    implicit def genericEmptyRecord: DerivedGenericRecord[HNil, HNil, HNil] =
+      (_: HNil, _: HNil) => emptyRecord.xmap[HNil](_ => HNil)(_ => ())
 
     implicit def singletonCoproduct[L <: Symbol, A](implicit
         labelSingleton: Witness.Aux[L],
@@ -95,7 +100,8 @@ trait JsonSchemas extends algebra.JsonSchemas {
   trait GenericJsonSchemaLowPriority extends GenericJsonSchemaLowLowPriority {
     this: GenericJsonSchema.type =>
 
-    implicit def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
+    @deprecated("Replaced by `consGenericRecord`", "1.2.0")
+    def consRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
         labelHead: Witness.Aux[L],
         jsonSchemaHead: JsonSchema[H],
         jsonSchemaTail: DocumentedGenericRecord[T, DT]
@@ -109,7 +115,38 @@ trait JsonSchemas extends algebra.JsonSchemas {
             }(ht => (ht.head, ht.tail))
       }
 
-    implicit def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
+    implicit def consGenericRecord[
+        L <: Symbol,
+        H,
+        T <: HList,
+        DH <: Option[docs],
+        DT <: HList,
+        VH <: Option[H],
+        VT <: HList
+    ](implicit
+        labelHead: Witness.Aux[L],
+        jsonSchemaHead: JsonSchema[H],
+        jsonSchemaTail: DerivedGenericRecord[T, DT, VT]
+    ): DerivedGenericRecord[FieldType[L, H] :: T, DH :: DT, VH :: VT] =
+      new DerivedGenericRecord[FieldType[L, H] :: T, DH :: DT, VH :: VT] {
+        def record(docs: DH :: DT, defaultValues: VH :: VT) = {
+          val recordHead = defaultValues.head match {
+            case Some(defaultValue) =>
+              optFieldWithDefault[H](labelHead.value.name, defaultValue, docs.head.map(_.text))
+            case None =>
+              field[H](labelHead.value.name, docs.head.map(_.text))
+          }
+          val recordTail = jsonSchemaTail.record(docs.tail, defaultValues.tail)
+          recordHead
+            .zip(recordTail)
+            .xmap[FieldType[L, H] :: T] { case (h, t) =>
+              shapelessField[L](h) :: t
+            }(ht => (ht.head, ht.tail))
+        }
+      }
+
+    @deprecated("Replaced by `consOptGenericRecord`", "1.2.0")
+    def consOptRecord[L <: Symbol, H, T <: HList, DH <: Option[docs], DT <: HList](implicit
         labelHead: Witness.Aux[L],
         jsonSchemaHead: JsonSchema[H],
         jsonSchemaTail: DocumentedGenericRecord[T, DT]
@@ -121,6 +158,31 @@ trait JsonSchemas extends algebra.JsonSchemas {
             .xmap[FieldType[L, Option[H]] :: T] { case (h, t) =>
               shapelessField[L](h) :: t
             }(ht => (ht.head, ht.tail))
+      }
+
+    implicit def consOptGenericRecord[
+        L <: Symbol,
+        H,
+        T <: HList,
+        DH <: Option[docs],
+        DT <: HList,
+        VH <: None.type, // we don’t support default values for optional case class fields
+        VT <: HList
+    ](implicit
+        labelHead: Witness.Aux[L],
+        jsonSchemaHead: JsonSchema[H],
+        jsonSchemaTail: DerivedGenericRecord[T, DT, VT]
+    ): DerivedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT, VH :: VT] =
+      new DerivedGenericRecord[FieldType[L, Option[H]] :: T, DH :: DT, VH :: VT] {
+        def record(docs: DH :: DT, defaultValues: VH :: VT) = {
+          val recordHead = optField[H](labelHead.value.name, docs.head.map(_.text))
+          val recordTail = jsonSchemaTail.record(docs.tail, defaultValues.tail)
+          recordHead
+            .zip(recordTail)
+            .xmap[FieldType[L, Option[H]] :: T] { case (h, t) =>
+              shapelessField[L](h) :: t
+            }(ht => (ht.head, ht.tail))
+        }
       }
 
     implicit def consCoproduct[L <: Symbol, H, T <: Coproduct](implicit
@@ -166,11 +228,23 @@ trait JsonSchemas extends algebra.JsonSchemas {
     )
     class GenericTagged[A](val jsonSchema: Tagged[A]) extends GenericJsonSchema[A]
 
+    @deprecated("Replaced by `DerivedGenericRecord`", "1.2.0")
     trait DocumentedGenericRecord[A, D <: HList] {
       def record(docs: D): Record[A]
     }
 
-    implicit def recordGeneric[A, R, D <: HList](implicit
+    /**
+      * Intermediate type used by the machinery to summon a `Record[A]` schema
+      * @tparam A Case class type for which a schema is derived
+      * @tparam D List of `@docs` annotations attached to the case class fields
+      * @tparam V List of default values for the case class fields
+      */
+    trait DerivedGenericRecord[A, D <: HList, V <: HList] {
+      def record(docs: D, defaultValues: V): Record[A]
+    }
+
+    @deprecated("Replaced by `derivedGenericRecord`", "1.2.0")
+    def recordGeneric[A, R, D <: HList](implicit
         gen: LabelledGeneric.Aux[A, R],
         docOpt: GenericDescription[A],
         docAnns: Annotations.Aux[docs, A, D],
@@ -179,6 +253,22 @@ trait JsonSchemas extends algebra.JsonSchemas {
         nameOpt: GenericSchemaName[A]
     ): GenericRecord[A] = {
       val recordA = record.record(docAnns()).xmap[A](gen.from)(gen.to)
+      val namedA = nameOpt.value.fold(recordA)(recordA.named(_))
+      val docA = docOpt.description.fold(namedA)(namedA.withDescription(_))
+      val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))
+      new GenericRecord[A](titleA)
+    }
+
+    implicit def derivedGenericRecord[A, R, D <: HList, V <: HList](implicit
+        gen: LabelledGeneric.Aux[A, R],
+        docOpt: GenericDescription[A],
+        docAnns: Annotations.Aux[docs, A, D],
+        defaultValues: Default.Aux[A, V],
+        titleOpt: GenericTitle[A],
+        record: DerivedGenericRecord[R, D, V],
+        nameOpt: GenericSchemaName[A]
+    ): GenericRecord[A] = {
+      val recordA = record.record(docAnns(), defaultValues()).xmap[A](gen.from)(gen.to)
       val namedA = nameOpt.value.fold(recordA)(recordA.named(_))
       val docA = docOpt.description.fold(namedA)(namedA.withDescription(_))
       val titleA = titleOpt.title.fold(docA)(docA.withTitle(_))

@@ -289,6 +289,25 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       tpe: JsonSchema[A]
   ): Record[Option[A]]
 
+  /**
+    * The JSON schema of a record with a single optional field with the given `name`
+    *
+    *   - Decoders fallback to the `defaultValue` if the field is absent from
+    *     the decoded JSON object. They fail if the field is present but has an
+    *     invalid value,
+    *   - Encoders always produce the field (even when it has the `defaultValue`),
+    *   - Documentation interpreters produce the JSON schema of a JSON object with an
+    *     optional property of the given `name`.
+    *
+    * @group operations
+    */
+  final def optFieldWithDefault[A: JsonSchema](
+      name: String,
+      defaultValue: A,
+      docs: Option[String] = None
+  ): Record[A] =
+    optField[A](name, docs).xmap(_.getOrElse(defaultValue))(Option(_))
+
   /** Tags a schema for type `A` with the given tag name */
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A]
 
