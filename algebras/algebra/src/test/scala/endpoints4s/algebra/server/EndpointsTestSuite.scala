@@ -488,6 +488,19 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       }
     }
 
+    "accept requests with the required case insensitive headers" in {
+      serveEndpoint(joinedHeadersEndpoint, "success") { port =>
+        val twoHeaders =
+          HttpRequest(uri = s"http://localhost:$port/joinedHeadersEndpoint")
+            .withHeaders(RawHeader("a", "foo"), RawHeader("b", "foo"))
+        whenReady(sendAndDecodeEntityAsText(twoHeaders)) { case (response, entity) =>
+          assert(response.status == StatusCodes.OK)
+          assert(entity == "success")
+        }
+        ()
+      }
+    }
+
     "decode transformed request headers" in {
       serveEndpoint(xmapHeadersEndpoint, "ignored") { port =>
         val validRequest =
