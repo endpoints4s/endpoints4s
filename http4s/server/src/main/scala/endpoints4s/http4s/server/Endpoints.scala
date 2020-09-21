@@ -16,6 +16,7 @@ import org.http4s
 import org.http4s.{EntityEncoder, EntityDecoder, Header, Headers}
 
 import scala.util.control.NonFatal
+import org.http4s.util.CaseInsensitiveString
 
 /**
   * Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]]
@@ -137,9 +138,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
 
   def requestHeader(name: String, docs: Documentation): RequestHeaders[String] =
     headers =>
-      headers.collectFirst {
-        case h if h.name.value == name => h.value
-      } match {
+      headers.get(CaseInsensitiveString(name)).map(_.value) match {
         case Some(value) => Valid(value)
         case None        => Invalid(s"Missing header $name")
       }
@@ -148,10 +147,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       name: String,
       docs: Documentation
   ): RequestHeaders[Option[String]] =
-    headers =>
-      Valid(headers.collectFirst {
-        case h if h.name.value == name => h.value
-      })
+    headers => Valid(headers.get(CaseInsensitiveString(name)).map(_.value))
 
   // RESPONSES
   implicit lazy val responseInvariantFunctor: endpoints4s.InvariantFunctor[Response] =
