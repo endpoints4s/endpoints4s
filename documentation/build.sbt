@@ -160,7 +160,7 @@ val `example-quickstart-server` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.9.1",
+        "org.scala-stm" %% "scala-stm" % "0.10.0",
         scalaTestDependency
       )
     )
@@ -332,7 +332,7 @@ lazy val `example-cqrs-commands-endpoints` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.9.1",
+        "org.scala-stm" %% "scala-stm" % "0.10.0",
         "io.circe" %% "circe-generic" % circeVersion
       )
     )
