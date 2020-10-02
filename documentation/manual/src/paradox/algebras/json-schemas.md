@@ -59,7 +59,7 @@ be defined as follows:
 
 (We have omitted the definition of `circleSchema` for the sake of conciseness)
 
-First, all the alternative record schemas (in this example, `circeSchema` and `rectangleSchema`) must
+First, all the alternative record schemas (in this example, `circleSchema` and `rectangleSchema`) must
 be `tagged` with a unique name. Then, the `orElse` operation combines the alternative schemas into a
 single schema that accepts one of them.
 
