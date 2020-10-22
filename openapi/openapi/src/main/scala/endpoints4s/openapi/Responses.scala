@@ -4,8 +4,7 @@ package openapi
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.{MediaType, Schema}
 
-/**
-  * Interpreter for [[algebra.Responses]]
+/** Interpreter for [[algebra.Responses]]
   *
   * @group interpreters
   */
@@ -18,8 +17,7 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
 
   type Response[A] = List[DocumentedResponse]
 
-  /**
-    * @param status Response status code (e.g. OK or NotFound)
+  /** @param status Response status code (e.g. OK or NotFound)
     * @param documentation Human readable documentation. Not optional because its required by openapi
     * @param headers Response headers documentation
     * @param content Map that associates each possible content-type (e.g. “text/html”) with a `MediaType` description

@@ -6,8 +6,7 @@ import play.api.libs.json._
 
 import scala.collection.compat._
 
-/**
-  * An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces Play JSON `play.api.libs.json.Reads`
+/** An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces Play JSON `play.api.libs.json.Reads`
   * and `play.api.libs.json.Writes`.
   */
 trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {

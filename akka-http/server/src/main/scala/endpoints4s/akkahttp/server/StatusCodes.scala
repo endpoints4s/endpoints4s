@@ -3,8 +3,7 @@ package endpoints4s.akkahttp.server
 import akka.http.scaladsl.model.{StatusCode => AkkaStatusCode, StatusCodes => AkkaStatusCodes}
 import endpoints4s.algebra
 
-/**
-  * [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
+/** [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

@@ -4,8 +4,7 @@ import scalaj.http.HttpResponse
 import endpoints4s.{Invalid, InvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.Documentation
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait Responses extends algebra.Responses with StatusCodes {
   this: algebra.Errors =>

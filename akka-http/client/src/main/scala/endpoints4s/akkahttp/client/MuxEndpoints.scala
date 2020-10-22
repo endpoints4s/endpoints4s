@@ -5,8 +5,7 @@ import endpoints4s.algebra.MuxRequest
 
 import scala.concurrent.Future
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends algebra.MuxEndpoints {
   self: EndpointsWithCustomErrors =>

@@ -3,8 +3,7 @@ package endpoints4s.play.server
 import endpoints4s.algebra
 import play.api.mvc.RequestHeader
 
-/**
-  * [[algebra.Methods]] interpreter that decodes and encodes methods.
+/** [[algebra.Methods]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

@@ -13,8 +13,7 @@ import endpoints4s.algebra.circe.JsonEntitiesFromCodecs
 trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 
 //#microservice-endpoint-description
-  /**
-    * Application of a command.
+  /** Application of a command.
     *
     * Returns the produced event, or `None` in case of failure (aggregate
     * not found or invalid command).
@@ -26,8 +25,7 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
     )
 //#microservice-endpoint-description
 
-  /**
-    * Read the event long (optionally from a given timestamp).
+  /** Read the event long (optionally from a given timestamp).
     */
   val events: Endpoint[Option[Long], Seq[StoredEvent]] =
     endpoint(
@@ -38,8 +36,7 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 }
 //#endpoints
 
-/**
-  * Base trait of commands.
+/** Base trait of commands.
   *
   * Note that we could also have just reused the DTOs of the public API,
   * but we chose to use distinct data types so that the public API is

@@ -14,8 +14,7 @@ import Util.circeJsonWriteable
 import cats.Show
 import play.api.http.Writeable
 
-/**
-  * Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode
+/** Interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Decoder]] to decode
   * JSON entities in HTTP requests, and circe’s [[io.circe.Encoder]] to build JSON entities
   * in HTTP responses.
   *

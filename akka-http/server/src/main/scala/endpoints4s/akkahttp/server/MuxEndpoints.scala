@@ -7,8 +7,7 @@ import endpoints4s.algebra.MuxRequest
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-/**
-  * Extends the [[Endpoints]] interpreter with [[algebra.MuxEndpoints]]
+/** Extends the [[Endpoints]] interpreter with [[algebra.MuxEndpoints]]
   * support.
   *
   * @group interpreters
@@ -60,8 +59,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
 }
 
-/**
-  * A function whose return type depends on the type
+/** A function whose return type depends on the type
   * of the given `req`.
   *
   * @tparam Req  Request base type
@@ -71,8 +69,7 @@ trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
   def apply[R <: Resp](req: Req { type Response = R }): Future[R]
 }
 
-/**
-  * A function whose return type depends on the type
+/** A function whose return type depends on the type
   * of the given `req`.
   *
   * @tparam Req  Request base type

@@ -13,8 +13,7 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.Future
 import scala.concurrent.stm.{Ref, atomic}
 
-/**
-  * Implementation of the queries service
+/** Implementation of the queries service
   */
 class QueriesService(
     commandsBaseUrl: String,

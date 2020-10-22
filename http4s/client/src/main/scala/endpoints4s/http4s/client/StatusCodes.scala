@@ -3,8 +3,7 @@ package endpoints4s.http4s.client
 import endpoints4s.algebra
 import org.http4s.{Status => Http4sStatus}
 
-/**
-  * [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
+/** [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

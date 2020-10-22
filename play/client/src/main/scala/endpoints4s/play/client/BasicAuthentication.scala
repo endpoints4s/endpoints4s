@@ -5,8 +5,7 @@ import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 import play.api.libs.ws.WSAuthScheme
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication {
   self: EndpointsWithCustomErrors =>

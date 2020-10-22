@@ -8,8 +8,7 @@ import akka.http.scaladsl.model.Uri
 import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation
 
-/**
-  * [[algebra.Urls]] interpreter that builds URLs.
+/** [[algebra.Urls]] interpreter that builds URLs.
   *
   * @group interpreters
   */

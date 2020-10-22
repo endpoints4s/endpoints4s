@@ -2,8 +2,7 @@ package endpoints4s.play.client
 
 import endpoints4s.{Invalid, algebra}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BuiltInErrors extends algebra.BuiltInErrors {
   this: EndpointsWithCustomErrors =>

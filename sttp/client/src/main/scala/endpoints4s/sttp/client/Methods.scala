@@ -3,8 +3,7 @@ package endpoints4s.sttp.client
 import endpoints4s.algebra
 import com.softwaremill.sttp
 
-/**
-  * [[algebra.Methods]] interpreter that builds URLs.
+/** [[algebra.Methods]] interpreter that builds URLs.
   *
   * @group interpreters
   */

@@ -9,8 +9,7 @@ import org.http4s
 import org.http4s.headers.{Authorization, `WWW-Authenticate`}
 import org.http4s.{BasicCredentials, Challenge}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication
     extends EndpointsWithCustomErrors

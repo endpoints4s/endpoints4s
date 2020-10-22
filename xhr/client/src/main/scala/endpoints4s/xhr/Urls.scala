@@ -6,8 +6,7 @@ import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
 
 import scala.scalajs.js
 
-/**
-  * [[algebra.Urls]] interpreter that builds URLs (in a JavaScript runtime environment).
+/** [[algebra.Urls]] interpreter that builds URLs (in a JavaScript runtime environment).
   *
   * @group interpreters
   */
@@ -34,8 +33,7 @@ trait Urls extends algebra.Urls {
   implicit lazy val stringSegment: Segment[String] =
     (s: String) => js.URIUtils.encodeURIComponent(s)
 
-  /**
-    * Defines how to build a query string from an `A`
+  /** Defines how to build a query string from an `A`
     */
   trait QueryString[A] {
 

@@ -4,8 +4,7 @@ import endpoints4s.openapi.model.{MediaType, Schema}
 import endpoints4s.ujson.codecs.schemas
 import endpoints4s.{Invalid, algebra}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BuiltInErrors extends algebra.BuiltInErrors {
   this: EndpointsWithCustomErrors =>

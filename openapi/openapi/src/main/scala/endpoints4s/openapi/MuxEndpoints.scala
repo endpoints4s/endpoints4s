@@ -3,8 +3,7 @@ package endpoints4s.openapi
 import endpoints4s.algebra.MuxRequest
 import endpoints4s.algebra
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 

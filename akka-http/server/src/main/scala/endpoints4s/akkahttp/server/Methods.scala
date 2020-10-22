@@ -3,8 +3,7 @@ package endpoints4s.akkahttp.server
 import akka.http.scaladsl.model.{HttpMethod, HttpMethods}
 import endpoints4s.algebra
 
-/**
-  * [[algebra.Methods]] interpreter that decodes and encodes methods.
+/** [[algebra.Methods]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

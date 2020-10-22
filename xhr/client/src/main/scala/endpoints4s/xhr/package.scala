@@ -1,7 +1,6 @@
 package endpoints4s
 
-/**
-  * Web client using `XMLHttpRequest`
+/** Web client using `XMLHttpRequest`
   *
   * @groupname interpreters Interpreters
   */

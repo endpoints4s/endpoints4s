@@ -2,8 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s._
 
-/**
-  * @group algebras
+/** @group algebras
   */
 trait Requests extends Urls with Methods with SemigroupalSyntax {
 
@@ -36,8 +35,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     */
   def emptyRequestHeaders: RequestHeaders[Unit]
 
-  /**
-    * A required request header
+  /** A required request header
     * @param name Header name (e.g., “Authorization”)
     * @group operations
     */
@@ -46,8 +44,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       docs: Documentation = None
   ): RequestHeaders[String]
 
-  /**
-    * An optional request header
+  /** An optional request header
     * @param name Header name (e.g., “Authorization”)
     * @group operations
     */
@@ -111,16 +108,14 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     */
   implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity]
 
-  /**
-    * Empty request -- request without a body.
+  /** Empty request -- request without a body.
     * Use `description` of [[endpoints4s.algebra.Endpoints#endpoint]] to document an empty body.
     *
     * @group operations
     */
   def emptyRequest: RequestEntity[Unit]
 
-  /**
-    * Request with a `String` body.
+  /** Request with a `String` body.
     *
     *   - Server interpreters accept requests with content-type `text/plain` and
     *     reject requests with an incorrect content-type.
@@ -133,8 +128,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     */
   def textRequest: RequestEntity[String]
 
-  /**
-    * Alternative between two possible request entities, differentiated by the
+  /** Alternative between two possible request entities, differentiated by the
     * `Content-Type` header
     *
     * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
@@ -151,8 +145,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   implicit class RequestEntitySyntax[A](requestEntity: RequestEntity[A]) {
 
-    /**
-      * Alternative between two possible request entities, differentiated by the
+    /** Alternative between two possible request entities, differentiated by the
       * `Content-Type` header
       *
       * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
@@ -168,8 +161,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       choiceRequestEntity(requestEntity, otherRequestEntity)
   }
 
-  /**
-    * Request for given parameters
+  /** Request for given parameters
     *
     * @param method Request method
     * @param url Request URL
@@ -193,8 +185,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out]
 
-  /**
-    * Helper method to perform GET request
+  /** Helper method to perform GET request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
     * @group operations
@@ -206,8 +197,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
     request(Get, url, docs = docs, headers = headers)
 
-  /**
-    * Helper method to perform POST request
+  /** Helper method to perform POST request
     * @param docs Request documentation
     * @tparam UrlP Payload carried by url
     * @tparam BodyP Payload carried by body
@@ -226,8 +216,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): Request[Out] =
     request(Post, url, entity, docs, headers)
 
-  /**
-    * Helper method to perform PUT request
+  /** Helper method to perform PUT request
     * @tparam UrlP Payload carried by url
     * @tparam BodyP Payload carried by body
     * @tparam HeadersP Payload carried by headers
@@ -245,8 +234,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): Request[Out] =
     request(Put, url, entity, docs, headers)
 
-  /**
-    * Helper method to perform DELETE request
+  /** Helper method to perform DELETE request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
     * @group operations
@@ -258,8 +246,7 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   )(implicit tuplerUH: Tupler.Aux[UrlP, HeadersP, Out]): Request[Out] =
     request(Delete, url, docs = docs, headers = headers)
 
-  /**
-    * Helper method to perform PATCH request
+  /** Helper method to perform PATCH request
     * @param docs Request documentation
     * @tparam UrlP Payload carried by url
     * @tparam BodyP Payload carried by body

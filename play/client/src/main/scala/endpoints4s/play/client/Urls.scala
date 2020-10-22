@@ -8,8 +8,7 @@ import endpoints4s.algebra.Documentation
 
 import scala.collection.compat.Factory
 
-/**
-  * [[algebra.Urls]] interpreter that builds URLs.
+/** [[algebra.Urls]] interpreter that builds URLs.
   *
   * @group interpreters
   */

@@ -16,8 +16,7 @@ import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
+/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
   * Play’s `WSClient` HTTP client, and uses [[algebra.BuiltInErrors]] to model client and
   * server errors.
   *
@@ -32,8 +31,7 @@ class Endpoints(val host: String, val wsClient: WSClient)(implicit
     with EndpointsWithCustomErrors
     with BuiltInErrors
 
-/**
-  * An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
+/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
   * * Play’s `WSClient` HTTP client.
   *
   * @group interpreters
@@ -48,8 +46,7 @@ trait EndpointsWithCustomErrors
   def wsClient: WSClient
   implicit def executionContext: ExecutionContext
 
-  /**
-    * A function that, given an `A` and a request model, returns an updated request
+  /** A function that, given an `A` and a request model, returns an updated request
     * containing additional headers
     */
   type RequestHeaders[A] = (A, WSRequest) => WSRequest
@@ -93,8 +90,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /**
-    * A function that takes an `A` information and eventually returns a `WSResponse`
+  /** A function that takes an `A` information and eventually returns a `WSResponse`
     */
   type Request[A] = A => Future[WSResponse]
 
@@ -108,8 +104,7 @@ trait EndpointsWithCustomErrors
         fa compose g
     }
 
-  /**
-    * A function that, given an `A` information and a `WSRequest`, returns a `WSRequest` with a body correctly set
+  /** A function that, given an `A` information and a `WSRequest`, returns a `WSRequest` with a body correctly set
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
@@ -155,8 +150,7 @@ trait EndpointsWithCustomErrors
       wsRequest.execute()
     }
 
-  /**
-    * Function returning the entity decoder from the response status and headers
+  /** Function returning the entity decoder from the response status and headers
     */
   type Response[A] = (
       StatusCode,
@@ -262,8 +256,7 @@ trait EndpointsWithCustomErrors
         .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
-  /**
-    * A function that, given an `A`, eventually attempts to decode the `B` response.
+  /** A function that, given an `A`, eventually attempts to decode the `B` response.
     *
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */

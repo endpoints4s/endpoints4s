@@ -6,8 +6,7 @@ import endpoints4s.algebra.Documentation
 import org.http4s.headers.Authorization
 import org.http4s.BasicCredentials
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication {
   self: EndpointsWithCustomErrors =>

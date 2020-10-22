@@ -2,8 +2,7 @@ package endpoints4s.algebra.circe
 
 import io.circe.{Decoder => CirceDecoder, Encoder => CirceEncoder}
 
-/**
-  * Combines both an [[io.circe.Encoder]] and a [[io.circe.Decoder]] into a single type class.
+/** Combines both an [[io.circe.Encoder]] and a [[io.circe.Decoder]] into a single type class.
   *
   * You don’t need to define instances by yourself as they can be derived from an existing pair
   * of an [[io.circe.Encoder]] and a [[io.circe.Decoder]].

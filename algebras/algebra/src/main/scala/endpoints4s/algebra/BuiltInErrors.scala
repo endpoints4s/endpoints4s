@@ -2,8 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s.Invalid
 
-/**
-  * Interpreter for the [[Errors]] algebra that uses endpoints4s built-in error types:
+/** Interpreter for the [[Errors]] algebra that uses endpoints4s built-in error types:
   *
   *   - [[Invalid]] for client errors,
   *   - and `Throwable` for server error.
@@ -26,13 +25,11 @@ trait BuiltInErrors extends Errors { this: EndpointsWithCustomErrors =>
   final def serverErrorToThrowable(serverError: ServerError): Throwable =
     serverError
 
-  /**
-    * Response entity format for [[Invalid]] values
+  /** Response entity format for [[Invalid]] values
     */
   def clientErrorsResponseEntity: ResponseEntity[Invalid]
 
-  /**
-    * Response entity format for `Throwable` values
+  /** Response entity format for `Throwable` values
     */
   def serverErrorResponseEntity: ResponseEntity[Throwable]
 

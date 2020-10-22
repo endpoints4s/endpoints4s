@@ -11,8 +11,7 @@ import play.api.mvc.{RequestHeader, Result}
 import scala.collection.compat._
 import scala.collection.mutable
 
-/**
-  * [[algebra.Urls]] interpreter that decodes and encodes URLs.
+/** [[algebra.Urls]] interpreter that decodes and encodes URLs.
   *
   * @group interpreters
   */
@@ -20,8 +19,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   val utf8Name = UTF_8.name()
 
-  /**
-    * Convenient type alias modeling the extraction of an `A` information from request headers.
+  /** Convenient type alias modeling the extraction of an `A` information from request headers.
     *
     * This type has an instance of `Applicative`.
     */
@@ -94,19 +92,16 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       def encode(s: String) = URLEncoder.encode(s, utf8Name)
     }
 
-  /**
-    * Query string encoding and decoding
+  /** Query string encoding and decoding
     */
   trait QueryString[A] {
 
-    /**
-      * @return None in case of decoding failure
+    /** @return None in case of decoding failure
       * @param qs Map of identifiers and parameter values (these are already URL decoded)
       */
     def decode(qs: Map[String, Seq[String]]): Validated[A]
 
-    /**
-      * @return Map of identifiers and URL encoded parameter values
+    /** @return Map of identifiers and URL encoded parameter values
       */
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
@@ -160,8 +155,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait QueryStringParam[A] {
 
-    /**
-      * @return a decoded `A` value, or `None` if it was malformed
+    /** @return a decoded `A` value, or `None` if it was malformed
       */
     def decode(name: String, qs: Map[String, Seq[String]]): Validated[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
@@ -258,8 +252,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait Path[A] extends Url[A] {
 
-    /**
-      * @return None in case the incoming path didn’t match, Some(Left(…))
+    /** @return None in case the incoming path didn’t match, Some(Left(…))
       *         in case it matched but decoding failed, Some(Right(…))
       *         if it matched and decoding succeeded
       */
@@ -362,8 +355,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait Url[A] {
 
-    /**
-      * @return `None` if the request doesn’t match, `Some(Invalid(…))` if
+    /** @return `None` if the request doesn’t match, `Some(Invalid(…))` if
       *          it matched but decoding failed, and `Some(Valid(…))`
       *          if it matched and succeeded
       */
@@ -425,8 +417,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     }
   }
 
-  /**
-    * This method is called by ''endpoints'' when decoding a request failed.
+  /** This method is called by ''endpoints'' when decoding a request failed.
     *
     * The provided implementation calls `clientErrorsResponse` to construct
     * a response containing the errors.

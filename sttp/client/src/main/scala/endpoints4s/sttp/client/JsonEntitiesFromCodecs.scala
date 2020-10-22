@@ -1,7 +1,6 @@
 package endpoints4s.sttp.client
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON request
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON request
   *
   * @group interpreters
   */

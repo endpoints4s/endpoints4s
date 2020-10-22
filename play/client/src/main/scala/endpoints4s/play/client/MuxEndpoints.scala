@@ -6,8 +6,7 @@ import endpoints4s.play.client.Endpoints.futureFromEither
 
 import scala.concurrent.Future
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends algebra.Endpoints {
   self: EndpointsWithCustomErrors =>

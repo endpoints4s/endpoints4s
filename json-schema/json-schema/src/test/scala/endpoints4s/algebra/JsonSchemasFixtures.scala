@@ -2,8 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s.{Invalid, Valid}
 
-/**
-  * This file doesn’t contain actual tests.
+/** This file doesn’t contain actual tests.
   *
   * Its purpose is just to exercise the [[JsonSchemas]] algebra.
   *

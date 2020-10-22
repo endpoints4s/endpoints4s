@@ -7,35 +7,30 @@ import org.scalajs.dom.XMLHttpRequest
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer
 
-/**
-  * Client that relies on the web browser to handle gzip compression
+/** Client that relies on the web browser to handle gzip compression
   *
   * @group interpreters
   */
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
-  /**
-    * As a client, we just need to give the path of the asset we are interested in, the web browser will
+  /** As a client, we just need to give the path of the asset we are interested in, the web browser will
     * automatically set HTTP headers to handle gzip compression (`Accept-Encoding`) and decompress the response.
     */
   type AssetRequest = AssetPath
 
-  /**
-    * {{{
+  /** {{{
     *   // foo/bar/baz-123abc
     *   AssetPath("foo/bar", "baz")
     * }}}
     */
   case class AssetPath(path: String, name: String)
 
-  /**
-    * As we request the asset via an XMLHttpRequest, we get its content as an
+  /** As we request the asset via an XMLHttpRequest, we get its content as an
     * `ArrayBuffer`
     */
   type AssetResponse = ArrayBuffer
 
-  /**
-    * Convenient constructor for building an [[AssetRequest]] from its path and name.
+  /** Convenient constructor for building an [[AssetRequest]] from its path and name.
     *
     * {{{
     *   myAssetsEndpoint(asset("foo/bar", "baz"))
@@ -43,8 +38,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   def asset(path: String, name: String): AssetRequest = AssetPath(path, name)
 
-  /**
-    * Encodes an [[AssetPath]] as a request path.
+  /** Encodes an [[AssetPath]] as a request path.
     * Throws an exception if the asset digest is not found.
     */
   // FIXME Check the asset digest in the `asset` smart constructor
@@ -58,8 +52,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       s"$path/${js.URIUtils.encodeURIComponent(name)}-$digest"
   }
 
-  /**
-    * An endpoint for requesting assets.
+  /** An endpoint for requesting assets.
     *
     * If the server fails to find the requested asset, this endpoint returns
     * a failed response.

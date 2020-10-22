@@ -11,8 +11,7 @@ import endpoints4s.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponent
 
 import scala.concurrent.Future
 
-/**
-  * Implementation of the public API based on our “commands” and “queries” microservices.
+/** Implementation of the public API based on our “commands” and “queries” microservices.
   */
 class PublicServer(
     commandsBaseUrl: String,

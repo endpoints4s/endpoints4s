@@ -1,8 +1,7 @@
 package endpoints4s
 package openapi
 
-/**
-  * Interpreter for [[endpoints4s.algebra.Methods]]
+/** Interpreter for [[endpoints4s.algebra.Methods]]
   *
   * @group interpreters
   */

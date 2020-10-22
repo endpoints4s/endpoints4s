@@ -4,16 +4,14 @@ import endpoints4s.xhr
 
 import scala.scalajs.js
 
-/**
-  * Implements [[xhr.Endpoints]] by using JavaScript promises, and
+/** Implements [[xhr.Endpoints]] by using JavaScript promises, and
   * [[endpoints4s.algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
   */
 trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 
-/**
-  * Implements [[xhr.Endpoints]] by using JavaScript promises
+/** Implements [[xhr.Endpoints]] by using JavaScript promises
   * @group interpreters
   */
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {

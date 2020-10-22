@@ -3,16 +3,14 @@ package openapi
 
 import endpoints4s.openapi.model._
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints,
+/** Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints,
   * and uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints.
+/** Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints.
   *
   * @group interpreters
   */
@@ -21,8 +19,7 @@ trait EndpointsWithCustomErrors
     with Requests
     with Responses {
 
-  /**
-    * @return An `OpenApi` instance for the given endpoint descriptions
+  /** @return An `OpenApi` instance for the given endpoint descriptions
     * @param info      General information about the documentation to generate
     * @param endpoints The endpoints to generate the documentation for
     */
@@ -47,8 +44,7 @@ trait EndpointsWithCustomErrors
 
   type Endpoint[A, B] = DocumentedEndpoint
 
-  /**
-    * @param path Path template (e.g. “/user/{id}”)
+  /** @param path Path template (e.g. “/user/{id}”)
     * @param item Item documentation
     */
   case class DocumentedEndpoint(path: String, item: PathItem) {

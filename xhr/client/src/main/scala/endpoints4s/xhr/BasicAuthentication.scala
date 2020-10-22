@@ -5,8 +5,7 @@ import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 import org.scalajs.dom.window.btoa
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 

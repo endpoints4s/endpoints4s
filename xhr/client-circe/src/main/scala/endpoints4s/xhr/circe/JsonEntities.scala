@@ -5,8 +5,7 @@ import endpoints4s.xhr.EndpointsWithCustomErrors
 import io.circe.{parser, Decoder => CirceDecoder, Encoder => CirceEncoder}
 import org.scalajs.dom.XMLHttpRequest
 
-/**
-  * An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
+/** An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
   * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
   * HTTP responses.
   *

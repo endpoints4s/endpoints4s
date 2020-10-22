@@ -10,8 +10,7 @@ import endpoints4s.algebra
 
 import scala.concurrent.Future
 
-/**
-  * Interpreter for the [[algebra.ChunkedEntities]] algebra in the [[endpoints4s.akkahttp.server]] family.
+/** Interpreter for the [[algebra.ChunkedEntities]] algebra in the [[endpoints4s.akkahttp.server]] family.
   *
   * @group interpreters
   */
@@ -59,8 +58,7 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 
 }
 
-/**
-  * Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.akkahttp.server]] family.
+/** Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.akkahttp.server]] family.
   *
   * @group interpreters
   */

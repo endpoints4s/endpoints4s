@@ -7,8 +7,7 @@ import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
 
 import scala.collection.mutable
 
-/**
-  * @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
+/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
 @throws(classOf[IllegalArgumentException])
@@ -910,8 +909,7 @@ sealed trait Schema {
   def example: Option[ujson.Value]
   def title: Option[String]
 
-  /**
-    * @return The same schema with its description overridden by the given `description`,
+  /** @return The same schema with its description overridden by the given `description`,
     *         or stay unchanged if this one is empty.
     */
   def withDefinedDescription(description: Option[String]): Schema =

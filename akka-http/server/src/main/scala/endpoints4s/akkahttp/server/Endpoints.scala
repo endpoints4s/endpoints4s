@@ -21,16 +21,14 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
   * to model client and server errors.
   *
   * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
   * @group interpreters
   */
 trait EndpointsWithCustomErrors
@@ -276,8 +274,7 @@ trait EndpointsWithCustomErrors
         )
     }
 
-  /**
-    * This method is called by ''endpoints'' when an exception is thrown during
+  /** This method is called by ''endpoints'' when an exception is thrown during
     * request processing.
     *
     * The provided implementation uses [[serverErrorResponse]] to complete

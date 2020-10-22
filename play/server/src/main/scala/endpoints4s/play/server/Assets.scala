@@ -8,29 +8,25 @@ import play.api.http.{ContentTypes, HttpEntity}
 import play.api.mvc.Results
 import play.mvc.Http.HeaderNames
 
-/**
-  * Interpreter for [[algebra.Assets]] that performs routing using Play framework
+/** Interpreter for [[algebra.Assets]] that performs routing using Play framework
   *
   * @group interpreters
   */
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
-  /**
-    * @param assetPath Path of the requested asset
+  /** @param assetPath Path of the requested asset
     * @param isGzipSupported Whether the client supports gzip encoding or not
     */
   case class AssetRequest(assetPath: AssetPath, isGzipSupported: Boolean)
 
-  /**
-    * {{{
+  /** {{{
     *   // foo/bar/baz-123abc
     *   AssetPath("foo" :: "bar" :: Nil, "123abc", "baz")
     * }}}
     */
   case class AssetPath(path: Seq[String], digest: String, name: String)
 
-  /**
-    * Convenient constructor for building an asset from its name, without
+  /** Convenient constructor for building an asset from its name, without
     * providing its digest.
     *
     * Useful for reverse routing:
@@ -45,8 +41,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   def asset(name: String): AssetRequest = makeAsset(None, name)
 
-  /**
-    * Convenient constructor for building an asset from its name and
+  /** Convenient constructor for building an asset from its name and
     * path, without providing its digest.
     *
     * Useful for reverse routing:
@@ -81,15 +76,13 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     ) // HACK isGzipSupported makes no sense here
   }
 
-  /**
-    * An [[AssetResponse]] is either [[AssetNotFound]] (if the asset has not been found on
+  /** An [[AssetResponse]] is either [[AssetNotFound]] (if the asset has not been found on
     * the server) or [[Found]] otherwise.
     */
   sealed trait AssetResponse
   case object AssetNotFound extends AssetResponse
 
-  /**
-    * @param data Asset content
+  /** @param data Asset content
     * @param contentLength Size, if known
     * @param contentType Content type, if known
     * @param isGzipped Whether `data` contains the gzipped version of the asset
@@ -101,8 +94,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       isGzipped: Boolean
   ) extends AssetResponse
 
-  /**
-    * Decodes and encodes an [[AssetPath]] into a URL path.
+  /** Decodes and encodes an [[AssetPath]] into a URL path.
     */
   def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
     val stringPath = segment[String](name, docs)
@@ -127,8 +119,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   private lazy val gzipSupport: RequestHeaders[Boolean] =
     headers => Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))
 
-  /**
-    * An endpoint for serving assets.
+  /** An endpoint for serving assets.
     *
     * @param url URL description
     * @return An HTTP endpoint serving assets
@@ -149,8 +140,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     endpoint(req, assetResponse)
   }
 
-  /**
-    * Builds a Play `Result` from an [[AssetResponse]]
+  /** Builds a Play `Result` from an [[AssetResponse]]
     */
   private def assetResponse: Response[AssetResponse] = {
     case Found(resource, maybeLength, maybeContentType, isGzipped) =>
@@ -168,8 +158,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     case AssetNotFound => NotFound
   }
 
-  /**
-    * @param pathPrefix Prefix to use to look up the resources in the classpath. You
+  /** @param pathPrefix Prefix to use to look up the resources in the classpath. You
     *                   most probably never want to publish all your classpath resources.
     * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
     *         looking for the requested asset in the classpath resources.

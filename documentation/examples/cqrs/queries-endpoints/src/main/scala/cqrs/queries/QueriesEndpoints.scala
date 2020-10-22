@@ -6,8 +6,7 @@ import endpoints4s.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-/**
-  * This is our *internal* protocol for queries. We don’t have to suffer from
+/** This is our *internal* protocol for queries. We don’t have to suffer from
   * REST conventions:
   *  - our client doesn’t care about the “semantic” difference between POST and GET.
   *  - status codes other than 500 and 200 are useless: the query is built

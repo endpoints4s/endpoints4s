@@ -8,8 +8,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 import scala.collection.immutable.SortedMap
 
-/**
-  * This is the model used for querying.
+/** This is the model used for querying.
   */
 // TODO Add useful stats
 case class Meter(

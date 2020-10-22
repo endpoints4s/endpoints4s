@@ -1,7 +1,6 @@
 package endpoints4s.play.server.circe
 
-/**
-  * Convenient trait that groups together [[endpoints4s.play.server.JsonEntitiesFromCodecs]]
+/** Convenient trait that groups together [[endpoints4s.play.server.JsonEntitiesFromCodecs]]
   * and [[endpoints4s.algebra.circe.JsonEntitiesFromCodecs]].
   *
   * @group interpreters

@@ -1,7 +1,6 @@
 package endpoints4s.play
 
-/**
-  * Client interpreters backed by Play WS
+/** Client interpreters backed by Play WS
   *
   * @groupname interpreters Interpreters
   */

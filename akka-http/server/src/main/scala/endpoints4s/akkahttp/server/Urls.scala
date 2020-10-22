@@ -10,8 +10,7 @@ import endpoints4s.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, 
 
 import scala.collection.mutable
 
-/**
-  * [[algebra.Urls]] interpreter that decodes and encodes URLs.
+/** [[algebra.Urls]] interpreter that decodes and encodes URLs.
   *
   * @group interpreters
   */
@@ -83,8 +82,7 @@ trait Urls extends algebra.Urls with StatusCodes {
         params => fa.validate(params).map(f)
     }
 
-  /**
-    * Given a parameter name and a query string content, returns a decoded parameter
+  /** Given a parameter name and a query string content, returns a decoded parameter
     * value of type `T`, or `Invalid` if decoding failed
     */
   type QueryStringParam[T] = (String, Map[String, Seq[String]]) => Validated[T]
@@ -257,8 +255,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       }
     }
 
-  /**
-    * Simpler alternative to `Directive.&()` method
+  /** Simpler alternative to `Directive.&()` method
     */
   protected def joinDirectives[T1, T2](
       dir1: Directive1[T1],
@@ -277,8 +274,7 @@ trait Urls extends algebra.Urls with StatusCodes {
     directive.tmap(_ => Tuple1(()))
   }
 
-  /**
-    * This method is called by endpoints4s when decoding a request failed.
+  /** This method is called by endpoints4s when decoding a request failed.
     *
     * The provided implementation calls `clientErrorsResponse` to complete
     * with a response containing the errors.

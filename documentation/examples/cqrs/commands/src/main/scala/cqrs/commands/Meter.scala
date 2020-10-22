@@ -3,8 +3,7 @@ package cqrs.commands
 import java.time.Instant
 import java.util.UUID
 
-/**
-  * This is the model used to validate commands.
+/** This is the model used to validate commands.
   * It is not necessary the same as the one for querying.
   *
   * For instance, here we use a `List` to store the records,
@@ -21,8 +20,7 @@ case class Record(date: Instant, value: BigDecimal)
 
 object Meter {
 
-  /**
-    * @return The produced event, or `None` if the command was not valid.
+  /** @return The produced event, or `None` if the command was not valid.
     */
   // TODO Return meaningful information in case of invalid command
   def handleCreationCommand(creationCommand: CreationCommand): Option[Event] =

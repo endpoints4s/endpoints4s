@@ -1,7 +1,6 @@
 package endpoints4s.algebra
 
-/**
-  * Helper trait that can be mixed into [[JsonSchemas]] to implement (as no-ops)
+/** Helper trait that can be mixed into [[JsonSchemas]] to implement (as no-ops)
   * the documentation related methods. This is useful for implementing any
   * non-documentation inteprereters.
   */

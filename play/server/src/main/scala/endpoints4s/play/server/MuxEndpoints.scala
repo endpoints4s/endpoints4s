@@ -9,8 +9,7 @@ import play.api.mvc.{EssentialAction, Result}
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
@@ -90,8 +89,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 }
 
 //#mux-handler-async
-/**
-  * A function whose return type depends on the type
+/** A function whose return type depends on the type
   * of the given `req`.
   *
   * @tparam Req Request base type
@@ -102,8 +100,7 @@ trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
 }
 //#mux-handler-async
 
-/**
-  * A function whose return type depends on the type
+/** A function whose return type depends on the type
   * of the given `req`.
   *
   * @tparam Req Request base type

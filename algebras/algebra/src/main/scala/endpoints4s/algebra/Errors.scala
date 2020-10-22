@@ -2,8 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s.Invalid
 
-/**
-  * Defines the error types used to model client and server errors.
+/** Defines the error types used to model client and server errors.
   *
   * The `ClientErrors` type is used by endpoints4s to model errors coming
   * from the client (missing query parameter, invalid entity, etc.).
@@ -59,8 +58,7 @@ trait Errors { this: Responses =>
     */
   def serverErrorToThrowable(serverError: ServerError): Throwable
 
-  /**
-    * Response used by endpoints4s when decoding
+  /** Response used by endpoints4s when decoding
     * a request fails.
     *
     * The provided implementation forwards to `badRequest`.
@@ -70,14 +68,12 @@ trait Errors { this: Responses =>
   lazy val clientErrorsResponse: Response[ClientErrors] =
     badRequest(docs = Some("Client error"))
 
-  /**
-    * Format of the response entity carrying the client errors.
+  /** Format of the response entity carrying the client errors.
     * @group operations
     */
   def clientErrorsResponseEntity: ResponseEntity[ClientErrors]
 
-  /**
-    * Response used by endpoints4s when the
+  /** Response used by endpoints4s when the
     * business logic of an endpoint fails.
     *
     * The provided implementation forwards to `internalServerError`
@@ -86,8 +82,7 @@ trait Errors { this: Responses =>
   lazy val serverErrorResponse: Response[ServerError] =
     internalServerError(docs = Some("Server error"))
 
-  /**
-    * Format of the response entity carrying the server error.
+  /** Format of the response entity carrying the server error.
     * @group operations
     */
   def serverErrorResponseEntity: ResponseEntity[ServerError]

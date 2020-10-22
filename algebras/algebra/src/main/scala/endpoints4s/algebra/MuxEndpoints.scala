@@ -1,21 +1,18 @@
 package endpoints4s.algebra
 
-/**
-  * Algebra interface for describing endpoints such that one endpoint can
+/** Algebra interface for describing endpoints such that one endpoint can
   * handle several types of requests and responses.
   *
   * @group algebras
   */
 trait MuxEndpoints extends EndpointsWithCustomErrors {
 
-  /**
-    * Information carried by a multiplexed HTTP endpoint.
+  /** Information carried by a multiplexed HTTP endpoint.
     * @group types
     */
   type MuxEndpoint[Req <: MuxRequest, Resp, Transport]
 
-  /**
-    * Multiplexed HTTP endpoint.
+  /** Multiplexed HTTP endpoint.
     *
     * A multiplexing endpoint makes it possible to use several request
     * and response types in the same HTTP endpoint. In other words, it
@@ -36,8 +33,7 @@ trait MuxEndpoints extends EndpointsWithCustomErrors {
 
 }
 
-/**
-  * Multiplexed request type
+/** Multiplexed request type
   */
 trait MuxRequest {
 

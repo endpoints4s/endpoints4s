@@ -1,7 +1,6 @@
 package endpoints4s.algebra
 
-/**
-  * Describes endpoints related to static assets (e.g. medias, scripts, stylesheets, etc.)
+/** Describes endpoints related to static assets (e.g. medias, scripts, stylesheets, etc.)
   *
   * @group algebras
   */
@@ -22,8 +21,7 @@ trait Assets extends EndpointsWithCustomErrors {
     */
   type AssetResponse
 
-  /**
-    * A [[Path]] that extracts an [[AssetPath]] from all the path segments.
+  /** A [[Path]] that extracts an [[AssetPath]] from all the path segments.
     *
     * Consider the following definition:
     * {{{
@@ -40,8 +38,7 @@ trait Assets extends EndpointsWithCustomErrors {
       docs: Documentation = None
   ): Path[AssetPath]
 
-  /**
-    * @param url URL description
+  /** @param url URL description
     * @param docs description of a response when asset is found. Required by openapi
     * @param notFoundDocs description of a not found asset response. Required by openapi
     * @return An HTTP endpoint serving assets
