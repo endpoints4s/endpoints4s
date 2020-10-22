@@ -102,7 +102,7 @@ object EndpointsSettings {
   val playjsonVersion = "2.9.1"
   val playVersion = "2.8.2"
   val sttpVersion = "1.7.2"
-  val akkaActorVersion = "2.6.8"
+  val akkaActorVersion = "2.6.10"
   val akkaHttpVersion = "10.2.1"
   val http4sVersion = "0.21.7"
   val ujsonVersion = "1.1.0"
