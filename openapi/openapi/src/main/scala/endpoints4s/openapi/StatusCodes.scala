@@ -1,8 +1,7 @@
 package endpoints4s
 package openapi
 
-/**
-  * Interpreter for [[endpoints4s.algebra.StatusCodes]]
+/** Interpreter for [[endpoints4s.algebra.StatusCodes]]
   *
   * @group interpreters
   */

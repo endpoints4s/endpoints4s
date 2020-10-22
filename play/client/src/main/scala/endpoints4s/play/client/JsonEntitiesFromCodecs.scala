@@ -3,8 +3,7 @@ package endpoints4s.play.client
 import play.api.http.ContentTypes
 import play.api.libs.ws.{BodyWritable, InMemoryBody}
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
   * and decodes JSON responses.
   *
   * @group interpreters

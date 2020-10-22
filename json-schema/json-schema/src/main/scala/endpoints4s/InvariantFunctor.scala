@@ -3,8 +3,7 @@ package endpoints4s
 /** Defines ways to transform a given type constructor F */
 trait InvariantFunctor[F[_]] {
 
-  /**
-    * Transforms an `F[A]` value into an `F[B]` value given a pair
+  /** Transforms an `F[A]` value into an `F[B]` value given a pair
     * of functions from `A` to `B` and from `B` to `A`.
     *
     * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
@@ -15,16 +14,14 @@ trait InvariantFunctor[F[_]] {
 /** Provides extensions methods for values of type [[InvariantFunctor]] */
 trait InvariantFunctorSyntax {
 
-  /**
-    * Extension methods for values of type `F[A]` for which there is an implicit
+  /** Extension methods for values of type `F[A]` for which there is an implicit
     * `InvariantFunctor[F]` instance.
     */
   implicit class InvariantFunctorSyntax[A, F[_]](val fa: F[A])(implicit
       ev: InvariantFunctor[F]
   ) {
 
-    /**
-      * Transforms an `F[A]` value into an `F[B]` value given a pair
+    /** Transforms an `F[A]` value into an `F[B]` value given a pair
       * of functions from `A` to `B` and from `B` to `A`.
       *
       * @see [[http://julienrf.github.io/endpoints/algebras/endpoints.html#transforming-and-refining-url-constituents Some examples]]
@@ -41,8 +38,7 @@ trait InvariantFunctorSyntax {
   */
 trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
 
-  /**
-    * Transforms an `F[A]` value into an `F[B]` value given a partial function
+  /** Transforms an `F[A]` value into an `F[B]` value given a partial function
     * from `A` to `B`, and a total function from `B` to `A`.
     *
     * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
@@ -51,8 +47,7 @@ trait PartialInvariantFunctor[F[_]] extends InvariantFunctor[F] {
     */
   def xmapPartial[A, B](fa: F[A], f: A => Validated[B], g: B => A): F[B]
 
-  /**
-    * Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
+  /** Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
     *
     * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
     *
@@ -71,8 +66,7 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
       ev: PartialInvariantFunctor[F]
   ) {
 
-    /**
-      * Transforms an `F[A]` value into an `F[B]` value given a partial function
+    /** Transforms an `F[A]` value into an `F[B]` value given a partial function
       * from `A` to `B`, and a total function from `B` to `A`.
       *
       * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
@@ -82,8 +76,7 @@ trait PartialInvariantFunctorSyntax extends InvariantFunctorSyntax {
     def xmapPartial[B](f: A => Validated[B])(g: B => A): F[B] =
       ev.xmapPartial(fa, f, g)
 
-    /**
-      * Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
+    /** Transforms an `F[A]` value into an `F[B]` value given a `Codec[A, B]`.
       *
       * This is useful to ''refine'' the type `A` into a possibly smaller type `B`.
       *

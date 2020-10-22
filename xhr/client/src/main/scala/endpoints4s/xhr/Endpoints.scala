@@ -16,8 +16,7 @@ import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
-/**
-  * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
+/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
   * using XMLHttpRequest. It uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * The interpreter is ''partially'' implemented: it returns endpoint invocation
@@ -29,8 +28,7 @@ import scala.scalajs.js
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
+/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
   * using XMLHttpRequest.
   *
   * @group interpreters
@@ -41,8 +39,7 @@ trait EndpointsWithCustomErrors
     with Methods
     with StatusCodes {
 
-  /**
-    * A function that takes the information `A` and the XMLHttpRequest
+  /** A function that takes the information `A` and the XMLHttpRequest
     * and sets up some headers on it.
     */
   type RequestHeaders[A] = js.Function2[A, XMLHttpRequest, Unit]
@@ -87,8 +84,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /**
-    * A function that takes the information `A` and returns an XMLHttpRequest
+  /** A function that takes the information `A` and returns an XMLHttpRequest
     * with an optional request entity. If provided, the request entity must be
     * compatible with the `send` method of XMLHttpRequest.
     */
@@ -112,8 +108,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /**
-    * A function that, given information `A` and an XMLHttpRequest, returns
+  /** A function that, given information `A` and an XMLHttpRequest, returns
     * a request entity.
     * Also, as a side-effect, the function can set the corresponding Content-Type header
     * on the given XMLHttpRequest.
@@ -181,8 +176,7 @@ trait EndpointsWithCustomErrors
     xhr
   }
 
-  /**
-    * Attempts to decode an `A` from an XMLHttpRequest’s response
+  /** Attempts to decode an `A` from an XMLHttpRequest’s response
     */
   type Response[A] = js.Function1[XMLHttpRequest, Option[ResponseEntity[A]]]
 
@@ -222,13 +216,11 @@ trait EndpointsWithCustomErrors
         .decode(xhr.responseText)
         .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
 
-  /**
-    * Discards response entity
+  /** Discards response entity
     */
   def emptyResponse: ResponseEntity[Unit] = _ => Right(())
 
-  /**
-    * Decodes a text entity
+  /** Decodes a text entity
     */
   def textResponse: ResponseEntity[String] = xhr => Right(xhr.responseText)
 
@@ -295,16 +287,14 @@ trait EndpointsWithCustomErrors
         .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(xhr).map(mapResponseEntity(_)(Right(_))))
 
-  /**
-    * A function that takes the information needed to build a request and returns
+  /** A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
     */
   abstract class Endpoint[A, B](request: Request[A]) extends (A => Result[B]) {
     def href(a: A): String = request.href(a)
   }
 
-  /**
-    * A value that eventually yields an `A`.
+  /** A value that eventually yields an `A`.
     *
     * Typically, concrete representation of `Result` will have an instance of `MonadError`, so
     * that we can perform requests (sequentially and in parallel) and recover errors.

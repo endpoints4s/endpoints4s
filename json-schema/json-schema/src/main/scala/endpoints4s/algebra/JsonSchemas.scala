@@ -8,8 +8,7 @@ import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.util.control.Exception
 
-/**
-  * An algebra interface for describing algebraic data types. Such descriptions
+/** An algebra interface for describing algebraic data types. Such descriptions
   * can be interpreted to produce a JSON schema of the data type, a JSON encoder,
   * a JSON decoder, etc.
   *
@@ -72,8 +71,7 @@ import scala.util.control.Exception
   */
 trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
-  /**
-    * The JSON schema of a type `A`
+  /** The JSON schema of a type `A`
     *
     * JSON schemas can be interpreted as encoders serializing values of type `A` into JSON,
     * decoders de-serializing JSON documents into values of type `A`, or documentation rendering
@@ -89,15 +87,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   type JsonSchema[A]
 
-  /**
-    * Provides `xmap` and `xmapPartial` operations.
+  /** Provides `xmap` and `xmapPartial` operations.
     *
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema]
 
-  /**
-    * A more specific type of JSON schema for record types (case classes)
+  /** A more specific type of JSON schema for record types (case classes)
     *
     * Values of type `Record[A]` can be constructed with the operations [[field]] and [[optField]].
     *
@@ -107,15 +103,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   type Record[A] <: JsonSchema[A]
 
-  /**
-    * Provides `xmap` and `xmapPartial` operations.
+  /** Provides `xmap` and `xmapPartial` operations.
     *
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record]
 
-  /**
-    * A more specific type of JSON schema for sum types (sealed traits)
+  /** A more specific type of JSON schema for sum types (sealed traits)
     *
     * “Tagged” schemas include the name of the type `A` as an additional discriminator field. By default,
     * the name of the discriminator field is defined by the operation [[defaultDiscriminatorName]] but
@@ -129,15 +123,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   type Tagged[A] <: JsonSchema[A]
 
-  /**
-    * Provides `xmap` and `xmapPartial` operations.
+  /** Provides `xmap` and `xmapPartial` operations.
     *
     * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged]
 
-  /**
-    * A more specific type of JSON schema for enumerations, i.e. types that have a specific set of valid values
+  /** A more specific type of JSON schema for enumerations, i.e. types that have a specific set of valid values
     *
     * Values of type `Enum[A]` can be constructed by the operations [[enumeration]] and [[stringEnumeration]].
     *
@@ -159,8 +151,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   def enumeration[A](values: Seq[A])(tpe: JsonSchema[A]): Enum[A]
 
-  /**
-    * Convenient constructor for enumerations represented by string values.
+  /** Convenient constructor for enumerations represented by string values.
     * @group operations
     */
   final def stringEnumeration[A](
@@ -181,8 +172,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     )
   }
 
-  /**
-    * A schema for a statically known value.
+  /** A schema for a statically known value.
     *
     *   - Decoder interpreters first try to decode incoming values with the given `tpe` schema,
     *     and then check that it is equal to the given `value`,
@@ -218,8 +208,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Annotates the enumeration JSON schema with a name */
   def namedEnum[A](schema: Enum[A], name: String): Enum[A]
 
-  /**
-    * Captures a lazy reference to a JSON schema currently being defined:
+  /** Captures a lazy reference to a JSON schema currently being defined:
     *
     * {{{
     *   case class Recursive(next: Option[Recursive])
@@ -237,8 +226,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
 
-  /**
-    * Captures a lazy reference to a JSON schema currently being defined.
+  /** Captures a lazy reference to a JSON schema currently being defined.
     *
     * Interpreters should return a JsonSchema value that does not evaluate
     * the given `schema` unless it is effectively used.
@@ -289,8 +277,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       tpe: JsonSchema[A]
   ): Record[Option[A]]
 
-  /**
-    * The JSON schema of a record with a single optional field with the given `name`
+  /** The JSON schema of a record with a single optional field with the given `name`
     *
     *   - Decoders fallback to the `defaultValue` if the field is absent from
     *     the decoded JSON object. They fail if the field is present but has an
@@ -404,8 +391,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       title: String
   ): JsonSchema[A]
 
-  /**
-    * A schema that can be either `schemaA` or `schemaB`.
+  /** A schema that can be either `schemaA` or `schemaB`.
     *
     * Documentation interpreter produce a `oneOf` JSON schema.
     * Encoder interpreters forward to either `schemaA` or `schemaB`.
@@ -426,15 +412,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       schemaB: JsonSchema[B]
   ): JsonSchema[Either[A, B]]
 
-  /**
-    * Documentation related methods for annotating schemas. Encoder and decoder
+  /** Documentation related methods for annotating schemas. Encoder and decoder
     * interpreters ignore this information.
     */
   sealed trait JsonSchemaDocumentationOps[A] {
     type Self <: JsonSchema[A]
 
-    /**
-      * Include an example of value in this schema
+    /** Include an example of value in this schema
       *
       *   - Encoder and decoder interpreters ignore this value,
       *   - Documentation interpreters can show this example value.
@@ -443,8 +427,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       */
     def withExample(example: A): Self
 
-    /**
-      * Include a description of what this schema represents
+    /** Include a description of what this schema represents
       *
       *   - Encoder and decoder interpreters ignore this description,
       *   - Documentation interpreters can show this description.
@@ -453,8 +436,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       */
     def withDescription(description: String): Self
 
-    /**
-      * Include a title for the schema
+    /** Include a title for the schema
       *
       *   - Encoder and decoder interpreters ignore the title,
       *   - Documentation interpreters can show this title.
@@ -465,8 +447,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   }
 
-  /**
-    * Implicit methods for values of type [[JsonSchema]]
+  /** Implicit methods for values of type [[JsonSchema]]
     * @group operations
     */
   final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A])
@@ -482,8 +463,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     def withTitle(title: String): JsonSchema[A] =
       withTitleJsonSchema(schemaA, title)
 
-    /**
-      * A schema that can be either `schemaA` or `schemaB`.
+    /** A schema that can be either `schemaA` or `schemaB`.
       *
       *   - Encoder interpreters forward to `schemaA` to encode a `Left` value or `schemaB`
       *     to encode a `Right` value,
@@ -540,8 +520,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       */
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
 
-    /**
-      * Give a name to the schema
+    /** Give a name to the schema
       *
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
@@ -610,8 +589,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     )(implicit cta: ClassTag[A], ctb: ClassTag[B]): Tagged[C] =
       orElseMergeTagged(taggedA, taggedB)
 
-    /**
-      * Give a name to the schema
+    /** Give a name to the schema
       *
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
@@ -623,8 +601,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       */
     def named(name: String): Tagged[A] = namedTagged(taggedA, name)
 
-    /**
-      * Override the name of the type discriminator field of this record.
+    /** Override the name of the type discriminator field of this record.
       */
     def withDiscriminator(name: String): Tagged[A] =
       withDiscriminatorTagged(taggedA, name)
@@ -643,8 +620,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   final implicit class EnumOps[A](enumA: Enum[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Enum[A]
 
-    /**
-      * Give a name to the schema
+    /** Give a name to the schema
       *
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
@@ -679,8 +655,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       )
     }(_.toString)
 
-  /**
-    * A JSON schema for type `String`.
+  /** A JSON schema for type `String`.
     *
     * @param format An additional semantic information about the underlying format of the string
     * @see [[https://json-schema.org/understanding-json-schema/reference/string.html#format]]

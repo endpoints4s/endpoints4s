@@ -55,7 +55,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     implicit val schemaAuthor: JsonSchema[Author] = (
       field[String]("name", documentation = Some("Author name"))
         .xmap[Author](Author)(_.name)
-      )
+    )
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
 

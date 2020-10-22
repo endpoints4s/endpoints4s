@@ -1,7 +1,6 @@
 package endpoints4s.algebra
 
-/**
-  * @group algebras
+/** @group algebras
   * @groupname types Types
   * @groupdesc types Types introduced by the algebra
   * @groupprio types 1
@@ -52,8 +51,7 @@ trait StatusCodes {
   def NotModified: StatusCode = unsupportedInterpreter("1.2.0")
 
   // 4xx Client Error
-  /**
-    * @note You should use the `badRequest` constructor provided by the [[endpoints4s.algebra.Responses]]
+  /** @note You should use the `badRequest` constructor provided by the [[endpoints4s.algebra.Responses]]
     *       trait to ensure that errors produced by endpoints4s are consistently
     *       handled by interpreters.
     * @group operations
@@ -142,8 +140,7 @@ trait StatusCodes {
   def UnavailableForLegalReasons: StatusCode = unsupportedInterpreter("1.1.0")
 
   // 5xx Server Error
-  /**
-    * @note You should use the `internalServerError` constructor provided by the
+  /** @note You should use the `internalServerError` constructor provided by the
     *       [[endpoints4s.algebra.Responses]] trait to ensure that errors produced by endpoints4s
     *       are consistently handled by interpreters.
     * @group operations

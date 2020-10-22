@@ -1,7 +1,6 @@
 package endpoints4s.generic
 
-/**
-  * Adds a description to a case class field, a case class, or a sealed trait.
+/** Adds a description to a case class field, a case class, or a sealed trait.
   *
   * Annotate a case class field, case class, or sealed trait with this
   * annotation to set a description for the schema or the record field.
@@ -10,8 +9,7 @@ package endpoints4s.generic
   */
 case class docs(text: String) extends scala.annotation.Annotation
 
-/**
-  * Defines the title of a generic schema.
+/** Defines the title of a generic schema.
   *
   * Annotate a sealed trait or case class definition with this annotation
   * to define its schema title.
@@ -20,8 +18,7 @@ case class docs(text: String) extends scala.annotation.Annotation
   */
 case class title(value: String) extends scala.annotation.Annotation
 
-/**
-  * Defines the name of a generic schema.
+/** Defines the name of a generic schema.
   *
   * Annotate a sealed trait or case class definition with this annotation
   * to define its schema name. Setting the name of a schema explicitly means
@@ -39,8 +36,7 @@ case class title(value: String) extends scala.annotation.Annotation
   */
 case class name(value: String) extends scala.annotation.Annotation
 
-/**
-  * Specifies that a generic schema should not have a name.
+/** Specifies that a generic schema should not have a name.
   *
   * Annotate a sealed trait or case class definition with this annotation to
   * prevent the schema from being named. This is sometimes useful for forcing
@@ -48,8 +44,7 @@ case class name(value: String) extends scala.annotation.Annotation
   */
 case class unnamed() extends scala.annotation.Annotation
 
-/**
-  * Defines the name of the discriminator field of a generic tagged schema.
+/** Defines the name of the discriminator field of a generic tagged schema.
   *
   * Annotate a sealed trait definition with this annotation to define
   * the name of its discriminator field.

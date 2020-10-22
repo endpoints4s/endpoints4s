@@ -3,8 +3,7 @@ package endpoints4s.xhr
 import endpoints4s.{Codec, algebra}
 import org.scalajs.dom.XMLHttpRequest
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
   * and decodes JSON responses.
   *
   * @group interpreters
@@ -22,8 +21,7 @@ trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.Json
 
 }
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
   * and decodes JSON responses.
   *
   * @group interpreters

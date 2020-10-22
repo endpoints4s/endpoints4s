@@ -7,8 +7,7 @@ import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAl
 
 import scala.collection.compat._
 
-/**
-  * An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a JSON schema for
+/** An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a JSON schema for
   * a given algebraic data type description.
   *
   * The encoding of the schemas of sealed traits (obtained with the operation
@@ -20,8 +19,7 @@ import scala.collection.compat._
 trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   openapiJsonSchemas =>
 
-  /**
-    * The JSON codecs used to produce some parts of the documentation.
+  /** The JSON codecs used to produce some parts of the documentation.
     */
   final lazy val ujsonSchemas: endpoints4s.ujson.JsonSchemas =
     new endpoints4s.ujson.JsonSchemas {
@@ -88,8 +86,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         title: Option[String] = None
     ) extends DocumentedJsonSchema
 
-    /**
-      * @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
+    /** @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
       */
     case class Array(
         schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]],
@@ -512,8 +509,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   sealed trait CoproductEncoding
 
-  /**
-    * This object contains the options for how to encode coproduct JSON schemas.
+  /** This object contains the options for how to encode coproduct JSON schemas.
     *
     * The following Scala coproduct is the candidate example. Each encoding
     * option includes the schema that it would generate for that example.
@@ -663,8 +659,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     case object OneOfWithBaseRef extends CoproductEncoding
   }
 
-  /**
-    * Override this method to customize the strategy used to encode the JSON
+  /** Override this method to customize the strategy used to encode the JSON
     * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
     *
     * @see [[JsonSchemas.CoproductEncoding$]]

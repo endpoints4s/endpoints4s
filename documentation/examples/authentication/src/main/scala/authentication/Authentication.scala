@@ -28,8 +28,7 @@ import play.api.libs.functional.syntax._
 import play.api.mvc.Results
 
 //#enriched-algebra
-/**
-  * Algebra interface for defining authenticated endpoints using JWT.
+/** Algebra interface for defining authenticated endpoints using JWT.
   */
 trait Authentication extends algebra.Endpoints {
 
@@ -57,8 +56,7 @@ trait Authentication extends algebra.Endpoints {
   // The following two methods are internally used by interpreters to implement the authentication logic
 
 //#protected-endpoints-algebra
-  /**
-    * A request with the given `method`, `url` and `entity`, and which is rejected by the server if it
+  /** A request with the given `method`, `url` and `entity`, and which is rejected by the server if it
     * doesn’t contain a valid JWT.
     */
   private[authentication] def authenticatedRequest[U, E, UE, UET](
@@ -78,8 +76,7 @@ trait Authentication extends algebra.Endpoints {
       response: Response[A]
   ): Response[A]
 
-  /**
-    * User-facing constructor for endpoints requiring authentication.
+  /** User-facing constructor for endpoints requiring authentication.
     *
     * @return An endpoint requiring a authentication information to be provided
     *         in the `Authorization` request header. It returns `response`
@@ -138,8 +135,7 @@ object ClockSettings {
 }
 
 //#client-interpreter
-/**
-  * Interpreter for the [[Authentication]] algebra interface that produces
+/** Interpreter for the [[Authentication]] algebra interface that produces
   * a Play client (using `play.api.libs.ws.WSClient`).
   */
 trait ClientAuthentication extends client.Endpoints with Authentication {
@@ -205,8 +201,7 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
 }
 //#client-interpreter
 
-/**
-  * Interpreter for the [[Authentication]] algebra interface that produces
+/** Interpreter for the [[Authentication]] algebra interface that produces
   * a Play server.
   */
 //#server-interpreter

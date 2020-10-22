@@ -6,8 +6,7 @@ import play.api.mvc.{DefaultActionBuilder, PlayBodyParsers}
 
 import scala.concurrent.ExecutionContext
 
-/**
-  * Play components needed by the interpreter
+/** Play components needed by the interpreter
   */
 trait PlayComponents {
   def playBodyParsers: PlayBodyParsers

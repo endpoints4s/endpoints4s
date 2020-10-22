@@ -1,7 +1,6 @@
 package endpoints4s
 
-/**
-  * Algebra interfaces
+/** Algebra interfaces
   *
   * @groupname algebras Algebras
   * @groupname interpreters Interpreters

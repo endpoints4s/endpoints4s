@@ -5,8 +5,7 @@ package quickstart
 import endpoints4s.{algebra, generic}
 
 //#get-endpoint-definition
-/**
-  * Defines the HTTP endpoints description of a web service implementing a counter.
+/** Defines the HTTP endpoints description of a web service implementing a counter.
   * This web service has two endpoints: one for getting the current value of the counter,
   * and one for incrementing it.
   */
@@ -17,8 +16,7 @@ trait CounterEndpoints
     with generic.JsonSchemas {
 
 //#get-endpoint-definition
-  /**
-    * Get the counter current value.
+  /** Get the counter current value.
     * Uses the HTTP verb “GET” and URL path “/current-value”.
     * The response entity is a JSON document representing the counter value.
     */
@@ -27,8 +25,7 @@ trait CounterEndpoints
     endpoint(get(path / "current-value"), ok(jsonResponse[Counter]))
 
 //#get-endpoint-definition
-  /**
-    * Increments the counter value.
+  /** Increments the counter value.
     * Uses the HTTP verb “POST” and URL path “/increment”.
     * The request entity is a JSON document representing the increment to apply to the counter.
     * The response entity is empty.

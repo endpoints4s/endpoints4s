@@ -9,8 +9,7 @@ object DocumentedApi
     with openapi.BasicAuthentication
     with openapi.JsonEntities {
 
-  /**
-    * Produces an OpenAPI description of the endpoints.
+  /** Produces an OpenAPI description of the endpoints.
     */
   val documentation: OpenApi =
     openApi(

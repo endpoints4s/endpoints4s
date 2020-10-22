@@ -4,16 +4,14 @@ import endpoints4s.xhr
 
 import scala.concurrent.{Future, Promise}
 
-/**
-  * Implements [[xhr.Endpoints]] by using Scala’s `Futures`, and uses [[endpoints4s.algebra.BuiltInErrors]]
+/** Implements [[xhr.Endpoints]] by using Scala’s `Futures`, and uses [[endpoints4s.algebra.BuiltInErrors]]
   * to model client and server errors.
   *
   * @group interpreters
   */
 trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 
-/**
-  * Implements [[xhr.Endpoints]] by using Scala’s `Future`s.
+/** Implements [[xhr.Endpoints]] by using Scala’s `Future`s.
   * @group interpreters
   */
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {

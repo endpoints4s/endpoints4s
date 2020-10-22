@@ -7,8 +7,7 @@ import endpoints4s.akkahttp.server
 
 import scala.concurrent.stm.Ref
 
-/**
-  * Defines a Play router (and reverse router) for the endpoints described
+/** Defines a Play router (and reverse router) for the endpoints described
   * in the `CounterEndpoints` trait.
   */
 object CounterServer

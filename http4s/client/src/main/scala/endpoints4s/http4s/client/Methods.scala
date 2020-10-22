@@ -3,8 +3,7 @@ package endpoints4s.http4s.client
 import endpoints4s.algebra
 import org.http4s
 
-/**
-  * [[algebra.Methods]] interpreter that decodes and encodes methods.
+/** [[algebra.Methods]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

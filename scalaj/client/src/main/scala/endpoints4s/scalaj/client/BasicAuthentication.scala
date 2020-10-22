@@ -6,8 +6,7 @@ import endpoints4s.{Tupler, algebra}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 

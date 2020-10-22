@@ -4,8 +4,7 @@ package quickstart
 import endpoints4s.openapi
 import endpoints4s.openapi.model.{Info, OpenApi}
 
-/**
-  * Generates OpenAPI documentation for the endpoints described in the `CounterEndpoints` trait.
+/** Generates OpenAPI documentation for the endpoints described in the `CounterEndpoints` trait.
   */
 object CounterDocumentation
     extends CounterEndpoints

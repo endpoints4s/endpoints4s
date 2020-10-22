@@ -11,8 +11,7 @@ import org.http4s.Uri
 import scala.collection.compat._
 import scala.collection.mutable
 
-/**
-  * [[algebra.Urls]] interpreter that decodes and encodes URLs.
+/** [[algebra.Urls]] interpreter that decodes and encodes URLs.
   *
   * @group interpreters
   */

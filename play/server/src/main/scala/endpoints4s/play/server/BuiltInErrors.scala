@@ -3,8 +3,7 @@ package endpoints4s.play.server
 import endpoints4s.{Invalid, algebra}
 import play.api.http.{ContentTypes, Writeable}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BuiltInErrors extends algebra.BuiltInErrors {
   this: EndpointsWithCustomErrors =>

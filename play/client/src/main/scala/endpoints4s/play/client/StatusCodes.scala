@@ -2,8 +2,7 @@ package endpoints4s.play.client
 
 import endpoints4s.algebra
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait StatusCodes extends algebra.StatusCodes {
 

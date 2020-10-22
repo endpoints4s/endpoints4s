@@ -5,8 +5,7 @@ import endpoints4s.{Decoder, Encoder, xhr}
 
 import scala.scalajs.js
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
 

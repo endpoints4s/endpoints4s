@@ -2,14 +2,12 @@ package endpoints4s
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * A validated value of type `A` can either be `Valid` or `Invalid`
+/** A validated value of type `A` can either be `Valid` or `Invalid`
   * @tparam A Type of the validated value
   */
 sealed trait Validated[+A] {
 
-  /**
-    * Transforms this validated value into a value of type `B`
+  /** Transforms this validated value into a value of type `B`
     */
   def fold[B](valid: A => B, invalid: Seq[String] => B): B =
     this match {
@@ -17,8 +15,7 @@ sealed trait Validated[+A] {
       case Invalid(errors) => invalid(errors)
     }
 
-  /**
-    * Transforms a valid value of type `A` into a valid value of type `B`.
+  /** Transforms a valid value of type `A` into a valid value of type `B`.
     * An invalid value is returned as it is.
     */
   def map[B](f: A => B): Validated[B] =
@@ -27,8 +24,7 @@ sealed trait Validated[+A] {
       case invalid: Invalid => invalid
     }
 
-  /**
-    * Transforms the error list of an invalid value.
+  /** Transforms the error list of an invalid value.
     * A valid value is returned as it is.
     */
   def mapErrors(f: Seq[String] => Seq[String]): Validated[A] =
@@ -37,8 +33,7 @@ sealed trait Validated[+A] {
       case Invalid(errors) => Invalid(f(errors))
     }
 
-  /**
-    * Subsequently validates this valid value.
+  /** Subsequently validates this valid value.
     * An invalid value is returned as it is.
     */
   def flatMap[B](f: A => Validated[B]): Validated[B] =
@@ -47,8 +42,7 @@ sealed trait Validated[+A] {
       case invalid: Invalid => invalid
     }
 
-  /**
-    * Tuples together two validated values and tries to return a flat tuple instead of nested tuples. Also strips
+  /** Tuples together two validated values and tries to return a flat tuple instead of nested tuples. Also strips
     * out `Unit` values in the tuples.
     *
     * If `this` and `that` are both invalid values, this operation returns an `Invalid` value containing both
@@ -66,8 +60,7 @@ sealed trait Validated[+A] {
       case (Invalid(errs1), Invalid(errs2)) => Invalid(errs1 ++ errs2)
     }
 
-  /**
-    * Transforms this `Validated[A]` value into an `Either[Seq[String], A]` value.
+  /** Transforms this `Validated[A]` value into an `Either[Seq[String], A]` value.
     */
   def toEither: Either[Seq[String], A] =
     this match {
@@ -91,8 +84,7 @@ object Invalid {
 
 object Validated {
 
-  /**
-    * Turns `None` into an invalid value, using the given `error` message.
+  /** Turns `None` into an invalid value, using the given `error` message.
     * Turns a `Some[A]` value into a `Valid[A]` value.
     */
   def fromOption[A](maybeA: Option[A])(error: => String): Validated[A] =
@@ -101,8 +93,7 @@ object Validated {
       case None        => Invalid(error)
     }
 
-  /**
-    * Turns an `Either[Seq[String], A]` into a `Validated[A]`
+  /** Turns an `Either[Seq[String], A]` into a `Validated[A]`
     */
   def fromEither[A](either: Either[Seq[String], A]): Validated[A] =
     either match {
@@ -110,8 +101,7 @@ object Validated {
       case Right(a)     => Valid(a)
     }
 
-  /**
-    * Turns a `Success[A]` into a `Validated[A]`
+  /** Turns a `Success[A]` into a `Validated[A]`
     * Turns a `Failure[A]` into an invalid value, using the exception message as an 'error' message
     */
   def fromTry[A](tryA: Try[A]): Validated[A] =

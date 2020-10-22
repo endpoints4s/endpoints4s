@@ -4,8 +4,7 @@ import endpoints4s.{PartialInvariantFunctor, Semigroupal, Tupler, Validated, alg
 import endpoints4s.algebra.Documentation
 import scalaj.http.HttpRequest
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait Requests extends algebra.Requests with Urls with Methods {
 

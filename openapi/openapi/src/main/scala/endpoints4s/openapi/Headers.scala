@@ -2,14 +2,12 @@ package endpoints4s.openapi
 
 import endpoints4s.openapi.model.Schema
 
-/**
-  * Internal.
+/** Internal.
   * @group interpreters
   */
 trait Headers {
 
-  /**
-    * @param value List of request header names (e.g. “Authorization”)
+  /** @param value List of request header names (e.g. “Authorization”)
     */
   case class DocumentedHeaders(value: List[DocumentedHeader])
 

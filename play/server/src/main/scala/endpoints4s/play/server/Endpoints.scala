@@ -20,8 +20,7 @@ import play.twirl.api.Html
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework, and uses
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Play framework, and uses
   * [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * Consider the following endpoints definition:
@@ -54,8 +53,7 @@ import scala.util.control.NonFatal
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Play framework.
   * @group interpreters
   */
 trait EndpointsWithCustomErrors
@@ -68,8 +66,7 @@ trait EndpointsWithCustomErrors
 
   import playComponents.executionContext
 
-  /**
-    * An attempt to extract an `A` from a request headers.
+  /** An attempt to extract an `A` from a request headers.
     *
     * Models failure by returning a `Left(result)`. That makes it possible
     * to early return an HTTP response if a header is wrong (e.g. if
@@ -115,21 +112,18 @@ trait EndpointsWithCustomErrors
         headers => fa(headers).zip(fb(headers))
     }
 
-  /**
-    * An HTTP request.
+  /** An HTTP request.
     *
     * Has an instance of `InvariantFunctor`.
     */
   trait Request[A] {
 
-    /**
-      * Extracts a `RequestEntity[A]` from an incoming request. That is
+    /** Extracts a `RequestEntity[A]` from an incoming request. That is
       * a way to extract an `A` from an incoming request.
       */
     def decode: RequestExtractor[RequestEntity[A]]
 
-    /**
-      * Reverse routing.
+    /** Reverse routing.
       * @param a Information carried by the request
       * @return The URL and HTTP verb matching the `a` value.
       */
@@ -165,13 +159,11 @@ trait EndpointsWithCustomErrors
       }
     }
 
-  /**
-    * The URL and HTTP headers of a request.
+  /** The URL and HTTP headers of a request.
     */
   trait UrlAndHeaders[A] { parent =>
 
-    /**
-      * Attempts to extract an `A` from an incoming request.
+    /** Attempts to extract an `A` from an incoming request.
       *
       * Two kinds of situations can happen:
       * 1. The incoming request URL does not match `this` definition: nothing
@@ -181,15 +173,13 @@ trait EndpointsWithCustomErrors
       */
     def decode: RequestExtractor[Validated[A]]
 
-    /**
-      * Reverse routing.
+    /** Reverse routing.
       * @param a Information carried by the request URL and headers
       * @return The URL and HTTP verb matching the `a` value.
       */
     def encode(a: A): Call
 
-    /**
-      * Promotes `this` to a `Request[B]`.
+    /** Promotes `this` to a `Request[B]`.
       *
       * @param toB Function defining how to get a `BodyParser[B]` from the extracted `A`
       * @param toA Function defining how to get back an `A` from the `B`.
@@ -269,8 +259,7 @@ trait EndpointsWithCustomErrors
       def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
     }
 
-  /**
-    * Decodes a request.
+  /** Decodes a request.
     * @param url Request URL
     * @param entity Request entity
     * @param docs Request documentation
@@ -298,8 +287,7 @@ trait EndpointsWithCustomErrors
         (a, c)
       }
 
-  /**
-    * Turns the `A` information into a proper Play `Result`
+  /** Turns the `A` information into a proper Play `Result`
     */
   type Response[A] = A => Result
 
@@ -406,8 +394,7 @@ trait EndpointsWithCustomErrors
     case Right(b) => responseB(b)
   }
 
-  /**
-    * @return An HTTP response redirecting to another endpoint (using 303 code status).
+  /** @return An HTTP response redirecting to another endpoint (using 303 code status).
     * @param other Endpoint to redirect to
     * @param args Arguments to pass to the endpoint to generate its URL
     */
@@ -419,16 +406,14 @@ trait EndpointsWithCustomErrors
     def playHandler(header: RequestHeader): Option[PlayHandler]
   }
 
-  /**
-    * Concrete representation of an `Endpoint` for routing purpose.
+  /** Concrete representation of an `Endpoint` for routing purpose.
     */
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
 
     /** Reverse routing */
     def call(a: A): Call = request.encode(a)
 
-    /**
-      * Provides an actual implementation to the endpoint definition, to turn it
+    /** Provides an actual implementation to the endpoint definition, to turn it
       * into something effectively usable by the Play router.
       *
       * @param service Function that turns the information carried by the request into
@@ -437,23 +422,20 @@ trait EndpointsWithCustomErrors
     def implementedBy(service: A => B): EndpointWithHandler[A, B] =
       EndpointWithHandler(this, service andThen Future.successful)
 
-    /**
-      * Same as `implementedBy`, but with an async `service`.
+    /** Same as `implementedBy`, but with an async `service`.
       */
     def implementedByAsync(service: A => Future[B]): EndpointWithHandler[A, B] =
       EndpointWithHandler(this, service)
   }
 
-  /**
-    * An endpoint from which we can get a Play request handler.
+  /** An endpoint from which we can get a Play request handler.
     */
   case class EndpointWithHandler[A, B](
       endpoint: Endpoint[A, B],
       service: A => Future[B]
   ) extends ToPlayHandler {
 
-    /**
-      * Builds a request `Handler` (a Play `Action`) if the incoming request headers matches
+    /** Builds a request `Handler` (a Play `Action`) if the incoming request headers matches
       * the `endpoint` definition.
       */
     def playHandler(header: RequestHeader): Option[PlayHandler] =
@@ -499,8 +481,7 @@ trait EndpointsWithCustomErrors
   ): Endpoint[A, B] =
     Endpoint(request, response)
 
-  /**
-    * Builds a Play router out of endpoint definitions.
+  /** Builds a Play router out of endpoint definitions.
     *
     * {{{
     *   val routes = routesFromEndpoints(
@@ -525,8 +506,7 @@ trait EndpointsWithCustomErrors
   )(implicit ev: Unit =:= B): ToPlayHandler =
     endpoint.implementedBy(_ => ())
 
-  /**
-    * This method is called by ''endpoints'' when an exception is thrown during
+  /** This method is called by ''endpoints'' when an exception is thrown during
     * request processing.
     *
     * The provided implementation calls [[serverErrorResponse]] to construct

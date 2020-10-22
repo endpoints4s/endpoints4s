@@ -18,8 +18,7 @@ import org.http4s.{EntityEncoder, EntityDecoder, Header, Headers}
 import scala.util.control.NonFatal
 import org.http4s.util.CaseInsensitiveString
 
-/**
-  * Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]]
+/** Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]]
   * to model client and server errors.
   *
   * Consider the following endpoint definition:
@@ -58,8 +57,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
 
 }
 
-/**
-  * Interpreter for [[algebra.EndpointsWithCustomErrors]] based on http4s.
+/** Interpreter for [[algebra.EndpointsWithCustomErrors]] based on http4s.
   * @group interpreters
   */
 trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Methods with Urls {
@@ -131,8 +129,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   ) =
     endpoints.reduceLeft(_ orElse _)
 
-  /**
-    * HEADERS
+  /** HEADERS
     */
   def emptyRequestHeaders: RequestHeaders[Unit] = _ => Valid(())
 
@@ -367,8 +364,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
         headers => fa(headers).zip(fb(headers))
     }
 
-  /**
-    * This method is called by ''endpoints'' when decoding a request failed.
+  /** This method is called by ''endpoints'' when decoding a request failed.
     *
     * The provided implementation calls `clientErrorsResponse` to construct
     * a response containing the errors.
@@ -378,8 +374,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   def handleClientErrors(invalid: Invalid): Effect[http4s.Response[Effect]] =
     Effect.pure(clientErrorsResponse(invalidToClientErrors(invalid)))
 
-  /**
-    * This method is called by ''endpoints'' when an exception is thrown during
+  /** This method is called by ''endpoints'' when an exception is thrown during
     * request processing.
     *
     * The provided implementation calls [[serverErrorResponse]] to construct

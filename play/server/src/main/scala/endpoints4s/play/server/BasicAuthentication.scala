@@ -10,15 +10,13 @@ import play.api.http.HeaderNames.AUTHORIZATION
 import play.api.libs.streams.Accumulator
 import play.api.mvc.{BodyParser, Results}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   import playComponents.executionContext
 
-  /**
-    * Extracts the credentials from the request headers.
+  /** Extracts the credentials from the request headers.
     * In case of absence of credentials, returns an `Unauthorized` result.
     */
   private lazy val basicAuthenticationHeader: RequestHeaders[Option[Credentials]] =

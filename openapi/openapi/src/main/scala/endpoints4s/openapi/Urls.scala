@@ -7,8 +7,7 @@ import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.Schema
 import scala.collection.compat.Factory
 
-/**
-  * Interpreter for [[algebra.Urls]]
+/** Interpreter for [[algebra.Urls]]
   *
   * @group interpreters
   */
@@ -16,13 +15,11 @@ trait Urls extends algebra.Urls {
 
   type QueryString[A] = DocumentedQueryString
 
-  /**
-    * @param parameters List of query string parameters
+  /** @param parameters List of query string parameters
     */
   case class DocumentedQueryString(parameters: List[DocumentedParameter])
 
-  /**
-    * @param name Name of the parameter
+  /** @param name Name of the parameter
     * @param required Whether this parameter is required or not (MUST be true for path parameters)
     */
   case class DocumentedParameter(
@@ -183,8 +180,7 @@ trait Urls extends algebra.Urls {
       ): Url[B] = fa
     }
 
-  /**
-    * @param path List of path segments. Left is a static segment, right is a path parameter
+  /** @param path List of path segments. Left is a static segment, right is a path parameter
     * @param queryParameters Query string parameters
     */
   case class DocumentedUrl(

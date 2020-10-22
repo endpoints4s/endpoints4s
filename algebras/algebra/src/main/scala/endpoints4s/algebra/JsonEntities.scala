@@ -2,8 +2,7 @@ package endpoints4s.algebra
 
 import endpoints4s.Codec
 
-/**
-  * Algebra interface for describing JSON entities in requests and responses.
+/** Algebra interface for describing JSON entities in requests and responses.
   *
   * Generally, this algebra is not directly used, but one of its specialized algebras
   * is used instead: [[JsonEntitiesFromSchemas]] or [[JsonEntitiesFromCodecs]].
@@ -32,8 +31,7 @@ trait JsonEntities extends EndpointsWithCustomErrors {
     */
   type JsonResponse[A]
 
-  /**
-    * Request with a JSON body, given an implicit `JsonRequest[A]`
+  /** Request with a JSON body, given an implicit `JsonRequest[A]`
     *
     *   - Server interpreters accept requests with content-type `application/json` and
     *     reject requests with an incorrect content-type.
@@ -49,8 +47,7 @@ trait JsonEntities extends EndpointsWithCustomErrors {
   def jsonResponse[A: JsonResponse]: ResponseEntity[A]
 }
 
-/**
-  * Fixes both the `JsonRequest` and `JsonResponse` types to be a same `JsonCodec` type.
+/** Fixes both the `JsonRequest` and `JsonResponse` types to be a same `JsonCodec` type.
   *
   * This trait is used as an implementation detail (to reuse code between [[JsonEntitiesFromSchemas]]
   * and [[JsonEntitiesFromCodecs]]) and is not useful to end-users.
@@ -71,8 +68,7 @@ trait JsonCodecs extends JsonEntities {
 
 }
 
-/**
-  * Turns a `JsonCodec` into a [[Codec]].
+/** Turns a `JsonCodec` into a [[Codec]].
   *
   * @group algebras
   */
@@ -85,8 +81,7 @@ trait JsonEntitiesFromCodecs extends JsonCodecs {
 
 }
 
-/**
-  * Partially applies the [[JsonEntities]] algebra interface to fix the
+/** Partially applies the [[JsonEntities]] algebra interface to fix the
   * `JsonRequest` and `JsonResponse` types to be `JsonSchema`.
   *
   * @group algebras

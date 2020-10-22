@@ -8,8 +8,7 @@ import cqrs.queries.Meter
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-/**
-  * Definition of the public HTTP API of our application.
+/** Definition of the public HTTP API of our application.
   *
   * We expose a REST interface for manipulating meters.
   */

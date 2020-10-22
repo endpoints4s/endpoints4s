@@ -3,8 +3,7 @@ package endpoints4s.xhr.faithful
 import endpoints4s.xhr
 import faithful.{Future, Promise}
 
-/**
-  * Implements [[xhr.Endpoints]] by using faithful.
+/** Implements [[xhr.Endpoints]] by using faithful.
   *
   * @group interpreters
   */

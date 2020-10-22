@@ -6,8 +6,7 @@ import endpoints4s.{Codec, PartialInvariantFunctor, PartialInvariantFunctorSynta
 
 import scala.collection.compat.Factory
 
-/**
-  * Algebra interface for describing URLs made of a path and a query string.
+/** Algebra interface for describing URLs made of a path and a query string.
   *
   * A path is itself made of segments chained together.
   *
@@ -70,8 +69,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     */
   implicit class QueryStringSyntax[A](first: QueryString[A]) {
 
-    /**
-      * Convenient method to concatenate two [[QueryString]]s.
+    /** Convenient method to concatenate two [[QueryString]]s.
       *
       * {{{
       *   qs[Int]("foo") & qs[String]("baz")
@@ -92,8 +90,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
       tupler: Tupler[A, B]
   ): QueryString[tupler.Out]
 
-  /**
-    * Builds a `QueryString` with one parameter.
+  /** Builds a `QueryString` with one parameter.
     *
     * Examples:
     *
@@ -111,8 +108,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
       value: QueryStringParam[A]
   ): QueryString[A]
 
-  /**
-    * Make a query string parameter optional:
+  /** Make a query string parameter optional:
     *
     * {{{
     *   path / "articles" /? qs[Option[Int]]("page")
@@ -128,8 +124,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     */
   implicit def optionalQueryStringParam[A: QueryStringParam]: QueryStringParam[Option[A]]
 
-  /**
-    * Support query string parameters with multiple values:
+  /** Support query string parameters with multiple values:
     *
     * {{{
     *   path / "articles" /? qs[List[Long]]("id")
@@ -145,8 +140,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     X
   ]](implicit factory: Factory[A, CC[A]]): QueryStringParam[CC[A]]
 
-  /**
-    * A query string parameter codec for type `A`.
+  /** A query string parameter codec for type `A`.
     *
     * The trait `Urls` provides implicit instances of type `QueryStringParam[A]`
     * for basic types (e.g., `Int`, `String`, etc.). You can create additional
@@ -199,8 +193,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
   implicit def doubleQueryString: QueryStringParam[Double] =
     stringQueryString.xmapWithCodec(Codec.doubleCodec)
 
-  /**
-    * An URL path segment codec for type `A`.
+  /** An URL path segment codec for type `A`.
     *
     * The trait `Urls` provides implicit instances of `Segment[A]` for basic types
     * (e.g., `Int`, `String`, etc.). You can create additional instances by transforming
@@ -325,8 +318,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
       tupler: Tupler[A, B]
   ): Path[tupler.Out]
 
-  /**
-    * An empty path.
+  /** An empty path.
     *
     * Useful to begin a path definition:
     *
@@ -338,8 +330,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
     */
   val path: Path[Unit] = staticPathSegment("")
 
-  /**
-    * An URL carrying an `A` information
+  /** An URL carrying an `A` information
     *
     * Values of type `URL[A]` are typically constructed by first using the [[path]]
     * constructor and then chaining it with segments and query parameters.

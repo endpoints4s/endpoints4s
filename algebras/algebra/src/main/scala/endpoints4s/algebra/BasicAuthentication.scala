@@ -3,8 +3,7 @@ package endpoints4s.algebra
 import endpoints4s.Tupler
 import endpoints4s.algebra.BasicAuthentication.Credentials
 
-/**
-  * Provides vocabulary to describe endpoints that use Basic HTTP authentication.
+/** Provides vocabulary to describe endpoints that use Basic HTTP authentication.
   *
   * This trait works fine, but developers are likely to implement their own
   * authentication mechanism, specific to their application.
@@ -13,8 +12,7 @@ import endpoints4s.algebra.BasicAuthentication.Credentials
   */
 trait BasicAuthentication extends EndpointsWithCustomErrors {
 
-  /**
-    * A response that can either be Forbidden (403) or the given `Response[A]`.
+  /** A response that can either be Forbidden (403) or the given `Response[A]`.
     *
     * The returned `Response[Option[A]]` signals “forbidden” with a `None` value.
     *
@@ -31,8 +29,7 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
       .orElse(response(Forbidden, emptyResponse, docs))
       .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 
-  /**
-    * A request with the given `method`, `url`, `entity` and `headers`, but
+  /** A request with the given `method`, `url`, `entity` and `headers`, but
     * which also contains the Basic Authentication credentials in its
     * “Authorization” header.
     *
@@ -54,8 +51,7 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Request[Out]
 
-  /**
-    * Describes an endpoint protected by Basic HTTP authentication
+  /** Describes an endpoint protected by Basic HTTP authentication
     * @group operations
     */
   def authenticatedEndpoint[U, E, R, H, UE, HCred, Out](

@@ -19,8 +19,7 @@ import scala.concurrent.ExecutionContext
 //#login-endpoint
 trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
 
-  /**
-    * Login endpoint: takes the API key in a query string parameter and returns either `Some(authenticationToken)`
+  /** Login endpoint: takes the API key in a query string parameter and returns either `Some(authenticationToken)`
     * if the credentials are valid, or `None` otherwise
     */
   val login = endpoint(
@@ -30,8 +29,7 @@ trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
 //#login-endpoint
 
 //#protected-endpoint
-  /**
-    * Some resource requiring the request to provide a valid JWT token. Returns a message
+  /** Some resource requiring the request to provide a valid JWT token. Returns a message
     * “Hello ''user_name''” if the request is correctly authenticated, otherwise returns
     * an `Unauthorized` HTTP response.
     */
@@ -48,8 +46,7 @@ trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
 }
 //#login-endpoint
 
-/**
-  * Client for the `AuthenticationEndpoints`, using the `ClientAuthentication`
+/** Client for the `AuthenticationEndpoints`, using the `ClientAuthentication`
   * interpreter (implementing the authentication logic), defined below.
   */
 class Client(
@@ -61,8 +58,7 @@ class Client(
     with AuthenticationEndpoints
     with ClientAuthentication
 
-/**
-  * Example of server implementing the `AuthenticationEndpoints`
+/** Example of server implementing the `AuthenticationEndpoints`
   */
 //#login-implementation
 class Server(

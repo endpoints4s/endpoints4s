@@ -6,8 +6,7 @@ import io.circe._
 
 import scala.collection.compat._
 
-/**
-  * An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a circe codec.
+/** An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a circe codec.
   */
 trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 

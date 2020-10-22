@@ -4,13 +4,11 @@ import endpoints4s.algebra
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
@@ -30,8 +28,7 @@ trait EndpointsWithCustomErrors
       response: Response[Resp]
   ) {
 
-    /**
-      * This method just wraps a call in a Future and is not real async call
+    /** This method just wraps a call in a Future and is not real async call
       */
     def callAsync(args: Req)(implicit ec: ExecutionContext): Future[Resp] =
       Future {

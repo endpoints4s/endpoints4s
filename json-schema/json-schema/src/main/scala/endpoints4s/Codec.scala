@@ -2,13 +2,11 @@ package endpoints4s
 
 import java.util.UUID
 
-/**
-  * A way to decode a `From` value into a `To` value.
+/** A way to decode a `From` value into a `To` value.
   */
 trait Decoder[-From, +To] {
 
-  /**
-    * @return The decoded `To` value, or the validation errors in case of failure.
+  /** @return The decoded `To` value, or the validation errors in case of failure.
     */
   def decode(from: From): Validated[To]
 }
@@ -24,8 +22,7 @@ object Decoder {
     from => ab.decode(from).flatMap(bc.decode)
 }
 
-/**
-  * A way to encode a `From` value into a `To` value
+/** A way to encode a `From` value into a `To` value
   */
 trait Encoder[-From, +To] {
   def encode(from: From): To
@@ -42,8 +39,7 @@ object Encoder {
     from => bc.encode(ab.encode(from))
 }
 
-/**
-  * A way to encode and decode values
+/** A way to encode and decode values
   * @tparam E Type of encoded values
   * @tparam D Type of decoded values
   */

@@ -7,8 +7,7 @@ import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import scalaj.http.{Http, HttpRequest}
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait Urls extends algebra.Urls {
 

@@ -2,8 +2,7 @@ package endpoints4s.xhr
 
 import endpoints4s.algebra
 
-/**
-  * [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
+/** [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
   */

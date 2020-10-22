@@ -5,8 +5,7 @@ import play.api.routing.Router
 
 import scala.concurrent.Future
 
-/**
-  * Implementation of the queries service.
+/** Implementation of the queries service.
   */
 class Queries(service: QueriesService, val playComponents: PlayComponents)
     extends QueriesEndpoints

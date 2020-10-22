@@ -1,7 +1,6 @@
 package endpoints4s.algebra
 
-/**
-  * @group algebras
+/** @group algebras
   * @groupname types Types
   * @groupdesc types Types introduced by the algebra
   * @groupprio types 1

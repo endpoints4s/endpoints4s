@@ -15,8 +15,7 @@ import endpoints4s.{
 import scala.collection.compat._
 import scala.collection.mutable
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 

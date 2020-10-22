@@ -3,8 +3,7 @@ package endpoints4s.algebra
 import endpoints4s.{Invalid, Valid, Validated}
 import org.scalatest.freespec.AnyFreeSpec
 
-/**
-  * Tests that must be run on all [[JsonSchemas]] interpreters.
+/** Tests that must be run on all [[JsonSchemas]] interpreters.
   */
 trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures {
 

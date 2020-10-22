@@ -3,8 +3,7 @@ package endpoints4s.play.server
 import endpoints4s.algebra
 import play.api.mvc.Results
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait StatusCodes extends algebra.StatusCodes {
 

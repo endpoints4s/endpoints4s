@@ -23,8 +23,7 @@ import shapeless.{
 import scala.annotation.{implicitNotFound, nowarn}
 import scala.reflect.ClassTag
 
-/**
-  * Enriches [[JsonSchemas]] with two kinds of operations:
+/** Enriches [[JsonSchemas]] with two kinds of operations:
   *
   *   - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic
   *     data type `A`;
@@ -233,8 +232,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
       def record(docs: D): Record[A]
     }
 
-    /**
-      * Intermediate type used by the machinery to summon a `Record[A]` schema
+    /** Intermediate type used by the machinery to summon a `Record[A]` schema
       * @tparam A Case class type for which a schema is derived
       * @tparam D List of `@docs` annotations attached to the case class fields
       * @tparam V List of default values for the case class fields
@@ -374,8 +372,7 @@ trait JsonSchemas extends algebra.JsonSchemas {
     }
   }
 
-  /**
-    * Compute a schema name (used for documentation) based on a `ClassTag`.
+  /** Compute a schema name (used for documentation) based on a `ClassTag`.
     * The provided implementation uses the fully qualified name of the class.
     * This could result in non unique values and mess with documentation.
     *

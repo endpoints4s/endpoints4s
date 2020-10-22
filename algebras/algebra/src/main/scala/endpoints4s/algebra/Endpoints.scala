@@ -4,8 +4,7 @@ import endpoints4s.Hashing
 
 import scala.annotation.nowarn
 
-/**
-  * Algebra interface for describing endpoints made of requests and responses.
+/** Algebra interface for describing endpoints made of requests and responses.
   *
   * Requests and responses contain headers and entity.
   *
@@ -25,15 +24,13 @@ import scala.annotation.nowarn
   */
 trait Endpoints extends EndpointsWithCustomErrors with BuiltInErrors
 
-/**
-  * Algebra interface for describing endpoints made of requests and responses.
+/** Algebra interface for describing endpoints made of requests and responses.
   *
   * @group algebras
   */
 trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
-  /**
-    * Information carried by an HTTP endpoint
+  /** Information carried by an HTTP endpoint
     *
     * Values of type [[Endpoint]] can be constructed by using the operation
     * [[endpoint]].
@@ -44,8 +41,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     */
   type Endpoint[A, B]
 
-  /**
-    * Define an HTTP endpoint
+  /** Define an HTTP endpoint
     *
     * @param request  Request
     * @param response Response
@@ -58,8 +54,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B]
 
-  /**
-    * @param operationId A unique identifier which identifies this operation
+  /** @param operationId A unique identifier which identifies this operation
     * @param summary     Short description
     * @param description Detailed description
     * @param tags        OpenAPI tags
@@ -140,8 +135,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   object EndpointDocs {
 
-    /**
-      * @return An empty documentation value, with no summary, no description,
+    /** @return An empty documentation value, with no summary, no description,
       *         no tags, no callbacks, and the `deprecated` flag set to `false`.
       *
       * You can transform the returned [[EndpointDocs]] value by using the `withXxx`
@@ -176,14 +170,12 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   }
 
-  /**
-    * Callbacks indexed by URL pattern
+  /** Callbacks indexed by URL pattern
     * @see Swagger Documentation at [[https://swagger.io/docs/specification/callbacks/]]
     */
   type CallbacksDocs = Map[String, CallbackDocs]
 
-  /**
-    * @param method   HTTP method used for the callback
+  /** @param method   HTTP method used for the callback
     * @param entity   Contents of the callback message
     * @param response Expected response
     */
@@ -235,8 +227,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   object CallbackDocs {
 
-    /**
-      * A wrapper type for a [[RequestEntity]] whose carried information is unknown.
+    /** A wrapper type for a [[RequestEntity]] whose carried information is unknown.
       *
       * This wrapper type is necessary because Scala 3 does not support writing `RequestEntity[_]`.
       */
@@ -253,8 +244,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         }
     }
 
-    /**
-      * A wrapper type for a [[Response]] whose carried information is unknown.
+    /** A wrapper type for a [[Response]] whose carried information is unknown.
       *
       * This wrapper type is necessary because Scala 3 does not support writing `Response[_]`
       */
@@ -271,8 +261,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
         }
     }
 
-    /**
-      * Convenience constructor that wraps the `entity` and `response` parameters.
+    /** Convenience constructor that wraps the `entity` and `response` parameters.
       */
     def apply[A, B](
         method: Method,

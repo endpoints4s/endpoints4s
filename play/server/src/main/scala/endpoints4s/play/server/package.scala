@@ -1,7 +1,6 @@
 package endpoints4s.play
 
-/**
-  * Server interpreters backed by Play framework
+/** Server interpreters backed by Play framework
   *
   * @groupname interpreters Interpreters
   */

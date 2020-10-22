@@ -3,15 +3,13 @@ package endpoints4s.play.client
 import endpoints4s.algebra
 import play.api.libs.ws.WSRequest
 
-/**
-  * [[algebra.Methods]] interpreter that builds URLs.
+/** [[algebra.Methods]] interpreter that builds URLs.
   *
   * @group interpreters
   */
 trait Methods extends algebra.Methods {
 
-  /**
-    * String representation of the method
+  /** String representation of the method
     */
   type Method = WSRequest => WSRequest
 

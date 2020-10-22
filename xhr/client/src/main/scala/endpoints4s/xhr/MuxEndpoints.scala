@@ -4,8 +4,7 @@ import endpoints4s.{Decoder, Encoder, algebra}
 import endpoints4s.algebra.MuxRequest
 import org.scalajs.dom.XMLHttpRequest
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 

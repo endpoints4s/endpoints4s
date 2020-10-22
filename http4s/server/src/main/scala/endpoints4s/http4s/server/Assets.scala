@@ -135,8 +135,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
       case i  => MediaType.forExtension(name.substring(i + 1))
     }
 
-  /**
-    * @param pathPrefix Prefix to use to look up the resources in the classpath (like '/assets'). You
+  /** @param pathPrefix Prefix to use to look up the resources in the classpath (like '/assets'). You
     *                   most probably never want to publish all your classpath resources.
     * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
     *         looking for the requested asset in the classpath resources.

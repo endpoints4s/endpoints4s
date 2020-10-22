@@ -4,8 +4,7 @@ package openapi
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.{MediaType, Schema}
 
-/**
-  * Interpreter for [[algebra.Requests]].
+/** Interpreter for [[algebra.Requests]].
   *
   * @group interpreters
   */

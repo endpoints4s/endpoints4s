@@ -4,8 +4,7 @@ import scala.util.hashing.MurmurHash3
 
 private[endpoints4s] object Hashing {
 
-  /**
-    * @return a hash for the given `values`, computed using the MurmurHash3 algorithm
+  /** @return a hash for the given `values`, computed using the MurmurHash3 algorithm
     *
     * Use this method to implement the `hashCode` operation of data classes:
     *

@@ -4,8 +4,7 @@ package sttp.client
 import com.softwaremill.sttp
 import endpoints4s.algebra.MuxRequest
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait MuxEndpoints[R[_]] extends algebra.Endpoints {
   self: EndpointsWithCustomErrors[R] =>

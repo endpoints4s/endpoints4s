@@ -1,7 +1,6 @@
 package endpoints4s
 
-/**
-  * Defines a strategy for tupling `A` and `B` values, according to types `A` and `B`.
+/** Defines a strategy for tupling `A` and `B` values, according to types `A` and `B`.
   *
   * The actual implementation avoids nested tuples and eliminates `Unit`, so that instead of ending with, e.g.,
   * the following type:

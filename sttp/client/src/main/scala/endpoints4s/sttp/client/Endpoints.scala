@@ -16,8 +16,7 @@ import endpoints4s.{
 import endpoints4s.algebra.Documentation
 import com.softwaremill.sttp
 
-/**
-  * An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
+/** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client
   * and server errors.
   *
@@ -35,8 +34,7 @@ class Endpoints[R[_]](
     with EndpointsWithCustomErrors[R]
     with BuiltInErrors[R]
 
-/**
-  * An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
+/** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`.
   *
   * @tparam R The monad wrapping the response. It is defined by the backend
@@ -53,8 +51,7 @@ trait EndpointsWithCustomErrors[R[_]]
 
   type SttpRequest = sttp.Request[_, Nothing]
 
-  /**
-    * A function that, given an `A` and a request model, returns an updated request
+  /** A function that, given an `A` and a request model, returns an updated request
     * containing additional headers
     */
   type RequestHeaders[A] = (A, SttpRequest) => SttpRequest
@@ -97,8 +94,7 @@ trait EndpointsWithCustomErrors[R[_]]
         }
     }
 
-  /**
-    * A function that takes an `A` information and returns a `sttp.Request`
+  /** A function that takes an `A` information and returns a `sttp.Request`
     */
   type Request[A] = A => SttpRequest
 
@@ -112,8 +108,7 @@ trait EndpointsWithCustomErrors[R[_]]
         fa compose g
     }
 
-  /**
-    * A function that, given an `A` information and a `sttp.Request`, eventually returns a `sttp.Request`
+  /** A function that, given an `A` information and a `sttp.Request`, eventually returns a `sttp.Request`
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
@@ -162,8 +157,7 @@ trait EndpointsWithCustomErrors[R[_]]
 
   trait Response[A] {
 
-    /**
-      * Function to validate the response (headers, code).
+    /** Function to validate the response (headers, code).
       */
     def decodeResponse(response: sttp.Response[String]): Option[R[A]]
   }
@@ -178,8 +172,7 @@ trait EndpointsWithCustomErrors[R[_]]
         }
     }
 
-  /**
-    * Trait that indicates how a response should be interpreted
+  /** Trait that indicates how a response should be interpreted
     */
   trait ResponseEntity[A] {
     def decodeEntity(response: sttp.Response[String]): R[A]
@@ -313,8 +306,7 @@ trait EndpointsWithCustomErrors[R[_]]
     }
   }
 
-  /**
-    * A function that, given an `A`, eventually attempts to decode the `B` response.
+  /** A function that, given an `A`, eventually attempts to decode the `B` response.
     */
   //#endpoint-type
   type Endpoint[A, B] = A => R[B]

@@ -4,8 +4,7 @@ package openapi
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model._
 
-/**
-  * Interpreter for [[algebra.Assets]]
+/** Interpreter for [[algebra.Assets]]
   *
   * @group interpreters
   */

@@ -2,8 +2,7 @@ package endpoints4s.xhr
 
 import endpoints4s.algebra
 
-/**
-  * @group interpreters
+/** @group interpreters
   */
 trait Methods extends algebra.Methods {
   type Method = String

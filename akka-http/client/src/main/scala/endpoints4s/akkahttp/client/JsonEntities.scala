@@ -3,8 +3,7 @@ package endpoints4s.akkahttp.client
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints4s.{Codec, algebra}
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON request
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON request
   * and decodes JSON responses using Akka HTTP.
   *
   * @group interpreters
@@ -25,8 +24,7 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 
 }
 
-/**
-  * Interpreter for [[endpoints4s.algebra.JsonEntitiesFromSchemas]] that encodes JSON request
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromSchemas]] that encodes JSON request
   * and decodes JSON responses using Akka HTTP.
   *
   * @group interpreters

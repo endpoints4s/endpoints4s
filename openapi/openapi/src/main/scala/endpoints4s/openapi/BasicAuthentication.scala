@@ -5,8 +5,7 @@ import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.{SecurityRequirement, SecurityScheme}
 
-/**
-  * Interpreter for [[endpoints4s.algebra.BasicAuthentication]] that produces
+/** Interpreter for [[endpoints4s.algebra.BasicAuthentication]] that produces
   * OpenAPI documentation.
   *
   * @group interpreters

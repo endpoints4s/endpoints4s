@@ -10,8 +10,7 @@ import endpoints4s.play.server.{
 import play.api.routing.{Router => PlayRouter}
 import play.twirl.api.{Html, StringInterpolation}
 
-/**
-  * These endpoints serve the web page and the assets.
+/** These endpoints serve the web page and the assets.
   */
 class BootstrapEndpoints(val playComponents: PlayComponents)
     extends Endpoints

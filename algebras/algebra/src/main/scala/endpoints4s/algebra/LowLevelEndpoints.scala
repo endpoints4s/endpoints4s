@@ -1,7 +1,6 @@
 package endpoints4s.algebra
 
-/**
-  * Provides a way to define endpoints that directly expose the low level APIs of the
+/** Provides a way to define endpoints that directly expose the low level APIs of the
   * interpreters.
   *
   * Using this trait is not recommended because endpoints defined using these methods
