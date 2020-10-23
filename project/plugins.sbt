@@ -38,4 +38,5 @@ addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.4.4")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-compatibility" % "0.0.9")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.0.0-RC2")
+addSbtPlugin("ch.epfl.scala" % "sbt-eviction-rules" % "1.0.0-RC1")

@@ -32,14 +32,23 @@ ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
 
-ThisBuild / compatibilityRules ++= Seq(
-  "org.typelevel" %%% "cats*" % "semver",
-  "co.fs2" %%% "fs2*" % "semver",
-  "com.typesafe.play" %%% "play-json" % "semver",
-  "com.typesafe.play" %%% "play-functional" % "semver",
-  "com.typesafe.akka" %% "akka*" % "semver",
-  "org.scala-js" % "scalajs-*" % "semver",
-  "org.scala-lang.modules" %% "*" % "semver"
-)
+ThisBuild / versionScheme := Some("early-semver")
+ThisBuild / version := "1.2.0"
 
-ThisBuild / compatibilityIgnored += "joda-time" % "joda-time"
+val versionSchemes = Def.setting {
+  Seq(
+    "org.endpoints4s" %%% "*" % "early-semver",
+    "org.typelevel" %%% "cats*" % "early-semver",
+    "co.fs2" %%% "fs2*" % "early-semver",
+    "com.typesafe.play" %%% "play-json" % "early-semver",
+    "com.typesafe.play" %%% "play-functional" % "early-semver",
+    "com.typesafe.akka" %% "akka*" % "early-semver",
+    "org.scala-js" % "scalajs-*" % "early-semver",
+    "org.scala-lang.modules" %% "*" % "early-semver",
+    "io.netty" % "*" % "always" // These guys use an unconventional versioning scheme
+  )
+}
+
+ThisBuild / evictionRules ++= versionSchemes.value
+ThisBuild / versionPolicyDependencyRules ++= versionSchemes.value
+ThisBuild / versionPolicyIgnored += "joda-time" % "joda-time"
