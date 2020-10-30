@@ -1,5 +1,7 @@
 package endpoints4s.algebra
 
+import java.time.{Duration, Instant, OffsetDateTime, ZoneOffset}
+
 import endpoints4s.{Invalid, Valid, Validated}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -124,6 +126,37 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
     val schema = optFieldWithDefault[Int]("value", 42)
     val invalidJson = Json.obj("value" -> Json.str("one"))
     assert(decodeJson(schema, invalidJson).isInstanceOf[Invalid])
+  }
+
+  "Instant" in {
+    val now = Instant.now()
+    checkRoundTrip[Instant](implicitly, Json.str(now.toString), now)
+    val offsetDateTime = OffsetDateTime.of(2020, 10, 29, 10, 28, 0, 0, ZoneOffset.ofHours(2))
+    checkDecodingFailure[Instant](
+      implicitly,
+      Json.str(offsetDateTime.toString),
+      Seq(s"Text '${offsetDateTime.toString}' could not be parsed at index 16")
+    )
+  }
+
+  "OffsetDateTime" in {
+    val now = OffsetDateTime.now()
+    checkRoundTrip[OffsetDateTime](implicitly, Json.str(now.toString), now)
+    checkDecodingFailure[OffsetDateTime](
+      implicitly,
+      Json.str("not a date"),
+      Seq("Text 'not a date' could not be parsed at index 0")
+    )
+  }
+
+  "Duration" in {
+    val duration = Duration.ofDays(7)
+    checkRoundTrip[Duration](implicitly, Json.str(duration.toString), duration)
+    checkDecodingFailure[Duration](
+      implicitly,
+      Json.str("not a duration"),
+      Seq("Text cannot be parsed to a Duration")
+    )
   }
 
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =

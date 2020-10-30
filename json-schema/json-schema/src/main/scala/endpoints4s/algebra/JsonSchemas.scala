@@ -1,11 +1,13 @@
 package endpoints4s.algebra
 
+import java.time.{Duration, Instant, OffsetDateTime}
 import java.util.UUID
 
 import endpoints4s.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
 
 import scala.collection.compat._
 import scala.reflect.ClassTag
+import scala.util.Try
 import scala.util.control.Exception
 
 /** An algebra interface for describing algebraic data types. Such descriptions
@@ -718,5 +720,44 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   implicit def mapJsonSchema[A](implicit
       jsonSchema: JsonSchema[A]
   ): JsonSchema[Map[String, A]]
+
+  /** An ISO 8601 date-time in UTC
+    *
+    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @group operations
+    */
+  implicit lazy val instantJsonSchema: JsonSchema[Instant] =
+    stringJsonSchema(format = Some("date-time"))
+      .xmapPartial { instantString =>
+        Validated.fromTry(Try(Instant.parse(instantString)))
+      }(instant => instant.toString)
+      .withExample(Instant.now())
+      .withDescription("ISO 8601 Date and time in UTC")
+
+  /** An ISO8601 date-time
+    *
+    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @group operations
+    */
+  implicit lazy val offsetDateTimeSchema: JsonSchema[OffsetDateTime] =
+    stringJsonSchema(format = Some("date-time"))
+      .xmapPartial { dateTimeString =>
+        Validated.fromTry(Try(OffsetDateTime.parse(dateTimeString)))
+      }(dateTime => dateTime.toString)
+      .withExample(OffsetDateTime.now())
+      .withDescription("ISO 8601 Date and time")
+
+  /** An ISO 8601 duration
+    *
+    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @group operations
+    */
+  implicit lazy val durationSchema: JsonSchema[Duration] =
+    stringJsonSchema(format = Some("duration"))
+      .xmapPartial { durationString =>
+        Validated.fromTry(Try(Duration.parse(durationString)))
+      }(duration => duration.toString)
+      .withExample(Duration.ofDays(7))
+      .withDescription("ISO 8601 Duration")
 
 }

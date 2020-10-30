@@ -19,7 +19,11 @@ val `json-schema` =
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .jsConfigure(
+      _.settings(
+        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0" % Test
+      ).disablePlugins(ScoverageSbtPlugin)
+    )
 
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
