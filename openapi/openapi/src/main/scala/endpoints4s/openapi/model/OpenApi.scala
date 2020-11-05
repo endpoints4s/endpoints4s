@@ -163,6 +163,9 @@ object OpenApi {
     for (title <- schema.title) {
       fields += "title" -> title
     }
+    for (default <- schema.default) {
+      fields += "default" -> default
+    }
     new ujson.Obj(fields)
   }
 
@@ -926,6 +929,7 @@ object MediaType {
 sealed trait Schema {
   def description: Option[String]
   def example: Option[ujson.Value]
+  def default: Option[ujson.Value]
   def title: Option[String]
 
   /** @return The same schema with its description overridden by the given `description`,
@@ -957,19 +961,20 @@ object Schema {
       val additionalProperties: Option[Schema],
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"Object($properties, $additionalProperties, $description, $example, $title)"
+      s"Object($properties, $additionalProperties, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Object =>
           properties == that.properties && additionalProperties == that.additionalProperties &&
             description == that.description && example == that.example &&
-            title == that.title
+            title == that.title && default == that.default
         case _ => false
       }
 
@@ -979,7 +984,8 @@ object Schema {
         additionalProperties,
         description,
         example,
-        title
+        title,
+        default
       )
 
     private[this] def copy(
@@ -987,9 +993,10 @@ object Schema {
         additionalProperties: Option[Schema] = additionalProperties,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
     ): Object =
-      new Object(properties, additionalProperties, description, example, title)
+      new Object(properties, additionalProperties, description, example, title, default)
 
     def withProperty(properties: List[Property]): Object =
       copy(properties = properties)
@@ -1005,6 +1012,9 @@ object Schema {
 
     def withTitle(title: Option[String]): Object =
       copy(title = title)
+
+    def withDefault(default: Option[ujson.Value]): Object =
+      copy(default = default)
   }
 
   object Object {
@@ -1016,7 +1026,7 @@ object Schema {
         example: Option[ujson.Value],
         title: Option[String]
     ): Object =
-      new Object(properties, additionalProperties, description, example, title)
+      new Object(properties, additionalProperties, description, example, title, None)
 
   }
 
@@ -1024,30 +1034,33 @@ object Schema {
       val elementType: Either[Schema, List[Schema]],
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"Array($elementType, $description, $example, $title)"
+      s"Array($elementType, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Array =>
-          elementType == that.elementType && description == that.description && example == that.example && title == that.title
+          elementType == that.elementType && description == that.description &&
+            example == that.example && title == that.title && default == that.default
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(elementType, description, example, title)
+      Hashing.hash(elementType, description, example, title, default)
 
     private[this] def copy(
         elementType: Either[Schema, List[Schema]] = elementType,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
     ): Array =
-      new Array(elementType, description, example, title)
+      new Array(elementType, description, example, title, default)
 
     def withElementType(elementType: Either[Schema, List[Schema]]): Array =
       copy(elementType = elementType)
@@ -1061,6 +1074,9 @@ object Schema {
     def withTitle(title: Option[String]): Array =
       copy(title = title)
 
+    def withDefault(default: Option[ujson.Value]): Array =
+      copy(default = default)
+
   }
 
   object Array {
@@ -1071,7 +1087,7 @@ object Schema {
         example: Option[ujson.Value],
         title: Option[String]
     ): Array =
-      new Array(elementType, description, example, title)
+      new Array(elementType, description, example, title, None)
 
   }
 
@@ -1080,32 +1096,34 @@ object Schema {
       val values: List[ujson.Value],
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"Enum($elementType, $values, $description, $example, $title)"
+      s"Enum($elementType, $values, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Enum =>
           elementType == that.elementType && values == that.values && description == that.description &&
-            example == that.example && title == that.title
+            example == that.example && title == that.title && default == that.default
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(elementType, values, description, example, title)
+      Hashing.hash(elementType, values, description, example, title, default)
 
     private[this] def copy(
         elementType: Schema = elementType,
         values: List[ujson.Value] = values,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
     ): Enum =
-      new Enum(elementType, values, description, example, title)
+      new Enum(elementType, values, description, example, title, default)
 
     def withElementType(elementType: Schema): Enum =
       copy(elementType = elementType)
@@ -1121,6 +1139,9 @@ object Schema {
 
     def withTitle(title: Option[String]): Enum =
       copy(title = title)
+
+    def withDefault(default: Option[ujson.Value]): Enum =
+      copy(default = default)
   }
 
   object Enum {
@@ -1131,7 +1152,7 @@ object Schema {
         description: Option[String],
         example: Option[ujson.Value],
         title: Option[String]
-    ): Enum = new Enum(elementType, values, description, example, title)
+    ): Enum = new Enum(elementType, values, description, example, title, None)
 
   }
 
@@ -1194,24 +1215,26 @@ object Schema {
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String],
-      val minimum: Option[Double] = None,
-      val exclusiveMinimum: Option[Boolean] = None,
-      val maximum: Option[Double] = None,
-      val exclusiveMaximum: Option[Boolean] = None,
-      val multipleOf: Option[Double] = None
+      val default: Option[ujson.Value],
+      val minimum: Option[Double],
+      val exclusiveMinimum: Option[Boolean],
+      val maximum: Option[Double],
+      val exclusiveMaximum: Option[Boolean],
+      val multipleOf: Option[Double]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"Primitive($name, $format, $description, $example, $title, $minimum, $exclusiveMinimum, $maximum, $exclusiveMaximum, $multipleOf)"
+      s"Primitive($name, $format, $description, $example, $title, $default, $minimum, $exclusiveMinimum, $maximum, $exclusiveMaximum, $multipleOf)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Primitive =>
           name == that.name && format == that.format && description == that.description &&
-            example == that.example && title == that.title && minimum == that.minimum &&
-            exclusiveMinimum == that.exclusiveMinimum && maximum == that.maximum &&
-            exclusiveMaximum == that.exclusiveMaximum && multipleOf == that.multipleOf
+            example == that.example && title == that.title && default == that.default &&
+            minimum == that.minimum && exclusiveMinimum == that.exclusiveMinimum &&
+            maximum == that.maximum && exclusiveMaximum == that.exclusiveMaximum &&
+            multipleOf == that.multipleOf
         case _ => false
       }
 
@@ -1222,6 +1245,7 @@ object Schema {
         description,
         example,
         title,
+        default,
         minimum,
         exclusiveMinimum,
         maximum,
@@ -1235,11 +1259,12 @@ object Schema {
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
         title: Option[String] = title,
-        minimum: Option[Double] = None,
-        exclusiveMinimum: Option[Boolean] = None,
-        maximum: Option[Double] = None,
-        exclusiveMaximum: Option[Boolean] = None,
-        multipleOf: Option[Double] = None
+        default: Option[ujson.Value] = default,
+        minimum: Option[Double] = minimum,
+        exclusiveMinimum: Option[Boolean] = exclusiveMinimum,
+        maximum: Option[Double] = maximum,
+        exclusiveMaximum: Option[Boolean] = exclusiveMaximum,
+        multipleOf: Option[Double] = multipleOf
     ): Primitive =
       new Primitive(
         name,
@@ -1247,6 +1272,7 @@ object Schema {
         description,
         example,
         title,
+        default,
         minimum,
         exclusiveMinimum,
         maximum,
@@ -1269,6 +1295,9 @@ object Schema {
     def withTitle(title: Option[String]): Primitive =
       copy(title = title)
 
+    def withDefault(default: Option[ujson.Value]): Primitive =
+      copy(default = default)
+
     def withMinimum(minimum: Option[Double]): Primitive =
       copy(minimum = minimum)
 
@@ -1283,7 +1312,6 @@ object Schema {
 
     def withMultipleOf(multipleOf: Option[Double]): Primitive =
       copy(multipleOf = multipleOf)
-
   }
 
   object Primitive {
@@ -1295,7 +1323,7 @@ object Schema {
         example: Option[ujson.Value],
         title: Option[String]
     ): Primitive =
-      new Primitive(name, format, description, example, title)
+      new Primitive(name, format, description, example, title, None, None, None, None, None, None)
 
   }
 
@@ -1303,31 +1331,33 @@ object Schema {
       val alternatives: Alternatives,
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"OneOf($alternatives, $description, $example, $title)"
+      s"OneOf($alternatives, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: OneOf =>
           alternatives == that.alternatives && description == that.description &&
-            example == that.example && title == that.title
+            example == that.example && title == that.title && default == that.default
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(alternatives, description, example, title)
+      Hashing.hash(alternatives, description, example, title, default)
 
     private[this] def copy(
         alternatives: Alternatives = alternatives,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
     ): OneOf =
-      new OneOf(alternatives, description, example, title)
+      new OneOf(alternatives, description, example, title, default)
 
     def withAlternatives(alternatives: Alternatives): OneOf =
       copy(alternatives = alternatives)
@@ -1341,6 +1371,9 @@ object Schema {
     def withTitle(title: Option[String]): OneOf =
       copy(title = title)
 
+    def withDefault(default: Option[ujson.Value]): OneOf =
+      copy(default = default)
+
   }
 
   object OneOf {
@@ -1350,7 +1383,7 @@ object Schema {
         description: Option[String],
         example: Option[ujson.Value],
         title: Option[String]
-    ): OneOf = new OneOf(alternatives, description, example, title)
+    ): OneOf = new OneOf(alternatives, description, example, title, None)
 
   }
 
@@ -1435,31 +1468,33 @@ object Schema {
       val schemas: List[Schema],
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"AllOf($schemas, $description, $example, $title)"
+      s"AllOf($schemas, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: AllOf =>
           schemas == that.schemas && description == that.description &&
-            example == that.example && title == that.title
+            example == that.example && title == that.title && default == that.default
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(schemas, description, example, title)
+      Hashing.hash(schemas, description, example, title, default)
 
     private[this] def copy(
         schemas: List[Schema] = schemas,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
     ): AllOf =
-      new AllOf(schemas, description, example, title)
+      new AllOf(schemas, description, example, title, default)
 
     def withSchemas(schemas: List[Schema]): AllOf =
       copy(schemas = schemas)
@@ -1473,6 +1508,9 @@ object Schema {
     def withTitle(title: Option[String]): AllOf =
       copy(title = title)
 
+    def withDefault(default: Option[ujson.Value]): AllOf =
+      copy(default = default)
+
   }
 
   object AllOf {
@@ -1482,7 +1520,7 @@ object Schema {
         description: Option[String],
         example: Option[ujson.Value],
         title: Option[String]
-    ): AllOf = new AllOf(schemas, description, example, title)
+    ): AllOf = new AllOf(schemas, description, example, title, None)
 
   }
 
@@ -1495,6 +1533,7 @@ object Schema {
 
     override val example: None.type = None // Reference objects can’t have examples
     override val title: None.type = None // Reference objects can’t have a title
+    override val default: None.type = None // Reference objects can’t have a default value
 
     override def toString: String =
       s"Reference($name, $original, $description)"
