@@ -11,8 +11,8 @@ val `sttp-client` =
       `scala 2.12 to 2.13`,
       name := "sttp-client",
       libraryDependencies ++= Seq(
-        "com.softwaremill.sttp" %% "core" % sttpVersion,
-        "com.softwaremill.sttp" %% "akka-http-backend" % sttpVersion % Test,
+        "com.softwaremill.sttp.client" %% "core" % sttpVersion,
+        "com.softwaremill.sttp.client" %% "akka-http-backend" % sttpVersion % Test,
         "com.typesafe.akka" %% "akka-stream" % "2.6.10" % Test
       )
     )

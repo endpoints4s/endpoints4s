@@ -14,7 +14,16 @@ import endpoints4s.{
   algebra
 }
 import endpoints4s.algebra.Documentation
-import com.softwaremill.sttp
+import _root_.sttp.model.{Uri => SUri}
+import _root_.sttp.client.{
+  Identity,
+  NothingT,
+  SttpBackend,
+  asStringAlways,
+  basicRequest,
+  Request => SRequest,
+  Response => SResponse
+}
 
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client
@@ -29,7 +38,7 @@ import com.softwaremill.sttp
   */
 class Endpoints[R[_]](
     val host: String,
-    val backend: sttp.SttpBackend[R, Nothing]
+    val backend: SttpBackend[R, Nothing, NothingT]
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors[R]
     with BuiltInErrors[R]
@@ -47,9 +56,9 @@ trait EndpointsWithCustomErrors[R[_]]
     with StatusCodes {
 
   val host: String
-  val backend: sttp.SttpBackend[R, Nothing]
+  val backend: SttpBackend[R, Nothing, NothingT]
 
-  type SttpRequest = sttp.Request[_, Nothing]
+  type SttpRequest = SRequest[_, Nothing]
 
   /** A function that, given an `A` and a request model, returns an updated request
     * containing additional headers
@@ -94,7 +103,7 @@ trait EndpointsWithCustomErrors[R[_]]
         }
     }
 
-  /** A function that takes an `A` information and returns a `sttp.Request`
+  /** A function that takes an `A` information and returns a `SRequest`
     */
   type Request[A] = A => SttpRequest
 
@@ -108,7 +117,7 @@ trait EndpointsWithCustomErrors[R[_]]
         fa compose g
     }
 
-  /** A function that, given an `A` information and a `sttp.Request`, eventually returns a `sttp.Request`
+  /** A function that, given an `A` information and a `SRequest`, eventually returns a `SRequest`
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
@@ -150,8 +159,8 @@ trait EndpointsWithCustomErrors[R[_]]
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
 
-      val uri: sttp.Id[sttp.Uri] = sttp.Uri(new URI(s"${host}${url.encode(a)}"))
-      val sttpRequest: SttpRequest = method(sttp.sttp.get(uri = uri))
+      val uri: Identity[SUri] = SUri(new URI(s"${host}${url.encode(a)}"))
+      val sttpRequest: SttpRequest = method(basicRequest.get(uri = uri))
       entity(b, headers(c, sttpRequest))
     }
 
@@ -159,14 +168,14 @@ trait EndpointsWithCustomErrors[R[_]]
 
     /** Function to validate the response (headers, code).
       */
-    def decodeResponse(response: sttp.Response[String]): Option[R[A]]
+    def decodeResponse(response: SResponse[String]): Option[R[A]]
   }
 
   implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
       def xmap[A, B](fa: Response[A], f: A => B, g: B => A): Response[B] =
         new Response[B] {
-          def decodeResponse(response: sttp.Response[String]): Option[R[B]] =
+          def decodeResponse(response: SResponse[String]): Option[R[B]] =
             fa.decodeResponse(response)
               .map(ra => backend.responseMonad.map(ra)(f))
         }
@@ -175,7 +184,7 @@ trait EndpointsWithCustomErrors[R[_]]
   /** Trait that indicates how a response should be interpreted
     */
   trait ResponseEntity[A] {
-    def decodeEntity(response: sttp.Response[String]): R[A]
+    def decodeEntity(response: SResponse[String]): R[A]
   }
 
   implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
@@ -192,29 +201,29 @@ trait EndpointsWithCustomErrors[R[_]]
       entity: ResponseEntity[A]
   )(f: A => B): ResponseEntity[B] =
     new ResponseEntity[B] {
-      def decodeEntity(response: sttp.Response[String]): R[B] =
+      def decodeEntity(response: SResponse[String]): R[B] =
         backend.responseMonad.map(entity.decodeEntity(response))(f)
     }
 
   /** Successfully decodes no information from a response */
   def emptyResponse: ResponseEntity[Unit] =
     new ResponseEntity[Unit] {
-      def decodeEntity(response: sttp.Response[String]) =
+      def decodeEntity(response: SResponse[String]) =
         backend.responseMonad.unit(())
     }
 
   /** Successfully decodes string information from a response */
   def textResponse: ResponseEntity[String] =
     new ResponseEntity[String] {
-      def decodeEntity(response: sttp.Response[String]): R[String] =
-        backend.responseMonad.unit(response.body.merge)
+      def decodeEntity(response: SResponse[String]): R[String] =
+        backend.responseMonad.unit(response.body)
     }
 
   def stringCodecResponse[A](implicit
       codec: Codec[String, A]
   ): ResponseEntity[A] =
     sttpResponse =>
-      codec.decode(sttpResponse.body.merge) match {
+      codec.decode(sttpResponse.body) match {
         case Valid(a) => backend.responseMonad.unit(a)
         case Invalid(errors) =>
           backend.responseMonad.error(new Exception(errors.mkString(". ")))
@@ -266,10 +275,10 @@ trait EndpointsWithCustomErrors[R[_]]
       tupler: Tupler.Aux[A, B, Res]
   ): Response[Res] = {
     new Response[Res] {
-      def decodeResponse(response: sttp.Response[String]) = {
+      def decodeResponse(response: SResponse[String]) = {
         if (response.code == statusCode) {
-          val headersMap = response.headers.iterator.map { case (k, v) =>
-            (k.toLowerCase, v)
+          val headersMap = response.headers.iterator.map { case h =>
+            (h.name.toLowerCase, h.value)
           }.toMap
           headers(headersMap) match {
             case Valid(b) =>
@@ -293,7 +302,7 @@ trait EndpointsWithCustomErrors[R[_]]
   ): Response[Either[A, B]] = {
     new Response[Either[A, B]] {
       def decodeResponse(
-          response: sttp.Response[String]
+          response: SResponse[String]
       ): Option[R[Either[A, B]]] =
         responseA
           .decodeResponse(response)
@@ -318,9 +327,7 @@ trait EndpointsWithCustomErrors[R[_]]
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     a => {
-      val req: sttp.Request[String, Nothing] =
-        request(a).response(sttp.asString)
-      val result = backend.send(req)
+      val result = backend.send(request(a).response(asStringAlways))
       backend.responseMonad.flatMap(result) { sttpResponse =>
         decodeResponse(response, sttpResponse)
       }
@@ -328,7 +335,7 @@ trait EndpointsWithCustomErrors[R[_]]
 
   private[client] def decodeResponse[A](
       response: Response[A],
-      sttpResponse: sttp.Response[String]
+      sttpResponse: SResponse[String]
   ): R[A] = {
     val maybeResponse =
       response.decodeResponse(sttpResponse)

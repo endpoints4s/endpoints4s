@@ -1,7 +1,8 @@
 package endpoints4s.sttp.client
 
 import endpoints4s.algebra
-import com.softwaremill.sttp
+import sttp.client.{Request => SRequest, Identity}
+import sttp.model.{Method => SMethod}
 
 /** [[algebra.Methods]] interpreter that builds URLs.
   *
@@ -9,21 +10,21 @@ import com.softwaremill.sttp
   */
 trait Methods extends algebra.Methods {
 
-  type Method = sttp.Request[_, Nothing] => sttp.Request[_, Nothing]
+  type Method = SRequest[_, Nothing] => SRequest[_, Nothing]
 
-  private def setMethod(method: sttp.Method): Method =
-    _.copy(method = method: sttp.Id[sttp.Method])
+  private def setMethod(method: SMethod): Method =
+    _.copy(method = method: Identity[SMethod])
 
-  def Get = setMethod(sttp.Method.GET)
+  def Get = setMethod(SMethod.GET)
 
-  def Post = setMethod(sttp.Method.POST)
+  def Post = setMethod(SMethod.POST)
 
-  def Put = setMethod(sttp.Method.PUT)
+  def Put = setMethod(SMethod.PUT)
 
-  def Delete = setMethod(sttp.Method.DELETE)
+  def Delete = setMethod(SMethod.DELETE)
 
-  def Patch = setMethod(sttp.Method.PATCH)
+  def Patch = setMethod(SMethod.PATCH)
 
-  def Options = setMethod(sttp.Method.OPTIONS)
+  def Options = setMethod(SMethod.OPTIONS)
 
 }
