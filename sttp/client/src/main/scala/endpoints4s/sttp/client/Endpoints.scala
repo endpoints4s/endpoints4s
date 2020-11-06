@@ -103,7 +103,7 @@ trait EndpointsWithCustomErrors[R[_]]
         }
     }
 
-  /** A function that takes an `A` information and returns a `SRequest`
+  /** A function that takes an `A` information and returns a `SttpRequest`
     */
   type Request[A] = A => SttpRequest
 
@@ -117,7 +117,7 @@ trait EndpointsWithCustomErrors[R[_]]
         fa compose g
     }
 
-  /** A function that, given an `A` information and a `SRequest`, eventually returns a `SRequest`
+  /** A function that, given an `A` information and a `SttpRequest`, eventually returns a `SttpRequest`
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 
