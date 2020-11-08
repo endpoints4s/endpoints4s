@@ -648,14 +648,17 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @group operations
     */
   final implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
-    stringJsonSchema(format = Some("uuid")).xmapPartial { str =>
-      Validated.fromEither(
-        Exception.nonFatalCatch
-          .either(UUID.fromString(str))
-          .left
-          .map(_ => s"Invalid UUID value: '$str'" :: Nil)
-      )
-    }(_.toString)
+    stringJsonSchema(format = Some("uuid"))
+      .xmapPartial { str =>
+        Validated.fromEither(
+          Exception.nonFatalCatch
+            .either(UUID.fromString(str))
+            .left
+            .map(_ => s"Invalid UUID value: '$str'" :: Nil)
+        )
+      }(_.toString)
+      .withExample(UUID.fromString("5f27b818-027a-4008-b410-de01e1dd3a93"))
+      .withDescription("Universally unique identifier (RFC 4122)")
 
   /** A JSON schema for type `String`.
     *
