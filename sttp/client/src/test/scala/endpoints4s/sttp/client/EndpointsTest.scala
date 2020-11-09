@@ -1,27 +1,15 @@
 package endpoints4s.sttp.client
 
-import com.softwaremill.sttp
-import com.softwaremill.sttp.TryHttpURLConnectionBackend
-import com.softwaremill.sttp.akkahttp.AkkaHttpBackend
-import endpoints4s.algebra.client.{
-  BasicAuthTestSuite,
-  JsonFromCodecTestSuite,
-  TextEntitiesTestSuite,
-  SumTypedEntitiesTestSuite,
-  EndpointsTestSuite
-}
-import endpoints4s.algebra.{
-  BasicAuthenticationTestApi,
-  EndpointsTestApi,
-  SumTypedEntitiesTestApi,
-  TextEntitiesTestApi
-}
+import _root_.sttp.client.{NothingT, SttpBackend, TryHttpURLConnectionBackend}
+import _root_.sttp.client.akkahttp.AkkaHttpBackend
+import endpoints4s.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite, JsonFromCodecTestSuite, SumTypedEntitiesTestSuite, TextEntitiesTestSuite}
+import endpoints4s.algebra.{BasicAuthenticationTestApi, EndpointsTestApi, SumTypedEntitiesTestApi, TextEntitiesTestApi}
 import endpoints4s.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-class TestClient[R[_]](address: String, backend: sttp.SttpBackend[R, _])
+class TestClient[R[_]](address: String, backend: SttpBackend[R, Nothing, NothingT])
     extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]

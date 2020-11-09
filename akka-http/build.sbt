@@ -43,7 +43,7 @@ val `akka-http-server` =
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).withDottyCompat(scalaVersion.value),
         ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
         ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.softwaremill.sttp" %% "core" % sttpVersion % Test).withDottyCompat(scalaVersion.value), // Temporary
+        ("com.softwaremill.sttp.client" %% "core" % sttpVersion % Test).withDottyCompat(scalaVersion.value), // Temporary
         scalaTestDependency.withDottyCompat(scalaVersion.value)
       )
     )
