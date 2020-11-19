@@ -46,6 +46,9 @@ final class OpenApi private (
 
   def withComponents(components: Components): OpenApi =
     copy(components = components)
+
+  def withSecuritySchemas(securitySchemes: Map[String, SecurityScheme]): OpenApi =
+    copy(components = components.withSecuritySchemas(securitySchemes))
 }
 
 object OpenApi {
