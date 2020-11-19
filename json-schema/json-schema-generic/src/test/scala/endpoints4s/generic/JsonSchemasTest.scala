@@ -225,15 +225,15 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     def stringJsonSchema(format: Option[String]): String = "string"
 
-    lazy val intJsonSchema: String = "integer"
+    def intWithPropsJsonSchema(props: NumericConstraints[Int]): String = "integer"
 
-    lazy val longJsonSchema: String = "integer"
+    def longWithPropsJsonSchema(props: NumericConstraints[Long]): String = "integer"
 
-    lazy val bigdecimalJsonSchema: String = "number"
+    def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): String = "number"
 
-    lazy val floatJsonSchema: String = "number"
+    def floatWithPropsJsonSchema(props: NumericConstraints[Float]): String = "number"
 
-    lazy val doubleJsonSchema: String = "number"
+    def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): String = "number"
 
     lazy val booleanJsonSchema: String = "boolean"
 

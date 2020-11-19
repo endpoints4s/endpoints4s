@@ -78,6 +78,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         title: Option[String] = None
     ) extends DocumentedJsonSchema
 
+    // TODO: set numeric properties if present
     case class Primitive(
         name: String,
         format: Option[String] = None,
@@ -454,28 +455,28 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive("string", format)
     )
 
-  lazy val intJsonSchema: JsonSchema[Int] =
+  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
       ujsonSchemas.intJsonSchema,
       Primitive("integer", format = Some("int32"))
     )
 
-  lazy val longJsonSchema: JsonSchema[Long] =
+  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
     new JsonSchema(
       ujsonSchemas.longJsonSchema,
       Primitive("integer", format = Some("int64"))
     )
 
-  lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
     new JsonSchema(ujsonSchemas.bigdecimalJsonSchema, Primitive("number"))
 
-  lazy val floatJsonSchema: JsonSchema[Float] =
+  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
     new JsonSchema(
       ujsonSchemas.floatJsonSchema,
       Primitive("number", format = Some("float"))
     )
 
-  lazy val doubleJsonSchema: JsonSchema[Double] =
+  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
     new JsonSchema(
       ujsonSchemas.doubleJsonSchema,
       Primitive("number", format = Some("double"))

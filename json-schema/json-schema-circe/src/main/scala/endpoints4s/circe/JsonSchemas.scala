@@ -296,19 +296,20 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def stringJsonSchema(format: Option[String]): JsonSchema[String] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def intJsonSchema: JsonSchema[Int] =
+  // TODO: for all numeric constraints check if they are valid
+  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def longJsonSchema: JsonSchema[Long] =
+  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def floatJsonSchema: JsonSchema[Float] =
+  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def doubleJsonSchema: JsonSchema[Double] =
+  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
     JsonSchema(implicitly, implicitly)
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] =
