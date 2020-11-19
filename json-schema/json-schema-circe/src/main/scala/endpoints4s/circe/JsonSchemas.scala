@@ -296,21 +296,29 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def stringJsonSchema(format: Option[String]): JsonSchema[String] =
     JsonSchema(implicitly, implicitly)
 
-  // TODO: for all numeric constraints check if they are valid
-  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = bigdecimalWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithPropsJsonSchema(NumericConstraints())
 
-  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
-    JsonSchema(implicitly, implicitly)
+  private def getDecoder[A: Decoder: MultipleOf: Ordering](constraints: NumericConstraints[A]) =
+    Decoder[A].ensure(a => constraints.satisfiedBy(a), s"does not satisfy the constraints: $constraints")
 
-  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
-    JsonSchema(implicitly, implicitly)
+  override def intWithPropsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
+    JsonSchema(implicitly, getDecoder(constraints))
 
-  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
-    JsonSchema(implicitly, implicitly)
+  override def longWithPropsJsonSchema(constraints: NumericConstraints[Long]): JsonSchema[Long] =
+    JsonSchema(implicitly, getDecoder(constraints))
 
-  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
-    JsonSchema(implicitly, implicitly)
+  override def bigdecimalWithPropsJsonSchema(constraints: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def floatWithPropsJsonSchema(constraints: NumericConstraints[Float]): JsonSchema[Float] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def doubleWithPropsJsonSchema(constraints: NumericConstraints[Double]): JsonSchema[Double] =
+    JsonSchema(implicitly, getDecoder(constraints))
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] =
     JsonSchema(implicitly, implicitly)

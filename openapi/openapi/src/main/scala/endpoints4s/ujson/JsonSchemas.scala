@@ -283,60 +283,66 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = ujson.Str(_)
     }
 
-  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
+  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = bigdecimalWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithPropsJsonSchema(NumericConstraints())
+
+  override def intWithPropsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema[Int] {
       val decoder = {
         case ujson.Num(x) if x.isValidInt =>
           val int = x.toInt
-          if (props.isValid(int)) Valid(x.toInt)
-          else Invalid(s"$x does not satisfy the constraints: $props")
+          if (constraints.satisfiedBy(int)) Valid(x.toInt)
+          else Invalid(s"$x does not satisfy the constraints: $constraints")
         case json => Invalid(s"Invalid integer value: $json")
       }
       val encoder = n => ujson.Num(n.toDouble)
     }
 
-  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
+  override def longWithPropsJsonSchema(constraints: NumericConstraints[Long]): JsonSchema[Long] =
     new JsonSchema[Long] {
       val decoder = {
         case json @ ujson.Num(x)  =>
           val y = BigDecimal(x) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
           if (y.isValidLong) {
             val long = y.toLong
-            if (props.isValid(long)) Valid(long)
-            else Invalid(s"$x does not satisfy the constraints: $props")
+            if (constraints.satisfiedBy(long)) Valid(long)
+            else Invalid(s"$x does not satisfy the constraints: $constraints")
           } else Invalid(s"Invalid integer value: $json")
         case json => Invalid(s"Invalid number value: $json")
       }
       val encoder = n => ujson.Num(n.toDouble)
     }
 
-  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
+  override def bigdecimalWithPropsJsonSchema(constraints: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
     new JsonSchema[BigDecimal] {
       val decoder = {
-        case ujson.Num(x) if props.isValid(x) => Valid(BigDecimal(x))
-        case ujson.Num(x)                    => Invalid(s"$x does not satisfy the constraints: $props")
+        case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(BigDecimal(x))
+        case ujson.Num(x)                    => Invalid(s"$x does not satisfy the constraints: $constraints")
         case json                            => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.doubleValue)
     }
 
-  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
+  override def floatWithPropsJsonSchema(constraints: NumericConstraints[Float]): JsonSchema[Float] =
     new JsonSchema[Float] {
       val decoder = {
         case ujson.Num(x) =>
           val float = x.toFloat
-          if (props.isValid(float)) Valid(float)
-          else Invalid(s"$x does not satisfy the constraints: $props")
+          if (constraints.satisfiedBy(float)) Valid(float)
+          else Invalid(s"$x does not satisfy the constraints: $constraints")
         case json => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.toDouble)
     }
 
-  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
+  override def doubleWithPropsJsonSchema(constraints: NumericConstraints[Double]): JsonSchema[Double] =
     new JsonSchema[Double] {
       val decoder = {
-        case ujson.Num(x) if props.isValid(x)=> Valid(x)
-        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $props")
+        case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(x)
+        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $constraints")
         case json         => Invalid(s"Invalid number value: $json")
       }
       val encoder = ujson.Num(_)

@@ -3,7 +3,7 @@ package endpoints4s.algebra
 import java.time.{Duration, Instant, OffsetDateTime}
 import java.util.UUID
 
-import endpoints4s.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
+import endpoints4s.{MultipleOf, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
 
 import scala.collection.compat._
 import scala.reflect.ClassTag
@@ -680,10 +680,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   case class NumericConstraints[A](
       minimum: Option[A] = None,
-      exclusiveMinimum: Option[A] = None,
+      exclusiveMinimum: Option[Boolean] = None,
       maximum: Option[A] = None,
-      exclusiveMaximum: Option[A] = None
-  )(implicit ord: Ordering[A]) {
+      exclusiveMaximum: Option[Boolean] = None,
+      multipleOf: Option[A] = None,
+  )(implicit val ord: Ordering[A], mult: MultipleOf[A]) {
+    import ord._
 
     override def toString: String =
       (p2s(minimum, "minimum") ++
@@ -691,71 +693,79 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
         p2s(maximum, "maximum") ++
         p2s(exclusiveMaximum, "exclusiveMaximum")).mkString(", ")
 
-    private def p2s(opt: Option[A], name: String): List[String] =
+    private def p2s[B](opt: Option[B], name: String): List[String] =
       opt.map(v => s"$name:$v").toList
 
-    /** Check whether the value */
-    def isValid(value: A): Boolean =
-      minimum.forall(ord.lteq(_, value)) &&
-        exclusiveMaximum.forall(ord.lt(_, value)) &&
-        maximum.forall(ord.gteq(_, value)) &&
-        exclusiveMaximum.forall(ord.gt(_, value))
+    /** Check whether the value satisfies all the constraints */
+    def satisfiedBy(value: A): Boolean = {
+      def checkMultipleOf(bound: A) = mult.multipleOf(bound, value)
+
+      def checkMinimum(bound: A) =
+        if (exclusiveMinimum.getOrElse(false)) bound < value
+        else bound <= value
+
+      def checkMaximum(bound: A) =
+        if (exclusiveMaximum.getOrElse(false)) bound > value
+        else bound >= value
+
+      minimum.forall(checkMinimum) && maximum.forall(checkMaximum) && multipleOf.forall(checkMultipleOf)
+    }
   }
 
   /** A JSON schema for type `Int` where certain properties, such as minimum, maximum, etc. are set.
     * @group operations
     */
-  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int]
+  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
+    intJsonSchema
 
   /** A JSON schema for type `Int`
     * @group operations
     */
-  implicit def intJsonSchema: JsonSchema[Int] =
-    intWithPropsJsonSchema(NumericConstraints())
+  implicit def intJsonSchema: JsonSchema[Int]
 
   /** A JSON schema for type `Long` where certain properties, such as minimum, maximum, etc. are set.
     * @group operations
     */
-  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long]
+  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
+    longJsonSchema
 
   /** A JSON schema for type `Long`
     * @group operations
     */
-  implicit def longJsonSchema: JsonSchema[Long] =
-    longWithPropsJsonSchema(NumericConstraints[Long]())
+  implicit def longJsonSchema: JsonSchema[Long]
 
   /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
     * @group operations
     */
-  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal]
+  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
+    bigdecimalJsonSchema
 
   /** A JSON schema for type `BigDecimal`
     * @group operations
     */
-  implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] =
-    bigdecimalWithPropsJsonSchema(NumericConstraints())
+  implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal]
 
   /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
     * @group operations
     */
-  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float]
+  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
+    floatJsonSchema
 
   /** A JSON schema for type `Float`
     * @group operations
     */
-  implicit def floatJsonSchema: JsonSchema[Float] =
-    floatWithPropsJsonSchema(NumericConstraints())
+  implicit def floatJsonSchema: JsonSchema[Float]
 
   /** A JSON schema for type `Double` where certain properties, such as minimum, maximum, etc. are set.
     * @group operations
     */
-  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double]
+  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
+    doubleJsonSchema
 
   /** A JSON schema for type `Double`
     * @group operations
     */
-  implicit def doubleJsonSchema: JsonSchema[Double] =
-    doubleWithPropsJsonSchema(NumericConstraints[Double]())
+  implicit def doubleJsonSchema: JsonSchema[Double]
 
   /** A JSON schema for type `Boolean`
     * @group operations

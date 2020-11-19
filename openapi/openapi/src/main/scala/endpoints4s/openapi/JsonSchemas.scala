@@ -455,28 +455,34 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive("string", format)
     )
 
-  def intWithPropsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
+  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = bigdecimalWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithPropsJsonSchema(NumericConstraints())
+
+  override def intWithPropsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
       ujsonSchemas.intJsonSchema,
       Primitive("integer", format = Some("int32"))
     )
 
-  def longWithPropsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
+  override def longWithPropsJsonSchema(constraints: NumericConstraints[Long]): JsonSchema[Long] =
     new JsonSchema(
       ujsonSchemas.longJsonSchema,
       Primitive("integer", format = Some("int64"))
     )
 
-  def bigdecimalWithPropsJsonSchema(props: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
+  override def bigdecimalWithPropsJsonSchema(constraints: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
     new JsonSchema(ujsonSchemas.bigdecimalJsonSchema, Primitive("number"))
 
-  def floatWithPropsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
+  override def floatWithPropsJsonSchema(constraints: NumericConstraints[Float]): JsonSchema[Float] =
     new JsonSchema(
       ujsonSchemas.floatJsonSchema,
       Primitive("number", format = Some("float"))
     )
 
-  def doubleWithPropsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
+  override def doubleWithPropsJsonSchema(constraints: NumericConstraints[Double]): JsonSchema[Double] =
     new JsonSchema(
       ujsonSchemas.doubleJsonSchema,
       Primitive("number", format = Some("double"))
