@@ -5,6 +5,8 @@ import endpoints4s.{
   Decoder,
   Encoder,
   Invalid,
+  MultipleOf,
+  NumericConstraints,
   PartialInvariantFunctor,
   Tupler,
   Valid,
@@ -283,13 +285,22 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = ujson.Str(_)
     }
 
-  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = bigdecimalWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints())
+  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
 
-  override def intWithPropsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
+  override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema[Int] {
       val decoder = {
         case ujson.Num(x) if x.isValidInt =>
@@ -301,11 +312,15 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = n => ujson.Num(n.toDouble)
     }
 
-  override def longWithPropsJsonSchema(constraints: NumericConstraints[Long]): JsonSchema[Long] =
+  override def longWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Long]
+  ): JsonSchema[Long] =
     new JsonSchema[Long] {
       val decoder = {
-        case json @ ujson.Num(x)  =>
-          val y = BigDecimal(x) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
+        case json @ ujson.Num(x) =>
+          val y = BigDecimal(
+            x
+          ) // no `isValidLong` operation on `Double`, so convert to `BigDecimal`
           if (y.isValidLong) {
             val long = y.toLong
             if (constraints.satisfiedBy(long)) Valid(long)
@@ -316,17 +331,21 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = n => ujson.Num(n.toDouble)
     }
 
-  override def bigdecimalWithPropsJsonSchema(constraints: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
+  override def bigdecimalWithConstraintsJsonSchema(
+      constraints: NumericConstraints[BigDecimal]
+  ): JsonSchema[BigDecimal] =
     new JsonSchema[BigDecimal] {
       val decoder = {
         case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(BigDecimal(x))
-        case ujson.Num(x)                    => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json                            => Invalid(s"Invalid number value: $json")
+        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
+        case json                                       => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.doubleValue)
     }
 
-  override def floatWithPropsJsonSchema(constraints: NumericConstraints[Float]): JsonSchema[Float] =
+  override def floatWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Float]
+  ): JsonSchema[Float] =
     new JsonSchema[Float] {
       val decoder = {
         case ujson.Num(x) =>
@@ -338,12 +357,14 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = x => ujson.Num(x.toDouble)
     }
 
-  override def doubleWithPropsJsonSchema(constraints: NumericConstraints[Double]): JsonSchema[Double] =
+  override def doubleWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Double]
+  ): JsonSchema[Double] =
     new JsonSchema[Double] {
       val decoder = {
         case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(x)
-        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json         => Invalid(s"Invalid number value: $json")
+        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
+        case json                                       => Invalid(s"Invalid number value: $json")
       }
       val encoder = ujson.Num(_)
     }

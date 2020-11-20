@@ -1,6 +1,6 @@
 package endpoints4s.openapi
 
-import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
+import endpoints4s.{NumericConstraints, PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.Schema
 import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
@@ -23,6 +23,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     */
   final lazy val ujsonSchemas: endpoints4s.ujson.JsonSchemas =
     new endpoints4s.ujson.JsonSchemas {
+
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName
     }
@@ -33,14 +34,17 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       val ujsonSchema: ujsonSchemas.JsonSchema[A],
       val docs: DocumentedJsonSchema
   )
+
   class Record[A](
       override val ujsonSchema: ujsonSchemas.Record[A],
       override val docs: DocumentedRecord
   ) extends JsonSchema[A](ujsonSchema, docs)
+
   class Tagged[A](
       override val ujsonSchema: ujsonSchemas.Tagged[A],
       override val docs: DocumentedCoProd
   ) extends JsonSchema[A](ujsonSchema, docs)
+
   class Enum[A](
       override val ujsonSchema: ujsonSchemas.Enum[A],
       override val docs: DocumentedEnum
@@ -62,6 +66,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         example: Option[ujson.Value] = None,
         title: Option[String] = None
     ) extends DocumentedJsonSchema
+
     case class Field(
         name: String,
         tpe: DocumentedJsonSchema,
@@ -78,13 +83,17 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         title: Option[String] = None
     ) extends DocumentedJsonSchema
 
-    // TODO: set numeric properties if present
     case class Primitive(
         name: String,
         format: Option[String] = None,
         description: Option[String] = None,
         example: Option[ujson.Value] = None,
-        title: Option[String] = None
+        title: Option[String] = None,
+        minimum: Option[String] = None,
+        exclusiveMinimum: Option[Boolean] = None,
+        maximum: Option[String] = None,
+        exclusiveMaximum: Option[Boolean] = None,
+        multipleOf: Option[String] = None
     ) extends DocumentedJsonSchema
 
     /** @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
@@ -109,7 +118,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     sealed abstract class LazySchema extends DocumentedJsonSchema {
       def value: DocumentedJsonSchema
     }
+
     object LazySchema {
+
       def apply(s: => DocumentedJsonSchema): LazySchema =
         new LazySchema {
           lazy val value: DocumentedJsonSchema = s
@@ -129,6 +140,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema] =
     new PartialInvariantFunctor[JsonSchema] {
+
       def xmapPartial[A, B](
           fa: JsonSchema[A],
           f: A => Validated[B],
@@ -139,6 +151,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             .xmapPartial(fa.ujsonSchema, f, g),
           fa.docs
         )
+
       override def xmap[A, B](
           fa: JsonSchema[A],
           f: A => B,
@@ -149,8 +162,10 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           fa.docs
         )
     }
+
   implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record] =
     new PartialInvariantFunctor[Record] {
+
       def xmapPartial[A, B](
           fa: Record[A],
           f: A => Validated[B],
@@ -161,14 +176,17 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             .xmapPartial(fa.ujsonSchema, f, g),
           fa.docs
         )
+
       override def xmap[A, B](fa: Record[A], f: A => B, g: B => A): Record[B] =
         new Record(
           ujsonSchemas.recordPartialInvFunctor.xmap(fa.ujsonSchema, f, g),
           fa.docs
         )
     }
+
   implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged] =
     new PartialInvariantFunctor[Tagged] {
+
       def xmapPartial[A, B](
           fa: Tagged[A],
           f: A => Validated[B],
@@ -179,6 +197,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             .xmapPartial(fa.ujsonSchema, f, g),
           fa.docs
         )
+
       override def xmap[A, B](fa: Tagged[A], f: A => B, g: B => A): Tagged[B] =
         new Tagged(
           ujsonSchemas.taggedPartialInvFunctor.xmap(fa.ujsonSchema, f, g),
@@ -198,8 +217,10 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] =
     new Record(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
     new Tagged(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
     new Enum(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
 
@@ -208,6 +229,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       ujsonSchemas.lazyRecord(schema.ujsonSchema, name),
       LazySchema(namedRecord(schema, name).docs)
     )
+
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
     new JsonSchema(
       ujsonSchemas.lazyTagged(schema.ujsonSchema, name),
@@ -455,37 +477,99 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive("string", format)
     )
 
-  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] = bigdecimalWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithPropsJsonSchema(NumericConstraints())
-  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithPropsJsonSchema(NumericConstraints())
+  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
 
-  override def intWithPropsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints())
+  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithConstraintsJsonSchema(
+    NumericConstraints()
+  )
+
+  private def toS[A](opt: Option[A]) = opt.map(_.toString)
+
+  override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
       ujsonSchemas.intJsonSchema,
-      Primitive("integer", format = Some("int32"))
+      Primitive(
+        "integer",
+        format = Some("int32"),
+        minimum = toS(constraints.minimum),
+        exclusiveMinimum = constraints.exclusiveMinimum,
+        maximum = toS(constraints.exclusiveMaximum),
+        exclusiveMaximum = constraints.exclusiveMaximum,
+        multipleOf = toS(constraints.multipleOf)
+      )
     )
 
-  override def longWithPropsJsonSchema(constraints: NumericConstraints[Long]): JsonSchema[Long] =
+  override def longWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Long]
+  ): JsonSchema[Long] =
     new JsonSchema(
       ujsonSchemas.longJsonSchema,
-      Primitive("integer", format = Some("int64"))
+      Primitive(
+        "integer",
+        format = Some("int64"),
+        minimum = toS(constraints.minimum),
+        exclusiveMinimum = constraints.exclusiveMinimum,
+        maximum = toS(constraints.exclusiveMaximum),
+        exclusiveMaximum = constraints.exclusiveMaximum,
+        multipleOf = toS(constraints.multipleOf)
+      )
     )
 
-  override def bigdecimalWithPropsJsonSchema(constraints: NumericConstraints[BigDecimal]): JsonSchema[BigDecimal] =
-    new JsonSchema(ujsonSchemas.bigdecimalJsonSchema, Primitive("number"))
+  override def bigdecimalWithConstraintsJsonSchema(
+      constraints: NumericConstraints[BigDecimal]
+  ): JsonSchema[BigDecimal] =
+    new JsonSchema(
+      ujsonSchemas.bigdecimalJsonSchema,
+      Primitive(
+        "number",
+        minimum = toS(constraints.minimum),
+        exclusiveMinimum = constraints.exclusiveMinimum,
+        maximum = toS(constraints.exclusiveMaximum),
+        exclusiveMaximum = constraints.exclusiveMaximum,
+        multipleOf = toS(constraints.multipleOf)
+      )
+    )
 
-  override def floatWithPropsJsonSchema(constraints: NumericConstraints[Float]): JsonSchema[Float] =
+  override def floatWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Float]
+  ): JsonSchema[Float] =
     new JsonSchema(
       ujsonSchemas.floatJsonSchema,
-      Primitive("number", format = Some("float"))
+      Primitive(
+        "number",
+        format = Some("float"),
+        minimum = toS(constraints.minimum),
+        exclusiveMinimum = constraints.exclusiveMinimum,
+        maximum = toS(constraints.exclusiveMaximum),
+        exclusiveMaximum = constraints.exclusiveMaximum,
+        multipleOf = toS(constraints.multipleOf)
+      )
     )
 
-  override def doubleWithPropsJsonSchema(constraints: NumericConstraints[Double]): JsonSchema[Double] =
+  override def doubleWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Double]
+  ): JsonSchema[Double] =
     new JsonSchema(
       ujsonSchemas.doubleJsonSchema,
-      Primitive("number", format = Some("double"))
+      Primitive(
+        "number",
+        format = Some("double"),
+        minimum = toS(constraints.minimum),
+        exclusiveMinimum = constraints.exclusiveMinimum,
+        maximum = toS(constraints.exclusiveMaximum),
+        exclusiveMaximum = constraints.exclusiveMaximum,
+        multipleOf = toS(constraints.multipleOf)
+      )
     )
 
   lazy val booleanJsonSchema: JsonSchema[Boolean] =
@@ -705,8 +789,25 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           )
       case coprod @ DocumentedCoProd(_, None, _, _, _, _) =>
         expandCoproductSchema(coprod, referencedSchemas)
-      case Primitive(name, format, description, example, title) =>
-        Schema.Primitive(name, format, description, example, title)
+      case Primitive(
+            name,
+            format,
+            description,
+            example,
+            title,
+            min,
+            exclusiveMin,
+            max,
+            exclusiveMax,
+            multipleOf
+          ) =>
+        Schema
+          .Primitive(name, format, description, example, title)
+          .withMinimum(min)
+          .withExclusiveMinimum(exclusiveMin)
+          .withMaximum(max)
+          .withExclusiveMaximum(exclusiveMax)
+          .withMultipleOf(multipleOf)
       case Array(Left(elementType), description, example, title) =>
         Schema.Array(
           Left(toSchema(elementType, coprodBase, referencedSchemas)),
