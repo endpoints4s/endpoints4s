@@ -250,7 +250,9 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          },
         |          "id" : {
         |            "type" : "string",
-        |            "format" : "uuid"
+        |            "format" : "uuid",
+        |            "description": "Universally unique identifier (RFC 4122)",
+        |            "example": "5f27b818-027a-4008-b410-de01e1dd3a93"
         |          },
         |          "storage" : {
         |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage"
