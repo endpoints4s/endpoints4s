@@ -3,15 +3,7 @@ package endpoints4s.algebra
 import java.time.{Duration, Instant, OffsetDateTime}
 import java.util.UUID
 
-import endpoints4s.{
-  MultipleOf,
-  NumericConstraints,
-  PartialInvariantFunctor,
-  PartialInvariantFunctorSyntax,
-  Tupler,
-  Validated
-}
-
+import endpoints4s._
 import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.util.Try

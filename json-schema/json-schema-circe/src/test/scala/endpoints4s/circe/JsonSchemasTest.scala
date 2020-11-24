@@ -208,4 +208,15 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "numeric constraint value" in {
+    import JsonSchemasCodec.{constraintNumericSchema, createNumericErrorMessage}
+    def decode(int: Int) = constraintNumericSchema.decoder.decodeJson(Json.fromInt(int))
+
+    assert(constraintNumericSchema.encoder(6) == Json.fromInt(6))
+    assert(decode(6).contains(6))
+    assert(decode(10) == Left(DecodingFailure(createNumericErrorMessage(10), Nil)))
+    assert(decode(-1) == Left(DecodingFailure(createNumericErrorMessage(-1), Nil)))
+    assert(decode(5) == Left(DecodingFailure(createNumericErrorMessage(5), Nil)))
+  }
+
 }

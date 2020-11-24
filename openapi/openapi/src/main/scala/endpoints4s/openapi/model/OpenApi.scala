@@ -66,11 +66,11 @@ object OpenApi {
       case primitive: Schema.Primitive =>
         fields += "type" -> ujson.Str(primitive.name)
         primitive.format.foreach(s => fields += "format" -> ujson.Str(s))
-        primitive.minimum.foreach(s => fields += "minimum" -> ujson.Str(s))
-        primitive.exclusiveMinimum.foreach(s => fields += "exclusiveMinimum" -> ujson.Bool(s))
-        primitive.maximum.foreach(s => fields += "maximum" -> ujson.Str(s))
-        primitive.exclusiveMaximum.foreach(s => fields += "exclusiveMaximum" -> ujson.Bool(s))
-        primitive.multipleOf.foreach(s => fields += "multipleOf" -> ujson.Str(s))
+        primitive.minimum.foreach(d => fields += "minimum" -> ujson.Num(d))
+        primitive.exclusiveMinimum.foreach(b => fields += "exclusiveMinimum" -> ujson.Bool(b))
+        primitive.maximum.foreach(d => fields += "maximum" -> ujson.Num(d))
+        primitive.exclusiveMaximum.foreach(b => fields += "exclusiveMaximum" -> ujson.Bool(b))
+        primitive.multipleOf.foreach(d => fields += "multipleOf" -> ujson.Num(d))
       case obj: Schema.Object =>
         fields ++= List(
           "type" -> "object",
@@ -1180,11 +1180,11 @@ object Schema {
       val description: Option[String],
       val example: Option[ujson.Value],
       val title: Option[String],
-      val minimum: Option[String] = None,
+      val minimum: Option[Double] = None,
       val exclusiveMinimum: Option[Boolean] = None,
-      val maximum: Option[String] = None,
+      val maximum: Option[Double] = None,
       val exclusiveMaximum: Option[Boolean] = None,
-      val multipleOf: Option[String] = None
+      val multipleOf: Option[Double] = None
   ) extends Schema
       with Serializable {
 
@@ -1221,11 +1221,11 @@ object Schema {
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
         title: Option[String] = title,
-        minimum: Option[String] = None,
+        minimum: Option[Double] = None,
         exclusiveMinimum: Option[Boolean] = None,
-        maximum: Option[String] = None,
+        maximum: Option[Double] = None,
         exclusiveMaximum: Option[Boolean] = None,
-        multipleOf: Option[String] = None
+        multipleOf: Option[Double] = None
     ): Primitive =
       new Primitive(
         name,
@@ -1255,19 +1255,19 @@ object Schema {
     def withTitle(title: Option[String]): Primitive =
       copy(title = title)
 
-    def withMinimum(minimum: Option[String]): Primitive =
+    def withMinimum(minimum: Option[Double]): Primitive =
       copy(minimum = minimum)
 
     def withExclusiveMinimum(exclusiveMinimum: Option[Boolean]): Primitive =
       copy(exclusiveMinimum = exclusiveMinimum)
 
-    def withMaximum(maximum: Option[String]): Primitive =
+    def withMaximum(maximum: Option[Double]): Primitive =
       copy(maximum = maximum)
 
     def withExclusiveMaximum(exclusiveMaximum: Option[Boolean]): Primitive =
       copy(exclusiveMaximum = exclusiveMaximum)
 
-    def withMultipleOf(multipleOf: Option[String]): Primitive =
+    def withMultipleOf(multipleOf: Option[Double]): Primitive =
       copy(multipleOf = multipleOf)
 
   }

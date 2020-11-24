@@ -1,18 +1,6 @@
 package endpoints4s.ujson
 
-import endpoints4s.{
-  Codec,
-  Decoder,
-  Encoder,
-  Invalid,
-  MultipleOf,
-  NumericConstraints,
-  PartialInvariantFunctor,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{ujson => _, _}
 
 import scala.collection.compat._
 import scala.collection.mutable
@@ -285,20 +273,20 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = ujson.Str(_)
     }
 
-  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+  implicit lazy val intJsonSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(NumericConstraints())
+
+  implicit lazy val longJsonSchema: JsonSchema[Long] =
+    longWithConstraintsJsonSchema(NumericConstraints())
+
   implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
     bigdecimalWithConstraintsJsonSchema(NumericConstraints())
-  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+
+  implicit lazy val floatJsonSchema: JsonSchema[Float] =
+    floatWithConstraintsJsonSchema(NumericConstraints())
+
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] =
+    doubleWithConstraintsJsonSchema(NumericConstraints())
 
   override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema[Int] {

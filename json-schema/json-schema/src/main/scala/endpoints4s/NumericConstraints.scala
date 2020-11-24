@@ -17,11 +17,12 @@ case class NumericConstraints[A](
     (p2s(minimum, "minimum") ++
       p2s(exclusiveMinimum, "exclusiveMinimum") ++
       p2s(maximum, "maximum") ++
-      p2s(exclusiveMaximum, "exclusiveMaximum")).mkString(", ")
+      p2s(exclusiveMaximum, "exclusiveMaximum") ++
+      p2s(multipleOf, "multipleOf")).mkString(", ")
 
   /** Check whether the value satisfies all the constraints */
   def satisfiedBy(value: A): Boolean = {
-    def checkMultipleOf(bound: A) = mult.multipleOf(bound, value)
+    def checkMultipleOf(bound: A) = mult.multipleOf(value, bound)
 
     def checkMinimum(bound: A) =
       if (exclusiveMinimum.getOrElse(false)) bound < value
@@ -31,9 +32,9 @@ case class NumericConstraints[A](
       if (exclusiveMaximum.getOrElse(false)) bound > value
       else bound >= value
 
-    minimum.forall(checkMinimum) && maximum.forall(checkMaximum) && multipleOf.forall(
-      checkMultipleOf
-    )
+    minimum.forall(checkMinimum) &&
+    maximum.forall(checkMaximum) &&
+    multipleOf.forall(checkMultipleOf)
   }
 
   private def p2s[B](opt: Option[B], name: String): List[String] =

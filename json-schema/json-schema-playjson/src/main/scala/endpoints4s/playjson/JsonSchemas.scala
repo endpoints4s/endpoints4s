@@ -179,22 +179,27 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     JsonSchema(implicitly, implicitly)
 
   private def getReads[A: Reads: MultipleOf: Ordering](constraints: NumericConstraints[A]) =
-    implicitly[Reads[A]].filter(a => constraints.satisfiedBy(a))
+    implicitly[Reads[A]].flatMap { value =>
+      val r2: Reads[A] = /* explicit type annotation as otherwise the compiler fails */
+        if (constraints.satisfiedBy(value)) Reads.pure(value)
+        else Reads.failed(s"$value does not satisfy the constraints: $constraints")
+      r2
+    }
 
-  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+  implicit lazy val intJsonSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(NumericConstraints())
+
+  implicit lazy val longJsonSchema: JsonSchema[Long] =
+    longWithConstraintsJsonSchema(NumericConstraints())
+
   implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
     bigdecimalWithConstraintsJsonSchema(NumericConstraints())
-  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+
+  implicit lazy val floatJsonSchema: JsonSchema[Float] =
+    floatWithConstraintsJsonSchema(NumericConstraints())
+
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] =
+    doubleWithConstraintsJsonSchema(NumericConstraints())
 
   override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     JsonSchema(getReads(constraints), implicitly)

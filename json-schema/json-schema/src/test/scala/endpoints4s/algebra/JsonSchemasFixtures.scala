@@ -1,6 +1,6 @@
 package endpoints4s.algebra
 
-import endpoints4s.{Invalid, Valid}
+import endpoints4s.{Invalid, NumericConstraints, Valid}
 
 /** This file doesn’t contain actual tests.
   *
@@ -122,5 +122,16 @@ trait JsonSchemasFixtures extends JsonSchemas {
   val intOrBoolean: JsonSchema[Either[Int, Boolean]] =
     intJsonSchema.orFallbackTo(booleanJsonSchema)
   //#one-of
+
+  //#numeric-constraint
+  def createNumericErrorMessage[A](value: A) =
+    s"$value does not satisfy the constraints: minimum:0, maximum:10, exclusiveMaximum:true, multipleOf:2"
+
+  val constraintNumericSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(
+    NumericConstraints(minimum = Some(0), maximum = Some(10), exclusiveMaximum = Some(true), multipleOf = Some(2))
+  )
+  //#numeric-constraint
+
 
 }

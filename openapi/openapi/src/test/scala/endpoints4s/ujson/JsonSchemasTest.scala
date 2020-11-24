@@ -399,6 +399,29 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "constrained numeric value" in {
+    checkRoundTrip(
+      constraintNumericSchema,
+      ujson.Num(6),
+      6
+    )
+    checkDecodingFailure(
+      constraintNumericSchema,
+      ujson.Num(10),
+      Seq(createNumericErrorMessage(10))
+    )
+    checkDecodingFailure(
+      constraintNumericSchema,
+      ujson.Num(-1),
+      Seq(createNumericErrorMessage(-1))
+    )
+    checkDecodingFailure(
+      constraintNumericSchema,
+      ujson.Num(5),
+      Seq(createNumericErrorMessage(5))
+    )
+  }
+
   def checkRoundTrip[A](
       schema: JsonSchema[A],
       json: ujson.Value,

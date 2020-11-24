@@ -89,11 +89,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         description: Option[String] = None,
         example: Option[ujson.Value] = None,
         title: Option[String] = None,
-        minimum: Option[String] = None,
+        minimum: Option[Double] = None,
         exclusiveMinimum: Option[Boolean] = None,
-        maximum: Option[String] = None,
+        maximum: Option[Double] = None,
         exclusiveMaximum: Option[Boolean] = None,
-        multipleOf: Option[String] = None
+        multipleOf: Option[Double] = None
     ) extends DocumentedJsonSchema
 
     /** @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
@@ -493,7 +493,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     NumericConstraints()
   )
 
-  private def toS[A](opt: Option[A]) = opt.map(_.toString)
+  private def toD[A: Numeric](opt: Option[A]) = opt.map(a => Numeric[A].toDouble(a))
 
   override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
@@ -501,11 +501,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "integer",
         format = Some("int32"),
-        minimum = toS(constraints.minimum),
+        minimum = toD(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toS(constraints.exclusiveMaximum),
+        maximum = toD(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toS(constraints.multipleOf)
+        multipleOf = toD(constraints.multipleOf)
       )
     )
 
@@ -517,11 +517,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "integer",
         format = Some("int64"),
-        minimum = toS(constraints.minimum),
+        minimum = toD(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toS(constraints.exclusiveMaximum),
+        maximum = toD(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toS(constraints.multipleOf)
+        multipleOf = toD(constraints.multipleOf)
       )
     )
 
@@ -532,11 +532,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       ujsonSchemas.bigdecimalJsonSchema,
       Primitive(
         "number",
-        minimum = toS(constraints.minimum),
+        minimum = toD(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toS(constraints.exclusiveMaximum),
+        maximum = toD(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toS(constraints.multipleOf)
+        multipleOf = toD(constraints.multipleOf)
       )
     )
 
@@ -548,11 +548,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "number",
         format = Some("float"),
-        minimum = toS(constraints.minimum),
+        minimum = toD(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toS(constraints.exclusiveMaximum),
+        maximum = toD(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toS(constraints.multipleOf)
+        multipleOf = toD(constraints.multipleOf)
       )
     )
 
@@ -564,11 +564,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "number",
         format = Some("double"),
-        minimum = toS(constraints.minimum),
+        minimum = toD(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toS(constraints.exclusiveMaximum),
+        maximum = toD(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toS(constraints.multipleOf)
+        multipleOf = toD(constraints.multipleOf)
       )
     )
 
