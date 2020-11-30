@@ -4,21 +4,59 @@ package endpoints4s
   * valid w.r.t. to the properties.
   * @group operations
   */
-case class NumericConstraints[A](
-    minimum: Option[A] = None,
-    exclusiveMinimum: Option[Boolean] = None,
-    maximum: Option[A] = None,
-    exclusiveMaximum: Option[Boolean] = None,
-    multipleOf: Option[A] = None
-)(implicit val ord: Ordering[A], mult: MultipleOf[A]) {
+final class NumericConstraints[A] private (
+    val minimum: Option[A] = None,
+    val exclusiveMinimum: Option[Boolean] = None,
+    val maximum: Option[A] = None,
+    val exclusiveMaximum: Option[Boolean] = None,
+    val multipleOf: Option[A] = None
+)(implicit val ord: Ordering[A], mult: MultipleOf[A])
+    extends Serializable {
   import ord._
 
   override def toString: String =
-    (p2s(minimum, "minimum") ++
-      p2s(exclusiveMinimum, "exclusiveMinimum") ++
-      p2s(maximum, "maximum") ++
-      p2s(exclusiveMaximum, "exclusiveMaximum") ++
-      p2s(multipleOf, "multipleOf")).mkString(", ")
+    (optToString(minimum, "minimum") ++
+      optToString(exclusiveMinimum, "exclusiveMinimum") ++
+      optToString(maximum, "maximum") ++
+      optToString(exclusiveMaximum, "exclusiveMaximum") ++
+      optToString(multipleOf, "multipleOf")).mkString(", ")
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: NumericConstraints[_] =>
+        minimum == that.minimum &&
+          exclusiveMinimum == that.exclusiveMinimum &&
+          maximum == that.maximum &&
+          exclusiveMaximum == that.exclusiveMaximum &&
+          multipleOf == that.multipleOf
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    Hashing.hash(minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf)
+
+  def withMinimum(minimum: Option[A]): NumericConstraints[A] =
+    copy(minimum = minimum)
+
+  def withExclusiveMinimum(exclusiveMinimum: Option[Boolean]): NumericConstraints[A] =
+    copy(exclusiveMinimum = exclusiveMinimum)
+
+  def withMaximum(maximum: Option[A]): NumericConstraints[A] =
+    copy(maximum = maximum)
+
+  def withExclusiveMaximum(exclusiveMaximum: Option[Boolean]): NumericConstraints[A] =
+    copy(exclusiveMaximum = exclusiveMaximum)
+
+  def withMultipleOf(multipleOf: Option[A]): NumericConstraints[A] =
+    copy(multipleOf = multipleOf)
+
+  private def copy(
+      minimum: Option[A] = minimum,
+      exclusiveMinimum: Option[Boolean] = exclusiveMinimum,
+      maximum: Option[A] = maximum,
+      exclusiveMaximum: Option[Boolean] = exclusiveMaximum,
+      multipleOf: Option[A] = multipleOf
+  ) = new NumericConstraints[A](minimum, exclusiveMinimum, maximum, exclusiveMaximum, multipleOf)
 
   /** Check whether the value satisfies all the constraints */
   def satisfiedBy(value: A): Boolean = {
@@ -37,6 +75,13 @@ case class NumericConstraints[A](
     multipleOf.forall(checkMultipleOf)
   }
 
-  private def p2s[B](opt: Option[B], name: String): List[String] =
+  private def optToString[B](opt: Option[B], name: String): List[String] =
     opt.map(v => s"$name:$v").toList
+}
+
+object NumericConstraints {
+
+  def apply[A](implicit ord: Ordering[A], mult: MultipleOf[A]): NumericConstraints[A] =
+    new NumericConstraints[A]()
+
 }

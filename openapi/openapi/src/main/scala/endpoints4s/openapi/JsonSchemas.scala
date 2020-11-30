@@ -477,23 +477,23 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive("string", format)
     )
 
-  implicit lazy val intJsonSchema: JsonSchema[Int] = intWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val longJsonSchema: JsonSchema[Long] = longWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+  implicit lazy val intJsonSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(NumericConstraints[Int])
+
+  implicit lazy val longJsonSchema: JsonSchema[Long] =
+    longWithConstraintsJsonSchema(NumericConstraints[Long])
 
   implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
-    bigdecimalWithConstraintsJsonSchema(NumericConstraints())
-  implicit lazy val floatJsonSchema: JsonSchema[Float] = floatWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
-  implicit lazy val doubleJsonSchema: JsonSchema[Double] = doubleWithConstraintsJsonSchema(
-    NumericConstraints()
-  )
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints[BigDecimal])
 
-  private def toD[A: Numeric](opt: Option[A]) = opt.map(a => Numeric[A].toDouble(a))
+  implicit lazy val floatJsonSchema: JsonSchema[Float] =
+    floatWithConstraintsJsonSchema(NumericConstraints[Float])
+
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] =
+    doubleWithConstraintsJsonSchema(NumericConstraints[Double])
+
+  private def toDouble[A: Numeric](opt: Option[A]) =
+    opt.map(a => Numeric[A].toDouble(a))
 
   override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
@@ -501,11 +501,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "integer",
         format = Some("int32"),
-        minimum = toD(constraints.minimum),
+        minimum = toDouble(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toD(constraints.maximum),
+        maximum = toDouble(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toD(constraints.multipleOf)
+        multipleOf = toDouble(constraints.multipleOf)
       )
     )
 
@@ -517,11 +517,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "integer",
         format = Some("int64"),
-        minimum = toD(constraints.minimum),
+        minimum = toDouble(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toD(constraints.maximum),
+        maximum = toDouble(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toD(constraints.multipleOf)
+        multipleOf = toDouble(constraints.multipleOf)
       )
     )
 
@@ -532,11 +532,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       ujsonSchemas.bigdecimalJsonSchema,
       Primitive(
         "number",
-        minimum = toD(constraints.minimum),
+        minimum = toDouble(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toD(constraints.maximum),
+        maximum = toDouble(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toD(constraints.multipleOf)
+        multipleOf = toDouble(constraints.multipleOf)
       )
     )
 
@@ -548,11 +548,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "number",
         format = Some("float"),
-        minimum = toD(constraints.minimum),
+        minimum = toDouble(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toD(constraints.maximum),
+        maximum = toDouble(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toD(constraints.multipleOf)
+        multipleOf = toDouble(constraints.multipleOf)
       )
     )
 
@@ -564,11 +564,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       Primitive(
         "number",
         format = Some("double"),
-        minimum = toD(constraints.minimum),
+        minimum = toDouble(constraints.minimum),
         exclusiveMinimum = constraints.exclusiveMinimum,
-        maximum = toD(constraints.maximum),
+        maximum = toDouble(constraints.maximum),
         exclusiveMaximum = constraints.exclusiveMaximum,
-        multipleOf = toD(constraints.multipleOf)
+        multipleOf = toDouble(constraints.multipleOf)
       )
     )
 

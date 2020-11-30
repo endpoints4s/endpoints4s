@@ -129,7 +129,11 @@ trait JsonSchemasFixtures extends JsonSchemas {
 
   val constraintNumericSchema: JsonSchema[Int] =
     intWithConstraintsJsonSchema(
-    NumericConstraints(minimum = Some(0), maximum = Some(10), exclusiveMaximum = Some(true), multipleOf = Some(2))
+      NumericConstraints[Int]
+        .withMinimum(Some(0))
+        .withMaximum(Some(10))
+        .withExclusiveMaximum(Some(true))
+        .withMultipleOf(Some(2))
   )
   //#numeric-constraint
 

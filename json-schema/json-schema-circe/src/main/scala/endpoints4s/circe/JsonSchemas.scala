@@ -297,19 +297,19 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     JsonSchema(implicitly, implicitly)
 
   implicit lazy val intJsonSchema: JsonSchema[Int] =
-    intWithConstraintsJsonSchema(NumericConstraints())
+    intWithConstraintsJsonSchema(NumericConstraints[Int])
 
   implicit lazy val longJsonSchema: JsonSchema[Long] =
-    longWithConstraintsJsonSchema(NumericConstraints())
+    longWithConstraintsJsonSchema(NumericConstraints[Long])
 
   implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
-    bigdecimalWithConstraintsJsonSchema(NumericConstraints())
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints[BigDecimal])
 
   implicit lazy val floatJsonSchema: JsonSchema[Float] =
-    floatWithConstraintsJsonSchema(NumericConstraints())
+    floatWithConstraintsJsonSchema(NumericConstraints[Float])
 
   implicit lazy val doubleJsonSchema: JsonSchema[Double] =
-    doubleWithConstraintsJsonSchema(NumericConstraints())
+    doubleWithConstraintsJsonSchema(NumericConstraints[Double])
 
   private def getDecoder[A: Decoder: MultipleOf: Ordering](constraints: NumericConstraints[A]) =
     Decoder[A].flatMap { value =>

@@ -408,17 +408,17 @@ class JsonSchemasTest extends AnyFreeSpec {
     checkDecodingFailure(
       constraintNumericSchema,
       ujson.Num(10),
-      Seq(createNumericErrorMessage(10))
+      Seq(createNumericErrorMessage(10.0))
     )
     checkDecodingFailure(
       constraintNumericSchema,
       ujson.Num(-1),
-      Seq(createNumericErrorMessage(-1))
+      Seq(createNumericErrorMessage(-1.0))
     )
     checkDecodingFailure(
       constraintNumericSchema,
       ujson.Num(5),
-      Seq(createNumericErrorMessage(5))
+      Seq(createNumericErrorMessage(5.0))
     )
   }
 

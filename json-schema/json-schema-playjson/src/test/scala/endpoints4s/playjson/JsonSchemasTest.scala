@@ -386,7 +386,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     testRoundtrip(constraintNumericSchema, JsNumber(6), 6)
     assertError(constraintNumericSchema, JsNumber(10), createNumericErrorMessage(10))
     assertError(constraintNumericSchema, JsNumber(-1), createNumericErrorMessage(-1))
-    assertError(constraintNumericSchema, JsNumber(5), createNumericErrorMessage(-5))
+    assertError(constraintNumericSchema, JsNumber(5), createNumericErrorMessage(5))
   }
 
   private def testRoundtrip[A](
