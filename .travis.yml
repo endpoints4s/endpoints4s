@@ -45,7 +45,7 @@ jobs:
       scala: 2.13.3
       script: sbt ++$TRAVIS_SCALA_VERSION test manual/makeSite
     - stage: test
-      scala: 0.27.0-RC1
+      scala: 3.0.0-M2
       script: sbt "++ $TRAVIS_SCALA_VERSION ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
     - stage: test
       script: sbt versionPolicyCheck scalafmtCheck
