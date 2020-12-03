@@ -1,6 +1,6 @@
 package endpoints4s
 
-/** Possible restrictions on the numeric value used. Needs an instance for [[Ordering]] to check whether values are
+/** Possible restrictions on the numeric value used. Needs an instance for `Ordering` to check whether values are
   * valid w.r.t. to the properties.
   * @group operations
   */
@@ -10,7 +10,7 @@ final class NumericConstraints[A] private (
     val maximum: Option[A] = None,
     val exclusiveMaximum: Option[Boolean] = None,
     val multipleOf: Option[A] = None
-)(implicit val ord: Ordering[A], mult: MultipleOf[A])
+)(implicit ord: Ordering[A], mult: MultipleOf[A])
     extends Serializable {
   import ord._
 

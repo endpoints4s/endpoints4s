@@ -492,8 +492,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   implicit lazy val doubleJsonSchema: JsonSchema[Double] =
     doubleWithConstraintsJsonSchema(NumericConstraints[Double])
 
-  private def toDouble[A: Numeric](opt: Option[A]) =
-    opt.map(a => Numeric[A].toDouble(a))
+  private def toDouble[A](opt: Option[A])(implicit num: Numeric[A]) =
+    opt.map(a => num.toDouble(a))
 
   override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
     new JsonSchema(
