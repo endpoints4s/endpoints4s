@@ -296,20 +296,51 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def stringJsonSchema(format: Option[String]): JsonSchema[String] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def intJsonSchema: JsonSchema[Int] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val intJsonSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(NumericConstraints[Int])
 
-  implicit def longJsonSchema: JsonSchema[Long] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val longJsonSchema: JsonSchema[Long] =
+    longWithConstraintsJsonSchema(NumericConstraints[Long])
 
-  implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints[BigDecimal])
 
-  implicit def floatJsonSchema: JsonSchema[Float] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val floatJsonSchema: JsonSchema[Float] =
+    floatWithConstraintsJsonSchema(NumericConstraints[Float])
 
-  implicit def doubleJsonSchema: JsonSchema[Double] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] =
+    doubleWithConstraintsJsonSchema(NumericConstraints[Double])
+
+  private def getDecoder[A: Decoder: MultipleOf: Ordering](constraints: NumericConstraints[A]) =
+    Decoder[A].flatMap { value =>
+      Decoder[A].ensure(
+        a => constraints.satisfiedBy(a),
+        s"$value does not satisfy the constraints: $constraints"
+      )
+    }
+
+  override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def longWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Long]
+  ): JsonSchema[Long] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def bigdecimalWithConstraintsJsonSchema(
+      constraints: NumericConstraints[BigDecimal]
+  ): JsonSchema[BigDecimal] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def floatWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Float]
+  ): JsonSchema[Float] =
+    JsonSchema(implicitly, getDecoder(constraints))
+
+  override def doubleWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Double]
+  ): JsonSchema[Double] =
+    JsonSchema(implicitly, getDecoder(constraints))
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] =
     JsonSchema(implicitly, implicitly)

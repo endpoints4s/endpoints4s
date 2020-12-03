@@ -1,6 +1,13 @@
 package endpoints4s.playjson
 
-import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
+import endpoints4s.{
+  MultipleOf,
+  NumericConstraints,
+  PartialInvariantFunctor,
+  Tupler,
+  Validated,
+  algebra
+}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -171,20 +178,51 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def stringJsonSchema(format: Option[String]): JsonSchema[String] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def intJsonSchema: JsonSchema[Int] =
-    JsonSchema(implicitly, implicitly)
+  private def getReads[A: Reads: MultipleOf: Ordering](constraints: NumericConstraints[A]) =
+    implicitly[Reads[A]].flatMap { value =>
+      val r2: Reads[A] = /* explicit type annotation as otherwise the compiler fails */
+        if (constraints.satisfiedBy(value)) Reads.pure(value)
+        else Reads.failed(s"$value does not satisfy the constraints: $constraints")
+      r2
+    }
 
-  implicit def longJsonSchema: JsonSchema[Long] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val intJsonSchema: JsonSchema[Int] =
+    intWithConstraintsJsonSchema(NumericConstraints[Int])
 
-  implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val longJsonSchema: JsonSchema[Long] =
+    longWithConstraintsJsonSchema(NumericConstraints[Long])
 
-  implicit def floatJsonSchema: JsonSchema[Float] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val bigdecimalJsonSchema: JsonSchema[BigDecimal] =
+    bigdecimalWithConstraintsJsonSchema(NumericConstraints[BigDecimal])
 
-  implicit def doubleJsonSchema: JsonSchema[Double] =
-    JsonSchema(implicitly, implicitly)
+  implicit lazy val floatJsonSchema: JsonSchema[Float] =
+    floatWithConstraintsJsonSchema(NumericConstraints[Float])
+
+  implicit lazy val doubleJsonSchema: JsonSchema[Double] =
+    doubleWithConstraintsJsonSchema(NumericConstraints[Double])
+
+  override def intWithConstraintsJsonSchema(constraints: NumericConstraints[Int]): JsonSchema[Int] =
+    JsonSchema(getReads(constraints), implicitly)
+
+  override def longWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Long]
+  ): JsonSchema[Long] =
+    JsonSchema(getReads(constraints), implicitly)
+
+  override def bigdecimalWithConstraintsJsonSchema(
+      constraints: NumericConstraints[BigDecimal]
+  ): JsonSchema[BigDecimal] =
+    JsonSchema(getReads(constraints), implicitly)
+
+  override def floatWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Float]
+  ): JsonSchema[Float] =
+    JsonSchema(getReads(constraints), implicitly)
+
+  override def doubleWithConstraintsJsonSchema(
+      constraints: NumericConstraints[Double]
+  ): JsonSchema[Double] =
+    JsonSchema(getReads(constraints), implicitly)
 
   implicit def booleanJsonSchema: JsonSchema[Boolean] =
     JsonSchema(implicitly, implicitly)

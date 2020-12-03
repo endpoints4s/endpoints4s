@@ -3,8 +3,7 @@ package endpoints4s.algebra
 import java.time.{Duration, Instant, OffsetDateTime}
 import java.util.UUID
 
-import endpoints4s.{PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler, Validated}
-
+import endpoints4s._
 import scala.collection.compat._
 import scala.reflect.ClassTag
 import scala.util.Try
@@ -452,7 +451,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Implicit methods for values of type [[JsonSchema]]
     * @group operations
     */
-  final implicit class JsonSchemaOps[A](schemaA: JsonSchema[A])
+  implicit final class JsonSchemaOps[A](schemaA: JsonSchema[A])
       extends JsonSchemaDocumentationOps[A] {
     type Self = JsonSchema[A]
 
@@ -490,7 +489,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Implicit methods for values of type [[Record]]
     * @group operations
     */
-  final implicit class RecordOps[A](recordA: Record[A]) extends JsonSchemaDocumentationOps[A] {
+  implicit final class RecordOps[A](recordA: Record[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Record[A]
 
     /** Merge the fields of `recordA` with the fields of `recordB`
@@ -545,7 +544,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class TaggedOps[A](taggedA: Tagged[A]) extends JsonSchemaDocumentationOps[A] {
+  implicit final class TaggedOps[A](taggedA: Tagged[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Tagged[A]
 
     /** Define a schema that alternatively accepts `taggedA` or `taggedB`
@@ -619,7 +618,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   }
 
   /** @group operations */
-  final implicit class EnumOps[A](enumA: Enum[A]) extends JsonSchemaDocumentationOps[A] {
+  implicit final class EnumOps[A](enumA: Enum[A]) extends JsonSchemaDocumentationOps[A] {
     type Self = Enum[A]
 
     /** Give a name to the schema
@@ -647,7 +646,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for type `UUID`
     * @group operations
     */
-  final implicit lazy val uuidJsonSchema: JsonSchema[UUID] =
+  implicit final lazy val uuidJsonSchema: JsonSchema[UUID] =
     stringJsonSchema(format = Some("uuid"))
       .xmapPartial { str =>
         Validated.fromEither(
@@ -671,28 +670,60 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for type `String`
     * @group operations
     */
-  final implicit def defaultStringJsonSchema: JsonSchema[String] =
+  implicit final def defaultStringJsonSchema: JsonSchema[String] =
     stringJsonSchema(format = None)
+
+  /** A JSON schema for type `Int` where certain properties, such as minimum, maximum, etc. are set.
+    * @group operations
+    */
+  def intWithConstraintsJsonSchema(props: NumericConstraints[Int]): JsonSchema[Int] =
+    intJsonSchema
 
   /** A JSON schema for type `Int`
     * @group operations
     */
   implicit def intJsonSchema: JsonSchema[Int]
 
+  /** A JSON schema for type `Long` where certain properties, such as minimum, maximum, etc. are set.
+    * @group operations
+    */
+  def longWithConstraintsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
+    longJsonSchema
+
   /** A JSON schema for type `Long`
     * @group operations
     */
   implicit def longJsonSchema: JsonSchema[Long]
+
+  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
+    * @group operations
+    */
+  def bigdecimalWithConstraintsJsonSchema(
+      props: NumericConstraints[BigDecimal]
+  ): JsonSchema[BigDecimal] =
+    bigdecimalJsonSchema
 
   /** A JSON schema for type `BigDecimal`
     * @group operations
     */
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal]
 
+  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
+    * @group operations
+    */
+  def floatWithConstraintsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
+    floatJsonSchema
+
   /** A JSON schema for type `Float`
     * @group operations
     */
   implicit def floatJsonSchema: JsonSchema[Float]
+
+  /** A JSON schema for type `Double` where certain properties, such as minimum, maximum, etc. are set.
+    * @group operations
+    */
+  def doubleWithConstraintsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
+    doubleJsonSchema
 
   /** A JSON schema for type `Double`
     * @group operations

@@ -8,6 +8,7 @@ node_modules/
 .metals/
 .bloop/
 .vscode/
+.bsp/
 
 project/metals.sbt
 

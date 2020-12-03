@@ -66,6 +66,11 @@ object OpenApi {
       case primitive: Schema.Primitive =>
         fields += "type" -> ujson.Str(primitive.name)
         primitive.format.foreach(s => fields += "format" -> ujson.Str(s))
+        primitive.minimum.foreach(d => fields += "minimum" -> ujson.Num(d))
+        primitive.exclusiveMinimum.foreach(b => fields += "exclusiveMinimum" -> ujson.Bool(b))
+        primitive.maximum.foreach(d => fields += "maximum" -> ujson.Num(d))
+        primitive.exclusiveMaximum.foreach(b => fields += "exclusiveMaximum" -> ujson.Bool(b))
+        primitive.multipleOf.foreach(d => fields += "multipleOf" -> ujson.Num(d))
       case obj: Schema.Object =>
         fields ++= List(
           "type" -> "object",
@@ -1174,32 +1179,66 @@ object Schema {
       val format: Option[String],
       val description: Option[String],
       val example: Option[ujson.Value],
-      val title: Option[String]
+      val title: Option[String],
+      val minimum: Option[Double] = None,
+      val exclusiveMinimum: Option[Boolean] = None,
+      val maximum: Option[Double] = None,
+      val exclusiveMaximum: Option[Boolean] = None,
+      val multipleOf: Option[Double] = None
   ) extends Schema
       with Serializable {
 
     override def toString: String =
-      s"Primitive($name, $format, $description, $example, $title)"
+      s"Primitive($name, $format, $description, $example, $title, $minimum, $exclusiveMinimum, $maximum, $exclusiveMaximum, $multipleOf)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Primitive =>
           name == that.name && format == that.format && description == that.description &&
-            example == that.example && title == that.title
+            example == that.example && title == that.title && minimum == that.minimum &&
+            exclusiveMinimum == that.exclusiveMinimum && maximum == that.maximum &&
+            exclusiveMaximum == that.exclusiveMaximum && multipleOf == that.multipleOf
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(name, format, description, example, title)
+      Hashing.hash(
+        name,
+        format,
+        description,
+        example,
+        title,
+        minimum,
+        exclusiveMinimum,
+        maximum,
+        exclusiveMaximum,
+        multipleOf
+      )
 
     private[this] def copy(
         name: String = name,
         format: Option[String] = format,
         description: Option[String] = description,
         example: Option[ujson.Value] = example,
-        title: Option[String] = title
+        title: Option[String] = title,
+        minimum: Option[Double] = None,
+        exclusiveMinimum: Option[Boolean] = None,
+        maximum: Option[Double] = None,
+        exclusiveMaximum: Option[Boolean] = None,
+        multipleOf: Option[Double] = None
     ): Primitive =
-      new Primitive(name, format, description, example, title)
+      new Primitive(
+        name,
+        format,
+        description,
+        example,
+        title,
+        minimum,
+        exclusiveMinimum,
+        maximum,
+        exclusiveMaximum,
+        multipleOf
+      )
 
     def withName(name: String): Primitive =
       copy(name = name)
@@ -1215,6 +1254,21 @@ object Schema {
 
     def withTitle(title: Option[String]): Primitive =
       copy(title = title)
+
+    def withMinimum(minimum: Option[Double]): Primitive =
+      copy(minimum = minimum)
+
+    def withExclusiveMinimum(exclusiveMinimum: Option[Boolean]): Primitive =
+      copy(exclusiveMinimum = exclusiveMinimum)
+
+    def withMaximum(maximum: Option[Double]): Primitive =
+      copy(maximum = maximum)
+
+    def withExclusiveMaximum(exclusiveMaximum: Option[Boolean]): Primitive =
+      copy(exclusiveMaximum = exclusiveMaximum)
+
+    def withMultipleOf(multipleOf: Option[Double]): Primitive =
+      copy(multipleOf = multipleOf)
 
   }
 
