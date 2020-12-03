@@ -36,7 +36,7 @@ val `akka-http-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "akka-http-server",
-      version := "3.0.0",
+      version := "4.0.0",
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).withDottyCompat(scalaVersion.value),
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).withDottyCompat(scalaVersion.value),
