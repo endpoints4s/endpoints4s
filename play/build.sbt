@@ -47,6 +47,7 @@ val `play-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "play-client",
+      version := "2.0.0",
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion).withDottyCompat(scalaVersion.value),
         // Override transitive dependencies of Play
