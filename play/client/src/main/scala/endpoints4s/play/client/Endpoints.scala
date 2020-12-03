@@ -12,7 +12,7 @@ import endpoints4s.{
 }
 import endpoints4s.algebra.Documentation
 import endpoints4s.play.client.Endpoints.futureFromEither
-import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.libs.ws.{DefaultBodyWritables, WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -113,7 +113,7 @@ trait EndpointsWithCustomErrors
   }
 
   lazy val textRequest: (String, WSRequest) => WSRequest =
-    (body, req) => req.withBody(body)
+    (body, req) => req.withBody(body)(DefaultBodyWritables.writeableOf_String)
 
   def choiceRequestEntity[A, B](
       requestEntityA: RequestEntity[A],

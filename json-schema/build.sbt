@@ -56,7 +56,7 @@ lazy val `json-schema-circe` =
     .settings(
       publishSettings,
       name := "json-schema-circe",
-      libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
+      libraryDependencies += ("io.circe" %%% "circe-core" % circeVersion).withDottyCompat(scalaVersion.value),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
