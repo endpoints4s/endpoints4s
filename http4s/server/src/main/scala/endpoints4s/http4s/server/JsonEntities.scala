@@ -39,6 +39,16 @@ trait JsonEntitiesFromSchemas
 
 }
 
+/** Interpreter for [[endpoints4s.algebra.JsonEntities]] that decodes JSON entities with a
+  * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
+  *
+  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
+  * you only need an encoder to build responses, or a decoder to decode requests.
+  *
+  * It is especially useful to encode `OpenApi` documents into JSON entities.
+  *
+  * @group interpreters
+  */
 trait JsonEntitiesFromEncodersAndDecoders
     extends algebra.JsonEntities
     with EndpointsWithCustomErrors {
