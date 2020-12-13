@@ -8,7 +8,7 @@ Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/curre
 
 @scaladoc[API documentation](endpoints4s.akkahttp.client.index)
 
-### `Endpoints`
+### `endpoints4s.akkahttp.client.Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function
 from `A` to `Future[B]`:
@@ -23,7 +23,7 @@ It can be invoked as follows:
 
 @@snip [EndpointsDocs.scala](/akka-http/client/src/test/scala/endpoints4s/akkahttp/client/EndpointsDocs.scala) { #invocation }
 
-### `ChunkedEntities`
+### `endpoints4s.akkahttp.client.ChunkedEntities`
 
 The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.scaladsl.Source[A, _]`:
 
@@ -43,7 +43,7 @@ It can be invoked as follows:
 
 @scaladoc[API documentation](endpoints4s.akkahttp.server.index)
 
-### `Endpoints`
+### `endpoints4s.akkahttp.server.Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to something that,
 given an implementation function `A => B`, returns an `akka.http.scaladsl.server.Route`
@@ -60,7 +60,7 @@ It can be implemented as follows:
 Alternatively, there is also a method `implementedByAsync` that takes an implementing function
 returning a `Future[B]`.
 
-### `ChunkedEntities`
+### `endpoints4s.akkahttp.server.ChunkedEntities`
 
 The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `akka.stream.scaladsl.Source[A, _]`.
 

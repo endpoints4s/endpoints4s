@@ -45,7 +45,7 @@ val sharedJVM = shared.jvm
 
 val client =
   project.enablePlugins(ScalaJSPlugin).settings(
-    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "$version$"
+    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "$xhr-client-version$"
   ).dependsOn(sharedJS)
 
 val server =
@@ -59,7 +59,7 @@ val server =
 @@@
 
 The `shared` project uses the
-@ref[`json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas)
+@ref[`json-schema-generic` module](algebras/json-schemas.md#generic-derivation-of-json-schemas-based-on-shapeless-)
 in addition to the required algebra interface @ref[`algebra`](algebras/endpoints.md),
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
