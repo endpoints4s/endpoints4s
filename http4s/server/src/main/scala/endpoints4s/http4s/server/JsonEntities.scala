@@ -1,6 +1,5 @@
 package endpoints4s.http4s.server
 
-import cats.implicits._
 import endpoints4s.{Codec, Decoder, Encoder, Invalid, Valid, algebra}
 import fs2.Chunk
 import org.http4s
@@ -59,29 +58,31 @@ private object JsonEntities {
   def decodeJsonRequest[A](
       endpoints: EndpointsWithCustomErrors
   )(decoder: Decoder[String, A]): endpoints.RequestEntity[A] = {
-    import endpoints.Effect
-    req =>
-      http4s.EntityDecoder
-        .decodeBy(MediaType.application.json) { (msg: http4s.Media[Effect]) =>
-          http4s.DecodeResult.success(EntityDecoder.decodeText(msg))
-        }
+    val entityDecoder = http4s.EntityDecoder
+      .decodeBy(MediaType.application.json) { (msg: http4s.Media[endpoints.Effect]) =>
+        http4s.DecodeResult.success(EntityDecoder.decodeText(msg)(endpoints.Effect))(
+          endpoints.Effect
+        )
+      }(endpoints.Effect)
+    req => {
+      val decodeResult = entityDecoder
         .decode(req, strict = true)
-        .leftWiden[Throwable]
-        .rethrowT
-        .flatMap { value =>
-          decoder.decode(value) match {
-            case Valid(a)     => Effect.pure(Right(a))
-            case inv: Invalid => endpoints.handleClientErrors(inv).map(Left.apply)
-          }
+        .leftMap[Throwable](identity)(endpoints.Effect)
+        .rethrowT(endpoints.Effect)
+      endpoints.Effect.flatMap(decodeResult) { value =>
+        decoder.decode(value) match {
+          case Valid(a) => endpoints.Effect.pure(Right(a))
+          case inv: Invalid =>
+            endpoints.Effect.map(endpoints.handleClientErrors(inv))(Left.apply)
         }
+      }
+    }
   }
 
   def encodeJsonResponse[A](
       endpoints: EndpointsWithCustomErrors
-  )(encoder: Encoder[A, String]): endpoints.ResponseEntity[A] = {
-    import endpoints.Effect
-    EntityEncoder[Effect, Chunk[Byte]]
+  )(encoder: Encoder[A, String]): endpoints.ResponseEntity[A] =
+    EntityEncoder[endpoints.Effect, Chunk[Byte]]
       .contramap[A](value => Chunk.bytes(encoder.encode(value).getBytes()))
       .withContentType(`Content-Type`(MediaType.application.json))
-  }
 }
