@@ -12,7 +12,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.3.3")
-addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.4.4")
+addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.1")
 addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
