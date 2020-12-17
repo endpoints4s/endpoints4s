@@ -8,7 +8,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 @scaladoc[API documentation](endpoints4s.http4s.client.index)
 
-### `Endpoints`
+### `endpoints4s.http4s.client.Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a `Kleisli[Effect, A, B]` aka a function
 from `A` to `Effect[B]`, where `Effect[_]` can be any type constructor `F[_]` with a valid `cats.effect.Sync` instance (e.g. `cats.effect.IO` or `monix.eval.Task`) :
@@ -29,7 +29,7 @@ It can be invoked as follows using `IO`:
 
 @scaladoc[API documentation](endpoints4s.http4s.server.index)
 
-### `Endpoints`
+### `endpoints4s.http4s.server.Endpoints`
 
 The `Endpoints` interpreter provides a `routesFromEndpoints` operation that
 turns a sequence of endpoints with their implementation into an `org.http4s.HttpRoutes[F]`

@@ -88,9 +88,8 @@ val manual =
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:endpoints4s/endpoints4s.github.io.git",
       ghpagesBranch := "master",
-      ParadoxMaterialThemePlugin.paradoxMaterialThemeSettings(Paradox),
-      Paradox / paradoxMaterialTheme := {
-        val theme = (Paradox / paradoxMaterialTheme).value
+      Compile / paradoxMaterialTheme := {
+        val theme = (Compile / paradoxMaterialTheme).value
         val repository =
           (ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl.toURI
         theme
@@ -98,9 +97,10 @@ val manual =
           .withSocial(repository)
           .withCustomStylesheet("snippets.css")
       },
-      (Paradox / paradoxProperties) ++= Map(
+      paradoxProperties ++= Map(
         "version"           -> version.value,
         "akka-http-version" -> (`akka-http-server` / version).value,
+        "xhr-client-version" -> (`xhr-client` / version).value,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
         "github.base_url"   -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
       ),
@@ -111,7 +111,7 @@ val manual =
         packageDoc / siteSubdirName
       ),
       makeSite / mappings ++= {
-        val gvSourceDirectory = sourceDirectory.value / "graphviz"
+        val gvSourceDirectory = (Compile / sourceDirectory).value / "graphviz"
         val gvTargetDirectory = target.value / "graphviz"
         (gvSourceDirectory ** "*.gv")
           .get()

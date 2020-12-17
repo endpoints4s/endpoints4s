@@ -90,7 +90,7 @@ Note that we use a variant discovered by Christian Hofer *et al.* [2], which use
 type members rather than type parameters.
 @@@
 
-### Summary
+### Algebras Summary
 
 **Algebras** are traits that provide abstract type members and methods defining how to
 **construct** and **combine** endpoint descriptions.
