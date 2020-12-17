@@ -33,7 +33,7 @@ ThisBuild / sonatypeProjectHosting := Some(
 )
 
 ThisBuild / versionScheme := Some("early-semver")
-ThisBuild / version := "1.2.0"
+ThisBuild / version := "1.3.0"
 
 val versionSchemes = Def.setting {
   Seq(
