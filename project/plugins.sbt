@@ -11,7 +11,7 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.1")
+addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.2")
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.0")
 addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
