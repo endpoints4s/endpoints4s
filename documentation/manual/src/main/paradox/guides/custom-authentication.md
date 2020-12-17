@@ -29,7 +29,7 @@ Let’s start with the login endpoint. This endpoint takes requests containing
 credentials and returns responses containing the issued JWT, or an empty
 “Bad Request” response in case the credentials where invalid.
 
-### Algebra
+### Authentication algebra
 
 The existing algebras already provides all we need to describe such an endpoint,
 except for two things:
@@ -68,7 +68,7 @@ The endpoint takes request using the `GET` method, the `/login` URL and a query 
 parameter `apiKey` containing the credentials. The returned response is either a
 “Bad Request”, or a “Ok” with the issued authentication token.
 
-### Server interpreter
+### Authentication server interpreter
 
 The server interpreter fixes the `AuthenticationToken` type member to `UserInfo`
 and implements the `authenticationToken` and `wheneverValid` methods:
@@ -133,7 +133,7 @@ These relationships are illustrated by the following diagram:
 
 The traits provided by endpoints4s are shown in gray.
 
-### Client interpreter
+### Authentication client interpreter
 
 The implementation of the client interpreter repeats the same
 recipe: we define a trait `ClientAuthentication`, which extends
@@ -171,9 +171,9 @@ hence the usage of `Option`. The implementation checks whether
 the status is 400, in which case it returns `None`, otherwise it
 returns the underlying response wrapped in a `Some`.
 
-### Putting things together
+### Putting things together (authentication)
 
-If we create an instance of our `Client` an run our `Server`, we can test
+If we create an instance of our `Client` and run our `Server`, we can test
 that the following scenarios work as expected:
 
 @@snip [AuthenticationTest.scala](/documentation/examples/authentication/src/test/scala/authentication/AuthenticationTest.scala) { #login-test-client }
@@ -191,7 +191,7 @@ Such protected endpoints take requests containing the serialized token in their
 `Authorization` HTTP header, and return a 401 (`Unauthorized`) response in case
 the token is not found or is invalid.
 
-### Algebra
+### Protected endpoints algebra
 
 To define protected endpoints, we need to enrich the `Authentication` algebra
 with additional vocabulary. First, we need a way to define that requests that must
@@ -241,7 +241,7 @@ The `authenticatedEndpoint` operation can be used as follows:
 Since the request URL is static and the request has no entity, the information carried
 by the request is just the `AuthenticationToken`.
 
-### Server interpreter
+### Protected endpoints server interpreter
 
 Our Play-based server is implemented as follows:
 
@@ -251,13 +251,13 @@ And the protected endpoint can be implemented as follows:
 
 @@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #protected-resource-implementation }
 
-### Client interpreter
+### Protected endpoints client interpreter
 
 And our Play-based client is implemented as follows:
 
 @@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-client }
 
-### Putting things together
+### Putting things together (protected endpoints)
 
 Our `Client` and `Server` instances are now able to have more sophisticated exchanges:
 
