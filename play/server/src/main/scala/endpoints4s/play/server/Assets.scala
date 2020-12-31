@@ -131,9 +131,12 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   ): Endpoint[AssetRequest, AssetResponse] = {
     val req =
       invariantFunctorRequest
-        .inmap( // TODO remove this boilerplate using play-products
+        .inmap[
+          (AssetPath, Boolean),
+          AssetRequest
+        ]( // TODO remove this boilerplate using play-products
           request(Get, url, headers = gzipSupport),
-          AssetRequest.tupled,
+          { case (assetPath, isGzipSupported) => AssetRequest(assetPath, isGzipSupported) },
           (assetRequest: AssetRequest) => (assetRequest.assetPath, assetRequest.isGzipSupported)
         )
 

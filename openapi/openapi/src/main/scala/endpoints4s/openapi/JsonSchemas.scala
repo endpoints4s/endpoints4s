@@ -753,7 +753,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   /** Override this method to customize the strategy used to encode the JSON
     * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
     *
-    * @see [[JsonSchemas.CoproductEncoding$]]
+    * @see [[CoproductEncoding]]
     */
   def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
 
