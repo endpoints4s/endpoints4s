@@ -220,7 +220,7 @@ val `example-basic-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       scalaJSUseMainModuleInitializer := true,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.1.0"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -266,7 +266,7 @@ val `example-cqrs-public-endpoints` =
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.1.0"
       )
     )
     .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
@@ -286,7 +286,7 @@ val `example-cqrs-web-client` =
       libraryDependencies ++= Seq(
         "com.raquo" %%% "laminar" % "0.11.0",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
-        "io.github.cquiroz" %%% "scala-java-time" % "2.0.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.1.0"
       ),
       scalaJSUseMainModuleInitializer := true
     )
