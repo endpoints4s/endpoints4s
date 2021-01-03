@@ -5,7 +5,7 @@ package endpoints4s
   * tuples from 3 to 21 elements
   */
 trait TuplerAppend extends Tupler2 {
-  [3..21#
+  [4..21#
   /**
     * A [[Tupler]] that appends an element to an existing tuple of size 1.
     */
