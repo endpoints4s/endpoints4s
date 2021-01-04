@@ -24,10 +24,14 @@ val `sttp-client` =
         "com.typesafe.akka" %% "akka-stream" % "2.6.10" % Test
       )
     )
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .jsConfigure(project =>
+      project
+        .dependsOn(LocalProject("algebraJS") % "compile->compile")
+        .disablePlugins(ScoverageSbtPlugin)
+    )
     .jvmConfigure(project =>
       project
-        .dependsOn(LocalProject("openapiJVM"))
+//        .dependsOn(LocalProject("openapiJVM") % "test->test")
         .dependsOn(
           LocalProject("algebraJVM") % "compile->compile;test->test",
           LocalProject("algebra-playjsonJVM") % "test->test"
