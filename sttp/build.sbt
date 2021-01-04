@@ -1,24 +1,36 @@
 import EndpointsSettings._
 
-val `algebra-jvm` = LocalProject("algebraJVM")
-val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
-
 val `sttp-client` =
-  project
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
     .in(file("client"))
+    .enablePlugins(ScalaJSPlugin)
     .settings(
       publishSettings,
       `scala 2.12 to 2.13`,
       name := "sttp-client",
-      version := "3.0.0",
+      version := "2.0.1",
       libraryDependencies ++= Seq(
-        "com.softwaremill.sttp.client" %% "core" % sttpVersion,
+        "com.softwaremill.sttp.client" %%% "core" % sttpVersion
+      )
+    )
+    .jsSettings(
+      //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
+      coverageEnabled := false
+    )
+    .jvmSettings(
+      libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client" %% "akka-http-backend" % sttpVersion % Test,
         "com.typesafe.akka" %% "akka-stream" % "2.6.10" % Test
       )
     )
-    .dependsOn(LocalProject("openapiJVM"))
-    .dependsOn(
-      `algebra-jvm` % "compile->compile;test->test",
-      `algebra-playjson-jvm` % "test->test"
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .jvmConfigure(project =>
+      project
+        .dependsOn(LocalProject("openapiJVM"))
+        .dependsOn(
+          LocalProject("algebraJVM") % "compile->compile;test->test",
+          LocalProject("algebra-playjsonJVM") % "test->test"
+        )
     )
+
