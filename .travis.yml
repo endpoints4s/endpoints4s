@@ -59,7 +59,7 @@ jobs:
 #        - chmod 600 ci/travis-key
 #        - eval "$(ssh-agent -s)"
 #        - ssh-add ci/travis-key
-#        - sbt "++ 2.12.11 publishSigned" "++ 2.13.2 publishSigned" sonatypeReleaseAll "++ 2.13.2 manual/makeSite" manual/ghpagesPushSite
+#        - sbt versionCheck "++ 2.12.12 publishSigned" "++ 2.13.3 publishSigned" sonatypeReleaseAll "++ 2.13.3 manual/makeSite" manual/ghpagesPushSite
 
 env:
   global:

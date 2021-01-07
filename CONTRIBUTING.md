@@ -74,3 +74,35 @@ mill all __.compile #compile everything
 mill all __.test #test everything
 ~~~
 After generating intellij project you may need to navigate to Settings -> Languages & Frameworks -> Worksheet and set inteprpretation mode to "Always Ammonite"
+
+## Release process
+
+1. Bump the version of every module that hasn’t been bumped (e.g., change `1.0.0+` into
+   `1.0.1`, `1.1.0`, or `2.0.0`, according to the compatibility guarantees of the module)
+2. Run the following command:
+   ~~~ sh
+   $ sbt versionCheck "++ 2.12.12 publishSigned" "++ 2.13.3 publishSigned" sonatypeReleaseAll "++ 2.13.3 manual/makeSite" manual/ghpagesPushSite
+   ~~~
+3. Reset the compatibility intention to `Compatibility.BinaryAndSourceCompatible`,
+   and add a `+` suffix to the version of every module (e.g., change `1.0.0`
+   into `1.0.0+`)
+
+## Breakage policy
+
+Our goal is to publish backward binary compatible releases of the algebra modules for as long
+as possible. It is OK to break compatibility in interpreter modules, but if possible we
+should keep backward compatibility.
+
+So, algebra and interpreters have different version numbers and compatibility guarantees
+across releases.
+
+After every release, the level of compatibility is reset to `Compatibility.BinaryAndSourceCompatible`
+in every module.
+
+If necessary, we can relax this constraint to `Compatibility.BinaryCompatible` in modules that
+need to introduce potential source incompatibilities. In such a case, we can also preset the
+version number of the module (e.g., we can change `1.0.0+` into `1.1.0`).
+
+If necessary, we can relax this constraint to `Compatibility.None` in interpreter modules that
+need to break binary compatibility. In such a case, we can also preset the version number of
+the module (e.g., we can change `1.0.0+` into `2.0.0`).

@@ -33,6 +33,14 @@ ThisBuild / sonatypeProjectHosting := Some(
 )
 
 ThisBuild / versionScheme := Some("early-semver")
+
+// Default intention: binary compatibility between releases.
+// We want to keep binary compatibility as long as we can for the algebra,
+// but it is OK to publish breaking releases of interpreters. So,
+// interpreter modules may override this setting.
+ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
+// Default version, used by the algebra modules, and by the interpreters,
+// unless they override it.
 ThisBuild / version := "1.3.0"
 
 val versionSchemes = Def.setting {
