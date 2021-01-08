@@ -59,7 +59,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   ): Path[AssetPath] = {
     case p :+ s =>
       Some((Valid(AssetPath(p, s)), Nil))
-    case Nil => None
+    case _ => None
   }
 
   private val gzipSupport: RequestHeaders[Boolean] =
@@ -97,13 +97,15 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   ): Endpoint[AssetRequest, AssetResponse] = {
     val assetRequest =
       requestPartialInvariantFunctor
-        .xmap(
+        .xmap[(AssetPath, Boolean, Option[HttpDate]), AssetRequest](
           request(
             Get,
             url,
             headers = requestHeadersSemigroupal.product(gzipSupport, ifModifiedSince)
           ),
-          AssetRequest.tupled,
+          { case (assetPath, isGzipSupported, ifModifiedSince) =>
+            AssetRequest(assetPath, isGzipSupported, ifModifiedSince)
+          },
           (assetRequest: AssetRequest) =>
             (assetRequest.assetPath, assetRequest.isGzipSupported, assetRequest.ifModifiedSince)
         )

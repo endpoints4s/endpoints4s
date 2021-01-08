@@ -14,6 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: coursier/cache-action@v5
+    - uses: actions/setup-node@v2
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.11
@@ -27,12 +28,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - uses: coursier/cache-action@v5
+    - uses: actions/setup-node@v2
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
-    - run: sbt ++2.13.3 test manual/makeSite
+    - run: sbt ++2.13.4 test manual/makeSite
 
   test3:
     name: Test (Scala 3)
@@ -43,7 +45,7 @@ jobs:
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.11
-    - run: sbt "++ 3.0.0-M2 ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
+    - run: sbt "++ 3.0.0-M3 ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
 
   versionPolicy:
     name: Check versioning policy and code style
