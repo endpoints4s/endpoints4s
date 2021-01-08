@@ -578,7 +578,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   lazy val byteJsonSchema: JsonSchema[Byte] =
     new JsonSchema(ujsonSchemas.byteJsonSchema, Primitive("integer"))
 
-  def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+  def arrayJsonSchema[C[X] <: Iterable[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =

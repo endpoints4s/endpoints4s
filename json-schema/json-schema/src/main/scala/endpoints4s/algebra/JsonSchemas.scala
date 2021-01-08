@@ -743,7 +743,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A JSON schema for sequences
     * @group operations
     */
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+  implicit def arrayJsonSchema[C[X] <: Iterable[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]]

@@ -348,7 +348,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   implicit def byteJsonSchema: JsonSchema[Byte] =
     JsonSchema(implicitly, implicitly)
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+  implicit def arrayJsonSchema[C[X] <: Iterable[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =
