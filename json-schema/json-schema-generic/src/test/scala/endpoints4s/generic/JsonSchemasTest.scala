@@ -239,7 +239,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     lazy val byteJsonSchema: String = "byte"
 
-    def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+    def arrayJsonSchema[C[X] <: Iterable[X], A](implicit
         jsonSchema: String,
         factory: Factory[A, C[A]]
     ): String = s"[$jsonSchema]"

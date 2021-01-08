@@ -376,7 +376,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = b => ujson.Num(b.toDouble)
     }
 
-  implicit def arrayJsonSchema[C[X] <: Seq[X], A](implicit
+  implicit def arrayJsonSchema[C[X] <: Iterable[X], A](implicit
       jsonSchema: JsonSchema[A],
       factory: Factory[A, C[A]]
   ): JsonSchema[C[A]] =
@@ -396,7 +396,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
             .map(_.result())
         case json => Invalid(s"Invalid JSON array: $json")
       }
-      val encoder = as => ujson.Arr(as.map(jsonSchema.codec.encode): _*)
+      val encoder = as => ujson.Arr.from(as.map(jsonSchema.codec.encode))
     }
 
   implicit def mapJsonSchema[A](implicit

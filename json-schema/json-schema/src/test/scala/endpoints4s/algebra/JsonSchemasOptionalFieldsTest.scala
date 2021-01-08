@@ -159,6 +159,10 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
     )
   }
 
+  "Set" in {
+    checkRoundTrip[Set[Int]](implicitly, Json.arr(Json.num(1)), Set(1))
+  }
+
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =
     decodeJson(schema, json) match {
       case Valid(a) =>
