@@ -34,9 +34,9 @@ val build = project.in(file(".")).dependsOn(`sbt-assets`)
 
 ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
 
-addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.4.6")
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.1")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.0.0-RC2")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.0.0-RC4")
 addSbtPlugin("ch.epfl.scala" % "sbt-eviction-rules" % "1.0.0-RC1")
