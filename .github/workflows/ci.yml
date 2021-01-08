@@ -1,0 +1,57 @@
+name: CI
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - "v*"
+  pull_request:
+
+jobs:
+  test212:
+    name: Test (Scala 2.12)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: coursier/cache-action@v5
+    - uses: olafurpg/setup-scala@v10
+      with:
+        java-version: adopt@1.11
+    - run: npm install jsdom@12.2.0
+    - run: sbt ++2.12.12 coverage test coverageReport coverageAggregate
+    - run: bash <(curl -s https://codecov.io/bash)
+
+  test213:
+    name: Test (Scala 2.13)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: coursier/cache-action@v5
+    - uses: olafurpg/setup-scala@v10
+      with:
+        java-version: adopt@1.11
+    - run: npm install jsdom@12.2.0
+    - run: sudo apt-get install graphviz
+    - run: sbt ++2.13.3 test manual/makeSite
+
+  test3:
+    name: Test (Scala 3)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: coursier/cache-action@v5
+    - uses: olafurpg/setup-scala@v10
+      with:
+        java-version: adopt@1.11
+    - run: sbt "++ 3.0.0-M2 ;json-schemaJVM/compile;algebraJVM/compile;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
+
+  versionPolicy:
+    name: Check versioning policy and code style
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: coursier/cache-action@v5
+    - uses: olafurpg/setup-scala@v10
+      with:
+        java-version: adopt@1.11
+    - run: sbt versionPolicyCheck scalafmtCheck
