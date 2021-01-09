@@ -89,6 +89,17 @@ trait Tupler3 extends Tupler2 {
       }
     }
 
+  implicit def tupler1And4[A, B, C, D, E]: Tupler[A, (B, C, D, E)] { type Out = (A, B, C, D, E) } =
+    new Tupler[A, (B, C, D, E)] {
+      type Out = (A, B, C, D, E)
+      def apply(a: A, bcde: (B, C, D, E)): (A, B, C, D, E) =
+        (a, bcde._1, bcde._2, bcde._3, bcde._4)
+      def unapply(out: (A, B, C, D, E)): (A, (B, C, D, E)) = {
+        val (a, b, c, d, e) = out
+        (a, (b, c, d, e))
+      }
+    }
+
   implicit def tupler2And3[A, B, C, D, E]
       : Tupler[(A, B), (C, D, E)] { type Out = (A, B, C, D, E) } =
     new Tupler[(A, B), (C, D, E)] {
