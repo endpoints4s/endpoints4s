@@ -27,13 +27,13 @@ class TuplerTests {
     tupling((a, b, c, d, e, f), g): (A, B, C, D, E, F, G)
     tupling((a, b, c, d, e), (f, g)): (A, B, C, D, E, (F, G))
     tupling((a, b, c, d), (e, f, g)): (A, B, C, D, (E, F, G))
-//    tupling((a, b, c), (d, e, f, g)): (A, B, C, (D, E, F, G)) // Does not compile
+    tupling((a, b, c), (d, e, f, g)): (A, B, C, (D, E, F, G))
     tupling((a, b), (c, d, e, f, g)): (A, B, (C, D, E, F, G))
     tupling(a, (b, c, d, e, f, g)): (A, (B, C, D, E, F, G))
     tupling((a, b, c, d, e, f, g), h): (A, B, C, D, E, F, G, H)
     tupling((a, b, c, d, e, f), (g, h)): (A, B, C, D, E, F, (G, H))
     tupling((a, b, c, d, e), (f, g, h)): (A, B, C, D, E, (F, G, H))
-//    tupling((a, b, c, d), (e, f, g, h)): (A, B, C, D, (E, F, G, H)) // Does not compile
+    tupling((a, b, c, d), (e, f, g, h)): (A, B, C, D, (E, F, G, H))
     tupling((a, b, c), (d, e, f, g, h)): (A, B, C, (D, E, F, G, H))
     tupling((a, b), (c, d, e, f, g, h)): (A, B, (C, D, E, F, G, H))
     tupling(a, (b, c, d, e, f, g, h)): (A, (B, C, D, E, F, G, H))
@@ -41,7 +41,7 @@ class TuplerTests {
     tupling((a, b), (c, d, e, f, g, h, i)): (A, B, (C, D, E, F, G, H, I))
     tupling((a, b, c), (d, e, f, g, h, i)): (A, B, C, (D, E, F, G, H, I))
     tupling((a, b, c, d), (e, f, g, h, i)): (A, B, C, D, (E, F, G, H, I))
-//    tupling((a, b, c, d, e), (f, g, h, i)): (A, B, C, D, E, (F, G, H, I)) // Does not compile
+    tupling((a, b, c, d, e), (f, g, h, i)): (A, B, C, D, E, (F, G, H, I))
     tupling((a, b, c, d, e, f), (g, h, i)): (A, B, C, D, E, F, (G, H, I))
     tupling((a, b, c, d, e, f, g), (h, i)): (A, B, C, D, E, F, G, (H, I))
     tupling((a, b, c, d, e, f, g, h), i): (A, B, C, D, E, F, G, H, I)

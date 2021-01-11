@@ -114,7 +114,7 @@ trait Tupler3 extends Tupler2 {
 
 }
 
-trait Tupler4 extends Tupler3 with TuplerAppend {
+trait Tupler4 extends TuplerAppend {
 
   implicit def leftUnit[A]: Aux[Unit, A, A] =
     new Tupler[Unit, A] {
