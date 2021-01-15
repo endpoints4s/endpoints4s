@@ -1,4 +1,4 @@
-# endpoints 
+# endpoints4s 
 
 [![Gitter](https://badges.gitter.im/.svg)](https://gitter.im/endpoints4s/endpoints4s)
 [![codecov.io](http://codecov.io/github/endpoints4s/endpoints4s/coverage.svg?branch=master)](http://codecov.io/github/endpoints4s/endpoints4s?branch=master)
@@ -34,6 +34,7 @@ See the [open issues](https://github.com/endpoints4s/endpoints4s/issues).
 You are using endpoints4s? Please consider [adding your organization to the list](https://github.com/endpoints4s/endpoints4s/edit/master/README.md).
 
 - [Bestmile](https://bestmile.com/)
+- [Rivero](https://www.rivero.tech/)
 
 ## Sponsors
 
