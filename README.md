@@ -29,6 +29,12 @@ And then browse http://localhost:9000.
 
 See the [open issues](https://github.com/endpoints4s/endpoints4s/issues).
 
+## Adopters
+
+You are using endpoints4s? Please consider [adding your organization to the list](https://github.com/endpoints4s/endpoints4s/edit/master/README.md).
+
+- [Bestmile](https://bestmile.com/)
+
 ## Sponsors
 
 [Bestmile](https://bestmile.com) supports engineering work on the project.
