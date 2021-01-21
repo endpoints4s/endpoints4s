@@ -76,14 +76,18 @@ trait EndpointsWithCustomErrors
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
     def implementedBy(implementation: A => B): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
-        request { arguments => response(implementation(arguments)) }
+        request { arguments =>
+          Directives.encodeResponse {
+            response(implementation(arguments))
+          }
+        }
       }
 
     def implementedByAsync(implementation: A => Future[B]): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
         request { arguments =>
           Directives.onComplete(implementation(arguments)) {
-            case Success(result) => response(result)
+            case Success(result) => Directives.encodeResponse(response(result))
             case Failure(ex)     => throw ex
           }
         }
