@@ -1,7 +1,7 @@
 package endpoints4s.play.client
 
 import endpoints4s.algebra
-import endpoints4s.algebra.client
+import endpoints4s.algebra.{Address, User, client}
 import endpoints4s.generic
 import play.api.libs.ws.WSClient
 import play.api.test.WsTestClient
@@ -15,11 +15,13 @@ class TestJsonSchemaClient(address: String, wsClient: WSClient)(implicit
   with algebra.BasicAuthenticationTestApi
   with generic.JsonSchemas
   with algebra.JsonTestApi
-  with JsonEntitiesFromSchemas
+  with JsonEntitiesFromSchemas {
+  implicit def userCodec: JsonSchema[User] = genericJsonSchema[User]
+  implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
+}
 
 class EndpointsJsonSchemaTest
-  extends client.JsonTestSuite[TestJsonSchemaClient]
-    with client.BasicAuthTestSuite[TestJsonSchemaClient] {
+  extends client.JsonTestSuite[TestJsonSchemaClient] {
 
   import ExecutionContext.Implicits.global
 
@@ -35,7 +37,6 @@ class EndpointsJsonSchemaTest
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
-  basicAuthSuite()
 
   override def afterAll(): Unit = {
     wsClient.close()
