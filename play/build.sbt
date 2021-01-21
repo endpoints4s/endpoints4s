@@ -4,6 +4,7 @@ val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
+val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 
 val `play-server` =
@@ -64,3 +65,4 @@ val `play-client` =
       `algebra-circe-jvm` % "test->test"
     )
     .dependsOn(`openapi-jvm`)
+    .dependsOn(`json-schema-generic-jvm` % "test->test")
