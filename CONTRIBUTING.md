@@ -77,15 +77,15 @@ After generating intellij project you may need to navigate to Settings -> Langua
 
 ## Release process
 
-1. Bump the version of every module that hasn’t been bumped (e.g., change `1.0.0+` into
+1. Bump the version of every module that hasn’t been bumped (e.g., change `1.0.0+n` into
    `1.0.1`, `1.1.0`, or `2.0.0`, according to the compatibility guarantees of the module)
 2. Run the following command:
    ~~~ sh
    $ sbt versionCheck "++ 2.12.12 publishSigned" "++ 2.13.3 publishSigned" sonatypeReleaseAll "++ 2.13.3 manual/makeSite" manual/ghpagesPushSite
    ~~~
 3. Reset the compatibility intention to `Compatibility.BinaryAndSourceCompatible`,
-   and add a `+` suffix to the version of every module (e.g., change `1.0.0`
-   into `1.0.0+`)
+   and add a `+n` suffix to the version of every module (e.g., change `1.0.0`
+   into `1.0.0+n`)
 
 ## Breakage policy
 
@@ -101,8 +101,8 @@ in every module.
 
 If necessary, we can relax this constraint to `Compatibility.BinaryCompatible` in modules that
 need to introduce potential source incompatibilities. In such a case, we can also preset the
-version number of the module (e.g., we can change `1.0.0+` into `1.1.0`).
+version number of the module (e.g., we can change `1.0.0+n` into `1.1.0`).
 
 If necessary, we can relax this constraint to `Compatibility.None` in interpreter modules that
 need to break binary compatibility. In such a case, we can also preset the version number of
-the module (e.g., we can change `1.0.0+` into `2.0.0`).
+the module (e.g., we can change `1.0.0+n` into `2.0.0`).
