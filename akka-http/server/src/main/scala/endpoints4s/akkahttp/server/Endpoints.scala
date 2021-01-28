@@ -88,7 +88,11 @@ trait EndpointsWithCustomErrors
       */
     def implementedBy(implementation: A => B): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
-        request.directive { arguments => response(implementation(arguments)) }
+        request.directive { arguments =>
+          Directives.encodeResponse {
+            response(implementation(arguments))
+          }
+        }
       }
 
     /** @return An Akka HTTP `Route` for this endpoint
@@ -100,7 +104,7 @@ trait EndpointsWithCustomErrors
       Directives.handleExceptions(endpointsExceptionHandler) {
         request.directive { arguments =>
           Directives.onComplete(implementation(arguments)) {
-            case Success(result) => response(result)
+            case Success(result) => Directives.encodeResponse(response(result))
             case Failure(ex)     => throw ex
           }
         }
