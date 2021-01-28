@@ -7,6 +7,7 @@ endpoints4s
 * [Design in a Nutshell](design.md)
 * [Algebras and Interpreters](algebras-and-interpreters.md)
 * [Guides](guides.md)
+* [Community](community.md)
 * [Comparison with Similar Tools](comparison.md)
 * [Talks and Publications](talks.md)
 * [Release and Compatibility Notes](release-and-compatibility-notes.md)
@@ -60,8 +61,7 @@ The library currently supports the following backends:
   in a few minutes what the library does and how to setup a project ;
 - Check out the @ref[use cases](use-cases.md) to know the typical problems that endpoints4s addresses ;
 - Browse the @scaladoc[API documentation](endpoints4s.index) or the
-  [samples](https://github.com/endpoints4s/endpoints4s/tree/master/documentation/examples) ;
-- Meet the community in the [gitter room](https://gitter.im/endpoints4s/endpoints4s).
+  [samples](https://github.com/endpoints4s/endpoints4s/tree/master/documentation/examples).
 
 ## Contributing
 
