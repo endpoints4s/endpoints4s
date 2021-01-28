@@ -2,7 +2,7 @@ package endpoints4s.akkahttp.server
 
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes}
+import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes, Uri}
 import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
 import akka.http.scaladsl.unmarshalling._
 import endpoints4s.algebra.Documentation
@@ -41,7 +41,14 @@ trait EndpointsWithCustomErrors
     def decode(httpRequest: HttpRequest): Validated[A]
   }
 
-  type Request[A] = Directive1[A]
+  trait Request[A] {
+
+    /** A directive that extracts an `A` from an incoming request */
+    def directive: Directive1[A]
+
+    /** The URI of a request carrying the given `a` parameter */
+    def uri(a: A): Uri
+  }
 
   type RequestEntity[A] = Directive1[A]
 
@@ -74,24 +81,39 @@ trait EndpointsWithCustomErrors
     ExceptionHandler { case NonFatal(t) => handleServerError(t) }
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
+
+    /** @return An Akka HTTP `Route` for this endpoint
+      * @param implementation Function that transforms the `A` value carried in
+      *                       the request into a `B` value to send in the response.
+      */
     def implementedBy(implementation: A => B): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
-        request { arguments =>
+        request.directive { arguments =>
           Directives.encodeResponse {
             response(implementation(arguments))
           }
         }
       }
 
+    /** @return An Akka HTTP `Route` for this endpoint
+      * @param implementation Asynchronous function that transforms the `A` value
+      *                       carried in the request into a `B` value to send in
+      *                       the response.
+      */
     def implementedByAsync(implementation: A => Future[B]): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
-        request { arguments =>
+        request.directive { arguments =>
           Directives.onComplete(implementation(arguments)) {
             case Success(result) => Directives.encodeResponse(response(result))
             case Failure(ex)     => throw ex
           }
         }
       }
+
+    /** @return The `Uri` of this endpoint, for a request carrying the
+      *         given `a` value.
+      */
+    def uri(a: A): Uri = request.uri(a)
   }
 
   /* ************************
@@ -99,7 +121,13 @@ trait EndpointsWithCustomErrors
   ************************* */
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
-    directive1InvFunctor
+    new PartialInvariantFunctor[Request] {
+      def xmapPartial[A, B](fa: Request[A], f: A => Validated[B], g: B => A): Request[B] =
+        new Request[B] {
+          val directive: Directive1[B] = directive1InvFunctor.xmapPartial(fa.directive, f, g)
+          def uri(b: B): Uri = fa.uri(g(b))
+        }
+    }
 
   def emptyRequest: RequestEntity[Unit] = convToDirective1(Directives.pass)
 
@@ -243,17 +271,24 @@ trait EndpointsWithCustomErrors
   )(implicit
       tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
-  ): Request[Out] = {
-    val methodDirective = convToDirective1(Directives.method(method))
-    val headersDirective: Directive1[C] =
-      directive1InvFunctor.xmapPartial[Validated[C], C](
-        Directives.extractRequest.map(headers.decode),
-        identity,
-        c => Valid(c)
-      )
-    val matchDirective = methodDirective & url.directive & headersDirective
-    matchDirective.tflatMap { case (_, a, c) =>
-      entity.map(b => tuplerABC(tuplerAB(a, b), c))
+  ): Request[Out] = new Request[Out] {
+    val directive = {
+      val methodDirective = convToDirective1(Directives.method(method))
+      val headersDirective: Directive1[C] =
+        directive1InvFunctor.xmapPartial[Validated[C], C](
+          Directives.extractRequest.map(headers.decode),
+          identity,
+          c => Valid(c)
+        )
+      val matchDirective = methodDirective & url.directive & headersDirective
+      matchDirective.tflatMap { case (_, a, c) =>
+        entity.map(b => tuplerABC(tuplerAB(a, b), c))
+      }
+    }
+    def uri(out: Out): Uri = {
+      val (ab, _) = tuplerABC.unapply(out)
+      val (a, _) = tuplerAB.unapply(ab)
+      url.uri(a)
     }
   }
 

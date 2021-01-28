@@ -34,7 +34,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
         encoder: Encoder[Resp, Transport]
     ): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
-        request { request =>
+        request.directive { request =>
           decoder.decode(request) match {
             case inv: Invalid => handleClientErrors(inv)
             case Valid(req) =>
