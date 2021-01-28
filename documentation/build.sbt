@@ -99,7 +99,7 @@ val manual =
       },
       paradoxProperties ++= Map(
         "version"           -> version.value,
-        "akka-http-version" -> (`akka-http-server` / version).value,
+        "akka-http-server-version" -> (`akka-http-server` / version).value,
         "xhr-client-version" -> (`xhr-client` / version).value,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
         "github.base_url"   -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
