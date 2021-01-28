@@ -98,11 +98,13 @@ val manual =
           .withCustomStylesheet("snippets.css")
       },
       paradoxProperties ++= Map(
-        "version"           -> version.value,
+        "version"                  -> version.value,
         "akka-http-server-version" -> (`akka-http-server` / version).value,
-        "xhr-client-version" -> (`xhr-client` / version).value,
-        "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
-        "github.base_url"   -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
+        "xhr-client-version"       -> (`xhr-client` / version).value,
+        "akka-version"             -> akkaActorVersion,
+        "akka-http-version"        -> akkaHttpVersion,
+        "scaladoc.base_url"        -> s".../${(packageDoc / siteSubdirName).value}",
+        "github.base_url"          -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
       ),
       paradoxDirectives += ((_: Writer.Context) => org.endpoints4s.paradox.coordinates.CoordinatesDirective),
       packageDoc / siteSubdirName := "api",

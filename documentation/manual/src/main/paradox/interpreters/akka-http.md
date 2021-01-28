@@ -43,6 +43,21 @@ It can be invoked as follows:
 
 @scaladoc[API documentation](endpoints4s.akkahttp.server.index)
 
+@@@ warning
+
+As explained in the section
+[Mixed versioning is not allowed](https://doc.akka.io/docs/akka/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed)
+in the Akka documentation, you have to make sure that all the
+Akka modules of your application depend on the same version of
+Akka, and that all the Akka HTTP modules of your application depend
+of the same version of Akka HTTP.
+
+For your information, the `akka-http-server` module of endpoints4s
+depends on Akka @var[akka-version] and Akka HTTP
+@var[akka-http-version].
+
+@@@
+
 ### `endpoints4s.akkahttp.server.Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to something that,
