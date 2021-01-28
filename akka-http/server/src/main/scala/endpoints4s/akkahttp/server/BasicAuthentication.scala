@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.headers.{
   HttpChallenges,
   `WWW-Authenticate`
 }
-import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes => AkkaStatusCodes}
+import akka.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
 import akka.http.scaladsl.server.{Directive, Directive1, Directives}
 import endpoints4s.{Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.BasicAuthentication.Credentials
@@ -26,7 +26,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
-  ): Request[Out] = {
+  ): Request[Out] = new Request[Out] {
     val authHeader: RequestHeaders[Option[Credentials]] =
       httpHeaders =>
         Valid(
@@ -62,16 +62,23 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
             }
         }
 
-    joinDirectives(
+    val directive =
       joinDirectives(
         joinDirectives(
-          convToDirective1(Directives.method(method)),
-          url.directive
+          joinDirectives(
+            convToDirective1(Directives.method(method)),
+            url.directive
+          ),
+          entity
         ),
-        entity
-      ),
-      headersDirective
-    )
+        headersDirective
+      )
+
+    def uri(out: Out): Uri = {
+      val (ue, _) = tuplerUEHCred.unapply(out)
+      val (u, _) = tuplerUE.unapply(ue)
+      url.uri(u)
+    }
   }
 
 }
