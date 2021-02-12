@@ -259,6 +259,20 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         }
       }
 
+      "return correct url with trailing slash" in {
+        wireMockServer.stubFor(
+          get(urlEqualTo(s"/user/"))
+            .willReturn(
+              aResponse()
+                .withStatus(200)
+            )
+        )
+
+        whenReady(call(client.trailingSlashEndpoint, ())) {
+          _ shouldEqual (())
+        }
+      }
+
       "encode query strings" should {
         import client._
 

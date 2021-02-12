@@ -410,7 +410,9 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       request.path
         .split("/")
         .toList
-        .map(s => URLDecoder.decode(s, utf8Name))
+        .map(s => URLDecoder.decode(s, utf8Name)) ++ {
+        if (request.path.endsWith("/")) List("") else Nil
+      }
     path.decode(if (segments.isEmpty) List("") else segments).flatMap {
       case (validA, Nil) => Some(validA)
       case (_, _)        => None
