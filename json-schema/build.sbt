@@ -14,7 +14,7 @@ val `json-schema` =
       addScalaTestCrossDependency,
       libraryDependencies ++= Seq(
         ("org.scala-lang.modules" %%% "scala-collection-compat" % "2.3.2").withDottyCompat(scalaVersion.value),
-        ("org.scalacheck" %%% "scalacheck" % "1.15.2" % Test).withDottyCompat(scalaVersion.value)
+        ("org.scalacheck" %%% "scalacheck" % "1.15.3" % Test).withDottyCompat(scalaVersion.value)
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
