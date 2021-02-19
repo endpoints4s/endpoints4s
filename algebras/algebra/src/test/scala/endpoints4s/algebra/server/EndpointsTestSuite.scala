@@ -3,7 +3,7 @@ package endpoints4s.algebra.server
 import java.time.LocalDate
 import java.util.UUID
 
-import akka.http.scaladsl.model.HttpMethods.{DELETE, PUT}
+import akka.http.scaladsl.model.HttpMethods.{DELETE, PUT, GET}
 import akka.http.scaladsl.model.headers.{
   ETag,
   RawHeader,
@@ -24,7 +24,10 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       decodeUrl(path)("/") shouldEqual Matched(())
       decodeUrl(path)("/foo") shouldEqual NotMatched
       decodeUrl(path / "foo")("/foo") shouldEqual Matched(())
+      decodeUrl(path / "foo" / "")("/foo/") shouldEqual Matched(())
       decodeUrl(path / "foo")("/") shouldEqual NotMatched
+      decodeUrl(path / "foo")("/foo/") shouldEqual NotMatched
+      decodeUrl(path / "foo" / "")("/foo") shouldEqual NotMatched
       decodeUrl(path / "foo" / "bar")("/foo/bar") shouldEqual Matched(())
       decodeUrl(path / "foo" / "bar")("/foo") shouldEqual NotMatched
     }
@@ -33,6 +36,8 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       decodeUrl(path / s[Int]())("/42") shouldEqual Matched(42)
       decodeUrl(path / s[Long]())("/42") shouldEqual Matched(42L)
       decodeUrl(path / s[Double]())("/42.0") shouldEqual Matched(42.0)
+      decodeUrl(path / s[Int]() / "")("/42/") shouldEqual Matched(42)
+      decodeUrl(path / s[Int]() / "")("/42") shouldEqual NotMatched
       decodeUrl(path / s[Int]())("/") shouldEqual NotMatched
       decodeUrl(path / s[Int]())("/42/bar") shouldEqual NotMatched
       decodeUrl(path / s[Int]())("/foo") shouldEqual Malformed(
@@ -103,6 +108,9 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       )
       decodeUrl(path / "foo" /? qs[Boolean]("b"))("/foo?b=false") shouldEqual Matched(
         false
+      )
+      decodeUrl(path / "foo" / "" /? qs[Int]("n"))("/foo/?n=42") shouldEqual Matched(
+        42
       )
       decodeUrl(path / "foo" /? qs[Int]("n"))("/foo") shouldEqual Malformed(
         Seq(
@@ -372,6 +380,15 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       serveEndpoint(serverApi.deleteEndpoint, ()) { port =>
         val request =
           HttpRequest(method = DELETE, s"http://localhost:$port/user/foo123")
+        whenReady(send(request)) { case (response, entity) =>
+          assert(entity.isEmpty)
+          assert(response.status.intValue() == 200)
+          ()
+        }
+      }
+
+      serveEndpoint(serverApi.trailingSlashEndpoint, ()) { port =>
+        val request = HttpRequest(method = GET, s"http://localhost:$port/user/")
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
           assert(response.status.intValue() == 200)
