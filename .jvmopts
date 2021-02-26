@@ -1,4 +1,3 @@
 -Xms2048M
 -Xmx4G
 -Xss6M
--XX:+CMSClassUnloadingEnabled
