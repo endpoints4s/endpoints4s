@@ -371,7 +371,10 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     *
     * This method can be overridden to customize the error reporting logic.
     */
-  def handleClientErrors(request: http4s.Request[Effect], invalid: Invalid): Effect[http4s.Response[Effect]] =
+  def handleClientErrors(
+      request: http4s.Request[Effect],
+      invalid: Invalid
+  ): Effect[http4s.Response[Effect]] =
     Effect.pure(clientErrorsResponse(invalidToClientErrors(invalid)))
 
   /** This method is called by ''endpoints'' when an exception is thrown during
