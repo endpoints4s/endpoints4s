@@ -107,15 +107,15 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
                   implementation(a)
                     .map(response)
                     .recoverWith { case NonFatal(t) =>
-                      handleServerError(t)
+                      handleServerError(http4sRequest, t)
                     }
                 } catch {
-                  case NonFatal(t) => handleServerError(t)
+                  case NonFatal(t) => handleServerError(http4sRequest, t)
                 }
               case Left(errorResponse) => errorResponse.pure[Effect]
             })
         } catch {
-          case NonFatal(t) => Some(handleServerError(t))
+          case NonFatal(t) => Some(handleServerError(http4sRequest, t))
         }
       }
       Function.unlift(handler)
@@ -385,7 +385,10 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     *
     * This method can be overridden to customize the error reporting logic.
     */
-  def handleServerError(throwable: Throwable): Effect[http4s.Response[Effect]] =
+  def handleServerError(
+      request: http4s.Request[Effect],
+      throwable: Throwable
+  ): Effect[http4s.Response[Effect]] =
     Effect.pure(serverErrorResponse(throwableToServerError(throwable)))
 
 }
