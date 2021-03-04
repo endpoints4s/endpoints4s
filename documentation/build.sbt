@@ -16,7 +16,6 @@ val `play-server-circe` = LocalProject("play-server-circe")
 val `akka-http-client` = LocalProject("akka-http-client")
 val `akka-http-server` = LocalProject("akka-http-server")
 
-val `http4s-client` = LocalProject("http4s-client")
 val `http4s-server` = LocalProject("http4s-server")
 
 val `xhr-client` = LocalProject("xhr-client")
@@ -60,7 +59,6 @@ val apiDoc =
         `play-client`,
         `play-server`,
         `play-server-circe`,
-        `http4s-client`,
         `http4s-server`,
         `xhr-client`,
         `xhr-client-circe`,
