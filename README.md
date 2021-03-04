@@ -14,7 +14,7 @@ See the [documentation](http://endpoints4s.github.io) to learn more.
 
 ~~~
 $ sbt
-> ++2.13.2
+> ++2.13.5
 > <example>/reStart
 ~~~
 

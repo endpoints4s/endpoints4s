@@ -34,7 +34,7 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
-    - run: sbt ++2.13.4 test manual/makeSite
+    - run: sbt ++2.13.5 test manual/makeSite
 
   test3:
     name: Test (Scala 3)
