@@ -61,9 +61,16 @@ trait Urls extends algebra.Urls with StatusCodes {
     ): Option[Validated[A]]
 
     final def directive: Directive1[A] = {
-      (Directives.path(Directives.Segments) & Directives.parameterMultiMap)
-        .tflatMap { case (segments, query) =>
-          validateUrl(segments, query) match {
+      (Directives.extractUri & Directives.path(
+        Directives.Segments ~ Directives.Slash.?
+      ) & Directives.parameterMultiMap)
+        .tflatMap { case (uri, segments, query) =>
+          val segmentsLeadingTrailingSlash = "" :: segments ++ {
+            if (uri.path.endsWithSlash && uri.path != Uri.Path.SingleSlash)
+              List("")
+            else Nil
+          }
+          validateUrl(segmentsLeadingTrailingSlash, query) match {
             case None               => Directives.reject
             case Some(inv: Invalid) => handleClientErrors(inv)
             case Some(Valid(a))     => Directives.provide(a)
@@ -320,12 +327,9 @@ trait Urls extends algebra.Urls with StatusCodes {
 
   def staticPathSegment(segment: String): Path[Unit] = new Path[Unit] {
     def validate(segments: List[String]): Option[(Validated[Unit], List[String])] = {
-      if (segment.isEmpty) Some((Valid(()), segments))
-      else {
-        segments match {
-          case `segment` :: tail => Some((Valid(()), tail))
-          case _                 => None
-        }
+      segments match {
+        case `segment` :: tail => Some((Valid(()), tail))
+        case _                 => None
       }
     }
     def path(a: Unit): Uri.Path =

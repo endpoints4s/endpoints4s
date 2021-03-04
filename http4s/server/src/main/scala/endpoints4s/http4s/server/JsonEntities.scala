@@ -83,7 +83,7 @@ private object JsonEntities {
         decoder.decode(value) match {
           case Valid(a) => endpoints.Effect.pure(Right(a))
           case inv: Invalid =>
-            endpoints.Effect.map(endpoints.handleClientErrors(inv))(Left.apply)
+            endpoints.Effect.map(endpoints.handleClientErrors(req, inv))(Left.apply)
         }
       }
     }

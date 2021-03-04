@@ -71,6 +71,11 @@ trait EndpointsTestApi extends algebra.Endpoints {
     wheneverFound(ok(textResponse))
   )
 
+  val trailingSlashEndpoint = endpoint(
+    get(path / "user" / ""),
+    ok(emptyResponse),
+  )
+
   val headers1 = requestHeader("A") ++ requestHeader("B")
   val joinedHeadersEndpoint = endpoint(
     get(path / "joinedHeadersEndpoint", headers = headers1),

@@ -39,6 +39,8 @@ trait EndpointsDocs extends Endpoints {
   path
   // static segment: “/users”
   path / "users"
+  // path with trailing slash: “/users/”
+  path / "users" / ""
   // path parameter: “/users/1234”, “/users/5678”, …
   path / "users" / segment[Long]()
   // path parameter: “/assets/images/logo.png”

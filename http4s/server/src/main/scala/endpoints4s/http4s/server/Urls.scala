@@ -223,7 +223,7 @@ trait Urls extends algebra.Urls with StatusCodes {
       uri.path
         .split("/")
         .map(URLDecoder.decode(_, utf8Name))
-        .toList
+        .toList ++ { if (uri.path.endsWith("/")) List("") else Nil }
 
     path.decode(if (segments.isEmpty) List("") else segments).flatMap {
       case (validated, Nil) => Some(validated)
