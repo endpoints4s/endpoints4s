@@ -19,7 +19,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt ++2.12.12 coverage test coverageReport coverageAggregate
+    - run: sbt ++2.12.13 coverage test coverageReport coverageAggregate
     - run: bash <(curl -s https://codecov.io/bash)
 
   test213:
