@@ -35,11 +35,19 @@ lazy val `json-schema-generic` =
       publishSettings,
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "json-schema-generic",
-      libraryDependencies ++= Seq(
-        ("com.chuusai" %%% "shapeless" % "2.3.7").cross(CrossVersion.for3Use2_13),
-        scalaTestDependency,
-      ),
-      (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
+      libraryDependencies ++= {
+        val commonDependencies = Seq(scalaTestDependency)
+        val scala2Dependencies = Seq("com.chuusai" %%% "shapeless" % "2.3.7")
+        if (scalaVersion.value.startsWith("2.")) scala2Dependencies ++ commonDependencies
+        else commonDependencies
+      },
+      (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
+      // Add src/main/scala-2 as a source directory for Scala 2.12 and 2.13
+      (Compile / unmanagedSourceDirectories) ++= {
+        val crossSourceDirectory = baseDirectory.value / ".." / "src" / "main"
+        if (scalaVersion.value.startsWith("2.")) Seq(crossSourceDirectory / "scala-2")
+        else Nil
+      }
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
