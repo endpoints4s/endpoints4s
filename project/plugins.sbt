@@ -1,18 +1,18 @@
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.3.2")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.4.0")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.5.0")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.5")
 
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "2.1.1")
+addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.1")
-addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.1")
+addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.2")
 addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.3")
@@ -34,7 +34,7 @@ val build = project.in(file(".")).dependsOn(`sbt-assets`)
 
 ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
 
-addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.2")
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.5.3")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 

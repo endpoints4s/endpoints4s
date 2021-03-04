@@ -20,7 +20,7 @@ trait Urls extends algebra.Urls {
   type Segment[A] = A => String
 
   case class Path[A](toStr: A => String)
-      extends Url(toStr.andThen(url => Http(protocol + address + "/" + url)))
+      extends Url(toStr.andThen(url => Http(protocol + address + url)))
 
   implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] =
     new PartialInvariantFunctor[Path] {
@@ -109,8 +109,7 @@ trait Urls extends algebra.Urls {
       val (a, b) = tupler.unapply(ab)
       val firstStr = first.toStr(a)
       val secondStr = second.toStr(b)
-      val separator = if (firstStr.isEmpty || secondStr.isEmpty) "" else "/"
-      firstStr + separator + secondStr
+      firstStr + "/" + secondStr
     })
   }
 
