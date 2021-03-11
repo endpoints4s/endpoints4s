@@ -5,7 +5,7 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.5")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.6")
 
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 
