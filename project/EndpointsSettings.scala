@@ -67,7 +67,7 @@ object EndpointsSettings {
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.5",
-    crossScalaVersions := Seq("2.13.5", "3.0.0-M3", "2.12.12")
+    crossScalaVersions := Seq("2.13.5", "3.0.0-RC1", "2.12.12")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -104,10 +104,10 @@ object EndpointsSettings {
   val sttpVersion = "2.2.9"
   val akkaActorVersion = "2.6.12"
   val akkaHttpVersion = "10.2.4"
-  val http4sVersion = "0.21.19"
+  val http4sVersion = "0.21.20"
   val ujsonVersion = "1.1.0"
 
-  val scalaTestVersion = "3.2.5"
+  val scalaTestVersion = "3.2.6"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =

@@ -12,8 +12,8 @@ val `http4s-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      version := "5.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      version := "6.0.0",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-core" % http4sVersion).withDottyCompat(scalaVersion.value),
         ("org.http4s" %% "http4s-dsl" % http4sVersion).withDottyCompat(scalaVersion.value),

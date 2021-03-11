@@ -286,7 +286,7 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.12.0",
+        "com.raquo" %%% "laminar" % "0.12.1",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
       ),
@@ -348,7 +348,7 @@ val `example-cqrs-commands` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.15.2" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.15.3" % Test,
         scalaTestDependency
       )
     )
@@ -384,7 +384,7 @@ val `example-cqrs` =
     .settings(
       cancelable in Global := true,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.15.2" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.15.3" % Test,
         scalaTestDependency
       )
     )
@@ -436,7 +436,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.pauldijou" %% "jwt-play" % "5.0.0",
+        "com.github.jwt-scala" %% "jwt-play" % "7.0.0",
         scalaTestDependency
       )
     )
