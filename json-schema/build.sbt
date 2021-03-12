@@ -37,9 +37,10 @@ lazy val `json-schema-generic` =
       name := "json-schema-generic",
       libraryDependencies ++= {
         val commonDependencies = Seq(scalaTestDependency)
-        val scala2Dependencies = Seq("com.chuusai" %%% "shapeless" % "2.3.7")
-        if (scalaVersion.value.startsWith("2.")) scala2Dependencies ++ commonDependencies
-        else commonDependencies
+        val shapelessDependency =
+          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.7"
+          else "org.typelevel" %% "shapeless3-deriving" % "3.0.1"
+        shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
       // Add src/main/scala-2 as a source directory for Scala 2.12 and 2.13
@@ -47,7 +48,8 @@ lazy val `json-schema-generic` =
         val crossSourceDirectory = baseDirectory.value / ".." / "src" / "main"
         if (scalaVersion.value.startsWith("2.")) Seq(crossSourceDirectory / "scala-2")
         else Nil
-      }
+      },
+      Test / scalacOptions ++= (if (scalaVersion.value.startsWith("2.")) Nil else Seq("-Yretain-trees"))
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
