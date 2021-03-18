@@ -32,8 +32,6 @@ ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
 
-ThisBuild / versionScheme := Some("early-semver")
-
 // Default intention: binary compatibility between releases.
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
@@ -58,5 +56,5 @@ val versionSchemes = Def.setting {
 }
 
 ThisBuild / evictionRules ++= versionSchemes.value
-ThisBuild / versionPolicyDependencyRules ++= versionSchemes.value
+ThisBuild / versionPolicyDependencySchemes ++= versionSchemes.value
 ThisBuild / versionPolicyIgnored += "joda-time" % "joda-time"
