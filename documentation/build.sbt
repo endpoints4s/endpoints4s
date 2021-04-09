@@ -162,7 +162,7 @@ val `example-quickstart-server` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.11.0",
+        "org.scala-stm" %% "scala-stm" % "0.11.1",
         scalaTestDependency
       )
     )
@@ -222,7 +222,7 @@ val `example-basic-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       scalaJSUseMainModuleInitializer := true,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.1"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -268,7 +268,7 @@ val `example-cqrs-public-endpoints` =
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.2.1"
       )
     )
     .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
@@ -286,9 +286,9 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.12.1",
+        "com.raquo" %%% "laminar" % "0.12.2",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
-        "io.github.cquiroz" %%% "scala-java-time" % "2.2.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.2.1"
       ),
       scalaJSUseMainModuleInitializer := true
     )
@@ -334,7 +334,7 @@ lazy val `example-cqrs-commands-endpoints` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scala-stm" %% "scala-stm" % "0.11.0",
+        "org.scala-stm" %% "scala-stm" % "0.11.1",
         "io.circe" %% "circe-generic" % circeVersion
       )
     )
@@ -436,7 +436,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.jwt-scala" %% "jwt-play" % "7.1.2",
+        "com.github.jwt-scala" %% "jwt-play" % "7.1.3",
         scalaTestDependency
       )
     )
