@@ -36,7 +36,7 @@ lazy val `json-schema-generic` =
       publishSettings,
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "json-schema-generic",
-      libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.3").withDottyCompat(scalaVersion.value),
+      libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.4").withDottyCompat(scalaVersion.value),
       addScalaTestCrossDependency,
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
     )
