@@ -1,6 +1,5 @@
 import sbt._
 import sbt.Keys._
-import dotty.tools.sbtplugin.DottyPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport.mimaPreviousArtifacts
 
@@ -67,7 +66,7 @@ object EndpointsSettings {
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.4",
-    crossScalaVersions := Seq("2.13.4", "3.0.0-RC1", "2.12.12")
+    crossScalaVersions := Seq("2.13.4", "3.0.0-RC3", "2.12.12")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -111,10 +110,9 @@ object EndpointsSettings {
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =
-    libraryDependencies += scalaTestDependency.withDottyCompat(
-      scalaVersion.value)
+    libraryDependencies += scalaTestDependency.cross(CrossVersion.for3Use2_13)
   val macroParadiseDependency = Seq(
-    scalacOptions in Compile ++= {
+    Compile / scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, n)) if n >= 13 => "-Ymacro-annotations" :: Nil
         case _                       => Nil

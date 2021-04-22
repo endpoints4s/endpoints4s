@@ -15,11 +15,11 @@ pomExtra :=
     </developer>
   </developers>
 
-scalacOptions in (Compile, doc) ++= Seq(
+Compile / doc / scalacOptions ++= Seq(
   "-doc-source-url",
   s"https://github.com/julienrf/endpoints/tree/v${version.value}€{FILE_PATH}.scala",
   "-sourcepath",
-  baseDirectory.in(LocalRootProject).value.getAbsolutePath
+  (LocalRootProject / baseDirectory).value.getAbsolutePath
 )
 
 autoAPIMappings := true

@@ -17,13 +17,13 @@ val `play-server` =
       version := "2.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
       libraryDependencies ++= Seq(
-        ("com.typesafe.play" %% "play-netty-server" % playVersion).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.play" %% "play-test" % playVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.play" %% "play-netty-server" % playVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "play-test" % playVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play
-        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value)
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -39,7 +39,7 @@ val `play-server-circe` =
       name := "play-server-circe",
       version := "2.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
-      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value)
+      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
 
@@ -53,11 +53,11 @@ val `play-client` =
       version := "2.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
       libraryDependencies ++= Seq(
-        ("com.typesafe.play" %% "play-ahc-ws" % playVersion).withDottyCompat(scalaVersion.value),
+        ("com.typesafe.play" %% "play-ahc-ws" % playVersion).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play
-        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value)
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(
