@@ -19,8 +19,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt ++2.12.13 coverage test coverageReport coverageAggregate
-    - run: bash <(curl -s https://codecov.io/bash)
+    - run: sbt ++2.12.13 test
 
   test213:
     name: Test (Scala 2.13)
@@ -34,7 +33,8 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
-    - run: sbt ++2.13.4 test manual/makeSite
+    - run: sbt ++2.13.4 coverage test coverageReport coverageAggregate manual/makeSite
+    - run: bash <(curl -s https://codecov.io/bash)
 
   test3:
     name: Test (Scala 3)
