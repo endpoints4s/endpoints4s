@@ -13,7 +13,7 @@ lazy val openapi =
       `scala 2.12 to dotty`,
       name := "openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
-      libraryDependencies += ("com.lihaoyi" %%% "ujson" % ujsonVersion).withDottyCompat(scalaVersion.value)
+      libraryDependencies += ("com.lihaoyi" %%% "ujson" % ujsonVersion).cross(CrossVersion.for3Use2_13)
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjectsWithScope(
