@@ -20,9 +20,9 @@ val documentation =
 
 noPublishSettings
 
-ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
+ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
-publishTo in ThisBuild := sonatypePublishTo.value
+ThisBuild / publishTo := sonatypePublishTo.value
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
