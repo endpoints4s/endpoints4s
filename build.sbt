@@ -20,9 +20,9 @@ val documentation =
 
 noPublishSettings
 
-ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
+ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
-publishTo in ThisBuild := sonatypePublishTo.value
+ThisBuild / publishTo := sonatypePublishTo.value
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
@@ -31,8 +31,6 @@ Global / excludeLintKeys += coverageEnabled
 ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
-
-ThisBuild / versionScheme := Some("early-semver")
 
 // Default intention: binary compatibility between releases.
 // We want to keep binary compatibility as long as we can for the algebra,
@@ -58,5 +56,5 @@ val versionSchemes = Def.setting {
 }
 
 ThisBuild / evictionRules ++= versionSchemes.value
-ThisBuild / versionPolicyDependencyRules ++= versionSchemes.value
+ThisBuild / versionPolicyDependencySchemes ++= versionSchemes.value
 ThisBuild / versionPolicyIgnored += "joda-time" % "joda-time"

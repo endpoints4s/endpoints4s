@@ -12,11 +12,11 @@ val algebra =
       name := "algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
-        ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).withDottyCompat(scalaVersion.value)
+        ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOnLocalCrossProjectsWithScope(
@@ -36,8 +36,8 @@ val `algebra-circe` =
       `scala 2.12 to dotty`,
       name := "algebra-circe",
       libraryDependencies ++= Seq(
-        ("io.circe" %%% "circe-parser" % circeVersion).withDottyCompat(scalaVersion.value),
-        ("io.circe" %%% "circe-generic" % circeVersion % Test).withDottyCompat(scalaVersion.value)
+        ("io.circe" %%% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13),
+        ("io.circe" %%% "circe-generic" % circeVersion % Test).cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
@@ -54,7 +54,7 @@ val `algebra-playjson` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-playjson",
-      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value)
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
