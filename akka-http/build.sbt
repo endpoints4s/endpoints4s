@@ -18,11 +18,11 @@ val `akka-http-client` =
       version := "3.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        scalaTestDependency.withDottyCompat(scalaVersion.value)
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        scalaTestDependency.cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
@@ -40,13 +40,13 @@ val `akka-http-server` =
       version := "4.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).withDottyCompat(scalaVersion.value),
-        ("com.softwaremill.sttp.client" %% "core" % sttpVersion % Test).withDottyCompat(scalaVersion.value), // Temporary
-        scalaTestDependency.withDottyCompat(scalaVersion.value)
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.softwaremill.sttp.client" %% "core" % sttpVersion % Test).cross(CrossVersion.for3Use2_13), // Temporary
+        scalaTestDependency.cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile", `openapi-jvm`)

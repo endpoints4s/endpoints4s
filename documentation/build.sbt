@@ -41,16 +41,16 @@ val apiDoc =
       noPublishSettings,
       `scala 2.13`,
       coverageEnabled := false,
-      scalacOptions in (ScalaUnidoc, unidoc) ++= Seq(
+      ScalaUnidoc / unidoc / scalacOptions ++= Seq(
         "-implicits",
         "-diagrams",
         "-groups",
         "-doc-source-url",
         s"https://github.com/endpoints4s/endpoints4s/blob/v${version.value}€{FILE_PATH}.scala",
         "-sourcepath",
-        (baseDirectory in ThisBuild).value.absolutePath
+        (ThisBuild / baseDirectory).value.absolutePath
       ),
-      unidocProjectFilter in (ScalaUnidoc, unidoc) := inProjects(
+      ScalaUnidoc / unidoc / unidocProjectFilter := inProjects(
         `algebra-jvm`,
         `algebra-circe-jvm`,
         `algebra-playjson-jvm`,
@@ -183,10 +183,10 @@ val `example-basic-shared` = {
       noPublishSettings,
       `scala 2.12 to 2.13`,
       macroParadiseDependency,
-      (sourceGenerators in Compile) += Def.task {
+      Compile / sourceGenerators += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value.getParentFile,
-          targetDirectory = (sourceManaged in Compile).value,
+          targetDirectory = (Compile / sourceManaged).value,
           generatedObjectName = "AssetsDigests",
           generatedPackage = Some("sample")
         )
@@ -196,13 +196,13 @@ val `example-basic-shared` = {
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(
       coverageEnabled := false, // TODO Enable coverage when we add more tests
-      (resourceGenerators in Compile) += Def.task {
+      Compile / resourceGenerators += Def.task {
         assets.AssetsTasks.gzipAssets(
           baseDirectory = baseDirectory.value.getParentFile,
-          targetDirectory = (target in Compile).value
+          targetDirectory = (Compile / target).value
         )
       }.taskValue,
-      unmanagedResourceDirectories in Compile += assetsDirectory(
+      Compile / unmanagedResourceDirectories += assetsDirectory(
         baseDirectory.value.getParentFile
       )
     )
@@ -232,7 +232,7 @@ val `example-basic-play-server` =
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      unmanagedResources in Compile += (fastOptJS in (`example-basic-client`, Compile))
+      Compile / unmanagedResources += (`example-basic-client` / Compile / fastOptJS)
         .map(_.data)
         .value,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.30",
@@ -302,21 +302,21 @@ val `example-cqrs-public-server` =
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      unmanagedResources in Compile += (fastOptJS in (`example-cqrs-web-client`, Compile))
+      Compile / unmanagedResources += (`example-cqrs-web-client` / Compile / fastOptJS)
         .map(_.data)
         .value,
-      (sourceGenerators in Compile) += Def
+      Compile / sourceGenerators += Def
         .task {
           assets.AssetsTasks.generateDigests(
             baseDirectory =
-              (crossTarget in fastOptJS in `example-cqrs-web-client`).value,
-            targetDirectory = (sourceManaged in Compile).value,
+              (`example-cqrs-web-client` / fastOptJS / crossTarget).value,
+            targetDirectory = (Compile / sourceManaged).value,
             generatedObjectName = "BootstrapDigests",
             generatedPackage = Some("cqrs.publicserver"),
             assetsPath = identity
           )
         }
-        .dependsOn(fastOptJS in Compile in `example-cqrs-web-client`)
+        .dependsOn(`example-cqrs-web-client` / Compile / fastOptJS)
         .taskValue
     )
     .dependsOn(`play-server-circe`, `play-client`, `openapi-jvm`)
@@ -382,7 +382,7 @@ val `example-cqrs` =
     .in(file("examples/cqrs/infra"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
-      cancelable in Global := true,
+      Global / cancelable := true,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.15.3" % Test,
         scalaTestDependency
@@ -409,19 +409,19 @@ val `example-documented` =
 //          .get
 //          .toString)
 //      ),
-      assemblyMergeStrategy in assembly := {
+      assembly / assemblyMergeStrategy := {
         case x if x.endsWith("io.netty.versions.properties") =>
           MergeStrategy.first
         case x if x.endsWith("module-info.class") =>
           MergeStrategy.first
         case x =>
-          val oldStrategy = (assemblyMergeStrategy in assembly).value
+          val oldStrategy = (assembly / assemblyMergeStrategy).value
           oldStrategy(x)
       },
-      (sourceGenerators in Compile) += Def.task {
+      Compile / sourceGenerators += Def.task {
         assets.AssetsTasks.generateDigests(
           baseDirectory = baseDirectory.value,
-          targetDirectory = (sourceManaged in Compile).value,
+          targetDirectory = (Compile / sourceManaged).value,
           generatedObjectName = "AssetsDigests",
           generatedPackage = Some("counter"),
           assetsPath = _ / "src" / "main" / "resources" / "public"
