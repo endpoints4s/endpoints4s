@@ -104,10 +104,10 @@ object EndpointsSettings {
   val sttpVersion = "2.2.9"
   val akkaActorVersion = "2.6.12"
   val akkaHttpVersion = "10.2.4"
-  val http4sVersion = "0.21.21"
-  val ujsonVersion = "1.3.11"
+  val http4sVersion = "0.21.22"
+  val ujsonVersion = "1.1.0"
 
-  val scalaTestVersion = "3.2.7"
+  val scalaTestVersion = "3.2.8"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val addScalaTestCrossDependency =
