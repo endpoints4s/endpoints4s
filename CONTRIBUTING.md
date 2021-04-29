@@ -32,8 +32,13 @@ $ sbt test
 Or, for a specific Scala version:
 
 ~~~ sh
+<<<<<<< HEAD
 $ sbt "++ 2.12.11 test"
 $ sbt "++ 2.13.5 test"
+=======
+$ sbt "++ 2.12.13 test"
+$ sbt "++ 2.13.2 test"
+>>>>>>> master
 ~~~
 
 ### Format source code
@@ -81,7 +86,7 @@ After generating intellij project you may need to navigate to Settings -> Langua
    `1.0.1`, `1.1.0`, or `2.0.0`, according to the compatibility guarantees of the module)
 2. Run the following command:
    ~~~ sh
-   $ sbt versionCheck "++ 2.12.12 publishSigned" "++ 2.13.5 publishSigned" sonatypeReleaseAll "++ 2.13.5 manual/makeSite" manual/ghpagesPushSite
+   $ sbt versionCheck "++ 2.12.13 publishSigned" "++ 2.13.5 publishSigned" sonatypeReleaseAll "++ 2.13.5 manual/makeSite" manual/ghpagesPushSite
    ~~~
 3. Reset the compatibility intention to `Compatibility.BinaryAndSourceCompatible`,
    and add a `+n` suffix to the version of every module (e.g., change `1.0.0`

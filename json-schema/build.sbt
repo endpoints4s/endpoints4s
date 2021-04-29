@@ -13,15 +13,15 @@ val `json-schema` =
       name := "algebra-json-schema",
       addScalaTestCrossDependency,
       libraryDependencies ++= Seq(
-        ("org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.2").withDottyCompat(scalaVersion.value),
-        ("org.scalacheck" %%% "scalacheck" % "1.15.3" % Test).withDottyCompat(scalaVersion.value)
+        ("org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.3").cross(CrossVersion.for3Use2_13),
+        ("org.scalacheck" %%% "scalacheck" % "1.15.3" % Test).cross(CrossVersion.for3Use2_13)
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(
       _.settings(
-        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.0" % Test
+        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.2" % Test
       ).disablePlugins(ScoverageSbtPlugin)
     )
 
@@ -36,7 +36,7 @@ lazy val `json-schema-generic` =
       publishSettings,
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "json-schema-generic",
-      libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.3").withDottyCompat(scalaVersion.value),
+      libraryDependencies += ("com.chuusai" %%% "shapeless" % "2.3.4").cross(CrossVersion.for3Use2_13),
       addScalaTestCrossDependency,
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
     )
@@ -56,7 +56,7 @@ lazy val `json-schema-circe` =
     .settings(
       publishSettings,
       name := "json-schema-circe",
-      libraryDependencies += ("io.circe" %%% "circe-core" % circeVersion).withDottyCompat(scalaVersion.value),
+      libraryDependencies += ("io.circe" %%% "circe-core" % circeVersion).cross(CrossVersion.for3Use2_13),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
@@ -80,7 +80,7 @@ lazy val `json-schema-playjson` =
     .settings(
       publishSettings,
       name := "json-schema-playjson",
-      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).withDottyCompat(scalaVersion.value),
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
