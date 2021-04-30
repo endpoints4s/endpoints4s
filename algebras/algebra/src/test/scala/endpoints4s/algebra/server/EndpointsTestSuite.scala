@@ -154,7 +154,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
 
     "transformed" in {
       implicit val pageQueryString: QueryStringParam[Page] =
-        intQueryString.xmap(Page)(_.number)
+        intQueryString.xmap(Page(_))(_.number)
       val url = path /? qs[Page]("page")
       decodeUrl(url)("/?page=42") shouldEqual Matched(Page(42))
       decodeUrl(url)("/?page=foo") shouldEqual Malformed(
@@ -164,7 +164,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       )
 
       implicit val blogSlugQueryString: QueryStringParam[BlogSlug] =
-        stringQueryString.xmap(BlogSlug)(_.slug)
+        stringQueryString.xmap(BlogSlug(_))(_.slug)
       val url2 = path /? qs[BlogSlug]("slug")
       decodeUrl(url2)("/?slug=this-is-a-slug") shouldEqual (Matched(
         BlogSlug("this-is-a-slug")
@@ -181,7 +181,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
     "transformed" in {
       val paginatedUrl =
         (path /? (qs[Int]("from") & qs[Int]("limit")))
-          .xmap(Page2.tupled)(p => (p.from, p.limit))
+          .xmap((Page2.apply _).tupled)(p => (p.from, p.limit))
       decodeUrl(paginatedUrl)("/?from=1&limit=10") shouldEqual Matched(
         Page2(1, 10)
       )
