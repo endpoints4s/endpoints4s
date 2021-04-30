@@ -12,12 +12,17 @@ val algebra =
       name := "algebra",
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
-        ("org.scalatest" %%% "scalatest" % scalaTestVersion % Test).cross(CrossVersion.for3Use2_13),
+        scalaTestDependency,
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).cross(CrossVersion.for3Use2_13)
-      )
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
+        } else Nil
+      }
     )
     .dependsOnLocalCrossProjectsWithScope(
       "json-schema" -> "test->test;compile->compile"
@@ -38,7 +43,12 @@ val `algebra-circe` =
       libraryDependencies ++= Seq(
         ("io.circe" %%% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13),
         ("io.circe" %%% "circe-generic" % circeVersion % Test).cross(CrossVersion.for3Use2_13)
-      )
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
+        } else Nil
+      }
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))

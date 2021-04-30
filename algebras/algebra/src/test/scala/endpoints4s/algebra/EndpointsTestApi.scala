@@ -169,7 +169,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
   case class StringWrapper(str: String)
 
   val transformedResponseEntity =
-    textResponse.xmap(StringWrapper)(_.str)
+    textResponse.xmap(StringWrapper(_))(_.str)
 
   val endpointWithTransformedResponseEntity = endpoint(
     get(path / "transformed-response-entity"),
@@ -183,7 +183,7 @@ trait EndpointsTestApi extends algebra.Endpoints {
     ok(
       entity = textResponse,
       headers = responseHeader("ETag")
-    ).xmap(TransformedResponse.tupled)(r => (r.entity, r.etag))
+    ).xmap((TransformedResponse.apply _).tupled)(r => (r.entity, r.etag))
   )
 
 }
