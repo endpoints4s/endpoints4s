@@ -16,13 +16,13 @@ trait JsonSchemasFixtures extends JsonSchemas {
     implicit val schema: JsonSchema[User] = (
       field[String]("name", Some("Name of the user")) zip
         field[Int]("age")
-    ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
+    ).xmap((User.apply _).tupled)(user => (user.name, user.age))
 
     val schema2: JsonSchema[User] = (
       emptyRecord zip
         field[String]("name", Some("Name of the user")) zip
         field[Int]("age")
-    ).xmap((User.apply _).tupled)(Function.unlift(User.unapply))
+    ).xmap((User.apply _).tupled)(user => (user.name, user.age))
   }
 
   sealed trait Foo
@@ -34,11 +34,11 @@ trait JsonSchemasFixtures extends JsonSchemas {
 
   object Foo {
     implicit val schema: Tagged[Foo] = {
-      val barSchema: Record[Bar] = field[String]("s").xmap(Bar)(_.s)
-      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
+      val barSchema: Record[Bar] = field[String]("s").xmap(Bar(_))(_.s)
+      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz(_))(_.i)
       val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
       val quxSchema: Record[Qux.type] = emptyRecord.xmap(_ => Qux)(_ => ())
-      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux)(_.b)
+      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux(_))(_.b)
 
       (barSchema.tagged("Bar") orElse bazSchema.tagged("Baz") orElse baxSchema
         .tagged("Bax") orElse quxSchema.tagged("Qux") orElse quuxSchema.tagged(
@@ -59,11 +59,11 @@ trait JsonSchemasFixtures extends JsonSchemas {
     }
 
     val alternativeSchemaForMerge: Tagged[Foo] = {
-      val barSchema: Record[Bar] = field[String]("s").xmap(Bar)(_.s)
-      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz)(_.i)
+      val barSchema: Record[Bar] = field[String]("s").xmap(Bar(_))(_.s)
+      val bazSchema: Record[Baz] = field[Int]("i").xmap(Baz(_))(_.i)
       val baxSchema: Record[Bax] = emptyRecord.xmap(_ => Bax())(_ => ())
       val quxSchema: Record[Qux.type] = emptyRecord.xmap(_ => Qux)(_ => ())
-      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux)(_.b)
+      val quuxSchema: Record[Quux] = field[Byte]("b").xmap(Quux(_))(_.b)
 
       (
         barSchema.tagged("Bar") orElseMerge
@@ -96,7 +96,7 @@ trait JsonSchemasFixtures extends JsonSchemas {
   case class Recursive(next: Option[Recursive])
   val recursiveSchema: Record[Recursive] = (
     optField("next")(lazyRecord(recursiveSchema, "Rec"))
-  ).xmap(Recursive)(_.next)
+  ).xmap(Recursive(_))(_.next)
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 

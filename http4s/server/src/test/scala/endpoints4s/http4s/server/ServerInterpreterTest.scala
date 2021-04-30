@@ -79,8 +79,8 @@ class ServerInterpreterTest
   )(runTests: Int => Unit): Unit =
     serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
 
-  def serveEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, Resp],
+  def serveEndpoint[Req, Resp](
+      endpoint: serverApi.Endpoint[Req, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit =
     serveGeneralEndpoint(endpoint, (_: Any) => response)(runTests)
