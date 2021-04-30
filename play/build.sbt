@@ -24,7 +24,15 @@ val `play-server` =
         ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
-      )
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(
+            ExclusionRule("org.scala-lang.modules", "scala-xml_3.0.0-RC3"),
+            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
+          )
+        } else Nil
+      }
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
@@ -58,7 +66,15 @@ val `play-client` =
         ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
-      )
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(
+            ExclusionRule("org.scala-lang.modules", "scala-xml_3.0.0-RC3"),
+            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
+          )
+        } else Nil
+      }
     )
     .dependsOn(
       `algebra-jvm` % "test->test;compile->compile",

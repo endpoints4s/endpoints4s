@@ -39,8 +39,8 @@ trait ServerTestBase[T <: algebra.Endpoints]
   /** @param runTests A function that is called after the server is started and before it is stopped. It takes
     *                 the TCP port number as parameter.
     */
-  def serveEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, Resp],
+  def serveEndpoint[Req, Resp](
+      endpoint: serverApi.Endpoint[Req, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit
 

@@ -37,8 +37,8 @@ class ServerInterpreterTest
     )
   }
 
-  def serveEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, Resp],
+  def serveEndpoint[Req, Resp](
+      endpoint: serverApi.Endpoint[Req, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit =
     serveRoutes(
@@ -52,9 +52,9 @@ class ServerInterpreterTest
       serverApi.routesFromEndpoints(endpoint.implementedBy(request => request))
     )(runTests)
 
-  def serveStreamedEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
-      response: Source[Resp, _]
+  def serveStreamedEndpoint[Req, Resp, Mat](
+      endpoint: serverApi.Endpoint[Req, serverApi.Chunks[Resp]],
+      response: Source[Resp, Mat]
   )(runTests: Int => Unit): Unit =
     serveRoutes(
       serverApi.routesFromEndpoints(endpoint.implementedBy(_ => response))
