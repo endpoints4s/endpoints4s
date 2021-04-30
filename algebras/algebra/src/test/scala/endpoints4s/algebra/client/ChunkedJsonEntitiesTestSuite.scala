@@ -106,7 +106,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
       (post & path("upload")) {
         extractRequestEntity { entity =>
           val bytes = entity.dataBytes.map(_.toArray)
-          whenReady(bytes.runWith(Sink.seq))(_ shouldEqual expectedItems)
+          whenReady(bytes.runWith[Future[Seq[Array[Byte]]]](Sink.seq))(_ shouldEqual expectedItems)
           complete(HttpEntity.Empty)
         }
       }

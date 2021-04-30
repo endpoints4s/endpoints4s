@@ -18,9 +18,9 @@ import scala.util.control.NonFatal
 
 trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends EndpointsTestSuite[T] {
 
-  def serveStreamedEndpoint[Resp](
-      endpoint: serverApi.Endpoint[_, serverApi.Chunks[Resp]],
-      response: Source[Resp, _]
+  def serveStreamedEndpoint[Req, Resp, Mat](
+      endpoint: serverApi.Endpoint[Req, serverApi.Chunks[Resp]],
+      response: Source[Resp, Mat]
   )(
       runTests: Int => Unit
   ): Unit
@@ -89,7 +89,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
 
     "close connection in case of error" in {
       val source: Source[serverApi.Counter, _] =
-        Source((1 to 3).map(serverApi.Counter)).flatMapConcat {
+        Source((1 to 3).map(serverApi.Counter(_))).flatMapConcat {
           case serverApi.Counter(3) =>
             Source.failed(new Exception("Something went wrong"))
           case serverApi.Counter(n) => Source.single(serverApi.Counter(n))

@@ -26,7 +26,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     implicit val schema: JsonSchema[Shape] = {
 
       val circleSchema =
-        field[Double]("radius").xmap(Circle)(_.radius)
+        field[Double]("radius").xmap(Circle(_))(_.radius)
 
       val rectangleSchema = (
         field[Double]("width") zip
@@ -67,7 +67,7 @@ trait JsonSchemasDocs extends JsonSchemas {
 
   val recursiveSchema: Record[Recursive] = (
     optField("next")(lazyRecord(recursiveSchema, "Rec"))
-  ).xmap(Recursive)(_.next)
+  ).xmap(Recursive(_))(_.next)
   //#recursive
 
   //#tuple
@@ -86,7 +86,7 @@ trait JsonSchemasDocs extends JsonSchemas {
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
         field[Double]("height")
-    ).xmap(Rectangle.tupled)(rect => (rect.width, rect.height))
+    ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
       .withExample(Rectangle(10, 20))
       .withDescription("A rectangle shape")
     //#with-example
