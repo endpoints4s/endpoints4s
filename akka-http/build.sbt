@@ -22,8 +22,13 @@ val `akka-http-client` =
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        scalaTestDependency.cross(CrossVersion.for3Use2_13)
-      )
+        scalaTestDependency
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
+        } else Nil
+      }
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
@@ -47,7 +52,30 @@ val `akka-http-server` =
         ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.softwaremill.sttp.client" %% "core" % sttpVersion % Test).cross(CrossVersion.for3Use2_13), // Temporary
         scalaTestDependency.cross(CrossVersion.for3Use2_13)
-      )
+      ),
+      excludeDependencies ++= {
+        if (scalaBinaryVersion.value.startsWith("3")) {
+          List(
+            ExclusionRule("org.scala-lang.modules", "scala-xml_3.0.0-RC3"),
+            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-featurespec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-shouldmatchers_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-matchers-core_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-diagrams_2.13"),
+            ExclusionRule("org.scalatest", "scalatest_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-core_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-refspec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-funspec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-freespec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-propspec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-flatspec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-funsuite_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-wordspec_2.13"),
+            ExclusionRule("org.scalatest", "scalatest-mustmatchers_2.13"),
+            ExclusionRule("org.scalactic", "scalactic_2.13")
+          )
+        } else Nil
+      }
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile", `openapi-jvm`)
     .dependsOn(`algebra-circe-jvm` % "test->test")

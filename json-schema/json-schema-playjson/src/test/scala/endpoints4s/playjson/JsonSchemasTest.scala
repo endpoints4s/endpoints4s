@@ -193,10 +193,10 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").tagged("Circle").xmap(Circle)(_.r) orElse
+    val schema = field[Double]("r").tagged("Circle").xmap(Circle(_))(_.r) orElse
       (field[Int]("w") zip field[Int]("h"))
         .tagged("Rect")
-        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+        .xmap((Rect.apply _).tupled)(rect => (rect.w, rect.h))
 
     testRoundtrip(
       schema,
@@ -221,11 +221,11 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     val circleSchema = field[Double]("r")
       .tagged("Circle")
-      .xmap(Circle)(_.r)
+      .xmap(Circle(_))(_.r)
 
     val rectSchema = (field[Int]("w") zip field[Int]("h"))
       .tagged("Rect")
-      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+      .xmap((Rect.apply _).tupled)(rect => (rect.w, rect.h))
 
     val schema = circleSchema orElseMerge rectSchema
     testRoundtrip(
@@ -249,9 +249,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
+    val schema = field[Double]("r").xmap(Circle(_))(_.r).tagged("Circle") orElse
       (field[Int]("w") zip field[Int]("h"))
-        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+        .xmap((Rect.apply _).tupled)(rect => (rect.w, rect.h))
         .tagged("Rect")
 
     testRoundtrip(
@@ -275,9 +275,9 @@ class JsonSchemasTest extends AnyFreeSpec {
     case class Circle(r: Double) extends Shape
     case class Rect(w: Int, h: Int) extends Shape
 
-    val schema = field[Double]("r").xmap(Circle)(_.r).tagged("Circle") orElse
+    val schema = field[Double]("r").xmap(Circle(_))(_.r).tagged("Circle") orElse
       (field[Int]("w") zip field[Int]("h"))
-        .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+        .xmap((Rect.apply _).tupled)(rect => (rect.w, rect.h))
         .tagged("Rect")
 
     assertError(

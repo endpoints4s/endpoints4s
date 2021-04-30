@@ -109,8 +109,6 @@ object EndpointsSettings {
   val scalaTestVersion = "3.2.8"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
-  val addScalaTestCrossDependency =
-    libraryDependencies += scalaTestDependency.cross(CrossVersion.for3Use2_13)
   val macroParadiseDependency = Seq(
     Compile / scalacOptions ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
