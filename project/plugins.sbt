@@ -24,7 +24,7 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.6.3")
 //) // Used by the example-documented project
 addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.7.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.7.1")
 
 addSbtPlugin("io.spray" % "sbt-boilerplate" % "0.6.1")
 
