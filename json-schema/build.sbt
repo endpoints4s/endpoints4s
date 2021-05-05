@@ -12,7 +12,7 @@ val `json-schema` =
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
         "org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.3",
-        "org.scalacheck" %%% "scalacheck" % "1.15.3" % Test,
+        "org.scalacheck" %%% "scalacheck" % "1.15.4" % Test,
         scalaTestDependency
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
@@ -36,7 +36,7 @@ lazy val `json-schema-generic` =
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "json-schema-generic",
       libraryDependencies ++= Seq(
-        ("com.chuusai" %%% "shapeless" % "2.3.4").cross(CrossVersion.for3Use2_13),
+        ("com.chuusai" %%% "shapeless" % "2.3.5").cross(CrossVersion.for3Use2_13),
         scalaTestDependency,
       ),
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
