@@ -28,7 +28,7 @@ val `play-server` =
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(
-            ExclusionRule("org.scala-lang.modules", "scala-xml_3.0.0-RC3"),
+            ExclusionRule("org.scala-lang.modules", "scala-xml_3"),
             ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
           )
         } else Nil
@@ -70,7 +70,7 @@ val `play-client` =
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(
-            ExclusionRule("org.scala-lang.modules", "scala-xml_3.0.0-RC3"),
+            ExclusionRule("org.scala-lang.modules", "scala-xml_3"),
             ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
           )
         } else Nil

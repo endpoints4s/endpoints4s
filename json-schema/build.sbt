@@ -20,7 +20,7 @@ val `json-schema` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(
       _.settings(
-        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.2" % Test
+        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0" % Test
       ).disablePlugins(ScoverageSbtPlugin)
     )
 
@@ -36,7 +36,7 @@ lazy val `json-schema-generic` =
       `scala 2.12 to dotty`, // Only pretend to make sbt happy
       name := "json-schema-generic",
       libraryDependencies ++= Seq(
-        ("com.chuusai" %%% "shapeless" % "2.3.6").cross(CrossVersion.for3Use2_13),
+        ("com.chuusai" %%% "shapeless" % "2.3.7").cross(CrossVersion.for3Use2_13),
         scalaTestDependency,
       ),
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate"
