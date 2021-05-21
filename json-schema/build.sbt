@@ -20,7 +20,7 @@ val `json-schema` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(
       _.settings(
-        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.2" % Test
+        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0" % Test
       ).disablePlugins(ScoverageSbtPlugin)
     )
 
