@@ -10,7 +10,6 @@ import scala.collection.mutable
 /** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
-@throws(classOf[IllegalArgumentException])
 final class OpenApi private (
     val info: Info,
     val paths: Map[String, PathItem],
