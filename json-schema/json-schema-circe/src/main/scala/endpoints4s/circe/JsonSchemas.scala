@@ -166,8 +166,9 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     )
   }
 
-  private def lazySchema[A](
-      schema: => JsonSchema[A]
+  def lazySchema[A](
+      schema: => JsonSchema[A],
+      name: String
   ): JsonSchema[A] = {
     // The schema won’t be evaluated until its `encoder` or `decoder` is effectively used
     lazy val evaluatedSchema = schema
@@ -178,11 +179,6 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         Decoder.instance(c => evaluatedSchema.decoder(c))
     }
   }
-
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
-    lazySchema(schema)
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
-    lazySchema(schema)
 
   def emptyRecord: Record[Unit] =
     Record(

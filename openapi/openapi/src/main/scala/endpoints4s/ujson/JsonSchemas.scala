@@ -119,13 +119,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = tpe.encoder
     }
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
-    new JsonSchema[A] {
-      val decoder = json => schema.decoder.decode(json)
-      val encoder = value => schema.encoder.encode(value)
-    }
-
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A] =
     new JsonSchema[A] {
       val decoder = json => schema.decoder.decode(json)
       val encoder = value => schema.encoder.encode(value)

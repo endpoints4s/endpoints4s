@@ -143,6 +143,68 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
     Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
   }
 
+  "Recursive expression" in {
+    val recSchema =
+      Schema.Reference(
+        "Expression",
+        Some(
+          Schema.OneOf(
+            Schema.EnumeratedAlternatives(
+              Schema.Primitive("integer", Some("int32"), None, None, None) ::
+                Schema.Object(
+                  Schema.Property(
+                    "x",
+                    Schema.Reference("Expression", None, None),
+                    isRequired = true,
+                    description = None
+                  ) :: Schema.Property(
+                    "y",
+                    Schema.Reference("Expression", None, None),
+                    isRequired = true,
+                    description = None
+                  ) :: Nil,
+                  additionalProperties = None,
+                  description = None,
+                  example = None,
+                  title = None
+                ) :: Nil
+            ),
+            None,
+            None,
+            None
+          )
+        ),
+        None
+      )
+    val expectedSchema =
+      Schema.OneOf(
+        Schema.EnumeratedAlternatives(
+          Schema.Primitive("integer", Some("int32"), None, None, None) ::
+            Schema.Object(
+              Schema.Property(
+                "x",
+                recSchema,
+                isRequired = true,
+                description = None
+              ) :: Schema.Property(
+                "y",
+                recSchema,
+                isRequired = true,
+                description = None
+              ) :: Nil,
+              additionalProperties = None,
+              description = None,
+              example = None,
+              title = None
+            ) :: Nil
+        ),
+        None,
+        None,
+        None
+      )
+    Fixtures.toSchema(Fixtures.expressionSchema.docs) shouldBe expectedSchema
+  }
+
   "Refining JSON schemas preserves documentation" should {
     "JsonSchema" in {
       val expectedSchema = Fixtures.intJsonSchema.docs

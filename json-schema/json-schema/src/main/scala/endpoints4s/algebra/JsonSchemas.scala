@@ -214,6 +214,24 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * {{{
     *   case class Recursive(next: Option[Recursive])
     *   val recursiveSchema: Record[Recursive] = (
+    *     optField("next")(lazySchema(recursiveSchema, "Rec"))
+    *   ).xmap(Recursive)(_.next)
+    * }}}
+    *
+    * Interpreters should return a JsonSchema value that does not evaluate
+    * the given `schema` unless it is effectively used.
+    *
+    * @param schema The JSON schema whose evaluation should be delayed
+    * @param name A unique name identifying the schema
+    * @group operations
+    */
+  def lazySchema[A](schema: => JsonSchema[A], name: String): JsonSchema[A]
+
+  /** Captures a lazy reference to a JSON schema currently being defined:
+    *
+    * {{{
+    *   case class Recursive(next: Option[Recursive])
+    *   val recursiveSchema: Record[Recursive] = (
     *     optField("next")(lazyRecord(recursiveSchema, "Rec"))
     *   ).xmap(Recursive)(_.next)
     * }}}
@@ -225,7 +243,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
+  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
+    lazySchema(schema, name)
 
   /** Captures a lazy reference to a JSON schema currently being defined.
     *
@@ -236,7 +255,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A]
+  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
+    lazySchema(schema, name)
 
   /** The JSON schema of a record with no fields
     *

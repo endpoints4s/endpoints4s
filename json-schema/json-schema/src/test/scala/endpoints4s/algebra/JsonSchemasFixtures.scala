@@ -98,6 +98,24 @@ trait JsonSchemasFixtures extends JsonSchemas {
     optField("next")(lazyRecord(recursiveSchema, "Rec"))
   ).xmap(Recursive(_))(_.next)
 
+  sealed trait Expression
+  object Expression {
+    case class Literal(value: Int) extends Expression
+    case class Add(x: Expression, y: Expression) extends Expression
+  }
+  val expressionSchema: JsonSchema[Expression] = {
+    implicit val self: JsonSchema[Expression] = lazySchema(expressionSchema, "Expression")
+    intJsonSchema
+      .orFallbackTo(field[Expression]("x") zip field[Expression]("y"))
+      .xmap[Expression] {
+        case Left(value)   => Expression.Literal(value)
+        case Right((x, y)) => Expression.Add(x, y)
+      } {
+        case Expression.Literal(value) => Left(value)
+        case Expression.Add(x, y)      => Right((x, y))
+      }
+  }
+
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 
   implicit val boolIntString: JsonSchema[(Boolean, Int, String)] =
@@ -134,8 +152,7 @@ trait JsonSchemasFixtures extends JsonSchemas {
         .withMaximum(Some(10))
         .withExclusiveMaximum(Some(true))
         .withMultipleOf(Some(2))
-  )
+    )
   //#numeric-constraint
-
 
 }
