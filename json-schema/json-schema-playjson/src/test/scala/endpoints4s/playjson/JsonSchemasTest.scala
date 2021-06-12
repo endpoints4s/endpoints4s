@@ -344,6 +344,23 @@ class JsonSchemasTest extends AnyFreeSpec {
       Recursive(Some(Recursive(Some(Recursive(None)))))
     )
   }
+  "recursive expression type" in {
+    testRoundtrip(
+      expressionSchema,
+      Json.obj("x" -> Json.obj("x" -> JsNumber(1), "y" -> JsNumber(2)), "y" -> JsNumber(3)),
+      Expression.Add(
+        Expression.Add(Expression.Literal(1), Expression.Literal(2)),
+        Expression.Literal(3)
+      )
+    )
+  }
+  "mutually recursive types" in {
+    testRoundtrip(
+      mutualRecursiveA,
+      Json.obj("b" -> Json.obj("a" -> Json.obj())),
+      MutualRecursiveA(Some(MutualRecursiveB(Some(MutualRecursiveA(None)))))
+    )
+  }
 
   "tuple" in {
     testRoundtrip(

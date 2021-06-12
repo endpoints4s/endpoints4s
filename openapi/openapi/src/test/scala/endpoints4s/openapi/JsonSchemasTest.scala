@@ -17,9 +17,9 @@ class JsonSchemasTest extends AnyFreeSpec {
           "s",
           DocumentedJsonSchemas.defaultStringJsonSchema.docs,
           isOptional = false,
-          documentation = None,
+          documentation = None
         ) :: Nil
-      ),
+      )
     ) ::
       (
         "Baz",
@@ -28,9 +28,9 @@ class JsonSchemasTest extends AnyFreeSpec {
             "i",
             DocumentedJsonSchemas.intJsonSchema.docs,
             isOptional = false,
-            documentation = None,
+            documentation = None
           ) :: Nil
-        ),
+        )
       ) ::
       ("Bax", DocumentedRecord(Nil)) ::
       ("Qux", DocumentedRecord(Nil)) ::
@@ -41,9 +41,9 @@ class JsonSchemasTest extends AnyFreeSpec {
             "b",
             DocumentedJsonSchemas.byteJsonSchema.docs,
             isOptional = false,
-            documentation = None,
+            documentation = None
           ) :: Nil
-        ),
+        )
       ) ::
       Nil
   )
@@ -55,13 +55,13 @@ class JsonSchemasTest extends AnyFreeSpec {
           "name",
           DocumentedJsonSchemas.defaultStringJsonSchema.docs,
           isOptional = false,
-          documentation = Some("Name of the user"),
+          documentation = Some("Name of the user")
         ) ::
           Field(
             "age",
             DocumentedJsonSchemas.intJsonSchema.docs,
             isOptional = false,
-            documentation = None,
+            documentation = None
           ) ::
           Nil
       )
@@ -85,7 +85,7 @@ class JsonSchemasTest extends AnyFreeSpec {
       DocumentedEnum(
         DocumentedJsonSchemas.defaultStringJsonSchema.docs,
         ujson.Str("Red") :: ujson.Str("Blue") :: Nil,
-        Some("Color"),
+        Some("Color")
       )
     assert(DocumentedJsonSchemas.Enum.colorSchema.docs == expectedSchema)
   }
@@ -98,7 +98,7 @@ class JsonSchemasTest extends AnyFreeSpec {
             "quux",
             DocumentedJsonSchemas.defaultStringJsonSchema.docs,
             isOptional = false,
-            documentation = None,
+            documentation = None
           ) :: Nil
         ),
         ujson.Obj("quux" -> ujson.Str("bar")) :: ujson.Obj(
@@ -106,7 +106,7 @@ class JsonSchemasTest extends AnyFreeSpec {
         ) :: Nil,
         None,
         None,
-        None,
+        None
       )
     assert(
       DocumentedJsonSchemas.NonStringEnum.enumSchema.docs == expectedSchema
@@ -121,7 +121,7 @@ class JsonSchemasTest extends AnyFreeSpec {
             None,
             None,
             None,
-            None,
+            None
           ) =>
         assert(tpe.isInstanceOf[LazySchema])
       case _ =>
@@ -131,11 +131,74 @@ class JsonSchemasTest extends AnyFreeSpec {
     }
   }
 
+  "recursive expression" in {
+    DocumentedJsonSchemas.expressionSchema.docs match {
+      case r: RecursiveSchema =>
+        assert(r.name == "Expression")
+        assert(
+          r.value == OneOf(
+            List(
+              Primitive(
+                "integer",
+                Some("int32"),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              ),
+              DocumentedRecord(
+                List(
+                  Field("x", r, false, None),
+                  Field("y", r, false, None)
+                ),
+                None,
+                None,
+                None,
+                None,
+                None
+              )
+            ),
+            None,
+            None,
+            None
+          )
+        )
+      case _ =>
+        fail(
+          s"Unexpected type for 'expressionSchema': ${DocumentedJsonSchemas.expressionSchema.docs}"
+        )
+    }
+  }
+  "mutually recursive" in {
+    DocumentedJsonSchemas.mutualRecursiveA.docs match {
+      case r: RecursiveSchema =>
+        assert(r.name == "MutualRecursiveA")
+        assert(
+          r.value == DocumentedRecord(
+            List(Field("b", DocumentedJsonSchemas.mutualRecursiveB.docs, true, None)),
+            None,
+            None,
+            None,
+            None,
+            None
+          )
+        )
+      case _ =>
+        fail(
+          s"Unexpected type for 'mutualRecursiveA': ${DocumentedJsonSchemas.mutualRecursiveA.docs}"
+        )
+    }
+  }
+
   "maps" in {
     val expected = DocumentedRecord(
       Nil,
       Some(DocumentedJsonSchemas.intJsonSchema.docs),
-      None,
+      None
     )
     assert(DocumentedJsonSchemas.intDictionary.docs == expected)
   }
@@ -156,7 +219,7 @@ class JsonSchemasTest extends AnyFreeSpec {
       minimum = Some(0.0),
       maximum = Some(10.0),
       exclusiveMaximum = Some(true),
-      multipleOf = Some(2.0),
+      multipleOf = Some(2.0)
     )
 
     assert(DocumentedJsonSchemas.constraintNumericSchema.docs == expected)
