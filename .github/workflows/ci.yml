@@ -45,7 +45,7 @@ jobs:
     - uses: olafurpg/setup-scala@v10
       with:
         java-version: adopt@1.11
-    - run: sbt "++ 3.0.0 ;json-schemaJVM/test;json-schemaJS/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;algebraJVM/test;algebraJS/test;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
+    - run: sbt "++ 3.0.0 ;json-schemaJVM/test;json-schemaJS/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test;openapiJVM/compile;http4s-server/compile;http4s-client/compile;play-server/compile;play-client/compile;akka-http-server/compile;akka-http-client/compile"
 
   versionPolicy:
     name: Check versioning policy and code style
