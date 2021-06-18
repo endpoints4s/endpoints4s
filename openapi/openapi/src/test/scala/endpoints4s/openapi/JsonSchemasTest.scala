@@ -92,7 +92,7 @@ class JsonSchemasTest extends AnyFreeSpec {
         ujson.Str("Red") :: ujson.Str("Blue") :: Nil,
         Some("Color")
       )
-    assert(DocumentedJsonSchemas.Enum.colorSchema.docs == expectedSchema)
+    assert(DocumentedJsonSchemas.ColorEnum.colorSchema.docs == expectedSchema)
   }
 
   "int value enum" in {

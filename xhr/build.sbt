@@ -7,7 +7,7 @@ val `xhr-client` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "xhr-client",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.None,
@@ -28,13 +28,13 @@ val `xhr-client-faithful` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "xhr-client-faithful",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
-      libraryDependencies += "org.julienrf" %%% "faithful" % "2.0.0"
+      libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0").cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`xhr-client`)
 
@@ -45,7 +45,7 @@ val `xhr-client-circe` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "xhr-client-circe",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.None,
