@@ -8,14 +8,14 @@ val `sttp-client` =
     .in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "sttp-client",
       version := "3.0.0+n",
       versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
       libraryDependencies ++= Seq(
-        "com.softwaremill.sttp.client" %% "core" % sttpVersion,
-        "com.softwaremill.sttp.client" %% "akka-http-backend" % sttpVersion % Test,
-        "com.typesafe.akka" %% "akka-stream" % "2.6.14" % Test
+        ("com.softwaremill.sttp.client" %% "core" % sttpVersion).cross(CrossVersion.for3Use2_13),
+        ("com.softwaremill.sttp.client" %% "akka-http-backend" % sttpVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % "2.6.14" % Test).cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(LocalProject("openapiJVM"))

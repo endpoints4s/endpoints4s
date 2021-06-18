@@ -79,8 +79,8 @@ class ServerInterpreterTest
     import java.io._
 
     val directive =
-      url.directive.map(a => DecodedUrl.Matched(a)) | [Tuple1[DecodedUrl[A]]] Directives
-        .provide(DecodedUrl.NotMatched)
+      url.directive.map(a => DecodedUrl.Matched(a))
+        .|[Tuple1[DecodedUrl[A]]](Directives.provide(DecodedUrl.NotMatched))
     val route = directive { decodedA => req =>
       val baos = new ByteArrayOutputStream
       val oos = new ObjectOutputStream(baos)

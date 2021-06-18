@@ -26,8 +26,8 @@ class AkkaHttpClientEndpointsJsonSchemaTest
     extends JsonTestSuite[TestJsonSchemaClient]
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 
-  implicit val system = ActorSystem()
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val ec: ExecutionContext = system.dispatcher
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(

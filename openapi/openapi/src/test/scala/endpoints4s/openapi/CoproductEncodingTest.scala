@@ -11,7 +11,7 @@ class CoproductEncodingTest extends AnyFreeSpec {
       with algebra.JsonEntitiesFromSchemas
       with algebra.JsonSchemasFixtures {
 
-    implicit val fooSchema = Foo.schema.named("Foo")
+    implicit val fooSchema: JsonSchema[Foo] = Foo.schema.named("Foo")
 
     val foo = endpoint(get(path / "foo"), ok(jsonResponse[Foo]))
   }

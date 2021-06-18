@@ -54,7 +54,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
 
     implicit val schemaAuthor: JsonSchema[Author] = (
       field[String]("name", documentation = Some("Author name"))
-        .xmap[Author](Author)(_.name)
+        .xmap[Author](Author(_))(_.name)
     )
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
@@ -78,7 +78,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       authenticatedEndpoint(
         Post,
         path / "books",
-        ok(jsonResponse(Enum.colorSchema)),
+        ok(jsonResponse(ColorEnum.colorSchema)),
         jsonRequest[Book],
         requestDocs = Some("Books list"),
         endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))

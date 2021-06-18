@@ -130,7 +130,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
   ): Record[Types] =
     inline erasedValue[(Types, Labels)] match
       case (EmptyTuple, EmptyTuple) =>
-        emptyTupleRecord.asInstanceOf[Record[Types]]
+        emptyRecord.xmap(_ => EmptyTuple)(_ => ()).asInstanceOf[Record[Types]]
       case _: (head *: tail, labelHead *: labelsTail) =>
         val (maybeDoc, docsTail) =
           /*inline*/ docAnnotations match
@@ -162,9 +162,6 @@ trait JsonSchemas extends algebra.JsonSchemas:
         recordHead.zip(recordTail)
           .xmap[head *: tail]((h, t) => h *: t) { case h *: t => (h, t) } // TODO Define as a new operation in the algebra
           .asInstanceOf[Record[Types]] // FIXME Remove asIntanceOf
-
-  private val emptyTupleRecord: Record[EmptyTuple] =
-    emptyRecord.xmap(_ => EmptyTuple)(_ => ())
 
   /** Summon the title of a schema for the type `A`. If the type `A`
     * has a [[title @title]] annotation, it is used as a title, otherwise
