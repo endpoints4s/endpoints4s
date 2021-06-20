@@ -225,6 +225,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
+  @deprecated("Use `lazySchema` instead", "1.4.0")
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
 
   /** Captures a lazy reference to a JSON schema currently being defined.
@@ -236,6 +237,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
+  @deprecated("Use `lazySchema` instead", "1.4.0")
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A]
 
   /** A lazy JSON schema that can references schemas currently being defined:
@@ -254,7 +256,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param schema The record JSON schema whose evaluation should be delayed
     * @group operations
     */
-  def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A]
+  def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
+    sys.error(s"Unsupported algebra version: 1.4.0. Please update your interpreter.")
 
   /** The JSON schema of a record with no fields
     *

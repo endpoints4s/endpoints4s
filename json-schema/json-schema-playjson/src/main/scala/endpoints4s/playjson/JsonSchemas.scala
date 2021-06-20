@@ -112,7 +112,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     )
   }
 
-  def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] = {
+  override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] = {
     // The schema won’t be evaluated until its `reads` or `writes` is effectively used
     lazy val evaluatedSchema = schema
     new JsonSchema[A] {

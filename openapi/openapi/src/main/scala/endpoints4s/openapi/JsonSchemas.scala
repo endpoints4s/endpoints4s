@@ -253,7 +253,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       LazySchema(namedTagged(schema, name).docs)
     )
 
-  def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
+  override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
     new JsonSchema(
       ujsonSchemas.lazySchema(name)(schema.ujsonSchema),
       RecursiveSchema(name, schema.docs)

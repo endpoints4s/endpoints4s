@@ -123,14 +123,23 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(JsonSchemasCodec.expressionSchema.encoder(expr) == json)
   }
   "mutually recursive types" in {
-    val json = Json.obj("b" -> Json.obj("a" -> Json.obj()))
-    val rec = JsonSchemasCodec.MutualRecursiveA(
+    val jsonA = Json.obj("b" -> Json.obj("a" -> Json.obj()))
+    val recA = JsonSchemasCodec.MutualRecursiveA(
       Some(JsonSchemasCodec.MutualRecursiveB(Some(JsonSchemasCodec.MutualRecursiveA(None))))
     )
     assert(
-      JsonSchemasCodec.mutualRecursiveA.decoder.decodeJson(json).exists(_ == rec)
+      JsonSchemasCodec.mutualRecursiveA.decoder.decodeJson(jsonA).exists(_ == recA)
     )
-    assert(JsonSchemasCodec.mutualRecursiveA.encoder(rec) == json)
+    assert(JsonSchemasCodec.mutualRecursiveA.encoder(recA) == jsonA)
+
+    val jsonB = Json.obj("a" -> Json.obj("b" -> Json.obj()))
+    val recB = JsonSchemasCodec.MutualRecursiveB(
+      Some(JsonSchemasCodec.MutualRecursiveA(Some(JsonSchemasCodec.MutualRecursiveB(None))))
+    )
+    assert(
+      JsonSchemasCodec.mutualRecursiveB.decoder.decodeJson(jsonB).exists(_ == recB)
+    )
+    assert(JsonSchemasCodec.mutualRecursiveB.encoder(recB) == jsonB)
   }
 
   "tuple" in {
