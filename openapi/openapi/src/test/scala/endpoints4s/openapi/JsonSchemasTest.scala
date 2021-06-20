@@ -133,7 +133,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "recursive expression" in {
     DocumentedJsonSchemas.expressionSchema.docs match {
-      case r: RecursiveSchema =>
+      case r: LazySchema =>
         assert(r.name == "Expression")
         assert(
           r.value == OneOf(
@@ -175,7 +175,7 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
   "mutually recursive" in {
     DocumentedJsonSchemas.mutualRecursiveA.docs match {
-      case r: RecursiveSchema =>
+      case r: LazySchema =>
         assert(r.name == "MutualRecursiveA")
         assert(
           r.value == DocumentedRecord(

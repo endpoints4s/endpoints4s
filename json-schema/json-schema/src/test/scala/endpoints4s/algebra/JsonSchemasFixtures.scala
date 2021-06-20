@@ -95,7 +95,7 @@ trait JsonSchemasFixtures extends JsonSchemas {
 
   case class Recursive(next: Option[Recursive])
   val recursiveSchema: Record[Recursive] = (
-    optField("next")(lazyRecord(recursiveSchema, "Rec"))
+    optField("next")(lazySchema("Rec")(recursiveSchema))
   ).xmap(Recursive(_))(_.next)
 
   sealed trait Expression

@@ -116,29 +116,14 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed abstract class LazySchema extends DocumentedJsonSchema {
+      val name: String
       def value: DocumentedJsonSchema
     }
 
     object LazySchema {
 
-      def apply(s: => DocumentedJsonSchema): LazySchema =
+      def apply(n: String, s: => DocumentedJsonSchema): LazySchema =
         new LazySchema {
-          lazy val value: DocumentedJsonSchema = s
-          def description: Option[String] = value.description
-          def example: Option[ujson.Value] = value.example
-          def title: Option[String] = value.title
-        }
-    }
-
-    sealed abstract class RecursiveSchema extends DocumentedJsonSchema {
-      val name: String
-      def value: DocumentedJsonSchema
-    }
-
-    object RecursiveSchema {
-
-      def apply(n: String, s: => DocumentedJsonSchema): RecursiveSchema =
-        new RecursiveSchema {
           val name: String = n
           lazy val value: DocumentedJsonSchema = s
           def description: Option[String] = value.description
@@ -241,23 +226,15 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
     new Enum(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
 
-  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
-    new JsonSchema(
-      ujsonSchemas.lazyRecord(schema.ujsonSchema, name),
-      LazySchema(namedRecord(schema, name).docs)
-    )
-
-  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
-    new JsonSchema(
-      ujsonSchemas.lazyTagged(schema.ujsonSchema, name),
-      LazySchema(namedTagged(schema, name).docs)
-    )
-
   override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
     new JsonSchema(
       ujsonSchemas.lazySchema(name)(schema.ujsonSchema),
-      RecursiveSchema(name, schema.docs)
+      LazySchema(name, schema.docs)
     )
+  def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
+    lazySchema(name)(schema)
+  def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
+    lazySchema(name)(schema)
 
   def emptyRecord: Record[Unit] =
     new Record(ujsonSchemas.emptyRecord, DocumentedRecord(Nil))
@@ -356,8 +333,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case s: Primitive        => s.copy(example = Some(exampleJson))
         case s: Array            => s.copy(example = Some(exampleJson))
         case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
-        case s: LazySchema       => LazySchema(updatedDocs(s.value))
-        case s: RecursiveSchema  => RecursiveSchema(s.name, updatedDocs(s.value))
+        case s: LazySchema       => LazySchema(s.name, updatedDocs(s.value))
         case s: OneOf            => s.copy(example = Some(exampleJson))
       }
     new JsonSchema(
@@ -404,8 +380,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case s: Primitive        => s.copy(title = Some(title))
         case s: Array            => s.copy(title = Some(title))
         case s: DocumentedEnum   => s.copy(title = Some(title))
-        case s: LazySchema       => LazySchema(updatedDocs(s.value))
-        case s: RecursiveSchema  => RecursiveSchema(s.name, updatedDocs(s.value))
+        case s: LazySchema       => LazySchema(s.name, updatedDocs(s.value))
         case s: OneOf            => s.copy(title = Some(title))
       }
     new JsonSchema(
@@ -452,8 +427,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case s: Primitive        => s.copy(description = Some(description))
         case s: Array            => s.copy(description = Some(description))
         case s: DocumentedEnum   => s.copy(description = Some(description))
-        case s: LazySchema       => LazySchema(updatedDocs(s.value))
-        case s: RecursiveSchema  => RecursiveSchema(s.name, updatedDocs(s.value))
+        case s: LazySchema       => LazySchema(s.name, updatedDocs(s.value))
         case s: OneOf            => s.copy(description = Some(description))
       }
     new JsonSchema(
@@ -889,13 +863,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           title
         )
       case lzy: LazySchema =>
-        toSchema(lzy.value, coprodBase, referencedSchemas)
-      case rec: RecursiveSchema =>
-        if (referencedSchemas(rec.name)) Schema.Reference(rec.name, None, None)
+        if (referencedSchemas(lzy.name)) Schema.Reference(lzy.name, None, None)
         else
           Schema.Reference(
-            rec.name,
-            Some(toSchema(rec.value, coprodBase, referencedSchemas + rec.name)),
+            lzy.name,
+            Some(toSchema(lzy.value, coprodBase, referencedSchemas + lzy.name)),
             None
           )
       case OneOf(alternatives, description, example, title) =>
