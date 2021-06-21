@@ -1,7 +1,7 @@
 package endpoints4s
 package sttp.client
 
-import _root_.sttp.client.{asStringAlways, Request => SRequest}
+import _root_.sttp.client3.{asStringAlways, Request => SRequest}
 import endpoints4s.algebra.MuxRequest
 
 /** @group interpreters
@@ -18,7 +18,7 @@ trait MuxEndpoints[R[_]] extends algebra.Endpoints {
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): R[req.Response] = {
-      val sttpRequest: SRequest[String, Nothing] =
+      val sttpRequest: SRequest[String, Any] =
         request(encoder.encode(req)).response(asStringAlways)
       val result = self.backend.send(sttpRequest)
       self.backend.responseMonad.flatMap(result) { res =>

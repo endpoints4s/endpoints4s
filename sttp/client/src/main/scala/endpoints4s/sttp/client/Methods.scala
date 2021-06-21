@@ -1,7 +1,7 @@
 package endpoints4s.sttp.client
 
 import endpoints4s.algebra
-import sttp.client.{Request => SRequest, Identity}
+import sttp.client3.{Request => SRequest, Identity}
 import sttp.model.{Method => SMethod}
 
 /** [[algebra.Methods]] interpreter that builds URLs.
@@ -10,7 +10,7 @@ import sttp.model.{Method => SMethod}
   */
 trait Methods extends algebra.Methods {
 
-  type Method = SRequest[_, Nothing] => SRequest[_, Nothing]
+  type Method = SRequest[_, Any] => SRequest[_, Any]
 
   private def setMethod(method: SMethod): Method =
     _.copy(method = method: Identity[SMethod])
