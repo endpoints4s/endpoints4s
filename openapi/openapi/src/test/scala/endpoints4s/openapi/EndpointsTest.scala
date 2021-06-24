@@ -385,10 +385,6 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
       )
     }
   }
-
-  "Foo" in {
-    println(OpenApi.stringEncoder.encode(MyFixture.api))
-  }
 }
 
 trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
@@ -501,52 +497,4 @@ object Fixtures
       versionedResource
     )
 
-}
-
-trait MyFixture extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
-  sealed trait Expression
-  object Expression {
-    case class Literal(value: Int) extends Expression
-    case class Add(x: Expression, y: Expression) extends Expression
-  }
-
-  implicit val expressionSchema: JsonSchema[Expression] =
-    lazySchema[Expression]("Expression") {
-      intJsonSchema
-        .orFallbackTo(field[Expression]("x") zip field[Expression]("y"))
-        .xmap[Expression] {
-          case Left(value)   => Expression.Literal(value)
-          case Right((x, y)) => Expression.Add(x, y)
-        } {
-          case Expression.Literal(value) => Left(value)
-          case Expression.Add(x, y)      => Right((x, y))
-        }
-    }
-
-  val eval = endpoint(
-    post(path / "eval", jsonRequest[Expression]),
-    ok(jsonResponse[Int])
-  )
-
-  case class A(b: Option[B])
-  case class B(a: Option[A])
-  implicit val aSchema: JsonSchema[A] = lazySchema("A") {
-    optField[B]("b").xmap(A.apply)(_.b)
-  }
-  implicit val bSchema: JsonSchema[B] = lazySchema("B") {
-    optField[A]("a").xmap(B.apply)(_.a)
-  }
-
-  val a = endpoint(
-    post(path / "a", jsonRequest[A]),
-    ok(jsonResponse[Int])
-  )
-  val b = endpoint(
-    post(path / "b", jsonRequest[B]),
-    ok(jsonResponse[Int])
-  )
-}
-
-object MyFixture extends MyFixture with Endpoints with JsonEntitiesFromSchemas {
-  val api = openApi(Info("My API", "1.0.0"))(eval, a, b)
 }
