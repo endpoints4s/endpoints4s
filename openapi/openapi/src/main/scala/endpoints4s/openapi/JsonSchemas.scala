@@ -116,15 +116,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
     // A documented JSON schema that is unevaluated unless its `value` is accessed
     sealed abstract class LazySchema extends DocumentedJsonSchema {
-      def name: String =
-        sys.error(s"Unsupported algebra version: 2.1.0. Please update your interpreter.")
+      def name: String
       def value: DocumentedJsonSchema
     }
 
     object LazySchema {
-
-      def apply(s: => DocumentedJsonSchema): LazySchema =
-        sys.error(s"Unsupported algebra version: 2.1.0. Please update your interpreter.")
 
       def apply(n: String, s: => DocumentedJsonSchema): LazySchema =
         new LazySchema {
