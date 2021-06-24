@@ -94,9 +94,13 @@ trait JsonSchemasFixtures extends JsonSchemas {
   }
 
   case class Recursive(next: Option[Recursive])
-  val recursiveSchema: Record[Recursive] = (
-    optField("next")(lazySchema("Rec")(recursiveSchema))
-  ).xmap(Recursive(_))(_.next)
+  val recursiveSchema: Record[Recursive] =
+    lazyRecord("Rec")(
+      optField("next")(recursiveSchema)
+    ).xmap(Recursive(_))(_.next)
+      .withDescription("Rec description")
+      .withTitle("Rec title")
+      .withExample(Recursive(None))
 
   sealed trait Expression
   object Expression {
@@ -115,6 +119,9 @@ trait JsonSchemasFixtures extends JsonSchemas {
           case Expression.Add(x, y)      => Right((x, y))
         }
     }
+      .withDescription("Expression description")
+      .withTitle("Expression title")
+      .withExample(Expression.Literal(1))
 
   case class MutualRecursiveA(b: Option[MutualRecursiveB])
   case class MutualRecursiveB(a: Option[MutualRecursiveA])
@@ -124,6 +131,33 @@ trait JsonSchemasFixtures extends JsonSchemas {
   val mutualRecursiveB: JsonSchema[MutualRecursiveB] = lazySchema("MutualRecursiveB")(
     optField("a")(mutualRecursiveA)
   ).xmap(MutualRecursiveB(_))(_.a)
+
+  sealed trait TaggedRecursive extends Product with Serializable
+  case class TaggedRecursiveA(a: String, next: Option[TaggedRecursive]) extends TaggedRecursive
+  case class TaggedRecursiveB(b: Int, next: Option[TaggedRecursive]) extends TaggedRecursive
+  val taggedRecursiveSchema: Tagged[TaggedRecursive] =
+    lazyTagged("TaggedRec") {
+      val nextField = optField("next")(taggedRecursiveSchema)
+      val aSchema = (field[String]("a") zip nextField)
+        .xmap { case (a, next) =>
+          TaggedRecursiveA(a, next)
+        } { case TaggedRecursiveA(a, next) =>
+          (a, next)
+        }
+      val bSchema = (field[Int]("b") zip nextField)
+        .xmap { case (b, next) =>
+          TaggedRecursiveB(b, next)
+        } { case TaggedRecursiveB(b, next) =>
+          (b, next)
+        }
+
+      (aSchema.tagged("A") orElseMerge bSchema.tagged("B"))
+        // Put some doc inside lazyTagged, and some more outside to make sure it works both way
+        .withDiscriminator("kind")
+        .withDescription("TaggedRec description")
+    }
+      .withTitle("TaggedRec title")
+      .withExample(TaggedRecursiveA("foo", None))
 
   val intDictionary: JsonSchema[Map[String, Int]] = mapJsonSchema[Int]
 

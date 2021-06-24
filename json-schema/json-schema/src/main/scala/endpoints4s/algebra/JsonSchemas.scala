@@ -225,7 +225,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
-  @deprecated("Use `lazySchema` instead", "1.4.0")
+  @deprecated("Use `lazyRecord(name)(...)` instead", "1.4.0")
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A]
 
   /** Captures a lazy reference to a JSON schema currently being defined.
@@ -237,8 +237,40 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     * @param name A unique name identifying the schema
     * @group operations
     */
-  @deprecated("Use `lazySchema` instead", "1.4.0")
+  @deprecated("Use `lazyTagged(name)(...)` instead", "1.4.0")
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A]
+
+  /** Captures a lazy reference to a JSON schema currently being defined:
+    *
+    * {{{
+    *   case class Recursive(next: Option[Recursive])
+    *   val recursiveSchema: Record[Recursive] =
+    *     lazyRecord("Rec") {
+    *       optField("next")(recursiveSchema)
+    *     }.xmap(Recursive(_))(_.next)
+    * }}}
+    *
+    * Interpreters should return a JsonSchema value that does not evaluate
+    * the given `schema` unless it is effectively used.
+    *
+    * @param name A unique name identifying the schema
+    * @param schema The record JSON schema whose evaluation should be delayed
+    * @group operations
+    */
+  def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] =
+    sys.error(s"Unsupported algebra version: 1.4.0. Please update your interpreter.")
+
+  /** Captures a lazy reference to a JSON schema currently being defined.
+    *
+    * Interpreters should return a JsonSchema value that does not evaluate
+    * the given `schema` unless it is effectively used.
+    *
+    * @param name A unique name identifying the schema
+    * @param schema The tagged JSON schema whose evaluation should be delayed
+    * @group operations
+    */
+  def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] =
+    sys.error(s"Unsupported algebra version: 1.4.0. Please update your interpreter.")
 
   /** A lazy JSON schema that can references schemas currently being defined:
     *

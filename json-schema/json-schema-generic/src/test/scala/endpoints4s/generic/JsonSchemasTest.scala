@@ -105,6 +105,10 @@ class JsonSchemasTest extends AnyFreeSpec {
       s"=>'$name'!($schema)"
     override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
       s"=>'$name'!($schema)"
+    override def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] =
+      s"=>'$name'!($schema)"
+    override def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] =
+      s"=>'$name'!($schema)"
 
     def emptyRecord: String =
       "%"

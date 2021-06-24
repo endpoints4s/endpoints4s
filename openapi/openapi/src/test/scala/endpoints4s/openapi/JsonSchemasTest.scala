@@ -114,20 +114,23 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "recursive" in {
+    def badSchema =
+      fail(s"Unexpected type for 'recursiveSchema': ${DocumentedJsonSchemas.recursiveSchema.docs}")
+
     DocumentedJsonSchemas.recursiveSchema.docs match {
-      case DocumentedRecord(
-            List(Field("next", tpe, true, None)),
-            None,
-            None,
-            None,
-            None,
-            None
-          ) =>
-        assert(tpe.isInstanceOf[LazySchema])
-      case _ =>
-        fail(
-          s"Unexpected type for 'recSchema': ${DocumentedJsonSchemas.recursiveSchema.docs}"
-        )
+      case r: DocumentedRecord.Lazy =>
+        assert(r.name == Some("Rec"))
+        assert(r.additionalProperties == None)
+        assert(r.description == Some("Rec description"))
+        assert(r.example == Some(ujson.Obj()))
+        assert(r.title == Some("Rec title"))
+        r.fields match {
+          case List(Field("next", tpe, true, None)) =>
+            assert(tpe eq r)
+          case _ => badSchema
+
+        }
+      case _ => badSchema
     }
   }
 
@@ -162,9 +165,9 @@ class JsonSchemasTest extends AnyFreeSpec {
                 None
               )
             ),
-            None,
-            None,
-            None
+            Some("Expression description"),
+            Some(ujson.Num(1)),
+            Some("Expression title")
           )
         )
       case _ =>
@@ -191,6 +194,54 @@ class JsonSchemasTest extends AnyFreeSpec {
         fail(
           s"Unexpected type for 'mutualRecursiveA': ${DocumentedJsonSchemas.mutualRecursiveA.docs}"
         )
+    }
+  }
+  "tagged recursive" in {
+    def badSchema =
+      fail(
+        s"Unexpected type for 'taggedRecursiveSchema': ${DocumentedJsonSchemas.taggedRecursiveSchema.docs}"
+      )
+
+    DocumentedJsonSchemas.taggedRecursiveSchema.docs match {
+      case r: DocumentedCoProd.Lazy =>
+        assert(r.name == Some("TaggedRec"))
+        assert(r.discriminatorName == "kind")
+        assert(r.description == Some("TaggedRec description"))
+        assert(r.example == Some(ujson.Obj("a" -> ujson.Str("foo"), "kind" -> ujson.Str("A"))))
+        assert(r.title == Some("TaggedRec title"))
+        r.alternatives match {
+          case ("A", a) :: ("B", b) :: Nil =>
+            val expectedNext = Field(
+              "next",
+              r,
+              isOptional = true,
+              documentation = None
+            )
+            val expectedA = DocumentedRecord(
+              Field(
+                "a",
+                DocumentedJsonSchemas.defaultStringJsonSchema.docs,
+                isOptional = false,
+                documentation = None
+              )
+                :: expectedNext
+                :: Nil
+            )
+            val expectedB = DocumentedRecord(
+              Field(
+                "b",
+                DocumentedJsonSchemas.intJsonSchema.docs,
+                isOptional = false,
+                documentation = None
+              )
+                :: expectedNext
+                :: Nil
+            )
+            assert(a == expectedA)
+            assert(b == expectedB)
+          case _ => badSchema
+        }
+      case _ => badSchema
     }
   }
 

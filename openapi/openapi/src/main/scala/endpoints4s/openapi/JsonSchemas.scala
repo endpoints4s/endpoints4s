@@ -58,14 +58,76 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   object DocumentedJsonSchema {
 
-    case class DocumentedRecord(
-        fields: List[Field],
-        additionalProperties: Option[DocumentedJsonSchema] = None,
-        name: Option[String] = None,
-        description: Option[String] = None,
-        example: Option[ujson.Value] = None,
-        title: Option[String] = None
-    ) extends DocumentedJsonSchema
+    sealed abstract class DocumentedRecord extends DocumentedJsonSchema {
+      def fields: List[Field]
+      def additionalProperties: Option[DocumentedJsonSchema]
+      def name: Option[String]
+
+      def withName(name: Option[String]): DocumentedRecord
+      def withExample(example: => Option[ujson.Value]): DocumentedRecord
+      def withTitle(title: Option[String]): DocumentedRecord
+      def withDescription(description: Option[String]): DocumentedRecord
+    }
+    object DocumentedRecord {
+
+      case class Immediate(
+          fields: List[Field],
+          additionalProperties: Option[DocumentedJsonSchema] = None,
+          name: Option[String] = None,
+          description: Option[String] = None,
+          example: Option[ujson.Value] = None,
+          title: Option[String] = None
+      ) extends DocumentedRecord {
+        def withName(name: Option[String]): DocumentedRecord =
+          copy(name = name)
+        def withExample(example: => Option[ujson.Value]): DocumentedRecord =
+          copy(example = example)
+        def withTitle(title: Option[String]): DocumentedRecord =
+          copy(title = title)
+        def withDescription(description: Option[String]): DocumentedRecord =
+          copy(description = description)
+      }
+
+      class Lazy(name: String, docs: => DocumentedRecord) extends DocumentedRecord {
+        lazy val evaluatedDocs = docs
+        def fields: List[Field] = evaluatedDocs.fields
+        def additionalProperties: Option[DocumentedJsonSchema] =
+          evaluatedDocs.additionalProperties
+        def name: Option[String] = Some(name)
+        def description: Option[String] = evaluatedDocs.description
+        def example: Option[ujson.Value] = evaluatedDocs.example
+        def title: Option[String] = evaluatedDocs.title
+
+        def withName(_name: Option[String]): DocumentedRecord =
+          new Lazy(name, this) {
+            override def name: Option[String] = _name
+          }
+        def withExample(_example: => Option[ujson.Value]): DocumentedRecord =
+          new Lazy(name, this) {
+            override def example: Option[ujson.Value] = _example
+          }
+        def withTitle(_title: Option[String]): DocumentedRecord =
+          new Lazy(name, this) {
+            override def title: Option[String] = _title
+          }
+        def withDescription(_description: Option[String]): DocumentedRecord =
+          new Lazy(name, this) {
+            override def description: Option[String] = _description
+          }
+      }
+
+      def apply(
+          fields: List[Field],
+          additionalProperties: Option[DocumentedJsonSchema] = None,
+          name: Option[String] = None,
+          description: Option[String] = None,
+          example: Option[ujson.Value] = None,
+          title: Option[String] = None
+      ): DocumentedRecord = {
+        Immediate(fields, additionalProperties, name, description, example, title)
+      }
+
+    }
 
     case class Field(
         name: String,
@@ -74,14 +136,80 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         documentation: Option[String]
     )
 
-    case class DocumentedCoProd(
-        alternatives: List[(String, DocumentedRecord)],
-        name: Option[String] = None,
-        discriminatorName: String = defaultDiscriminatorName,
-        description: Option[String] = None,
-        example: Option[ujson.Value] = None,
-        title: Option[String] = None
-    ) extends DocumentedJsonSchema
+    sealed abstract class DocumentedCoProd extends DocumentedJsonSchema {
+      def alternatives: List[(String, DocumentedRecord)]
+      def name: Option[String]
+      def discriminatorName: String
+
+      def withName(name: Option[String]): DocumentedCoProd
+      def withExample(example: => Option[ujson.Value]): DocumentedCoProd
+      def withTitle(title: Option[String]): DocumentedCoProd
+      def withDescription(description: Option[String]): DocumentedCoProd
+      def withDiscriminatorName(discriminatorName: String): DocumentedCoProd
+    }
+
+    object DocumentedCoProd {
+      case class Immediate(
+          alternatives: List[(String, DocumentedRecord)],
+          name: Option[String] = None,
+          discriminatorName: String = defaultDiscriminatorName,
+          description: Option[String] = None,
+          example: Option[ujson.Value] = None,
+          title: Option[String] = None
+      ) extends DocumentedCoProd {
+        def withName(name: Option[String]): DocumentedCoProd =
+          copy(name = name)
+        def withExample(example: => Option[ujson.Value]): DocumentedCoProd =
+          copy(example = example)
+        def withTitle(title: Option[String]): DocumentedCoProd =
+          copy(title = title)
+        def withDescription(description: Option[String]): DocumentedCoProd =
+          copy(description = description)
+        def withDiscriminatorName(discriminatorName: String): DocumentedCoProd =
+          copy(discriminatorName = discriminatorName)
+      }
+
+      class Lazy(name: String, docs: => DocumentedCoProd) extends DocumentedCoProd {
+        lazy val evaluatedDocs = docs
+        def alternatives: List[(String, DocumentedRecord)] = evaluatedDocs.alternatives
+        def name: Option[String] = Some(name)
+        def discriminatorName: String = evaluatedDocs.discriminatorName
+        def description: Option[String] = evaluatedDocs.description
+        def example: Option[ujson.Value] = evaluatedDocs.example
+        def title: Option[String] = evaluatedDocs.title
+
+        def withName(_name: Option[String]): DocumentedCoProd =
+          new Lazy(name, this) {
+            override def name: Option[String] = _name
+          }
+        def withExample(_example: => Option[ujson.Value]): DocumentedCoProd =
+          new Lazy(name, this) {
+            override def example: Option[ujson.Value] = _example
+          }
+        def withTitle(_title: Option[String]): DocumentedCoProd =
+          new Lazy(name, this) {
+            override def title: Option[String] = _title
+          }
+        def withDescription(_description: Option[String]): DocumentedCoProd =
+          new Lazy(name, this) {
+            override def description: Option[String] = _description
+          }
+        def withDiscriminatorName(_discriminatorName: String): DocumentedCoProd =
+          new Lazy(name, null) {
+            override def discriminatorName: String = _discriminatorName
+          }
+      }
+
+      def apply(
+          alternatives: List[(String, DocumentedRecord)],
+          name: Option[String] = None,
+          discriminatorName: String = defaultDiscriminatorName,
+          description: Option[String] = None,
+          example: Option[ujson.Value] = None,
+          title: Option[String] = None
+      ): DocumentedCoProd =
+        Immediate(alternatives, name, discriminatorName, description, example, title)
+    }
 
     case class Primitive(
         name: String,
@@ -218,10 +346,10 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] =
-    new Record(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+    new Record(schema.ujsonSchema, schema.docs.withName(Some(name)))
 
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
-    new Tagged(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
+    new Tagged(schema.ujsonSchema, schema.docs.withName(Some(name)))
 
   def namedEnum[A](schema: Enum[A], name: String): Enum[A] =
     new Enum(schema.ujsonSchema, schema.docs.copy(name = Some(name)))
@@ -235,6 +363,18 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     lazySchema(name)(schema)
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
     lazySchema(name)(schema)
+
+  override def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] =
+    new Record[A](
+      ujsonSchemas.lazyRecord(name)(schema.ujsonSchema),
+      new DocumentedRecord.Lazy(name, schema.docs)
+    )
+
+  override def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] =
+    new Tagged[A](
+      ujsonSchemas.lazyTagged(name)(schema.ujsonSchema),
+      new DocumentedCoProd.Lazy(name, schema.docs)
+    )
 
   def emptyRecord: Record[Unit] =
     new Record(ujsonSchemas.emptyRecord, DocumentedRecord(Nil))
@@ -268,7 +408,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     new Tagged(
       ujsonSchemas
         .withDiscriminatorTagged(tagged.ujsonSchema, discriminatorName),
-      tagged.docs.copy(discriminatorName = discriminatorName)
+      tagged.docs.withDiscriminatorName(discriminatorName)
     )
 
   def choiceTagged[A, B](
@@ -291,24 +431,20 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   def withExampleRecord[A](
       record: Record[A],
       example: A
-  ): Record[A] = {
-    val exampleJson = record.ujsonSchema.codec.encode(example)
+  ): Record[A] =
     new Record[A](
       record.ujsonSchema,
-      record.docs.copy(example = Some(exampleJson))
+      record.docs.withExample(Some(record.ujsonSchema.codec.encode(example)))
     )
-  }
 
   def withExampleTagged[A](
       tagged: Tagged[A],
       example: A
-  ): Tagged[A] = {
-    val exampleJson = tagged.ujsonSchema.codec.encode(example)
+  ): Tagged[A] =
     new Tagged[A](
       tagged.ujsonSchema,
-      tagged.docs.copy(example = Some(exampleJson))
+      tagged.docs.withExample(Some(tagged.ujsonSchema.codec.encode(example)))
     )
-  }
 
   def withExampleEnum[A](
       enumeration: Enum[A],
@@ -325,11 +461,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       schema: JsonSchema[A],
       example: A
   ): JsonSchema[A] = {
-    val exampleJson = schema.ujsonSchema.codec.encode(example)
+    lazy val exampleJson = schema.ujsonSchema.codec.encode(example)
     def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
       djs match {
-        case s: DocumentedRecord => s.copy(example = Some(exampleJson))
-        case s: DocumentedCoProd => s.copy(example = Some(exampleJson))
+        case s: DocumentedRecord => s.withExample(Some(exampleJson))
+        case s: DocumentedCoProd => s.withExample(Some(exampleJson))
         case s: Primitive        => s.copy(example = Some(exampleJson))
         case s: Array            => s.copy(example = Some(exampleJson))
         case s: DocumentedEnum   => s.copy(example = Some(exampleJson))
@@ -348,7 +484,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[A] =
     new Record[A](
       record.ujsonSchema,
-      record.docs.copy(title = Some(title))
+      record.docs.withTitle(Some(title))
     )
 
   def withTitleTagged[A](
@@ -357,7 +493,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Tagged[A] =
     new Tagged[A](
       tagged.ujsonSchema,
-      tagged.docs.copy(title = Some(title))
+      tagged.docs.withTitle(Some(title))
     )
 
   def withTitleEnum[A](
@@ -375,8 +511,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): JsonSchema[A] = {
     def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
       djs match {
-        case s: DocumentedRecord => s.copy(title = Some(title))
-        case s: DocumentedCoProd => s.copy(title = Some(title))
+        case s: DocumentedRecord => s.withTitle(Some(title))
+        case s: DocumentedCoProd => s.withTitle(Some(title))
         case s: Primitive        => s.copy(title = Some(title))
         case s: Array            => s.copy(title = Some(title))
         case s: DocumentedEnum   => s.copy(title = Some(title))
@@ -395,7 +531,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[A] =
     new Record[A](
       record.ujsonSchema,
-      record.docs.copy(description = Some(description))
+      record.docs.withDescription(Some(description))
     )
 
   def withDescriptionTagged[A](
@@ -404,7 +540,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Tagged[A] =
     new Tagged[A](
       tagged.ujsonSchema,
-      tagged.docs.copy(description = Some(description))
+      tagged.docs.withDescription(Some(description))
     )
 
   def withDescriptionEnum[A](
@@ -422,8 +558,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): JsonSchema[A] = {
     def updatedDocs(djs: DocumentedJsonSchema): DocumentedJsonSchema =
       djs match {
-        case s: DocumentedRecord => s.copy(description = Some(description))
-        case s: DocumentedCoProd => s.copy(description = Some(description))
+        case s: DocumentedRecord => s.withDescription(Some(description))
+        case s: DocumentedCoProd => s.withDescription(Some(description))
         case s: Primitive        => s.copy(description = Some(description))
         case s: Array            => s.copy(description = Some(description))
         case s: DocumentedEnum   => s.copy(description = Some(description))
@@ -767,28 +903,34 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       referencedSchemas: Set[String]
   ): Schema = {
     documentedCodec match {
-      case record @ DocumentedRecord(_, _, Some(name), _, _, _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None, None)
-        else
-          Schema.Reference(
-            name,
-            Some(
-              expandRecordSchema(record, coprodBase, referencedSchemas + name)
-            ),
-            None
-          )
-      case record @ DocumentedRecord(_, _, None, _, _, _) =>
-        expandRecordSchema(record, coprodBase, referencedSchemas)
-      case coprod @ DocumentedCoProd(_, Some(name), _, _, _, _) =>
-        if (referencedSchemas(name)) Schema.Reference(name, None, None)
-        else
-          Schema.Reference(
-            name,
-            Some(expandCoproductSchema(coprod, referencedSchemas + name)),
-            None
-          )
-      case coprod @ DocumentedCoProd(_, None, _, _, _, _) =>
-        expandCoproductSchema(coprod, referencedSchemas)
+      case record: DocumentedRecord =>
+        record.name match {
+          case Some(name) =>
+            if (referencedSchemas(name)) Schema.Reference(name, None, None)
+            else
+              Schema.Reference(
+                name,
+                Some(
+                  expandRecordSchema(record, coprodBase, referencedSchemas + name)
+                ),
+                None
+              )
+          case None =>
+            expandRecordSchema(record, coprodBase, referencedSchemas)
+        }
+      case coprod: DocumentedCoProd =>
+        coprod.name match {
+          case Some(name) =>
+            if (referencedSchemas(name)) Schema.Reference(name, None, None)
+            else
+              Schema.Reference(
+                name,
+                Some(expandCoproductSchema(coprod, referencedSchemas + name)),
+                None
+              )
+          case None =>
+            expandCoproductSchema(coprod, referencedSchemas)
+        }
       case Primitive(
             name,
             format,

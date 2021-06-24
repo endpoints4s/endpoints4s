@@ -141,6 +141,29 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     assert(JsonSchemasCodec.mutualRecursiveB.encoder(recB) == jsonB)
   }
+  "recursive tagged" in {
+    val json = Json.obj(
+      "kind" -> Json.fromString("A"),
+      "a" -> Json.fromString("foo"),
+      "next" -> Json.obj(
+        "kind" -> Json.fromString("B"),
+        "b" -> Json.fromInt(42)
+      )
+    )
+    val rec = JsonSchemasCodec.TaggedRecursiveA(
+      a = "foo",
+      next = Some(
+        JsonSchemasCodec.TaggedRecursiveB(
+          b = 42,
+          next = None
+        )
+      )
+    )
+    assert(
+      JsonSchemasCodec.taggedRecursiveSchema.decoder.decodeJson(json).exists(_ == rec)
+    )
+    assert(JsonSchemasCodec.taggedRecursiveSchema.encoder(rec) == json)
+  }
 
   "tuple" in {
     val json = Json.arr(Json.True, Json.fromInt(42), Json.fromString("foo"))

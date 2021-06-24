@@ -126,6 +126,28 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
     lazySchema(name)(schema)
 
+  override def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    Record(
+      Reads(js => evaluatedSchema.reads.reads(js)),
+      OWrites(a => evaluatedSchema.writes.writes(a))
+    )
+  }
+
+  override def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    new Tagged[A] {
+      override def discriminator: String =
+        evaluatedSchema.discriminator
+      def tagAndJson(a: A): (String, JsObject) =
+        evaluatedSchema.tagAndJson(a)
+      def findReads(tagName: String): Option[Reads[A]] =
+        evaluatedSchema.findReads(tagName)
+    }
+  }
+
   def emptyRecord: Record[Unit] =
     Record(
       new Reads[Unit] {

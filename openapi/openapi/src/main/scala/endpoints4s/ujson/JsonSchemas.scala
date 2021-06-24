@@ -29,7 +29,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
   }
 
-  abstract class Tagged[A](val discriminator: String) extends Record[A] {
+  trait Tagged[A] extends Record[A] {
+    def discriminator: String
     def findDecoder(tag: String): Option[Decoder[ujson.Value, A]]
     def tagAndObj(a: A): (String, ujson.Obj)
 
@@ -94,8 +95,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           f: A => Validated[B],
           g: B => A
       ): Tagged[B] =
-        new Tagged[B](fa.discriminator) {
-
+        new Tagged[B] {
+          val discriminator = fa.discriminator
           def findDecoder(tag: String): Option[Decoder[ujson.Value, B]] =
             fa.findDecoder(tag).map(Decoder.sequentially(_)(a => f(a)))
           def tagAndObj(b: B): (String, ujson.Obj) = fa.tagAndObj(g(b))
@@ -119,16 +120,40 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = tpe.encoder
     }
 
-  override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
+  override def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
     new JsonSchema[A] {
-      val decoder = json => schema.decoder.decode(json)
-      val encoder = value => schema.encoder.encode(value)
+      val decoder = json => evaluatedSchema.decoder.decode(json)
+      val encoder = value => evaluatedSchema.encoder.encode(value)
     }
+  }
 
   def lazyRecord[A](schema: => Record[A], name: String): JsonSchema[A] =
     lazySchema(name)(schema)
   def lazyTagged[A](schema: => Tagged[A], name: String): JsonSchema[A] =
     lazySchema(name)(schema)
+
+  override def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    new Record[A] {
+      val decoder = json => evaluatedSchema.decoder.decode(json)
+      val encoder = value => evaluatedSchema.encoder.encode(value)
+    }
+  }
+
+  override def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] = {
+    // The schema won’t be evaluated until its `reads` or `writes` is effectively used
+    lazy val evaluatedSchema = schema
+    new Tagged[A] {
+      lazy val discriminator = evaluatedSchema.discriminator
+      def findDecoder(tag: String): Option[Decoder[ujson.Value, A]] =
+        evaluatedSchema.findDecoder(tag)
+      def tagAndObj(a: A): (String, ujson.Obj) =
+        evaluatedSchema.tagAndObj(a)
+    }
+  }
 
   lazy val emptyRecord: Record[Unit] = new Record[Unit] {
 
@@ -182,8 +207,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =
-    new Tagged[A](defaultDiscriminatorName) {
-
+    new Tagged[A] {
+      val discriminator = defaultDiscriminatorName
       def findDecoder(tagName: String) =
         if (tagName == tag) Some(recordA.decoder) else None
       def tagAndObj(value: A) = (tag, recordA.encoder.encode(value))
@@ -193,8 +218,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       tagged: Tagged[A],
       discriminatorName: String
   ): Tagged[A] =
-    new Tagged[A](discriminatorName) {
-
+    new Tagged[A] {
+      val discriminator = discriminatorName
       def findDecoder(tag: String): Option[Decoder[ujson.Value, A]] =
         tagged.findDecoder(tag)
       def tagAndObj(value: A) = tagged.tagAndObj(value)
@@ -205,7 +230,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       taggedB: Tagged[B]
   ): Tagged[Either[A, B]] = {
     assert(taggedA.discriminator == taggedB.discriminator)
-    new Tagged[Either[A, B]](taggedB.discriminator) {
+    new Tagged[Either[A, B]] {
+      val discriminator = taggedB.discriminator
       def findDecoder(tag: String): Option[Decoder[ujson.Value, Either[A, B]]] =
         taggedA
           .findDecoder(tag)

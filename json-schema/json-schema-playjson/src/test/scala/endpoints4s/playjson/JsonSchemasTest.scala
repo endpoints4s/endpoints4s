@@ -361,6 +361,28 @@ class JsonSchemasTest extends AnyFreeSpec {
       MutualRecursiveA(Some(MutualRecursiveB(Some(MutualRecursiveA(None)))))
     )
   }
+  "recursive tagged" in {
+    testRoundtrip(
+      taggedRecursiveSchema,
+      Json.obj(
+        "kind" -> JsString("A"),
+        "a" -> JsString("foo"),
+        "next" -> Json.obj(
+          "kind" -> JsString("B"),
+          "b" -> JsNumber(42)
+        )
+      ),
+      JsonSchemasCodec.TaggedRecursiveA(
+        a = "foo",
+        next = Some(
+          JsonSchemasCodec.TaggedRecursiveB(
+            b = 42,
+            next = None
+          )
+        )
+      )
+    )
+  }
 
   "tuple" in {
     testRoundtrip(

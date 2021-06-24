@@ -108,7 +108,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
   }
 
   "Recursive types" in {
-    val recSchema =
+    val expectedSchema =
       Schema.Reference(
         "Rec",
         Some(
@@ -120,25 +120,12 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
               description = None
             ) :: Nil,
             additionalProperties = None,
-            description = None,
-            example = None,
-            title = None
+            description = Some("Rec description"),
+            example = Some(ujson.Obj()),
+            title = Some("Rec title")
           )
         ),
         None
-      )
-    val expectedSchema =
-      Schema.Object(
-        Schema.Property(
-          "next",
-          recSchema,
-          isRequired = false,
-          description = None
-        ) :: Nil,
-        additionalProperties = None,
-        description = None,
-        example = None,
-        title = None
       )
     Fixtures.toSchema(Fixtures.recursiveSchema.docs) shouldBe expectedSchema
   }
@@ -169,9 +156,9 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
                   title = None
                 ) :: Nil
             ),
-            None,
-            None,
-            None
+            Some("Expression description"),
+            Some(ujson.Num(1)),
+            Some("Expression title")
           )
         ),
         None
@@ -214,6 +201,73 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
           description = None,
           example = None,
           title = None
+        )
+      ),
+      None
+    )
+  }
+  "Tagged Recursive" in {
+    def kindSchema(name: String) = Schema.Property(
+      "kind",
+      Schema.Enum(
+        Schema.Primitive("string", None, None, None, None),
+        name :: Nil,
+        None,
+        Some(name),
+        None
+      ),
+      isRequired = true,
+      description = None
+    )
+    val nextSchema = Schema.Property(
+      "next",
+      Schema.Reference("TaggedRec", None, None),
+      isRequired = false,
+      description = None
+    )
+    Fixtures.toSchema(Fixtures.taggedRecursiveSchema.docs) shouldBe Schema.Reference(
+      "TaggedRec",
+      Some(
+        Schema.OneOf(
+          Schema.DiscriminatedAlternatives(
+            "kind",
+            (
+              "A" -> Schema.Object(
+                kindSchema("A") ::
+                  Schema.Property(
+                    "a",
+                    Schema.Primitive("string", None, None, None, None),
+                    isRequired = true,
+                    description = None
+                  )
+                  :: nextSchema
+                  :: Nil,
+                additionalProperties = None,
+                description = None,
+                example = None,
+                title = None
+              )
+            ) :: (
+              "B" -> Schema.Object(
+                kindSchema("B") ::
+                  Schema.Property(
+                    "b",
+                    Schema.Primitive("integer", Some("int32"), None, None, None),
+                    isRequired = true,
+                    description = None
+                  )
+                  :: nextSchema
+                  :: Nil,
+                additionalProperties = None,
+                description = None,
+                example = None,
+                title = None
+              )
+            ) :: Nil
+          ),
+          Some("TaggedRec description"),
+          Some(ujson.Obj("a" -> ujson.Str("foo"), "kind" -> ujson.Str("A"))),
+          Some("TaggedRec title")
         )
       ),
       None
