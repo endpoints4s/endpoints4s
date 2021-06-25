@@ -99,7 +99,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         def title: Option[String] = evaluatedDocs.title
 
         def withName(n: String): DocumentedRecord =
-          new Lazy(n, this)
+          new Lazy(n, docs)
         def withExample(e: => ujson.Value): DocumentedRecord =
           new Lazy(n, this) {
             override def example: Option[ujson.Value] = Some(e)
@@ -177,7 +177,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         def title: Option[String] = evaluatedDocs.title
 
         def withName(n: String): DocumentedCoProd =
-          new Lazy(n, this)
+          new Lazy(n, docs)
         def withExample(e: => ujson.Value): DocumentedCoProd =
           new Lazy(n, this) {
             override def example: Option[ujson.Value] = Some(e)
@@ -191,7 +191,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
             override def description: Option[String] = Some(d)
           }
         def withDiscriminatorName(d: String): DocumentedCoProd =
-          new Lazy(n, null) {
+          new Lazy(n, this) {
             override def discriminatorName: String = d
           }
       }
