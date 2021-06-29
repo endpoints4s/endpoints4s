@@ -50,7 +50,7 @@ val `akka-http-server` =
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.softwaremill.sttp.client" %% "core" % sttpVersion % Test).cross(CrossVersion.for3Use2_13), // Temporary
+        ("com.softwaremill.sttp.client" %% "core" % "2.2.9" % Test).cross(CrossVersion.for3Use2_13), // Temporary
         scalaTestDependency.cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
