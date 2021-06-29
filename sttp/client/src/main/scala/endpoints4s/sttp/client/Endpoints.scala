@@ -15,9 +15,8 @@ import endpoints4s.{
 }
 import endpoints4s.algebra.Documentation
 import _root_.sttp.model.{Uri => SUri}
-import _root_.sttp.client.{
+import _root_.sttp.client3.{
   Identity,
-  NothingT,
   SttpBackend,
   asStringAlways,
   basicRequest,
@@ -38,7 +37,7 @@ import _root_.sttp.client.{
   */
 class Endpoints[R[_]](
     val host: String,
-    val backend: SttpBackend[R, Nothing, NothingT]
+    val backend: SttpBackend[R, Any]
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors[R]
     with BuiltInErrors[R]
@@ -56,9 +55,9 @@ trait EndpointsWithCustomErrors[R[_]]
     with StatusCodes {
 
   val host: String
-  val backend: SttpBackend[R, Nothing, NothingT]
+  val backend: SttpBackend[R, Any]
 
-  type SttpRequest = SRequest[_, Nothing]
+  type SttpRequest = SRequest[_, Any]
 
   /** A function that, given an `A` and a request model, returns an updated request
     * containing additional headers
