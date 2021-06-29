@@ -1,7 +1,7 @@
 package endpoints4s.sttp.client
 
 import endpoints4s.algebra
-import sttp.client.Identity
+import sttp.client3.Identity
 
 trait EndpointsDocs extends Endpoints[Identity] with algebra.EndpointsDocs {
 
