@@ -1,15 +1,15 @@
 package endpoints4s.sttp.client
 
-import _root_.sttp.client.{NothingT, SttpBackend, TryHttpURLConnectionBackend}
-import _root_.sttp.client.akkahttp.AkkaHttpBackend
+import _root_.sttp.client3.{SttpBackend, TryHttpURLConnectionBackend}
+import _root_.sttp.client3.akkahttp.AkkaHttpBackend
 import endpoints4s.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite, JsonFromCodecTestSuite, SumTypedEntitiesTestSuite, TextEntitiesTestSuite}
 import endpoints4s.algebra.{BasicAuthenticationTestApi, EndpointsTestApi, SumTypedEntitiesTestApi, TextEntitiesTestApi}
 import endpoints4s.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.Try
 
-class TestClient[R[_]](address: String, backend: SttpBackend[R, Nothing, NothingT])
+class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
     extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
@@ -29,7 +29,7 @@ class EndpointsTestSync
   val backend = TryHttpURLConnectionBackend()
 
   val client: TestClient[Try] =
-    new TestClient(s"http://localhost:$wiremockPort", backend)
+    new TestClient[Try](s"http://localhost:$wiremockPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
@@ -50,8 +50,6 @@ class EndpointsTestAkka
     with JsonFromCodecTestSuite[TestClient[Future]]
     with SumTypedEntitiesTestSuite[TestClient[Future]]
     with TextEntitiesTestSuite[TestClient[Future]] {
-
-  import ExecutionContext.Implicits.global
 
   val backend = AkkaHttpBackend()
 
