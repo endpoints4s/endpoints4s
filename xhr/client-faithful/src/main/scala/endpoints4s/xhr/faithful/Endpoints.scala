@@ -17,7 +17,7 @@ trait Endpoints extends xhr.Endpoints {
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
-    new Endpoint[A, B](request) {
+    new Endpoint[A, B](request, response) {
       def apply(a: A) = {
         val promise = new Promise[B]()
         performXhr(request, response, a)(
