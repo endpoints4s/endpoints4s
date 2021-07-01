@@ -1,7 +1,10 @@
 package endpoints4s.algebra
 
-import endpoints4s.Tupler
+import endpoints4s.{Codec, Invalid, Tupler, Valid, Validated}
 import endpoints4s.algebra.BasicAuthentication.Credentials
+import java.util.Base64
+import java.nio.charset.StandardCharsets
+import scala.util.Try
 
 /** Provides vocabulary to describe endpoints that use Basic HTTP authentication.
   *
@@ -84,4 +87,86 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
 
 object BasicAuthentication {
   case class Credentials(username: String, password: String)
+  case class Bearer(token: String)
+}
+
+trait AuthenticationMiddlewares extends Middlewares {
+  import BasicAuthentication._
+
+  lazy val base64StringCodec: Codec[String, String] =
+    Codec.fromEncoderAndDecoder[String, String](s =>
+      Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8))
+    )(s =>
+      Validated.fromTry { Try(new String(Base64.getDecoder().decode(s), StandardCharsets.UTF_8)) }
+    )
+
+  lazy val basicAuthHeader: RequestHeaders[Option[Credentials]] = {
+    val basicPrefix = "Basic "
+
+    optRequestHeader("Authorization").xmapPartial {
+      case Some(auth) =>
+        val (prefix, suffix) = auth.splitAt(basicPrefix.length)
+        if (prefix == basicPrefix) {
+          base64StringCodec.decode(suffix).flatMap { userPass =>
+            userPass.indexOf(':') match {
+              case -1 => Valid(Some(Credentials(userPass, "")))
+              case index =>
+                Valid(
+                  Some(Credentials(userPass.substring(0, index), userPass.substring(index + 1)))
+                )
+            }
+          }
+        } else {
+          Invalid("Malformed Authorization header")
+        }
+      case None => Valid(None)
+    }(_.map { case Credentials(username, password) =>
+      s"Basic ${base64StringCodec.encode(s"$username:$password")}"
+    })
+  }
+
+  lazy val bearerAuthHeader: RequestHeaders[Bearer] = {
+    val bearerPrefix = "Bearer "
+
+    requestHeader("Authorization").xmapPartial { auth =>
+      val (prefix, suffix) = auth.splitAt(bearerPrefix.length)
+      if (prefix == bearerPrefix) {
+        base64StringCodec.decode(suffix).map(Bearer)
+      } else {
+        Invalid("Malformed Authorization header")
+      }
+    } { case Bearer(token) =>
+      s"Bearer ${base64StringCodec.encode(token)}"
+    }
+  }
+
+  def wwwAuthHeader(realm: Option[String]): ResponseHeaders[Unit] =
+    realm match {
+      case Some(realm) =>
+        responseHeader("WWW-Authenticate").xmap(_ => ())(_ =>
+          s"""Basic real="$realm", charset="UTF-8""""
+        )
+      case None => emptyResponseHeaders
+    }
+
+  def unauthorizedResponse(realm: Option[String]) =
+    response(
+      Unauthorized,
+      emptyResponse,
+      Some("User is not authorized to call that endpoint"),
+      wwwAuthHeader(realm)
+    )
+
+  implicit class AuthenticationEndpointOps[A, B](endpoint: Endpoint[A, B]) {
+
+    def withBasicAuth(realm: Option[String]): Endpoint[(A, Option[Credentials]), Option[B]] =
+      endpoint
+        .mapRequest(_.withHeaders(basicAuthHeader))
+        .mapResponse(_.orElse(unauthorizedResponse(realm)).xmap(_.left.toOption)(_.toLeft(())))
+
+    def withBearerAuth: Endpoint[(A, Bearer), Option[B]] =
+      endpoint
+        .mapRequest(_.withHeaders(bearerAuthHeader))
+        .mapResponse(_.orElse(unauthorizedResponse(None)).xmap(_.left.toOption)(_.toLeft(())))
+  }
 }

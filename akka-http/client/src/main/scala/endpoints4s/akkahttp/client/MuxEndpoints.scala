@@ -20,7 +20,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints {
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): Future[req.Response] =
-      request(encoder.encode(req)).flatMap { resp =>
+      settings.requestExecutor(request(encoder.encode(req))).flatMap { resp =>
         futureFromEither(
           decodeResponse(response, resp).toRight({
             resp.discardEntityBytes();
