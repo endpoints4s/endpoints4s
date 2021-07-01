@@ -327,7 +327,10 @@ trait EndpointsWithCustomErrors[R[_]]
   /** A function that, given an `A`, eventually attempts to decode the `B` response.
     */
   //#endpoint-type
-  case class Endpoint[A, B](request: Request[A], response: Response[B]) extends (A => R[B]) {
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => R[B])
+      //#endpoint-type
+      {
     def apply(a: A): R[B] = {
       val result = backend.send(request(a).response(asStringAlways))
       backend.responseMonad.flatMap(result) { sttpResponse =>
@@ -335,7 +338,6 @@ trait EndpointsWithCustomErrors[R[_]]
       }
     }
   }
-  //#endpoint-type
 
   def endpoint[A, B](
       request: Request[A],

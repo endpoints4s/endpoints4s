@@ -259,7 +259,10 @@ trait EndpointsWithCustomErrors
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */
   //#concrete-carrier-type
-  case class Endpoint[A, B](request: Request[A], response: Response[B]) extends (A => Future[B]) {
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => Future[B])
+      //#concrete-carrier-type
+      {
     def apply(a: A): Future[B] =
       request(a).execute().flatMap { wsResp =>
         futureFromEither(
@@ -267,7 +270,6 @@ trait EndpointsWithCustomErrors
         )
       }
   }
-  //#concrete-carrier-type
 
   def endpoint[A, B](
       request: Request[A],
