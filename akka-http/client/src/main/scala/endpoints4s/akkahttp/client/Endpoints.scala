@@ -275,10 +275,10 @@ trait EndpointsWithCustomErrors
         .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
   //#endpoint-type
-  case class Endpoint[A, B](
-      request: Request[A],
-      response: Response[B]
-  ) extends (A => Future[B]) {
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => Future[B])
+      //#endpoint-type
+      {
     def apply(a: A): Future[B] =
       settings
         .requestExecutor(request(a))
@@ -297,7 +297,6 @@ trait EndpointsWithCustomErrors
           }
         }
   }
-  //#endpoint-type
 
   def endpoint[A, B](
       request: Request[A],

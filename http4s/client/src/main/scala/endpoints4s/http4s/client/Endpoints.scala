@@ -241,7 +241,10 @@ trait EndpointsWithCustomErrors
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
 
   //#endpoint-type
-  case class Endpoint[A, B](request: Request[A], response: Response[B]) extends (A => Effect[B]) {
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => Effect[B])
+      //#endpoint-type
+      {
     def apply(a: A): Effect[B] =
       request(a).flatMap { req =>
         client
@@ -250,7 +253,6 @@ trait EndpointsWithCustomErrors
       }
     def asKleisli: Kleisli[Effect, A, B] = Kleisli(this)
   }
-  //#endpoint-type
 
   override def endpoint[A, B](
       request: Request[A],
