@@ -11,6 +11,7 @@ import org.http4s.{BasicCredentials, Challenge}
 
 /** @group interpreters
   */
+@deprecated("Use AuthenticatedEndpointsServer instead", "1.5.0")
 trait BasicAuthentication
     extends EndpointsWithCustomErrors
     with endpoints4s.algebra.BasicAuthentication {

@@ -1,12 +1,16 @@
 package sample
 
 import cats.effect.IO
-import endpoints4s.http4s.server.{BasicAuthentication, Endpoints, JsonEntitiesFromCodecs}
+import endpoints4s.http4s.server.{Endpoints, JsonEntitiesFromCodecs}
 import org.http4s.HttpRoutes
 
 import scala.util.Random
 
-object Api extends Endpoints[IO] with JsonEntitiesFromCodecs with BasicAuthentication with ApiAlg {
+object Api
+    extends Endpoints[IO]
+    with JsonEntitiesFromCodecs
+    with endpoints4s.algebra.AuthenticatedEndpointsServer
+    with ApiAlg {
 
   val router: HttpRoutes[IO] = HttpRoutes.of(
     routesFromEndpoints(
@@ -14,10 +18,13 @@ object Api extends Endpoints[IO] with JsonEntitiesFromCodecs with BasicAuthentic
       maybe.implementedBy(_ => if (util.Random.nextBoolean()) Some(()) else None) orElse
         action.implementedBy { _ => ActionResult("Action") },
       actionFut.implementedByEffect { _ => IO.pure(ActionResult("Action")) },
-      auth.implementedBy { credentials =>
-        println(s"Authenticated request: ${credentials.username}")
-        if (Random.nextBoolean()) Some(())
-        else None // Randomly return a forbidden
+      auth.implementedBy {
+        case Some(credentials) =>
+          println(s"Authenticated request: ${credentials.username}")
+          if (Random.nextBoolean()) Some(())
+          else None // Randomly return an unauthorized
+        case None =>
+          None // Missing credentials. always return an unauthorized
       }
     )
   )

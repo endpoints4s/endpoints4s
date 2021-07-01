@@ -5,7 +5,11 @@ import endpoints4s.akkahttp.server._
 import scala.concurrent.Future
 import scala.util.Random
 
-object Api extends ApiAlg with Endpoints with JsonEntitiesFromCodecs with BasicAuthentication {
+object Api
+    extends ApiAlg
+    with Endpoints
+    with JsonEntitiesFromCodecs
+    with endpoints4s.algebra.AuthenticatedEndpointsServer {
 
   import akka.http.scaladsl.server.Directives._
 
@@ -18,10 +22,13 @@ object Api extends ApiAlg with Endpoints with JsonEntitiesFromCodecs with BasicA
       } ~
       maybe.implementedBy { _ =>
         if (util.Random.nextBoolean()) Some(()) else None
-      } ~ auth.implementedBy { credentials =>
-        println(s"Authenticated request: ${credentials.username}")
-        if (Random.nextBoolean()) Some(())
-        else None // Randomly return a forbidden
+      } ~ auth.implementedBy {
+        case Some(credentials) =>
+          println(s"Authenticated request: ${credentials.username}")
+          if (Random.nextBoolean()) Some(())
+          else None // Randomly return an unauthorized
+        case None =>
+          None // Missing credentials. always return an unauthorized
       }
 
 }

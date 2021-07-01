@@ -5,6 +5,8 @@ import java.net.ServerSocket
 import cats.effect.{ContextShift, IO, Timer}
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.server.{
+  AssetsTestSuite,
+  AuthenticatedEndpointsTestSuite,
   BasicAuthenticationTestSuite,
   DecodedUrl,
   EndpointsTestSuite,
@@ -18,11 +20,11 @@ import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
-import endpoints4s.algebra.server.AssetsTestSuite
 import cats.effect.Blocker
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
+    with AuthenticatedEndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with JsonEntitiesFromSchemasTestSuite[EndpointsTestApi]
     with TextEntitiesTestSuite[EndpointsTestApi]

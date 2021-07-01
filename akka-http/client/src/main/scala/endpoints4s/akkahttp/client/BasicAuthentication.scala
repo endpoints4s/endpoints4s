@@ -7,6 +7,7 @@ import endpoints4s.algebra.Documentation
 
 /** @group interpreters
   */
+@deprecated("Use AuthenticatedEndpointsClient instead", "1.5.0")
 trait BasicAuthentication extends algebra.BasicAuthentication {
   self: EndpointsWithCustomErrors =>
 

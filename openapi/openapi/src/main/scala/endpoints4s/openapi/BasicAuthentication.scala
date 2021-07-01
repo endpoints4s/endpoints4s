@@ -10,6 +10,7 @@ import endpoints4s.openapi.model.{SecurityRequirement, SecurityScheme}
   *
   * @group interpreters
   */
+@deprecated("Use AuthenticatedEndpoints instead", "1.5.0")
 trait BasicAuthentication
     extends algebra.BasicAuthentication
     with EndpointsWithCustomErrors

@@ -11,7 +11,7 @@ class Api(val playComponents: PlayComponents)
     with Endpoints
     with JsonEntitiesFromCodecs
     with Assets
-    with BasicAuthentication {
+    with endpoints4s.algebra.AuthenticatedEndpointsServer {
 
   val routes = routesFromEndpoints(
     index.implementedBy { case (name, age, _) => User(name, age) },
@@ -21,10 +21,13 @@ class Api(val playComponents: PlayComponents)
     ),
     assets.implementedBy(assetsResources()),
     maybe.implementedBy(_ => if (util.Random.nextBoolean()) Some(()) else None),
-    auth.implementedBy { credentials =>
-      println(s"Authenticated request: ${credentials.username}")
-      if (Random.nextBoolean()) Some(())
-      else None // Randomly return a forbidden
+    auth.implementedBy {
+      case Some(credentials) =>
+        println(s"Authenticated request: ${credentials.username}")
+        if (Random.nextBoolean()) Some(())
+        else None // Randomly return a forbidden
+      case None =>
+        None // Missing credentials. always return an unauthorized
     }
   )
 

@@ -7,6 +7,7 @@ import org.scalajs.dom.window.btoa
 
 /** @group interpreters
   */
+@deprecated("Use AuthenticatedEndpointsClient instead", "1.5.0")
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   private[endpoints4s] def authenticatedRequest[U, E, H, UE, HCred, Out](

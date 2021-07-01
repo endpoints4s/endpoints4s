@@ -12,11 +12,15 @@ import org.http4s.client.asynchttpclient.AsyncHttpClient
 import cats.effect.ContextShift
 import endpoints4s.algebra.circe
 import org.http4s.Uri
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
     extends Endpoints[F](host, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
+    with algebra.AuthenticatedEndpointsTestApi
+    with algebra.AuthenticatedEndpointsClient
     with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
@@ -26,6 +30,7 @@ class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
 
 class Http4sClientEndpointsJsonSchemaTest
     extends client.EndpointsTestSuite[TestJsonSchemaClient[IO]]
+    with client.AuthenticatedEndpointsTestSuite[TestJsonSchemaClient[IO]]
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]] {
@@ -53,6 +58,7 @@ class Http4sClientEndpointsJsonSchemaTest
   def encodeUrl[A](url: client.Url[A])(a: A): String =
     url.encodeUrl(a).toOption.get.renderString
 
+  authTestSuite()
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
