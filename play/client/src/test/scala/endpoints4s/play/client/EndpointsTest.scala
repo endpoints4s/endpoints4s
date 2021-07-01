@@ -7,12 +7,16 @@ import play.api.libs.ws.WSClient
 import play.api.test.WsTestClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class TestClient(address: String, wsClient: WSClient)(implicit
     EC: ExecutionContext
 ) extends Endpoints(address, wsClient)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
+    with algebra.AuthenticatedEndpointsTestApi
+    with algebra.AuthenticatedEndpointsClient
     with algebra.BasicAuthenticationTestApi
     with algebra.EndpointsTestApi
     with algebra.JsonFromCodecTestApi
@@ -23,6 +27,7 @@ class TestClient(address: String, wsClient: WSClient)(implicit
 
 class EndpointsTest
     extends client.EndpointsTestSuite[TestClient]
+    with algebra.client.AuthenticatedEndpointsTestSuite[TestClient]
     with client.BasicAuthTestSuite[TestClient]
     with client.JsonFromCodecTestSuite[TestClient]
     with client.SumTypedEntitiesTestSuite[TestClient]
@@ -41,6 +46,7 @@ class EndpointsTest
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
+  authTestSuite()
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()

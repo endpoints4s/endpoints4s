@@ -2,17 +2,35 @@ package endpoints4s.sttp.client
 
 import _root_.sttp.client3.{SttpBackend, TryHttpURLConnectionBackend}
 import _root_.sttp.client3.akkahttp.AkkaHttpBackend
-import endpoints4s.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite, JsonFromCodecTestSuite, SumTypedEntitiesTestSuite, TextEntitiesTestSuite}
-import endpoints4s.algebra.{BasicAuthenticationTestApi, EndpointsTestApi, SumTypedEntitiesTestApi, TextEntitiesTestApi}
+import endpoints4s.algebra.client.{
+  AuthenticatedEndpointsTestSuite,
+  BasicAuthTestSuite,
+  EndpointsTestSuite,
+  JsonFromCodecTestSuite,
+  SumTypedEntitiesTestSuite,
+  TextEntitiesTestSuite
+}
+import endpoints4s.algebra.{
+  AuthenticatedEndpointsTestApi,
+  AuthenticatedEndpointsClient,
+  BasicAuthenticationTestApi,
+  EndpointsTestApi,
+  SumTypedEntitiesTestApi,
+  TextEntitiesTestApi
+}
 import endpoints4s.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import scala.concurrent.Future
 import scala.util.Try
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
     extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
+    with AuthenticatedEndpointsTestApi
+    with AuthenticatedEndpointsClient
     with BasicAuthenticationTestApi
     with EndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
@@ -21,6 +39,7 @@ class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
 
 class EndpointsTestSync
     extends EndpointsTestSuite[TestClient[Try]]
+    with AuthenticatedEndpointsTestSuite[TestClient[Try]]
     with BasicAuthTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]]
     with SumTypedEntitiesTestSuite[TestClient[Try]]
@@ -38,6 +57,7 @@ class EndpointsTestSync
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
+  authTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
   sumTypedRequestsTestSuite()
@@ -46,6 +66,7 @@ class EndpointsTestSync
 
 class EndpointsTestAkka
     extends EndpointsTestSuite[TestClient[Future]]
+    with AuthenticatedEndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
     with JsonFromCodecTestSuite[TestClient[Future]]
     with SumTypedEntitiesTestSuite[TestClient[Future]]
@@ -62,6 +83,7 @@ class EndpointsTestAkka
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
+  authTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
   sumTypedRequestsTestSuite()

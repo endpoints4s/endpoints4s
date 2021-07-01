@@ -1,10 +1,9 @@
 package sample
 
-import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra._
 import io.circe.generic.JsonCodec
 
-trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodecs with BasicAuthentication {
+trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodecs with AuthenticatedEndpoints {
 
   val index: Endpoint[(String, Int, String), User] =
     endpoint(
@@ -31,8 +30,8 @@ trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodecs with BasicAuthe
   val maybe =
     endpoint(get(path / "option"), wheneverFound(ok(emptyResponse)))
 
-  val auth: Endpoint[Credentials, Option[Unit]] =
-    authenticatedEndpoint(Get, path / "auth", response = ok(emptyResponse))
+  val auth: Endpoint[UsernamePassword, Option[Unit]] =
+    endpoint(get(path / "auth"), ok(emptyResponse)).withBasicAuth()
 
 }
 

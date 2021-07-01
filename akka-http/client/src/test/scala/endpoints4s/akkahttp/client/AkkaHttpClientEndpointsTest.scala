@@ -9,13 +9,17 @@ import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
+import scala.annotation.nowarn
 
+@nowarn("cat=deprecation")
 class TestClient(settings: EndpointsSettings)(implicit
     EC: ExecutionContext,
     M: Materializer
 ) extends Endpoints(settings)
     with BasicAuthentication
     with algebra.EndpointsTestApi
+    with algebra.AuthenticatedEndpointsTestApi
+    with algebra.AuthenticatedEndpointsClient
     with algebra.BasicAuthenticationTestApi
     with algebra.TextEntitiesTestApi
     with algebra.JsonFromCodecTestApi
@@ -29,6 +33,7 @@ class TestClient(settings: EndpointsSettings)(implicit
 
 class AkkaHttpClientEndpointsTest
     extends algebra.client.EndpointsTestSuite[TestClient]
+    with algebra.client.AuthenticatedEndpointsTestSuite[TestClient]
     with algebra.client.BasicAuthTestSuite[TestClient]
     with algebra.client.JsonFromCodecTestSuite[TestClient]
     with algebra.client.TextEntitiesTestSuite[TestClient]
@@ -76,6 +81,7 @@ class AkkaHttpClientEndpointsTest
     endpoint(req)
 
   clientTestSuite()
+  authTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
   textEntitiesTestSuite()
