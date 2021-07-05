@@ -15,7 +15,7 @@ val `play-server` =
       `scala 2.12 to dotty`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
       name := "play-server",
       version := "2.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-netty-server" % playVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.play" %% "play-test" % playVersion % Test).cross(CrossVersion.for3Use2_13),
@@ -46,7 +46,7 @@ val `play-server-circe` =
       `scala 2.12 to dotty`,
       name := "play-server-circe",
       version := "2.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
@@ -59,7 +59,7 @@ val `play-client` =
       `scala 2.12 to dotty`,
       name := "play-client",
       version := "2.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play

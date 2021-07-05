@@ -8,7 +8,7 @@ lazy val openapi =
     .in(file("openapi"))
     .settings(
       version := "2.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+      versionPolicyIntention := Compatibility.None,
       publishSettings,
       `scala 2.12 to dotty`,
       name := "openapi",
