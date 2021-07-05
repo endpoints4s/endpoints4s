@@ -107,6 +107,63 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
     assert(JsonSchemasCodec.recursiveSchema.encoder(rec) == json)
   }
+  "recursive expression type" in {
+    val json = Json.obj(
+      "x" -> Json.obj("x" -> Json.fromInt(1), "y" -> Json.fromInt(2)),
+      "y" -> Json.fromInt(3)
+    )
+    val expr = JsonSchemasCodec.Expression.Add(
+      JsonSchemasCodec.Expression
+        .Add(JsonSchemasCodec.Expression.Literal(1), JsonSchemasCodec.Expression.Literal(2)),
+      JsonSchemasCodec.Expression.Literal(3)
+    )
+    assert(
+      JsonSchemasCodec.expressionSchema.decoder.decodeJson(json).exists(_ == expr)
+    )
+    assert(JsonSchemasCodec.expressionSchema.encoder(expr) == json)
+  }
+  "mutually recursive types" in {
+    val jsonA = Json.obj("b" -> Json.obj("a" -> Json.obj()))
+    val recA = JsonSchemasCodec.MutualRecursiveA(
+      Some(JsonSchemasCodec.MutualRecursiveB(Some(JsonSchemasCodec.MutualRecursiveA(None))))
+    )
+    assert(
+      JsonSchemasCodec.mutualRecursiveA.decoder.decodeJson(jsonA).exists(_ == recA)
+    )
+    assert(JsonSchemasCodec.mutualRecursiveA.encoder(recA) == jsonA)
+
+    val jsonB = Json.obj("a" -> Json.obj("b" -> Json.obj()))
+    val recB = JsonSchemasCodec.MutualRecursiveB(
+      Some(JsonSchemasCodec.MutualRecursiveA(Some(JsonSchemasCodec.MutualRecursiveB(None))))
+    )
+    assert(
+      JsonSchemasCodec.mutualRecursiveB.decoder.decodeJson(jsonB).exists(_ == recB)
+    )
+    assert(JsonSchemasCodec.mutualRecursiveB.encoder(recB) == jsonB)
+  }
+  "recursive tagged" in {
+    val json = Json.obj(
+      "kind" -> Json.fromString("A"),
+      "a" -> Json.fromString("foo"),
+      "next" -> Json.obj(
+        "kind" -> Json.fromString("B"),
+        "b" -> Json.fromInt(42)
+      )
+    )
+    val rec = JsonSchemasCodec.TaggedRecursiveA(
+      a = "foo",
+      next = Some(
+        JsonSchemasCodec.TaggedRecursiveB(
+          b = 42,
+          next = None
+        )
+      )
+    )
+    assert(
+      JsonSchemasCodec.taggedRecursiveSchema.decoder.decodeJson(json).exists(_ == rec)
+    )
+    assert(JsonSchemasCodec.taggedRecursiveSchema.encoder(rec) == json)
+  }
 
   "tuple" in {
     val json = Json.arr(Json.True, Json.fromInt(42), Json.fromString("foo"))
