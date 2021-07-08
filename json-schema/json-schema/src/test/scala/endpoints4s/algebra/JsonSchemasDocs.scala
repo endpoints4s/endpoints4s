@@ -65,8 +65,8 @@ trait JsonSchemasDocs extends JsonSchemas {
   //#recursive
   case class Recursive(next: Option[Recursive])
 
-  val recursiveSchema: Record[Recursive] = (
-    optField("next")(lazySchema("Rec")(recursiveSchema))
+  val recursiveSchema: Record[Recursive] = lazyRecord("Rec")(
+    optField("next")(recursiveSchema)
   ).xmap(Recursive(_))(_.next)
   //#recursive
 
