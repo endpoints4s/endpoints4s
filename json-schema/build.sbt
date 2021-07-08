@@ -43,12 +43,6 @@ lazy val `json-schema-generic` =
         shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
-      // Add src/main/scala-2 as a source directory for Scala 2.12 and 2.13
-      (Compile / unmanagedSourceDirectories) ++= {
-        val crossSourceDirectory = baseDirectory.value / ".." / "src" / "main"
-        if (scalaVersion.value.startsWith("2.")) Seq(crossSourceDirectory / "scala-2")
-        else Nil
-      },
       Test / scalacOptions ++= (if (scalaVersion.value.startsWith("2.")) Nil else Seq("-Yretain-trees"))
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
