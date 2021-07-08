@@ -35,7 +35,7 @@ val `http4s-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-client",
-      version := "3.0.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).cross(CrossVersion.for3Use2_13),

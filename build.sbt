@@ -39,7 +39,7 @@ ThisBuild / sonatypeProjectHosting := Some(
 ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
-ThisBuild / version := "1.3.0+n"
+ThisBuild / version := "1.4.0"
 
 val versionSchemes = Def.setting {
   Seq(
