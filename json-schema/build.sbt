@@ -11,7 +11,7 @@ val `json-schema` =
       publishSettings,
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.4.4",
+        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.5.0",
         "org.scalacheck" %%% "scalacheck" % "1.15.4" % Test,
         scalaTestDependency
       ),
