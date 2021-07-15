@@ -9,4 +9,4 @@ object Api
     with JsonEntitiesFromCodecs
     with Assets
     with thenable.Endpoints
-    with BasicAuthentication
+    with endpoints4s.algebra.AuthenticatedEndpointsClient

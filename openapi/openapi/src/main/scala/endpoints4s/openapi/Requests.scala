@@ -8,7 +8,12 @@ import endpoints4s.openapi.model.{MediaType, Schema}
   *
   * @group interpreters
   */
-trait Requests extends algebra.Requests with Urls with Methods with Headers {
+trait Requests
+    extends algebra.Requests
+    with algebra.RequestMiddlewares
+    with Urls
+    with Methods
+    with Headers {
 
   type RequestHeaders[A] = DocumentedHeaders
 
@@ -98,4 +103,21 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
         DocumentedHeaders(fa.value ++ fb.value)
     }
 
+  /* ************************
+      MIDDLEWARES
+  ************************* */
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    request.copy(headers = DocumentedHeaders(request.headers.value ++ headers.value))
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    request.copy(url =
+      request.url.copy(queryParameters = request.url.queryParameters ++ qs.parameters)
+    )
 }

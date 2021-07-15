@@ -12,6 +12,7 @@ import play.api.mvc.{BodyParser, Results}
 
 /** @group interpreters
   */
+@deprecated("Use AuthenticatedEndpointsServer instead", "1.5.0")
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   import playComponents.executionContext

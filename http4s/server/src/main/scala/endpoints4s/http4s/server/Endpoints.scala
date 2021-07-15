@@ -60,7 +60,11 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
 /** Interpreter for [[algebra.EndpointsWithCustomErrors]] based on http4s.
   * @group interpreters
   */
-trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Methods with Urls {
+trait EndpointsWithCustomErrors
+    extends algebra.EndpointsWithCustomErrors
+    with algebra.Middlewares
+    with Methods
+    with Urls {
   type Effect[A]
   implicit def Effect: Sync[Effect]
 
@@ -391,4 +395,71 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   ): Effect[http4s.Response[Effect]] =
     Effect.pure(serverErrorResponse(throwableToServerError(throwable)))
 
+  // MIDDLEWARES
+
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] = {
+    val liftedRequest = request.lift
+    Function.unlift { http4sRequest =>
+      liftedRequest(http4sRequest).map { route =>
+        headers(http4sRequest.headers) match {
+          case Valid(h) => route.map(_.map(tupler(_, h)))
+          case inv: Invalid =>
+            route.flatMap {
+              case Left(r) => Effect.pure(Left(r))
+              case _       => handleClientErrors(http4sRequest, inv).map(_.asLeft)
+            }
+        }
+      }
+    }
+  }
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] = {
+    val liftedRequest = request.lift
+    Function.unlift { http4sRequest =>
+      liftedRequest(http4sRequest).map { route =>
+        qs(http4sRequest.uri.multiParams) match {
+          case Valid(h) => route.map(_.map(tupler(_, h)))
+          case inv: Invalid =>
+            route.flatMap {
+              case Left(r) => Effect.pure(Left(r))
+              case _       => handleClientErrors(http4sRequest, inv).map(_.asLeft)
+            }
+        }
+      }
+    }
+  }
+
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    out => {
+      val (a, h) = tupler.unapply(out)
+      val http4sResponse = response(a)
+      http4sResponse.withHeaders(http4sResponse.headers ++ headers(h))
+    }
 }
