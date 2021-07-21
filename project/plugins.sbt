@@ -36,5 +36,5 @@ ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.0.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.1.0")
 addSbtPlugin("ch.epfl.scala" % "sbt-eviction-rules" % "1.0.0-RC1")
