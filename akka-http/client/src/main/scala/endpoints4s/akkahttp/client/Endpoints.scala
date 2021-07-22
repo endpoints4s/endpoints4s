@@ -96,7 +96,7 @@ trait EndpointsWithCustomErrors
       case x                             => throw InvalidHeaderDefinition(x)
     }
 
-  type Request[A] = A => HttpRequest
+  type Request[A] = A => Future[HttpRequest]
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
@@ -147,8 +147,8 @@ trait EndpointsWithCustomErrors
         if (settings.baseUri == Uri("/")) Uri(url.encode(a))
         else Uri(s"${settings.baseUri.path}${url.encode(a)}")
 
-      method(entity(b, HttpRequest(uri = uri)))
-        .withHeaders(headers(c, List.empty))
+      Future.successful(method(entity(b, HttpRequest(uri = uri)))
+        .withHeaders(headers(c, List.empty)))
     }
 
   // Defines how to decode the entity according to the status code value and response headers
@@ -280,10 +280,10 @@ trait EndpointsWithCustomErrors
       //#endpoint-type
       {
     def apply(a: A): Future[B] =
-      settings
-        .requestExecutor(request(a))
-        .flatMap { httpResponse =>
-          decodeResponse(response, httpResponse) match {
+      for {
+        httpRequest <- request(a)
+        httpResponse <- settings.requestExecutor(httpRequest)
+        decodedResponse <- decodeResponse(response, httpResponse) match {
             case Some(entityB) =>
               entityB(httpResponse.entity).flatMap(futureFromEither)
             case None =>
@@ -295,7 +295,7 @@ trait EndpointsWithCustomErrors
                 )
               )
           }
-        }
+      } yield decodedResponse
   }
 
   def endpoint[A, B](
@@ -367,7 +367,7 @@ trait EndpointsWithCustomErrors
     tuplerOut => {
       val (a, h) = tupler.unapply(tuplerOut)
       val httpRequest = request(a)
-      httpRequest.withHeaders(headers(h, httpRequest.headers.toList))
+      for (req <- httpRequest) yield req.withHeaders(headers(h, req.headers.toList))
     }
 
   def addRequestQueryString[A, B, Out](
@@ -377,11 +377,11 @@ trait EndpointsWithCustomErrors
     tuplerOut => {
       val (a, q) = tupler.unapply(tuplerOut)
       val httpRequest = request(a)
-      httpRequest.withUri(
-        httpRequest.uri.withQuery(
-          Uri.Query(httpRequest.uri.query() ++ Uri.Query(qs.encodeQueryString(q)): _*)
+      for (req <- httpRequest) yield req.withUri(
+        req.uri.withQuery(
+          Uri.Query(req.uri.query() ++ Uri.Query(qs.encodeQueryString(q)): _*)
         )
-      )
+           )
     }
 
   def addResponseHeaders[A, H](
