@@ -34,7 +34,6 @@ class Endpoints(val settings: EndpointsSettings)(implicit
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
-    with algebra.Middlewares
     with Urls
     with Methods
     with StatusCodes {
@@ -147,8 +146,10 @@ trait EndpointsWithCustomErrors
         if (settings.baseUri == Uri("/")) Uri(url.encode(a))
         else Uri(s"${settings.baseUri.path}${url.encode(a)}")
 
-      Future.successful(method(entity(b, HttpRequest(uri = uri)))
-        .withHeaders(headers(c, List.empty)))
+      Future.successful(
+        method(entity(b, HttpRequest(uri = uri)))
+          .withHeaders(headers(c, List.empty))
+      )
     }
 
   // Defines how to decode the entity according to the status code value and response headers
@@ -284,17 +285,17 @@ trait EndpointsWithCustomErrors
         httpRequest <- request(a)
         httpResponse <- settings.requestExecutor(httpRequest)
         decodedResponse <- decodeResponse(response, httpResponse) match {
-            case Some(entityB) =>
-              entityB(httpResponse.entity).flatMap(futureFromEither)
-            case None =>
-              httpResponse.entity
-                .discardBytes() // See https://github.com/akka/akka-http/issues/1495
-              Future.failed(
-                new Throwable(
-                  s"Unexpected response status: ${httpResponse.status.intValue()}"
-                )
+          case Some(entityB) =>
+            entityB(httpResponse.entity).flatMap(futureFromEither)
+          case None =>
+            httpResponse.entity
+              .discardBytes() // See https://github.com/akka/akka-http/issues/1495
+            Future.failed(
+              new Throwable(
+                s"Unexpected response status: ${httpResponse.status.intValue()}"
               )
-          }
+            )
+        }
       } yield decodedResponse
   }
 
@@ -377,11 +378,12 @@ trait EndpointsWithCustomErrors
     tuplerOut => {
       val (a, q) = tupler.unapply(tuplerOut)
       val httpRequest = request(a)
-      for (req <- httpRequest) yield req.withUri(
-        req.uri.withQuery(
-          Uri.Query(req.uri.query() ++ Uri.Query(qs.encodeQueryString(q)): _*)
+      for (req <- httpRequest)
+        yield req.withUri(
+          req.uri.withQuery(
+            Uri.Query(req.uri.query() ++ Uri.Query(qs.encodeQueryString(q)): _*)
+          )
         )
-           )
     }
 
   def addResponseHeaders[A, H](

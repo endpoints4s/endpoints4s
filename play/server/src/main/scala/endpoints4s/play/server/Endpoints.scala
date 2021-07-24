@@ -58,7 +58,6 @@ trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with Bu
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
-    with algebra.Middlewares
     with Urls
     with Methods
     with StatusCodes {

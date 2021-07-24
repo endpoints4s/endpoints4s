@@ -54,6 +54,33 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B]
 
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B]
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C]
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B]
+
+  implicit class EndpointSyntax[A, B](endpoint: Endpoint[A, B]) {
+
+    def mapRequest[C](f: Request[A] => Request[C]): Endpoint[C, B] =
+      mapEndpointRequest(endpoint, f)
+
+    def mapResponse[C](f: Response[B] => Response[C]): Endpoint[A, C] =
+      mapEndpointResponse(endpoint, f)
+
+    def mapDocs(f: EndpointDocs => EndpointDocs): Endpoint[A, B] =
+      mapEndpointDocs(endpoint, f)
+  }
+
   /** @param operationId A unique identifier which identifies this operation
     * @param summary     Short description
     * @param description Detailed description

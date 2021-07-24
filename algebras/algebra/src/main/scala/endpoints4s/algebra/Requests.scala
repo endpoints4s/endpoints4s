@@ -185,6 +185,16 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out]
 
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out]
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out]
+
   /** Helper method to perform GET request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
@@ -265,4 +275,16 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): Request[Out] =
     request(Patch, url, entity, docs, headers)
 
+  implicit class RequestSyntax[A](request: Request[A]) {
+
+    def addHeaders[H](headers: RequestHeaders[H])(implicit
+        tupler: Tupler[A, H]
+    ): Request[tupler.Out] =
+      addRequestHeaders(request, headers)
+
+    def addQueryString[Q](qs: QueryString[Q])(implicit
+        tupler: Tupler[A, Q]
+    ): Request[tupler.Out] =
+      addRequestQueryString(request, qs)
+  }
 }

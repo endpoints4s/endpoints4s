@@ -60,11 +60,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
 /** Interpreter for [[algebra.EndpointsWithCustomErrors]] based on http4s.
   * @group interpreters
   */
-trait EndpointsWithCustomErrors
-    extends algebra.EndpointsWithCustomErrors
-    with algebra.Middlewares
-    with Methods
-    with Urls {
+trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Methods with Urls {
   type Effect[A]
   implicit def Effect: Sync[Effect]
 

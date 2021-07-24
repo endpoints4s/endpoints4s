@@ -11,7 +11,7 @@ import scala.util.Try
   *
   * @group algebras
   */
-trait AuthenticatedEndpoints extends Middlewares {
+trait AuthenticatedEndpoints extends Endpoints {
 
   private[algebra] lazy val base64StringCodec: Codec[String, String] =
     Codec.fromEncoderAndDecoder[String, String](s =>
@@ -82,7 +82,7 @@ trait AuthenticatedEndpoints extends Middlewares {
       realm: Option[String] = None
   )(implicit tupler: Tupler[A, UsernamePassword]): Endpoint[tupler.Out, Option[B]] =
     endpoint
-      .mapRequest(_.withHeaders(basicAuthHeader))
+      .mapRequest(_.addHeaders(basicAuthHeader))
       .mapResponse(_.orElse(unauthorizedResponse(realm)).xmap(_.left.toOption)(_.toLeft(())))
 
   /** Add Bearer token authentication to an endpoint.
@@ -94,7 +94,7 @@ trait AuthenticatedEndpoints extends Middlewares {
       bearerFormat: Option[String] = None
   )(implicit tupler: Tupler[A, BearerToken]): Endpoint[tupler.Out, Option[B]] =
     endpoint
-      .mapRequest(_.withHeaders(bearerAuthHeader))
+      .mapRequest(_.addHeaders(bearerAuthHeader))
       .mapResponse(_.orElse(unauthorizedResponse(None)).xmap(_.left.toOption)(_.toLeft(())))
 
   implicit class AuthenticationEndpointOps[A, B](endpoint: Endpoint[A, B]) {

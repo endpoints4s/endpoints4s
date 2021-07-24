@@ -38,7 +38,6 @@ class Endpoints(val host: String, val wsClient: WSClient)(implicit
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
-    with algebra.Middlewares
     with Urls
     with Methods
     with StatusCodes {

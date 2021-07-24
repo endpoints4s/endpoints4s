@@ -8,12 +8,7 @@ import endpoints4s.openapi.model.{MediaType, Schema}
   *
   * @group interpreters
   */
-trait Requests
-    extends algebra.Requests
-    with algebra.RequestMiddlewares
-    with Urls
-    with Methods
-    with Headers {
+trait Requests extends algebra.Requests with Urls with Methods with Headers {
 
   type RequestHeaders[A] = DocumentedHeaders
 
@@ -102,10 +97,6 @@ trait Requests
       ): RequestHeaders[tupler.Out] =
         DocumentedHeaders(fa.value ++ fb.value)
     }
-
-  /* ************************
-      MIDDLEWARES
-  ************************* */
 
   def addRequestHeaders[A, H](
       request: Request[A],

@@ -29,7 +29,6 @@ class Endpoints[F[_]: Sync](val host: Uri, val client: Client[F])
 
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
-    with algebra.Middlewares
     with Urls
     with Methods
     with StatusCodes {

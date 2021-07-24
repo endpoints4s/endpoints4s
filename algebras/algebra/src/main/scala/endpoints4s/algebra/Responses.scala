@@ -144,6 +144,11 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
       headers: ResponseHeaders[B] = emptyResponseHeaders
   )(implicit tupler: Tupler.Aux[A, B, R]): Response[R]
 
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out]
+
   /** Alternative between two possible choices of responses.
     *
     * Server interpreters construct either one or the other response.
@@ -229,6 +234,11 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
       */
     final def orElse[B](otherResponse: Response[B]): Response[Either[A, B]] =
       choiceResponse(response, otherResponse)
+
+    def addHeaders[H](headers: ResponseHeaders[H])(implicit
+        tupler: Tupler[A, H]
+    ): Response[tupler.Out] =
+      addResponseHeaders(response, headers)
   }
 
 }

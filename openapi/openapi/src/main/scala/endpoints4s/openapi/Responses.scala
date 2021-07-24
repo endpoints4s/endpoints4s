@@ -8,7 +8,7 @@ import endpoints4s.openapi.model.{MediaType, Schema}
   *
   * @group interpreters
   */
-trait Responses extends algebra.Responses with algebra.Middlewares with StatusCodes with Headers {
+trait Responses extends algebra.Responses with StatusCodes with Headers {
   this: algebra.Errors =>
 
   type ResponseEntity[A] = Map[String, MediaType]
@@ -99,10 +99,6 @@ trait Responses extends algebra.Responses with algebra.Middlewares with StatusCo
     DocumentedHeaders(
       List(DocumentedHeader(name, docs, required = false, Schema.simpleString))
     )
-
-  /* ************************
-      MIDDLEWARES
-  ************************* */
 
   def addResponseHeaders[A, H](
       response: Response[A],
