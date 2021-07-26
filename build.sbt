@@ -37,6 +37,8 @@ ThisBuild / sonatypeProjectHosting := Some(
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
 ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
+// Ignore dependencies to modules with version like `1.2.3+n`
+ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
 ThisBuild / version := "1.4.0+n"
