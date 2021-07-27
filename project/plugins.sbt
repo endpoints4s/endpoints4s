@@ -32,9 +32,8 @@ lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 
 val build = project.in(file(".")).dependsOn(`sbt-assets`)
 
-ivyLoggingLevel in ThisBuild := UpdateLogging.Quiet
+ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.0.1")
-addSbtPlugin("ch.epfl.scala" % "sbt-eviction-rules" % "1.0.0-RC1")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.2.1")
