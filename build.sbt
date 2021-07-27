@@ -37,24 +37,16 @@ ThisBuild / sonatypeProjectHosting := Some(
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
 ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
+// Ignore dependencies to modules with version like `1.2.3+n`
+ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
 ThisBuild / version := "1.4.0+n"
 
 val versionSchemes = Def.setting {
   Seq(
-    "org.endpoints4s" %%% "*" % "early-semver",
-    "org.typelevel" %%% "cats*" % "early-semver",
-    "co.fs2" %%% "fs2*" % "early-semver",
-    "com.typesafe.play" %%% "play-json" % "early-semver",
-    "com.typesafe.play" %%% "play-functional" % "early-semver",
-    "com.typesafe.akka" %% "akka*" % "early-semver",
-    "org.scala-js" % "scalajs-*" % "early-semver",
-    "org.scala-lang.modules" %% "*" % "early-semver",
-    "io.netty" % "*" % "always" // These guys use an unconventional versioning scheme
+    "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",
   )
 }
 
-ThisBuild / evictionRules ++= versionSchemes.value
-ThisBuild / versionPolicyDependencySchemes ++= versionSchemes.value
-ThisBuild / versionPolicyIgnored += "joda-time" % "joda-time"
+ThisBuild / libraryDependencySchemes ++= versionSchemes.value
