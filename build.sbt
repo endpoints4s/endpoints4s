@@ -45,7 +45,9 @@ ThisBuild / version := "1.4.0+n"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",
+  "com.softwaremill.sttp.model" %%% "core" % "semver-spec",
   "com.typesafe.akka" %%% "akka-http" % "semver-spec",
   "com.typesafe.akka" %%% "akka-http-core" % "semver-spec",
   "com.typesafe.akka" %%% "akka-parsing" % "semver-spec",
+  "org.log4s" %%% "log4s" % "semver-spec"
 )
