@@ -43,10 +43,9 @@ ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+
 // unless they override it.
 ThisBuild / version := "1.4.0+n"
 
-val versionSchemes = Def.setting {
-  Seq(
-    "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",
-  )
-}
-
-ThisBuild / libraryDependencySchemes ++= versionSchemes.value
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",
+  "com.typesafe.akka" %%% "akka-http" % "semver-spec",
+  "com.typesafe.akka" %%% "akka-http-core" % "semver-spec",
+  "com.typesafe.akka" %%% "akka-parsing" % "semver-spec",
+)
