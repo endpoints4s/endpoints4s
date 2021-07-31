@@ -96,16 +96,16 @@ trait Urls extends algebra.Urls {
     DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true)
 
   override def intQueryString: QueryStringParam[Int] =
-    DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleInt, isRequired = true)
 
   override def longQueryString: QueryStringParam[Long] =
-    DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleLong, isRequired = true)
 
   override def booleanQueryString: QueryStringParam[Boolean] =
     DocumentedQueryStringParam(Schema.simpleBoolean, isRequired = true)
 
   override def doubleQueryString: QueryStringParam[Double] =
-    DocumentedQueryStringParam(Schema.simpleNumber, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleDouble, isRequired = true)
 
   type Segment[A] = Schema
 
@@ -122,11 +122,11 @@ trait Urls extends algebra.Urls {
 
   override def uuidSegment: Segment[UUID] = Schema.simpleUUID
 
-  override def intSegment: Segment[Int] = Schema.simpleInteger
+  override def intSegment: Segment[Int] = Schema.simpleInt
 
-  override def longSegment: Segment[Long] = Schema.simpleInteger
+  override def longSegment: Segment[Long] = Schema.simpleLong
 
-  override def doubleSegment: Segment[Double] = Schema.simpleNumber
+  override def doubleSegment: Segment[Double] = Schema.simpleDouble
 
   type Path[A] = DocumentedUrl
 
