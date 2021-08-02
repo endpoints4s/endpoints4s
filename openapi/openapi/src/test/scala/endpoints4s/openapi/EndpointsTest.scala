@@ -27,7 +27,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
           In.Query,
           required = true,
           description = None,
-          schema = Schema.simpleDouble
+          schema = Schema.simpleNumber
         ) ::
           Parameter(
             "lang",
