@@ -41,7 +41,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             In.Query,
             required = false,
             description = None,
-            schema = Schema.Array(Left(Schema.simpleInteger), None, None, None)
+            schema = Schema.Array(Left(Schema.simpleLong), None, None, None)
           ) ::
           Nil
       Fixtures.quux.item
