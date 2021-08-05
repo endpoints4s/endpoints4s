@@ -1524,9 +1524,10 @@ object Schema {
 
   val simpleUUID = Primitive("string", format = Some("uuid"), None, None, None)
   val simpleString = Primitive("string", None, None, None, None)
-  val simpleInteger = Primitive("integer", None, None, None, None)
+  val simpleInteger = Primitive("integer", format = Some("int32"), None, None, None)
+  val simpleLong = Primitive("integer", format = Some("int64"), None, None, None)
   val simpleBoolean = Primitive("boolean", None, None, None, None)
-  val simpleNumber = Primitive("number", None, None, None, None)
+  val simpleNumber = Primitive("number", format = Some("double"), None, None, None)
 
 }
 

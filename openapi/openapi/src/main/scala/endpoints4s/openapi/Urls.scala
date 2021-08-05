@@ -99,7 +99,7 @@ trait Urls extends algebra.Urls {
     DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
 
   override def longQueryString: QueryStringParam[Long] =
-    DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleLong, isRequired = true)
 
   override def booleanQueryString: QueryStringParam[Boolean] =
     DocumentedQueryStringParam(Schema.simpleBoolean, isRequired = true)
@@ -124,7 +124,7 @@ trait Urls extends algebra.Urls {
 
   override def intSegment: Segment[Int] = Schema.simpleInteger
 
-  override def longSegment: Segment[Long] = Schema.simpleInteger
+  override def longSegment: Segment[Long] = Schema.simpleLong
 
   override def doubleSegment: Segment[Double] = Schema.simpleNumber
 
