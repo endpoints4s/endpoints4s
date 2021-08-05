@@ -100,7 +100,7 @@ object EndpointsSettings {
   val circeVersion = "0.13.0"
   val playjsonVersion = "2.9.2"
   val playVersion = "2.8.7"
-  val sttpVersion = "3.3.12"
+  val sttpVersion = "3.3.13"
   val akkaActorVersion = "2.6.15"
   val akkaHttpVersion = "10.2.5"
   val http4sVersion = "0.23.0"
