@@ -24,7 +24,7 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
-    new Endpoint[A, B](request) {
+    new Endpoint[A, B](request, response) {
       def apply(a: A) =
         new js.Promise[B]((resolve, error) => {
           performXhr(request, response, a)(

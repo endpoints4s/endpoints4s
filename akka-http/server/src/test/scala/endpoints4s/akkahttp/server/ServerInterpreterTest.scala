@@ -21,6 +21,7 @@ import scala.concurrent.duration.DurationInt
 
 class ServerInterpreterTest
     extends algebra.server.EndpointsTestSuite[EndpointsCodecsTestApi]
+    with algebra.server.AuthenticatedEndpointsTestSuite[EndpointsCodecsTestApi]
     with algebra.server.BasicAuthenticationTestSuite[EndpointsCodecsTestApi]
     with algebra.server.ChunkedJsonEntitiesTestSuite[EndpointsCodecsTestApi]
     with algebra.server.TextEntitiesTestSuite[EndpointsCodecsTestApi]

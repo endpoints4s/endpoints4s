@@ -33,7 +33,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       extends Fixtures
       with openapi.Endpoints
       with openapi.JsonEntitiesFromSchemas
-      with openapi.BasicAuthentication {
+      with openapi.AuthenticatedEndpoints {
 
     def openApiDocument: OpenApi =
       openApi(
@@ -46,7 +46,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       extends algebra.Endpoints
       with algebra.JsonEntitiesFromSchemas
       with generic.JsonSchemas
-      with algebra.BasicAuthentication
+      with algebra.AuthenticatedEndpoints
       with algebra.JsonSchemasFixtures {
 
     implicit private val schemaStorage: JsonSchema[Storage] =
@@ -75,14 +75,11 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     )
 
     val postBook =
-      authenticatedEndpoint(
-        Post,
-        path / "books",
+      endpoint(
+        post(path / "books", jsonRequest[Book], Some("Books list")),
         ok(jsonResponse(Enum.colorSchema)),
-        jsonRequest[Book],
-        requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
-      )
+        docs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
+      ).withBasicAuth()
   }
 
   "OpenApi" should {
@@ -177,10 +174,27 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |              }
         |            }
         |          },
-        |          "403" : {
-        |            "description" : ""
+        |          "401": {
+        |            "description": "User is not authorized to call that endpoint",
+        |            "headers": {
+        |              "WWW-Authenticate": {
+        |                "schema": {
+        |                  "type": "string"
+        |                }
+        |              }
+        |            }
         |          }
         |        },
+        |        "parameters": [
+        |          {
+        |            "name": "Authorization",
+        |            "in": "header",
+        |            "schema": {
+        |              "type": "string"
+        |            },
+        |            "required": true
+        |          }
+        |        ],
         |        "tags" : [
         |          "Books",
         |          "Another tag"

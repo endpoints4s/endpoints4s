@@ -10,7 +10,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 ### `endpoints4s.http4s.client.Endpoints`
 
-The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a `Kleisli[Effect, A, B]` aka a function
+The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function
 from `A` to `Effect[B]`, where `Effect[_]` can be any type constructor `F[_]` with a valid `cats.effect.Sync` instance (e.g. `cats.effect.IO` or `monix.eval.Task`) :
 
 @@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }

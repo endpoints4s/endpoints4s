@@ -20,16 +20,18 @@ trait MuxEndpoints extends algebra.MuxEndpoints {
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): Future[req.Response] =
-      request(encoder.encode(req)).flatMap { resp =>
-        futureFromEither(
+      for {
+        req2 <- request(encoder.encode(req))
+        resp <- settings.requestExecutor(req2)
+        entity <- futureFromEither(
           decodeResponse(response, resp).toRight({
-            resp.discardEntityBytes();
+            resp.discardEntityBytes()
             new Throwable(s"Unexpected response status or headers")
           })
-        ).flatMap { entity =>
-          entity(resp.entity).flatMap { t =>
-            futureFromEither(t).flatMap(tt =>
-              futureFromEither(
+        )
+        t <- entity(resp.entity)
+        tt <- futureFromEither(t)
+        ttt <- futureFromEither(
                 decoder
                   .decode(tt)
                   .fold(
@@ -37,10 +39,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints {
                     errors => Left(new Exception(errors.mkString(". ")))
                   )
               )
-            )
-          }
-        }
-      }
+      } yield ttt
   }
 
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](

@@ -5,6 +5,7 @@ import java.net.ServerSocket
 import akka.stream.scaladsl.Source
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.server.{
+  AuthenticatedEndpointsTestSuite,
   BasicAuthenticationTestSuite,
   DecodedUrl,
   EndpointsTestSuite,
@@ -21,6 +22,7 @@ import scala.concurrent.Future
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
+    with AuthenticatedEndpointsTestSuite[EndpointsTestApi]
     with BasicAuthenticationTestSuite[EndpointsTestApi]
     with ChunkedJsonEntitiesTestSuite[EndpointsTestApi]
     with SumTypedEntitiesTestSuite[EndpointsTestApi]

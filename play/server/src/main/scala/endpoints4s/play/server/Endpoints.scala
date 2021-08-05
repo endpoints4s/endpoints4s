@@ -517,4 +517,88 @@ trait EndpointsWithCustomErrors
   def handleServerError(throwable: Throwable): Result =
     serverErrorResponse(throwableToServerError(throwable))
 
+  // Middlewares
+
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] = new Request[tupler.Out] {
+
+    def decode: RequestExtractor[RequestEntity[tupler.Out]] = req => {
+      request.decode(req).map { a =>
+        headers(req.headers) match {
+          case inv: Invalid =>
+            _ =>
+              Some(
+                BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
+              )
+          case Valid(h) => a.andThen(_.map(_.map(tupler(_, h))))
+        }
+      }
+    }
+
+    def encode(out: tupler.Out): Call = request.encode(tupler.unapply(out)._1)
+  }
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+
+      def decode: RequestExtractor[RequestEntity[tupler.Out]] = req => {
+        request.decode(req).map { a =>
+          qs.decode(req.queryString) match {
+            case inv: Invalid =>
+              // TODO avoid duplication
+              _ =>
+                Some(
+                  BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
+                )
+            case Valid(q) => a.andThen(_.map(_.map(tupler(_, q))))
+          }
+        }
+      }
+
+      def encode(out: tupler.Out): Call = {
+        val (a, q) = tupler.unapply(out)
+        val call = request.encode(a)
+        val queryString = qs
+          .encode(q)
+          .flatMap { case (n, vs) => vs.map(v => (n, v)) }
+          .map { case (n, v) => s"$n=$v" }
+          .mkString("&")
+        if (call.url.contains('?'))
+          call.copy(url = s"${call.url}&${queryString}")
+        else
+          call.copy(url = s"${call.url}?${queryString}")
+      }
+    }
+
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    o => {
+      val (a, h) = tupler.unapply(o)
+      response(a).withHeaders(headers(h): _*)
+    }
 }

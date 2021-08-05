@@ -1,9 +1,12 @@
 package sample.algebra
 
-import endpoints4s.algebra.{BasicAuthentication, circe, Endpoints}
+import endpoints4s.algebra.{AuthenticatedEndpoints, circe, Endpoints}
 import io.circe.generic.JsonCodec
 
-trait DocumentedApi extends Endpoints with BasicAuthentication with circe.JsonEntitiesFromCodecs {
+trait DocumentedApi
+    extends Endpoints
+    with AuthenticatedEndpoints
+    with circe.JsonEntitiesFromCodecs {
 
   val items =
     endpoint(
@@ -28,13 +31,11 @@ trait DocumentedApi extends Endpoints with BasicAuthentication with circe.JsonEn
     )
 
   val admin =
-    authenticatedEndpoint(
-      Get,
-      path / "admin",
-      requestEntity = emptyRequest,
-      response = ok(emptyResponse, Some("Administration page")),
-      endpointDocs = EndpointDocs().withSummary(Some("Authentication endpoint"))
-    )
+    endpoint(
+      get(path / "admin"),
+      ok(emptyResponse, Some("Administration page")),
+      docs = EndpointDocs().withSummary(Some("Authentication endpoint"))
+    ).withBasicAuth()
 
 }
 

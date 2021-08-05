@@ -265,6 +265,16 @@ trait EndpointsWithCustomErrors[R[_]]
   ): ResponseHeaders[Option[String]] =
     headers => Valid(headers.get(name.toLowerCase))
 
+  private def decodeHeaders[A](
+      headers: ResponseHeaders[A],
+      response: SResponse[String]
+  ): Validated[A] = {
+    val headersMap = response.headers.iterator.map { case h =>
+      (h.name.toLowerCase, h.value)
+    }.toMap
+    headers(headersMap)
+  }
+
   def response[A, B, Res](
       statusCode: StatusCode,
       entity: ResponseEntity[A],
@@ -317,20 +327,24 @@ trait EndpointsWithCustomErrors[R[_]]
   /** A function that, given an `A`, eventually attempts to decode the `B` response.
     */
   //#endpoint-type
-  type Endpoint[A, B] = A => R[B]
-  //#endpoint-type
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => R[B])
+      //#endpoint-type
+      {
+    def apply(a: A): R[B] = {
+      val result = backend.send(request(a).response(asStringAlways))
+      backend.responseMonad.flatMap(result) { sttpResponse =>
+        decodeResponse(response, sttpResponse)
+      }
+    }
+  }
 
   def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
-    a => {
-      val result = backend.send(request(a).response(asStringAlways))
-      backend.responseMonad.flatMap(result) { sttpResponse =>
-        decodeResponse(response, sttpResponse)
-      }
-    }
+    Endpoint(request, response)
 
   private[client] def decodeResponse[A](
       response: Response[A],
@@ -368,4 +382,68 @@ trait EndpointsWithCustomErrors[R[_]]
       )
   }
 
+  // Middlewares
+
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, h) = tupler.unapply(tuplerOut)
+      headers(h, request(a))
+    }
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, q) = tupler.unapply(tuplerOut)
+      val sttpRequest = request(a)
+      qs.encodeQueryString(q) match {
+        case Some(queryString) =>
+          // TODO QueryString should product sttp QueryParam instead of string (also avoid potention URL encoding issues)
+          val uri = sttpRequest.uri.toString()
+          val newUri =
+            if (uri.contains('?')) s"$uri&$queryString"
+            else s"$uri?$queryString"
+          sttpRequest.copy[Identity, Any, Any](uri = SUri(new URI(newUri)))
+        case None => sttpRequest
+      }
+    }
+
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    new Response[tupler.Out] {
+      def decodeResponse(resp: SResponse[String]): Option[R[tupler.Out]] = {
+        response.decodeResponse(resp).map { rOut =>
+          decodeHeaders(headers, resp) match {
+            case Valid(h) => backend.responseMonad.map(rOut)(tupler(_, h))
+            case Invalid(errors) =>
+              backend.responseMonad.error(new Exception(errors.mkString(". ")))
+          }
+        }
+
+      }
+    }
 }

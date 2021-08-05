@@ -1,18 +1,31 @@
 package endpoints4s.scalaj.client
 
 import endpoints4s.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite}
-import endpoints4s.algebra.{BasicAuthenticationTestApi, EndpointsTestApi}
+import endpoints4s.algebra.{
+  AuthenticatedEndpointsTestApi,
+  AuthenticatedEndpointsClient,
+  BasicAuthenticationTestApi,
+  EndpointsTestApi
+}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.annotation.nowarn
+import endpoints4s.algebra.client.AuthenticatedEndpointsTestSuite
 
+@nowarn("cat=deprecation")
 class TestClient(val address: String)
     extends EndpointsTestApi
     with BasicAuthenticationTestApi
     with Endpoints
     with BasicAuthentication
+    with AuthenticatedEndpointsTestApi
+    with AuthenticatedEndpointsClient
 
-class EndpointsTest extends EndpointsTestSuite[TestClient] with BasicAuthTestSuite[TestClient] {
+class EndpointsTest
+    extends EndpointsTestSuite[TestClient]
+    with AuthenticatedEndpointsTestSuite[TestClient]
+    with BasicAuthTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$wiremockPort")
 
@@ -38,6 +51,7 @@ class EndpointsTest extends EndpointsTestSuite[TestClient] with BasicAuthTestSui
 
   clientTestSuite()
 
+  authTestSuite()
   basicAuthSuite()
 
 }

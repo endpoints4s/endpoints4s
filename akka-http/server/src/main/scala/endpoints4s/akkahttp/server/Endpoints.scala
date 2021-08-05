@@ -3,7 +3,14 @@ package endpoints4s.akkahttp.server
 import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes, Uri}
-import akka.http.scaladsl.server.{Directive1, Directives, ExceptionHandler, Route, StandardRoute}
+import akka.http.scaladsl.server.{
+  Directive1,
+  Directives,
+  ExceptionHandler,
+  Route,
+  RouteResult,
+  StandardRoute
+}
 import akka.http.scaladsl.unmarshalling._
 import endpoints4s.algebra.Documentation
 import endpoints4s.{
@@ -192,6 +199,13 @@ trait EndpointsWithCustomErrors
         (httpRequest: HttpRequest) => fa.decode(httpRequest).zip(fb.decode(httpRequest))(tupler)
     }
 
+  private def requestHeadersDirective[A](headers: RequestHeaders[A]): Directive1[A] =
+    directive1InvFunctor.xmapPartial[Validated[A], A](
+      Directives.extractRequest.map(headers.decode),
+      identity,
+      a => Valid(a)
+    )
+
   /* ************************
       RESPONSES
   ************************* */
@@ -274,12 +288,7 @@ trait EndpointsWithCustomErrors
   ): Request[Out] = new Request[Out] {
     val directive = {
       val methodDirective = convToDirective1(Directives.method(method))
-      val headersDirective: Directive1[C] =
-        directive1InvFunctor.xmapPartial[Validated[C], C](
-          Directives.extractRequest.map(headers.decode),
-          identity,
-          c => Valid(c)
-        )
+      val headersDirective = requestHeadersDirective(headers)
       val matchDirective = methodDirective & url.directive & headersDirective
       matchDirective.tflatMap { case (_, a, c) =>
         entity.map(b => tuplerABC(tuplerAB(a, b), c))
@@ -324,4 +333,74 @@ trait EndpointsWithCustomErrors
   def handleServerError(throwable: Throwable): StandardRoute =
     StandardRoute(serverErrorResponse(throwableToServerError(throwable)))
 
+  /* ************************
+      MIDDLEWARES
+  ************************* */
+
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] = new Request[tupler.Out] {
+
+    def directive: Directive1[tupler.Out] =
+      (request.directive & requestHeadersDirective(headers))
+        .tmap { case (a, h) =>
+          tupler(a, h)
+        }
+
+    def uri(a: tupler.Out): Uri = request.uri(tupler.unapply(a)._1)
+  }
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      def directive: Directive1[tupler.Out] =
+        (request.directive & qs.directive)
+          .tmap { case (a, h) =>
+            tupler(a, h)
+          }
+      def uri(o: tupler.Out): Uri = {
+        val (a, q) = tupler.unapply(o)
+        val uri = request.uri(a)
+        uri.withQuery(Uri.Query(uri.query() ++ qs.encode(q): _*))
+      }
+    }
+
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    o => {
+      val (a, h) = tupler.unapply(o)
+      val httpHeaders = headers(h)
+      val route = response(a)
+      requestContext => {
+        implicit val ec = requestContext.executionContext
+        route(requestContext).map {
+          case RouteResult.Complete(response) =>
+            RouteResult.Complete(response.withHeaders(response.headers ++ httpHeaders))
+          case r: RouteResult.Rejected => r
+        }
+      }
+    }
 }

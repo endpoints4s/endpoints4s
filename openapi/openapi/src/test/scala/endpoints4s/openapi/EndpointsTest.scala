@@ -14,8 +14,8 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
 
   "Path parameters" should {
     "Appear as patterns between braces in the documentation" in {
-      Fixtures.baz.path shouldBe "/baz/{quux}"
-      Fixtures.multipleSegmentsPath.path shouldBe "/assets/{file}"
+      Fixtures.baz.documentedEndpoint.path shouldBe "/baz/{quux}"
+      Fixtures.multipleSegmentsPath.documentedEndpoint.path shouldBe "/assets/{file}"
     }
   }
 
@@ -44,7 +44,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             schema = Schema.Array(Left(Schema.simpleLong), None, None, None)
           ) ::
           Nil
-      Fixtures.quux.item
+      Fixtures.quux.documentedEndpoint.item
         .operations("get")
         .parameters shouldBe expectedParameters
     }

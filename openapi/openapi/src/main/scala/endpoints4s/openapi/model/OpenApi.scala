@@ -1605,4 +1605,14 @@ object SecurityScheme {
       scheme = Some("basic"),
       bearerFormat = None
     )
+
+  def bearer(bearerFormat: Option[String] = None): SecurityScheme =
+    SecurityScheme(
+      `type` = "http",
+      description = Some("Bearer Authentication"),
+      name = None,
+      in = None,
+      scheme = Some("bearer"),
+      bearerFormat = bearerFormat
+    )
 }

@@ -6,7 +6,7 @@ import endpoints4s.openapi.model.{Info, OpenApi}
 object DocumentedApi
     extends sample.algebra.DocumentedApi
     with openapi.Endpoints
-    with openapi.BasicAuthentication
+    with openapi.AuthenticatedEndpoints
     with openapi.JsonEntities {
 
   /** Produces an OpenAPI description of the endpoints.

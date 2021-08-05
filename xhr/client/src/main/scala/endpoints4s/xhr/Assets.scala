@@ -2,7 +2,6 @@ package endpoints4s.xhr
 
 import endpoints4s.algebra
 import endpoints4s.algebra.Documentation
-import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.ArrayBuffer
@@ -69,14 +68,8 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   private def arrayBufferGet(url: Url[AssetPath]): Request[AssetRequest] =
     new Request[AssetRequest] {
-      def apply(
-          assetRequest: AssetRequest
-      ): (XMLHttpRequest, Option[js.Any]) = {
-        val xhr = new XMLHttpRequest
-        xhr.open("GET", url.encode(assetRequest))
-        xhr.responseType = "arraybuffer"
-        (xhr, None)
-      }
+      def apply(assetRequest: AssetRequest): RequestData =
+        RequestData("GET", _.responseType = "arraybuffer", _ => None)
       def href(assetRequest: AssetRequest): String = url.encode(assetRequest)
     }
 

@@ -240,21 +240,25 @@ trait EndpointsWithCustomErrors
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
 
   //#endpoint-type
-  type Endpoint[A, B] = Kleisli[Effect, A, B]
-  //#endpoint-type
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => Effect[B])
+      //#endpoint-type
+      {
+    def apply(a: A): Effect[B] =
+      request(a).flatMap { req =>
+        client
+          .run(req)
+          .use(res => decodeResponse(response, res).flatMap(_.apply(res)))
+      }
+    def asKleisli: Kleisli[Effect, A, B] = Kleisli(this)
+  }
 
   override def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs
   ): Endpoint[A, B] =
-    Kleisli { a =>
-      request(a).flatMap { req =>
-        client
-          .run(req)
-          .use(res => decodeResponse(response, res).flatMap(_.apply(res)))
-      }
-    }
+    Endpoint(request, response)
 
   private[client] def decodeResponse[A](
       response: Response[A],
@@ -294,4 +298,58 @@ trait EndpointsWithCustomErrors
   )(f: A => Effect[B]): ResponseEntity[B] =
     res => entity(res).flatMap(f)
 
+  // Middlewares
+
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  def addRequestQueryString[A, Q, Out](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    out => {
+      val (a, q) = tupler.unapply(out)
+      request(a).map { http4sRequest =>
+        http4sRequest.withUri(
+          http4sRequest.uri.withMultiValueQueryParams(qs(q).multiParams)
+        )
+      }
+    }
+
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    out => {
+      val (a, h) = tupler.unapply(out)
+      request(a).map(headers(h, _))
+    }
+
+  def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (sc, hs) =>
+      response(sc, hs).flatMap { responseEntity =>
+        headers(hs) match {
+          case Valid(h) => Some(responseEntity.andThen(_.map(tupler(_, h))))
+          case Invalid(errors) =>
+            Some(res => effect.raiseError(new Throwable(errors.mkString(", "))))
+        }
+      }
 }
