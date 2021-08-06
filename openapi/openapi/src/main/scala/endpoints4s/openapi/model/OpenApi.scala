@@ -89,14 +89,27 @@ object OpenApi {
         }
         obj.additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
       case array: Schema.Array =>
-        val itemsSchema = array.elementType match {
-          case Left(value)  => schemaJson(value)
-          case Right(value) => ujson.Arr(value.map(schemaJson): _*)
+        fields += "type" -> "array"
+        array.elementType match {
+          case Left(value) =>
+            fields += "items" -> schemaJson(value)
+          case Right(value) =>
+            /** Best effort to represent the heterogeneous array in OpenAPI 3.0
+              * This should be changed with OpenAPI 3.1 and more idiomatic representation using `prefixItems`
+              */
+            fields ++= List(
+              "items" -> schemaJson(
+                Schema.OneOf(
+                  alternatives = Schema.EnumeratedAlternatives(value),
+                  description = None,
+                  example = None,
+                  title = None
+                )
+              ),
+              "minItems" -> ujson.Num(value.length.toDouble),
+              "maxItems" -> ujson.Num(value.length.toDouble)
+            )
         }
-        fields ++= List(
-          "type" -> "array",
-          "items" -> itemsSchema
-        )
       case enm: Schema.Enum =>
         fields ++= schemaJson(
           enm.elementType.withDefinedDescription(enm.description)
