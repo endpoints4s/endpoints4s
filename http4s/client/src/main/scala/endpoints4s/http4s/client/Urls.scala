@@ -82,7 +82,7 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
     }
 
   override def stringSegment: Segment[String] =
-    s => Uri.pathEncode(s)
+    s => Uri.Path.unsafeFromString(Uri.pathEncode(s))
 
   trait Path[A] extends Url[A] {
     final def encodeUrl(value: A): ParseResult[Uri] =
@@ -104,7 +104,7 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
 
   def segment[A](name: String, docs: Documentation)(implicit
       s: Segment[A]
-  ): Path[A] = a => s.encode(a) :: Nil
+  ): Path[A] = a => s.encode(a).renderString :: Nil
 
   def remainingSegments(name: String, docs: Documentation): Path[String] =
     _ :: Nil

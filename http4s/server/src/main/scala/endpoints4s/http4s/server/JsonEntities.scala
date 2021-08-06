@@ -93,6 +93,6 @@ private object JsonEntities {
       endpoints: EndpointsWithCustomErrors
   )(encoder: Encoder[A, String]): endpoints.ResponseEntity[A] =
     EntityEncoder[endpoints.Effect, Chunk[Byte]]
-      .contramap[A](value => Chunk.bytes(encoder.encode(value).getBytes()))
+      .contramap[A](value => Chunk.array(encoder.encode(value).getBytes()))
       .withContentType(`Content-Type`(MediaType.application.json))
 }

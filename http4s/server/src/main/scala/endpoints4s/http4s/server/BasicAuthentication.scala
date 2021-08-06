@@ -27,7 +27,7 @@ trait BasicAuthentication
     headers =>
       Valid(
         headers
-          .get(Authorization)
+          .get[Authorization]
           .flatMap { authHeader =>
             authHeader.credentials match {
               case BasicCredentials(username, password) =>

@@ -3,17 +3,16 @@ package endpoints4s.http4s.client
 import endpoints4s.algebra
 import endpoints4s.algebra.client
 
-import cats.effect.Sync
+import cats.effect.Concurrent
 import org.http4s.client.Client
 import cats.effect.IO
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.global
-import org.http4s.client.asynchttpclient.AsyncHttpClient
-import cats.effect.ContextShift
+import _root_.org.http4s.asynchttpclient.client.AsyncHttpClient
+import cats.effect.unsafe.implicits.global
 import endpoints4s.algebra.circe
 import org.http4s.Uri
 
-class TestJsonSchemaClient[F[_]: Sync](host: Uri, client: Client[F])
+class TestJsonSchemaClient[F[_]: Concurrent](host: Uri, client: Client[F])
     extends Endpoints[F](host, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
@@ -30,7 +29,6 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
-  implicit val ctx: ContextShift[IO] = IO.contextShift(global)
 
   val (ahc, shutdown) =
     AsyncHttpClient.allocate[IO]().unsafeRunSync()

@@ -17,7 +17,7 @@ trait BuiltInErrors extends algebra.BuiltInErrors {
     val hdr = `Content-Type`(MediaType.application.json)
     EntityEncoder.simple(hdr) { invalid =>
       val s = endpoints4s.ujson.codecs.invalidCodec.encode(invalid)
-      Chunk.bytes(s.getBytes(StandardCharsets.UTF_8))
+      Chunk.array(s.getBytes(StandardCharsets.UTF_8))
     }
   }
 
