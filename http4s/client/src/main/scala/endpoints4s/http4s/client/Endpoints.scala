@@ -136,7 +136,13 @@ trait EndpointsWithCustomErrors
     effect.map(effect.fromEither(url.encodeUrl(urlP)))(uri =>
       entity(
         bodyP,
-        headers(headersP, Http4sRequest(method, host.withPath(host.path.concat(uri.path))))
+        headers(
+          headersP,
+          Http4sRequest(
+            method,
+            host.withPath(Uri.Path.unsafeFromString(host.path.renderString + uri.renderString))
+          )
+        )
       )
     )
   }
@@ -168,8 +174,6 @@ trait EndpointsWithCustomErrors
     }
 
   override def emptyResponse: ResponseEntity[Unit] = _ => ().pure[Effect]
-
-    
 
   override def textResponse: ResponseEntity[String] = _.as[String]
 

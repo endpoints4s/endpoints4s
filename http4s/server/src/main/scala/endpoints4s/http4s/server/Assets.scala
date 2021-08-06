@@ -12,7 +12,7 @@ import cats.effect.kernel.Sync
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   val DefaultBufferSize = 10240
 
-  implicit def EffectSync: Sync[Effect] 
+  implicit def EffectSync: Sync[Effect]
 
   // Digests are unsupported.
   def digests: Map[String, String] = Map.empty
@@ -80,7 +80,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
         if (isGzipped) Some(`Content-Encoding`(ContentCoding.gzip)) else None
       val contentLengthHeader: Header.ToRaw =
         `Content-Length`.fromLong(length) match {
-          case Left(_) => `Transfer-Encoding`(TransferCoding.chunked)
+          case Left(_)   => `Transfer-Encoding`(TransferCoding.chunked)
           case Right(cl) => cl
         }
 

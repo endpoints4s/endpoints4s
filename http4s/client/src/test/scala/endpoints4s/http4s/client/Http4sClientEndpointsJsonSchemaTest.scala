@@ -29,7 +29,6 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
-
   val (ahc, shutdown) =
     AsyncHttpClient.allocate[IO]().unsafeRunSync()
 
