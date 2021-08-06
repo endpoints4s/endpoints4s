@@ -94,9 +94,8 @@ object OpenApi {
           case Left(value) =>
             fields += "items" -> schemaJson(value)
           case Right(value) =>
-            /** Best effort to represent the heterogeneous array in OpenAPI 3.0
-              * This should be changed with OpenAPI 3.1 and more idiomatic representation using `prefixItems`
-              */
+            // Best effort (not 100% accurate) to represent the heterogeneous array in OpenAPI 3.0
+            // This should be changed with OpenAPI 3.1 and more idiomatic representation using `prefixItems`
             fields ++= List(
               "items" -> schemaJson(
                 Schema.OneOf(
