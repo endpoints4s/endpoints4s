@@ -8,7 +8,7 @@ import org.http4s.client.Client
 import cats.effect.IO
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.global
-import org.http4s.client.asynchttpclient.AsyncHttpClient
+import _root_.org.http4s.asynchttpclient.AsyncHttpClient
 import cats.effect.ContextShift
 import endpoints4s.algebra.circe
 import org.http4s.Uri

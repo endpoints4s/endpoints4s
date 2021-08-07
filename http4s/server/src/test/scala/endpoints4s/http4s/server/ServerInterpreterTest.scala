@@ -14,7 +14,7 @@ import endpoints4s.algebra.server.{
 }
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
