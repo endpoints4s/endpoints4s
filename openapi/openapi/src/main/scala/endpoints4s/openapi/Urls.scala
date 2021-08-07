@@ -1,7 +1,8 @@
-package endpoints4s
-package openapi
+package endpoints4s.openapi
 
 import java.util.UUID
+
+import endpoints4s.{ujson => _, _}
 
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.Schema
@@ -48,13 +49,40 @@ trait Urls extends algebra.Urls {
       )
     )
 
-  case class DocumentedQueryStringParam(schema: Schema, isRequired: Boolean)
-  type QueryStringParam[A] = DocumentedQueryStringParam
+  override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+      value: QueryStringParam[Option[A]]
+  ): QueryString[A] =
+    DocumentedQueryString(
+      List(
+        DocumentedParameter(
+          name,
+          required = false,
+          docs,
+          schema = {
+            val defaultJson = value.encoder.encode(Some(default))
+            value.schema.withDefinedDefault(Some(defaultJson))
+          }
+        )
+      )
+    )
+
+  case class DocumentedQueryStringParam[A](
+      schema: Schema,
+      isRequired: Boolean,
+      encoder: Encoder[A, ujson.Value]
+  )
+  type QueryStringParam[A] = DocumentedQueryStringParam[A]
 
   implicit def optionalQueryStringParam[A](implicit
       param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =
-    param.copy(isRequired = false)
+    param.copy(
+      isRequired = false,
+      encoder = {
+        case None    => ujson.Null
+        case Some(a) => param.encoder.encode(a)
+      }
+    )
 
   implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
       param: QueryStringParam[A],
@@ -67,7 +95,8 @@ trait Urls extends algebra.Urls {
         example = None,
         title = None
       ),
-      isRequired = false
+      isRequired = false,
+      encoder = cc => ujson.Arr(cc.map(param.encoder.encode))
     )
 
   implicit lazy val queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
@@ -86,26 +115,30 @@ trait Urls extends algebra.Urls {
           fa: QueryStringParam[A],
           f: A => Validated[B],
           g: B => A
-      ): QueryStringParam[B] = fa
+      ): QueryStringParam[B] = new DocumentedQueryStringParam[B](
+        schema = fa.schema,
+        isRequired = fa.isRequired,
+        encoder = b => fa.encoder.encode(g(b))
+      )
     }
 
   def stringQueryString: QueryStringParam[String] =
-    DocumentedQueryStringParam(Schema.simpleString, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleString, isRequired = true, ujson.Str(_))
 
   override def uuidQueryString: QueryStringParam[UUID] =
-    DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleUUID, isRequired = true, u => ujson.Str(u.toString))
 
   override def intQueryString: QueryStringParam[Int] =
-    DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleInteger, isRequired = true, n => ujson.Num(n.toDouble))
 
   override def longQueryString: QueryStringParam[Long] =
-    DocumentedQueryStringParam(Schema.simpleLong, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleLong, isRequired = true, n => ujson.Num(n.toDouble))
 
   override def booleanQueryString: QueryStringParam[Boolean] =
-    DocumentedQueryStringParam(Schema.simpleBoolean, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleBoolean, isRequired = true, ujson.Bool(_))
 
   override def doubleQueryString: QueryStringParam[Double] =
-    DocumentedQueryStringParam(Schema.simpleNumber, isRequired = true)
+    DocumentedQueryStringParam(Schema.simpleNumber, isRequired = true, ujson.Num(_))
 
   type Segment[A] = Schema
 

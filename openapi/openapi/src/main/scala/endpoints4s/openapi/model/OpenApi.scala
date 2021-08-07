@@ -967,6 +967,27 @@ sealed trait Schema {
       case s: Schema.Reference =>
         s.withDescription(description.orElse(s.description))
     }
+
+  /** @return The same schema with its default overridden by the given `default`,
+    *         or stay unchanged if this one is empty.
+    */
+  def withDefinedDefault(default: Option[ujson.Value]): Schema =
+    this match {
+      case s: Schema.Object =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.Array =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.Enum =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.Primitive =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.OneOf =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.AllOf =>
+        s.withDefault(default.orElse(s.default))
+      case s: Schema.Reference =>
+        s.withDefault(default.orElse(s.default))
+    }
 }
 
 object Schema {
