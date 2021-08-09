@@ -71,12 +71,14 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             "name",
             Schema.Primitive("string", None, None, None, None),
             isRequired = true,
+            defaultValue = None,
             description = Some("Name of the user")
           ) ::
             Schema.Property(
               "age",
               Schema.Primitive("integer", Some("int32"), None, None, None),
               isRequired = true,
+              defaultValue = None,
               description = None
             ) ::
             Nil,
@@ -117,6 +119,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
               "next",
               Schema.Reference("Rec", None, None),
               isRequired = false,
+              defaultValue = None,
               description = None
             ) :: Nil,
             additionalProperties = None,
@@ -143,11 +146,13 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
                     "x",
                     Schema.Reference("Expression", None, None),
                     isRequired = true,
+                    defaultValue = None,
                     description = None
                   ) :: Schema.Property(
                     "y",
                     Schema.Reference("Expression", None, None),
                     isRequired = true,
+                    defaultValue = None,
                     description = None
                   ) :: Nil,
                   additionalProperties = None,
@@ -184,6 +189,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
                       None
                     ),
                     isRequired = false,
+                    defaultValue = None,
                     description = None
                   ) :: Nil,
                   additionalProperties = None,
@@ -195,6 +201,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
               None
             ),
             isRequired = false,
+            defaultValue = None,
             description = None
           ) :: Nil,
           additionalProperties = None,
@@ -217,12 +224,14 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
         None
       ),
       isRequired = true,
+      defaultValue = None,
       description = None
     )
     val nextSchema = Schema.Property(
       "next",
       Schema.Reference("TaggedRec", None, None),
       isRequired = false,
+      defaultValue = None,
       description = None
     )
     Fixtures.toSchema(Fixtures.taggedRecursiveSchema.docs) shouldBe Schema.Reference(
@@ -238,6 +247,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
                     "a",
                     Schema.Primitive("string", None, None, None, None),
                     isRequired = true,
+                    defaultValue = None,
                     description = None
                   )
                   :: nextSchema
@@ -254,6 +264,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
                     "b",
                     Schema.Primitive("integer", Some("int32"), None, None, None),
                     isRequired = true,
+                    defaultValue = None,
                     description = None
                   )
                   :: nextSchema
