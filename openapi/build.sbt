@@ -28,7 +28,7 @@ lazy val openapi =
         ProblemFilters.exclude[IncompatibleMethTypeProblem]("endpoints4s.openapi.model.OpenApi.this"),
 
         // Due to adding a new parameter to default `private` constructors
-        // OK since the constructors are `private`
+        // OK since these are `private` in Scala (although not `private` in JVM classfiles)
         ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#AllOf.this"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Array.this"),
         ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Enum.this"),
@@ -38,8 +38,13 @@ lazy val openapi =
         ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.this"),
 
         // Due to adding a new member to a Scala `sealed` class
-        // OK since `Schema` is sealed and subtypes are final
-        ProblemFilters.exclude[ReversedMissingMethodProblem]("endpoints4s.openapi.model.Schema.default")
+        // OK since `Schema` is `sealed` in Scala (although not in JVM classfiles) and subtypes are final
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("endpoints4s.openapi.model.Schema.default"),
+
+        // Due to switching return type from `None.type` to `Option[String]`.
+        // OK since `Option` should have all the same methods as `None`
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.example"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.title")
       )
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)

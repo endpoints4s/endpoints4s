@@ -64,6 +64,20 @@ object OpenApi {
 
   private[openapi] def schemaJson(schema: Schema): ujson.Obj = {
     val fields = mutable.LinkedHashMap.empty[String, ujson.Value]
+
+    for (description <- schema.description) {
+      fields += "description" -> ujson.Str(description)
+    }
+    for (example <- schema.example) {
+      fields += "example" -> example
+    }
+    for (title <- schema.title) {
+      fields += "title" -> title
+    }
+    for (default <- schema.default) {
+      fields += "default" -> default
+    }
+
     schema match {
       case primitive: Schema.Primitive =>
         fields += "type" -> ujson.Str(primitive.name)
@@ -150,22 +164,23 @@ object OpenApi {
       case allOf: Schema.AllOf =>
         fields += "allOf" -> ujson.Arr(allOf.schemas.map(schemaJson): _*)
       case reference: Schema.Reference =>
-        fields += "$ref" -> ujson.Str(
-          Schema.Reference.toRefPath(reference.name)
-        )
+        /* In OpenAPI 3.0 (and 2.0), reference schemas are special in that all
+         * their sibling values are ignored!
+         *
+         * This means that if any other sibling schema fields have been set
+         * (eg. for a `description`, `example`, etc.), we need to nest the
+         * schema reference object inside an `allOf` field.
+         *
+         * See <https://stackoverflow.com/a/41752575/3072788>.
+         */
+        val refSchemaName = ujson.Str(Schema.Reference.toRefPath(reference.name))
+        if (fields.isEmpty) {
+          fields += "$ref" -> refSchemaName
+        } else {
+          fields += "allOf" -> ujson.Arr(ujson.Obj("$ref" -> refSchemaName))
+        }
     }
-    for (description <- schema.description) {
-      fields += "description" -> ujson.Str(description)
-    }
-    for (example <- schema.example) {
-      fields += "example" -> example
-    }
-    for (title <- schema.title) {
-      fields += "title" -> title
-    }
-    for (default <- schema.default) {
-      fields += "default" -> default
-    }
+
     new ujson.Obj(fields)
   }
 
@@ -1527,32 +1542,35 @@ object Schema {
   final class Reference private (
       val name: String,
       val original: Option[Schema],
-      val description: Option[String]
+      val description: Option[String],
+      val example: Option[ujson.Value],
+      val title: Option[String], // you probably want the title on the original schema!
+      val default: Option[ujson.Value]
   ) extends Schema
       with Serializable {
 
-    override val example: None.type = None // Reference objects can’t have examples
-    override val title: None.type = None // Reference objects can’t have a title
-    override val default: None.type = None // Reference objects can’t have a default value
-
     override def toString: String =
-      s"Reference($name, $original, $description)"
+      s"Reference($name, $original, $description, $example, $title, $default)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Reference =>
-          name == that.name && original == that.original && description == that.description
+          name == that.name && original == that.original && description == that.description &&
+            example == that.example && title == that.title && default == that.default
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(name, original, description, example, title)
+      Hashing.hash(name, original, description, example, title, default)
 
     private[this] def copy(
         name: String = name,
         original: Option[Schema] = original,
-        description: Option[String] = description
-    ) = new Reference(name, original, description)
+        description: Option[String] = description,
+        example: Option[ujson.Value] = example,
+        title: Option[String] = title,
+        default: Option[ujson.Value] = default
+    ) = new Reference(name, original, description, example, title, default)
 
     def withName(name: String): Reference = copy(name = name)
 
@@ -1562,6 +1580,14 @@ object Schema {
     def withDescription(description: Option[String]): Reference =
       copy(description = description)
 
+    def withExample(example: Option[ujson.Value]): Reference =
+      copy(example = example)
+
+    def withTitle(description: Option[String]): Reference =
+      copy(description = description)
+
+    def withDefault(default: Option[ujson.Value]): Reference =
+      copy(default = default)
   }
 
   object Reference {
@@ -1570,7 +1596,7 @@ object Schema {
         name: String,
         original: Option[Schema],
         description: Option[String]
-    ): Reference = new Reference(name, original, description)
+    ): Reference = new Reference(name, original, description, None, None, None)
 
     def toRefPath(name: String): String =
       s"#/components/schemas/$name"
