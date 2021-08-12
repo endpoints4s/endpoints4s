@@ -3,7 +3,6 @@ package endpoints4s.openapi.model
 import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
 import endpoints4s.{Encoder, Hashing}
 
-import java.io.Serializable
 import scala.collection.mutable
 
 /** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
