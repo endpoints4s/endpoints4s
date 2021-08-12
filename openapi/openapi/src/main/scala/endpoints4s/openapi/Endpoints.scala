@@ -3,6 +3,8 @@ package openapi
 
 import endpoints4s.openapi.model._
 
+import scala.collection.mutable
+
 /** Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints,
   * and uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
@@ -24,22 +26,21 @@ trait EndpointsWithCustomErrors
     * @param endpoints The endpoints to generate the documentation for
     */
   def openApi(info: Info)(endpoints: DocumentedEndpoint*): OpenApi = {
-    val items =
-      endpoints
-        .groupBy(_.path)
-        .map { case (k, es) =>
-          (
-            k,
-            es.tail.foldLeft(PathItem(es.head.item.operations)) { (item, e2) =>
-              PathItem(item.operations ++ e2.item.operations)
-            }
-          )
-        }
+    val map = mutable.LinkedHashMap.empty[String, PathItem]
+    for (e <- endpoints) {
+      val key = e.path
+      val newValue = map.get(key) match {
+        case Some(current) => PathItem(current.operations ++ e.item.operations)
+        case None          => PathItem(e.item.operations)
+      }
+      map.update(key, newValue)
+    }
+
     val components = Components(
       schemas = captureSchemas(endpoints),
       securitySchemes = captureSecuritySchemes(endpoints)
     )
-    OpenApi(info, items, components)
+    OpenApi(info, map, components)
   }
 
   type Endpoint[A, B] = DocumentedEndpoint

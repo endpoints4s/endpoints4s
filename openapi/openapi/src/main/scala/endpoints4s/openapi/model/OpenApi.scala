@@ -1,20 +1,21 @@
 package endpoints4s.openapi.model
 
-import java.io.Serializable
-
-import endpoints4s.{Encoder, Hashing}
 import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
+import endpoints4s.{Encoder, Hashing}
 
-import scala.collection.mutable
+import java.io.Serializable
+import scala.collection.{Map, mutable, immutable}
 
 /** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
 final class OpenApi private (
     val info: Info,
-    val paths: Map[String, PathItem],
+    private val innerPaths: Map[String, PathItem],
     val components: Components
 ) extends Serializable {
+
+  lazy val paths: immutable.Map[String, PathItem] = innerPaths.toMap
 
   override def toString =
     s"OpenApi($info, $paths, $components)"
@@ -28,11 +29,11 @@ final class OpenApi private (
 
   override def hashCode(): Int = Hashing.hash(info, paths, components)
 
-  val tags: Set[Tag] = OpenApi.extractTags(paths)
+  val tags: Set[Tag] = OpenApi.extractTags(innerPaths)
 
   private[this] def copy(
       info: Info = info,
-      paths: Map[String, PathItem] = paths,
+      paths: Map[String, PathItem] = innerPaths,
       components: Components = components
   ): OpenApi =
     new OpenApi(info, paths, components)
@@ -51,7 +52,7 @@ object OpenApi {
 
   val openApiVersion = "3.0.0"
 
-  def apply(info: Info, paths: Map[String, PathItem], components: Components) =
+  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components) =
     new OpenApi(info, paths, components)
 
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
@@ -85,7 +86,7 @@ object OpenApi {
         )
         val required = obj.properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
-          fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
+          fields += "required" -> ujson.Arr(required.map(ujson.Str): _*)
         }
         obj.additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
       case array: Schema.Array =>
@@ -344,7 +345,7 @@ object OpenApi {
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
           "info" -> infoJson(openApi.info),
-          "paths" -> pathsJson(openApi.paths)
+          "paths" -> pathsJson(openApi.innerPaths)
         )
       if (openApi.tags.nonEmpty) {
         val tagsAsJson = openApi.tags.map(tag => tagJson(tag)).toList
@@ -1522,12 +1523,12 @@ object Schema {
       s"#/components/schemas/$name"
   }
 
-  val simpleUUID = Primitive("string", format = Some("uuid"), None, None, None)
-  val simpleString = Primitive("string", None, None, None, None)
-  val simpleInteger = Primitive("integer", format = Some("int32"), None, None, None)
-  val simpleLong = Primitive("integer", format = Some("int64"), None, None, None)
-  val simpleBoolean = Primitive("boolean", None, None, None, None)
-  val simpleNumber = Primitive("number", format = Some("double"), None, None, None)
+  val simpleUUID: Primitive = Primitive("string", format = Some("uuid"), None, None, None)
+  val simpleString: Primitive = Primitive("string", None, None, None, None)
+  val simpleInteger: Primitive = Primitive("integer", format = Some("int32"), None, None, None)
+  val simpleLong: Primitive = Primitive("integer", format = Some("int64"), None, None, None)
+  val simpleBoolean: Primitive = Primitive("boolean", None, None, None, None)
+  val simpleNumber: Primitive = Primitive("number", format = Some("double"), None, None, None)
 
 }
 
