@@ -1,6 +1,7 @@
-import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 import EndpointsSettings._
 import LocalCrossProject._
+import com.typesafe.tools.mima.core.{IncompatibleMethTypeProblem, ProblemFilters}
 
 lazy val openapi =
   crossProject(JSPlatform, JVMPlatform)
@@ -17,7 +18,10 @@ lazy val openapi =
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
         } else Nil
-      }
+      },
+      mimaBinaryIssueFilters ++= Seq(
+        ProblemFilters.exclude[IncompatibleMethTypeProblem]("endpoints4s.openapi.model.OpenApi.this")
+      )
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjectsWithScope(
