@@ -3,7 +3,7 @@ package openapi
 
 import endpoints4s.openapi.model._
 
-import scala.collection.mutable
+import scala.collection.immutable.SeqMap
 
 /** Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints,
   * and uses [[algebra.BuiltInErrors]] to model client and server errors.
@@ -26,21 +26,20 @@ trait EndpointsWithCustomErrors
     * @param endpoints The endpoints to generate the documentation for
     */
   def openApi(info: Info)(endpoints: DocumentedEndpoint*): OpenApi = {
-    val map = mutable.LinkedHashMap.empty[String, PathItem]
-    for (e <- endpoints) {
-      val key = e.path
-      val newValue = map.get(key) match {
-        case Some(current) => PathItem(current.operations ++ e.item.operations)
-        case None          => PathItem(e.item.operations)
+    val pathItems = endpoints.foldLeft(SeqMap.empty[String, PathItem]) { case (groupedItems, currentEndpoint) =>
+      val key = currentEndpoint.path
+      val newValue = groupedItems.get(key) match {
+        case Some(current) => PathItem(current.operations ++ currentEndpoint.item.operations)
+        case None          => PathItem(currentEndpoint.item.operations)
       }
-      map.update(key, newValue)
+      groupedItems.updated(key, newValue)
     }
 
     val components = Components(
       schemas = captureSchemas(endpoints),
       securitySchemes = captureSecuritySchemes(endpoints)
     )
-    OpenApi(info, map, components)
+    OpenApi(info, pathItems, components)
   }
 
   type Endpoint[A, B] = DocumentedEndpoint
@@ -113,7 +112,7 @@ trait EndpointsWithCustomErrors
     val responses =
       (clientErrorsResponse ++ serverErrorResponse ++ response)
         .map(r =>
-          r.status.toString() -> Response(
+          r.status.toString -> Response(
             r.documentation,
             responseHeaders(r.headers),
             r.content
@@ -139,7 +138,7 @@ trait EndpointsWithCustomErrors
             val responses =
               callback.response.value
                 .map(r =>
-                  r.status.toString() -> Response(
+                  r.status.toString -> Response(
                     r.documentation,
                     responseHeaders(r.headers),
                     r.content

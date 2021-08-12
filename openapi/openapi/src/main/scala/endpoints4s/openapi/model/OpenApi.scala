@@ -4,18 +4,20 @@ import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
 import endpoints4s.{Encoder, Hashing}
 
 import java.io.Serializable
-import scala.collection.{Map, mutable, immutable}
+import scala.collection.immutable.SeqMap
+import scala.collection.mutable
+
 
 /** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
 final class OpenApi private (
     val info: Info,
-    private val innerPaths: Map[String, PathItem],
+    private val innerPaths: SeqMap[String, PathItem],
     val components: Components
 ) extends Serializable {
 
-  lazy val paths: immutable.Map[String, PathItem] = innerPaths.toMap
+  def paths: Map[String, PathItem] = innerPaths
 
   override def toString =
     s"OpenApi($info, $paths, $components)"
@@ -33,7 +35,7 @@ final class OpenApi private (
 
   private[this] def copy(
       info: Info = info,
-      paths: Map[String, PathItem] = innerPaths,
+      paths: SeqMap[String, PathItem] = innerPaths,
       components: Components = components
   ): OpenApi =
     new OpenApi(info, paths, components)
@@ -41,8 +43,11 @@ final class OpenApi private (
   def withInfo(info: Info): OpenApi =
     copy(info = info)
 
-  def withPaths(paths: Map[String, PathItem]): OpenApi =
+  def withPaths(paths: SeqMap[String, PathItem]): OpenApi =
     copy(paths = paths)
+
+  def withPaths(paths: Map[String, PathItem]): OpenApi =
+    withPaths(paths.to(SeqMap))
 
   def withComponents(components: Components): OpenApi =
     copy(components = components)
@@ -52,7 +57,10 @@ object OpenApi {
 
   val openApiVersion = "3.0.0"
 
-  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components) =
+  def apply(info: Info, paths: Map[String, PathItem], components: Components) =
+    new OpenApi(info, paths.to(SeqMap), components)
+
+  def apply(info: Info, paths: SeqMap[String, PathItem], components: Components) =
     new OpenApi(info, paths, components)
 
   private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
