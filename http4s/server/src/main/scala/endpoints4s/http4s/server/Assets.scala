@@ -2,15 +2,17 @@ package endpoints4s.http4s.server
 
 import java.net.URL
 
-import cats.effect.{Blocker, ContextShift}
 import endpoints4s.algebra.Documentation
 import endpoints4s.{Valid, algebra}
 import fs2.io._
 import org.http4s.headers._
 import org.http4s._
+import cats.effect.kernel.Sync
 
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   val DefaultBufferSize = 10240
+
+  implicit def EffectSync: Sync[Effect]
 
   // Digests are unsupported.
   def digests: Map[String, String] = Map.empty
@@ -63,21 +65,24 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
   }
 
   private val gzipSupport: RequestHeaders[Boolean] =
-    headers => Valid(headers.get(`Accept-Encoding`).exists(_.satisfiedBy(ContentCoding.gzip)))
+    headers => Valid(headers.get[`Accept-Encoding`].exists(_.satisfiedBy(ContentCoding.gzip)))
 
   private val ifModifiedSince: RequestHeaders[Option[HttpDate]] =
-    headers => Valid(headers.get(`If-Modified-Since`).map(_.date))
+    headers => Valid(headers.get[`If-Modified-Since`].map(_.date))
 
   private val assetResponse: Response[AssetResponse] = {
     case AssetResponse.NotFound                    => Response(NotFound)
     case AssetResponse.Found(_, _, _, _, _, false) => Response(NotModified)
     case AssetResponse.Found(data, length, lastModified, mediaType, isGzipped, true) =>
-      val lastModifiedHeader = lastModified.map(`Last-Modified`(_))
-      val contentTypeHeader = mediaType.map(`Content-Type`(_))
-      val contentCodingHeader =
+      val lastModifiedHeader: Option[Header.ToRaw] = lastModified.map(`Last-Modified`(_))
+      val contentTypeHeader: Option[Header.ToRaw] = mediaType.map(`Content-Type`(_))
+      val contentCodingHeader: Option[Header.ToRaw] =
         if (isGzipped) Some(`Content-Encoding`(ContentCoding.gzip)) else None
-      val contentLengthHeader =
-        `Content-Length`.fromLong(length).getOrElse(`Transfer-Encoding`(TransferCoding.chunked))
+      val contentLengthHeader: Header.ToRaw =
+        `Content-Length`.fromLong(length) match {
+          case Left(_)   => `Transfer-Encoding`(TransferCoding.chunked)
+          case Right(cl) => cl
+        }
 
       val headers = Headers(
         contentLengthHeader :: List(
@@ -142,10 +147,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
     *         looking for the requested asset in the classpath resources.
     */
-  def assetsResources(
-      blocker: Blocker,
-      pathPrefix: Option[String] = None
-  )(implicit cs: ContextShift[Effect]): AssetRequest => AssetResponse =
+  def assetsResources(pathPrefix: Option[String] = None): AssetRequest => AssetResponse =
     assetRequest =>
       toResourceUrl(pathPrefix, assetRequest)
         .map { case (url, isGzipped) =>
@@ -157,7 +159,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
             ifModifiedSinceSeconds.map(_ < lastModifiedSeconds).getOrElse(true)
 
           foundAssetResponse(
-            content = readInputStream(Effect.delay(url.openStream), DefaultBufferSize, blocker),
+            content = readInputStream(EffectSync.blocking(url.openStream), DefaultBufferSize),
             contentLength = urlConnection.getContentLengthLong,
             fileName = assetRequest.assetPath.name,
             isGzipped = isGzipped,

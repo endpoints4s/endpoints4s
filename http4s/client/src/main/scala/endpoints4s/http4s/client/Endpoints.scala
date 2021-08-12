@@ -1,6 +1,6 @@
 package endpoints4s.http4s.client
 
-import cats.effect.Sync
+import cats.effect.Concurrent
 import cats.implicits._
 import endpoints4s.algebra
 import endpoints4s.InvariantFunctor
@@ -9,22 +9,21 @@ import endpoints4s.Semigroupal
 import endpoints4s.PartialInvariantFunctor
 import endpoints4s.Invalid
 import org.http4s.{Request => Http4sRequest, Response => Http4sResponse}
-import org.http4s.Header
 import org.http4s.client.Client
 import org.http4s.Headers
 import endpoints4s.Validated
 import endpoints4s.Valid
-import org.http4s.util.CaseInsensitiveString
+import org.typelevel.ci._
 import cats.data.Kleisli
 import org.http4s.Status
 import org.http4s.Uri
 
-class Endpoints[F[_]: Sync](val host: Uri, val client: Client[F])
+class Endpoints[F[_]: Concurrent](val host: Uri, val client: Client[F])
     extends algebra.Endpoints
     with EndpointsWithCustomErrors
     with BuiltInErrors {
   type Effect[A] = F[A]
-  override def effect: Sync[Effect] = Sync[F]
+  override def effect: Concurrent[Effect] = Concurrent[F]
 }
 
 trait EndpointsWithCustomErrors
@@ -34,7 +33,7 @@ trait EndpointsWithCustomErrors
     with StatusCodes {
 
   type Effect[A]
-  implicit def effect: Sync[Effect]
+  implicit def effect: Concurrent[Effect]
 
   def host: Uri
   def client: Client[Effect]
@@ -47,7 +46,7 @@ trait EndpointsWithCustomErrors
       name: String,
       docs: Option[String]
   ): RequestHeaders[String] =
-    (value, req) => req.putHeaders(Header(name, value))
+    (value, req) => req.putHeaders((name, value))
 
   override def optRequestHeader(
       name: String,
@@ -55,7 +54,7 @@ trait EndpointsWithCustomErrors
   ): RequestHeaders[Option[String]] =
     (value, req) =>
       value match {
-        case Some(v) => req.putHeaders(Header(name, v))
+        case Some(v) => req.putHeaders((name, v))
         case None    => req
       }
 
@@ -137,7 +136,13 @@ trait EndpointsWithCustomErrors
     effect.map(effect.fromEither(url.encodeUrl(urlP)))(uri =>
       entity(
         bodyP,
-        headers(headersP, Http4sRequest(method, host.withPath(host.path + uri)))
+        headers(
+          headersP,
+          Http4sRequest(
+            method,
+            host.withPath(Uri.Path.unsafeFromString(host.path.renderString + uri.renderString))
+          )
+        )
       )
     )
   }
@@ -204,8 +209,8 @@ trait EndpointsWithCustomErrors
       docs: Option[String]
   ): ResponseHeaders[String] =
     hs =>
-      hs.get(CaseInsensitiveString(name)) match {
-        case Some(h) => Valid(h.value)
+      hs.get(CIString(name)) match {
+        case Some(h) => Valid(h.head.value)
         case None    => Invalid(s"Header '$name' not found")
       }
 
@@ -213,7 +218,7 @@ trait EndpointsWithCustomErrors
       name: String,
       docs: Option[String]
   ): ResponseHeaders[Option[String]] =
-    hs => Valid(hs.get(CaseInsensitiveString(name)).map(_.value))
+    hs => Valid(hs.get(CIString(name)).map(_.head.value))
 
   override def response[A, B, R](
       statusCode: StatusCode,

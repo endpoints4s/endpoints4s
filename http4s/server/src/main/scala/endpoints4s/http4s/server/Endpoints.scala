@@ -1,6 +1,6 @@
 package endpoints4s.http4s.server
 
-import cats.effect.Sync
+import cats.effect.Concurrent
 import cats.implicits._
 import endpoints4s.algebra.Documentation
 import endpoints4s.{
@@ -13,10 +13,10 @@ import endpoints4s.{
   algebra
 }
 import org.http4s
-import org.http4s.{EntityEncoder, EntityDecoder, Header, Headers}
+import org.http4s.{EntityEncoder, EntityDecoder, Headers}
 
 import scala.util.control.NonFatal
-import org.http4s.util.CaseInsensitiveString
+import org.typelevel.ci._
 
 /** Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]]
   * to model client and server errors.
@@ -47,13 +47,13 @@ import org.http4s.util.CaseInsensitiveString
   *
   * @tparam F Effect type
   */
-abstract class Endpoints[F[_]](implicit F: Sync[F])
+abstract class Endpoints[F[_]](implicit F: Concurrent[F])
     extends algebra.Endpoints
     with EndpointsWithCustomErrors
     with BuiltInErrors {
 
   final type Effect[A] = F[A]
-  final implicit def Effect: Sync[Effect] = F
+  final implicit def Effect: Concurrent[Effect] = F
 
 }
 
@@ -62,7 +62,7 @@ abstract class Endpoints[F[_]](implicit F: Sync[F])
   */
 trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with Methods with Urls {
   type Effect[A]
-  implicit def Effect: Sync[Effect]
+  implicit def Effect: Concurrent[Effect]
 
   type RequestHeaders[A] = http4s.Headers => Validated[A]
 
@@ -135,7 +135,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
 
   def requestHeader(name: String, docs: Documentation): RequestHeaders[String] =
     headers =>
-      headers.get(CaseInsensitiveString(name)).map(_.value) match {
+      headers.get(CIString(name)).map(_.head.value) match {
         case Some(value) => Valid(value)
         case None        => Invalid(s"Missing header $name")
       }
@@ -144,7 +144,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       name: String,
       docs: Documentation
   ): RequestHeaders[Option[String]] =
-    headers => Valid(headers.get(CaseInsensitiveString(name)).map(_.value))
+    headers => Valid(headers.get(CIString(name)).map(_.head.value))
 
   // RESPONSES
   implicit lazy val responseInvariantFunctor: endpoints4s.InvariantFunctor[Response] =
@@ -224,7 +224,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       name: String,
       docs: Documentation = None
   ): ResponseHeaders[String] =
-    value => Headers.of(Header(name, value))
+    value => Headers((name, value))
 
   def optResponseHeader(
       name: String,

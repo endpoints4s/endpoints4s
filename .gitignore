@@ -9,7 +9,7 @@ node_modules/
 .bloop/
 .vscode/
 .bsp/
-
+metals.sbt
 project/metals.sbt
 
 #direnv, niv and lorri
