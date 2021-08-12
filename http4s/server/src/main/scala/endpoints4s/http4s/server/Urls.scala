@@ -220,10 +220,10 @@ trait Urls extends algebra.Urls with StatusCodes {
       uri: http4s.Uri
   ): Option[Validated[A]] = {
     val segments =
-      uri.path
+      uri.path.renderString
         .split("/")
         .map(URLDecoder.decode(_, utf8Name))
-        .toList ++ { if (uri.path.endsWith("/")) List("") else Nil }
+        .toList ++ { if (uri.path.renderString.endsWith("/")) List("") else Nil }
 
     path.decode(if (segments.isEmpty) List("") else segments).flatMap {
       case (validated, Nil) => Some(validated)

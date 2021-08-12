@@ -1,7 +1,7 @@
 package sample
 
 import cats.effect._
-import org.http4s.server.blaze._
+import org.http4s.blaze.server._
 import org.http4s.implicits._
 
 import scala.concurrent.ExecutionContext

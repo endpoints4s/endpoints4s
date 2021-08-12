@@ -1,6 +1,6 @@
 package endpoints4s.http4s.server
 
-import cats.effect.IO
+import cats.effect.{IO, Sync}
 import endpoints4s.algebra
 
 class EndpointsTestApi
@@ -16,6 +16,8 @@ class EndpointsTestApi
     with algebra.SumTypedEntitiesTestApi {
 
   implicit def userCodec = userJsonSchema
+
+  def EffectSync: Sync[Effect] = Sync[IO]
 
   type AssetContent = fs2.Stream[Effect, Byte]
 

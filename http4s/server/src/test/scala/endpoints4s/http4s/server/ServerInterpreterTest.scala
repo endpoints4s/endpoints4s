@@ -2,7 +2,7 @@ package endpoints4s.http4s.server
 
 import java.net.ServerSocket
 
-import cats.effect.{ContextShift, IO, Timer}
+import cats.effect.IO
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.server.{
   BasicAuthenticationTestSuite,
@@ -14,12 +14,12 @@ import endpoints4s.algebra.server.{
 }
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
-import org.http4s.server.blaze.BlazeServerBuilder
+import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.syntax.kleisli._
 
 import scala.concurrent.ExecutionContext
 import endpoints4s.algebra.server.AssetsTestSuite
-import cats.effect.Blocker
+import cats.effect.unsafe.implicits.global
 
 class ServerInterpreterTest
     extends EndpointsTestSuite[EndpointsTestApi]
@@ -29,9 +29,6 @@ class ServerInterpreterTest
     with SumTypedEntitiesTestSuite[EndpointsTestApi]
     with AssetsTestSuite[EndpointsTestApi]
     with AssetsResourcesTest {
-
-  implicit val cs: ContextShift[IO] = IO.contextShift(ExecutionContext.global)
-  implicit val timer: Timer[IO] = IO.timer(ExecutionContext.global)
 
   val serverApi = new EndpointsTestApi
 
@@ -66,9 +63,7 @@ class ServerInterpreterTest
   }
 
   def assetsResources(pathPrefix: Option[String]) =
-    Blocker[IO]
-      .use(blocker => serverApi.Effect.point(serverApi.assetsResources(blocker, pathPrefix)))
-      .unsafeRunSync()
+    serverApi.assetsResources(pathPrefix)
 
   def serveAssetsEndpoint(
       endpoint: serverApi.Endpoint[
