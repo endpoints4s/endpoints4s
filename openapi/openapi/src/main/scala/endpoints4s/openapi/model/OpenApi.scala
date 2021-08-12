@@ -1,9 +1,7 @@
 package endpoints4s.openapi.model
 
-import java.io.Serializable
-
-import endpoints4s.{Encoder, Hashing}
 import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
+import endpoints4s.{Encoder, Hashing}
 
 import scala.collection.mutable
 
@@ -12,9 +10,11 @@ import scala.collection.mutable
   */
 final class OpenApi private (
     val info: Info,
-    val paths: Map[String, PathItem],
+    private val innerPaths: collection.Map[String, PathItem],
     val components: Components
 ) extends Serializable {
+
+  def paths: Map[String, PathItem] = innerPaths.toMap
 
   override def toString =
     s"OpenApi($info, $paths, $components)"
@@ -28,11 +28,11 @@ final class OpenApi private (
 
   override def hashCode(): Int = Hashing.hash(info, paths, components)
 
-  val tags: Set[Tag] = OpenApi.extractTags(paths)
+  val tags: Set[Tag] = OpenApi.extractTags(innerPaths)
 
   private[this] def copy(
       info: Info = info,
-      paths: Map[String, PathItem] = paths,
+      paths: collection.Map[String, PathItem] = innerPaths,
       components: Components = components
   ): OpenApi =
     new OpenApi(info, paths, components)
@@ -54,7 +54,10 @@ object OpenApi {
   def apply(info: Info, paths: Map[String, PathItem], components: Components) =
     new OpenApi(info, paths, components)
 
-  private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
+  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components) =
+    new OpenApi(info, paths, components)
+
+  private def mapJson[A](map: collection.Map[String, A])(f: A => ujson.Value): ujson.Obj =
     new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) =>
       (k, f(v))
     }.toSeq: _*))
@@ -85,7 +88,7 @@ object OpenApi {
         )
         val required = obj.properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
-          fields += "required" -> ujson.Arr(required.map(ujson.Str(_)): _*)
+          fields += "required" -> ujson.Arr(required.map(ujson.Str): _*)
         }
         obj.additionalProperties.foreach(p => fields += "additionalProperties" -> schemaJson(p))
       case array: Schema.Array =>
@@ -347,7 +350,7 @@ object OpenApi {
       )
     )
 
-  private def pathsJson(paths: Map[String, PathItem]): ujson.Obj =
+  private def pathsJson(paths: collection.Map[String, PathItem]): ujson.Obj =
     mapJson(paths)(pathItem => mapJson(pathItem.operations)(operationJson))
 
   private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
@@ -356,7 +359,7 @@ object OpenApi {
         mutable.LinkedHashMap(
           "openapi" -> ujson.Str(openApiVersion),
           "info" -> infoJson(openApi.info),
-          "paths" -> pathsJson(openApi.paths)
+          "paths" -> pathsJson(openApi.innerPaths)
         )
       if (openApi.tags.nonEmpty) {
         val tagsAsJson = openApi.tags.map(tag => tagJson(tag)).toList
@@ -368,7 +371,7 @@ object OpenApi {
       new ujson.Obj(fields)
     }
 
-  private def extractTags(paths: Map[String, PathItem]): Set[Tag] = {
+  private def extractTags(paths: collection.Map[String, PathItem]): Set[Tag] = {
     val allTags = paths.flatMap { case (_, pathItem) =>
       pathItem.operations.map { case (_, operation) =>
         operation.tags
@@ -1534,12 +1537,12 @@ object Schema {
       s"#/components/schemas/$name"
   }
 
-  val simpleUUID = Primitive("string", format = Some("uuid"), None, None, None)
-  val simpleString = Primitive("string", None, None, None, None)
-  val simpleInteger = Primitive("integer", format = Some("int32"), None, None, None)
-  val simpleLong = Primitive("integer", format = Some("int64"), None, None, None)
-  val simpleBoolean = Primitive("boolean", None, None, None, None)
-  val simpleNumber = Primitive("number", format = Some("double"), None, None, None)
+  val simpleUUID: Primitive = Primitive("string", format = Some("uuid"), None, None, None)
+  val simpleString: Primitive = Primitive("string", None, None, None, None)
+  val simpleInteger: Primitive = Primitive("integer", format = Some("int32"), None, None, None)
+  val simpleLong: Primitive = Primitive("integer", format = Some("int64"), None, None, None)
+  val simpleBoolean: Primitive = Primitive("boolean", None, None, None, None)
+  val simpleNumber: Primitive = Primitive("number", format = Some("double"), None, None, None)
 
 }
 
