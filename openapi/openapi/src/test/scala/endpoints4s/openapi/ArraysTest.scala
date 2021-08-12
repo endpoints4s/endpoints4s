@@ -81,18 +81,22 @@ class ArraysTest extends AnyWordSpec with Matchers {
         |              "application/json" : {
         |                "schema" : {
         |                  "type" : "array",
-        |                  "items" : [
-        |                    {
-        |                      "type" : "boolean"
-        |                    },
-        |                    {
-        |                      "type" : "integer",
-        |                      "format" : "int32"
-        |                    },
-        |                    {
-        |                      "type" : "string"
-        |                    }
-        |                  ]
+        |                  "items" : {
+        |                    "oneOf" : [
+        |                      {
+        |                        "type" : "boolean"
+        |                      },
+        |                      {
+        |                        "type" : "integer",
+        |                        "format" : "int32"
+        |                      },
+        |                      {
+        |                        "type" : "string"
+        |                      }
+        |                    ]
+        |                  },
+        |                  "minItems" : 3,
+        |                  "maxItems": 3
         |                }
         |              }
         |            }
