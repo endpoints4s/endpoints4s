@@ -4,20 +4,18 @@ import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
 import endpoints4s.{Encoder, Hashing}
 
 import java.io.Serializable
-import scala.collection.immutable.SeqMap
 import scala.collection.mutable
-
 
 /** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
   * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
   */
 final class OpenApi private (
     val info: Info,
-    private val innerPaths: SeqMap[String, PathItem],
+    private val innerPaths: collection.Map[String, PathItem],
     val components: Components
 ) extends Serializable {
 
-  def paths: Map[String, PathItem] = innerPaths
+  def paths: Map[String, PathItem] = innerPaths.toMap
 
   override def toString =
     s"OpenApi($info, $paths, $components)"
@@ -35,7 +33,7 @@ final class OpenApi private (
 
   private[this] def copy(
       info: Info = info,
-      paths: SeqMap[String, PathItem] = innerPaths,
+      paths: collection.Map[String, PathItem] = innerPaths,
       components: Components = components
   ): OpenApi =
     new OpenApi(info, paths, components)
@@ -43,11 +41,8 @@ final class OpenApi private (
   def withInfo(info: Info): OpenApi =
     copy(info = info)
 
-  def withPaths(paths: SeqMap[String, PathItem]): OpenApi =
-    copy(paths = paths)
-
   def withPaths(paths: Map[String, PathItem]): OpenApi =
-    withPaths(paths.to(SeqMap))
+    copy(paths = paths)
 
   def withComponents(components: Components): OpenApi =
     copy(components = components)
@@ -58,12 +53,12 @@ object OpenApi {
   val openApiVersion = "3.0.0"
 
   def apply(info: Info, paths: Map[String, PathItem], components: Components) =
-    new OpenApi(info, paths.to(SeqMap), components)
-
-  def apply(info: Info, paths: SeqMap[String, PathItem], components: Components) =
     new OpenApi(info, paths, components)
 
-  private def mapJson[A](map: Map[String, A])(f: A => ujson.Value): ujson.Obj =
+  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components) =
+    new OpenApi(info, paths, components)
+
+  private def mapJson[A](map: collection.Map[String, A])(f: A => ujson.Value): ujson.Obj =
     new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) =>
       (k, f(v))
     }.toSeq: _*))
@@ -344,7 +339,7 @@ object OpenApi {
       )
     )
 
-  private def pathsJson(paths: Map[String, PathItem]): ujson.Obj =
+  private def pathsJson(paths: collection.Map[String, PathItem]): ujson.Obj =
     mapJson(paths)(pathItem => mapJson(pathItem.operations)(operationJson))
 
   private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
@@ -365,7 +360,7 @@ object OpenApi {
       new ujson.Obj(fields)
     }
 
-  private def extractTags(paths: Map[String, PathItem]): Set[Tag] = {
+  private def extractTags(paths: collection.Map[String, PathItem]): Set[Tag] = {
     val allTags = paths.flatMap { case (_, pathItem) =>
       pathItem.operations.map { case (_, operation) =>
         operation.tags
