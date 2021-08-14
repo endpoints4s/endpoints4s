@@ -50,7 +50,7 @@ trait Urls extends algebra.Urls {
     )
 
   override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
-      value: QueryStringParam[Option[A]]
+      value: QueryStringParam[A]
   ): QueryString[A] =
     DocumentedQueryString(
       List(
@@ -59,7 +59,7 @@ trait Urls extends algebra.Urls {
           required = false,
           docs,
           schema = {
-            val defaultJson = value.encoder.encode(Some(default))
+            val defaultJson = value.encoder.encode(default)
             value.schema.withDefinedDefault(Some(defaultJson))
           }
         )

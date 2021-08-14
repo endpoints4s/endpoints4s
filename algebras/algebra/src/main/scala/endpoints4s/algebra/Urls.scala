@@ -121,8 +121,9 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @group operations
     */
   def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
-      value: QueryStringParam[Option[A]]
-  ): QueryString[A] = qs(name, docs)(value).xmap(_.getOrElse(default))(Some(_))
+      value: QueryStringParam[A]
+  ): QueryString[A] =
+    qs(name, docs)(optionalQueryStringParam(value)).xmap(_.getOrElse(default))(Some(_))
 
   /** Make a query string parameter optional:
     *
