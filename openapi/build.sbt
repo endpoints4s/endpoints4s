@@ -1,7 +1,12 @@
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
 import EndpointsSettings._
 import LocalCrossProject._
-import com.typesafe.tools.mima.core.{IncompatibleMethTypeProblem, ProblemFilters}
+import com.typesafe.tools.mima.core.{
+  DirectMissingMethodProblem,
+  IncompatibleMethTypeProblem,
+  ReversedMissingMethodProblem,
+  ProblemFilters
+}
 
 lazy val openapi =
   crossProject(JSPlatform, JVMPlatform)
@@ -20,7 +25,26 @@ lazy val openapi =
         } else Nil
       },
       mimaBinaryIssueFilters ++= Seq(
-        ProblemFilters.exclude[IncompatibleMethTypeProblem]("endpoints4s.openapi.model.OpenApi.this")
+        ProblemFilters.exclude[IncompatibleMethTypeProblem]("endpoints4s.openapi.model.OpenApi.this"),
+
+        // Due to adding a new parameter to default `private` constructors
+        // OK since these are `private` in Scala (although not `private` in JVM classfiles)
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#AllOf.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Array.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Enum.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Object.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#OneOf.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Primitive.this"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.this"),
+
+        // Due to adding a new member to a Scala `sealed` class
+        // OK since `Schema` is `sealed` in Scala (although not in JVM classfiles) and subtypes are final
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("endpoints4s.openapi.model.Schema.default"),
+
+        // Due to switching return type from `None.type` to `Option[String]`.
+        // OK since `Option` should have all the same methods as `None`
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.example"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.title")
       )
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
