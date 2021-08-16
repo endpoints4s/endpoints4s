@@ -17,6 +17,7 @@ class JsonSchemasTest extends AnyFreeSpec {
           "s",
           DocumentedJsonSchemas.defaultStringJsonSchema.docs,
           isOptional = false,
+          defaultValue = None,
           documentation = None
         ) :: Nil
       )
@@ -28,6 +29,7 @@ class JsonSchemasTest extends AnyFreeSpec {
             "i",
             DocumentedJsonSchemas.intJsonSchema.docs,
             isOptional = false,
+            defaultValue = None,
             documentation = None
           ) :: Nil
         )
@@ -41,6 +43,7 @@ class JsonSchemasTest extends AnyFreeSpec {
             "b",
             DocumentedJsonSchemas.byteJsonSchema.docs,
             isOptional = false,
+            defaultValue = None,
             documentation = None
           ) :: Nil
         )
@@ -55,12 +58,14 @@ class JsonSchemasTest extends AnyFreeSpec {
           "name",
           DocumentedJsonSchemas.defaultStringJsonSchema.docs,
           isOptional = false,
+          defaultValue = None,
           documentation = Some("Name of the user")
         ) ::
           Field(
             "age",
             DocumentedJsonSchemas.intJsonSchema.docs,
             isOptional = false,
+            defaultValue = None,
             documentation = None
           ) ::
           Nil
@@ -98,6 +103,7 @@ class JsonSchemasTest extends AnyFreeSpec {
             "quux",
             DocumentedJsonSchemas.defaultStringJsonSchema.docs,
             isOptional = false,
+            defaultValue = None,
             documentation = None
           ) :: Nil
         ),
@@ -125,8 +131,12 @@ class JsonSchemasTest extends AnyFreeSpec {
         assert(r.example == Some(ujson.Obj()))
         assert(r.title == Some("Rec title"))
         r.fields match {
-          case List(Field("next", tpe, true, None)) =>
-            assert(tpe eq r)
+          case List(field) =>
+            assert(field.name == "next")
+            assert(field.tpe eq r)
+            assert(field.isOptional == true)
+            assert(field.default == None)
+            assert(field.documentation == None)
           case _ => badSchema
 
         }
@@ -155,8 +165,8 @@ class JsonSchemasTest extends AnyFreeSpec {
               ),
               DocumentedRecord(
                 List(
-                  Field("x", r, false, None),
-                  Field("y", r, false, None)
+                  Field("x", r, false, None, None),
+                  Field("y", r, false, None, None)
                 ),
                 None,
                 None,
@@ -182,7 +192,7 @@ class JsonSchemasTest extends AnyFreeSpec {
         assert(r.name == "MutualRecursiveA")
         assert(
           r.value == DocumentedRecord(
-            List(Field("b", DocumentedJsonSchemas.mutualRecursiveB.docs, true, None)),
+            List(Field("b", DocumentedJsonSchemas.mutualRecursiveB.docs, true, None, None)),
             None,
             None,
             None,
@@ -215,6 +225,7 @@ class JsonSchemasTest extends AnyFreeSpec {
               "next",
               r,
               isOptional = true,
+              defaultValue = None,
               documentation = None
             )
             val expectedA = DocumentedRecord(
@@ -222,6 +233,7 @@ class JsonSchemasTest extends AnyFreeSpec {
                 "a",
                 DocumentedJsonSchemas.defaultStringJsonSchema.docs,
                 isOptional = false,
+                defaultValue = None,
                 documentation = None
               )
                 :: expectedNext
@@ -232,6 +244,7 @@ class JsonSchemasTest extends AnyFreeSpec {
                 "b",
                 DocumentedJsonSchemas.intJsonSchema.docs,
                 isOptional = false,
+                defaultValue = None,
                 documentation = None
               )
                 :: expectedNext
@@ -276,4 +289,25 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(DocumentedJsonSchemas.constraintNumericSchema.docs == expected)
   }
 
+  "optional field with default" in {
+    val expectedSchema =
+      DocumentedRecord(
+        Field(
+          "name",
+          DocumentedJsonSchemas.defaultStringJsonSchema.docs,
+          isOptional = false,
+          defaultValue = None,
+          documentation = Some("Name of the user")
+        ) ::
+          Field(
+            "age",
+            DocumentedJsonSchemas.intJsonSchema.docs,
+            isOptional = true,
+            defaultValue = Some(ujson.Num(42)),
+            documentation = None
+          ) ::
+          Nil
+      )
+    assert(DocumentedJsonSchemas.User.schemaWithDefault.docs == expectedSchema)
+  }
 }

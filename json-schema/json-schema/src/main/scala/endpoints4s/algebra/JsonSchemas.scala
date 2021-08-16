@@ -342,7 +342,7 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  final def optFieldWithDefault[A: JsonSchema](
+  def optFieldWithDefault[A: JsonSchema](
       name: String,
       defaultValue: A,
       docs: Option[String] = None
