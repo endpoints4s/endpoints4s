@@ -30,9 +30,12 @@ import _root_.sttp.client3.{
   *
   * Doest not support streaming responses for now
   *
-  * @param host    Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
-  * @param backend The underlying backend to use
-  * @tparam R The monad wrapping the response. It is defined by the backend
+  * @param host
+  *   Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
+  * @param backend
+  *   The underlying backend to use
+  * @tparam R
+  *   The monad wrapping the response. It is defined by the backend
   * @group interpreters
   */
 class Endpoints[R[_]](
@@ -45,7 +48,8 @@ class Endpoints[R[_]](
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`.
   *
-  * @tparam R The monad wrapping the response. It is defined by the backend
+  * @tparam R
+  *   The monad wrapping the response. It is defined by the backend
   * @group interpreters
   */
 trait EndpointsWithCustomErrors[R[_]]
@@ -59,8 +63,8 @@ trait EndpointsWithCustomErrors[R[_]]
 
   type SttpRequest = SRequest[_, Any]
 
-  /** A function that, given an `A` and a request model, returns an updated request
-    * containing additional headers
+  /** A function that, given an `A` and a request model, returns an updated request containing
+    * additional headers
     */
   type RequestHeaders[A] = (A, SttpRequest) => SttpRequest
 
@@ -116,7 +120,8 @@ trait EndpointsWithCustomErrors[R[_]]
         fa compose g
     }
 
-  /** A function that, given an `A` information and a `SttpRequest`, eventually returns a `SttpRequest`
+  /** A function that, given an `A` information and a `SttpRequest`, eventually returns a
+    * `SttpRequest`
     */
   type RequestEntity[A] = (A, SttpRequest) => SttpRequest
 

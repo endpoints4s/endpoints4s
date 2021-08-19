@@ -2,7 +2,8 @@ package endpoints4s.algebra
 
 import endpoints4s.Hashing
 
-/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#tagObject]]
+/** @see
+  *   [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#tagObject]]
   */
 final class Tag private (
     val name: String,
@@ -42,14 +43,15 @@ final class Tag private (
 
 object Tag {
 
-  /** Creates a new Tag without a description and external documentation object.  Use
+  /** Creates a new Tag without a description and external documentation object. Use
     * Tag(..).withDescription(..).withExternalDocs(..) to add those attributes.
     */
   def apply(name: String) = new Tag(name, None, None)
 
 }
 
-/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#externalDocumentationObject]]
+/** @see
+  *   [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md#externalDocumentationObject]]
   */
 final class ExternalDocumentationObject private (
     val url: String,

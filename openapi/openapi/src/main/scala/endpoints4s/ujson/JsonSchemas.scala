@@ -350,8 +350,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     new JsonSchema[BigDecimal] {
       val decoder = {
         case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(BigDecimal(x))
-        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json                                       => Invalid(s"Invalid number value: $json")
+        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $constraints")
+        case json         => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.doubleValue)
     }
@@ -376,8 +376,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     new JsonSchema[Double] {
       val decoder = {
         case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(x)
-        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json                                       => Invalid(s"Invalid number value: $json")
+        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $constraints")
+        case json         => Invalid(s"Invalid number value: $json")
       }
       val encoder = ujson.Num(_)
     }

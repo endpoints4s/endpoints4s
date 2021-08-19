@@ -14,12 +14,11 @@ import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAl
 
 import scala.collection.compat._
 
-/** An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a JSON schema for
-  * a given algebraic data type description.
+/** An interpreter for [[endpoints4s.algebra.JsonSchemas]] that produces a JSON schema for a given
+  * algebraic data type description.
   *
-  * The encoding of the schemas of sealed traits (obtained with the operation
-  * `orElse` or via generic derivation) can be configured by overriding
-  * [[JsonSchemas.coproductEncoding]].
+  * The encoding of the schemas of sealed traits (obtained with the operation `orElse` or via
+  * generic derivation) can be configured by overriding [[JsonSchemas.coproductEncoding]].
   *
   * @group interpreters
   */
@@ -319,7 +318,9 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         multipleOf: Option[Double] = None
     ) extends DocumentedJsonSchema
 
-    /** @param schema `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous array (ie, a tuple)
+    /** @param schema
+      *   `Left(itemSchema)` for a homogeneous array, or `Right(itemSchemas)` for a heterogeneous
+      *   array (ie, a tuple)
       */
     case class Array(
         schema: Either[DocumentedJsonSchema, List[DocumentedJsonSchema]],
@@ -847,8 +848,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
   /** This object contains the options for how to encode coproduct JSON schemas.
     *
-    * The following Scala coproduct is the candidate example. Each encoding
-    * option includes the schema that it would generate for that example.
+    * The following Scala coproduct is the candidate example. Each encoding option includes the
+    * schema that it would generate for that example.
     *
     * {{{
     * sealed trait Pet
@@ -858,12 +859,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     */
   object CoproductEncoding {
 
-    /** Strategy defining the base type schema in terms of `oneOf` and the
-      * variant schemas. The variants themselves don't refer to the base type,
-      * but they do include the discriminator field.
+    /** Strategy defining the base type schema in terms of `oneOf` and the variant schemas. The
+      * variants themselves don't refer to the base type, but they do include the discriminator
+      * field.
       *
-      *  - simpler looking schemas in Swagger UI
-      *  - some OpenAPI clients don't handle `oneOf` properly
+      *   - simpler looking schemas in Swagger UI
+      *   - some OpenAPI clients don't handle `oneOf` properly
       *
       * Using the `Pet` example above, this strategy yields the following:
       *
@@ -921,12 +922,12 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       */
     case object OneOf extends CoproductEncoding
 
-    /** Strategy that extends [[OneOf]] so that each variant also refers back
-      * to the base type schema using `allOf`. This approach is sometimes
-      * referred to in OpenAPI 3 as a way to model polymorphism.
+    /** Strategy that extends [[OneOf]] so that each variant also refers back to the base type
+      * schema using `allOf`. This approach is sometimes referred to in OpenAPI 3 as a way to model
+      * polymorphism.
       *
-      *  - compatible with OpenAPI clients that don't handle `oneOf` properly
-      *  - more complex schemas in Swagger UI
+      *   - compatible with OpenAPI clients that don't handle `oneOf` properly
+      *   - more complex schemas in Swagger UI
       *
       * Using the `Pet` example above, this strategy yields the following:
       *
@@ -995,10 +996,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     case object OneOfWithBaseRef extends CoproductEncoding
   }
 
-  /** Override this method to customize the strategy used to encode the JSON
-    * schema of coproducts. By default, it uses [[CoproductEncoding.OneOf]].
+  /** Override this method to customize the strategy used to encode the JSON schema of coproducts.
+    * By default, it uses [[CoproductEncoding.OneOf]].
     *
-    * @see [[CoproductEncoding]]
+    * @see
+    *   [[CoproductEncoding]]
     */
   def coproductEncoding: CoproductEncoding = CoproductEncoding.OneOf
 

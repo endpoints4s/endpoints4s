@@ -1,6 +1,8 @@
 package endpoints4s
 
-/** Ability for a type constructor `F` to combine together two values of type `F[A]` and `F[B]` into a value of type `F[(A, B)]` */
+/** Ability for a type constructor `F` to combine together two values of type `F[A]` and `F[B]` into
+  * a value of type `F[(A, B)]`
+  */
 trait Semigroupal[F[_]] {
 
   def product[A, B](fa: F[A], fb: F[B])(implicit

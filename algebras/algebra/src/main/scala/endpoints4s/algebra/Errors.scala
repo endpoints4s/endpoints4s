@@ -4,27 +4,33 @@ import endpoints4s.Invalid
 
 /** Defines the error types used to model client and server errors.
   *
-  * The `ClientErrors` type is used by endpoints4s to model errors coming
-  * from the client (missing query parameter, invalid entity, etc.).
+  * The `ClientErrors` type is used by endpoints4s to model errors coming from the client (missing
+  * query parameter, invalid entity, etc.).
   *
-  * The `ServerError` type is used by endpoints4s to model errors coming from
-  * the server business logic.
+  * The `ServerError` type is used by endpoints4s to model errors coming from the server business
+  * logic.
   *
-  * The `badRequest` and `internalServerError` operations defined in [[Responses]]
-  * define responses carrying entities of type `ClientErrors` and `ServerError`,
-  * respectively.
+  * The `badRequest` and `internalServerError` operations defined in [[Responses]] define responses
+  * carrying entities of type `ClientErrors` and `ServerError`, respectively.
   *
-  * Interpreters are expected to use the `clientErrorsResponse` and `serverErrorResponse`
-  * operations defined here to handle client and server errors, respectively.
+  * Interpreters are expected to use the `clientErrorsResponse` and `serverErrorResponse` operations
+  * defined here to handle client and server errors, respectively.
   *
-  * @see [[BuiltInErrors]]
+  * @see
+  *   [[BuiltInErrors]]
   * @group algebras
-  * @groupname types Types
-  * @groupdesc types Types introduced by the algebra
-  * @groupprio types 1
-  * @groupname operations Operations
-  * @groupdesc operations Operations creating and transforming values
-  * @groupprio operations 2
+  * @groupname types
+  *   Types
+  * @groupdesc types
+  *   Types introduced by the algebra
+  * @groupprio types
+  *   1
+  * @groupname operations
+  *   Operations
+  * @groupdesc operations
+  *   Operations creating and transforming values
+  * @groupprio operations
+  *   2
   */
 trait Errors { this: Responses =>
 
@@ -58,8 +64,7 @@ trait Errors { this: Responses =>
     */
   def serverErrorToThrowable(serverError: ServerError): Throwable
 
-  /** Response used by endpoints4s when decoding
-    * a request fails.
+  /** Response used by endpoints4s when decoding a request fails.
     *
     * The provided implementation forwards to `badRequest`.
     *
@@ -73,8 +78,7 @@ trait Errors { this: Responses =>
     */
   def clientErrorsResponseEntity: ResponseEntity[ClientErrors]
 
-  /** Response used by endpoints4s when the
-    * business logic of an endpoint fails.
+  /** Response used by endpoints4s when the business logic of an endpoint fails.
     *
     * The provided implementation forwards to `internalServerError`
     * @group operations
