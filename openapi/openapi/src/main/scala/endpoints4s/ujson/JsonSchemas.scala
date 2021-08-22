@@ -357,14 +357,14 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     }
 
   private[this] object JsonDouble {
-     def unapply(json: ujson.Value): Option[Double] = json match {
-       case ujson.Num(x) => Some(x)
-       case ujson.Str("NaN") => Some(Double.NaN)
-       case ujson.Str("Infinity") => Some(Double.PositiveInfinity)
-       case ujson.Str("-Infinity") => Some(Double.NegativeInfinity)
-       case _ => None
-     }
-   }
+    def unapply(json: ujson.Value): Option[Double] = json match {
+      case ujson.Num(x)           => Some(x)
+      case ujson.Str("NaN")       => Some(Double.NaN)
+      case ujson.Str("Infinity")  => Some(Double.PositiveInfinity)
+      case ujson.Str("-Infinity") => Some(Double.NegativeInfinity)
+      case _                      => None
+    }
+  }
 
   override def floatWithConstraintsJsonSchema(
       constraints: NumericConstraints[Float]
