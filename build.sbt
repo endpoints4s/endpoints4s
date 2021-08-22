@@ -36,12 +36,12 @@ ThisBuild / sonatypeProjectHosting := Some(
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
-ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
+ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
-ThisBuild / version := "1.5.0"
+ThisBuild / version := "1.5.0+n"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",

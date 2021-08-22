@@ -12,8 +12,8 @@ val `http4s-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      versionPolicyIntention := Compatibility.None,
-      version := "7.0.0",
+      // versionPolicyIntention := Compatibility.None,
+      version := "7.0.0+n",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-core" % http4sVersion).cross(CrossVersion.for3Use2_13),
         ("org.http4s" %% "http4s-dsl" % http4sVersion).cross(CrossVersion.for3Use2_13),
@@ -35,8 +35,8 @@ val `http4s-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-client",
-      versionPolicyIntention := Compatibility.None,
-      version := "5.0.0",
+      // versionPolicyIntention := Compatibility.None,
+      version := "5.0.0+n",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).cross(CrossVersion.for3Use2_13),
         ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).cross(CrossVersion.for3Use2_13)
