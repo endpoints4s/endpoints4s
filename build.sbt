@@ -41,7 +41,7 @@ ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
-ThisBuild / version := "1.4.0+n"
+ThisBuild / version := "1.5.0"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",
