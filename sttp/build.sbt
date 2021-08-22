@@ -10,7 +10,7 @@ val `sttp-client` =
       publishSettings,
       `scala 2.12 to 2.13`,
       name := "sttp-client",
-      version := "4.0.0+n",
+      version := "4.1.0+n",
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
         "com.softwaremill.sttp.client3" %% "akka-http-backend" % sttpVersion % Test,
