@@ -2,7 +2,6 @@ package endpoints4s
 package openapi
 
 import endpoints4s.openapi.model._
-
 import scala.collection.mutable
 
 /** Interpreter for [[algebra.Endpoints]] that produces an [[endpoints4s.openapi.model.OpenApi]] instance for endpoints,
@@ -45,35 +44,17 @@ trait EndpointsWithCustomErrors
 
   type Endpoint[A, B] = DocumentedEndpoint
 
-  /** @param path Path template (e.g. “/user/{id}”)
-    * @param item Item documentation
-    */
-  case class DocumentedEndpoint(path: String, item: PathItem) {
+  case class DocumentedEndpoint(
+      request: DocumentedRequest,
+      response: List[DocumentedResponse],
+      securityRequirements: Seq[SecurityRequirement],
+      docs: EndpointDocs
+  ) {
 
-    def withSecurity(
-        securityRequirements: SecurityRequirement*
-    ): DocumentedEndpoint = {
-      copy(item = PathItem(item.operations.map { case (verb, operation) =>
-        verb -> operation.withSecurity(securityRequirements.toList)
-      }))
-    }
-  }
+    def withSecurityRequirements(securityRequirements: SecurityRequirement*): DocumentedEndpoint =
+      copy(securityRequirements = securityRequirements)
 
-  def endpoint[A, B](
-      request: Request[A],
-      response: Response[B],
-      docs: EndpointDocs = EndpointDocs()
-  ): Endpoint[A, B] = {
-    val method =
-      request.method match {
-        case Get     => "get"
-        case Put     => "put"
-        case Post    => "post"
-        case Delete  => "delete"
-        case Options => "options"
-        case Patch   => "patch"
-      }
-    val correctPathSegments: List[Either[String, DocumentedParameter]] = {
+    private lazy val correctPathSegments: List[Either[String, DocumentedParameter]] = {
       val prefix = "_arg"
       request.url.path
         .foldLeft((0, List[Either[String, DocumentedParameter]]())) { // (num of empty-named args, new args list)
@@ -85,95 +66,132 @@ trait EndpointsWithCustomErrors
         ._2
         .reverse
     }
-    val pathParams = correctPathSegments.collect { case Right(param) => param }
-    val parameters =
-      pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
-        request.url.queryParameters.map(p =>
-          Parameter(p.name, In.Query, p.required, p.description, p.schema)
-        ) ++
-        request.headers.value.map(h =>
-          Parameter(
-            h.name,
-            In.Header,
-            required = h.required,
-            h.description,
-            h.schema
+
+    lazy val item: PathItem = {
+      val method =
+        request.method match {
+          case Get     => "get"
+          case Put     => "put"
+          case Post    => "post"
+          case Delete  => "delete"
+          case Options => "options"
+          case Patch   => "patch"
+        }
+
+      val pathParams = correctPathSegments.collect { case Right(param) => param }
+      val parameters =
+        pathParams.map(p => Parameter(p.name, In.Path, p.required, p.description, p.schema)) ++
+          request.url.queryParameters.map(p =>
+            Parameter(p.name, In.Query, p.required, p.description, p.schema)
+          ) ++
+          request.headers.value.map(h =>
+            Parameter(
+              h.name,
+              In.Header,
+              required = h.required,
+              h.description,
+              h.schema
+            )
           )
-        )
-    def responseHeaders(
-        documentedHeaders: DocumentedHeaders
-    ): Map[String, ResponseHeader] =
-      documentedHeaders.value.map { header =>
-        header.name -> ResponseHeader(
-          header.required,
-          header.description,
-          header.schema
-        )
-      }.toMap
-    val responses =
-      (clientErrorsResponse ++ serverErrorResponse ++ response)
-        .map(r =>
-          r.status.toString -> Response(
-            r.documentation,
-            responseHeaders(r.headers),
-            r.content
+      def responseHeaders(
+          documentedHeaders: DocumentedHeaders
+      ): Map[String, ResponseHeader] =
+        documentedHeaders.value.map { header =>
+          header.name -> ResponseHeader(
+            header.required,
+            header.description,
+            header.schema
           )
-        )
-        .toMap
-    val operation =
-      Operation(
-        docs.operationId,
-        docs.summary,
-        docs.description,
-        parameters,
-        if (request.entity.isEmpty) None
-        else Some(RequestBody(request.documentation, request.entity)),
-        responses,
-        docs.tags,
-        security = Nil, // might be refined later by specific interpreters
-        docs.callbacks.map { case (event, callbacks) =>
-          val items = callbacks.map { case (urlPattern, callback) =>
-            val method = callback.method.toString.toLowerCase
-            val requestBody =
-              RequestBody(callback.requestDocs, callback.entity.value)
-            val responses =
-              callback.response.value
-                .map(r =>
-                  r.status.toString -> Response(
-                    r.documentation,
-                    responseHeaders(r.headers),
-                    r.content
+        }.toMap
+      lazy val responses =
+        (clientErrorsResponse ++ serverErrorResponse ++ response)
+          .map(r =>
+            r.status.toString() -> Response(
+              r.documentation,
+              responseHeaders(r.headers),
+              r.content
+            )
+          )
+          .toMap
+
+      val operation =
+        Operation(
+          docs.operationId,
+          docs.summary,
+          docs.description,
+          parameters,
+          if (request.entity.isEmpty) None
+          else Some(RequestBody(request.documentation, request.entity)),
+          responses,
+          docs.tags,
+          security = securityRequirements.toList,
+          docs.callbacks.map { case (event, callbacks) =>
+            val items = callbacks.map { case (urlPattern, callback) =>
+              val method = callback.method.toString.toLowerCase
+              val requestBody =
+                RequestBody(callback.requestDocs, callback.entity.value)
+              val responses =
+                callback.response.value
+                  .map(r =>
+                    r.status.toString() -> Response(
+                      r.documentation,
+                      responseHeaders(r.headers),
+                      r.content
+                    )
                   )
+                  .toMap
+              val callbackOperation =
+                Operation(
+                  None,
+                  None,
+                  None,
+                  Nil,
+                  Some(requestBody),
+                  responses,
+                  Nil,
+                  Nil,
+                  Map.empty,
+                  deprecated = false
                 )
-                .toMap
-            val callbackOperation =
-              Operation(
-                None,
-                None,
-                None,
-                Nil,
-                Some(requestBody),
-                responses,
-                Nil,
-                Nil,
-                Map.empty,
-                deprecated = false
-              )
-            (urlPattern, PathItem(Map(method -> callbackOperation)))
-          }
-          (event, items)
-        },
-        docs.deprecated
-      )
-    val item = PathItem(Map(method -> operation))
-    val path = correctPathSegments
+              (urlPattern, PathItem(Map(method -> callbackOperation)))
+            }
+            (event, items)
+          },
+          docs.deprecated
+        )
+
+      PathItem(Map(method -> operation))
+    }
+    lazy val path: String = correctPathSegments
       .map {
         case Left(str)    => str
         case Right(param) => s"{${param.name}}"
       }
       .mkString("/")
-    DocumentedEndpoint(path, item)
   }
+
+  def endpoint[A, B](
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B] =
+    DocumentedEndpoint(request, response, Nil, docs)
+
+  override def mapEndpointRequest[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = currentEndpoint.copy(request = func(currentEndpoint.request))
+
+  override def mapEndpointResponse[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = currentEndpoint.copy(response = func(currentEndpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      currentEndpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    currentEndpoint.copy(docs = func(currentEndpoint.docs))
 
   private def captureSchemas(
       endpoints: Iterable[DocumentedEndpoint]

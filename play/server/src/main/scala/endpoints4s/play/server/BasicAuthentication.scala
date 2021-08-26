@@ -1,20 +1,16 @@
 package endpoints4s.play.server
 
 import java.util.Base64
-
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
-import endpoints4s.{Tupler, Valid, algebra}
+import endpoints4s.{Tupler, Valid, Validated, algebra}
 import play.api.http.HeaderNames
 import play.api.http.HeaderNames.AUTHORIZATION
-import play.api.libs.streams.Accumulator
-import play.api.mvc.{BodyParser, Results}
+import play.api.mvc.{RequestHeader, Results}
 
 /** @group interpreters
   */
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
-
-  import playComponents.executionContext
 
   /** Extracts the credentials from the request headers.
     * In case of absence of credentials, returns an `Unauthorized` result.
@@ -48,34 +44,52 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
       tuplerHC: Tupler.Aux[H, Credentials, HC],
       tuplerUEHC: Tupler.Aux[UE, HC, Out]
   ): Request[Out] = {
-    extractMethodUrlAndHeaders(
-      method,
-      url,
-      headers ++ basicAuthenticationHeader
-    ).toRequest[Out] {
-      case (_, (_, None /* credentials */ )) =>
-        _ =>
-          Some(
-            BodyParser(_ =>
-              Accumulator.done(
-                Left(
-                  Results.Unauthorized.withHeaders(
-                    HeaderNames.WWW_AUTHENTICATE -> "Basic realm=Realm"
-                  )
-                )
+    val u = url
+    val h = headers
+    val m = method
+    val e = entity
+    new Request[Out] {
+      type UrlData = U
+      type EntityData = E
+      type HeadersData = (H, Option[Credentials])
+
+      def url: Url[UrlData] = u
+      def headers: RequestHeaders[HeadersData] = h ++ basicAuthenticationHeader
+      def method: Method = m
+      def entity: RequestEntity[E] = e
+      def aggregateAndValidate(
+          urlData: UrlData,
+          headersData: HeadersData,
+          entityData: EntityData
+      ): Validated[Out] =
+        headersData match {
+          case (_, None) =>
+            sys.error(
+              "This request transformation is currently unsupported. You can't transform further an authenticated request."
+            )
+          case (h, Some(credentials)) =>
+            Valid(tuplerUEHC(tuplerUE(urlData, entityData), tuplerHC(h, credentials)))
+        }
+      def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[Out]] = {
+        matchRequestAndParseHeaders(requestHeader) {
+          case (_, (_, None /* credentials */ )) =>
+            requestEntityOf(
+              Left(
+                Results.Unauthorized
+                  .withHeaders(HeaderNames.WWW_AUTHENTICATE -> "Basic realm=Realm")
               )
             )
-          )
-      case (u, (h, Some(credentials))) =>
-        headers =>
-          entity(headers).map(
-            _.map(e => tuplerUEHC(tuplerUE(u, e), tuplerHC(h, credentials)))
-          )
-    } { out =>
-      val (ue, hc) = tuplerUEHC.unapply(out)
-      val (u, _) = tuplerUE.unapply(ue)
-      val (h, c) = tuplerHC.unapply(hc)
-      (u, (h, Some(c)))
+          case (urlData, (headersData, Some(credentials))) =>
+            requestEntityMap(entity) { entityData =>
+              tuplerUEHC(tuplerUE(urlData, entityData), tuplerHC(headersData, credentials))
+            }
+        }
+      }
+      def urlData(a: Out): U = {
+        val (ue, hc) = tuplerUEHC.unapply(a)
+        val (u, _) = tuplerUE.unapply(ue)
+        u
+      }
     }
   }
 

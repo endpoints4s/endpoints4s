@@ -468,6 +468,43 @@ trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] 
         }
       }
 
+      "Handle mapped endpoint left response" in {
+        wireMockServer.stubFor(
+          get(urlPathEqualTo("/mapped"))
+            .withQueryParam("x", equalTo("1"))
+            .withQueryParam("y", equalTo("2"))
+            .withHeader("If-None-Match", equalTo("\"xxx\""))
+            .withHeader("If-Modified-Since", equalTo("Wed, 21 Oct 2015 07:28:00 GMT"))
+            .willReturn(
+              aResponse().withStatus(304)
+            )
+        )
+
+        whenReady(call(client.mappedEndpoint, (1, "\"xxx\"", 2, "Wed, 21 Oct 2015 07:28:00 GMT"))) { response =>
+          assert(response == Left(()))
+        }
+      }
+
+      "Handle mapped endpoint right response" in {
+        wireMockServer.stubFor(
+          get(urlPathEqualTo("/mapped"))
+            .withQueryParam("x", equalTo("1"))
+            .withQueryParam("y", equalTo("2"))
+            .withHeader("If-None-Match", equalTo("foo"))
+            .withHeader("If-Modified-Since", equalTo("bar"))
+            .willReturn(
+              aResponse()
+                .withStatus(200)
+                .withHeader("ETag", "\"xxx\"")
+                .withHeader("Last-Modified", "Wed, 21 Oct 2015 07:28:00 GMT")
+            )
+        )
+
+        whenReady(call(client.mappedEndpoint, (1, "foo", 2, "bar"))) { response =>
+          assert(response == Right(("\"xxx\"", "Wed, 21 Oct 2015 07:28:00 GMT")))
+        }
+      }
+
     }
 
   }

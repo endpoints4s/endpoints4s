@@ -7,7 +7,6 @@ import org.http4s.Uri
 import endpoints4s.Validated
 import org.http4s.Query
 import endpoints4s.algebra.Documentation
-import org.http4s.ParseResult
 
 trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
 
@@ -75,7 +74,7 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
     s => s :: Nil
 
   trait Segment[A] {
-    def encode(a: A): Uri.Path
+    def encode(a: A): Uri.Path.Segment
   }
 
   override def segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
@@ -89,12 +88,13 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
     }
 
   override def stringSegment: Segment[String] =
-    s => Uri.Path.unsafeFromString(Uri.pathEncode(s))
+    s => Uri.Path.Segment(s)
 
   trait Path[A] extends Url[A] {
-    final def encodeUrl(value: A): ParseResult[Uri] =
-      Uri.fromString(encodePath(value).mkString("/"))
-    def encodePath(value: A): List[String]
+    final def encodeUrl(value: A): (Uri.Path, Query) =
+      (Uri.Path(encodePath(value).dropWhile(_ == Uri.Path.Segment(""))), Query.empty)
+
+    def encodePath(value: A): Vector[Uri.Path.Segment]
   }
 
   implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] =
@@ -107,27 +107,27 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
     }
 
   def staticPathSegment(segment: String): Path[Unit] =
-    _ => segment.split("/").toList
+    _ => segment.split("/").map(Uri.Path.Segment).toVector
 
   def segment[A](name: String, docs: Documentation)(implicit
       s: Segment[A]
-  ): Path[A] = a => s.encode(a).renderString :: Nil
+  ): Path[A] = a => Vector(s.encode(a))
 
   def remainingSegments(name: String, docs: Documentation): Path[String] =
-    _ :: Nil
+    segments => Vector(Uri.Path.Segment.encoded(segments))
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
       tupler: Tupler[A, B]
   ): Path[tupler.Out] =
     new Path[tupler.Out] {
-      def encodePath(ab: tupler.Out): List[String] = {
+      def encodePath(ab: tupler.Out): Vector[Uri.Path.Segment] = {
         val (a, b) = tupler.unapply(ab)
         first.encodePath(a) ++ second.encodePath(b)
       }
     }
 
   trait Url[A] {
-    def encodeUrl(value: A): ParseResult[Uri]
+    def encodeUrl(value: A): (Uri.Path, Query)
   }
 
   override def urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
@@ -144,7 +144,8 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
       tupler: Tupler[A, B]
   ): Url[tupler.Out] = { out =>
     val (a, b) = tupler.unapply(out)
-    path.encodeUrl(a).map(uri => uri.copy(query = uri.query ++ qs(b).pairs))
+    val (p, _) = path.encodeUrl(a)
+    (Uri.Path(p.segments.dropWhile(_ == Uri.Path.Segment(""))), qs(b))
   }
 
 }

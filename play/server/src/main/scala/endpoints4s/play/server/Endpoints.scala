@@ -96,6 +96,7 @@ trait EndpointsWithCustomErrors
   implicit lazy val requestHeadersPartialInvariantFunctor
       : endpoints4s.PartialInvariantFunctor[RequestHeaders] =
     new endpoints4s.PartialInvariantFunctor[RequestHeaders] {
+
       def xmapPartial[A, B](
           fa: RequestHeaders[A],
           f: A => Validated[B],
@@ -117,94 +118,109 @@ trait EndpointsWithCustomErrors
     * Has an instance of `InvariantFunctor`.
     */
   trait Request[A] {
+    type UrlData
+    type HeadersData
+    type EntityData
 
-    /** Extracts a `RequestEntity[A]` from an incoming request. That is
-      * a way to extract an `A` from an incoming request.
+    /** The URL component of this request */
+    def url: Url[UrlData]
+
+    /** The headers component of this request */
+    def headers: RequestHeaders[HeadersData]
+
+    /** The method of this request */
+    def method: Method
+
+    /** The entity of this request */
+    def entity: RequestEntity[EntityData]
+    def aggregateAndValidate(
+        urlData: UrlData,
+        headersData: HeadersData,
+        entityData: EntityData
+    ): Validated[A]
+    def urlData(a: A): UrlData
+
+    /** Returns a `RequestEntity[A]` (that is, a way to decode the entity of the incoming
+      * request) if the incoming request matches the method and URL of this request
+      * description.
       */
-    def decode: RequestExtractor[RequestEntity[A]]
+    def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[A]]
 
     /** Reverse routing.
       * @param a Information carried by the request
       * @return The URL and HTTP verb matching the `a` value.
       */
-    def encode(a: A): Call
+    final def encode(a: A): Call = Call(method.value, url.encodeUrl(urlData(a)))
+
+    /** @return If the incoming `requestHeader` match this request description (the
+      *         method and URL), validate the request URL parameters and headers.
+      *         Otherwise, returns `None`.
+      */
+    protected final def matchRequestAndParseHeaders(
+        requestHeader: RequestHeader
+    )(entity: (UrlData, HeadersData) => RequestEntity[A]): Option[RequestEntity[A]] = {
+      // Check that the incoming request matches the method and URL of this request description
+      val maybeValidatedUrlData =
+        (if (method.matches(requestHeader)) Some(()) else None)
+          .zip(url.decodeUrl(requestHeader))
+          .headOption
+
+      // If the incoming request matches the method and URL of this request description, parse the headers
+      val maybeValidatedUrlAndHeadersData: Option[Validated[(UrlData, HeadersData)]] =
+        maybeValidatedUrlData.map { case (_, validatedUrlData) =>
+          validatedUrlData.zip(headers(requestHeader.headers))
+        }
+
+      maybeValidatedUrlAndHeadersData.map {
+        case inv: Invalid                  => requestEntityOf(Left(handleClientErrors(inv)))
+        case Valid((urlData, headersData)) => entity(urlData, headersData)
+      }
+    }
   }
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](
-          fa: Request[A],
+          request: Request[A],
           f: A => Validated[B],
           g: B => A
       ): Request[B] =
         new Request[B] {
-          def decode: RequestExtractor[RequestEntity[B]] =
-            functorRequestExtractor.fmap(
-              fa.decode,
-              (requestEntity: RequestEntity[A]) => requestEntity.xmapPartial(f)(g)
-            )
-          def encode(b: B): Call = fa.encode(g(b))
+          type UrlData = request.UrlData
+          type HeadersData = request.HeadersData
+          type EntityData = request.EntityData
+          def url: Url[UrlData] = request.url
+          def headers: RequestHeaders[HeadersData] = request.headers
+          def method: Method = request.method
+          def entity: RequestEntity[EntityData] = request.entity
+          def aggregateAndValidate(
+              urlData: UrlData,
+              headersData: HeadersData,
+              entityData: EntityData
+          ): Validated[B] =
+            request.aggregateAndValidate(urlData, headersData, entityData).flatMap(f)
+          def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[B]] =
+            request.matchRequest(requestHeader).map { requestEntityA =>
+              requestEntityMapPartial(requestEntityA)(f)
+            }
+          def urlData(b: B): UrlData = request.urlData(g(b))
         }
     }
 
   implicit lazy val invariantFunctorRequest: InvariantFunctor[Request] =
     new InvariantFunctor[Request] {
-      def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] = {
-        val transformedRequest = requestPartialInvariantFunctor.xmap(m, f1, f2)
-        new Request[B] {
-          def decode: RequestExtractor[RequestEntity[B]] =
-            transformedRequest.decode
-          def encode(b: B): Call = transformedRequest.encode(b)
-        }
-      }
+      def inmap[A, B](m: Request[A], f1: A => B, f2: B => A): Request[B] =
+        requestPartialInvariantFunctor.xmap(m, f1, f2)
     }
-
-  /** The URL and HTTP headers of a request.
-    */
-  trait UrlAndHeaders[A] { parent =>
-
-    /** Attempts to extract an `A` from an incoming request.
-      *
-      * Two kinds of situations can happen:
-      * 1. The incoming request URL does not match `this` definition: nothing
-      *    is extracted (the `RequestExtractor` returns `None`) ;
-      * 2. The incoming request URL matches `this` definition but the headers or parameters
-      *    are erroneous: the `RequestExtractor` returns a `Some(Invalid(...))`.
-      */
-    def decode: RequestExtractor[Validated[A]]
-
-    /** Reverse routing.
-      * @param a Information carried by the request URL and headers
-      * @return The URL and HTTP verb matching the `a` value.
-      */
-    def encode(a: A): Call
-
-    /** Promotes `this` to a `Request[B]`.
-      *
-      * @param toB Function defining how to get a `BodyParser[B]` from the extracted `A`
-      * @param toA Function defining how to get back an `A` from the `B`.
-      */
-    def toRequest[B](toB: A => RequestEntity[B])(toA: B => A): Request[B] =
-      new Request[B] {
-        def decode: RequestExtractor[RequestEntity[B]] =
-          request =>
-            parent.decode(request).map {
-              case inv: Invalid =>
-                _ =>
-                  Some(
-                    BodyParser(_ => Accumulator.done(Left(handleClientErrors(inv))))
-                  )
-              case Valid(a) => toB(a)
-            }
-        def encode(b: B): Call = parent.encode(toA(b))
-      }
-  }
 
   /** Decodes a request entity */
   type RequestEntity[A] = RequestHeader => Option[BodyParser[A]]
 
+  private[server] def requestEntityOf[A](resultOrValue: Either[Result, A]): RequestEntity[A] =
+    _ => Some(BodyParser(_ => Accumulator.done(resultOrValue)))
+
   lazy val emptyRequest: RequestEntity[Unit] =
-    _ => Some(BodyParser(_ => Accumulator.done(Right(()))))
+    requestEntityOf(Right(()))
 
   lazy val textRequest: RequestEntity[String] =
     headers => {
@@ -231,33 +247,28 @@ trait EndpointsWithCustomErrors
           f: RequestEntity[From],
           map: From => Validated[To],
           contramap: To => From
-      ): RequestEntity[To] =
-        headers =>
-          f(headers).map(
-            _.validate(from =>
-              map(from) match {
-                case Valid(value)     => Right(value)
-                case invalid: Invalid => Left(handleClientErrors(invalid))
-              }
-            )
-          )
+      ): RequestEntity[To] = requestEntityMapPartial(f)(map)
+      override def xmap[A, B](fa: RequestEntity[A], f: A => B, g: B => A): RequestEntity[B] =
+        requestEntityMap(fa)(f)
     }
 
-  protected def extractMethodUrlAndHeaders[A, B](
-      method: Method,
-      url: Url[A],
-      headers: RequestHeaders[B]
-  ): UrlAndHeaders[(A, B)] =
-    new UrlAndHeaders[(A, B)] {
-      val decode: RequestExtractor[Validated[(A, B)]] =
-        request =>
-          method.extract(request).flatMap { _ =>
-            url.decodeUrl(request).map[Validated[(A, B)]] { validatedA =>
-              validatedA.zip(headers(request.headers))
-            }
+  private[server] def requestEntityMapPartial[A, B](
+      requestEntity: RequestEntity[A]
+  )(f: A => Validated[B]): RequestEntity[B] =
+    headers =>
+      requestEntity(headers).map(
+        _.validate(a =>
+          f(a) match {
+            case Valid(value)     => Right(value)
+            case invalid: Invalid => Left(handleClientErrors(invalid))
           }
-      def encode(ab: (A, B)): Call = Call(method.value, url.encodeUrl(ab._1))
-    }
+        )
+      )
+
+  private[server] def requestEntityMap[A, B](requestEntity: RequestEntity[A])(
+      f: A => B
+  ): RequestEntity[B] =
+    headers => requestEntity(headers).map(_.map(f))
 
   /** Decodes a request.
     * @param url Request URL
@@ -274,18 +285,120 @@ trait EndpointsWithCustomErrors
   )(implicit
       tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
-  ): Request[Out] =
-    extractMethodUrlAndHeaders(method, url, headers)
-      .toRequest { case (a, c) =>
-        headers =>
-          entity(headers).map(
-            _.map(b => tuplerABC.apply(tuplerAB.apply(a, b), c))
-          )
-      } { abc =>
+  ): Request[Out] = {
+    val u = url
+    val h = headers
+    val m = method
+    val e = entity
+    new Request[Out] {
+      type UrlData = A
+      type EntityData = B
+      type HeadersData = C
+      def url: Url[A] = u
+      def headers: RequestHeaders[C] = h
+      def method: Method = m
+      def entity: RequestEntity[B] = e
+      def aggregateAndValidate(
+          urlData: UrlData,
+          headersData: HeadersData,
+          entityData: EntityData
+      ): Validated[Out] =
+        Valid(tuplerABC.apply(tuplerAB.apply(urlData, entityData), headersData))
+      def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[Out]] = {
+        matchRequestAndParseHeaders(requestHeader) { (urlData, headersData) =>
+          requestEntityMap(entity) { entityData =>
+            tuplerABC.apply(tuplerAB.apply(urlData, entityData), headersData)
+          }
+        }
+      }
+      def urlData(abc: Out): A = {
         val (ab, c) = tuplerABC.unapply(abc)
         val (a, _) = tuplerAB.unapply(ab)
-        (a, c)
+        a
       }
+    }
+  }
+
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headersP: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] = new Request[tupler.Out] {
+    type UrlData = request.UrlData
+    type HeadersData = (request.HeadersData, H)
+    type EntityData = request.EntityData
+    def url: Url[UrlData] = request.url
+    def headers: RequestHeaders[HeadersData] =
+      hs => request.headers(hs).zip(headersP(hs))
+    def method: Method = request.method
+    def entity: RequestEntity[EntityData] = request.entity
+    def aggregateAndValidate(
+        urlData: UrlData,
+        headersData: HeadersData,
+        entityData: EntityData
+    ): Validated[tupler.Out] =
+      request
+        .aggregateAndValidate(urlData, headersData._1, entityData)
+        .map(tupler.apply(_, headersData._2))
+    def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[tupler.Out]] = {
+      matchRequestAndParseHeaders(requestHeader) { (urlData, headersData) =>
+        requestEntityMapPartial(entity) { entityData =>
+          aggregateAndValidate(urlData, headersData, entityData)
+        }
+      }
+    }
+    def urlData(out: tupler.Out): UrlData =
+      request.urlData(tupler.unapply(out)._1)
+  }
+
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      type UrlData = (request.UrlData, Q)
+      type HeadersData = request.HeadersData
+      type EntityData = request.EntityData
+      def url: Url[UrlData] = new Url[UrlData] {
+        def decodeUrl(req: RequestHeader): Option[Validated[(request.UrlData, Q)]] =
+          request.url.decodeUrl(req).map(_.zip(qs.decode(req.queryString)))
+        def encodeUrlComponents(
+            a: (request.UrlData, Q)
+        ): (Seq[String], Map[String, Seq[String]]) = {
+          val (path, query) = request.url.encodeUrlComponents(a._1)
+          (path, query ++ qs.encode(a._2))
+        }
+
+      }
+      def headers: RequestHeaders[HeadersData] = request.headers
+      def method: Method = request.method
+      def entity: RequestEntity[EntityData] = request.entity
+      def aggregateAndValidate(
+          urlData: UrlData,
+          headersData: HeadersData,
+          entityData: EntityData
+      ): Validated[tupler.Out] =
+        request
+          .aggregateAndValidate(urlData._1, headersData, entityData)
+          .map(tupler.apply(_, urlData._2))
+      def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[tupler.Out]] = {
+        matchRequestAndParseHeaders(requestHeader) { (urlData, headersData) =>
+          requestEntityMapPartial(entity) { entityData =>
+            aggregateAndValidate(urlData, headersData, entityData)
+          }
+        }
+      }
+      def urlData(out: tupler.Out): UrlData =
+        (request.urlData(tupler.unapply(out)._1), tupler.unapply(out)._2)
+    }
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    o => {
+      val (a, h) = tupler.unapply(o)
+      response(a).withHeaders(headers(h): _*)
+    }
 
   /** Turns the `A` information into a proper Play `Result`
     */
@@ -441,7 +554,7 @@ trait EndpointsWithCustomErrors
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       try {
         endpoint.request
-          .decode(header)
+          .matchRequest(header)
           .map { requestEntity =>
             EssentialAction { headers =>
               try {
@@ -480,6 +593,21 @@ trait EndpointsWithCustomErrors
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
     Endpoint(request, response)
+
+  override def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = Endpoint(func(endpoint.request), endpoint.response)
+
+  override def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = Endpoint(endpoint.request, func(endpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] = endpoint
 
   /** Builds a Play router out of endpoint definitions.
     *

@@ -20,8 +20,8 @@ import org.http4s.Uri
 
 import cats.effect.unsafe.implicits.global
 
-class TestJsonSchemaClient[F[_]: Concurrent](host: Uri, client: Client[F])
-    extends Endpoints[F](host, client)
+class TestJsonSchemaClient[F[_]: Concurrent](authority: Uri.Authority, scheme: Uri.Scheme, client: Client[F])
+    extends Endpoints[F](authority, scheme, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
     with ChunkedJsonEntities
@@ -50,7 +50,11 @@ class Http4sClientEndpointsJsonSchemaTest
     AsyncHttpClient.allocate[IO]().unsafeRunSync()
 
   val client = new TestJsonSchemaClient[IO](
-    Uri.unsafeFromString(s"http://localhost:$wiremockPort"),
+    Uri.Authority(
+      host = Uri.RegName("localhost"),
+      port = Some(wiremockPort)
+    ),
+    Uri.Scheme.http,
     ahc
   )
 
@@ -64,8 +68,15 @@ class Http4sClientEndpointsJsonSchemaTest
     eventualResponse.unsafeToFuture()
   }
 
-  def encodeUrl[A](url: client.Url[A])(a: A): String =
-    url.encodeUrl(a).toOption.get.renderString
+  def encodeUrl[A](url: client.Url[A])(a: A): String = {
+    val (path, query) = url.encodeUrl(a)
+    (path.isEmpty, query.isEmpty) match {
+      case (true, true)   => ""
+      case (false, true)  => s"/${path.renderString}"
+      case (true, false)  => s"?${query.renderString}"
+      case (false, false) => s"/${path.renderString}?${query.renderString}"
+    }
+  }
 
   override def callStreamedEndpoint[A, B](
       endpoint: streamingClient.Endpoint[fs2.Stream[IO, A], B],
@@ -86,7 +97,11 @@ class Http4sClientEndpointsJsonSchemaTest
       .unsafeToFuture()
 
   override val streamingClient = new TestJsonSchemaClient[IO](
-    Uri.unsafeFromString(s"http://localhost:$streamingPort"),
+    Uri.Authority(
+      host = Uri.RegName("localhost"),
+      port = Some(streamingPort)
+    ),
+    Uri.Scheme.http,
     ahc
   )
 

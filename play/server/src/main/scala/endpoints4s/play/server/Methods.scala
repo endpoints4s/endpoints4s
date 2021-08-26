@@ -10,10 +10,8 @@ import play.api.mvc.RequestHeader
 trait Methods extends algebra.Methods {
 
   case class Method(value: String) {
-    val extract: (RequestHeader) => Option[Unit] =
-      (request: RequestHeader) =>
-        if (request.method == value) Some(())
-        else None
+    def matches(requestHeader: RequestHeader): Boolean =
+      requestHeader.method == value
   }
 
   def Get = Method("GET")

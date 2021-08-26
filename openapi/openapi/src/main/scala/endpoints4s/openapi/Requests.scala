@@ -63,6 +63,20 @@ trait Requests extends algebra.Requests with Urls with Methods with Headers {
   ): Request[Out] =
     DocumentedRequest(method, url, headers, docs, entity)
 
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    request.copy(headers = DocumentedHeaders(request.headers.value ++ headers.value))
+
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    request.copy(url =
+      request.url.copy(queryParameters = request.url.queryParameters ++ qs.parameters)
+    )
+
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
       def xmapPartial[A, B](

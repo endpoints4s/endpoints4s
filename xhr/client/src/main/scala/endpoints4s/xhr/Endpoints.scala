@@ -2,6 +2,7 @@ package endpoints4s.xhr
 
 import endpoints4s.{
   Decoder,
+  Hashing,
   Invalid,
   InvariantFunctor,
   PartialInvariantFunctor,
@@ -84,13 +85,12 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /** A function that takes the information `A` and returns an XMLHttpRequest
-    * with an optional request entity. If provided, the request entity must be
-    * compatible with the `send` method of XMLHttpRequest.
+  /** A function that takes the information `A` and returns the data to create
+    * an XMLHttpRequest.
     */
   // FIXME Use a representation that makes it easier to set the request Content-Type header according to its entity type
   trait Request[A] {
-    def apply(a: A): (XMLHttpRequest, Option[js.Any])
+    def apply(a: A): RequestData
 
     def href(a: A): String
   }
@@ -103,7 +103,7 @@ trait EndpointsWithCustomErrors
           g: B => A
       ): Request[B] =
         new Request[B] {
-          def apply(b: B): (XMLHttpRequest, Option[js.Any]) = fa(g(b))
+          def apply(b: B): RequestData = fa(g(b))
           def href(b: B): String = fa.href(g(b))
         }
     }
@@ -152,8 +152,7 @@ trait EndpointsWithCustomErrors
       def apply(abc: Out) = {
         val (ab, c) = tuplerABC.unapply(abc)
         val (a, b) = tuplerAB.unapply(ab)
-        val xhr = makeXhr(method, url, a, headers, c)
-        (xhr, Some(entity(b, xhr)))
+        RequestData(method, headers(c, _), xhr => Some(entity(b, xhr)))
       }
 
       def href(abc: Out) = {
@@ -162,19 +161,6 @@ trait EndpointsWithCustomErrors
         url.encode(a)
       }
     }
-
-  private def makeXhr[A, B](
-      method: String,
-      url: Url[A],
-      a: A,
-      headers: RequestHeaders[B],
-      b: B
-  ): XMLHttpRequest = {
-    val xhr = new XMLHttpRequest
-    xhr.open(method, url.encode(a))
-    headers(b, xhr)
-    xhr
-  }
 
   /** Attempts to decode an `A` from an XMLHttpRequest’s response
     */
@@ -290,7 +276,8 @@ trait EndpointsWithCustomErrors
   /** A function that takes the information needed to build a request and returns
     * a task yielding the information carried by the response.
     */
-  abstract class Endpoint[A, B](request: Request[A]) extends (A => Result[B]) {
+  abstract class Endpoint[A, B](val request: Request[A], val response: Response[B])
+      extends (A => Result[B]) {
     def href(a: A): String = request.href(a)
   }
 
@@ -309,7 +296,12 @@ trait EndpointsWithCustomErrors
       onload: Either[Throwable, B] => Unit,
       onerror: XMLHttpRequest => Unit
   ): Unit = {
-    val (xhr, maybeEntity) = request(a)
+    val requestData = request(a)
+    val xhr = new XMLHttpRequest
+    xhr.open(requestData.method, request.href(a))
+    requestData.prepare(xhr)
+    val maybeEntity = requestData.entity(xhr)
+
     xhr.onload = _ => {
       val maybeResponse = response(xhr)
       def maybeClientErrors =
@@ -341,4 +333,119 @@ trait EndpointsWithCustomErrors
     xhr.send(maybeEntity.orNull)
   }
 
+  override def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    this.endpoint(f(endpoint.request), endpoint.response)
+
+  override def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    this.endpoint(endpoint.request, f(endpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      def apply(out: tupler.Out): RequestData = {
+        val (a, h) = tupler.unapply(out)
+        val requestData = request(a)
+        requestData.withPrepare(xhr => {
+          requestData.prepare(xhr)
+          headers(h, xhr)
+        })
+      }
+
+      def href(out: tupler.Out): String =
+        request.href(tupler.unapply(out)._1)
+    }
+
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      def apply(out: tupler.Out): RequestData =
+        request(tupler.unapply(out)._1)
+
+      def href(out: tupler.Out): String = {
+        val (a, q) = tupler.unapply(out)
+        val url = request.href(a)
+        qs.encode(q) match {
+          case Some(queryString) =>
+            if (url.contains('?')) s"$url&$queryString"
+            else s"$url?$queryString"
+          case None => url
+        }
+      }
+    }
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (xhr: XMLHttpRequest) =>
+      response(xhr).map[ResponseEntity[tupler.Out]] { a =>
+        headers(xhr) match {
+          case Valid(h) =>
+            mapResponseEntity(a)(tupler(_, h))
+          case Invalid(errors) =>
+            (_: XMLHttpRequest) => Left(new Exception(errors.mkString(". ")))
+        }
+      }
+}
+
+final class RequestData private (
+    val method: String,
+    val prepare: js.Function1[XMLHttpRequest, Unit],
+    val entity: js.Function1[XMLHttpRequest, Option[js.Any]]
+) extends Serializable {
+
+  override def toString: String =
+    s"RequestData($method, $prepare, $entity)"
+
+  override def equals(obj: Any): Boolean = obj match {
+    case other: RequestData =>
+      method == other.method && prepare == other.prepare && entity == other.entity
+    case _ =>
+      false
+  }
+
+  override def hashCode(): Int =
+    Hashing.hash(method, prepare, entity)
+
+  def withMethod(method: String): RequestData =
+    copy(method = method)
+
+  def withPrepare(prepare: js.Function1[XMLHttpRequest, Unit]): RequestData =
+    copy(prepare = prepare)
+
+  def withEntity(entity: js.Function1[XMLHttpRequest, Option[js.Any]]): RequestData =
+    copy(entity = entity)
+
+  private def copy(
+      method: String = method,
+      prepare: js.Function1[XMLHttpRequest, Unit] = prepare,
+      entity: js.Function1[XMLHttpRequest, Option[js.Any]] = entity
+  ): RequestData = new RequestData(method, prepare, entity)
+
+}
+
+object RequestData {
+
+  def apply(
+      method: String,
+      prepare: js.Function1[XMLHttpRequest, Unit],
+      entity: js.Function1[XMLHttpRequest, Option[js.Any]]
+  ): RequestData =
+    new RequestData(method, prepare, entity)
 }

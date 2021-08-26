@@ -103,4 +103,21 @@ trait Requests extends algebra.Requests with Urls with Methods {
         .method(method)
     }
 
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    out => {
+      val (a, h) = tupler.unapply(out)
+      request(a).headers(headers(h))
+    }
+
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    out => {
+      val (a, q) = tupler.unapply(out)
+      request(a).params(qs(q))
+    }
 }

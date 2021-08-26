@@ -2,7 +2,7 @@ package endpoints4s.play.server
 
 import akka.stream.scaladsl.{Source, StreamConverters}
 import akka.util.ByteString
-import endpoints4s.{Invalid, Valid, algebra}
+import endpoints4s.{Invalid, Valid, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import play.api.http.{ContentTypes, HttpEntity}
 import play.api.mvc.Results
@@ -96,10 +96,9 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /** Decodes and encodes an [[AssetPath]] into a URL path.
     */
-  def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
-    val stringPath = segment[String](name, docs)
+  def assetSegments(name: String, docs: Documentation): Path[AssetPath] =
     new Path[AssetPath] {
-      def decode(segments: List[String]) =
+      def decode(segments: List[String]): Option[(Validated[AssetPath], List[String])] =
         segments.reverse match {
           case s :: p =>
             val i = s.lastIndexOf('-')
@@ -109,12 +108,9 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
             } else Some((Invalid("Invalid asset segments"), Nil))
           case Nil => None
         }
-      def encode(s: AssetPath) =
-        s.path.foldRight(stringPath.encode(s"${s.name}-${s.digest}"))((segment, path) =>
-          s"${stringPath.encode(segment)}/$path"
-        )
+      def encode(s: AssetPath): Seq[String] =
+        s.path.map(stringSegment.encode) :+ stringSegment.encode(s"${s.name}-${s.digest}")
     }
-  }
 
   private lazy val gzipSupport: RequestHeaders[Boolean] =
     headers => Valid(headers.get(HeaderNames.ACCEPT_ENCODING).exists(_.contains("gzip")))

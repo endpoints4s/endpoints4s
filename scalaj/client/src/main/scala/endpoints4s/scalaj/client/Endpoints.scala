@@ -19,9 +19,23 @@ trait EndpointsWithCustomErrors
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
-  ): Endpoint[A, B] = {
+  ): Endpoint[A, B] =
     Endpoint(request, response)
-  }
+
+  override def mapEndpointRequest[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = endpoint(func(currentEndpoint.request), currentEndpoint.response)
+
+  override def mapEndpointResponse[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = endpoint(currentEndpoint.request, func(currentEndpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      currentEndpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] = currentEndpoint
 
   case class Endpoint[Req, Resp](
       request: Request[Req],

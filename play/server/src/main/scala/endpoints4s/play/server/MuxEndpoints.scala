@@ -43,7 +43,7 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
     ): ToPlayHandler =
       header =>
         try {
-          request.decode(header).map { requestEntity =>
+          request.matchRequest(header).map { requestEntity =>
             EssentialAction { headers =>
               try {
                 requestEntity(headers) match {

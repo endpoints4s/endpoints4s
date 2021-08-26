@@ -211,6 +211,11 @@ by overriding the
 @scaladoc[serverErrorResponseEntity](endpoints4s.algebra.BuiltInErrors#serverErrorResponseEntity:BuiltInErrors.this.ResponseEntity[Throwable])
 operation.
 
+## Middlewares
+
+Transformations of endpoint requests and responses can be defined in a reusable
+way as so-called middlewares. They are documented in a @ref[dedicated page](middlewares.md).
+
 ## Next Step
 
 See how you can describe endpoints with @ref[JSON entities](json-entities.md).

@@ -64,7 +64,7 @@ trait BasicAuthentication
         requestDocs,
         endpointDocs
       )(tuplerUE, tuplerHCred, tuplerUEHCred)
-      .withSecurity(
+      .withSecurityRequirements(
         SecurityRequirement(
           basicAuthenticationSchemeName,
           SecurityScheme.httpBasic

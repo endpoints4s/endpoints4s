@@ -24,14 +24,30 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
-    new Endpoint[A, B](request) {
+    new Endpoint[A, B](request, response) {
+
       def apply(a: A) =
         new js.Promise[B]((resolve, error) => {
-          performXhr(request, response, a)(
+          performXhr(this.request, this.response, a)(
             _.fold(exn => error(exn.getMessage), b => resolve(b)): Unit,
             xhr => error(xhr.responseText): Unit
           )
         })
     }
+
+  override def mapEndpointRequest[A, B, C](
+      e: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = endpoint(func(e.request), e.response)
+
+  override def mapEndpointResponse[A, B, C](
+      e: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = endpoint(e.request, func(e.response))
+
+  override def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] = endpoint
 
 }
