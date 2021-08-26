@@ -14,7 +14,7 @@ val `xhr-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "1.1.0",
+        "org.scala-js" %%% "scalajs-dom" % "1.2.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
