@@ -89,22 +89,24 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 }
 
 //#mux-handler-async
-/** A function whose return type depends on the type
-  * of the given `req`.
+/** A function whose return type depends on the type of the given `req`.
   *
-  * @tparam Req Request base type
-  * @tparam Resp Response base type
+  * @tparam Req
+  *   Request base type
+  * @tparam Resp
+  *   Response base type
   */
 trait MuxHandlerAsync[Req <: MuxRequest, Resp] {
   def apply[R <: Resp](req: Req { type Response = R }): Future[R]
 }
 //#mux-handler-async
 
-/** A function whose return type depends on the type
-  * of the given `req`.
+/** A function whose return type depends on the type of the given `req`.
   *
-  * @tparam Req Request base type
-  * @tparam Resp Response base type
+  * @tparam Req
+  *   Request base type
+  * @tparam Resp
+  *   Response base type
   */
 trait MuxHandler[Req <: MuxRequest, Resp] {
   def apply[R <: Resp](req: Req { type Response = R }): R

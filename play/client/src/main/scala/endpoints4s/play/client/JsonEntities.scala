@@ -4,8 +4,8 @@ import play.api.http.ContentTypes
 import play.api.libs.ws.{BodyWritable, InMemoryBody}
 import endpoints4s.{Codec, algebra, ujson}
 
-/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
-  * and decodes JSON responses using Play WS.
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests and
+  * decodes JSON responses using Play WS.
   *
   * @group interpreters
   */
@@ -28,8 +28,8 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 
 }
 
-/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromSchemas]] that encodes JSON requests
-  * and decodes JSON responses using Play WS.
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromSchemas]] that encodes JSON requests and
+  * decodes JSON responses using Play WS.
   *
   * @group interpreters
   */

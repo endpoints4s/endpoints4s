@@ -1,11 +1,10 @@
 package endpoints4s.algebra
 
-/** Provides a way to define endpoints that directly expose the low level APIs of the
-  * interpreters.
+/** Provides a way to define endpoints that directly expose the low level APIs of the interpreters.
   *
-  * Using this trait is not recommended because endpoints defined using these methods
-  * miss the opportunity to share a consistent protocol between client and server
-  * interpreters. However, it can be useful for transitioning legacy code.
+  * Using this trait is not recommended because endpoints defined using these methods miss the
+  * opportunity to share a consistent protocol between client and server interpreters. However, it
+  * can be useful for transitioning legacy code.
   *
   * Example of endpoint definition:
   *

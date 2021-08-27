@@ -32,20 +32,24 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   /** Information carried by an HTTP endpoint
     *
-    * Values of type [[Endpoint]] can be constructed by using the operation
-    * [[endpoint]].
+    * Values of type [[Endpoint]] can be constructed by using the operation [[endpoint]].
     *
-    * @tparam A Information carried by the request
-    * @tparam B Information carried by the response
+    * @tparam A
+    *   Information carried by the request
+    * @tparam B
+    *   Information carried by the response
     * @group types
     */
   type Endpoint[A, B]
 
   /** Define an HTTP endpoint
     *
-    * @param request  Request
-    * @param response Response
-    * @param docs     Documentation (used by documentation interpreters)
+    * @param request
+    *   Request
+    * @param response
+    *   Response
+    * @param docs
+    *   Documentation (used by documentation interpreters)
     * @group operations
     */
   def endpoint[A, B](
@@ -54,12 +58,18 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B]
 
-  /** @param operationId A unique identifier which identifies this operation
-    * @param summary     Short description
-    * @param description Detailed description
-    * @param tags        OpenAPI tags
-    * @param callbacks   Callbacks indexed by event name
-    * @param deprecated  Indicates whether this endpoint is deprecated or not
+  /** @param operationId
+    *   A unique identifier which identifies this operation
+    * @param summary
+    *   Short description
+    * @param description
+    *   Detailed description
+    * @param tags
+    *   OpenAPI tags
+    * @param callbacks
+    *   Callbacks indexed by event name
+    * @param deprecated
+    *   Indicates whether this endpoint is deprecated or not
     */
   final class EndpointDocs private (
       val operationId: Option[String],
@@ -135,11 +145,11 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
 
   object EndpointDocs {
 
-    /** @return An empty documentation value, with no summary, no description,
-      *         no tags, no callbacks, and the `deprecated` flag set to `false`.
+    /** @return
+      *   An empty documentation value, with no summary, no description, no tags, no callbacks, and
+      *   the `deprecated` flag set to `false`.
       *
-      * You can transform the returned [[EndpointDocs]] value by using the `withXxx`
-      * operations:
+      * You can transform the returned [[EndpointDocs]] value by using the `withXxx` operations:
       *
       * {{{
       *   EndpointDocs().withSummary(Some("endpoint summary"))
@@ -171,13 +181,17 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
   }
 
   /** Callbacks indexed by URL pattern
-    * @see Swagger Documentation at [[https://swagger.io/docs/specification/callbacks/]]
+    * @see
+    *   Swagger Documentation at [[https://swagger.io/docs/specification/callbacks/]]
     */
   type CallbacksDocs = Map[String, CallbackDocs]
 
-  /** @param method   HTTP method used for the callback
-    * @param entity   Contents of the callback message
-    * @param response Expected response
+  /** @param method
+    *   HTTP method used for the callback
+    * @param entity
+    *   Contents of the callback message
+    * @param response
+    *   Expected response
     */
   final class CallbackDocs private (
       val method: Method,

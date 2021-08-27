@@ -6,7 +6,8 @@ import org.pegdown.ast._
 
 object CoordinatesDirective extends InlineDirective("coordinates") {
   def render(node: DirectiveNode, visitor: Visitor, printer: Printer): Unit = {
-    val binarySuffix = if (node.attributes.values("platform").contains("js")) "sjs1_2.13" else "2.13"
+    val binarySuffix =
+      if (node.attributes.values("platform").contains("js")) "sjs1_2.13" else "2.13"
     val artifact = node.contents
     new ExpLinkNode(
       s"Artifact $artifact",

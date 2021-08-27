@@ -1,7 +1,7 @@
 package endpoints4s
 
-/** Type class that checks whether something is a multiple of another numeric value. Added since the std-lib Numeric
-  * does not have a modulo function.
+/** Type class that checks whether something is a multiple of another numeric value. Added since the
+  * std-lib Numeric does not have a modulo function.
   */
 trait MultipleOf[A] {
   def multipleOf(a: A, b: A): Boolean

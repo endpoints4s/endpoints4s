@@ -21,8 +21,8 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
-/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
-  * to model client and server errors.
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses
+  * [[algebra.BuiltInErrors]] to model client and server errors.
   *
   * @group interpreters
   */
@@ -82,9 +82,11 @@ trait EndpointsWithCustomErrors
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
 
-    /** @return An Akka HTTP `Route` for this endpoint
-      * @param implementation Function that transforms the `A` value carried in
-      *                       the request into a `B` value to send in the response.
+    /** @return
+      *   An Akka HTTP `Route` for this endpoint
+      * @param implementation
+      *   Function that transforms the `A` value carried in the request into a `B` value to send in
+      *   the response.
       */
     def implementedBy(implementation: A => B): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
@@ -95,10 +97,11 @@ trait EndpointsWithCustomErrors
         }
       }
 
-    /** @return An Akka HTTP `Route` for this endpoint
-      * @param implementation Asynchronous function that transforms the `A` value
-      *                       carried in the request into a `B` value to send in
-      *                       the response.
+    /** @return
+      *   An Akka HTTP `Route` for this endpoint
+      * @param implementation
+      *   Asynchronous function that transforms the `A` value carried in the request into a `B`
+      *   value to send in the response.
       */
     def implementedByAsync(implementation: A => Future[B]): Route =
       Directives.handleExceptions(endpointsExceptionHandler) {
@@ -110,8 +113,8 @@ trait EndpointsWithCustomErrors
         }
       }
 
-    /** @return The `Uri` of this endpoint, for a request carrying the
-      *         given `a` value.
+    /** @return
+      *   The `Uri` of this endpoint, for a request carrying the given `a` value.
       */
     def uri(a: A): Uri = request.uri(a)
   }
@@ -313,11 +316,10 @@ trait EndpointsWithCustomErrors
         )
     }
 
-  /** This method is called by ''endpoints'' when an exception is thrown during
-    * request processing.
+  /** This method is called by ''endpoints'' when an exception is thrown during request processing.
     *
-    * The provided implementation uses [[serverErrorResponse]] to complete
-    * with a response containing the error message.
+    * The provided implementation uses [[serverErrorResponse]] to complete with a response
+    * containing the error message.
     *
     * This method can be overridden to customize the error reporting logic.
     */

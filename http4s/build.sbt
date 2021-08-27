@@ -17,7 +17,8 @@ val `http4s-server` =
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-core" % http4sVersion).cross(CrossVersion.for3Use2_13),
         ("org.http4s" %% "http4s-dsl" % http4sVersion).cross(CrossVersion.for3Use2_13),
-        ("org.http4s" %% "http4s-blaze-server" % http4sVersion % Test).cross(CrossVersion.for3Use2_13)
+        ("org.http4s" %% "http4s-blaze-server" % http4sVersion % Test)
+          .cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
@@ -39,7 +40,8 @@ val `http4s-client` =
       version := "5.0.0+n",
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).cross(CrossVersion.for3Use2_13),
-        ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).cross(CrossVersion.for3Use2_13)
+        ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test)
+          .cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
