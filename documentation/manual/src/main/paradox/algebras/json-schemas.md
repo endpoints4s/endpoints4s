@@ -31,8 +31,8 @@ to the case class fields. A JSON schema for such objects would be defined as fol
 @@snip [JsonSchemasDocs.scala](/json-schema/json-schema/src/test/scala/endpoints4s/algebra/JsonSchemasDocs.scala) { #record-schema }
 
 The `field` constructor defines a JSON object schema with one field of the given
-type and name (and an optional text documentation). A similar constructor, `optField`,
-defines an optional field in a JSON object.
+type and name (and an optional text documentation). Two other constructors, `optField` and
+`optFieldWithDefault`, define optional fields in a JSON object.
 
 The return type of `rectangleSchema` is declared to be `JsonSchema[Rectangle]`, but we could have
 used a more specific type: `Record[Rectangle]`. This subtype of `JsonSchema[Rectangle]` provides

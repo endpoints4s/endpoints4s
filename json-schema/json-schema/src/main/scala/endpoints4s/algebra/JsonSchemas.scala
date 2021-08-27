@@ -336,7 +336,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *   - Decoders fallback to the `defaultValue` if the field is absent from
     *     the decoded JSON object. They fail if the field is present but has an
     *     invalid value,
-    *   - Encoders always produce the field (even when it has the `defaultValue`),
+    *   - Encoders must emit the field if it is not `defaultValue`, but can
+    *     choose to omit it when it has the `defaultValue`
     *   - Documentation interpreters produce the JSON schema of a JSON object with an
     *     optional property of the given `name`.
     *
