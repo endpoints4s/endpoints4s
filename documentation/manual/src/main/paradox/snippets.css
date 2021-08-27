@@ -23,3 +23,7 @@ pre:hover .go-to-source::before,
 .go-to-source:focus::before, .go-to-source:hover::before {
   color: #536dfe;
 }
+button.snippet-button.copy-snippet,
+a.snippet-button.go-to-source > span.pln {
+  visibility: collapse;
+}
