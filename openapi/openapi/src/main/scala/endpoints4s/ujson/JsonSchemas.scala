@@ -164,6 +164,44 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     val encoder = _ => ujson.Obj()
   }
 
+  /** Override this method to customize the behaviour of encoders produced by
+    * [[optFieldWithDefault]] when encoding a field value that corresponds to
+    * the specified default value. By default, the default values are included.
+    *
+    * As an example, consider the following Scala class and instances of it.
+    *
+    * {{{
+    * case class Book(
+    *   name: String,
+    *   availableAsEBook: Boolean = false
+    * )
+    *
+    * val book1 = Book("Complete Imaginary Works", false)
+    * val book2 = Book("History of Writing", true)
+    * }}}
+    *
+    * With `encodersSkipDefaultValues = false` (which is the default), the field
+    * is always encoded, regardless of whether it is also the default value.
+    * This makes encoding performance predictable, but results in larger and
+    * more complicated encoded payloads:
+    *
+    * {{{
+    * { "name": "Complete Imaginary Works", "availableAsEBook": false }
+    * { "name": "History of Writing", "availableAsEBook": true }
+    * }}}
+    *
+    * With `encodersSkipDefaultValues = true`, the field is skipped if its value
+    * if also the field's default value. This means encoding can be slower
+    * (since  potentially expensive equality check needs to be performed), but
+    * the encoded payloads are smaller and simpler:
+    *
+    * {{{
+    * { "name": "Complete Imaginary Works" }
+    * { "name": "History of Writing", "availableAsEBook": true }
+    * }}}
+    */
+  def encodersSkipDefaultValues: Boolean = false
+
   def field[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
   ): Record[A] =
@@ -204,6 +242,34 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
             case Some(value) => ujson.Obj(name -> tpe.codec.encode(value))
           }
       }
+    }
+
+  override def optFieldWithDefault[A](
+      name: String,
+      defaultValue: A,
+      docs: Option[String] = None
+  )(implicit
+      tpe: JsonSchema[A]
+  ): Record[A] =
+    new Record[A] {
+
+      val decoder = {
+        case obj @ ujson.Obj(fields) =>
+          fields.get(name) match {
+            case Some(ujson.Null) => Valid(defaultValue)
+            case Some(json)       => tpe.decoder.decode(json)
+            case None             => Valid(defaultValue)
+          }
+        case json => Invalid(s"Invalid JSON object: $json")
+      }
+
+      val encoder: Encoder[A, ujson.Obj] =
+        if (encodersSkipDefaultValues)
+          value =>
+            if (value == defaultValue) ujson.Obj()
+            else ujson.Obj(name -> tpe.encoder.encode(value))
+        else
+          value => ujson.Obj(name -> tpe.encoder.encode(value))
     }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =
