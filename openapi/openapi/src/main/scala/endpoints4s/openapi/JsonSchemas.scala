@@ -33,6 +33,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName
+
+      override def encodersSkipDefaultValues: Boolean = true
     }
 
   import DocumentedJsonSchema._
