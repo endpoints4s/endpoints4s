@@ -5,12 +5,14 @@ import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
-/** Interpreter for [[algebra.LowLevelEndpoints]] that represents the response as a
-  * `XMLHttpRequest` value.
+/** Interpreter for [[algebra.LowLevelEndpoints]] that represents the response as a `XMLHttpRequest`
+  * value.
   */
 trait LowLevelEndpoints extends algebra.LowLevelEndpoints with EndpointsWithCustomErrors {
 
-  /** Represents the request entity as a function that is passed the underlying XMLHttpRequest (so this one can be modified in place) and returns the actual entity to use */
+  /** Represents the request entity as a function that is passed the underlying XMLHttpRequest (so
+    * this one can be modified in place) and returns the actual entity to use
+    */
   type RawRequestEntity = js.Function1[XMLHttpRequest, js.Any]
 
   /** Sends the entity as it is */

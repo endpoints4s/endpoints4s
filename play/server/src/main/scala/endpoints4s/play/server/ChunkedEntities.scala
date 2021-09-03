@@ -7,7 +7,8 @@ import play.api.http.{ContentTypes, HttpChunk, HttpEntity}
 import play.api.libs.streams.Accumulator
 import play.api.mvc.BodyParser
 
-/** Interpreter for the [[algebra.ChunkedEntities]] algebra in the [[endpoints4s.play.server]] family.
+/** Interpreter for the [[algebra.ChunkedEntities]] algebra in the [[endpoints4s.play.server]]
+  * family.
   *
   * @group interpreters
   */
@@ -56,7 +57,8 @@ trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEnti
 
 }
 
-/** Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.play.server]] family.
+/** Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.play.server]]
+  * family.
   *
   * @group interpreters
   */

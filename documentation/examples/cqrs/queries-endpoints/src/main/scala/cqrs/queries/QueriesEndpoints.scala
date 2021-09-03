@@ -6,12 +6,11 @@ import endpoints4s.algebra.{BuiltInErrors, MuxEndpoints, MuxRequest, circe}
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
-/** This is our *internal* protocol for queries. We don’t have to suffer from
-  * REST conventions:
-  *  - our client doesn’t care about the “semantic” difference between POST and GET.
-  *  - status codes other than 500 and 200 are useless: the query is built
-  *    via a statically typed API, so we can not build bad requests, by construction, and the response
-  *    entity gives way more details about failures than status codes.
+/** This is our *internal* protocol for queries. We don’t have to suffer from REST conventions:
+  *   - our client doesn’t care about the “semantic” difference between POST and GET.
+  *   - status codes other than 500 and 200 are useless: the query is built via a statically typed
+  *     API, so we can not build bad requests, by construction, and the response entity gives way
+  *     more details about failures than status codes.
   */
 //#mux-endpoint
 trait QueriesEndpoints extends MuxEndpoints with BuiltInErrors with circe.JsonEntitiesFromCodecs {

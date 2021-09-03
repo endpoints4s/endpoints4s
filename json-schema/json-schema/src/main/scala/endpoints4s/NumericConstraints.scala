@@ -1,7 +1,7 @@
 package endpoints4s
 
-/** Possible restrictions on the numeric value used. Needs an instance for `Ordering` to check whether values are
-  * valid w.r.t. to the properties.
+/** Possible restrictions on the numeric value used. Needs an instance for `Ordering` to check
+  * whether values are valid w.r.t. to the properties.
   * @group operations
   */
 final class NumericConstraints[A] private (

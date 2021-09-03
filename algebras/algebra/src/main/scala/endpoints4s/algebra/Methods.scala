@@ -1,12 +1,18 @@
 package endpoints4s.algebra
 
 /** @group algebras
-  * @groupname types Types
-  * @groupdesc types Types introduced by the algebra
-  * @groupprio types 1
-  * @groupname operations Operations
-  * @groupdesc operations Operations creating and transforming values
-  * @groupprio operations 2
+  * @groupname types
+  *   Types
+  * @groupdesc types
+  *   Types introduced by the algebra
+  * @groupprio types
+  *   1
+  * @groupname operations
+  *   Operations
+  * @groupdesc operations
+  *   Operations creating and transforming values
+  * @groupprio operations
+  *   2
   */
 trait Methods {
 

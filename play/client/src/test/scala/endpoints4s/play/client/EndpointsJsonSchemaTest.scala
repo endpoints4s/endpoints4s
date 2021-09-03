@@ -9,19 +9,18 @@ import play.api.test.WsTestClient
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestJsonSchemaClient(address: String, wsClient: WSClient)(implicit
-  EC: ExecutionContext
+    EC: ExecutionContext
 ) extends Endpoints(address, wsClient)
-  with BasicAuthentication
-  with algebra.BasicAuthenticationTestApi
-  with generic.JsonSchemas
-  with algebra.JsonTestApi
-  with JsonEntitiesFromSchemas {
+    with BasicAuthentication
+    with algebra.BasicAuthenticationTestApi
+    with generic.JsonSchemas
+    with algebra.JsonTestApi
+    with JsonEntitiesFromSchemas {
   implicit def userCodec: JsonSchema[User] = genericJsonSchema[User]
   implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
 }
 
-class EndpointsJsonSchemaTest
-  extends client.JsonTestSuite[TestJsonSchemaClient] {
+class EndpointsJsonSchemaTest extends client.JsonTestSuite[TestJsonSchemaClient] {
 
   import ExecutionContext.Implicits.global
 
@@ -30,8 +29,8 @@ class EndpointsJsonSchemaTest
     new TestJsonSchemaClient(s"http://localhost:$wiremockPort", wsClient)
 
   def call[Req, Resp](
-    endpoint: client.Endpoint[Req, Resp],
-    args: Req
+      endpoint: client.Endpoint[Req, Resp],
+      args: Req
   ): Future[Resp] = endpoint(args)
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)

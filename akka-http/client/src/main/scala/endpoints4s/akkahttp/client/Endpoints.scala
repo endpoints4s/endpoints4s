@@ -18,7 +18,8 @@ import endpoints4s.{
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/** Akka-HTTP based interpreter that uses [[algebra.BuiltInErrors]] to model client and server errors.
+/** Akka-HTTP based interpreter that uses [[algebra.BuiltInErrors]] to model client and server
+  * errors.
   *
   * @group interpreters
   */

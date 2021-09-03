@@ -16,20 +16,19 @@ import org.scalajs.dom.XMLHttpRequest
 
 import scala.scalajs.js
 
-/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
-  * using XMLHttpRequest. It uses [[algebra.BuiltInErrors]] to model client and server errors.
+/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
+  * XMLHttpRequest. It uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
-  * The interpreter is ''partially'' implemented: it returns endpoint invocation
-  * results in an abstract `Result` type, which is yet to be defined
-  * by a more specialized interpreter. You can find such interpreters
-  * in the “known `Endpoints` subclasses” list.
+  * The interpreter is ''partially'' implemented: it returns endpoint invocation results in an
+  * abstract `Result` type, which is yet to be defined by a more specialized interpreter. You can
+  * find such interpreters in the “known `Endpoints` subclasses” list.
   *
   * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
-  * using XMLHttpRequest.
+/** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
+  * XMLHttpRequest.
   *
   * @group interpreters
   */
@@ -39,8 +38,8 @@ trait EndpointsWithCustomErrors
     with Methods
     with StatusCodes {
 
-  /** A function that takes the information `A` and the XMLHttpRequest
-    * and sets up some headers on it.
+  /** A function that takes the information `A` and the XMLHttpRequest and sets up some headers on
+    * it.
     */
   type RequestHeaders[A] = js.Function2[A, XMLHttpRequest, Unit]
 
@@ -84,9 +83,9 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /** A function that takes the information `A` and returns an XMLHttpRequest
-    * with an optional request entity. If provided, the request entity must be
-    * compatible with the `send` method of XMLHttpRequest.
+  /** A function that takes the information `A` and returns an XMLHttpRequest with an optional
+    * request entity. If provided, the request entity must be compatible with the `send` method of
+    * XMLHttpRequest.
     */
   // FIXME Use a representation that makes it easier to set the request Content-Type header according to its entity type
   trait Request[A] {
@@ -108,10 +107,9 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /** A function that, given information `A` and an XMLHttpRequest, returns
-    * a request entity.
-    * Also, as a side-effect, the function can set the corresponding Content-Type header
-    * on the given XMLHttpRequest.
+  /** A function that, given information `A` and an XMLHttpRequest, returns a request entity. Also,
+    * as a side-effect, the function can set the corresponding Content-Type header on the given
+    * XMLHttpRequest.
     */
   type RequestEntity[A] = js.Function2[A, XMLHttpRequest, js.Any]
 
@@ -287,8 +285,8 @@ trait EndpointsWithCustomErrors
         .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(xhr).map(mapResponseEntity(_)(Right(_))))
 
-  /** A function that takes the information needed to build a request and returns
-    * a task yielding the information carried by the response.
+  /** A function that takes the information needed to build a request and returns a task yielding
+    * the information carried by the response.
     */
   abstract class Endpoint[A, B](request: Request[A]) extends (A => Result[B]) {
     def href(a: A): String = request.href(a)
@@ -296,8 +294,8 @@ trait EndpointsWithCustomErrors
 
   /** A value that eventually yields an `A`.
     *
-    * Typically, concrete representation of `Result` will have an instance of `MonadError`, so
-    * that we can perform requests (sequentially and in parallel) and recover errors.
+    * Typically, concrete representation of `Result` will have an instance of `MonadError`, so that
+    * we can perform requests (sequentially and in parallel) and recover errors.
     */
   type Result[A]
 
