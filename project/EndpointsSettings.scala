@@ -104,7 +104,7 @@ object EndpointsSettings {
   val akkaActorVersion = "2.6.15"
   val akkaHttpVersion = "10.2.5"
   val http4sVersion = "0.23.1"
-  val ujsonVersion = "1.4.0"
+  val ujsonVersion = "1.4.1"
 
   val scalaTestVersion = "3.2.9"
   val scalaTestDependency =
