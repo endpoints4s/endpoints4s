@@ -20,8 +20,8 @@ object PlayComponents {
 
   /** Creates the `PlayComponents` from a `BuiltInComponents` instance
     *
-    * This can be useful in conjunction with the usage of `fromXxxWithComponents`
-    * methods of Play framework:
+    * This can be useful in conjunction with the usage of `fromXxxWithComponents` methods of Play
+    * framework:
     *
     * {{{
     *   val serverConfig = ServerConfig(...)

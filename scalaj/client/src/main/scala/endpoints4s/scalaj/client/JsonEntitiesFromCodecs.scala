@@ -1,7 +1,7 @@
 package endpoints4s.scalaj.client
 
-/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
-  * and decodes JSON responses.
+/** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests and
+  * decodes JSON responses.
   *
   * @group interpreters
   */

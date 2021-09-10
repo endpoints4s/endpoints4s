@@ -6,8 +6,8 @@ import org.http4s
 import org.http4s.headers.`Content-Type`
 import org.http4s.{EntityDecoder, EntityEncoder, MediaType}
 
-/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests
-  * and encodes JSON responses.
+/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests and encodes JSON
+  * responses.
   *
   * @group interpreters
   */
@@ -24,8 +24,8 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
     JsonEntities.encodeJsonResponse(this)(stringCodec)
 }
 
-/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests
-  * and encodes JSON responses.
+/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests and encodes JSON
+  * responses.
   *
   * @group interpreters
   */
@@ -42,8 +42,8 @@ trait JsonEntitiesFromSchemas
 /** Interpreter for [[endpoints4s.algebra.JsonEntities]] that decodes JSON entities with a
   * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
   *
-  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
-  * you only need an encoder to build responses, or a decoder to decode requests.
+  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs: you
+  * only need an encoder to build responses, or a decoder to decode requests.
   *
   * It is especially useful to encode `OpenApi` documents into JSON entities.
   *
