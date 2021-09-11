@@ -23,6 +23,11 @@ trait JsonSchemasFixtures extends JsonSchemas {
         field[String]("name", Some("Name of the user")) zip
         field[Int]("age")
     ).xmap((User.apply _).tupled)(user => (user.name, user.age))
+
+    val schemaWithDefault: JsonSchema[User] = (
+      field[String]("name", Some("Name of the user")) zip
+        optFieldWithDefault[Int]("age", 42)
+    ).xmap((User.apply _).tupled)(user => (user.name, user.age))
   }
 
   sealed trait Foo

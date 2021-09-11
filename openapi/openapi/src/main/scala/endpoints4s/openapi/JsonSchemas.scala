@@ -1,6 +1,13 @@
 package endpoints4s.openapi
 
-import endpoints4s.{NumericConstraints, PartialInvariantFunctor, Tupler, Validated, algebra}
+import endpoints4s.{
+  Hashing,
+  NumericConstraints,
+  PartialInvariantFunctor,
+  Tupler,
+  Validated,
+  algebra
+}
 import endpoints4s.algebra.Documentation
 import endpoints4s.openapi.model.Schema
 import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
@@ -26,6 +33,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
       override def defaultDiscriminatorName: String =
         openapiJsonSchemas.defaultDiscriminatorName
+
+      override def encodersSkipDefaultValues: Boolean = true
     }
 
   import DocumentedJsonSchema._
@@ -127,12 +136,104 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
 
     }
 
-    case class Field(
-        name: String,
-        tpe: DocumentedJsonSchema,
-        isOptional: Boolean,
-        documentation: Option[String]
-    )
+    @deprecatedInheritance
+    class Field private (
+        val name: String,
+        val tpe: DocumentedJsonSchema,
+        val isOptional: Boolean,
+        val default: Option[ujson.Value],
+        val documentation: Option[String]
+    ) extends Serializable
+        with Product
+        with Equals {
+
+      @deprecated("`Field` is no longer a `case class` and won't implement `Equals`", "3.1.0")
+      override def canEqual(other: Any): Boolean = other.isInstanceOf[Field]
+      @deprecated("`Field` is no longer a `case class` and won't implement `Product`", "3.1.0")
+      override def productArity: Int = 5
+      @deprecated("`Field` is no longer a `case class` and won't implement `Product`", "3.1.0")
+      override def productElement(idx: Int): Any = idx match {
+        case 0 => name
+        case 1 => tpe
+        case 2 => isOptional
+        case 3 => default
+        case 4 => documentation
+        case _ => throw new IndexOutOfBoundsException(idx.toString)
+      }
+      override def toString: String = s"Field($name,$tpe,$isOptional,$default,$documentation)"
+      override def hashCode: Int = Hashing.hash(name, tpe, isOptional, default, documentation)
+      override def equals(other: Any): Boolean = other match {
+        case field: Field =>
+          name == field.name && tpe == field.tpe && isOptional == field.isOptional &&
+            default == field.default && documentation == field.documentation
+        case _ => false
+      }
+
+      @deprecated("Use the Field apply method instead", "3.1.0")
+      def this(
+          name: String,
+          tpe: DocumentedJsonSchema,
+          isOptional: Boolean,
+          documentation: Option[String]
+      ) = this(name, tpe, isOptional, None, documentation)
+
+      @deprecated("Use `withName`, `withTpe`, etc. instead of `copy`", "3.1.0")
+      def copy(
+          name: String = name,
+          tpe: DocumentedJsonSchema = tpe,
+          isOptional: Boolean = isOptional,
+          documentation: Option[String] = documentation
+      ): Field =
+        new Field(name, tpe, isOptional, default, documentation)
+
+      def withName(name: String): Field =
+        new Field(name, tpe, isOptional, default, documentation)
+
+      def withTpe(tpe: DocumentedJsonSchema): Field =
+        new Field(name, tpe, isOptional, default, documentation)
+
+      def withIsOptional(isOptional: Boolean): Field =
+        new Field(name, tpe, isOptional, default, documentation)
+
+      def withDocumentation(documentation: Option[String]): Field =
+        new Field(name, tpe, isOptional, default, documentation)
+    }
+
+    object Field
+        extends runtime.AbstractFunction4[String, DocumentedJsonSchema, Boolean, Option[
+          String
+        ], Field] {
+
+      @deprecated(
+        "The Field apply method now takes an additional parameter 'default'",
+        "3.1.0"
+      )
+      def apply(
+          name: String,
+          tpe: DocumentedJsonSchema,
+          isOptional: Boolean,
+          documentation: Option[String]
+      ): Field = new Field(name, tpe, isOptional, None, documentation)
+
+      def apply(
+          name: String,
+          tpe: DocumentedJsonSchema,
+          isOptional: Boolean,
+          defaultValue: Option[ujson.Value],
+          documentation: Option[String]
+      ): Field = new Field(name, tpe, isOptional, defaultValue, documentation)
+
+      @deprecated("Use field extractors instead of unapply", "3.1.0")
+      def unapply(field: Field): Option[(String, DocumentedJsonSchema, Boolean, Option[String])] =
+        Some(
+          (
+            field.name,
+            field.tpe,
+            field.isOptional,
+            field.documentation
+          )
+        )
+    }
 
     sealed abstract class DocumentedCoProd extends DocumentedJsonSchema {
       def alternatives: List[(String, DocumentedRecord)]
@@ -380,7 +481,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[A] =
     new Record(
       ujsonSchemas.field(name, docs)(tpe.ujsonSchema),
-      DocumentedRecord(Field(name, tpe.docs, isOptional = false, docs) :: Nil)
+      DocumentedRecord(Field(name, tpe.docs, isOptional = false, defaultValue = None, docs) :: Nil)
     )
 
   def optField[A](name: String, docs: Documentation)(implicit
@@ -388,8 +489,22 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   ): Record[Option[A]] =
     new Record(
       ujsonSchemas.optField(name, docs)(tpe.ujsonSchema),
-      DocumentedRecord(Field(name, tpe.docs, isOptional = true, docs) :: Nil)
+      DocumentedRecord(Field(name, tpe.docs, isOptional = true, defaultValue = None, docs) :: Nil)
     )
+
+  override def optFieldWithDefault[A](
+      name: String,
+      defaultValue: A,
+      docs: Option[String] = None
+  )(implicit
+      tpe: JsonSchema[A]
+  ): Record[A] = {
+    val defValue = Some(tpe.ujsonSchema.encoder.encode(defaultValue))
+    new Record(
+      ujsonSchemas.optFieldWithDefault(name, defaultValue, docs)(tpe.ujsonSchema),
+      DocumentedRecord(Field(name, tpe.docs, isOptional = true, defValue, docs) :: Nil)
+    )
+  }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =
     new Tagged(
@@ -1031,6 +1146,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           f.name,
           toSchema(f.tpe, None, referencedSchemas),
           !f.isOptional,
+          f.default,
           f.documentation
         )
       )
@@ -1059,6 +1175,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
               None
             ),
           isRequired = true,
+          defaultValue = None,
           description = None
         )
 

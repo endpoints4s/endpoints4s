@@ -92,11 +92,12 @@ object OpenApi {
           "type" -> "object",
           "properties" -> new ujson.Obj(
             mutable.LinkedHashMap(
-              obj.properties.map(p =>
-                p.name -> schemaJson(
-                  p.schema.withDefinedDescription(p.description)
-                )
-              ): _*
+              obj.properties.map { (p: Schema.Property) =>
+                val schema = p.schema
+                  .withDefinedDescription(p.description)
+                  .withDefinedDefault(p.defaultValue)
+                p.name -> schemaJson(schema)
+              }: _*
             )
           )
         )
@@ -1196,30 +1197,39 @@ object Schema {
       val name: String,
       val schema: Schema,
       val isRequired: Boolean,
+      val defaultValue: Option[ujson.Value],
       val description: Option[String]
   ) extends Serializable {
 
+    def this(
+        name: String,
+        schema: Schema,
+        isRequired: Boolean,
+        description: Option[String]
+    ) = this(name, schema, isRequired, None, description)
+
     override def toString: String =
-      s"Property($name, $schema, $isRequired, $description)"
+      s"Property($name, $schema, $isRequired, $defaultValue, $description)"
 
     override def equals(other: Any): Boolean =
       other match {
         case that: Property =>
           name == that.name && schema == that.schema && isRequired == that.isRequired &&
-            description == that.description
+            defaultValue == that.defaultValue && description == that.description
         case _ => false
       }
 
     override def hashCode(): Int =
-      Hashing.hash(name, schema, isRequired, description)
+      Hashing.hash(name, schema, isRequired, defaultValue, description)
 
     private[this] def copy(
         name: String = name,
         schema: Schema = schema,
         isRequired: Boolean = isRequired,
+        defaultValue: Option[ujson.Value] = defaultValue,
         description: Option[String] = description
     ): Property =
-      new Property(name, schema, isRequired, description)
+      new Property(name, schema, isRequired, defaultValue, description)
 
     def withName(name: String): Property =
       copy(name = name)
@@ -1229,6 +1239,9 @@ object Schema {
 
     def withIsRequired(isRequired: Boolean): Property =
       copy(isRequired = isRequired)
+
+    def withDefaultValue(defaultValue: Option[ujson.Value]): Property =
+      copy(defaultValue = defaultValue)
 
     def withDescription(description: Option[String]): Property =
       copy(description = description)
@@ -1240,9 +1253,16 @@ object Schema {
         name: String,
         schema: Schema,
         isRequired: Boolean,
+        defaultValue: Option[ujson.Value],
         description: Option[String]
-    ): Property = new Property(name, schema, isRequired, description)
+    ): Property = new Property(name, schema, isRequired, defaultValue, description)
 
+    def apply(
+        name: String,
+        schema: Schema,
+        isRequired: Boolean,
+        description: Option[String]
+    ): Property = new Property(name, schema, isRequired, None, description)
   }
 
   final class Primitive private (

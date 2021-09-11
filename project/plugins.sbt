@@ -5,7 +5,7 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.1.0")
 
 addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
 
-addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.7")
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.10")
 
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.1.2")
 
@@ -36,4 +36,4 @@ ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "1.2.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "2.0.0")
