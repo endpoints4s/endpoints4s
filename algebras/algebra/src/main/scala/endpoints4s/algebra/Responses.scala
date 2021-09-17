@@ -9,30 +9,31 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** An HTTP response (status, headers, and entity) carrying an information of type A
     *
-    * Values of type `Response[A]` can be constructed by using the operations
-    * [[ok]], [[badRequest]], [[internalServerError]], or the more general operation
-    * [[response]].
+    * Values of type `Response[A]` can be constructed by using the operations [[ok]],
+    * [[badRequest]], [[internalServerError]], or the more general operation [[response]].
     *
-    * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
-    *       and [[ResponseSyntax]] classes
+    * @note
+    *   This type has implicit methods provided by the [[InvariantFunctorSyntax]] and
+    *   [[ResponseSyntax]] classes
     * @group types
     */
   type Response[A]
 
   /** Provides the operation `xmap` to the type `Response`
-    * @see [[InvariantFunctorSyntax]]
+    * @see
+    *   [[InvariantFunctorSyntax]]
     */
   implicit def responseInvariantFunctor: InvariantFunctor[Response]
 
   /** An HTTP response entity carrying an information of type A
     *
-    * Values of type [[ResponseEntity]] can be constructed by using the operations
-    * [[emptyResponse]] or [[textResponse]]. Additional types of response entities are
-    * provided by other algebra modules, such as [[endpoints4s.algebra.JsonEntities JsonEntities]]
-    * or [[endpoints4s.algebra.ChunkedEntities ChunkedEntities]].
+    * Values of type [[ResponseEntity]] can be constructed by using the operations [[emptyResponse]]
+    * or [[textResponse]]. Additional types of response entities are provided by other algebra
+    * modules, such as [[endpoints4s.algebra.JsonEntities JsonEntities]] or
+    * [[endpoints4s.algebra.ChunkedEntities ChunkedEntities]].
     *
-    * @note This type has implicit methods provided by the [[InvariantFunctorSyntax]]
-    *       class
+    * @note
+    *   This type has implicit methods provided by the [[InvariantFunctorSyntax]] class
     * @group types
     */
   type ResponseEntity[A]
@@ -61,19 +62,22 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     * You can construct values of type `ResponseHeaders` by using the operations [[responseHeader]],
     * [[optResponseHeader]], or [[emptyResponseHeaders]].
     *
-    * @note This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *       and [[InvariantFunctorSyntax]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[SemigroupalSyntax]] and
+    *   [[InvariantFunctorSyntax]] classes.
     * @group types
     */
   type ResponseHeaders[A]
 
   /** Provides `++` operation.
-    * @see [[SemigroupalSyntax]]
+    * @see
+    *   [[SemigroupalSyntax]]
     */
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders]
 
   /** Provides `xmap` operation.
-    * @see [[InvariantFunctorSyntax]]
+    * @see
+    *   [[InvariantFunctorSyntax]]
     */
   implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders]
 
@@ -87,8 +91,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Response headers containing a header with the given `name`.
     *
-    *   - Client interpreters should model the header value as `String`, or
-    *    fail if the response header is missing.
+    *   - Client interpreters should model the header value as `String`, or fail if the response
+    *     header is missing.
     *   - Server interpreters should produce such a response header.
     *   - Documentation interpreters should document this header.
     *
@@ -114,8 +118,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Response headers optionally containing a header with the given `name`.
     *
-    *   - Client interpreters should model the header value as `Some[String]`, or
-    *     `None` if the response header is missing.
+    *   - Client interpreters should model the header value as `Some[String]`, or `None` if the
+    *     response header is missing.
     *   - Server interpreters should produce such a response header.
     *   - Documentation interpreters should document this header.
     *
@@ -131,10 +135,14 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
     *   - Server interpreters construct a response with the given status and entity.
     *   - Client interpreters accept a response only if it has a corresponding status code.
     *
-    * @param statusCode Response status code
-    * @param entity     Response entity
-    * @param docs       Response documentation
-    * @param headers    Response headers
+    * @param statusCode
+    *   Response status code
+    * @param entity
+    *   Response entity
+    * @param docs
+    *   Response documentation
+    * @param headers
+    *   Response headers
     * @group operations
     */
   def response[A, B, R](
@@ -146,9 +154,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Alternative between two possible choices of responses.
     *
-    * Server interpreters construct either one or the other response.
-    * Client interpreters accept either one or the other response.
-    * Documentation interpreters list all the possible responses.
+    * Server interpreters construct either one or the other response. Client interpreters accept
+    * either one or the other response. Documentation interpreters list all the possible responses.
     */
   def choiceResponse[A, B](
       responseA: Response[A],
@@ -167,7 +174,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Bad Request (400) response, with an entity of type `ClientErrors`.
     *
-    * @see [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
+    * @see
+    *   [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
     * @group operations
     */
   final def badRequest[A, R](
@@ -180,7 +188,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Internal Server Error (500) response, with an entity of type `ServerError`.
     *
-    * @see [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
+    * @see
+    *   [[endpoints4s.algebra.Errors]] and [[endpoints4s.algebra.BuiltInErrors]]
     * @group operations
     */
   final def internalServerError[A, R](
@@ -193,8 +202,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
   /** Turns a `Response[A]` into a `Response[Option[A]]`.
     *
-    * Interpreters represent `None` with
-    * an empty HTTP response whose status code is 404 (Not Found).
+    * Interpreters represent `None` with an empty HTTP response whose status code is 404 (Not
+    * Found).
     *
     * @group operations
     */
@@ -214,8 +223,8 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
     /** Turns a `Response[A]` into a `Response[Option[A]]`.
       *
-      * Interpreters represent `None` with
-      * an empty HTTP response whose status code is 404 (Not Found).
+      * Interpreters represent `None` with an empty HTTP response whose status code is 404 (Not
+      * Found).
       */
     final def orNotFound(
         notFoundDocs: Documentation = None
@@ -223,9 +232,9 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
 
     /** Alternative between two possible choices of responses.
       *
-      * Server interpreters construct either one or the other response.
-      * Client interpreters accept either one or the other response.
-      * Documentation interpreters list all the possible responses.
+      * Server interpreters construct either one or the other response. Client interpreters accept
+      * either one or the other response. Documentation interpreters list all the possible
+      * responses.
       */
     final def orElse[B](otherResponse: Response[B]): Response[Either[A, B]] =
       choiceResponse(response, otherResponse)

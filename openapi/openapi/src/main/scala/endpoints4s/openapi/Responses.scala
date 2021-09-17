@@ -17,10 +17,15 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
 
   type Response[A] = List[DocumentedResponse]
 
-  /** @param status Response status code (e.g. OK or NotFound)
-    * @param documentation Human readable documentation. Not optional because its required by openapi
-    * @param headers Response headers documentation
-    * @param content Map that associates each possible content-type (e.g. “text/html”) with a `MediaType` description
+  /** @param status
+    *   Response status code (e.g. OK or NotFound)
+    * @param documentation
+    *   Human readable documentation. Not optional because its required by openapi
+    * @param headers
+    *   Response headers documentation
+    * @param content
+    *   Map that associates each possible content-type (e.g. “text/html”) with a `MediaType`
+    *   description
     */
   case class DocumentedResponse(
       status: StatusCode,

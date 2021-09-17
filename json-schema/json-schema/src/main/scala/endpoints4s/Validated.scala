@@ -3,7 +3,8 @@ package endpoints4s
 import scala.util.{Failure, Success, Try}
 
 /** A validated value of type `A` can either be `Valid` or `Invalid`
-  * @tparam A Type of the validated value
+  * @tparam A
+  *   Type of the validated value
   */
 sealed trait Validated[+A] {
 
@@ -15,8 +16,8 @@ sealed trait Validated[+A] {
       case Invalid(errors) => invalid(errors)
     }
 
-  /** Transforms a valid value of type `A` into a valid value of type `B`.
-    * An invalid value is returned as it is.
+  /** Transforms a valid value of type `A` into a valid value of type `B`. An invalid value is
+    * returned as it is.
     */
   def map[B](f: A => B): Validated[B] =
     this match {
@@ -24,8 +25,7 @@ sealed trait Validated[+A] {
       case invalid: Invalid => invalid
     }
 
-  /** Transforms the error list of an invalid value.
-    * A valid value is returned as it is.
+  /** Transforms the error list of an invalid value. A valid value is returned as it is.
     */
   def mapErrors(f: Seq[String] => Seq[String]): Validated[A] =
     this match {
@@ -33,8 +33,7 @@ sealed trait Validated[+A] {
       case Invalid(errors) => Invalid(f(errors))
     }
 
-  /** Subsequently validates this valid value.
-    * An invalid value is returned as it is.
+  /** Subsequently validates this valid value. An invalid value is returned as it is.
     */
   def flatMap[B](f: A => Validated[B]): Validated[B] =
     this match {
@@ -42,13 +41,14 @@ sealed trait Validated[+A] {
       case invalid: Invalid => invalid
     }
 
-  /** Tuples together two validated values and tries to return a flat tuple instead of nested tuples. Also strips
-    * out `Unit` values in the tuples.
+  /** Tuples together two validated values and tries to return a flat tuple instead of nested
+    * tuples. Also strips out `Unit` values in the tuples.
     *
-    * If `this` and `that` are both invalid values, this operation returns an `Invalid` value containing both
-    * `this` error messages and `that` error messages.
+    * If `this` and `that` are both invalid values, this operation returns an `Invalid` value
+    * containing both `this` error messages and `that` error messages.
     *
-    * @see [[Tupler]]
+    * @see
+    *   [[Tupler]]
     */
   def zip[A0 >: A, B](that: Validated[B])(implicit
       tupler: Tupler[A0, B]
@@ -84,8 +84,8 @@ object Invalid {
 
 object Validated {
 
-  /** Turns `None` into an invalid value, using the given `error` message.
-    * Turns a `Some[A]` value into a `Valid[A]` value.
+  /** Turns `None` into an invalid value, using the given `error` message. Turns a `Some[A]` value
+    * into a `Valid[A]` value.
     */
   def fromOption[A](maybeA: Option[A])(error: => String): Validated[A] =
     maybeA match {
@@ -101,8 +101,8 @@ object Validated {
       case Right(a)     => Valid(a)
     }
 
-  /** Turns a `Success[A]` into a `Validated[A]`
-    * Turns a `Failure[A]` into an invalid value, using the exception message as an 'error' message
+  /** Turns a `Success[A]` into a `Validated[A]` Turns a `Failure[A]` into an invalid value, using
+    * the exception message as an 'error' message
     */
   def fromTry[A](tryA: Try[A]): Validated[A] =
     tryA match {

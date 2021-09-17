@@ -27,13 +27,11 @@ object LocalCrossProject {
         namesAndScopes: (String, String)*
     ): CrossProject =
       crossProject
-        .jsConfigure(_.dependsOn(namesAndScopes.map {
-          case (name, scope) =>
-            LocalProject(s"${name}JS") % scope: ClasspathDependency
+        .jsConfigure(_.dependsOn(namesAndScopes.map { case (name, scope) =>
+          LocalProject(s"${name}JS") % scope: ClasspathDependency
         }: _*))
-        .jvmConfigure(_.dependsOn(namesAndScopes.map {
-          case (name, scope) =>
-            LocalProject(s"${name}JVM") % scope: ClasspathDependency
+        .jvmConfigure(_.dependsOn(namesAndScopes.map { case (name, scope) =>
+          LocalProject(s"${name}JVM") % scope: ClasspathDependency
         }: _*))
 
   }

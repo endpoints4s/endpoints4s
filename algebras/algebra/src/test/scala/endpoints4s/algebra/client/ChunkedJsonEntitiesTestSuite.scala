@@ -31,8 +31,8 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
 
   import streamingClient.{Counter, Endpoint, Chunks, streamedEndpointTest, uploadEndpointTest}
 
-  /** Calls the endpoint and accumulates the messages sent by the server.
-    * (only endpoints streaming a finite number of items can be tested)
+  /** Calls the endpoint and accumulates the messages sent by the server. (only endpoints streaming
+    * a finite number of items can be tested)
     */
   def callStreamedEndpoint[A, B](
       endpoint: Endpoint[A, Chunks[B]],

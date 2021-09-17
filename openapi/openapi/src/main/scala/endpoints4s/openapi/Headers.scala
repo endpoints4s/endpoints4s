@@ -7,7 +7,8 @@ import endpoints4s.openapi.model.Schema
   */
 trait Headers {
 
-  /** @param value List of request header names (e.g. “Authorization”)
+  /** @param value
+    *   List of request header names (e.g. “Authorization”)
     */
   case class DocumentedHeaders(value: List[DocumentedHeader])
 

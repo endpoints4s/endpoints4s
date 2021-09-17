@@ -18,8 +18,8 @@ import org.http4s.{EntityEncoder, EntityDecoder, Headers}
 import scala.util.control.NonFatal
 import org.typelevel.ci._
 
-/** Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]]
-  * to model client and server errors.
+/** Interpreter for [[algebra.Endpoints]] based on http4s. It uses [[algebra.BuiltInErrors]] to
+  * model client and server errors.
   *
   * Consider the following endpoint definition:
   *
@@ -45,7 +45,8 @@ import org.typelevel.ci._
   *   }
   * }}}
   *
-  * @tparam F Effect type
+  * @tparam F
+  *   Effect type
   */
 abstract class Endpoints[F[_]](implicit F: Concurrent[F])
     extends algebra.Endpoints
@@ -366,8 +367,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
 
   /** This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The provided implementation calls `clientErrorsResponse` to construct
-    * a response containing the errors.
+    * The provided implementation calls `clientErrorsResponse` to construct a response containing
+    * the errors.
     *
     * This method can be overridden to customize the error reporting logic.
     */
@@ -377,11 +378,10 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   ): Effect[http4s.Response[Effect]] =
     Effect.pure(clientErrorsResponse(invalidToClientErrors(invalid)))
 
-  /** This method is called by ''endpoints'' when an exception is thrown during
-    * request processing.
+  /** This method is called by ''endpoints'' when an exception is thrown during request processing.
     *
-    * The provided implementation calls [[serverErrorResponse]] to construct
-    * a response containing the error message.
+    * The provided implementation calls [[serverErrorResponse]] to construct a response containing
+    * the error message.
     *
     * This method can be overridden to customize the error reporting logic.
     */

@@ -5,8 +5,8 @@ import endpoints4s.{Codec, Decoder, Encoder, Invalid, algebra}
 import play.api.mvc.RequestHeader
 import play.api.http.{ContentTypes, Writeable}
 
-/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests
-  * and encodes JSON responses.
+/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests and encodes JSON
+  * responses.
   *
   * @group interpreters
   */
@@ -20,8 +20,8 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 
 }
 
-/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests
-  * and encodes JSON responses.
+/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests and encodes JSON
+  * responses.
   *
   * @group interpreters
   */
@@ -38,8 +38,8 @@ trait JsonEntitiesFromSchemas
 /** Interpreter for [[algebra.JsonEntities]] that decodes JSON entities with a
   * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
   *
-  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
-  * you only need an encoder to build responses, or a decoder to decode requests.
+  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs: you
+  * only need an encoder to build responses, or a decoder to decode requests.
   *
   * It is especially useful to encode `OpenApi` documents into JSON entities.
   *
