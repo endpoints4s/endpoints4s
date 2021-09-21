@@ -27,6 +27,7 @@ val `http4s-server` =
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
+    .dependsOn(`algebra-circe-jvm` % "compile->test;test->test")
 
 val `http4s-client` =
   project
@@ -36,7 +37,7 @@ val `http4s-client` =
       `scala 2.12 to dotty`,
       name := "http4s-client",
       version := "5.0.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("org.http4s" %% "http4s-client" % http4sVersion).cross(CrossVersion.for3Use2_13),
         ("org.http4s" %% "http4s-async-http-client" % http4sVersion % Test).cross(CrossVersion.for3Use2_13)
@@ -50,3 +51,4 @@ val `http4s-client` =
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
     .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
+
