@@ -2,8 +2,8 @@ package endpoints4s
 
 /** Defines a strategy for tupling `A` and `B` values, according to types `A` and `B`.
   *
-  * The actual implementation avoids nested tuples and eliminates `Unit`, so that instead of ending with, e.g.,
-  * the following type:
+  * The actual implementation avoids nested tuples and eliminates `Unit`, so that instead of ending
+  * with, e.g., the following type:
   *
   * {{{
   *   ((Unit, Int), (((Unit, Unit), String)))
@@ -16,17 +16,17 @@ package endpoints4s
   * }}}
   *
   * The following rules are implemented (by increasing priority):
-  *  - A, B               -> (A, B)
-  *  - A, (B, C)          -> (A, B, C)
-  *  - (A, B), C          -> (A, B, C)
-  *  - (A, B), (C, D)     -> (A, B, C, D)
-  *  - A, (B, C, D, E)    -> (A, B, C, D, E)
-  *  - (A, B), (C, D, E)  -> (A, B, C, D, E)
-  *  - (A, B, C), D       -> (A, B, C, D)
-  *  - (A, B, C, D), E    -> (A, B, C, D, E)
-  *  - (A, B, C, D, E), F -> (A, B, C, D, E, F)
-  *  - A, Unit            -> A
-  *  - Unit, A            -> A
+  *   - A, B -> (A, B)
+  *   - A, (B, C) -> (A, B, C)
+  *   - (A, B), C -> (A, B, C)
+  *   - (A, B), (C, D) -> (A, B, C, D)
+  *   - A, (B, C, D, E) -> (A, B, C, D, E)
+  *   - (A, B), (C, D, E) -> (A, B, C, D, E)
+  *   - (A, B, C), D -> (A, B, C, D)
+  *   - (A, B, C, D), E -> (A, B, C, D, E)
+  *   - (A, B, C, D, E), F -> (A, B, C, D, E, F)
+  *   - A, Unit -> A
+  *   - Unit, A -> A
   */
 //#definition
 trait Tupler[A, B] {

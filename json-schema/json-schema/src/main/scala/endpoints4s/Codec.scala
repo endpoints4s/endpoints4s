@@ -6,15 +6,16 @@ import java.util.UUID
   */
 trait Decoder[-From, +To] {
 
-  /** @return The decoded `To` value, or the validation errors in case of failure.
+  /** @return
+    *   The decoded `To` value, or the validation errors in case of failure.
     */
   def decode(from: From): Validated[To]
 }
 
 object Decoder {
 
-  /** Combines two decoders, sequentially, by feeding the input of the second one with
-    * the output of the first one
+  /** Combines two decoders, sequentially, by feeding the input of the second one with the output of
+    * the first one
     */
   def sequentially[A, B, C](
       ab: Decoder[A, B]
@@ -30,8 +31,8 @@ trait Encoder[-From, +To] {
 
 object Encoder {
 
-  /** Combines two encoders, sequentially, by feeding the input of the second one with
-    * the output of the first one
+  /** Combines two encoders, sequentially, by feeding the input of the second one with the output of
+    * the first one
     */
   def sequentially[A, B, C](
       ab: Encoder[A, B]
@@ -40,8 +41,10 @@ object Encoder {
 }
 
 /** A way to encode and decode values
-  * @tparam E Type of encoded values
-  * @tparam D Type of decoded values
+  * @tparam E
+  *   Type of encoded values
+  * @tparam D
+  *   Type of decoded values
   */
 trait Codec[E, D] extends Decoder[E, D] with Encoder[D, E]
 
@@ -55,20 +58,23 @@ object Codec {
       def encode(from: D): E = encoder.encode(from)
     }
 
-  /** Combines two codecs, sequentially, by feeding the input of the second one with
-    * the output of the first one
+  /** Combines two codecs, sequentially, by feeding the input of the second one with the output of
+    * the first one
     */
   def sequentially[A, B, C](ab: Codec[A, B])(bc: Codec[B, C]): Codec[A, C] =
     Codec.fromEncoderAndDecoder(Encoder.sequentially(bc)(ab))(
       Decoder.sequentially(ab)(bc)
     )
 
-  /** Produce a codec to/from a string. If the parsing function fails, the
-    * decoding output is an [[Invalid]] with a message mentioning the type name.
+  /** Produce a codec to/from a string. If the parsing function fails, the decoding output is an
+    * [[Invalid]] with a message mentioning the type name.
     *
-    * @param type name of the type being decoded
-    * @param parse parsing function to use, with exceptions turned into [[Invalid]]
-    * @param print printing function to use, not supposed to throw exceptions
+    * @param type
+    *   name of the type being decoded
+    * @param parse
+    *   parsing function to use, with exceptions turned into [[Invalid]]
+    * @param print
+    *   printing function to use, not supposed to throw exceptions
     */
   def parseStringCatchingExceptions[A](
       `type`: String,

@@ -28,7 +28,8 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 
 }
 
-/** Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.openapi]] family.
+/** Interpreter for the [[algebra.ChunkedJsonEntities]] algebra in the [[endpoints4s.openapi]]
+  * family.
   *
   * @group interpreters
   */

@@ -25,13 +25,11 @@ import scala.reflect.ClassTag
 
 /** Enriches [[JsonSchemas]] with two kinds of operations:
   *
-  *   - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic
-  *     data type `A`;
-  *   - `(field1 :×: field2 :×: …).as[A]` builds a tuple of `Record`s and maps
-  *     it to a case class `A`
+  *   - `genericJsonSchema[A]` derives the `JsonSchema` of an algebraic data type `A`;
+  *   - `(field1 :×: field2 :×: …).as[A]` builds a tuple of `Record`s and maps it to a case class
+  *     `A`
   *
-  * For instance, consider the following program that derives the JSON schema
-  * of a case class:
+  * For instance, consider the following program that derives the JSON schema of a case class:
   *
   * {{{
   *   case class User(name: String, age: Int)
@@ -233,9 +231,12 @@ trait JsonSchemas extends algebra.JsonSchemas {
     }
 
     /** Intermediate type used by the machinery to summon a `Record[A]` schema
-      * @tparam A Case class type for which a schema is derived
-      * @tparam D List of `@docs` annotations attached to the case class fields
-      * @tparam V List of default values for the case class fields
+      * @tparam A
+      *   Case class type for which a schema is derived
+      * @tparam D
+      *   List of `@docs` annotations attached to the case class fields
+      * @tparam V
+      *   List of default values for the case class fields
       */
     trait DerivedGenericRecord[A, D <: HList, V <: HList] {
       def record(docs: D, defaultValues: V): Record[A]
@@ -372,9 +373,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
     }
   }
 
-  /** Compute a schema name (used for documentation) based on a `ClassTag`.
-    * The provided implementation uses the fully qualified name of the class.
-    * This could result in non unique values and mess with documentation.
+  /** Compute a schema name (used for documentation) based on a `ClassTag`. The provided
+    * implementation uses the fully qualified name of the class. This could result in non unique
+    * values and mess with documentation.
     *
     * You can override this method to use a custom logic.
     */
@@ -388,12 +389,14 @@ trait JsonSchemas extends algebra.JsonSchemas {
 
   /** Derives a `JsonSchema[A]` for a type `A`.
     *
-    * In a sense, this operation asks shapeless to compute a ''type level'' description
-    * of a data type (based on HLists and Coproducts) and turns it into a ''term level''
-    * description of the data type (based on the `JsonSchemas` algebra interface)
+    * In a sense, this operation asks shapeless to compute a ''type level'' description of a data
+    * type (based on HLists and Coproducts) and turns it into a ''term level'' description of the
+    * data type (based on the `JsonSchemas` algebra interface)
     *
-    * @see [[genericRecord]] for details on how schemas are derived for case classes
-    * @see [[genericTagged]] for details on how schemas are derived for sealed traits
+    * @see
+    *   [[genericRecord]] for details on how schemas are derived for case classes
+    * @see
+    *   [[genericTagged]] for details on how schemas are derived for sealed traits
     */
   def genericJsonSchema[A](implicit
       genJsonSchema: GenericJsonSchema[A]
@@ -406,12 +409,11 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *
     *   - describes a JSON object,
     *   - has required properties of the same name and type as each case class field,
-    *   - has optional properties of the same name and type as each case class
-    *     field of type `Option[X]` for some type `X`,
-    *   - includes the description possibly attached to each case class field
-    *     via the [[docs @docs]] annotation,
-    *   - has a name, computed from a `ClassTag[A]` by the [[classTagToSchemaName]]
-    *     operation.
+    *   - has optional properties of the same name and type as each case class field of type
+    *     `Option[X]` for some type `X`,
+    *   - includes the description possibly attached to each case class field via the [[docs @docs]]
+    *     annotation,
+    *   - has a name, computed from a `ClassTag[A]` by the [[classTagToSchemaName]] operation.
     */
   def genericRecord[A](implicit
       genRecord: GenericJsonSchema.GenericRecord[A]
@@ -424,10 +426,9 @@ trait JsonSchemas extends algebra.JsonSchemas {
     *
     *   - is the alternative of the leaf case classes schemas,
     *   - the field used for discriminating the alternatives is defined by the
-    *     [[discriminator @discriminator]] annotation, if present on the sealed
-    *     trait definition, or by the [[defaultDiscriminatorName]] method otherwise,
-    *   - each alternative is discriminated by the name (not qualified) of the
-    *     case class.
+    *     [[discriminator @discriminator]] annotation, if present on the sealed trait definition, or
+    *     by the [[defaultDiscriminatorName]] method otherwise,
+    *   - each alternative is discriminated by the name (not qualified) of the case class.
     */
   def genericTagged[A](implicit
       genTagged: GenericJsonSchema.GenericTagged[A]

@@ -9,12 +9,11 @@ import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
 import play.api.routing.Router
 import play.core.server.{DefaultNettyServerComponents, ServerConfig}
 
-/** In the real world we would run the different services on distinct
-  * machines.
+/** In the real world we would run the different services on distinct machines.
   *
-  * But, because this example is just … an example, we want to be able to run
-  * everything with a single `sbt run` invocation. So, we run all the
-  * services (including serving the web client assets) within the same JVM.
+  * But, because this example is just … an example, we want to be able to run everything with a
+  * single `sbt run` invocation. So, we run all the services (including serving the web client
+  * assets) within the same JVM.
   */
 object Main extends App {
 

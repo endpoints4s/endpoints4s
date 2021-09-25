@@ -8,7 +8,9 @@ object codecs {
 
   object schemas extends openapi.JsonSchemas {
 
-    /** The default schema for representing `Invalid` values is a JSON array containing error strings */
+    /** The default schema for representing `Invalid` values is a JSON array containing error
+      * strings
+      */
     val invalid: JsonSchema[Invalid] =
       arrayJsonSchema[Seq, String]
         .xmap(errors => Invalid(errors))(_.errors)

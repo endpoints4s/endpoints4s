@@ -16,8 +16,8 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
 
   import playComponents.executionContext
 
-  /** Extracts the credentials from the request headers.
-    * In case of absence of credentials, returns an `Unauthorized` result.
+  /** Extracts the credentials from the request headers. In case of absence of credentials, returns
+    * an `Unauthorized` result.
     */
   private lazy val basicAuthenticationHeader: RequestHeaders[Option[Credentials]] =
     headers =>

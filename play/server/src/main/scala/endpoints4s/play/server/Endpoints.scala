@@ -68,9 +68,8 @@ trait EndpointsWithCustomErrors
 
   /** An attempt to extract an `A` from a request headers.
     *
-    * Models failure by returning a `Left(result)`. That makes it possible
-    * to early return an HTTP response if a header is wrong (e.g. if
-    * an authentication information is missing)
+    * Models failure by returning a `Left(result)`. That makes it possible to early return an HTTP
+    * response if a header is wrong (e.g. if an authentication information is missing)
     */
   type RequestHeaders[A] = Headers => Validated[A]
 
@@ -118,14 +117,16 @@ trait EndpointsWithCustomErrors
     */
   trait Request[A] {
 
-    /** Extracts a `RequestEntity[A]` from an incoming request. That is
-      * a way to extract an `A` from an incoming request.
+    /** Extracts a `RequestEntity[A]` from an incoming request. That is a way to extract an `A` from
+      * an incoming request.
       */
     def decode: RequestExtractor[RequestEntity[A]]
 
     /** Reverse routing.
-      * @param a Information carried by the request
-      * @return The URL and HTTP verb matching the `a` value.
+      * @param a
+      *   Information carried by the request
+      * @return
+      *   The URL and HTTP verb matching the `a` value.
       */
     def encode(a: A): Call
   }
@@ -166,23 +167,27 @@ trait EndpointsWithCustomErrors
     /** Attempts to extract an `A` from an incoming request.
       *
       * Two kinds of situations can happen:
-      * 1. The incoming request URL does not match `this` definition: nothing
-      *    is extracted (the `RequestExtractor` returns `None`) ;
-      * 2. The incoming request URL matches `this` definition but the headers or parameters
-      *    are erroneous: the `RequestExtractor` returns a `Some(Invalid(...))`.
+      *   1. The incoming request URL does not match `this` definition: nothing is extracted (the
+      *      `RequestExtractor` returns `None`) ; 2. The incoming request URL matches `this`
+      *      definition but the headers or parameters are erroneous: the `RequestExtractor` returns
+      *      a `Some(Invalid(...))`.
       */
     def decode: RequestExtractor[Validated[A]]
 
     /** Reverse routing.
-      * @param a Information carried by the request URL and headers
-      * @return The URL and HTTP verb matching the `a` value.
+      * @param a
+      *   Information carried by the request URL and headers
+      * @return
+      *   The URL and HTTP verb matching the `a` value.
       */
     def encode(a: A): Call
 
     /** Promotes `this` to a `Request[B]`.
       *
-      * @param toB Function defining how to get a `BodyParser[B]` from the extracted `A`
-      * @param toA Function defining how to get back an `A` from the `B`.
+      * @param toB
+      *   Function defining how to get a `BodyParser[B]` from the extracted `A`
+      * @param toA
+      *   Function defining how to get back an `A` from the `B`.
       */
     def toRequest[B](toB: A => RequestEntity[B])(toA: B => A): Request[B] =
       new Request[B] {
@@ -260,10 +265,14 @@ trait EndpointsWithCustomErrors
     }
 
   /** Decodes a request.
-    * @param url Request URL
-    * @param entity Request entity
-    * @param docs Request documentation
-    * @param headers Request headers
+    * @param url
+    *   Request URL
+    * @param entity
+    *   Request entity
+    * @param docs
+    *   Request documentation
+    * @param headers
+    *   Request headers
     */
   def request[A, B, C, AB, Out](
       method: Method,
@@ -394,9 +403,12 @@ trait EndpointsWithCustomErrors
     case Right(b) => responseB(b)
   }
 
-  /** @return An HTTP response redirecting to another endpoint (using 303 code status).
-    * @param other Endpoint to redirect to
-    * @param args Arguments to pass to the endpoint to generate its URL
+  /** @return
+    *   An HTTP response redirecting to another endpoint (using 303 code status).
+    * @param other
+    *   Endpoint to redirect to
+    * @param args
+    *   Arguments to pass to the endpoint to generate its URL
     */
   def redirect[A](other: => Endpoint[A, _])(args: A): Response[Unit] =
     _ => Results.Redirect(other.call(args))
@@ -413,11 +425,12 @@ trait EndpointsWithCustomErrors
     /** Reverse routing */
     def call(a: A): Call = request.encode(a)
 
-    /** Provides an actual implementation to the endpoint definition, to turn it
-      * into something effectively usable by the Play router.
+    /** Provides an actual implementation to the endpoint definition, to turn it into something
+      * effectively usable by the Play router.
       *
-      * @param service Function that turns the information carried by the request into
-      *                the information necessary to build the response
+      * @param service
+      *   Function that turns the information carried by the request into the information necessary
+      *   to build the response
       */
     def implementedBy(service: A => B): EndpointWithHandler[A, B] =
       EndpointWithHandler(this, service andThen Future.successful)
@@ -435,8 +448,8 @@ trait EndpointsWithCustomErrors
       service: A => Future[B]
   ) extends ToPlayHandler {
 
-    /** Builds a request `Handler` (a Play `Action`) if the incoming request headers matches
-      * the `endpoint` definition.
+    /** Builds a request `Handler` (a Play `Action`) if the incoming request headers matches the
+      * `endpoint` definition.
       */
     def playHandler(header: RequestHeader): Option[PlayHandler] =
       try {
@@ -506,11 +519,10 @@ trait EndpointsWithCustomErrors
   )(implicit ev: Unit =:= B): ToPlayHandler =
     endpoint.implementedBy(_ => ())
 
-  /** This method is called by ''endpoints'' when an exception is thrown during
-    * request processing.
+  /** This method is called by ''endpoints'' when an exception is thrown during request processing.
     *
-    * The provided implementation calls [[serverErrorResponse]] to construct
-    * a response containing the error message.
+    * The provided implementation calls [[serverErrorResponse]] to construct a response containing
+    * the error message.
     *
     * This method can be overridden to customize the error reporting logic.
     */
