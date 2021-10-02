@@ -5,9 +5,8 @@ import endpoints4s.algebra
 
 /** Partial interpreter for [[algebra.JsonEntities]].
   *
-  * This interpreter documents that entities have a JSON content type, but
-  * it can not document the schemas of these entities. See [[algebra.JsonEntitiesFromSchemas]]
-  * for this purpose.
+  * This interpreter documents that entities have a JSON content type, but it can not document the
+  * schemas of these entities. See [[algebra.JsonEntitiesFromSchemas]] for this purpose.
   *
   * @group interpreters
   */
@@ -21,7 +20,8 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
 }
 
-/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that produces a documentation of the JSON schemas.
+/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that produces a documentation of the JSON
+  * schemas.
   *
   * @group interpreters
   */

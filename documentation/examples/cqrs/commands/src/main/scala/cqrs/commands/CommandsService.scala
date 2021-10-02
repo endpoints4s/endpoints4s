@@ -6,8 +6,8 @@ import scala.concurrent.stm.{Ref, atomic}
 
 /** Implementation of the commands service.
   *
-  * We use an in-memory storage for simplicity but we could easily, for instance, have
-  * one cassandra node per aggregate.
+  * We use an in-memory storage for simplicity but we could easily, for instance, have one cassandra
+  * node per aggregate.
   */
 object CommandsService {
 
@@ -17,7 +17,8 @@ object CommandsService {
   // TODO more useful failure data
   //#signatures
   /** Atomically applies a command to the current aggregates.
-    * @return The completed event, or `None` if the command was not applicable
+    * @return
+    *   The completed event, or `None` if the command was not applicable
     */
   def apply(command: Command): Option[StoredEvent] = // …
     //#signatures
@@ -62,8 +63,9 @@ object CommandsService {
   )
 
   //#signatures
-  /** @return The sequence of events stored in the log. Events that happened
-    *         before the given optional timestamp are discarded.
+  /** @return
+    *   The sequence of events stored in the log. Events that happened before the given optional
+    *   timestamp are discarded.
     */
   def events(maybeSince: Option[Long]): Vector[StoredEvent] = // …
     //#signatures

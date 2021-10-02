@@ -4,18 +4,24 @@ import sbt._
 
 object AssetsTasks {
 
-  /**
-    * Generates a Scala source file containing the assets digests.
-    * The file is generated in a “assets” subdirectory, in the project’s target directory.
+  /** Generates a Scala source file containing the assets digests. The file is generated in a
+    * “assets” subdirectory, in the project’s target directory.
     *
     * The generated code contains a singleton object defining a Map of (path, digest).
     *
-    * @param baseDirectory Project’s base directory
-    * @param targetDirectory Project’s target directory
-    * @param generatedObjectName Name of the object to generate
-    * @param generatedPackage Name of the package in which the object will be generated
-    * @param assetsPath A function that, applied to the base directory, returns the directory that contains the assets
-    * @return The generated Scala file.
+    * @param baseDirectory
+    *   Project’s base directory
+    * @param targetDirectory
+    *   Project’s target directory
+    * @param generatedObjectName
+    *   Name of the object to generate
+    * @param generatedPackage
+    *   Name of the package in which the object will be generated
+    * @param assetsPath
+    *   A function that, applied to the base directory, returns the directory that contains the
+    *   assets
+    * @return
+    *   The generated Scala file.
     */
   def generateDigests(
       baseDirectory: File,
@@ -35,11 +41,10 @@ object AssetsTasks {
     val scalaCode = {
       val scalaMap =
         digests
-          .map {
-            case (name, hash) =>
-              s""""${name
-                .replace("\\", "/")
-                .replace("\"", "\\\"")}" -> "$hash""""
+          .map { case (name, hash) =>
+            s""""${name
+              .replace("\\", "/")
+              .replace("\"", "\\\"")}" -> "$hash""""
           }
           .mkString("Map(", ", ", ")")
       s"""
@@ -55,14 +60,17 @@ object AssetsTasks {
     Seq(scalaFile)
   }
 
-  /**
-    * Creates a gzipped copy of the assets.
-    * The copies are written in the project’s target directory, in a sub-directory “gzipped-assets”
+  /** Creates a gzipped copy of the assets. The copies are written in the project’s target
+    * directory, in a sub-directory “gzipped-assets”
     *
-    * @param baseDirectory Base directory of the sbt project
-    * @param targetDirectory Target directory of the project
-    * @param assetsPath A function that, applied to the base directory, returns the directory containing the assets
-    * @return The gzipped assets.
+    * @param baseDirectory
+    *   Base directory of the sbt project
+    * @param targetDirectory
+    *   Target directory of the project
+    * @param assetsPath
+    *   A function that, applied to the base directory, returns the directory containing the assets
+    * @return
+    *   The gzipped assets.
     */
   def gzipAssets(
       baseDirectory: File,

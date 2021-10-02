@@ -29,23 +29,27 @@ trait ServerTestBase[T <: algebra.Endpoints]
 
   val serverApi: T
 
-  /** @param url An URL definition (e.g., `path / "foo"`)
-    * @param urlCandidate An URL candidate (e.g., "/foo", "/bar")
-    * @return Whether the URL candidate matched the URL definition, or not, or if
-    *         decoding failed.
+  /** @param url
+    *   An URL definition (e.g., `path / "foo"`)
+    * @param urlCandidate
+    *   An URL candidate (e.g., "/foo", "/bar")
+    * @return
+    *   Whether the URL candidate matched the URL definition, or not, or if decoding failed.
     */
   def decodeUrl[A](url: serverApi.Url[A])(urlCandidate: String): DecodedUrl[A]
 
-  /** @param runTests A function that is called after the server is started and before it is stopped. It takes
-    *                 the TCP port number as parameter.
+  /** @param runTests
+    *   A function that is called after the server is started and before it is stopped. It takes the
+    *   TCP port number as parameter.
     */
   def serveEndpoint[Req, Resp](
       endpoint: serverApi.Endpoint[Req, Resp],
       response: => Resp
   )(runTests: Int => Unit): Unit
 
-  /** @param runTests A function that is called after the server is started and before it is stopped. It takes
-    *                 the TCP port number as parameter.
+  /** @param runTests
+    *   A function that is called after the server is started and before it is stopped. It takes the
+    *   TCP port number as parameter.
     */
   def serveIdentityEndpoint[Resp](
       endpoint: serverApi.Endpoint[Resp, Resp]
@@ -83,7 +87,8 @@ trait ServerTestBase[T <: algebra.Endpoints]
 
 }
 
-/** @tparam A The result of decoding an URL candidate
+/** @tparam A
+  *   The result of decoding an URL candidate
   */
 sealed trait DecodedUrl[+A] extends Serializable
 object DecodedUrl {

@@ -13,8 +13,9 @@ import scala.scalajs.js.typedarray.ArrayBuffer
   */
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
-  /** As a client, we just need to give the path of the asset we are interested in, the web browser will
-    * automatically set HTTP headers to handle gzip compression (`Accept-Encoding`) and decompress the response.
+  /** As a client, we just need to give the path of the asset we are interested in, the web browser
+    * will automatically set HTTP headers to handle gzip compression (`Accept-Encoding`) and
+    * decompress the response.
     */
   type AssetRequest = AssetPath
 
@@ -25,8 +26,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   case class AssetPath(path: String, name: String)
 
-  /** As we request the asset via an XMLHttpRequest, we get its content as an
-    * `ArrayBuffer`
+  /** As we request the asset via an XMLHttpRequest, we get its content as an `ArrayBuffer`
     */
   type AssetResponse = ArrayBuffer
 
@@ -38,8 +38,8 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   def asset(path: String, name: String): AssetRequest = AssetPath(path, name)
 
-  /** Encodes an [[AssetPath]] as a request path.
-    * Throws an exception if the asset digest is not found.
+  /** Encodes an [[AssetPath]] as a request path. Throws an exception if the asset digest is not
+    * found.
     */
   // FIXME Check the asset digest in the `asset` smart constructor
   def assetSegments(name: String, docs: Documentation): Path[AssetPath] = {
@@ -54,11 +54,12 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /** An endpoint for requesting assets.
     *
-    * If the server fails to find the requested asset, this endpoint returns
-    * a failed response.
+    * If the server fails to find the requested asset, this endpoint returns a failed response.
     *
-    * @param url URL description
-    * @return An HTTP endpoint for requesting assets
+    * @param url
+    *   URL description
+    * @return
+    *   An HTTP endpoint for requesting assets
     */
   def assetsEndpoint(
       url: Url[AssetPath],
