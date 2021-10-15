@@ -19,7 +19,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt ++2.12.13 test
+    - run: sbt ++2.12.15 test
 
   test213:
     name: Test (Scala 2.13)

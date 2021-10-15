@@ -33,7 +33,7 @@ $ sbt test
 Or, for a specific Scala version:
 
 ~~~ sh
-$ sbt "++ 2.12.13 test"
+$ sbt "++ 2.12.15 test"
 $ sbt "++ 2.13.6 test"
 ~~~
 
@@ -133,7 +133,7 @@ After generating intellij project you may need to navigate to Settings -> Langua
    ~~~
 5. Upload the bundles to sonatype, release them, and publish the documentation website
    ~~~ sh
-   sbt "++ 2.12.13 publishSigned" "++ 2.13.6 publishSigned" sonatypeReleaseAll "++ 2.13.6 manual/makeSite" manual/ghpagesPushSite
+   sbt "++ 2.12.15 publishSigned" "++ 2.13.6 publishSigned" sonatypeReleaseAll "++ 2.13.6 manual/makeSite" manual/ghpagesPushSite
    ~~~
 6. Create a tag `vx.y.z`
    ~~~ sh
