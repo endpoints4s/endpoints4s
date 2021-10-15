@@ -64,12 +64,12 @@ lazy val openapi =
 
         // Due to switching return type from `None.type` to `Option[String]`.
         // OK since `Option` should have all the same methods as `None`
-        ProblemFilters.exclude[DirectMissingMethodProblem](
-          "endpoints4s.openapi.model.Schema#Reference.example"
-        ),
-        ProblemFilters.exclude[DirectMissingMethodProblem](
-          "endpoints4s.openapi.model.Schema#Reference.title"
-        )
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.example"),
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.Schema#Reference.title"),
+
+        // Due to adding `JsonDouble`
+        // OK since it is a concrete value in the trait _and_ it is `private` in Scala
+        ProblemFilters.exclude[ReversedMissingMethodProblem]("endpoints4s.ujson.JsonSchemas.endpoints4s$ujson$JsonSchemas$$JsonDouble")
       )
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
