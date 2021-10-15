@@ -66,7 +66,7 @@ object EndpointsSettings {
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6", "3.0.1", "2.12.13")
+    crossScalaVersions := Seq("2.13.6", "3.0.2", "2.12.13")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -100,9 +100,9 @@ object EndpointsSettings {
   val circeVersion = "0.13.0"
   val playjsonVersion = "2.9.2"
   val playVersion = "2.8.7"
-  val sttpVersion = "3.3.13"
+  val sttpVersion = "3.3.15"
   val akkaActorVersion = "2.6.15"
-  val akkaHttpVersion = "10.2.5"
+  val akkaHttpVersion = "10.2.6"
   val http4sVersion = "0.23.1"
   val ujsonVersion = "1.4.0"
 
