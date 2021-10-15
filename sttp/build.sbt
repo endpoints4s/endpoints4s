@@ -16,7 +16,7 @@ val `sttp-client` =
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
         "com.softwaremill.sttp.client3" %% "akka-http-backend" % sttpVersion % Test,
-        "com.typesafe.akka" %% "akka-stream" % "2.6.15" % Test
+        "com.typesafe.akka" %% "akka-stream" % "2.6.17" % Test
       )
     )
     .dependsOn(`openapi-jvm`)
