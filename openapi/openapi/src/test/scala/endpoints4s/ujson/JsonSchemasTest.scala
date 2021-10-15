@@ -461,6 +461,19 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "infinities and NaN floating point numbers roundtrip" in {
+    implicit val doubleEquiv: Equiv[Double] = java.lang.Double.compare(_, _) == 0
+    implicit val floatEquiv: Equiv[Float] = java.lang.Float.compare(_, _) == 0
+
+    checkRoundTripToString[Double](doubleJsonSchema, "\"Infinity\"", Double.PositiveInfinity)
+    checkRoundTripToString[Double](doubleJsonSchema, "\"-Infinity\"", Double.NegativeInfinity)
+    checkRoundTripToString[Double](doubleJsonSchema, "\"NaN\"", Double.NaN)
+
+    checkRoundTripToString[Float](floatJsonSchema, "\"Infinity\"", Float.PositiveInfinity)
+    checkRoundTripToString[Float](floatJsonSchema, "\"-Infinity\"", Float.NegativeInfinity)
+    checkRoundTripToString[Float](floatJsonSchema, "\"NaN\"", Float.NaN)
+  }
+
   def checkRoundTrip[A](
       schema: JsonSchema[A],
       json: ujson.Value,
@@ -472,6 +485,22 @@ class JsonSchemasTest extends AnyFreeSpec {
     }
     val encoded = schema.codec.encode(expected)
     assert(encoded == json)
+    ()
+  }
+
+  def checkRoundTripToString[A](
+      schema: JsonSchema[A],
+      jsonStr: String,
+      expected: A
+  )(implicit
+      equivalence: Equiv[A]
+  ): Unit = {
+    schema.stringCodec.decode(jsonStr) match {
+      case Valid(decoded)  => assert(equivalence.equiv(decoded, expected))
+      case Invalid(errors) => fail(errors.toString())
+    }
+    val encoded = schema.stringCodec.encode(expected)
+    assert(encoded == jsonStr)
     ()
   }
 

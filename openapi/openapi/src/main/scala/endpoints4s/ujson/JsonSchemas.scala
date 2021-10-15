@@ -422,15 +422,25 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       val encoder = x => ujson.Num(x.doubleValue)
     }
 
+  private[this] object JsonDouble {
+    def unapply(json: ujson.Value): Option[Double] = json match {
+      case ujson.Num(x)           => Some(x)
+      case ujson.Str("NaN")       => Some(Double.NaN)
+      case ujson.Str("Infinity")  => Some(Double.PositiveInfinity)
+      case ujson.Str("-Infinity") => Some(Double.NegativeInfinity)
+      case _                      => None
+    }
+  }
+
   override def floatWithConstraintsJsonSchema(
       constraints: NumericConstraints[Float]
   ): JsonSchema[Float] =
     new JsonSchema[Float] {
       val decoder = {
-        case ujson.Num(x) =>
-          val float = x.toFloat
+        case JsonDouble(double) =>
+          val float = double.toFloat
           if (constraints.satisfiedBy(float)) Valid(float)
-          else Invalid(s"$x does not satisfy the constraints: $constraints")
+          else Invalid(s"$double does not satisfy the constraints: $constraints")
         case json => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.toDouble)
@@ -441,9 +451,10 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   ): JsonSchema[Double] =
     new JsonSchema[Double] {
       val decoder = {
-        case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(x)
-        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json                                       => Invalid(s"Invalid number value: $json")
+        case JsonDouble(double) =>
+          if (constraints.satisfiedBy(double)) Valid(double)
+          else Invalid(s"$double does not satisfy the constraints: $constraints")
+        case json => Invalid(s"Invalid number value: $json")
       }
       val encoder = ujson.Num(_)
     }
