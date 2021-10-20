@@ -15,12 +15,15 @@ trait Urls extends algebra.Urls {
 
   type QueryString[A] = DocumentedQueryString
 
-  /** @param parameters List of query string parameters
+  /** @param parameters
+    *   List of query string parameters
     */
   case class DocumentedQueryString(parameters: List[DocumentedParameter])
 
-  /** @param name Name of the parameter
-    * @param required Whether this parameter is required or not (MUST be true for path parameters)
+  /** @param name
+    *   Name of the parameter
+    * @param required
+    *   Whether this parameter is required or not (MUST be true for path parameters)
     */
   case class DocumentedParameter(
       name: String,
@@ -180,8 +183,10 @@ trait Urls extends algebra.Urls {
       ): Url[B] = fa
     }
 
-  /** @param path List of path segments. Left is a static segment, right is a path parameter
-    * @param queryParameters Query string parameters
+  /** @param path
+    *   List of path segments. Left is a static segment, right is a path parameter
+    * @param queryParameters
+    *   Query string parameters
     */
   case class DocumentedUrl(
       path: List[Either[String, DocumentedParameter]],

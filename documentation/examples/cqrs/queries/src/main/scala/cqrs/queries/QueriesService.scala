@@ -61,8 +61,8 @@ class QueriesService(
       meters: Map[UUID, Meter]
   )
 
-  /** Update the internal state so that the timestamp of the last applied event is greater or
-    * equal to the given timestamp.
+  /** Update the internal state so that the timestamp of the last applied event is greater or equal
+    * to the given timestamp.
     *
     * This is used by the public service to get consistent write-and-read.
     */
@@ -76,7 +76,9 @@ class QueriesService(
     }
   }
 
-  /** Update the projection by fetching the last events from the event store and applying them to our state */
+  /** Update the projection by fetching the last events from the event store and applying them to
+    * our state
+    */
   private def update(): Future[State] = {
 
     val maybeLastEventTimestamp = stateRef.single.get.lastEventTimestamp

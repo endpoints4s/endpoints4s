@@ -37,15 +37,15 @@ trait Authentication extends algebra.Endpoints {
 
   /** A response entity containing the authenticated user info
     *
-    * Clients decode the JWT attached to the response.
-    * Servers encode the authentication information as a JWT and attach it to their response.
+    * Clients decode the JWT attached to the response. Servers encode the authentication information
+    * as a JWT and attach it to their response.
     */
   def authenticationToken: Response[AuthenticationToken]
 
-  /** A response that might signal to the client that his request was invalid using
-    * a `BadRequest` status.
-    * Clients map `BadRequest` statuses to `None`, and the underlying `response` into `Some`.
-    * Conversely, servers build a `BadRequest` response on `None`, or the underlying `response` otherwise.
+  /** A response that might signal to the client that his request was invalid using a `BadRequest`
+    * status. Clients map `BadRequest` statuses to `None`, and the underlying `response` into
+    * `Some`. Conversely, servers build a `BadRequest` response on `None`, or the underlying
+    * `response` otherwise.
     */
   final def wheneverValid[A](responseA: Response[A]): Response[Option[A]] =
     responseA
@@ -56,8 +56,8 @@ trait Authentication extends algebra.Endpoints {
   // The following two methods are internally used by interpreters to implement the authentication logic
 
 //#protected-endpoints-algebra
-  /** A request with the given `method`, `url` and `entity`, and which is rejected by the server if it
-    * doesn’t contain a valid JWT.
+  /** A request with the given `method`, `url` and `entity`, and which is rejected by the server if
+    * it doesn’t contain a valid JWT.
     */
   private[authentication] def authenticatedRequest[U, E, UE, UET](
       method: Method,
@@ -68,9 +68,9 @@ trait Authentication extends algebra.Endpoints {
       tuplerUET: Tupler.Aux[UE, AuthenticationToken, UET]
   ): Request[UET]
 
-  /** A response that might signal to the client that his request was not authenticated.
-    * Clients throw an exception if the response status is `Unauthorized`.
-    * Servers build an `Unauthorized` response in case the incoming request was not correctly authenticated.
+  /** A response that might signal to the client that his request was not authenticated. Clients
+    * throw an exception if the response status is `Unauthorized`. Servers build an `Unauthorized`
+    * response in case the incoming request was not correctly authenticated.
     */
   private[authentication] def wheneverAuthenticated[A](
       response: Response[A]
@@ -78,18 +78,25 @@ trait Authentication extends algebra.Endpoints {
 
   /** User-facing constructor for endpoints requiring authentication.
     *
-    * @return An endpoint requiring a authentication information to be provided
-    *         in the `Authorization` request header. It returns `response`
-    *         if the request is correctly authenticated, otherwise it returns
-    *         an empty `Unauthorized` response.
+    * @return
+    *   An endpoint requiring a authentication information to be provided in the `Authorization`
+    *   request header. It returns `response` if the request is correctly authenticated, otherwise
+    *   it returns an empty `Unauthorized` response.
     *
-    * @param method        HTTP method
-    * @param url           Request URL
-    * @param response      HTTP response
-    * @param requestEntity HTTP request entity
-    * @tparam U Information carried by the URL
-    * @tparam E Information carried by the request entity
-    * @tparam R Information carried by the response
+    * @param method
+    *   HTTP method
+    * @param url
+    *   Request URL
+    * @param response
+    *   HTTP response
+    * @param requestEntity
+    *   HTTP request entity
+    * @tparam U
+    *   Information carried by the URL
+    * @tparam E
+    *   Information carried by the request entity
+    * @tparam R
+    *   Information carried by the response
     */
   final def authenticatedEndpoint[U, E, R, UE, UET](
       method: Method,
@@ -135,8 +142,8 @@ object ClockSettings {
 }
 
 //#client-interpreter
-/** Interpreter for the [[Authentication]] algebra interface that produces
-  * a Play client (using `play.api.libs.ws.WSClient`).
+/** Interpreter for the [[Authentication]] algebra interface that produces a Play client (using
+  * `play.api.libs.ws.WSClient`).
   */
 trait ClientAuthentication extends client.Endpoints with Authentication {
 
@@ -201,8 +208,7 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
 }
 //#client-interpreter
 
-/** Interpreter for the [[Authentication]] algebra interface that produces
-  * a Play server.
+/** Interpreter for the [[Authentication]] algebra interface that produces a Play server.
   */
 //#server-interpreter
 trait ServerAuthentication extends Authentication with server.Endpoints {

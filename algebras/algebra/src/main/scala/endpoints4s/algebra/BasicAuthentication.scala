@@ -5,8 +5,8 @@ import endpoints4s.algebra.BasicAuthentication.Credentials
 
 /** Provides vocabulary to describe endpoints that use Basic HTTP authentication.
   *
-  * This trait works fine, but developers are likely to implement their own
-  * authentication mechanism, specific to their application.
+  * This trait works fine, but developers are likely to implement their own authentication
+  * mechanism, specific to their application.
   *
   * @group algebras
   */
@@ -16,8 +16,10 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
     *
     * The returned `Response[Option[A]]` signals “forbidden” with a `None` value.
     *
-    * @param responseA Inner response (in case the authentication succeeds)
-    * @param docs Description of the authentication error
+    * @param responseA
+    *   Inner response (in case the authentication succeeds)
+    * @param docs
+    *   Description of the authentication error
     */
   private[endpoints4s] final def authenticated[A](
       responseA: Response[A],
@@ -29,15 +31,14 @@ trait BasicAuthentication extends EndpointsWithCustomErrors {
       .orElse(response(Forbidden, emptyResponse, docs))
       .xmap(_.fold[Option[A]](Some(_), _ => None))(_.toLeft(()))
 
-  /** A request with the given `method`, `url`, `entity` and `headers`, but
-    * which also contains the Basic Authentication credentials in its
-    * “Authorization” header.
+  /** A request with the given `method`, `url`, `entity` and `headers`, but which also contains the
+    * Basic Authentication credentials in its “Authorization” header.
     *
-    * The `Out` type aggregates together the URL information `U`, the entity
-    * information `E`, the headers information `H`, and the `Credentials`.
+    * The `Out` type aggregates together the URL information `U`, the entity information `E`, the
+    * headers information `H`, and the `Credentials`.
     *
-    * In case the authentication credentials are missing from the request,
-    * servers reject the request with an Unauthorized (401) status code.
+    * In case the authentication credentials are missing from the request, servers reject the
+    * request with an Unauthorized (401) status code.
     */
   private[endpoints4s] def authenticatedRequest[U, E, H, UE, HCred, Out](
       method: Method,

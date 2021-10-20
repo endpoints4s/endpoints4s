@@ -29,8 +29,8 @@ trait Assets extends EndpointsWithCustomErrors {
     * }}}
     *
     * Then, here is how the following requests are decoded:
-    * - `/assets/foo` => `foo`
-    * - `/assets/foo/bar` => `foo/bar`
+    *   - `/assets/foo` => `foo`
+    *   - `/assets/foo/bar` => `foo/bar`
     * @group operations
     */
   def assetSegments(
@@ -38,10 +38,14 @@ trait Assets extends EndpointsWithCustomErrors {
       docs: Documentation = None
   ): Path[AssetPath]
 
-  /** @param url URL description
-    * @param docs description of a response when asset is found. Required by openapi
-    * @param notFoundDocs description of a not found asset response. Required by openapi
-    * @return An HTTP endpoint serving assets
+  /** @param url
+    *   URL description
+    * @param docs
+    *   description of a response when asset is found. Required by openapi
+    * @param notFoundDocs
+    *   description of a not found asset response. Required by openapi
+    * @return
+    *   An HTTP endpoint serving assets
     * @group operations
     */
   def assetsEndpoint(

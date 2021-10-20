@@ -1,9 +1,10 @@
 package endpoints4s.algebra
 
-/** Algebra interface for describing request and response entities that use the chunked transfer-encoding.
+/** Algebra interface for describing request and response entities that use the chunked
+  * transfer-encoding.
   *
-  * It introduces a type `Chunks[A]`, which models a stream of chunks of type `A`.
-  * It also introduces constructors for chunked request and response entities.
+  * It introduces a type `Chunks[A]`, which models a stream of chunks of type `A`. It also
+  * introduces constructors for chunked request and response entities.
   *
   * Example:
   *
@@ -31,7 +32,8 @@ trait ChunkedEntities extends EndpointsWithCustomErrors {
 
   /** A stream of chunks of type `A`.
     *
-    * @tparam A Information carried by each chunk
+    * @tparam A
+    *   Information carried by each chunk
     * @group types
     */
   type Chunks[A]
@@ -62,8 +64,8 @@ trait ChunkedEntities extends EndpointsWithCustomErrors {
 
 }
 
-/** Enriches the [[ChunkedEntities]] algebra with constructors of request
-  * and response entities carrying JSON documents.
+/** Enriches the [[ChunkedEntities]] algebra with constructors of request and response entities
+  * carrying JSON documents.
   *
   * Example:
   *
@@ -81,7 +83,8 @@ trait ChunkedJsonEntities extends ChunkedEntities with JsonCodecs {
 
   /** A request entity carrying chunks of JSON values
     *
-    * @tparam A Type of values serialized into JSON
+    * @tparam A
+    *   Type of values serialized into JSON
     * @group operations
     */
   def jsonChunksRequest[A](implicit
@@ -90,7 +93,8 @@ trait ChunkedJsonEntities extends ChunkedEntities with JsonCodecs {
 
   /** A response entity carrying chunks of JSON values
     *
-    * @tparam A Type of values serialized into JSON
+    * @tparam A
+    *   Type of values serialized into JSON
     * @group operations
     */
   def jsonChunksResponse[A](implicit

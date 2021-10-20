@@ -15,8 +15,8 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 //#microservice-endpoint-description
   /** Application of a command.
     *
-    * Returns the produced event, or `None` in case of failure (aggregate
-    * not found or invalid command).
+    * Returns the produced event, or `None` in case of failure (aggregate not found or invalid
+    * command).
     */
   val command: Endpoint[Command, Option[StoredEvent]] =
     endpoint(
@@ -38,9 +38,9 @@ trait CommandsEndpoints extends Endpoints with JsonEntitiesFromCodecs {
 
 /** Base trait of commands.
   *
-  * Note that we could also have just reused the DTOs of the public API,
-  * but we chose to use distinct data types so that the public API is
-  * not cluttered with implementation details of the commands microservice.
+  * Note that we could also have just reused the DTOs of the public API, but we chose to use
+  * distinct data types so that the public API is not cluttered with implementation details of the
+  * commands microservice.
   */
 sealed trait Command
 

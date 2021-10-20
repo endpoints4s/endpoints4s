@@ -14,8 +14,10 @@ import play.mvc.Http.HeaderNames
   */
 trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
-  /** @param assetPath Path of the requested asset
-    * @param isGzipSupported Whether the client supports gzip encoding or not
+  /** @param assetPath
+    *   Path of the requested asset
+    * @param isGzipSupported
+    *   Whether the client supports gzip encoding or not
     */
   case class AssetRequest(assetPath: AssetPath, isGzipSupported: Boolean)
 
@@ -26,8 +28,7 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     */
   case class AssetPath(path: Seq[String], digest: String, name: String)
 
-  /** Convenient constructor for building an asset from its name, without
-    * providing its digest.
+  /** Convenient constructor for building an asset from its name, without providing its digest.
     *
     * Useful for reverse routing:
     *
@@ -35,14 +36,16 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     *   myAssetsEndpoint.call(asset("baz"))
     * }}}
     *
-    * @param name Asset name
-    * @return An `AssetRequest` describing the asset. There is no path prefixing the
-    *         name. Throws an exception if there is no digest for `name`.
+    * @param name
+    *   Asset name
+    * @return
+    *   An `AssetRequest` describing the asset. There is no path prefixing the name. Throws an
+    *   exception if there is no digest for `name`.
     */
   def asset(name: String): AssetRequest = makeAsset(None, name)
 
-  /** Convenient constructor for building an asset from its name and
-    * path, without providing its digest.
+  /** Convenient constructor for building an asset from its name and path, without providing its
+    * digest.
     *
     * Useful for reverse routing:
     *
@@ -50,10 +53,13 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     *   myAssetsEndpoint.call(asset("foo/bar", "baz"))
     * }}}
     *
-    * @param path Asset path (no leading nor trailing slash)
-    * @param name Asset name
-    * @return An `AssetRequest` describing the asset. Throws an exception if
-    *         there is no digest for `name`.
+    * @param path
+    *   Asset path (no leading nor trailing slash)
+    * @param name
+    *   Asset name
+    * @return
+    *   An `AssetRequest` describing the asset. Throws an exception if there is no digest for
+    *   `name`.
     */
   def asset(path: String, name: String): AssetRequest =
     makeAsset(Some(path), name)
@@ -76,16 +82,20 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     ) // HACK isGzipSupported makes no sense here
   }
 
-  /** An [[AssetResponse]] is either [[AssetNotFound]] (if the asset has not been found on
-    * the server) or [[Found]] otherwise.
+  /** An [[AssetResponse]] is either [[AssetNotFound]] (if the asset has not been found on the
+    * server) or [[Found]] otherwise.
     */
   sealed trait AssetResponse
   case object AssetNotFound extends AssetResponse
 
-  /** @param data Asset content
-    * @param contentLength Size, if known
-    * @param contentType Content type, if known
-    * @param isGzipped Whether `data` contains the gzipped version of the asset
+  /** @param data
+    *   Asset content
+    * @param contentLength
+    *   Size, if known
+    * @param contentType
+    *   Content type, if known
+    * @param isGzipped
+    *   Whether `data` contains the gzipped version of the asset
     */
   case class Found(
       data: Source[ByteString, _],
@@ -121,8 +131,10 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
 
   /** An endpoint for serving assets.
     *
-    * @param url URL description
-    * @return An HTTP endpoint serving assets
+    * @param url
+    *   URL description
+    * @return
+    *   An HTTP endpoint serving assets
     */
   def assetsEndpoint(
       url: Url[AssetPath],
@@ -161,10 +173,12 @@ trait Assets extends algebra.Assets with EndpointsWithCustomErrors {
     case AssetNotFound => NotFound
   }
 
-  /** @param pathPrefix Prefix to use to look up the resources in the classpath. You
-    *                   most probably never want to publish all your classpath resources.
-    * @return A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by
-    *         looking for the requested asset in the classpath resources.
+  /** @param pathPrefix
+    *   Prefix to use to look up the resources in the classpath. You most probably never want to
+    *   publish all your classpath resources.
+    * @return
+    *   A function that, given an [[AssetRequest]], builds an [[AssetResponse]] by looking for the
+    *   requested asset in the classpath resources.
     */
   def assetsResources(
       pathPrefix: Option[String] = None

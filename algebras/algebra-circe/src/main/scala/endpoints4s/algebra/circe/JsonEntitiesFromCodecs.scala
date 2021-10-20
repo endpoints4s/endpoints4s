@@ -11,11 +11,11 @@ import io.circe.{
   Encoder => CirceEncoder
 }
 
-/** Partial interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that only
-  * fixes the `JsonCodec[A]` type to a [[CirceCodec]].
+/** Partial interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that only fixes the
+  * `JsonCodec[A]` type to a [[CirceCodec]].
   *
-  * The `jsonRequest` and `jsonResponse` operations have to be implemented by
-  * a more specialized interpreter.
+  * The `jsonRequest` and `jsonResponse` operations have to be implemented by a more specialized
+  * interpreter.
   *
   * Typical usage:
   *

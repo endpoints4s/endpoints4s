@@ -446,8 +446,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             "format" -> ujson.Str("int32")
           )
         )
-      )
-      )
+      ))
     }
   }
 }

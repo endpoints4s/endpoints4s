@@ -9,12 +9,11 @@ import scala.reflect.ClassTag
 import scala.util.Try
 import scala.util.control.Exception
 
-/** An algebra interface for describing algebraic data types. Such descriptions
-  * can be interpreted to produce a JSON schema of the data type, a JSON encoder,
-  * a JSON decoder, etc.
+/** An algebra interface for describing algebraic data types. Such descriptions can be interpreted
+  * to produce a JSON schema of the data type, a JSON encoder, a JSON decoder, etc.
   *
-  * A description contains the fields of a case class and their type, and the
-  * constructor names of a sealed trait.
+  * A description contains the fields of a case class and their type, and the constructor names of a
+  * sealed trait.
   *
   * For instance, consider the following record type:
   *
@@ -63,34 +62,42 @@ import scala.util.control.Exception
   * }}}
   *
   * @group algebras
-  * @groupname types Types
-  * @groupdesc types Types introduced by the algebra
-  * @groupprio types 1
-  * @groupname operations Operations
-  * @groupdesc operations Operations creating and transforming values
-  * @groupprio operations 2
+  * @groupname types
+  *   Types
+  * @groupdesc types
+  *   Types introduced by the algebra
+  * @groupprio types
+  *   1
+  * @groupname operations
+  *   Operations
+  * @groupdesc operations
+  *   Operations creating and transforming values
+  * @groupprio operations
+  *   2
   */
 trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** The JSON schema of a type `A`
     *
-    * JSON schemas can be interpreted as encoders serializing values of type `A` into JSON,
-    * decoders de-serializing JSON documents into values of type `A`, or documentation rendering
-    * the underlying JSON schema.
+    * JSON schemas can be interpreted as encoders serializing values of type `A` into JSON, decoders
+    * de-serializing JSON documents into values of type `A`, or documentation rendering the
+    * underlying JSON schema.
     *
-    * The `JsonSchemas` trait provides implicit definitions of `JsonSchema[A]` for basic types (`Int`,
-    * `Double`, `String`, etc.), and operations such as [[field]], [[optField]], or [[enumeration]],
-    * which construct more complex JSON schemas.
+    * The `JsonSchemas` trait provides implicit definitions of `JsonSchema[A]` for basic types
+    * (`Int`, `Double`, `String`, etc.), and operations such as [[field]], [[optField]], or
+    * [[enumeration]], which construct more complex JSON schemas.
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
-    *       [[InvariantFunctorSyntax]], and [[JsonSchemaOps]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
+    *   [[InvariantFunctorSyntax]], and [[JsonSchemaOps]] classes.
     * @group types
     */
   type JsonSchema[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
     *
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def jsonSchemaPartialInvFunctor: PartialInvariantFunctor[JsonSchema]
 
@@ -98,55 +105,64 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * Values of type `Record[A]` can be constructed with the operations [[field]] and [[optField]].
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
-    *       [[InvariantFunctorSyntax]], and [[RecordOps]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
+    *   [[InvariantFunctorSyntax]], and [[RecordOps]] classes.
     * @group types
     */
   type Record[A] <: JsonSchema[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
     *
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def recordPartialInvFunctor: PartialInvariantFunctor[Record]
 
   /** A more specific type of JSON schema for sum types (sealed traits)
     *
-    * “Tagged” schemas include the name of the type `A` as an additional discriminator field. By default,
-    * the name of the discriminator field is defined by the operation [[defaultDiscriminatorName]] but
-    * it can be customized by calling the operation `withDiscriminator`.
+    * “Tagged” schemas include the name of the type `A` as an additional discriminator field. By
+    * default, the name of the discriminator field is defined by the operation
+    * [[defaultDiscriminatorName]] but it can be customized by calling the operation
+    * `withDiscriminator`.
     *
-    * Values of type `Tagged[A]` can be constructed by calling the operation `tagged` on a `Record[A]`.
+    * Values of type `Tagged[A]` can be constructed by calling the operation `tagged` on a
+    * `Record[A]`.
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
-    *       [[InvariantFunctorSyntax]], and [[TaggedOps]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]],
+    *   [[InvariantFunctorSyntax]], and [[TaggedOps]] classes.
     * @group types
     */
   type Tagged[A] <: JsonSchema[A]
 
   /** Provides `xmap` and `xmapPartial` operations.
     *
-    * @see [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]] and [[InvariantFunctorSyntax]]
     */
   implicit def taggedPartialInvFunctor: PartialInvariantFunctor[Tagged]
 
-  /** A more specific type of JSON schema for enumerations, i.e. types that have a specific set of valid values
+  /** A more specific type of JSON schema for enumerations, i.e. types that have a specific set of
+    * valid values
     *
-    * Values of type `Enum[A]` can be constructed by the operations [[enumeration]] and [[stringEnumeration]].
+    * Values of type `Enum[A]` can be constructed by the operations [[enumeration]] and
+    * [[stringEnumeration]].
     *
-    * @note This type has implicit methods provided by the [[EnumOps]] class.
+    * @note
+    *   This type has implicit methods provided by the [[EnumOps]] class.
     * @group types
     */
   type Enum[A] <: JsonSchema[A]
 
   /** Promotes a schema to an enumeration.
     *
-    *  - Decoder interpreters fail if the input value does not match the encoded
-    *    values of any of the possible values,
-    *  - Encoder interpreters never fail, even if the value is not contained in
-    *    the set of possible values,
-    *  - Documentation interpreters enrich the JSON schema with an `enum` property
-    *    listing the possible values.
+    *   - Decoder interpreters fail if the input value does not match the encoded values of any of
+    *     the possible values,
+    *   - Encoder interpreters never fail, even if the value is not contained in the set of possible
+    *     values,
+    *   - Documentation interpreters enrich the JSON schema with an `enum` property listing the
+    *     possible values.
     *
     * @group operations
     */
@@ -175,15 +191,14 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** A schema for a statically known value.
     *
-    *   - Decoder interpreters first try to decode incoming values with the given `tpe` schema,
-    *     and then check that it is equal to the given `value`,
+    *   - Decoder interpreters first try to decode incoming values with the given `tpe` schema, and
+    *     then check that it is equal to the given `value`,
     *   - Encoder interpreters always produce the given `value`, encoded according to `tpe`,
-    *   - Documentation interpreters enrich the JSON schema with a `const` property documenting
-    *     its only possible value (or an `enum` property with a single item).
+    *   - Documentation interpreters enrich the JSON schema with a `const` property documenting its
+    *     only possible value (or an `enum` property with a single item).
     *
-    * This is useful to model schemas of objects containing extra fields that
-    * are absent from their Scala representation. For example, here is a schema
-    * for a GeoJSON point:
+    * This is useful to model schemas of objects containing extra fields that are absent from their
+    * Scala representation. For example, here is a schema for a GeoJSON point:
     *
     * {{{
     *   case class Point(lon: Double, lat: Double)
@@ -218,11 +233,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *   ).xmap(Recursive)(_.next)
     * }}}
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
-    * the given `schema` unless it is effectively used.
+    * Interpreters should return a JsonSchema value that does not evaluate the given `schema` unless
+    * it is effectively used.
     *
-    * @param schema The record JSON schema whose evaluation should be delayed
-    * @param name A unique name identifying the schema
+    * @param schema
+    *   The record JSON schema whose evaluation should be delayed
+    * @param name
+    *   A unique name identifying the schema
     * @group operations
     */
   @deprecated("Use `lazyRecord(name)(...)` instead", "1.4.0")
@@ -230,11 +247,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** Captures a lazy reference to a JSON schema currently being defined.
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
-    * the given `schema` unless it is effectively used.
+    * Interpreters should return a JsonSchema value that does not evaluate the given `schema` unless
+    * it is effectively used.
     *
-    * @param schema The tagged JSON schema whose evaluation should be delayed
-    * @param name A unique name identifying the schema
+    * @param schema
+    *   The tagged JSON schema whose evaluation should be delayed
+    * @param name
+    *   A unique name identifying the schema
     * @group operations
     */
   @deprecated("Use `lazyTagged(name)(...)` instead", "1.4.0")
@@ -250,11 +269,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *     }.xmap(Recursive(_))(_.next)
     * }}}
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
-    * the given `schema` unless it is effectively used.
+    * Interpreters should return a JsonSchema value that does not evaluate the given `schema` unless
+    * it is effectively used.
     *
-    * @param name A unique name identifying the schema
-    * @param schema The record JSON schema whose evaluation should be delayed
+    * @param name
+    *   A unique name identifying the schema
+    * @param schema
+    *   The record JSON schema whose evaluation should be delayed
     * @group operations
     */
   def lazyRecord[A](name: String)(schema: => Record[A]): Record[A] =
@@ -262,11 +283,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** Captures a lazy reference to a JSON schema currently being defined.
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
-    * the given `schema` unless it is effectively used.
+    * Interpreters should return a JsonSchema value that does not evaluate the given `schema` unless
+    * it is effectively used.
     *
-    * @param name A unique name identifying the schema
-    * @param schema The tagged JSON schema whose evaluation should be delayed
+    * @param name
+    *   A unique name identifying the schema
+    * @param schema
+    *   The tagged JSON schema whose evaluation should be delayed
     * @group operations
     */
   def lazyTagged[A](name: String)(schema: => Tagged[A]): Tagged[A] =
@@ -281,11 +304,13 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *   ).xmap(Recursive)(_.next)
     * }}}
     *
-    * Interpreters should return a JsonSchema value that does not evaluate
-    * the given `schema` unless it is effectively used.
+    * Interpreters should return a JsonSchema value that does not evaluate the given `schema` unless
+    * it is effectively used.
     *
-    * @param name A unique name identifying the schema
-    * @param schema The record JSON schema whose evaluation should be delayed
+    * @param name
+    *   A unique name identifying the schema
+    * @param schema
+    *   The record JSON schema whose evaluation should be delayed
     * @group operations
     */
   def lazySchema[A](name: String)(schema: => JsonSchema[A]): JsonSchema[A] =
@@ -295,7 +320,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     *   - Encoder interpreters produce an empty JSON object,
     *   - Decoder interpreters fail if the JSON value is not a JSON object,
-    *   - Documentation interpreters produce the JSON schema of a JSON object schema with no properties.
+    *   - Documentation interpreters produce the JSON schema of a JSON object schema with no
+    *     properties.
     *
     * @group operations
     */
@@ -304,11 +330,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** The JSON schema of a record with a single field `name` of type `A`
     *
     *   - Encoder interpreters produce a JSON object with one property of the given `name`,
-    *   - Decoder interpreters fail if the JSON value is not a JSON object, or if it
-    *     doesn’t contain the `name` property, or if the property has an
-    *     invalid value (according to its `tpe`),
-    *   - Documentation interpreters produce the JSON schema of a JSON object schema with
-    *     one required property of the given `name`.
+    *   - Decoder interpreters fail if the JSON value is not a JSON object, or if it doesn’t contain
+    *     the `name` property, or if the property has an invalid value (according to its `tpe`),
+    *   - Documentation interpreters produce the JSON schema of a JSON object schema with one
+    *     required property of the given `name`.
     *
     * @group operations
     */
@@ -319,11 +344,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** The JSON schema of a record with a single optional field `name` of type `A`
     *
     *   - Encoder interpreters can omit the field or emit a field with a `null` value,
-    *   - Decoder interpreters successfully decode `None` if the field is absent or if
-    *     it is present but has the value `null`. They fail if the field is
-    *     present but contains an invalid value,
-    *   - Documentation interpreters produce the JSON schema of a JSON object with an
-    *     optional property of the given `name`.
+    *   - Decoder interpreters successfully decode `None` if the field is absent or if it is present
+    *     but has the value `null`. They fail if the field is present but contains an invalid value,
+    *   - Documentation interpreters produce the JSON schema of a JSON object with an optional
+    *     property of the given `name`.
     *
     * @group operations
     */
@@ -333,13 +357,12 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** The JSON schema of a record with a single optional field with the given `name`
     *
-    *   - Decoders fallback to the `defaultValue` if the field is absent from
-    *     the decoded JSON object. They fail if the field is present but has an
-    *     invalid value,
-    *   - Encoders must emit the field if it is not `defaultValue`, but can
-    *     choose to omit it when it has the `defaultValue`
-    *   - Documentation interpreters produce the JSON schema of a JSON object with an
-    *     optional property of the given `name`.
+    *   - Decoders fallback to the `defaultValue` if the field is absent from the decoded JSON
+    *     object. They fail if the field is present but has an invalid value,
+    *   - Encoders must emit the field if it is not `defaultValue`, but can choose to omit it when
+    *     it has the `defaultValue`
+    *   - Documentation interpreters produce the JSON schema of a JSON object with an optional
+    *     property of the given `name`.
     *
     * @group operations
     */
@@ -356,8 +379,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** Default discriminator field name for sum types.
     *
     * It defaults to "type", but you can override it twofold:
-    * - by overriding this field you can change default discriminator name algebra-wide
-    * - by using `withDiscriminator` you can specify discriminator field name for specific sum type
+    *   - by overriding this field you can change default discriminator name algebra-wide
+    *   - by using `withDiscriminator` you can specify discriminator field name for specific sum
+    *     type
     * @group operations
     */
   def defaultDiscriminatorName: String = "type"
@@ -374,7 +398,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       taggedB: Tagged[B]
   ): Tagged[Either[A, B]]
 
-  /** The JSON schema of a coproduct that share the same parent type and thus can be widened to that parent type */
+  /** The JSON schema of a coproduct that share the same parent type and thus can be widened to that
+    * parent type
+    */
   def orElseMergeTagged[A: ClassTag, C >: A, B <: C: ClassTag](
       taggedA: Tagged[A],
       taggedB: Tagged[B]
@@ -448,27 +474,27 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** A schema that can be either `schemaA` or `schemaB`.
     *
-    * Documentation interpreter produce a `oneOf` JSON schema.
-    * Encoder interpreters forward to either `schemaA` or `schemaB`.
-    * Decoder interpreters first try to decode with `schemaA`, and fallback to `schemaB`
-    * in case of failure.
+    * Documentation interpreter produce a `oneOf` JSON schema. Encoder interpreters forward to
+    * either `schemaA` or `schemaB`. Decoder interpreters first try to decode with `schemaA`, and
+    * fallback to `schemaB` in case of failure.
     *
-    * The difference between this operation and the operation `orElse` on “tagged” schemas
-    * is that this operation does not rely on a discriminator field between the alternative
-    * schemas. As a consequence, decoding is slower than with “tagged” schemas and provides
-    * less precise error messages.
+    * The difference between this operation and the operation `orElse` on “tagged” schemas is that
+    * this operation does not rely on a discriminator field between the alternative schemas. As a
+    * consequence, decoding is slower than with “tagged” schemas and provides less precise error
+    * messages.
     *
-    * @note Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype
-    *       of the other), otherwise, a value of type `B` might also be successfully
-    *       decoded as a value of type `A`, and this could have surprising consequences.
+    * @note
+    *   Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype of the
+    *   other), otherwise, a value of type `B` might also be successfully decoded as a value of type
+    *   `A`, and this could have surprising consequences.
     */
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],
       schemaB: JsonSchema[B]
   ): JsonSchema[Either[A, B]]
 
-  /** Documentation related methods for annotating schemas. Encoder and decoder
-    * interpreters ignore this information.
+  /** Documentation related methods for annotating schemas. Encoder and decoder interpreters ignore
+    * this information.
     */
   sealed trait JsonSchemaDocumentationOps[A] {
     type Self <: JsonSchema[A]
@@ -478,7 +504,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore this value,
       *   - Documentation interpreters can show this example value.
       *
-      * @param example Example value to attach to the schema
+      * @param example
+      *   Example value to attach to the schema
       */
     def withExample(example: A): Self
 
@@ -487,7 +514,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore this description,
       *   - Documentation interpreters can show this description.
       *
-      * @param description information about the values described by the schema
+      * @param description
+      *   information about the values described by the schema
       */
     def withDescription(description: String): Self
 
@@ -496,7 +524,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore the title,
       *   - Documentation interpreters can show this title.
       *
-      * @param title short title to attach to the schema
+      * @param title
+      *   short title to attach to the schema
       */
     def withTitle(title: String): Self
 
@@ -520,21 +549,23 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
     /** A schema that can be either `schemaA` or `schemaB`.
       *
-      *   - Encoder interpreters forward to `schemaA` to encode a `Left` value or `schemaB`
-      *     to encode a `Right` value,
-      *   - Decoder interpreters first try to decode with `schemaA`, and fallback to `schemaB`
-      *     in case of failure,
+      *   - Encoder interpreters forward to `schemaA` to encode a `Left` value or `schemaB` to
+      *     encode a `Right` value,
+      *   - Decoder interpreters first try to decode with `schemaA`, and fallback to `schemaB` in
+      *     case of failure,
       *   - Documentation interpreter produce a `oneOf` JSON schema.
       *
-      * The difference between this operation and the operation `orElse` on “tagged” schemas
-      * is that this operation does not rely on a discriminator field between the alternative
-      * schemas. As a consequence, decoding is slower than with “tagged” schemas and provides
-      * less precise error messages.
+      * The difference between this operation and the operation `orElse` on “tagged” schemas is that
+      * this operation does not rely on a discriminator field between the alternative schemas. As a
+      * consequence, decoding is slower than with “tagged” schemas and provides less precise error
+      * messages.
       *
-      * @note Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype
-      *       of the other), otherwise, a value of type `B` might also be successfully
-      *       decoded as a value of type `A`, and this could have surprising consequences.
-      * @param schemaB fallback schema
+      * @note
+      *   Be careful to use ''disjoint'' schemas for `A` and `B` (none must be a subtype of the
+      *   other), otherwise, a value of type `B` might also be successfully decoded as a value of
+      *   type `A`, and this could have surprising consequences.
+      * @param schemaB
+      *   fallback schema
       */
     def orFallbackTo[B](schemaB: JsonSchema[B]): JsonSchema[Either[A, B]] =
       orFallbackToJsonSchema(schemaA, schemaB)
@@ -548,30 +579,31 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
     /** Merge the fields of `recordA` with the fields of `recordB`
       *
-      *   - Encoder interpreters produce a JSON object with the fields of both
-      *     `recordA` and `recordB`,
+      *   - Encoder interpreters produce a JSON object with the fields of both `recordA` and
+      *     `recordB`,
       *   - Decoder interpreters validate the fields of `recordA` and `recordB`,
-      *   - Documentation interpreters produce the schema of a JSON object
-      *     containing the properties of both `recordA` and `recordB`.
+      *   - Documentation interpreters produce the schema of a JSON object containing the properties
+      *     of both `recordA` and `recordB`.
       */
     def zip[B](recordB: Record[B])(implicit t: Tupler[A, B]): Record[t.Out] =
       zipRecords(recordA, recordB)
 
     /** Tag a schema for type `A` with the given tag name
       *
-      * This operation is usually used in conjunction with the `orElse` operation
-      * on the resulting `Tagged` value, to define a schema that accepts several
-      * alternatives, discriminated by a type tag.
+      * This operation is usually used in conjunction with the `orElse` operation on the resulting
+      * `Tagged` value, to define a schema that accepts several alternatives, discriminated by a
+      * type tag.
       *
-      *   - Encoder interpreters include a discriminator field to the JSON object
-      *     they produce. The name of the discriminator field is “type”, by default,
-      *     but can be customized by calling the `withDiscriminator` operation or by
-      *     overriding the `defaultDiscriminatorName` operation of the trait `JsonSchemas`,
-      *   - Decoder interpreters validate that the discriminator field is present before
-      *     validating the remaining fields of the object,
+      *   - Encoder interpreters include a discriminator field to the JSON object they produce. The
+      *     name of the discriminator field is “type”, by default, but can be customized by calling
+      *     the `withDiscriminator` operation or by overriding the `defaultDiscriminatorName`
+      *     operation of the trait `JsonSchemas`,
+      *   - Decoder interpreters validate that the discriminator field is present before validating
+      *     the remaining fields of the object,
       *   - Documentation interpreters produce a `oneOf` schema listing all the alternative schemas.
       *
-      * @param tag Tag name (e.g., "Rectangle", "Circle")
+      * @param tag
+      *   Tag name (e.g., "Rectangle", "Circle")
       */
     def tagged(tag: String): Tagged[A] = taggedRecord(recordA, tag)
 
@@ -580,10 +612,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
       *
-      * @note Names are used by documentation interpreters to construct
-      *       references and the JSON schema specification requires these
-      *       to be valid URI's. Consider using `withTitle` if you just want
-      *       to override the heading displayed in documentation.
+      * @note
+      *   Names are used by documentation interpreters to construct references and the JSON schema
+      *   specification requires these to be valid URI's. Consider using `withTitle` if you just
+      *   want to override the heading displayed in documentation.
       */
     def named(name: String): Record[A] = namedRecord(recordA, name)
 
@@ -603,41 +635,42 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
     /** Define a schema that alternatively accepts `taggedA` or `taggedB`
       *
-      *   - Encoder interpreters forward to `taggedA` to encode a `Left` value or to
-      *     `taggedB` to encode a `Right` value,
-      *   - Decoder interpreters decode the type tag from the JSON object and then
-      *     forward to `taggedA` or `taggedB` according to its value,
-      *   - Documentation interpreters produce a `oneOf` schema listing the alternatives
-      *     in `taggedA` and the alternatives in `taggedB`.
+      *   - Encoder interpreters forward to `taggedA` to encode a `Left` value or to `taggedB` to
+      *     encode a `Right` value,
+      *   - Decoder interpreters decode the type tag from the JSON object and then forward to
+      *     `taggedA` or `taggedB` according to its value,
+      *   - Documentation interpreters produce a `oneOf` schema listing the alternatives in
+      *     `taggedA` and the alternatives in `taggedB`.
       */
     def orElse[B](taggedB: Tagged[B]): Tagged[Either[A, B]] =
       choiceTagged(taggedA, taggedB)
 
     /** Define a schema that alternatively accepts `taggedA` or `taggedB` and merges the result
       *
-      * Similar to `orElse` but instead of returning a `Tagged[Either[A, B]]`, it returns
-      * a `Tagged[C]`, where `C` is a super type of both `A` and `B`.
+      * Similar to `orElse` but instead of returning a `Tagged[Either[A, B]]`, it returns a
+      * `Tagged[C]`, where `C` is a super type of both `A` and `B`.
       *
       *   - Encoder interpreters forward to `taggedA` or `taggedB` based on the runtime type
       *     information of the value to encode,
-      *   - Decoder interpreters decode the type tag from the JSON object, forward to `taggedA`
-      *     or `taggedB` accordingly, and then widen the result type to `C`,
-      *   - Documentation interpreters produce a `oneOf` schema listing the alternatives
-      *     in `taggedA` and the alternatives in `taggedB`.
+      *   - Decoder interpreters decode the type tag from the JSON object, forward to `taggedA` or
+      *     `taggedB` accordingly, and then widen the result type to `C`,
+      *   - Documentation interpreters produce a `oneOf` schema listing the alternatives in
+      *     `taggedA` and the alternatives in `taggedB`.
       *
-      * @note Encoder interpreters rely on `ClassTag`s to perform the runtime type test
-      *       used for deciding whether to encode the `C` value as an `A` or a `B`.
-      *       Consequently, types `A` and `B` must be distinct after erasure.
-      *       Furthermore, the `orElseMerge` implementation requires the type `B` to
-      *       ''not'' be a supertype of `A`. This should not happen in general. For instance,
-      *       assuming three schemas, `schema1`, `schema2`, and `schema3`, for types having
-      *       a common super-type, if you write `schema1 orElseMerge schema2 orElseMerge schema3`,
-      *       then the right-hand side of `orElseMerge` is always a more specific type than its
-      *       left-hand side.
-      *       However, if you write `schema1 orElseMerge (schema2 orElseMerge schema3)` (note the
-      *       parentheses), then the result of `schema2 orElseMerge schema3` is a super-type of
-      *       `schema1`. In such a case, the `orElseMerge` operation won’t work.
-      * @see  [[https://www.scala-lang.org/api/current/scala/Any.html#isInstanceOf[T0]:Boolean isInstanceOf]] API documentation
+      * @note
+      *   Encoder interpreters rely on `ClassTag`s to perform the runtime type test used for
+      *   deciding whether to encode the `C` value as an `A` or a `B`. Consequently, types `A` and
+      *   `B` must be distinct after erasure. Furthermore, the `orElseMerge` implementation requires
+      *   the type `B` to ''not'' be a supertype of `A`. This should not happen in general. For
+      *   instance, assuming three schemas, `schema1`, `schema2`, and `schema3`, for types having a
+      *   common super-type, if you write `schema1 orElseMerge schema2 orElseMerge schema3`, then
+      *   the right-hand side of `orElseMerge` is always a more specific type than its left-hand
+      *   side. However, if you write `schema1 orElseMerge (schema2 orElseMerge schema3)` (note the
+      *   parentheses), then the result of `schema2 orElseMerge schema3` is a super-type of
+      *   `schema1`. In such a case, the `orElseMerge` operation won’t work.
+      * @see
+      *   [[https://www.scala-lang.org/api/current/scala/Any.html#isInstanceOf[T0]:Boolean isInstanceOf]]
+      *   API documentation
       */
     def orElseMerge[B <: C, C >: A](
         taggedB: Tagged[B]
@@ -649,10 +682,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
       *
-      * @note Names are used by documentation interpreters to construct
-      *       references and the JSON schema specification requires these
-      *       to be valid URI's. Consider using `withTitle` if you just want
-      *       to override the heading displayed in documentation.
+      * @note
+      *   Names are used by documentation interpreters to construct references and the JSON schema
+      *   specification requires these to be valid URI's. Consider using `withTitle` if you just
+      *   want to override the heading displayed in documentation.
       */
     def named(name: String): Tagged[A] = namedTagged(taggedA, name)
 
@@ -680,10 +713,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       *   - Encoder and decoder interpreters ignore the name,
       *   - Documentation interpreters use that name to refer to this schema.
       *
-      * @note Names are used by documentation interpreters to construct
-      *       references and the JSON schema specification requires these
-      *       to be valid URI's. Consider using `withTitle` if you just want
-      *       to override the heading displayed in documentation.
+      * @note
+      *   Names are used by documentation interpreters to construct references and the JSON schema
+      *   specification requires these to be valid URI's. Consider using `withTitle` if you just
+      *   want to override the heading displayed in documentation.
       */
     def named(name: String): Enum[A] = namedEnum(enumA, name)
 
@@ -715,8 +748,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** A JSON schema for type `String`.
     *
-    * @param format An additional semantic information about the underlying format of the string
-    * @see [[https://json-schema.org/understanding-json-schema/reference/string.html#format]]
+    * @param format
+    *   An additional semantic information about the underlying format of the string
+    * @see
+    *   [[https://json-schema.org/understanding-json-schema/reference/string.html#format]]
     * @group operations
     */
   def stringJsonSchema(format: Option[String]): JsonSchema[String]
@@ -738,7 +773,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   implicit def intJsonSchema: JsonSchema[Int]
 
-  /** A JSON schema for type `Long` where certain properties, such as minimum, maximum, etc. are set.
+  /** A JSON schema for type `Long` where certain properties, such as minimum, maximum, etc. are
+    * set.
     * @group operations
     */
   def longWithConstraintsJsonSchema(props: NumericConstraints[Long]): JsonSchema[Long] =
@@ -749,7 +785,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   implicit def longJsonSchema: JsonSchema[Long]
 
-  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
+  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc.
+    * are set.
     * @group operations
     */
   def bigdecimalWithConstraintsJsonSchema(
@@ -762,7 +799,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   implicit def bigdecimalJsonSchema: JsonSchema[BigDecimal]
 
-  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc. are set.
+  /** A JSON schema for type `BigDecimal` where certain properties, such as minimum, maximum, etc.
+    * are set.
     * @group operations
     */
   def floatWithConstraintsJsonSchema(props: NumericConstraints[Float]): JsonSchema[Float] =
@@ -773,7 +811,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   implicit def floatJsonSchema: JsonSchema[Float]
 
-  /** A JSON schema for type `Double` where certain properties, such as minimum, maximum, etc. are set.
+  /** A JSON schema for type `Double` where certain properties, such as minimum, maximum, etc. are
+    * set.
     * @group operations
     */
   def doubleWithConstraintsJsonSchema(props: NumericConstraints[Double]): JsonSchema[Double] =
@@ -811,7 +850,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** An ISO 8601 date-time in UTC
     *
-    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @see
+    *   http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
     * @group operations
     */
   implicit lazy val instantJsonSchema: JsonSchema[Instant] =
@@ -824,7 +864,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** An ISO8601 date-time
     *
-    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @see
+    *   http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
     * @group operations
     */
   implicit lazy val offsetDateTimeSchema: JsonSchema[OffsetDateTime] =
@@ -837,7 +878,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 
   /** An ISO 8601 duration
     *
-    * @see http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
+    * @see
+    *   http://json-schema.org/draft/2019-09/json-schema-validation.html#rfc.section.7.3.1
     * @group operations
     */
   implicit lazy val durationSchema: JsonSchema[Duration] =

@@ -8,25 +8,24 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Information carried by requests’ headers.
     *
-    * You can construct values of type `RequestHeaders` by using the operations
-    * [[requestHeader]], [[optRequestHeader]], or [[emptyRequestHeaders]].
+    * You can construct values of type `RequestHeaders` by using the operations [[requestHeader]],
+    * [[optRequestHeader]], or [[emptyRequestHeaders]].
     *
-    *   - Server interpreters raise an error if they can’t parse the incoming
-    *     request headers as a value of type `A`. By default,
-    *     they produce a Bad Request (400) response with a list of error messages
-    *     in a JSON array. Refer to the documentation of your server interpreter
-    *     to customize this behavior.
+    *   - Server interpreters raise an error if they can’t parse the incoming request headers as a
+    *     value of type `A`. By default, they produce a Bad Request (400) response with a list of
+    *     error messages in a JSON array. Refer to the documentation of your server interpreter to
+    *     customize this behavior.
     *
-    * @note  This type has implicit methods provided by the [[SemigroupalSyntax]]
-    *        and [[PartialInvariantFunctorSyntax]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[SemigroupalSyntax]] and
+    *   [[PartialInvariantFunctorSyntax]] classes.
     * @group types
     */
   type RequestHeaders[A]
 
   /** Ignore headers
     *
-    *   - Server interpreters don’t try to parse any information from the
-    *     request headers,
+    *   - Server interpreters don’t try to parse any information from the request headers,
     *   - Client interpreters supply no specific headers
     *
     * Use `description` of [[endpoints4s.algebra.Endpoints#endpoint]] to document empty headers.
@@ -36,7 +35,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   def emptyRequestHeaders: RequestHeaders[Unit]
 
   /** A required request header
-    * @param name Header name (e.g., “Authorization”)
+    * @param name
+    *   Header name (e.g., “Authorization”)
     * @group operations
     */
   def requestHeader(
@@ -45,7 +45,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): RequestHeaders[String]
 
   /** An optional request header
-    * @param name Header name (e.g., “Authorization”)
+    * @param name
+    *   Header name (e.g., “Authorization”)
     * @group operations
     */
   def optRequestHeader(
@@ -54,62 +55,66 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): RequestHeaders[Option[String]]
 
   /** Provides `++` operation.
-    * @see [[SemigroupalSyntax]]
+    * @see
+    *   [[SemigroupalSyntax]]
     */
   implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]]
     */
   implicit def requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders]
 
   /** Information carried by a whole request (headers and entity)
     *
-    * Values of type `Request[A]` can be constructed by using the operations
-    * [[request]], [[get]], [[post]], [[put]], or [[delete]].
+    * Values of type `Request[A]` can be constructed by using the operations [[request]], [[get]],
+    * [[post]], [[put]], or [[delete]].
     *
-    *   - Server interpreters raise an error if they can’t parse the incoming
-    *     request as a value of type `A`. By default,
-    *     they produce a Bad Request (400) response with a list of error messages
-    *     in a JSON array. Refer to the documentation of your server interpreter
-    *     to customize this behavior.
+    *   - Server interpreters raise an error if they can’t parse the incoming request as a value of
+    *     type `A`. By default, they produce a Bad Request (400) response with a list of error
+    *     messages in a JSON array. Refer to the documentation of your server interpreter to
+    *     customize this behavior.
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
+    * @note
+    *   This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
     * @group types
     */
   type Request[A]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]]
     */
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request]
 
   /** Information carried by request entity
     *
-    * Values of type `RequestEntity[A]` can be constructed by using the operations
-    * [[emptyRequest]] or [[textRequest]]. Additional types of request entities
-    * are provided by other algebra modules, such as [[endpoints4s.algebra.JsonEntities JsonEntities]]
-    * or [[endpoints4s.algebra.ChunkedEntities ChunkedEntities]].
+    * Values of type `RequestEntity[A]` can be constructed by using the operations [[emptyRequest]]
+    * or [[textRequest]]. Additional types of request entities are provided by other algebra
+    * modules, such as [[endpoints4s.algebra.JsonEntities JsonEntities]] or
+    * [[endpoints4s.algebra.ChunkedEntities ChunkedEntities]].
     *
-    *   - Server interpreters raise an error if they can’t parse the incoming
-    *     request entity as a value of type `A`. By default,
-    *     they produce a Bad Request (400) response with a list of error messages
-    *     in a JSON array. Refer to the documentation of your server interpreter
-    *     to customize this behavior.
+    *   - Server interpreters raise an error if they can’t parse the incoming request entity as a
+    *     value of type `A`. By default, they produce a Bad Request (400) response with a list of
+    *     error messages in a JSON array. Refer to the documentation of your server interpreter to
+    *     customize this behavior.
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
-    *       [[RequestEntitySyntax]] classes.
+    * @note
+    *   This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] and
+    *   [[RequestEntitySyntax]] classes.
     * @group types
     */
   type RequestEntity[A]
 
   /** Provides the operations `xmap` and `xmapPartial`.
-    * @see [[PartialInvariantFunctorSyntax]]
+    * @see
+    *   [[PartialInvariantFunctorSyntax]]
     */
   implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity]
 
-  /** Empty request -- request without a body.
-    * Use `description` of [[endpoints4s.algebra.Endpoints#endpoint]] to document an empty body.
+  /** Empty request -- request without a body. Use `description` of
+    * [[endpoints4s.algebra.Endpoints#endpoint]] to document an empty body.
     *
     * @group operations
     */
@@ -117,22 +122,21 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Request with a `String` body.
     *
-    *   - Server interpreters accept requests with content-type `text/plain` and
-    *     reject requests with an incorrect content-type.
-    *   - Server interpreters will use the character encoding set in the
-    *     content-type header to determine how the text is decoded.
-    *   - Client interpreters supply content-type `text/plain` with an explicit
-    *     character encoding
+    *   - Server interpreters accept requests with content-type `text/plain` and reject requests
+    *     with an incorrect content-type.
+    *   - Server interpreters will use the character encoding set in the content-type header to
+    *     determine how the text is decoded.
+    *   - Client interpreters supply content-type `text/plain` with an explicit character encoding
     *
     * @group operations
     */
   def textRequest: RequestEntity[String]
 
-  /** Alternative between two possible request entities, differentiated by the
-    * `Content-Type` header
+  /** Alternative between two possible request entities, differentiated by the `Content-Type` header
     *
-    * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
-    *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+    * @note
+    *   If `A` and `B` are both JSON-encoded and use disjoint schemas, use
+    *   [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
     *
     *   - Server interpreters accept either of the request entities
     *   - Client interpreters provide one of the two request entities
@@ -145,11 +149,12 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   implicit class RequestEntitySyntax[A](requestEntity: RequestEntity[A]) {
 
-    /** Alternative between two possible request entities, differentiated by the
-      * `Content-Type` header
+    /** Alternative between two possible request entities, differentiated by the `Content-Type`
+      * header
       *
-      * @note If `A` and `B` are both JSON-encoded and use disjoint schemas, use
-      *       [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
+      * @note
+      *   If `A` and `B` are both JSON-encoded and use disjoint schemas, use
+      *   [[endpoints4s.algebra.JsonSchemas.TaggedOps#orElse]] at the schema level instead
       *
       *   - Server interpreters accept either of the request entities
       *   - Client interpreters provide one of the two request entities
@@ -163,15 +168,24 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
 
   /** Request for given parameters
     *
-    * @param method Request method
-    * @param url Request URL
-    * @param entity Request entity
-    * @param docs Request documentation
-    * @param headers Request headers
-    * @tparam UrlP Payload carried by url
-    * @tparam BodyP Payload carried by body
-    * @tparam HeadersP Payload carried by headers
-    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @param method
+    *   Request method
+    * @param url
+    *   Request URL
+    * @param entity
+    *   Request entity
+    * @param docs
+    *   Request documentation
+    * @param headers
+    *   Request headers
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam BodyP
+    *   Payload carried by body
+    * @tparam HeadersP
+    *   Payload carried by headers
+    * @tparam UrlAndBodyPTupled
+    *   Payloads of Url and Body tupled together by [[Tupler]]
     * @group operations
     */
   def request[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
@@ -186,8 +200,10 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
   ): Request[Out]
 
   /** Helper method to perform GET request
-    * @tparam UrlP Payload carried by url
-    * @tparam HeadersP Payload carried by headers
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam HeadersP
+    *   Payload carried by headers
     * @group operations
     */
   final def get[UrlP, HeadersP, Out](
@@ -198,11 +214,16 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     request(Get, url, docs = docs, headers = headers)
 
   /** Helper method to perform POST request
-    * @param docs Request documentation
-    * @tparam UrlP Payload carried by url
-    * @tparam BodyP Payload carried by body
-    * @tparam HeadersP Payload carried by headers
-    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @param docs
+    *   Request documentation
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam BodyP
+    *   Payload carried by body
+    * @tparam HeadersP
+    *   Payload carried by headers
+    * @tparam UrlAndBodyPTupled
+    *   Payloads of Url and Body tupled together by [[Tupler]]
     * @group operations
     */
   final def post[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
@@ -217,10 +238,14 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     request(Post, url, entity, docs, headers)
 
   /** Helper method to perform PUT request
-    * @tparam UrlP Payload carried by url
-    * @tparam BodyP Payload carried by body
-    * @tparam HeadersP Payload carried by headers
-    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam BodyP
+    *   Payload carried by body
+    * @tparam HeadersP
+    *   Payload carried by headers
+    * @tparam UrlAndBodyPTupled
+    *   Payloads of Url and Body tupled together by [[Tupler]]
     * @group operations
     */
   final def put[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](
@@ -235,8 +260,10 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     request(Put, url, entity, docs, headers)
 
   /** Helper method to perform DELETE request
-    * @tparam UrlP Payload carried by url
-    * @tparam HeadersP Payload carried by headers
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam HeadersP
+    *   Payload carried by headers
     * @group operations
     */
   final def delete[UrlP, HeadersP, Out](
@@ -247,11 +274,16 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     request(Delete, url, docs = docs, headers = headers)
 
   /** Helper method to perform PATCH request
-    * @param docs Request documentation
-    * @tparam UrlP Payload carried by url
-    * @tparam BodyP Payload carried by body
-    * @tparam HeadersP Payload carried by headers
-    * @tparam UrlAndBodyPTupled Payloads of Url and Body tupled together by [[Tupler]]
+    * @param docs
+    *   Request documentation
+    * @tparam UrlP
+    *   Payload carried by url
+    * @tparam BodyP
+    *   Payload carried by body
+    * @tparam HeadersP
+    *   Payload carried by headers
+    * @tparam UrlAndBodyPTupled
+    *   Payloads of Url and Body tupled together by [[Tupler]]
     * @group operations
     */
   final def patch[UrlP, BodyP, HeadersP, UrlAndBodyPTupled, Out](

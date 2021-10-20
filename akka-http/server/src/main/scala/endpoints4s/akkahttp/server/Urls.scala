@@ -106,8 +106,8 @@ trait Urls extends algebra.Urls with StatusCodes {
       }
     }
 
-  /** Given a parameter name and a query string content, returns a decoded parameter
-    * value of type `T`, or `Invalid` if decoding failed
+  /** Given a parameter name and a query string content, returns a decoded parameter value of type
+    * `T`, or `Invalid` if decoding failed
     */
   trait QueryStringParam[T] {
     def decode(name: String, params: Map[String, Seq[String]]): Validated[T]
@@ -373,8 +373,8 @@ trait Urls extends algebra.Urls with StatusCodes {
 
   /** This method is called by endpoints4s when decoding a request failed.
     *
-    * The provided implementation calls `clientErrorsResponse` to complete
-    * with a response containing the errors.
+    * The provided implementation calls `clientErrorsResponse` to complete with a response
+    * containing the errors.
     *
     * This method can be overridden to customize the error reporting logic.
     */
