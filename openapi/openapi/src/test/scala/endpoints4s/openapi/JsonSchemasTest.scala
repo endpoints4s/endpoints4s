@@ -95,6 +95,16 @@ class JsonSchemasTest extends AnyFreeSpec {
     assert(DocumentedJsonSchemas.Enum.colorSchema.docs == expectedSchema)
   }
 
+  "int value enum" in {
+    val expectedSchema =
+      DocumentedEnum(
+        DocumentedJsonSchemas.intJsonSchema.docs,
+        ujson.Num(1) :: ujson.Num(2) :: ujson.Num(3) :: Nil,
+        Some("IntValue")
+      )
+    assert(DocumentedJsonSchemas.IntValueEnum.intValueEnumSchema.docs == expectedSchema)
+  }
+
   "non-string enum" in {
     val expectedSchema =
       DocumentedEnum(
