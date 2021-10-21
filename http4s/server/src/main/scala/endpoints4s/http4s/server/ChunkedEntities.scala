@@ -15,7 +15,7 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
     req => Effect.pure(Right(req.bodyText))
 
   def textChunksResponse: ResponseEntity[Chunks[String]] =
-    EntityEncoder.encodeBy()(stream => Entity(stream.through(fs2.text.utf8Encode)))
+    EntityEncoder.encodeBy()(stream => Entity(stream.through(fs2.text.utf8.encode)))
 
   def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]] =
     req => Effect.pure(Right(req.body.chunks.map(_.toArray)))
@@ -56,7 +56,7 @@ trait ChunkedJsonEntities
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     EntityEncoder.encodeBy(`Content-Type`(MediaType.application.`json`))(stream =>
-      Entity(stream.map(encoder.encode).through(fs2.text.utf8Encode))
+      Entity(stream.map(encoder.encode).through(fs2.text.utf8.encode))
     )
   }
 
