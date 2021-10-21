@@ -146,8 +146,10 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
   /** A more specific type of JSON schema for enumerations, i.e. types that have a specific set of
     * valid values
     *
-    * Values of type `Enum[A]` can be constructed by the operations [[enumeration]] and
-    * [[stringEnumeration]].
+    * Values of type `Enum[A]` can be constructed by the operations:
+    *  - [[enumeration]]
+    *  - [[stringEnumeration]]
+    *  - [[intEnumeration]]
     *
     * @note
     *   This type has implicit methods provided by the [[EnumOps]] class.
@@ -173,7 +175,22 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   final def stringEnumeration[A](
       values: Seq[A]
-  )(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] = {
+  )(encode: A => String)(implicit tpe: JsonSchema[String]): Enum[A] =
+    valueEnumeration(values)(encode)(tpe)
+
+  /** Convenient constructor for enumerations represented by int values.
+    * @group operations
+    */
+  final def intEnumeration[A](
+      values: Seq[A]
+  )(encode: A => Int)(implicit tpe: JsonSchema[Int]): Enum[A] =
+    valueEnumeration(values)(encode)(tpe)
+
+  /** Helper function to construct enumerations represented by values of some base type.
+    */
+  private def valueEnumeration[V, A](
+      values: Seq[A]
+  )(encode: A => V)(valueSchema: JsonSchema[V]): Enum[A] = {
     val encoded = values.map(a => (a, encode(a))).toMap
     val decoded = encoded.map(_.swap)
     assert(
@@ -181,9 +198,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       "Enumeration values must have different string representation"
     )
     enumeration(values)(
-      tpe.xmapPartial { str =>
-        Validated.fromOption(decoded.get(str))(
-          s"Invalid value: ${str} ; valid values are: ${values.map(encode).mkString(", ")}"
+      valueSchema.xmapPartial { value =>
+        Validated.fromOption(decoded.get(value))(
+          s"Invalid value: $value ; valid values are: ${values.map(encode).mkString(", ")}"
         )
       }(encode)
     )

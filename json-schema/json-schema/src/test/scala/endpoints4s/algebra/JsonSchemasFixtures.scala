@@ -90,6 +90,16 @@ trait JsonSchemasFixtures extends JsonSchemas {
       stringEnumeration[Color](Seq(Red, Blue))(_.toString).named("Color")
   }
 
+  object IntValueEnum {
+    sealed abstract class IntValueEnum(val value: Int)
+    case object One extends IntValueEnum(1)
+    case object Two extends IntValueEnum(2)
+    case object Three extends IntValueEnum(3)
+
+    val intValueEnumSchema: Enum[IntValueEnum] =
+      intEnumeration[IntValueEnum](Seq(One, Two, Three))(_.value).named("IntValue")
+  }
+
   object NonStringEnum {
     case class Foo(quux: String)
 
