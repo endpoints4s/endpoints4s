@@ -334,6 +334,24 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "int value enum" in {
+    checkRoundTrip(
+      IntValueEnum.intValueEnumSchema,
+      ujson.Num(2),
+      IntValueEnum.Two
+    )
+    checkDecodingFailure(
+      IntValueEnum.intValueEnumSchema,
+      ujson.Str("invalid"),
+      "Invalid integer value: \"invalid\"" :: Nil
+    )
+    checkDecodingFailure(
+      IntValueEnum.intValueEnumSchema,
+      ujson.Num(4),
+      "Invalid value: 4 ; valid values are: 1, 2, 3" :: Nil
+    )
+  }
+
   "non-string enum" in {
     assert(
       NonStringEnum.enumSchema.codec.encode(NonStringEnum.Foo("bar")) == ujson
