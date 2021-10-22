@@ -7,8 +7,6 @@ import cats.effect.Concurrent
 import org.http4s.client.Client
 import cats.effect.IO
 import scala.concurrent.Future
-import endpoints4s.algebra.circe
-import org.http4s.Uri
 
 import akka.stream.scaladsl.Source
 import akka.actor.ActorSystem
