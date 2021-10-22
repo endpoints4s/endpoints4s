@@ -46,7 +46,7 @@ val `play-server-circe` =
       `scala 2.12 to dotty`,
       name := "play-server-circe",
       version := "3.1.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
