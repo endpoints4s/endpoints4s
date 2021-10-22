@@ -29,7 +29,15 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
     }
   }
 
-  import streamingClient.{Counter, Endpoint, Chunks, streamedEndpointTest, uploadEndpointTest}
+  import streamingClient.{
+    Counter,
+    Endpoint,
+    Chunks,
+    streamedEndpointTest,
+    uploadEndpointTest,
+    streamedTextEndpointTest,
+    streamedBytesEndpointTest
+  }
 
   /** Calls the endpoint and accumulates the messages sent by the server. (only endpoints streaming
     * a finite number of items can be tested)
@@ -42,6 +50,64 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
       endpoint: Endpoint[Chunks[A], B],
       req: Source[A, _]
   ): Future[B]
+
+  "Decode bytes chunks streamed by a server" in {
+
+    val expectedItems =
+      Right(List(0.toByte)) :: Right(List(1.toByte)) :: Right(List(2.toByte)) :: Nil
+
+    serving(
+      (get & path("bytes")) {
+        complete(
+          HttpEntity.Chunked.fromData(
+            ContentTypes.`application/octet-stream`,
+            Source(
+              List(
+                ByteString(0.toByte),
+                ByteString(1.toByte),
+                ByteString(2.toByte)
+              )
+            )
+          )
+        )
+      }
+    ) {
+      whenReady(callStreamedEndpoint(streamedBytesEndpointTest, ()))(res =>
+        res.map(_.map(_.toList)) shouldEqual expectedItems
+      )
+      ()
+    }
+
+  }
+
+  "Decode string chunks streamed by a server" in {
+
+    val expectedItems =
+      Right("aaa") :: Right("bbb") :: Right("ccc") :: Nil
+
+    serving(
+      (get & path("text")) {
+        complete(
+          HttpEntity.Chunked.fromData(
+            ContentTypes.`text/plain(UTF-8)`,
+            Source(
+              List(
+                ByteString("aaa"),
+                ByteString("bbb"),
+                ByteString("ccc")
+              )
+            )
+          )
+        )
+      }
+    ) {
+      whenReady(callStreamedEndpoint(streamedTextEndpointTest, ()))(
+        _ shouldEqual expectedItems
+      )
+      ()
+    }
+
+  }
 
   "Decode chunks streamed by a server" in {
 
