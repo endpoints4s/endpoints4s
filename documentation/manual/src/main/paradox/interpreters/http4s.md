@@ -10,8 +10,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 ### `endpoints4s.http4s.client.Endpoints`
 
-The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a `Kleisli[Effect, A, B]` aka a function
-from `A` to `Effect[B]`, where `Effect[_]` can be any type constructor `F[_]` with a valid `cats.effect.Sync` instance (e.g. `cats.effect.IO` or `monix.eval.Task`) :
+The `Endpoints` interpreter provides a trait `Endpoint[A, B]` defined as follows
 
 @@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }
 
@@ -22,6 +21,20 @@ This means that, given the following endpoint definition:
 It can be invoked as follows using `IO`:
 
 @@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints4s/http4s/client/EndpointsDocs.scala) { #invocation }
+
+### `ChunkedEntities`
+
+The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `fs2.Stream[Effect, A]`:
+
+@@snip [ChunkedEntities.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/ChunkedEntities.scala) { #stream-type }
+
+This means that, given the following endpoint definition:
+
+@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+
+It can be invoked as follows:
+
+@@snip [ChunkedEntitiesDocs.scala](/http4s/client/src/test/scala/endpoints4s/http4s/client/ChunkedEntitiesDocs.scala) { #invocation }
 
 ## Server
 

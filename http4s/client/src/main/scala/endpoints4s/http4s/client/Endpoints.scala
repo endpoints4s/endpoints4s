@@ -14,9 +14,9 @@ import org.http4s.Headers
 import endpoints4s.Validated
 import endpoints4s.Valid
 import org.typelevel.ci._
-import cats.data.Kleisli
 import org.http4s.Status
 import org.http4s.Uri
+import cats.effect.Resource
 
 class Endpoints[F[_]: Concurrent](val host: Uri, val client: Client[F])
     extends algebra.Endpoints
@@ -243,23 +243,38 @@ trait EndpointsWithCustomErrors
       responseA(sc, hs)
         .map(_.andThen(_.map(_.asLeft[B])))
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
-
   //#endpoint-type
-  type Endpoint[A, B] = Kleisli[Effect, A, B]
+  trait Endpoint[A, B] {
+
+    /** This method returns a Resource[Effect, B] unlike `sendAndConsume` this is always safe to use in regard to laziness
+      */
+    def send(a: A): Resource[Effect, B]
+
+    /** This method might suffer from leaking resource if the handling of the underlying resource is lazy. Use `send` instead in this case.
+      */
+    def sendAndConsume(request: A): Effect[B] = send(request).use(effect.pure)
+
+    @deprecated(
+      since = "6.0.0",
+      message =
+        "This calls sendAndConsume which is potentially unsafe. Use sendAndConsume if you don't suffer any issues in regard to laziness, else use send"
+    )
+    def apply(request: A): Effect[B] = sendAndConsume(request)
+  }
   //#endpoint-type
 
   override def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs
-  ): Endpoint[A, B] =
-    Kleisli { a =>
-      request(a).flatMap { req =>
+  ): Endpoint[A, B] = new Endpoint[A, B] {
+    override def send(a: A): Resource[Effect, B] =
+      Resource.eval(request(a)).flatMap { req =>
         client
           .run(req)
-          .use(res => decodeResponse(response, res).flatMap(_.apply(res)))
+          .evalMap(res => decodeResponse(response, res).flatMap(_.apply(res)))
       }
-    }
+  }
 
   private[client] def decodeResponse[A](
       response: Response[A],
