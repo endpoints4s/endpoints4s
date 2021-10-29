@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/user/f3ac9be0-6339-4650-afb6-7305ece8edce/description?name=name1&age=18"
+  },
+  "response": {
+    "status": 200,
+    "body": "wiremockeResponse",
+    "headers": {
+      "Access-Control-Allow-Origin": "*"
+    }
+  }
+}
