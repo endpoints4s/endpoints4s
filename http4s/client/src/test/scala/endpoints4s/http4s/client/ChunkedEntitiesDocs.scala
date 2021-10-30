@@ -7,13 +7,13 @@ import cats.effect.Resource
 trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
   this: Endpoints[IO] =>
 
-  //#invocation
+  // #invocation
   val bytesSource: Resource[Effect, fs2.Stream[Effect, Array[Byte]]] =
     logo.send(())
 
   bytesSource.use(stream =>
     stream.evalMap { bytes => IO(println(s"Received ${bytes.length} bytes")) }.compile.drain
   )
-  //#invocation
+  // #invocation
 
 }

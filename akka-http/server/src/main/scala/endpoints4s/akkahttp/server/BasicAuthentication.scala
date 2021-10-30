@@ -50,7 +50,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
           case (h, Some(credentials)) =>
             Directives.provide(tuplerHCred(h, credentials))
           case (_, None) =>
-            Directive[Tuple1[HCred]] { _ => //inner is ignored
+            Directive[Tuple1[HCred]] { _ => // inner is ignored
               Directives.complete(
                 HttpResponse(
                   AkkaStatusCodes.Unauthorized,

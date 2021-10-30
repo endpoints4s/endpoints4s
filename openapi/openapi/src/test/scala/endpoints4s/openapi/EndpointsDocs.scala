@@ -13,10 +13,10 @@ object EndpointsDocs extends DocumentedEndpoints with openapi.Endpoints {
       someDocumentedResource
     )
 
-  //#documentation
-  //#documentation-asjson
+  // #documentation
+  // #documentation-asjson
   val apiJson: String = OpenApi.stringEncoder.encode(api)
-  //#documentation-asjson
-  //#documentation
+  // #documentation-asjson
+  // #documentation
 }
 //#documentation

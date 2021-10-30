@@ -5,9 +5,9 @@ import endpoints4s.algebra
 
 trait EndpointsDocs extends algebra.EndpointsDocs with Endpoints {
 
-  //#implementation
+  // #implementation
   val route: Route =
     someResource.implementedBy(x => s"Received $x")
-  //#implementation
+  // #implementation
 
 }

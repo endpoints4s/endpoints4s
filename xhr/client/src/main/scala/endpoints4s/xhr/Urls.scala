@@ -12,14 +12,14 @@ import scala.scalajs.js
   */
 trait Urls extends algebra.Urls {
 
-  //#segment
+  // #segment
   /** Defines how to build a path segment from an `A` */
   trait Segment[A] {
 
     /** @return An URL encoded path segment (e.g. "foo%2Fbar") */
     def encode(a: A): String
   }
-  //#segment
+  // #segment
 
   implicit lazy val segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {

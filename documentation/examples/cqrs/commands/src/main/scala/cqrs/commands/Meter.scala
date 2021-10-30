@@ -3,14 +3,12 @@ package cqrs.commands
 import java.time.Instant
 import java.util.UUID
 
-/** This is the model used to validate commands.
-  * It is not necessary the same as the one for querying.
+/** This is the model used to validate commands. It is not necessary the same as the one for
+  * querying.
   *
-  * For instance, here we use a `List` to store the records,
-  * because the ordering does not matter in the context of the
-  * application of a command. Conversely, the query model
-  * represents records as a `SortedMap` because it is useful
-  * to see the time series in chronological order.
+  * For instance, here we use a `List` to store the records, because the ordering does not matter in
+  * the context of the application of a command. Conversely, the query model represents records as a
+  * `SortedMap` because it is useful to see the time series in chronological order.
   */
 // TODO store the number of digits of the meter
 case class Meter(id: UUID, timeSeries: List[Record])
@@ -20,7 +18,8 @@ case class Record(date: Instant, value: BigDecimal)
 
 object Meter {
 
-  /** @return The produced event, or `None` if the command was not valid.
+  /** @return
+    *   The produced event, or `None` if the command was not valid.
     */
   // TODO Return meaningful information in case of invalid command
   def handleCreationCommand(creationCommand: CreationCommand): Option[Event] =

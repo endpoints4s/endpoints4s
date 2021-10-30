@@ -5,9 +5,9 @@ import fs2.Chunk
 
 trait ChunkedEntities extends endpoints4s.algebra.ChunkedEntities with EndpointsWithCustomErrors {
 
-  //#stream-type
+  // #stream-type
   type Chunks[A] = fs2.Stream[Effect, A]
-  //#stream-type
+  // #stream-type
 
   override def textChunksRequest: (Chunks[String], Http4sRequest[Effect]) => Http4sRequest[Effect] =
     (stream, req) => req.withEntity(stream)

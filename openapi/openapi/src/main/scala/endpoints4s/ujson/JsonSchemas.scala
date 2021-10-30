@@ -165,8 +165,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
   }
 
   /** Override this method to customize the behaviour of encoders produced by
-    * [[optFieldWithDefault]] when encoding a field value that corresponds to
-    * the specified default value. By default, the default values are included.
+    * [[optFieldWithDefault]] when encoding a field value that corresponds to the specified default
+    * value. By default, the default values are included.
     *
     * As an example, consider the following Scala class and instances of it.
     *
@@ -180,20 +180,18 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     * val book2 = Book("History of Writing", true)
     * }}}
     *
-    * With `encodersSkipDefaultValues = false` (which is the default), the field
-    * is always encoded, regardless of whether it is also the default value.
-    * This makes encoding performance predictable, but results in larger and
-    * more complicated encoded payloads:
+    * With `encodersSkipDefaultValues = false` (which is the default), the field is always encoded,
+    * regardless of whether it is also the default value. This makes encoding performance
+    * predictable, but results in larger and more complicated encoded payloads:
     *
     * {{{
     * { "name": "Complete Imaginary Works", "availableAsEBook": false }
     * { "name": "History of Writing", "availableAsEBook": true }
     * }}}
     *
-    * With `encodersSkipDefaultValues = true`, the field is skipped if its value
-    * if also the field's default value. This means encoding can be slower
-    * (since  potentially expensive equality check needs to be performed), but
-    * the encoded payloads are smaller and simpler:
+    * With `encodersSkipDefaultValues = true`, the field is skipped if its value if also the field's
+    * default value. This means encoding can be slower (since potentially expensive equality check
+    * needs to be performed), but the encoded payloads are smaller and simpler:
     *
     * {{{
     * { "name": "Complete Imaginary Works" }
@@ -416,8 +414,8 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
     new JsonSchema[BigDecimal] {
       val decoder = {
         case ujson.Num(x) if constraints.satisfiedBy(x) => Valid(BigDecimal(x))
-        case ujson.Num(x)                               => Invalid(s"$x does not satisfy the constraints: $constraints")
-        case json                                       => Invalid(s"Invalid number value: $json")
+        case ujson.Num(x) => Invalid(s"$x does not satisfy the constraints: $constraints")
+        case json         => Invalid(s"Invalid number value: $json")
       }
       val encoder = x => ujson.Num(x.doubleValue)
     }

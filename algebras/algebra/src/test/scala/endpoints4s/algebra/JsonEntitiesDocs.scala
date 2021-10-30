@@ -13,28 +13,28 @@ trait JsonEntitiesDocs extends JsonEntities {
   implicit def userJsonResponse: JsonResponse[User]
   implicit def errorsJsonResponse: JsonResponse[Seq[String]]
 
-  //#json-entities
+  // #json-entities
   endpoint(
     post(path / "user", jsonRequest[CreateUser]),
     ok(jsonResponse[User])
   )
-  //#json-entities
+  // #json-entities
 
-  //#response-or-not-found
+  // #response-or-not-found
   val getUser: Endpoint[Long, Option[User]] =
     endpoint(
       get(path / "user" / segment[Long]("id")),
       ok(jsonResponse[User]).orNotFound()
     )
-  //#response-or-not-found
+  // #response-or-not-found
 
-  //#response-or-else
+  // #response-or-else
   val maybeUserResponse: Response[Either[Unit, User]] =
     response(NotImplemented, emptyResponse).orElse(ok(jsonResponse[User]))
-  //#response-or-else
+  // #response-or-else
 
   locally {
-    //#response-xmap
+    // #response-xmap
     val maybeUserResponse: Response[Option[User]] =
       response(NotImplemented, emptyResponse)
         .orElse(ok(jsonResponse[User]))
@@ -42,7 +42,7 @@ trait JsonEntitiesDocs extends JsonEntities {
           case Left(())    => None
           case Right(user) => Some(user)
         }(_.toRight(()))
-    //#response-xmap
+    // #response-xmap
   }: @nowarn("cat=unused-locals")
 
 }

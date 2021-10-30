@@ -13,9 +13,12 @@ val algebra =
       libraryDependencies ++= Seq(
         "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
         scalaTestDependency,
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
         ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
@@ -66,7 +69,8 @@ val `algebra-playjson` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-playjson",
-      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion)
+        .cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))

@@ -31,7 +31,7 @@ class QueriesService(
 
   // --- internals
 
-  //#event-log-client
+  // #event-log-client
   import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
 
   /** Client for the event log */
@@ -39,7 +39,7 @@ class QueriesService(
       extends Endpoints(commandsBaseUrl, wsClient)
       with JsonEntitiesFromCodecs
       with CommandsEndpoints
-  //#event-log-client
+  // #event-log-client
 
   /** In-memory state */
   private val stateRef = Ref(
@@ -61,8 +61,8 @@ class QueriesService(
       meters: Map[UUID, Meter]
   )
 
-  /** Update the internal state so that the timestamp of the last applied event is greater or
-    * equal to the given timestamp.
+  /** Update the internal state so that the timestamp of the last applied event is greater or equal
+    * to the given timestamp.
     *
     * This is used by the public service to get consistent write-and-read.
     */
@@ -76,7 +76,9 @@ class QueriesService(
     }
   }
 
-  /** Update the projection by fetching the last events from the event store and applying them to our state */
+  /** Update the projection by fetching the last events from the event store and applying them to
+    * our state
+    */
   private def update(): Future[State] = {
 
     val maybeLastEventTimestamp = stateRef.single.get.lastEventTimestamp
@@ -94,12 +96,12 @@ class QueriesService(
         newState
       }
 
-    //#invocation
+    // #invocation
     val eventuallyUpdatedState: Future[State] =
       eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
         atomicallyApplyEvents(newEvents)
       }
-    //#invocation
+    // #invocation
     eventuallyUpdatedState
   }
 

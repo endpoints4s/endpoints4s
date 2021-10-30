@@ -25,7 +25,7 @@ import akka.stream._
 import akka.stream.scaladsl.{Flow => AkkaFlow, Sink => AkkaSink, Source => AkkaSource, _}
 import akka.{Done, NotUsed}
 import cats.effect._
-import cats.syntax.all._ 
+import cats.syntax.all._
 import fs2._
 import scala.annotation.implicitNotFound
 import cats.effect.unsafe.implicits.global
@@ -35,8 +35,8 @@ import cats.effect.kernel.Resource.ExitCase.Succeeded
 
 trait Converter {
 
-  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]].
-    * If the materialized value needs be obtained, use [[akkaSourceToFs2StreamMat]].
+  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]]. If the materialized
+    * value needs be obtained, use [[akkaSourceToFs2StreamMat]].
     */
   def akkaSourceToFs2Stream[A](
       source: Graph[SourceShape[A], NotUsed]
@@ -48,8 +48,8 @@ trait Converter {
       }
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]]. This method returns the FS2 [[Stream]]
-    * and the materialized value of the [[Graph]].
+  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]]. This method returns
+    * the FS2 [[Stream]] and the materialized value of the [[Graph]].
     */
   def akkaSourceToFs2StreamMat[A, M](
       source: Graph[SourceShape[A], M]
@@ -60,8 +60,8 @@ trait Converter {
       (subscriberStream[A](subscriber), mat)
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]].
-    * If the materialized value needs be obtained, use [[akkaSinkToFs2PipeMat]].
+  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]]. If the materialized
+    * value needs be obtained, use [[akkaSinkToFs2PipeMat]].
     */
   def akkaSinkToFs2Pipe[A](
       sink: Graph[SinkShape[A], NotUsed]
@@ -75,8 +75,8 @@ trait Converter {
         }
       }
 
-  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
-    * and the materialized value of the [[Graph]].
+  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]]. This method returns the
+    * FS2 [[Pipe]] and the materialized value of the [[Graph]].
     */
   def akkaSinkToFs2PipeMat[A, M](
       sink: Graph[SinkShape[A], M]
@@ -87,14 +87,13 @@ trait Converter {
       ((s: Stream[IO, A]) => publisherStream[A](publisher, s), mat)
     }
 
-  /** Converts an akka sink with a success-status-indicating Future[M]
-    * materialized result into an fs2 Pipe which will fail if the Future fails.
-    * The stream returned by this will emit the Future's value one time at the end,
-    * then terminate.
+  /** Converts an akka sink with a success-status-indicating Future[M] materialized result into an
+    * fs2 Pipe which will fail if the Future fails. The stream returned by this will emit the
+    * Future's value one time at the end, then terminate.
     */
   def akkaSinkToFs2PipeMat[A, M](
       akkaSink: Graph[SinkShape[A], Future[M]]
-  )(implicit ec: ExecutionContext, m: Materializer): IO[Pipe[IO, A, Either[Throwable, M]]] = 
+  )(implicit ec: ExecutionContext, m: Materializer): IO[Pipe[IO, A, Either[Throwable, M]]] =
     for {
       promise <- Deferred[IO, Either[Throwable, M]]
       fs2Sink <- akkaSinkToFs2PipeMat[A, Future[M]](akkaSink).flatMap { case (stream, mat) =>
@@ -116,8 +115,8 @@ trait Converter {
       }
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]].
-    * If the materialized value needs be obtained, use [[akkaSinkToFs2PipeMat]].
+  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]]. If the materialized
+    * value needs be obtained, use [[akkaSinkToFs2PipeMat]].
     */
   def akkaFlowToFs2Pipe[A, B](
       flow: Graph[FlowShape[A, B], NotUsed]
@@ -132,8 +131,8 @@ trait Converter {
         }
       }
 
-  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
-    * and the materialized value of the [[Graph]].
+  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]]. This method returns the
+    * FS2 [[Pipe]] and the materialized value of the [[Graph]].
     */
   def akkaFlowToFs2PipeMat[A, B, M](
       flow: Graph[FlowShape[A, B], M]
@@ -145,8 +144,8 @@ trait Converter {
       ((s: Stream[IO, A]) => transformerStream[A, B](subscriber, publisher, s), mat)
     }
 
-  /** Converts an FS2 [[Stream]] to an Akka Stream [[Graph]] of [[SourceShape]]. The [[Stream]] is run when the
-    * [[Graph]] is materialized.
+  /** Converts an FS2 [[Stream]] to an Akka Stream [[Graph]] of [[SourceShape]]. The [[Stream]] is
+    * run when the [[Graph]] is materialized.
     */
   def fs2StreamToAkkaSource[A](
       stream: Stream[IO, A]
@@ -156,8 +155,8 @@ trait Converter {
     val sink = AkkaSink.foreach[SourceQueueWithComplete[A]] { p =>
       // Fire and forget Future so it runs in the background
       import cats.effect.unsafe.implicits.global
-       
-       publisherStream[A](p, stream).compile.drain.unsafeToFuture()
+
+      publisherStream[A](p, stream).compile.drain.unsafeToFuture()
       ()
     }
 
@@ -170,8 +169,8 @@ trait Converter {
       .mapMaterializedValue(_ => NotUsed)
   }
 
-  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[SinkShape]]. The [[Sink]] is run when the
-    * [[Graph]] is materialized.
+  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[SinkShape]]. The [[Sink]] is run
+    * when the [[Graph]] is materialized.
     */
   def fs2PipeToAkkaSink[A](
       sink: Pipe[IO, A, Unit]
@@ -181,9 +180,7 @@ trait Converter {
     // The future returned from unsafeToFuture() completes when the subscriber stream completes and is made
     // available as materialized value of this sink.
     val sink2: AkkaSink[SinkQueueWithCancel[A], Future[Done]] = AkkaFlow[SinkQueueWithCancel[A]]
-      .map(s =>
-        subscriberStream[A](s).through(sink).compile.drain.as(Done: Done).unsafeToFuture()
-      )
+      .map(s => subscriberStream[A](s).through(sink).compile.drain.as(Done: Done).unsafeToFuture())
       .toMat(AkkaSink.head)(Keep.right)
       .mapMaterializedValue(ffd => ffd.flatten)
     // fromFuture dance above is because scala 2.11 lacks Future#flatten. `pure` instead of `delay`
@@ -198,8 +195,8 @@ trait Converter {
       .mapMaterializedValue(_._2)
   }
 
-  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[FlowShape]]. The [[Pipe]] is run when the
-    * [[Graph]] is materialized.
+  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[FlowShape]]. The [[Pipe]] is run
+    * when the [[Graph]] is materialized.
     */
   def fs2PipeToAkkaFlow[A, B](
       pipe: Pipe[IO, A, B]
@@ -265,10 +262,10 @@ trait Converter {
       .interruptWhen(watchCompletion.attempt)
       .evalMap(publish)
       .unNoneTerminate
-      .onFinalizeCase { 
-	case Canceled => complete
-	case Errored(e) => fail(e)
-	case Succeeded => complete
+      .onFinalizeCase {
+        case Canceled   => complete
+        case Errored(e) => fail(e)
+        case Succeeded  => complete
       }
   }
 

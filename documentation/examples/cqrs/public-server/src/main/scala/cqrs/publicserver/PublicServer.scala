@@ -25,34 +25,34 @@ class PublicServer(
   import playComponents.executionContext
 
   private val commandsClient = new CommandsClient(commandsBaseUrl, wsClient)
-  //#invocation
+  // #invocation
   private val queriesClient = new QueriesClient(queriesBaseUrl, wsClient)
-  //#invocation
+  // #invocation
 
   val routes: PlayRouter.Routes =
     routesFromEndpoints(
       listMeters.implementedByAsync { _ =>
-        //#invocation
+        // #invocation
         val metersList: Future[ResourceList] = queriesClient.query(FindAll)
-        //#invocation
+        // #invocation
         metersList.map(_.value)
       },
       getMeter.implementedByAsync { id =>
         queriesClient.query(FindById(id, None)).map(_.value)
       },
       createMeter.implementedByAsync { createData =>
-        //#microservice-endpoint-invocation
+        // #microservice-endpoint-invocation
         val eventuallyMaybeEvent: Future[Option[StoredEvent]] =
           commandsClient.command(CreateMeter(createData.label))
-        //#microservice-endpoint-invocation
+        // #microservice-endpoint-invocation
         for {
           maybeEvent <- eventuallyMaybeEvent
           maybeMeter <- Traverse[Option].flatSequence(
             maybeEvent.collect { case StoredEvent(t, MeterCreated(id, _)) =>
-              //#invocation-find-by-id
+              // #invocation-find-by-id
               val maybeMeter: Future[MaybeResource] =
                 queriesClient.query(FindById(id, after = Some(t)))
-              //#invocation-find-by-id
+              // #invocation-find-by-id
               maybeMeter.map(_.value)
             }
           )

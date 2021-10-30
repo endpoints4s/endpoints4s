@@ -8,21 +8,21 @@ trait JsonSchemasDocs extends JsonSchemas {
   case class Circle(radius: Double) extends Shape
   case class Rectangle(width: Double, height: Double) extends Shape
 
-  //#generic-schema
+  // #generic-schema
   implicit val shapeSchema: JsonSchema[Shape] = genericJsonSchema
-  //#generic-schema
+  // #generic-schema
 
   locally {
-    //#explicit-schema
+    // #explicit-schema
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width") zip
         field[Double]("height")
     ).as[Rectangle]
-    //#explicit-schema
+    // #explicit-schema
   }: @nowarn("cat=unused-locals")
 
   locally {
-    //#documented-generic-schema
+    // #documented-generic-schema
     @discriminator("kind")
     @title("Geometric shape")
     @name("ShapeSchema")
@@ -37,6 +37,6 @@ trait JsonSchemasDocs extends JsonSchemas {
         @docs("Rectangle width") width: Double,
         height: Double
     )
-    //#documented-generic-schema
+    // #documented-generic-schema
   }
 }

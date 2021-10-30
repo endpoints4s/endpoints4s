@@ -15,7 +15,7 @@ class Queries(service: QueriesService, val playComponents: PlayComponents)
 
   import playComponents.executionContext
 
-  //#multiplexed-impl
+  // #multiplexed-impl
   import endpoints4s.play.server.MuxHandlerAsync
 
   val routes: Router.Routes = routesFromEndpoints(
@@ -23,15 +23,15 @@ class Queries(service: QueriesService, val playComponents: PlayComponents)
       def apply[R <: QueryResp](
           query: QueryReq { type Response = R }
       ): Future[R] =
-        //#multiplexed-impl-essence
+        // #multiplexed-impl-essence
         query match {
           case FindById(id, t) => service.findById(id, t).map(MaybeResource)
           case FindAll         => service.findAll().map(ResourceList)
         }
-      //#multiplexed-impl-essence
+      // #multiplexed-impl-essence
     })
   )
-  //#multiplexed-impl
+  // #multiplexed-impl
 
   // These aliases are probably due to a limitation of circe
   implicit private def circeDecoderReq: io.circe.Decoder[QueryReq] =

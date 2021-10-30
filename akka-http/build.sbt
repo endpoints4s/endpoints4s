@@ -20,8 +20,12 @@ val `akka-http-client` =
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -51,10 +55,14 @@ val `akka-http-server` =
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.softwaremill.sttp.client" %% "core" % "2.2.10" % Test).cross(CrossVersion.for3Use2_13), // Temporary
+        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.softwaremill.sttp.client" %% "core" % "2.2.10" % Test)
+          .cross(CrossVersion.for3Use2_13), // Temporary
         scalaTestDependency.cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {

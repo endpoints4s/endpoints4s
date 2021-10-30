@@ -5,8 +5,11 @@ import endpoints4s.{Encoder, Hashing}
 
 import scala.collection.mutable
 
-/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
-  * @note Throws an exception on creation if several tags have the same name but not the same other attributes.
+/** @see
+  *   [[https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.0.md]]
+  * @note
+  *   Throws an exception on creation if several tags have the same name but not the same other
+  *   attributes.
   */
 final class OpenApi private (
     val info: Info,
@@ -948,8 +951,9 @@ sealed trait Schema {
   def default: Option[ujson.Value]
   def title: Option[String]
 
-  /** @return The same schema with its description overridden by the given `description`,
-    *         or stay unchanged if this one is empty.
+  /** @return
+    *   The same schema with its description overridden by the given `description`, or stay
+    *   unchanged if this one is empty.
     */
   def withDefinedDescription(description: Option[String]): Schema =
     this match {
@@ -969,8 +973,9 @@ sealed trait Schema {
         s.withDescription(description.orElse(s.description))
     }
 
-  /** @return The same schema with its default overridden by the given `default`,
-    *         or stay unchanged if this one is empty.
+  /** @return
+    *   The same schema with its default overridden by the given `default`, or stay unchanged if
+    *   this one is empty.
     */
   def withDefinedDefault(default: Option[ujson.Value]): Schema =
     this match {

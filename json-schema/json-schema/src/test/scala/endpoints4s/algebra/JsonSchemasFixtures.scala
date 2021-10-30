@@ -179,13 +179,13 @@ trait JsonSchemasFixtures extends JsonSchemas {
   implicit val boolIntString: JsonSchema[(Boolean, Int, String)] =
     tuple3JsonSchema
 
-  //#refined
+  // #refined
   val evenNumberSchema: JsonSchema[Int] =
     intJsonSchema.xmapPartial { n =>
       if (n % 2 == 0) Valid(n)
       else Invalid(s"Invalid even integer '$n'")
     }(n => n)
-  //#refined
+  // #refined
 
   case class RefinedTagged(x: Int)
   val refinedTaggedSchema: Tagged[RefinedTagged] =
@@ -194,12 +194,12 @@ trait JsonSchemasFixtures extends JsonSchemas {
       case _      => Invalid("Invalid tagged alternative")
     }(rc => Baz(rc.x))
 
-  //#one-of
+  // #one-of
   val intOrBoolean: JsonSchema[Either[Int, Boolean]] =
     intJsonSchema.orFallbackTo(booleanJsonSchema)
-  //#one-of
+  // #one-of
 
-  //#numeric-constraint
+  // #numeric-constraint
   def createNumericErrorMessage[A](value: A) =
     s"$value does not satisfy the constraints: minimum:0, maximum:10, exclusiveMaximum:true, multipleOf:2"
 
@@ -211,6 +211,6 @@ trait JsonSchemasFixtures extends JsonSchemas {
         .withExclusiveMaximum(Some(true))
         .withMultipleOf(Some(2))
     )
-  //#numeric-constraint
+  // #numeric-constraint
 
 }

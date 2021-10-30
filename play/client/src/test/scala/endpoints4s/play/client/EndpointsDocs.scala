@@ -6,8 +6,8 @@ import scala.concurrent.Future
 
 trait EndpointsDocs extends Endpoints with algebra.EndpointsDocs {
 
-  //#invocation
+  // #invocation
   val eventuallyString: Future[String] = someResource(42)
-  //#invocation
+  // #invocation
 
 }

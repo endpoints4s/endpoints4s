@@ -13,8 +13,6 @@ package object time {
 
   implicit final val encodeInstant: Encoder[Instant] =
     Encoder[(Long, Long)]
-      .contramap[Instant](instant =>
-        (instant.getEpochSecond, instant.getNano.toLong)
-      )
+      .contramap[Instant](instant => (instant.getEpochSecond, instant.getNano.toLong))
 
 }

@@ -17,11 +17,11 @@ object Main {
   val metersVar: Var[Map[UUID, Meter]] = Var(Map.empty)
 
   def main(args: Array[String]): Unit = {
-    //#list-meters-invocation
+    // #list-meters-invocation
     PublicEndpoints.listMeters(()).map { fetchedMeters =>
       metersVar.set(fetchedMeters.map(meter => meter.id -> meter).toMap)
     }
-    //#list-meters-invocation
+    // #list-meters-invocation
 
     val newMeterId = UUID.randomUUID().toString
 
@@ -32,10 +32,10 @@ object Main {
       if (name.isEmpty)
         dom.window.alert("Please type a name for the meter to create")
       else {
-        //#webapps-invocation
+        // #webapps-invocation
         val eventuallyCreatedMeter: Future[Meter] =
           PublicEndpoints.createMeter(CreateMeter(name))
-        //#webapps-invocation
+        // #webapps-invocation
         eventuallyCreatedMeter
           .map { createdMeter =>
             metersVar.update(_ + (createdMeter.id -> createdMeter))

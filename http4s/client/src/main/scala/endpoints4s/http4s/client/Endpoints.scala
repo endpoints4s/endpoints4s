@@ -243,14 +243,16 @@ trait EndpointsWithCustomErrors
       responseA(sc, hs)
         .map(_.andThen(_.map(_.asLeft[B])))
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
-  //#endpoint-type
+  // #endpoint-type
   trait Endpoint[A, B] {
 
-    /** This method returns a Resource[Effect, B] unlike `sendAndConsume` this is always safe to use in regard to laziness
+    /** This method returns a Resource[Effect, B] unlike `sendAndConsume` this is always safe to use
+      * in regard to laziness
       */
     def send(a: A): Resource[Effect, B]
 
-    /** This method might suffer from leaking resource if the handling of the underlying resource is lazy. Use `send` instead in this case.
+    /** This method might suffer from leaking resource if the handling of the underlying resource is
+      * lazy. Use `send` instead in this case.
       */
     def sendAndConsume(request: A): Effect[B] = send(request).use(effect.pure)
 
@@ -261,7 +263,7 @@ trait EndpointsWithCustomErrors
     )
     def apply(request: A): Effect[B] = sendAndConsume(request)
   }
-  //#endpoint-type
+  // #endpoint-type
 
   override def endpoint[A, B](
       request: Request[A],

@@ -5,8 +5,8 @@ import sttp.client3.Identity
 
 trait EndpointsDocs extends Endpoints[Identity] with algebra.EndpointsDocs {
 
-  //#invocation
+  // #invocation
   val string: String = someResource(42)
-  //#invocation
+  // #invocation
 
 }

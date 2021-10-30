@@ -7,8 +7,8 @@ import endpoints4s.akkahttp.server
 
 import scala.concurrent.stm.Ref
 
-/** Defines a Play router (and reverse router) for the endpoints described
-  * in the `CounterEndpoints` trait.
+/** Defines a Play router (and reverse router) for the endpoints described in the `CounterEndpoints`
+  * trait.
   */
 object CounterServer
     extends CounterEndpoints
@@ -24,9 +24,9 @@ object CounterServer
 
   // Implements the `increment` endpoint
   val incrementRoute =
-    //#endpoint-implementation
+    // #endpoint-implementation
     increment.implementedBy(inc => counter.single += inc.step)
-  //#endpoint-implementation
+  // #endpoint-implementation
 
   val routes: Route =
     currentValueRoute ~ incrementRoute

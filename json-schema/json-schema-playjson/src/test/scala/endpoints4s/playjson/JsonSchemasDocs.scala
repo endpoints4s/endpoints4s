@@ -5,11 +5,11 @@ import play.api.libs.json.{JsResult, JsValue, Json}
 
 trait JsonSchemasDocs extends algebra.JsonSchemasDocs with JsonSchemas {
 
-  //#codec
+  // #codec
   import JsonSchema._
   val shape: Shape = Circle(42)
   val shapeJson: JsValue = Json.toJson(shape)
   val maybeShape: JsResult[Shape] = Json.fromJson[Shape](shapeJson)
-  //#codec
+  // #codec
 
 }

@@ -5,22 +5,22 @@ import scala.annotation.nowarn
 trait JsonSchemasDocs extends JsonSchemas {
 
   locally {
-    //#record-type
+    // #record-type
     case class Rectangle(width: Double, height: Double)
-    //#record-type
-    //#record-schema
+    // #record-type
+    // #record-schema
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
         field[Double]("height")
     ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
-    //#record-schema
+    // #record-schema
   }: @nowarn("cat=unused-locals")
 
-  //#sum-type
+  // #sum-type
   sealed trait Shape
   case class Circle(radius: Double) extends Shape
   case class Rectangle(width: Double, height: Double) extends Shape
-  //#sum-type
+  // #sum-type
 
   object Shape {
     implicit val schema: JsonSchema[Shape] = {
@@ -33,7 +33,7 @@ trait JsonSchemasDocs extends JsonSchemas {
           field[Double]("height")
       ).xmap((Rectangle.apply _).tupled)(r => (r.width, r.height))
 
-      //#sum-type-schema
+      // #sum-type-schema
       // Given a `circleSchema: Record[Circle]` and a `rectangleSchema: Record[Rectangle]`
       (
         circleSchema.tagged("Circle") orElse
@@ -45,32 +45,32 @@ trait JsonSchemasDocs extends JsonSchemas {
         case c: Circle    => Left(c)
         case r: Rectangle => Right(r)
       }
-      //#sum-type-schema
+      // #sum-type-schema
     }
   }
 
   locally {
-    //#enum-status
+    // #enum-status
     sealed trait Status
     case object Active extends Status
     case object Inactive extends Status
     case object Obsolete extends Status
-    //#enum-status
-    //#enum-status-schema
+    // #enum-status
+    // #enum-status-schema
     implicit lazy val statusSchema: JsonSchema[Status] =
       stringEnumeration[Status](Seq(Active, Inactive, Obsolete))(_.toString)
-    //#enum-status-schema
+    // #enum-status-schema
   }: @nowarn("cat=unused-locals")
 
-  //#recursive
+  // #recursive
   case class Recursive(next: Option[Recursive])
 
   val recursiveSchema: Record[Recursive] = lazyRecord("Rec")(
     optField("next")(recursiveSchema)
   ).xmap(Recursive(_))(_.next)
-  //#recursive
+  // #recursive
 
-  //#tuple
+  // #tuple
   type Coordinates = (Double, Double) // (Longitude, Latitude)
   case class Point(coordinates: Coordinates)
 
@@ -78,17 +78,17 @@ trait JsonSchemasDocs extends JsonSchemas {
     field("type")(literal("Point")) zip
       field[Coordinates]("coordinates")
   ).xmap(Point(_))(_.coordinates)
-  //#tuple
+  // #tuple
 
   locally {
     case class Rectangle(width: Double, height: Double)
-    //#with-example
+    // #with-example
     implicit val rectangleSchema: JsonSchema[Rectangle] = (
       field[Double]("width", Some("Rectangle width")) zip
         field[Double]("height")
     ).xmap((Rectangle.apply _).tupled)(rect => (rect.width, rect.height))
       .withExample(Rectangle(10, 20))
       .withDescription("A rectangle shape")
-    //#with-example
+    // #with-example
   }: @nowarn("cat=unused-locals")
 }

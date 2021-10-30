@@ -21,9 +21,12 @@ val `play-server` =
         ("com.typesafe.play" %% "play-test" % playVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion % Test).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play
-        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
@@ -47,7 +50,8 @@ val `play-server-circe` =
       name := "play-server-circe",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.None,
-      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion)
+        .cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
 
@@ -63,9 +67,12 @@ val `play-client` =
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play
-        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13)
+        ("com.typesafe.akka" %% "akka-slf4j" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor-typed" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-serialization-jackson" % akkaActorVersion % Test)
+          .cross(CrossVersion.for3Use2_13)
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {

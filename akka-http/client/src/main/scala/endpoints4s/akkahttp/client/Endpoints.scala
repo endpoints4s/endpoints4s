@@ -18,7 +18,8 @@ import endpoints4s.{
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/** Akka-HTTP based interpreter that uses [[algebra.BuiltInErrors]] to model client and server errors.
+/** Akka-HTTP based interpreter that uses [[algebra.BuiltInErrors]] to model client and server
+  * errors.
   *
   * @group interpreters
   */
@@ -275,9 +276,9 @@ trait EndpointsWithCustomErrors
         .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
-  //#endpoint-type
+  // #endpoint-type
   type Endpoint[A, B] = A => Future[B]
-  //#endpoint-type
+  // #endpoint-type
 
   def endpoint[A, B](
       request: Request[A],

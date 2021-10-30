@@ -7,8 +7,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait EndpointsDocs extends algebra.EndpointsDocs with Endpoints {
 
-  //#invocation
+  // #invocation
   val eventuallyString: Future[String] = someResource.callAsync(42)
-  //#invocation
+  // #invocation
 
 }

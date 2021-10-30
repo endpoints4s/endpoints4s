@@ -98,7 +98,7 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
             .get()
       } yield assert(response.status == Status.OK)
     }
-    //#login-test-client
+    // #login-test-client
     "wrong login using client" in {
       for {
         loginResult <- client.login("unknown")
@@ -109,8 +109,8 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
         loginResult <- client.login("foobar")
       } yield assert(loginResult.nonEmpty)
     }
-    //#login-test-client
-    //#protected-endpoint-test
+    // #login-test-client
+    // #protected-endpoint-test
     "login and access protected resource" in {
       for {
         maybeToken <- client.login("foobar")
@@ -119,7 +119,7 @@ class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
         resource <- client.someResource(token)
       } yield assert(resource == "Hello Alice!")
     }
-    //#protected-endpoint-test
+    // #protected-endpoint-test
   }
 
 }

@@ -7,7 +7,7 @@ import scala.concurrent.duration.DurationInt
 
 trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
 
-  //#implementation
+  // #implementation
   import akka.stream.scaladsl.FileIO
   import java.nio.file.Paths
 
@@ -15,7 +15,7 @@ trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntiti
     logo.implementedBy { _ =>
       FileIO.fromPath(Paths.get("/foo/bar/logo.png")).map(_.toArray)
     }
-  //#implementation
+  // #implementation
 
 }
 

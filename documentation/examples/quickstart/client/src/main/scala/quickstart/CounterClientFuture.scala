@@ -9,8 +9,8 @@ object CounterClientFuture
     with xhr.future.Endpoints
     with xhr.JsonEntitiesFromSchemas {
 
-  //#endpoint-invocation
+  // #endpoint-invocation
   val eventuallyDone: Future[Unit] = increment(Increment(step = 42))
-  //#endpoint-invocation
+  // #endpoint-invocation
 
 }

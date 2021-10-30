@@ -43,7 +43,8 @@ lazy val `json-schema-generic` =
         shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
-      Test / scalacOptions ++= (if (scalaVersion.value.startsWith("2.")) Nil else Seq("-Yretain-trees"))
+      Test / scalacOptions ++= (if (scalaVersion.value.startsWith("2.")) Nil
+                                else Seq("-Yretain-trees"))
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
@@ -62,7 +63,9 @@ lazy val `json-schema-circe` =
       name := "json-schema-circe",
       version := "1.5.0+n",
       versionPolicyIntention := Compatibility.None,
-      libraryDependencies += ("io.circe" %%% "circe-core" % circeVersion).cross(CrossVersion.for3Use2_13),
+      libraryDependencies += ("io.circe" %%% "circe-core" % circeVersion).cross(
+        CrossVersion.for3Use2_13
+      ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
@@ -85,7 +88,9 @@ lazy val `json-schema-playjson` =
       `scala 2.12 to dotty`,
       publishSettings,
       name := "json-schema-playjson",
-      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13),
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(
+        CrossVersion.for3Use2_13
+      ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)

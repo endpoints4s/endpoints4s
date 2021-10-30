@@ -56,7 +56,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     val schemaPoint3 =
       (field[Int]("x") zip field[Int]("y") zip field[Int]("z")).as[Point3]
 
-    //#custom-schema
+    // #custom-schema
     sealed trait Shape
     case class Circle(radius: Double) extends Shape
     case class Rectangle(width: Double, height: Double) extends Shape
@@ -73,7 +73,7 @@ class JsonSchemasTest extends AnyFreeSpec {
       // but it will use the implicitly provided `GenericRecord[Circle]` for `Circle.
       genericJsonSchema[Shape]
     }
-    //#custom-schema
+    // #custom-schema
 
     case class CaseClassWithDefaultValue(x: Int, s: String = "hello")
     val caseClassWithDefaultValueSchema: JsonSchema[CaseClassWithDefaultValue] = genericJsonSchema

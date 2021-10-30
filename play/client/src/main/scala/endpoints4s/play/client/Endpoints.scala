@@ -16,12 +16,13 @@ import play.api.libs.ws.{DefaultBodyWritables, WSClient, WSRequest, WSResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
-  * Play’s `WSClient` HTTP client, and uses [[algebra.BuiltInErrors]] to model client and
-  * server errors.
+/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using Play’s
+  * `WSClient` HTTP client, and uses [[algebra.BuiltInErrors]] to model client and server errors.
   *
-  * @param host     Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
-  * @param wsClient The underlying client to use
+  * @param host
+  *   Base of the URL of the service that implements the endpoints (e.g. "http://foo.com")
+  * @param wsClient
+  *   The underlying client to use
   *
   * @group interpreters
   */
@@ -31,8 +32,8 @@ class Endpoints(val host: String, val wsClient: WSClient)(implicit
     with EndpointsWithCustomErrors
     with BuiltInErrors
 
-/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using
-  * * Play’s `WSClient` HTTP client.
+/** An interpreter for [[algebra.Endpoints]] that builds a client issuing requests using * Play’s
+  * `WSClient` HTTP client.
   *
   * @group interpreters
   */
@@ -46,8 +47,8 @@ trait EndpointsWithCustomErrors
   def wsClient: WSClient
   implicit def executionContext: ExecutionContext
 
-  /** A function that, given an `A` and a request model, returns an updated request
-    * containing additional headers
+  /** A function that, given an `A` and a request model, returns an updated request containing
+    * additional headers
     */
   type RequestHeaders[A] = (A, WSRequest) => WSRequest
 
@@ -104,7 +105,8 @@ trait EndpointsWithCustomErrors
         fa compose g
     }
 
-  /** A function that, given an `A` information and a `WSRequest`, returns a `WSRequest` with a body correctly set
+  /** A function that, given an `A` information and a `WSRequest`, returns a `WSRequest` with a body
+    * correctly set
     */
   type RequestEntity[A] = (A, WSRequest) => WSRequest
 
@@ -260,9 +262,9 @@ trait EndpointsWithCustomErrors
     *
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */
-  //#concrete-carrier-type
+  // #concrete-carrier-type
   type Endpoint[A, B] = A => Future[B]
-  //#concrete-carrier-type
+  // #concrete-carrier-type
 
   def endpoint[A, B](
       request: Request[A],

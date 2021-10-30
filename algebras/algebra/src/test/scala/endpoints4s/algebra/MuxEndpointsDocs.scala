@@ -10,7 +10,7 @@ trait MuxEndpointsDocs extends MuxEndpoints with JsonEntities {
   implicit def jsonJsonRequest: JsonRequest[Json]
   implicit def jsonJsonResponse: JsonResponse[Json]
 
-  //#mux-endpoint
+  // #mux-endpoint
   val users: MuxEndpoint[Command, Event, Json] =
     muxEndpoint[Command, Event, Json](
       post(path / "users", jsonRequest[Json]),
@@ -30,6 +30,6 @@ trait MuxEndpointsDocs extends MuxEndpoints with JsonEntities {
   trait Event
   case class UserCreated(id: Long) extends Event
   case class UserDeleted(id: Long) extends Event
-  //#mux-endpoint
+  // #mux-endpoint
 
 }

@@ -52,7 +52,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       applicative.map(fa, f)
   }
 
-  //#segment
+  // #segment
   /** Defines how to decode and encode path segments */
   trait Segment[A] {
 
@@ -62,7 +62,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     /** @return URL encoded path segment */
     def encode(a: A): String
   }
-  //#segment
+  // #segment
 
   implicit lazy val segmentPartialInvariantFunctor: PartialInvariantFunctor[Segment] =
     new PartialInvariantFunctor[Segment] {
@@ -96,12 +96,15 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
     */
   trait QueryString[A] {
 
-    /** @return None in case of decoding failure
-      * @param qs Map of identifiers and parameter values (these are already URL decoded)
+    /** @return
+      *   None in case of decoding failure
+      * @param qs
+      *   Map of identifiers and parameter values (these are already URL decoded)
       */
     def decode(qs: Map[String, Seq[String]]): Validated[A]
 
-    /** @return Map of identifiers and URL encoded parameter values
+    /** @return
+      *   Map of identifiers and URL encoded parameter values
       */
     def encode(a: A): Map[String, Seq[String]] // FIXME Encode to a String for better performance
   }
@@ -155,7 +158,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait QueryStringParam[A] {
 
-    /** @return a decoded `A` value, or `None` if it was malformed
+    /** @return
+      *   a decoded `A` value, or `None` if it was malformed
       */
     def decode(name: String, qs: Map[String, Seq[String]]): Validated[A]
     def encode(name: String, a: A): Map[String, Seq[String]]
@@ -252,9 +256,9 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait Path[A] extends Url[A] {
 
-    /** @return None in case the incoming path didn’t match, Some(Left(…))
-      *         in case it matched but decoding failed, Some(Right(…))
-      *         if it matched and decoding succeeded
+    /** @return
+      *   None in case the incoming path didn’t match, Some(Left(…)) in case it matched but decoding
+      *   failed, Some(Right(…)) if it matched and decoding succeeded
       */
     def decode(segments: List[String]): Option[(Validated[A], List[String])]
     def encode(a: A): String
@@ -355,9 +359,9 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   trait Url[A] {
 
-    /** @return `None` if the request doesn’t match, `Some(Invalid(…))` if
-      *          it matched but decoding failed, and `Some(Valid(…))`
-      *          if it matched and succeeded
+    /** @return
+      *   `None` if the request doesn’t match, `Some(Invalid(…))` if it matched but decoding failed,
+      *   and `Some(Valid(…))` if it matched and succeeded
       */
     def decodeUrl(req: RequestHeader): Option[Validated[A]]
     def encodeUrl(a: A): String
@@ -421,8 +425,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   /** This method is called by ''endpoints'' when decoding a request failed.
     *
-    * The provided implementation calls `clientErrorsResponse` to construct
-    * a response containing the errors.
+    * The provided implementation calls `clientErrorsResponse` to construct a response containing
+    * the errors.
     *
     * This method can be overridden to customize the error reporting logic.
     */

@@ -6,7 +6,7 @@ import endpoints4s.algebra.JsonStreamingExample
 
 trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
 
-  //#implementation
+  // #implementation
   import java.nio.file.Paths
   import akka.stream.scaladsl.FileIO
 
@@ -14,7 +14,7 @@ trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntiti
     logo.implementedBy { _ =>
       FileIO.fromPath(Paths.get("/foo/bar/logo.png")).map(_.toArray)
     }
-  //#implementation
+  // #implementation
 
 }
 

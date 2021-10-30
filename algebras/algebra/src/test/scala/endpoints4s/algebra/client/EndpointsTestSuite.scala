@@ -345,16 +345,16 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
         import client._
 
         "xmap locations" in {
-          //#location-type
+          // #location-type
           case class Location(longitude: Double, latitude: Double)
-          //#location-type
+          // #location-type
 
-          //#xmap
+          // #xmap
           val locationQueryString: QueryString[Location] =
             (qs[Double]("lon") & qs[Double]("lat")).xmap { case (lon, lat) =>
               Location(lon, lat)
             } { location => (location.longitude, location.latitude) }
-          //#xmap
+          // #xmap
 
           encodeUrl(path /? locationQueryString)(
             Location(12.0, 32.9)

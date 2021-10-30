@@ -12,8 +12,8 @@ import endpoints4s.{Codec, Decoder, Encoder, Invalid, Valid, Validated, algebra}
 
 /** Interpreter for [[algebra.JsonEntities]]
   *
-  * To use it mix in support for your favourite Json library
-  * You can use one of [[https://github.com/hseeberger/akka-http-json hseeberger/akka-http-json]] modules
+  * To use it mix in support for your favourite Json library You can use one of
+  * [[https://github.com/hseeberger/akka-http-json hseeberger/akka-http-json]] modules
   *
   * @group interpreters
   */
@@ -31,8 +31,8 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 
 }
 
-/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests and
-  * encodes JSON responses using Akka HTTP.
+/** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests and encodes JSON
+  * responses using Akka HTTP.
   *
   * @group interpreters
   */
@@ -46,8 +46,8 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 
 }
 
-/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests and
-  * encodes JSON responses using Akka HTTP.
+/** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests and encodes JSON
+  * responses using Akka HTTP.
   *
   * @group interpreters
   */
@@ -64,8 +64,8 @@ trait JsonEntitiesFromSchemas
 /** Interpreter for [[endpoints4s.algebra.JsonEntities]] that decodes JSON entities with a
   * [[endpoints4s.Decoder]] and encodes JSON entities with an [[endpoints4s.Encoder]].
   *
-  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs:
-  * you only need an encoder to build responses, or a decoder to decode requests.
+  * The difference with [[JsonEntitiesFromCodecs]] is that you don’t need bidirectional codecs: you
+  * only need an encoder to build responses, or a decoder to decode requests.
   *
   * It is especially useful to encode `OpenApi` documents into JSON entities.
   *

@@ -131,7 +131,7 @@ object Main {
     ()
   }
 
-  //#main-only
+  // #main-only
   class DocumentationServer(val playComponents: PlayComponents)
       extends play.server.Endpoints
       with play.server.JsonEntitiesFromEncodersAndDecoders
@@ -158,6 +158,6 @@ object Main {
 
     lazy val digests = AssetsDigests.digests
   }
-  //#main-only
+  // #main-only
 }
 //#main-only
