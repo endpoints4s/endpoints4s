@@ -57,16 +57,16 @@ object EndpointsSettings {
     libraryDependencies -= "org.scala-lang" % "scala-compiler" % scalaVersion.value % Runtime
   )
   val `scala 2.13` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7")
   )
   val `scala 2.12 to 2.13` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6", "2.12.13")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7", "2.12.13")
   )
   val `scala 2.12 to dotty` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6", "3.0.2", "2.12.13")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7", "3.0.2", "2.12.13")
   )
 
   val publishSettings = commonSettings ++ Seq(
