@@ -44,7 +44,7 @@ val `http4s-client` =
       version := "5.0.0+n",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
-        "org.http4s" %%% "http4s-client" % "0.23.6"
+        "org.http4s" %%% "http4s-client" % http4sVersion
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
