@@ -1,0 +1,10 @@
+version: '2'
+services:
+  wiremock:
+    image: wiremock/wiremock:2.31.0-alpine
+    command:
+      - --enable-stub-cors
+    volumes:
+      - ./:/home/wiremock
+    ports:
+      - "8080:8080"

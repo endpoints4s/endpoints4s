@@ -1,5 +1,6 @@
 package endpoints4s.scalaj.client
 
+import endpoints4s.algebra.client.EncodeTestSuite
 import endpoints4s.algebra.client.{BasicAuthTestSuite, EndpointsTestSuite, ClientEndpointsTestApi}
 import endpoints4s.algebra.BasicAuthenticationTestApi
 
@@ -11,7 +12,10 @@ class TestClient(val address: String)
     with Endpoints
     with BasicAuthentication
 
-class EndpointsTest extends EndpointsTestSuite[TestClient] with BasicAuthTestSuite[TestClient] {
+class EndpointsTest
+    extends EndpointsTestSuite[TestClient]
+    with BasicAuthTestSuite[TestClient]
+    with EncodeTestSuite[TestClient] {
 
   val client: TestClient = new TestClient(s"localhost:$stubServerPort")
 

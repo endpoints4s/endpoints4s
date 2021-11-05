@@ -19,6 +19,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.Thenable.Implicits._
+import scala.util.Try
 
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
@@ -37,10 +38,10 @@ trait EndpointsWithCustomErrors
 
   implicit class RequestInitOps(requestInit: FetchRequestInit) {
     def setRequestHeader(name: String, value: String): Unit = {
-      requestInit.headers = requestInit.headers
-        .getOrElse(new FetchHeaders())
-        .asInstanceOf[FetchHeaders]
-        .set(name, value)
+      if (requestInit.headers.isEmpty) {
+        requestInit.headers = new FetchHeaders()
+      }
+      requestInit.headers.asInstanceOf[FetchHeaders].set(name, value)
     }
   }
 
@@ -97,13 +98,13 @@ trait EndpointsWithCustomErrors
   // Returning Future is required only because of potential need to work with Promises in chunked requests
   type RequestEntity[A] = (A, FetchRequestInit) => Future[Unit]
 
-  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => Future.successful(())
+  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => Future.unit
 
-  lazy val textRequest: RequestEntity[String] = (body, requestInit) => {
-    requestInit.setRequestHeader("Content-type", "text/plain; charset=utf8")
-    requestInit.body = body
-    Future.successful(())
-  }
+  lazy val textRequest: RequestEntity[String] = (body, requestInit) =>
+    Future.fromTry(Try {
+      requestInit.setRequestHeader("Content-type", "text/plain; charset=utf8")
+      requestInit.body = body
+    })
 
   def choiceRequestEntity[A, B](
       requestEntityA: RequestEntity[A],

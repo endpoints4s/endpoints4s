@@ -1,6 +1,0 @@
-version: '2'
-services:
-  postgres:
-    image: wiremock/wiremock:latest-alpine
-    ports:
-      - "8080:8080"

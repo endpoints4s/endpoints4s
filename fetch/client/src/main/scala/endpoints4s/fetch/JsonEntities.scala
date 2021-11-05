@@ -5,14 +5,16 @@ import endpoints4s.algebra
 import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
 
 import scala.concurrent.Future
+import scala.util.Try
 
 trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.JsonEntitiesFromCodecs {
 
   def jsonRequest[A](implicit codec: JsonCodec[A]) =
     (a: A, requestInit: FetchRequestInit) => {
-      requestInit.setRequestHeader("Content-Type", "application/json")
-      requestInit.body = stringCodec(codec).encode(a)
-      Future.successful(())
+      Future.fromTry(Try {
+        requestInit.setRequestHeader("Content-Type", "application/json")
+        requestInit.body = stringCodec(codec).encode(a)
+      })
     }
 
   def jsonResponse[A](implicit codec: JsonCodec[A]) =

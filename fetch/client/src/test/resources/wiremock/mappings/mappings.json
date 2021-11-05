@@ -1,0 +1,296 @@
+{
+  "mappings": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/f3ac9be0-6339-4650-afb6-7305ece8edce/description?name=name1&age=18"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/userId/description?name=name1&age=18"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/userId/whatever?id=1bdae951-63ee-46b9-8ff0-4976acb8d48e"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/userId/whatever?id=1bdae951-63ee-46b9-8ff0-4976acb8d48e&age=18"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/userId/whatever?name=name1"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/userId/whatever?name=name1&age=18"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/error/user/userId/description?name=name1&age=18"
+      },
+      "response": {
+        "status": 501,
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/detailed/error/user/userId/description?name=name1&age=18"
+      },
+      "response": {
+        "status": 500,
+        "body": "[\"Unable to process your request\"]"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/joinedHeadersEndpoint",
+        "headers" : {
+          "A" : {
+            "equalTo" : "a"
+          },
+          "B" : {
+            "equalTo" : "b"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "29d15495-55ea-431e-bef3-392b05b14fef"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/xmapHeadersEndpoint",
+        "headers": {
+          "C": {
+            "equalTo": "11"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "f2ed5a13-9113-4717-9b21-65cd72a5540e"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/xmapUrlEndpoint/11"
+      },
+      "response": {
+        "status": 200,
+        "body": "f4e4ccbf-710a-4b38-bf8b-a9eb0a92382c"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/xmapReqBodyEndpoint",
+        "bodyPatterns": [
+          {
+            "equalTo": "2018-04-14"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": "dbb2297e-ae8c-4413-aab3-978833794c79"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/users/1"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/not/found/users/1"
+      },
+      "response": {
+        "status": 404,
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/user/"
+      },
+      "response": {
+        "status": 200
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/versioned-resource"
+      },
+      "response": {
+        "status": 200,
+        "body": "foo",
+        "headers": {
+          "Access-Control-Expose-Headers": "ETag",
+          "ETag": "d88b0456-67cb-40e5-8f0a-7664f3e93348",
+          "Last-Modified": "Fri, 1 Jan 2021 12:30:00 GMT"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/optional-response-header/some"
+      },
+      "response": {
+        "status": 200,
+        "body": "foo",
+        "headers": {
+          "Access-Control-Expose-Headers": "A",
+          "A": "a"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/optional-response-header/none"
+      },
+      "response": {
+        "status": 200,
+        "body": "foo"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/basic-auth/success"
+      },
+      "response": {
+        "status": 200,
+        "body": "wiremockeResponse"
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/basic-auth/failure"
+      },
+      "response": {
+        "status": 403,
+        "body": ""
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/user-json-codec",
+        "bodyPatterns": [
+          {
+            "equalTo": "{\"name\":\"name2\",\"age\":19}"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"street\":\"avenue1\",\"city\":\"NY\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/user",
+        "bodyPatterns": [
+          {
+            "equalTo": "{\"name\":\"name2\",\"age\":19}"
+          }
+        ]
+      },
+      "response": {
+        "status": 200,
+        "body": "{\"street\":\"avenue1\",\"city\":\"NY\"}"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/text",
+        "headers": {
+          "Content-Type": {
+            "and": [
+              {
+                "contains": "text/plain"
+              },
+              {
+                "contains": "charset"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "body": "Oekraïene"
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "/user-or-name",
+        "headers": {
+          "Content-Type": {
+            "matches": "application/json|(text/plain.*)"
+          }
+        }
+      },
+      "response": {
+        "status": 200
+      }
+    }
+  ]
+}

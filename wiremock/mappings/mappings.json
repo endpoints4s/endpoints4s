@@ -5,9 +5,6 @@
   },
   "response": {
     "status": 200,
-    "body": "wiremockeResponse",
-    "headers": {
-      "Access-Control-Allow-Origin": "*"
-    }
+    "body": "wiremockeResponse"
   }
 }

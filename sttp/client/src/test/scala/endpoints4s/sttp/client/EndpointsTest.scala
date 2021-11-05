@@ -2,6 +2,7 @@ package endpoints4s.sttp.client
 
 import _root_.sttp.client3.{SttpBackend, TryHttpURLConnectionBackend}
 import _root_.sttp.client3.akkahttp.AkkaHttpBackend
+import endpoints4s.algebra.client.EncodeTestSuite
 import endpoints4s.algebra.client.{
   BasicAuthTestSuite,
   EndpointsTestSuite,
@@ -35,7 +36,8 @@ class EndpointsTestSync
     with BasicAuthTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]]
     with SumTypedEntitiesTestSuite[TestClient[Try]]
-    with TextEntitiesTestSuite[TestClient[Try]] {
+    with TextEntitiesTestSuite[TestClient[Try]]
+    with EncodeTestSuite[TestClient[Try]] {
 
   val backend = TryHttpURLConnectionBackend()
 
