@@ -135,6 +135,18 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       )
     }
 
+    "optional with default value" in {
+      val url = path /? optQsWithDefault[Int]("n", 42)
+      decodeUrl(url)("/") shouldEqual Matched(42)
+      decodeUrl(url)("/?n=42") shouldEqual Matched(42)
+      decodeUrl(url)("/?n=43") shouldEqual Matched(43)
+      decodeUrl(url)("/?n=bar") shouldEqual Malformed(
+        Seq(
+          "Invalid integer value 'bar' for query parameter 'n'"
+        )
+      )
+    }
+
     "list" in {
       val url = path /? qs[List[Int]]("xs")
       decodeUrl(url)("/") shouldEqual Matched(Nil)

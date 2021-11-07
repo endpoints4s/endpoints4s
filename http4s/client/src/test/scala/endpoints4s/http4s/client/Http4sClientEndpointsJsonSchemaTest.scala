@@ -26,7 +26,7 @@ class TestJsonSchemaClient[F[_]: Concurrent](host: Uri, client: Client[F])
     with JsonEntitiesFromCodecs
     with ChunkedJsonEntities
     with algebra.BasicAuthenticationTestApi
-    with algebra.EndpointsTestApi
+    with algebra.client.ClientEndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.SumTypedEntitiesTestApi
     with algebra.ChunkedJsonEntitiesTestApi

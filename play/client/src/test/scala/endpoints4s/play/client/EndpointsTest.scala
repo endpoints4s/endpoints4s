@@ -14,7 +14,7 @@ class TestClient(address: String, wsClient: WSClient)(implicit
     with BasicAuthentication
     with JsonEntitiesFromCodecs
     with algebra.BasicAuthenticationTestApi
-    with algebra.EndpointsTestApi
+    with algebra.client.ClientEndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.TextEntitiesTestApi
     with algebra.SumTypedEntitiesTestApi

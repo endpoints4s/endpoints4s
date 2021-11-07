@@ -8,7 +8,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.EndpointsTestApi
 
-trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
+trait ClientEndpointsTestApi extends EndpointsTestApi {
+  type WithDefault[A] >: Option[A]
+}
+
+trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] {
 
   def clientTestSuite() = {
 
@@ -303,6 +307,19 @@ trait EndpointsTestSuite[T <: EndpointsTestApi] extends ClientTestBase[T] {
           encodeUrl(path /? (qs[Option[Int]]("n") & qs[Int]("v")))(
             (Some(0), 42)
           ) shouldEqual "?n=0&v=42"
+        }
+
+        "optional parameters with default value" in {
+          encodeUrl(path /? optQsWithDefault[Int]("n", 42))(Some(42)) shouldEqual "?n=42"
+          encodeUrl(path /? optQsWithDefault[Int]("n", 42))(Some(43)) shouldEqual "?n=43"
+          encodeUrl(path /? optQsWithDefault[Int]("n", 42))(None) shouldEqual ""
+          encodeUrl(path /? (optQsWithDefault[Int]("n", 0) & qs[Int]("v")))((None, 42)) shouldEqual "?v=42"
+          encodeUrl(path /? (optQsWithDefault[Int]("n", 0) & qs[Int]("v")))(
+            (Some(0), 42)
+          ) shouldEqual "?n=0&v=42"
+          encodeUrl(path /? (optQsWithDefault[Int]("n", 0) & qs[Int]("v")))(
+            (Some(1), 42)
+          ) shouldEqual "?n=1&v=42"
         }
 
         "list parameters" in {
