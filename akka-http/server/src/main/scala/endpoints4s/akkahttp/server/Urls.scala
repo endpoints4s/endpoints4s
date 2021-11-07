@@ -205,6 +205,13 @@ trait Urls extends algebra.Urls with StatusCodes {
     def encode(a: A): Uri.Query = param.encode(name, a)
   }
 
+  type WithDefault[A] = A
+
+  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
+  ): QueryString[WithDefault[A]] =
+    qs(name, docs)(optionalQueryStringParam(value)).xmap(_.getOrElse(default))(Some(_))
+
   implicit def optionalQueryStringParam[A](implicit
       param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] = new QueryStringParam[Option[A]] {

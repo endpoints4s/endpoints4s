@@ -108,6 +108,24 @@ trait Urls extends PartialInvariantFunctorSyntax {
       value: QueryStringParam[A]
   ): QueryString[A]
 
+  type WithDefault[A]
+
+  /** Builds a `QueryString` with one optional parameter, which has a default value.
+    *
+    * Examples:
+    *
+    * {{{
+    *   optQsWithDefault[Int]("page", 1) // optional `page` parameter, with default value 1
+    * }}}
+    *
+    * @param name Parameter’s name
+    * @tparam A Type of the value carried by the parameter
+    * @group operations
+    */
+  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
+  ): QueryString[WithDefault[A]]
+
   /** Make a query string parameter optional:
     *
     * {{{
