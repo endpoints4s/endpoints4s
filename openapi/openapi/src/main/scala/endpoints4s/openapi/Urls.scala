@@ -79,7 +79,7 @@ trait Urls extends algebra.Urls {
   ): QueryStringParam[Option[A]] =
     param.copy(
       isRequired = false,
-      encoder = _.map(param.encoder.encode)
+      encoder = _.flatMap(param.encoder.encode)
     )
 
   implicit def repeatedQueryStringParam[A, CC[X] <: Iterable[X]](implicit
