@@ -3,13 +3,11 @@ package endpoints4s.fetch.circe
 import endpoints4s.algebra
 import endpoints4s.fetch.EndpointsWithCustomErrors
 import io.circe.parser
-import io.circe.{Encoder => CirceEncoder}
 import io.circe.{Decoder => CirceDecoder}
+import io.circe.{Encoder => CirceEncoder}
 import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
 
-import scala.concurrent.Future
 import scala.scalajs.js.Thenable.Implicits._
-import scala.util.Try
 
 /** An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
   * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
@@ -27,10 +25,8 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
 
   def jsonRequest[A: JsonRequest]: RequestEntity[A] =
     (a: A, requestInit: FetchRequestInit) => {
-      Future.fromTry(Try {
-        requestInit.setRequestHeader("Content-Type", "application/json")
-        requestInit.body = CirceEncoder[A].apply(a).noSpaces
-      })
+      requestInit.setRequestHeader("Content-Type", "application/json")
+      requestInit.body = CirceEncoder[A].apply(a).noSpaces
     }
 
   def jsonResponse[A](implicit decoder: CirceDecoder[A]): ResponseEntity[A] =

@@ -19,7 +19,6 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.scalajs.js
 import scala.scalajs.js.Thenable.Implicits._
-import scala.util.Try
 
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
@@ -82,8 +81,7 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  // Future is returned base RequestEntity needs it
-  type Request[A] = A => Future[(FetchUrl, FetchRequestInit)]
+  type Request[A] = A => (FetchUrl, FetchRequestInit)
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
@@ -95,16 +93,14 @@ trait EndpointsWithCustomErrors
         (b: B) => fa(g(b))
     }
 
-  // Returning Future is required only because of potential need to work with Promises in chunked requests
-  type RequestEntity[A] = (A, FetchRequestInit) => Future[Unit]
+  type RequestEntity[A] = (A, FetchRequestInit) => Unit
 
-  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => Future.unit
+  lazy val emptyRequest: RequestEntity[Unit] = (_, _) => ()
 
-  lazy val textRequest: RequestEntity[String] = (body, requestInit) =>
-    Future.fromTry(Try {
-      requestInit.setRequestHeader("Content-type", "text/plain; charset=utf8")
-      requestInit.body = body
-    })
+  lazy val textRequest: RequestEntity[String] = (body, requestInit) => {
+    requestInit.setRequestHeader("Content-type", "text/plain; charset=utf8")
+    requestInit.body = body
+  }
 
   def choiceRequestEntity[A, B](
       requestEntityA: RequestEntity[A],
@@ -116,10 +112,10 @@ trait EndpointsWithCustomErrors
   implicit lazy val requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
       def xmapPartial[From, To](
-          f: (From, FetchRequestInit) => Future[Unit],
+          f: (From, FetchRequestInit) => Unit,
           map: From => Validated[To],
           contramap: To => From
-      ): (To, FetchRequestInit) => Future[Unit] =
+      ): (To, FetchRequestInit) => Unit =
         (to, xhr) => f(contramap(to), xhr)
     }
 
@@ -138,7 +134,7 @@ trait EndpointsWithCustomErrors
       val (a, b) = tuplerAB.unapply(ab)
       val (fetchUrl, requestInit) = makeFetch(method, url, a, headers, c)
       entity(b, requestInit)
-        .map(_ => (fetchUrl, requestInit))
+      (fetchUrl, requestInit)
     }
 
   private def makeFetch[A, B](
@@ -271,40 +267,38 @@ trait EndpointsWithCustomErrors
       onload: Either[Throwable, B] => Unit,
       onerror: Throwable => Unit
   ): Unit = {
-    request(a)
-      .foreach { case (url, requestInit) =>
-        val f = Fetch
-          .fetch(endpointsSettings.host.getOrElse("") + url.underlying, requestInit)
-        f.foreach { fetchResponse =>
-          val maybeResponse = response(fetchResponse)
-          def maybeClientErrors =
-            clientErrorsResponse(fetchResponse)
-              .map(
-                mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
-                  Left(
-                    new Exception(
-                      clientErrorsToInvalid(clientErrors).errors.mkString(". ")
-                    )
-                  )
+    val (url, requestInit) = request(a)
+    val f = Fetch
+      .fetch(endpointsSettings.host.getOrElse("") + url.underlying, requestInit)
+    f.foreach { fetchResponse =>
+      val maybeResponse = response(fetchResponse)
+      def maybeClientErrors =
+        clientErrorsResponse(fetchResponse)
+          .map(
+            mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
+              Left(
+                new Exception(
+                  clientErrorsToInvalid(clientErrors).errors.mkString(". ")
                 )
               )
-          def maybeServerError =
-            serverErrorResponse(fetchResponse).map(
-              mapPartialResponseEntity[ServerError, B](_)(serverError =>
-                Left(serverErrorToThrowable(serverError))
-              )
             )
+          )
+      def maybeServerError =
+        serverErrorResponse(fetchResponse).map(
+          mapPartialResponseEntity[ServerError, B](_)(serverError =>
+            Left(serverErrorToThrowable(serverError))
+          )
+        )
 
-          maybeResponse
-            .orElse(maybeClientErrors)
-            .orElse(maybeServerError) match {
-            case None =>
-              onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
-            case Some(entityB) =>
-              entityB(fetchResponse).foreach(onload)
-          }
-        }
-        f.failed.foreach(onerror)
+      maybeResponse
+        .orElse(maybeClientErrors)
+        .orElse(maybeServerError) match {
+        case None =>
+          onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
+        case Some(entityB) =>
+          entityB(fetchResponse).foreach(onload)
       }
+    }
+    f.failed.foreach(onerror)
   }
 }

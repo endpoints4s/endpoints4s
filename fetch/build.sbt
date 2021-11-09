@@ -21,17 +21,16 @@ val `fetch-client` =
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options
+          "--headless", // necessary for CI
           "--disable-gpu",
           "--window-size=1920,1200",
           "--ignore-certificate-errors",
           "--disable-extensions",
           "--no-sandbox",
           "--disable-dev-shm-usage"
-        ),
-        //FIXME only for development
-        org.scalajs.jsenv.selenium.SeleniumJSEnv
-          .Config()
-          .withKeepAlive(true)
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
     .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
@@ -57,17 +56,16 @@ val `fetch-client-circe` =
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options
+          "--headless", // necessary for CI
           "--disable-gpu",
           "--window-size=1920,1200",
           "--ignore-certificate-errors",
           "--disable-extensions",
           "--no-sandbox",
           "--disable-dev-shm-usage"
-        ),
-        //FIXME only for development
-        org.scalajs.jsenv.selenium.SeleniumJSEnv
-          .Config()
-          .withKeepAlive(true)
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
     .dependsOn(
