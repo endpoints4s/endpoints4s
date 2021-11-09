@@ -1,8 +1,0 @@
-version: '2'
-services:
-  wiremock:
-    volumes:
-      - ./mappings:/home/wiremock/mappings
-    image: wiremock/wiremock:2.9.0-alpine
-    ports:
-      - "8080:8080"
