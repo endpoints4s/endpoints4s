@@ -33,7 +33,7 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
-    - run: sbt ++2.13.6 coverage test coverageReport coverageAggregate manual/makeSite
+    - run: sbt ++2.13.7 coverage test coverageReport coverageAggregate manual/makeSite
     - run: bash <(curl -s https://codecov.io/bash)
 
   test3:
