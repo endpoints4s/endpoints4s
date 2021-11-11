@@ -127,9 +127,9 @@ After generating intellij project you may need to navigate to Settings -> Langua
    ~~~ sh
    git commit -a -m "Set release versions"
    ~~~
-4. Run `versionCheck`
+4. Run `versionPolicyCheck` and `versionCheck`
    ~~~ sh
-   sbt versionCheck
+   sbt versionPolicyCheck versionCheck
    ~~~
 5. Upload the bundles to sonatype, release them, and publish the documentation website
    ~~~ sh
