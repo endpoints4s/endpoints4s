@@ -241,11 +241,11 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     val circleSchema = field[Double]("r")
       .tagged("Circle")
-      .xmap(Circle)(_.r)
+      .xmap(Circle(_))(_.r)
 
     val rectSchema = (field[Int]("w") zip field[Int]("h"))
       .tagged("Rect")
-      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+      .xmap { case (w, h) => Rect(w, h) } (rect => (rect.w, rect.h))
 
     val schema = circleSchema orElseMerge rectSchema
     checkRoundTrip(
@@ -291,11 +291,11 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     val circleSchema = field[Double]("r")
       .tagged("Circle")
-      .xmap(Circle)(_.r)
+      .xmap(Circle(_))(_.r)
 
     val rectSchema = (field[Int]("w") zip field[Int]("h"))
       .tagged("Rect")
-      .xmap(Rect.tupled)(rect => (rect.w, rect.h))
+      .xmap { case (w, h) => Rect(w, h) }(rect => (rect.w, rect.h))
 
     val schema =
       (circleSchema orElseMerge rectSchema).withDiscriminator("shape")
@@ -318,17 +318,17 @@ class JsonSchemasTest extends AnyFreeSpec {
 
   "enum" in {
     checkRoundTrip(
-      Enum.colorSchema,
+      ColorEnum.colorSchema,
       ujson.Str("Blue"),
-      Enum.Blue
+      ColorEnum.Blue
     )
     checkDecodingFailure(
-      Enum.colorSchema,
+      ColorEnum.colorSchema,
       ujson.Num(42),
       "Invalid string value: 42" :: Nil
     )
     checkDecodingFailure(
-      Enum.colorSchema,
+      ColorEnum.colorSchema,
       ujson.Str("Orange"),
       "Invalid value: Orange ; valid values are: Red, Blue" :: Nil
     )

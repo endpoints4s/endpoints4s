@@ -80,7 +80,7 @@ trait JsonSchemasFixtures extends JsonSchemas {
     }
   }
 
-  object Enum {
+  object ColorEnum {
     sealed trait Color
     case object Red extends Color
     case object Green extends Color

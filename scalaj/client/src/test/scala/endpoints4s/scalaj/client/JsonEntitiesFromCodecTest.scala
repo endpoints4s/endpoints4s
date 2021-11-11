@@ -19,7 +19,7 @@ class JsonEntitiesFromCodecTest
     with TextEntitiesTestSuite[TestJsonClient] {
 
   val client: TestJsonClient = new TestJsonClient(s"localhost:$wiremockPort")
-  implicit val ec = ExecutionContext.Implicits.global
+  implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],

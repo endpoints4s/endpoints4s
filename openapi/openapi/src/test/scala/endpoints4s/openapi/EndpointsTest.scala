@@ -106,7 +106,7 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
         ),
         None
       )
-    Fixtures.toSchema(Fixtures.Enum.colorSchema.docs) shouldBe expectedSchema
+    Fixtures.toSchema(Fixtures.ColorEnum.colorSchema.docs) shouldBe expectedSchema
   }
 
   "Recursive types" in {
