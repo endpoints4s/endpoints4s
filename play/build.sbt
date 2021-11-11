@@ -47,7 +47,7 @@ val `play-server-circe` =
       name := "play-server-circe",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.None,
-      libraryDependencies += ("io.circe" %% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13)
+      libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
     )
     .dependsOn(`play-server`, `algebra-circe-jvm`, `json-schema-circe-jvm`)
 

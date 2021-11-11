@@ -286,7 +286,7 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.13.1",
+        "com.raquo" %%% "laminar" % "0.14.0",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.2"
       ),
@@ -332,7 +332,7 @@ lazy val `example-cqrs-commands-endpoints` =
     .in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to 2.13`, // Blocked by https://github.com/lampepfl/dotty-feature-requests/issues/161
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
         "io.circe" %% "circe-generic" % circeVersion

@@ -297,7 +297,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
-  import Enum._
+  import ColorEnum._
 
   "enum decoding fails because value cannot be decoded" in {
     assertError(

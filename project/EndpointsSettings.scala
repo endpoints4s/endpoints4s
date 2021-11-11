@@ -57,16 +57,16 @@ object EndpointsSettings {
     libraryDependencies -= "org.scala-lang" % "scala-compiler" % scalaVersion.value % Runtime
   )
   val `scala 2.13` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7")
   )
   val `scala 2.12 to 2.13` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6", "2.12.13")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7", "2.12.13")
   )
   val `scala 2.12 to dotty` = Seq(
-    scalaVersion := "2.13.6",
-    crossScalaVersions := Seq("2.13.6", "3.0.2", "2.12.13")
+    scalaVersion := "2.13.7",
+    crossScalaVersions := Seq("2.13.7", "3.0.2", "2.12.13")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -100,10 +100,10 @@ object EndpointsSettings {
   val circeVersion = "0.14.1"
   val playjsonVersion = "2.9.2"
   val playVersion = "2.8.7"
-  val sttpVersion = "3.3.16"
+  val sttpVersion = "3.3.15"
   val akkaActorVersion = "2.6.15"
   val akkaHttpVersion = "10.2.6"
-  val http4sVersion = "0.23.1"
+  val http4sVersion = "0.23.6"
   val ujsonVersion = "1.4.0"
 
   val scalaTestVersion = "3.2.10"

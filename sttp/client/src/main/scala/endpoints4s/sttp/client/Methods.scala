@@ -13,7 +13,7 @@ trait Methods extends algebra.Methods {
   type Method = SRequest[_, Any] => SRequest[_, Any]
 
   private def setMethod(method: SMethod): Method =
-    _.copy(method = method: Identity[SMethod])
+    _.copy[Identity, Any, Any](method = method: Identity[SMethod])
 
   def Get = setMethod(SMethod.GET)
 

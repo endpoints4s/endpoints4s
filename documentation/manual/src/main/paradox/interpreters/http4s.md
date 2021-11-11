@@ -12,7 +12,7 @@ Client and server backed by [http4s](http://http4s.org).
 
 The `Endpoints` interpreter provides a trait `Endpoint[A, B]` defined as follows
 
-@@snip [Endpoints.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }
+@@snip [Endpoints.scala](/http4s/client/shared/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }
 
 This means that, given the following endpoint definition:
 
@@ -20,13 +20,13 @@ This means that, given the following endpoint definition:
 
 It can be invoked as follows using `IO`:
 
-@@snip [EndpointsDocs.scala](/http4s/client/src/test/scala/endpoints4s/http4s/client/EndpointsDocs.scala) { #invocation }
+@@snip [EndpointsDocs.scala](/http4s/client/shared/src/test/scala/endpoints4s/http4s/client/EndpointsDocs.scala) { #invocation }
 
 ### `ChunkedEntities`
 
 The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `fs2.Stream[Effect, A]`:
 
-@@snip [ChunkedEntities.scala](/http4s/client/src/main/scala/endpoints4s/http4s/client/ChunkedEntities.scala) { #stream-type }
+@@snip [ChunkedEntities.scala](/http4s/client/shared/src/main/scala/endpoints4s/http4s/client/ChunkedEntities.scala) { #stream-type }
 
 This means that, given the following endpoint definition:
 
@@ -34,7 +34,7 @@ This means that, given the following endpoint definition:
 
 It can be invoked as follows:
 
-@@snip [ChunkedEntitiesDocs.scala](/http4s/client/src/test/scala/endpoints4s/http4s/client/ChunkedEntitiesDocs.scala) { #invocation }
+@@snip [ChunkedEntitiesDocs.scala](/http4s/client/shared/src/test/scala/endpoints4s/http4s/client/ChunkedEntitiesDocs.scala) { #invocation }
 
 ## Server
 

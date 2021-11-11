@@ -15,9 +15,7 @@ import endpoints4s.algebra.server.{
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 import org.http4s.blaze.server.BlazeServerBuilder
-import org.http4s.syntax.kleisli._
 
-import scala.concurrent.ExecutionContext
 import endpoints4s.algebra.server.AssetsTestSuite
 import cats.effect.unsafe.implicits.global
 
@@ -56,7 +54,7 @@ class ServerInterpreterTest
     val service = HttpRoutes.of[IO](endpoint.implementedBy(request2response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
-      BlazeServerBuilder[IO](ExecutionContext.global)
+      BlazeServerBuilder[IO]
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).unsafeRunSync()

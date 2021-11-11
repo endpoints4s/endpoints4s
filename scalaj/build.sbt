@@ -9,12 +9,12 @@ val `scalaj-client` =
     .in(file("client"))
     .settings(
       publishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       name := "scalaj-client",
       version := "3.1.0+n",
       versionPolicyIntention := Compatibility.BinaryCompatible,
       libraryDependencies ++= Seq(
-        "org.scalaj" %% "scalaj-http" % "2.4.2"
+        ("org.scalaj" %% "scalaj-http" % "2.4.2").cross(CrossVersion.for3Use2_13)
       )
     )
     .dependsOn(`openapi-jvm`)

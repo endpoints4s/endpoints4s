@@ -35,8 +35,8 @@ class AkkaHttpClientEndpointsTest
     with algebra.client.SumTypedEntitiesTestSuite[TestClient]
     with algebra.client.ChunkedJsonEntitiesTestSuite[TestClient] {
 
-  implicit val system = ActorSystem()
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val ec: ExecutionContext = system.dispatcher
 
   val client: TestClient = new TestClient(
     EndpointsSettings(
