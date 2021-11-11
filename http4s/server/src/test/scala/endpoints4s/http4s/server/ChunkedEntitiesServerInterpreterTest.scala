@@ -11,9 +11,7 @@ import endpoints4s.algebra.server.{
 }
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
-import org.http4s.syntax.kleisli._
 
-import scala.concurrent.ExecutionContext
 import akka.stream.scaladsl.Source
 
 import scala.concurrent.Future
@@ -55,7 +53,7 @@ class ChunkedEntitiesServerInterpreterTest
 
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => stream))
     val httpApp = Router("/" -> service).orNotFound
-    val server = BlazeServerBuilder[IO](implicitly[ExecutionContext])
+    val server = BlazeServerBuilder[IO]
       .bindHttp(port, "localhost")
       .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).start.unsafeRunSync()
@@ -82,7 +80,7 @@ class ChunkedEntitiesServerInterpreterTest
     )
     val httpApp = Router("/" -> service).orNotFound
     val server =
-      BlazeServerBuilder[IO](implicitly[ExecutionContext])
+      BlazeServerBuilder[IO]
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).start.unsafeRunSync()
@@ -100,7 +98,7 @@ class ChunkedEntitiesServerInterpreterTest
     val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => response))
     val httpApp = Router("/" -> service).orNotFound
     val server =
-      BlazeServerBuilder[IO](implicitly[ExecutionContext])
+      BlazeServerBuilder[IO]
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
@@ -118,7 +116,7 @@ class ChunkedEntitiesServerInterpreterTest
     val service = HttpRoutes.of[IO](endpoint.implementedBy(identity[Resp]))
     val httpApp = Router("/" -> service).orNotFound
     val server =
-      BlazeServerBuilder[IO](implicitly[ExecutionContext])
+      BlazeServerBuilder[IO]
         .bindHttp(port, "localhost")
         .withHttpApp(httpApp)
     server.resource.use(_ => IO(runTests(port))).unsafeRunSync()

@@ -43,14 +43,9 @@ val `algebra-circe` =
       version := "1.5.0+n",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
-        ("io.circe" %%% "circe-parser" % circeVersion).cross(CrossVersion.for3Use2_13),
-        ("io.circe" %%% "circe-generic" % circeVersion % Test).cross(CrossVersion.for3Use2_13)
-      ),
-      excludeDependencies ++= {
-        if (scalaBinaryVersion.value.startsWith("3")) {
-          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
-        } else Nil
-      }
+        "io.circe" %%% "circe-parser" % circeVersion,
+        "io.circe" %%% "circe-generic" % circeVersion % Test
+      )
     )
     .dependsOn(`algebra` % "test->test;compile->compile")
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
