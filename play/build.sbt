@@ -59,7 +59,7 @@ val `play-client` =
       `scala 2.12 to dotty`,
       name := "play-client",
       version := "3.1.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion).cross(CrossVersion.for3Use2_13),
         // Override transitive dependencies of Play
