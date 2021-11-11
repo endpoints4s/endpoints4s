@@ -67,6 +67,15 @@ trait Urls extends algebra.Urls {
       )
     )
 
+  /** A query string parameter documentation description for type `A`
+    *
+    * @param schema Schema that corresponds to type `A`
+    * @param isRequired Whether the query string parameter is required
+    * @param encoder JSON encoder for query string parameter value, primarily
+    * used for encoding of the parameter's default value.
+    * Result of the encoding is optional since the empty value of optional
+    * query string parameter should result in the empty encoded value.
+    */
   case class DocumentedQueryStringParam[A](
       schema: Schema,
       isRequired: Boolean,
