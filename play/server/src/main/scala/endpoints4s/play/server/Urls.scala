@@ -155,7 +155,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
 
   type WithDefault[A] = A
 
-  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+  override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
       value: QueryStringParam[A]
   ): QueryString[WithDefault[A]] =
     qs(name, docs)(optionalQueryStringParam(value)).xmap(_.getOrElse(default))(Some(_))

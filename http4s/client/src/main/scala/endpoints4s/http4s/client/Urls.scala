@@ -43,7 +43,7 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
 
   type WithDefault[A] = Option[A]
 
-  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+  override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
       value: QueryStringParam[A]
   ): QueryString[WithDefault[A]] =
     qs(name, docs)(optionalQueryStringParam(value))

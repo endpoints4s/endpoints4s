@@ -74,7 +74,7 @@ trait Urls extends algebra.Urls {
 
   type WithDefault[A] = Option[A]
 
-  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+  override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
       value: QueryStringParam[A]
   ): QueryString[WithDefault[A]] =
     qs(name, docs)(optionalQueryStringParam(value))
