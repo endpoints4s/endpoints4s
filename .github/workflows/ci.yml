@@ -46,7 +46,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt "++ 3.0.2 ;compile;json-schemaJVM/test;json-schemaJS/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test"
+    - run: sbt "++ 3.0.2 compile" "++ 3.0.2 ;json-schemaJVM/test;json-schemaJS/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test"
 
   versionPolicy:
     name: Check versioning policy and code style
