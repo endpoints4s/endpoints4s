@@ -10,11 +10,11 @@ val `xhr-client` =
       `scala 2.12 to 2.13`,
       name := "xhr-client",
       version := "3.1.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "1.2.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.0.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       )
     )
@@ -31,7 +31,7 @@ val `xhr-client-faithful` =
       `scala 2.12 to 2.13`,
       name := "xhr-client-faithful",
       version := "3.1.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "org.julienrf" %%% "faithful" % "2.0.0"

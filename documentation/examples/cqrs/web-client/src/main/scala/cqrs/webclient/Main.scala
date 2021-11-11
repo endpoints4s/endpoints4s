@@ -9,7 +9,7 @@ import org.scalajs.dom
 import faithful.cats.Instances._
 import cqrs.queries.Meter
 import faithful.Future
-import org.scalajs.dom.raw.HTMLInputElement
+import org.scalajs.dom.HTMLInputElement
 import scala.util.Try
 
 object Main {
