@@ -187,15 +187,15 @@ trait EndpointsWithCustomErrors
       )
       operationParametersSchemas = operation.parameters.map(_.schema)
       requestBodySchema = for {
-        body <- operation.requestBody.toIterable
+        body <- operation.requestBody.toList
         mediaType <- body.content.values
-        schema <- mediaType.schema.toIterable
+        schema <- mediaType.schema.toList
       } yield schema
       responseSchemas = for {
         (_, response) <- operation.responses.toSeq
         (_, mediaType) <- response.content.toSeq
         schema <-
-          mediaType.schema.toIterable ++ response.headers.values
+          mediaType.schema.toList ++ response.headers.values
             .map(_.schema)
       } yield schema
       schema <- requestBodySchema ++ responseSchemas ++ operationParametersSchemas
