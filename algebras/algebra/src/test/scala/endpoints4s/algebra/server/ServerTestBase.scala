@@ -25,7 +25,7 @@ trait ServerTestBase[T <: algebra.Endpoints]
     with BeforeAndAfter {
 
   override implicit def patienceConfig: PatienceConfig =
-    PatienceConfig(15.seconds, 20.millisecond)
+    PatienceConfig(20.seconds, 20.millisecond)
 
   val serverApi: T
 
