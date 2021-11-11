@@ -44,11 +44,16 @@ val `http4s-client` =
       version := "5.0.0+n",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
-        ("org.http4s" %%% "http4s-client" % http4sVersion).cross(CrossVersion.for3Use2_13)
+        "org.http4s" %%% "http4s-client" % http4sVersion
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
-          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
+          List(
+            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
+            ExclusionRule("org.typelevel", "cats-kernel_sjs1_2.13"),
+            ExclusionRule("org.typelevel", "cats-core_sjs1_2.13"),
+            ExclusionRule("org.typelevel", "simulacrum-scalafix-annotations_2.13")
+          )
         } else Nil
       }
     )
