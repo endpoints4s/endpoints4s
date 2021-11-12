@@ -12,7 +12,7 @@ val `scalaj-client` =
       `scala 2.12 to dotty`,
       name := "scalaj-client",
       version := "3.1.0+n",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("org.scalaj" %% "scalaj-http" % "2.4.2").cross(CrossVersion.for3Use2_13)
       )

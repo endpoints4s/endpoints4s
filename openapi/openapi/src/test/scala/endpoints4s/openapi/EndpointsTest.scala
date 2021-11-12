@@ -37,6 +37,13 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             schema = Schema.simpleString
           ) ::
           Parameter(
+            "page",
+            In.Query,
+            required = false,
+            description = None,
+            schema = Schema.simpleInteger.withDefault(Some(1))
+          ) ::
+            Parameter(
             "ids",
             In.Query,
             required = false,
@@ -508,9 +515,12 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
 
   val quux = endpoint(
     get(
-      path / "quux" /? (qs[Double]("n") & qs[Option[String]]("lang") & qs[List[
-        Long
-      ]]("ids"))
+      path / "quux" /? (
+        qs[Double]("n") &
+          qs[Option[String]]("lang") &
+          optQsWithDefault[Int]("page", 1) &
+          qs[List[Long]]("ids")
+      )
     ),
     ok(emptyResponse)
   )

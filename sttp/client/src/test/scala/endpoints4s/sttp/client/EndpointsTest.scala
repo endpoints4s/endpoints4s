@@ -7,11 +7,11 @@ import endpoints4s.algebra.client.{
   EndpointsTestSuite,
   JsonFromCodecTestSuite,
   SumTypedEntitiesTestSuite,
-  TextEntitiesTestSuite
+  TextEntitiesTestSuite,
+  ClientEndpointsTestApi
 }
 import endpoints4s.algebra.{
   BasicAuthenticationTestApi,
-  EndpointsTestApi,
   SumTypedEntitiesTestApi,
   TextEntitiesTestApi
 }
@@ -25,7 +25,7 @@ class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
     with BasicAuthenticationTestApi
-    with EndpointsTestApi
+    with ClientEndpointsTestApi
     with JsonFromPlayJsonCodecTestApi
     with SumTypedEntitiesTestApi
     with TextEntitiesTestApi

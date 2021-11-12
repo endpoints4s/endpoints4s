@@ -4,6 +4,7 @@ import java.util.UUID
 
 import endpoints4s.{Codec, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
+import scala.annotation.nowarn
 import scala.collection.compat.Factory
 
 /** Algebra interface for describing URLs made of a path and a query string.
@@ -107,6 +108,35 @@ trait Urls extends PartialInvariantFunctorSyntax {
   def qs[A](name: String, docs: Documentation = None)(implicit
       value: QueryStringParam[A]
   ): QueryString[A]
+
+  /** This type is necessary to express different perspectives of servers and clients
+    * on optional query string parameters with default value:
+    *   - Client interpreters should define it as `Option[A]` and omit query string parameters with default value
+    *     that are empty
+    *   - Server interpreters should define it as `A` and accept incoming requests whose query string parameters
+    *     with default value are missing, while providing the defined default value
+    *   - Documentation interpreters should mark the parameter as optional and document the provided default value
+    *
+    * @group types
+    */
+  type WithDefault[A]
+
+  /** Builds a `QueryString` with one optional parameter, which has a default value.
+    *
+    * Examples:
+    *
+    * {{{
+    *   optQsWithDefault[Int]("page", 1) // optional `page` parameter, with default value 1
+    * }}}
+    *
+    * @param name Parameter’s name
+    * @tparam A Type of the value carried by the parameter
+    * @group operations
+    */
+  @nowarn("cat=unused-params")
+  def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
+  ): QueryString[WithDefault[A]] = unsupportedInterpreter("1.6.0")
 
   /** Make a query string parameter optional:
     *

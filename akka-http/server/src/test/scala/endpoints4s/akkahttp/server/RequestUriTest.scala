@@ -9,9 +9,9 @@ class RequestUriTest extends AnyWordSpec {
     val p1 = path / "a" / "b/c" / segment[String]()
     val p2 = path / segment[String]() / segment[String]() / remainingSegments()
     val p3 =
-      path / segment[String]() /? (qs[String]("q") & qs[Option[String]]("r") & qs[List[String]](
-        "s"
-      ))
+      path / segment[String]() /? (qs[String]("q") & qs[Option[String]]("r") & optQsWithDefault[
+        Int
+      ]("s", 1) & qs[List[String]]("t"))
     val p4 = path / "a" /? qs[Option[Int]]("x")
     val e = endpoint(get(p4), ok(textResponse))
   }
@@ -25,8 +25,8 @@ class RequestUriTest extends AnyWordSpec {
       assert(p2.uri(("a b", "c/d", "e/f")).toString == "/a%20b/c%2Fd/e/f")
       assert(p2.uri(("a b", "c/d", "")).toString == "/a%20b/c%2Fd/")
       assert(
-        p3.uri(("a b", ("c d", Some("e f"), List("g h", "i j"))))
-          .toString == "/a%20b?q=c+d&r=e+f&s=g+h&s=i+j"
+        p3.uri(("a b", "c d", Some("e f"), 1, List("g h", "i j")))
+          .toString == "/a%20b?q=c+d&r=e+f&s=1&t=g+h&t=i+j"
       )
       assert(p4.uri(None).toString == "/a")
       assert(e.uri(Some(42)).toString == "/a?x=42")

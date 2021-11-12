@@ -53,6 +53,13 @@ trait Urls extends algebra.Urls {
       else Some(param(a).map(v => s"$name=$v").mkString("&"))
     }
 
+  type WithDefault[A] = Option[A]
+
+  override def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
+      value: QueryStringParam[A]
+  ): QueryString[WithDefault[A]] =
+    qs(name, docs)(optionalQueryStringParam(value))
+
   /** a query string parameter can have zero or several values */
   type QueryStringParam[A] = A => List[String]
 

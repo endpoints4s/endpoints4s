@@ -15,7 +15,7 @@ class TestClient(settings: EndpointsSettings)(implicit
     M: Materializer
 ) extends Endpoints(settings)
     with BasicAuthentication
-    with algebra.EndpointsTestApi
+    with algebra.client.ClientEndpointsTestApi
     with algebra.BasicAuthenticationTestApi
     with algebra.TextEntitiesTestApi
     with algebra.JsonFromCodecTestApi
