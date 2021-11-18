@@ -12,7 +12,9 @@ class FetchClientUrlEncodingTest
 
   implicit def executionContext = JSExecutionContext.queue
 
-  val client: TestClient = new TestClient(EndpointsSettings(Some("http://localhost:8080")))
+  val client: TestClient = new TestClient(
+    EndpointsSettings().withHost(Some("http://localhost:8080"))
+  )
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 }

@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-class TestClient(val endpointsSettings: EndpointsSettings)(implicit val ec: ExecutionContext)
+class TestClient(val settings: EndpointsSettings)(implicit val ec: ExecutionContext)
     extends Endpoints
     with BasicAuthentication
     with algebra.EndpointsTestApi
@@ -91,7 +91,9 @@ class FetchClientEndpointsTest
 
   implicit override def executionContext = JSExecutionContext.queue
 
-  val client: TestClient = new TestClient(EndpointsSettings(Some("http://localhost:8080")))
+  val client: TestClient = new TestClient(
+    EndpointsSettings().withHost(Some("http://localhost:8080"))
+  )
 
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],

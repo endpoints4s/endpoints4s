@@ -11,7 +11,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-class TestJsonSchemaClient(val endpointsSettings: EndpointsSettings)(implicit
+class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
     val ec: ExecutionContext
 ) extends Endpoints
     with BasicAuthentication
@@ -30,7 +30,8 @@ class FetchClientEndpointsJsonSchemaTest
   implicit override def executionContext = JSExecutionContext.queue
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
-    EndpointsSettings(Some("http://localhost:8080"))
+    EndpointsSettings()
+      .withHost(Some("http://localhost:8080"))
   )
 
   def call[Req, Resp](

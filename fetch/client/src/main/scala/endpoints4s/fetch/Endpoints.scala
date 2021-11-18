@@ -28,7 +28,7 @@ trait EndpointsWithCustomErrors
     with Methods
     with StatusCodes {
 
-  def endpointsSettings: EndpointsSettings
+  def settings: EndpointsSettings
   implicit def ec: ExecutionContext
 
   type RequestHeaders[A] = js.Function2[A, FetchRequestInit, Unit]
@@ -284,7 +284,7 @@ trait EndpointsWithCustomErrors
   ): Unit = {
     val (url, requestInit) = request(a)
     val f = Fetch
-      .fetch(endpointsSettings.host.getOrElse("") + url.underlying, requestInit)
+      .fetch(settings.host.getOrElse("") + url.underlying, requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
         val maybeResponse = response(fetchResponse)
