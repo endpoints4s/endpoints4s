@@ -6,7 +6,9 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import scala.scalajs.concurrent.JSExecutionContext
 
-class FetchClientEncodeTest extends AnyWordSpec with algebra.client.EncodeTestSuite[TestClient] {
+class FetchClientUrlEncodingTest
+    extends AnyWordSpec
+    with algebra.client.UrlEncodingTestSuite[TestClient] {
 
   implicit def executionContext = JSExecutionContext.queue
 

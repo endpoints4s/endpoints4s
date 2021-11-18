@@ -1,3 +1,3 @@
 package endpoints4s.fetch
 
-case class FetchUrl(val underlying: String) extends AnyVal
+case class FetchUrl(underlying: String) extends AnyVal

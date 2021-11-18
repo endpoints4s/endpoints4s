@@ -7,7 +7,8 @@ import io.circe.{Decoder => CirceDecoder}
 import io.circe.{Encoder => CirceEncoder}
 import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
 
-import scala.scalajs.js.Thenable.Implicits._
+import scala.scalajs.js
+import scala.scalajs.js.|
 
 /** An interpreter for [[algebra.JsonEntities]] that uses circe’s [[io.circe.Encoder]] to build JSON
   * entities in HTTP requests, and circe’s [[io.circe.Decoder]] to decode JSON entities from
@@ -30,6 +31,13 @@ trait JsonEntities extends EndpointsWithCustomErrors with algebra.JsonEntities {
     }
 
   def jsonResponse[A](implicit decoder: CirceDecoder[A]): ResponseEntity[A] =
-    response => response.text().map(text => parser.parse(text).flatMap(decoder.decodeJson))
+    response =>
+      response
+        .text()
+        .`then`((text: String) =>
+          parser
+            .parse(text)
+            .flatMap(decoder.decodeJson): Either[Throwable, A] | js.Thenable[Either[Throwable, A]]
+        )
 
 }

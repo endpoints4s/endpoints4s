@@ -27,7 +27,7 @@ class EndpointsTest
     with client.JsonFromCodecTestSuite[TestClient]
     with client.SumTypedEntitiesTestSuite[TestClient]
     with client.TextEntitiesTestSuite[TestClient]
-    with client.EncodeTestSuite[TestClient] {
+    with client.UrlEncodingTestSuite[TestClient] {
 
   val wsClient = new WsTestClient.InternalWSClient("http", stubServerPort)
   val client: TestClient =

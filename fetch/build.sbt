@@ -17,7 +17,6 @@ val `fetch-client` =
         "org.scala-js" %%% "scalajs-dom" % "1.2.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
-      //TODO needs to be headless for CI
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options
@@ -52,7 +51,6 @@ val `fetch-client-circe` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
-      //TODO needs to be headless for CI
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options

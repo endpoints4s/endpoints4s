@@ -105,11 +105,9 @@ class FetchClientEndpointsTest
       val response = "wiremockeResponse"
 
       for {
-        _ <- client
-          .UUIDEndpoint(uuid, "name1", 18)
+        _ <- call(client.UUIDEndpoint, (uuid, "name1", 18))
           .map(_ shouldEqual response)
-        _ <- client
-          .emptyResponseUUIDEndpoint(uuid, "name1", 18)
+        _ <- call(client.emptyResponseUUIDEndpoint, (uuid, "name1", 18))
           .map(_ shouldEqual (()))
       } yield succeed
     }
@@ -118,11 +116,9 @@ class FetchClientEndpointsTest
       val response = "wiremockeResponse"
 
       for {
-        _ <- client
-          .smokeEndpoint("userId", "name1", 18)
+        _ <- call(client.smokeEndpoint, ("userId", "name1", 18))
           .map(_ shouldEqual response)
-        _ <- client
-          .emptyResponseSmokeEndpoint("userId", "name1", 18)
+        _ <- call(client.emptyResponseSmokeEndpoint, ("userId", "name1", 18))
           .map(_ shouldEqual (()))
       } yield succeed
     }
@@ -132,11 +128,9 @@ class FetchClientEndpointsTest
       val response = "wiremockeResponse"
 
       for {
-        _ <- client
-          .optUUIDQsEndpoint("userId", uuid, None)
+        _ <- call(client.optUUIDQsEndpoint, ("userId", uuid, None))
           .map(_ shouldEqual response)
-        _ <- client
-          .optUUIDQsEndpoint("userId", uuid, Some(18))
+        _ <- call(client.optUUIDQsEndpoint, ("userId", uuid, Some(18)))
           .map(_ shouldEqual response)
       } yield succeed
     }
@@ -145,37 +139,27 @@ class FetchClientEndpointsTest
       val response = "wiremockeResponse"
 
       for {
-        _ <- client
-          .optQsEndpoint("userId", "name1", None)
+        _ <- call(client.optQsEndpoint, ("userId", "name1", None))
           .map(_ shouldEqual response)
-        _ <- client
-          .optQsEndpoint("userId", "name1", Some(18))
+        _ <- call(client.optQsEndpoint, ("userId", "name1", Some(18)))
           .map(_ shouldEqual response)
       } yield succeed
     }
 
     "throw exception when 5xx is returned from server" in {
       for {
-        _ <- client
-          .errorEndpoint("userId", "name1", 18)
-          .failed
+        _ <- call(client.errorEndpoint, ("userId", "name1", 18)).failed
           .map(x => x.getMessage shouldBe "Unexpected response status: 501")
-        _ <- client
-          .emptyResponseErrorEndpoint("userId", "name1", 18)
-          .failed
+        _ <- call(client.emptyResponseErrorEndpoint, ("userId", "name1", 18)).failed
           .map(x => x.getMessage shouldBe "Unexpected response status: 501")
       } yield succeed
     }
 
     "throw exception with a detailed error message when 500 is returned from server" in {
       for {
-        _ <- client
-          .detailedErrorEndpoint("userId", "name1", 18)
-          .failed
+        _ <- call(client.detailedErrorEndpoint, ("userId", "name1", 18)).failed
           .map(x => x.getMessage shouldBe "Unable to process your request")
-        _ <- client
-          .emptyResponseDetailedErrorEndpoint("userId", "name1", 18)
-          .failed
+        _ <- call(client.emptyResponseDetailedErrorEndpoint, ("userId", "name1", 18)).failed
           .map(x => x.getMessage shouldBe "Unable to process your request")
       } yield succeed
     }
@@ -183,8 +167,7 @@ class FetchClientEndpointsTest
     "properly handle joined headers" in {
       val response = UUID.fromString("29d15495-55ea-431e-bef3-392b05b14fef").toString
 
-      client
-        .joinedHeadersEndpoint("a", "b")
+      call(client.joinedHeadersEndpoint, ("a", "b"))
         .map(_ shouldEqual response)
     }
 
@@ -243,8 +226,7 @@ class FetchClientEndpointsTest
       val lastModified = DateTimeFormatter.RFC_1123_DATE_TIME
         .format(ZonedDateTime.parse("2021-01-01T12:30Z"))
 
-      client
-        .versionedResource()
+      call(client.versionedResource, ())
         .map { case (entity, cache) =>
           assert(entity == response)
           assert(
@@ -255,16 +237,14 @@ class FetchClientEndpointsTest
     }
 
     "Decode optional response headers" in {
-      client
-        .someOptionalResponseHeader()
+      call(client.someOptionalResponseHeader, ())
         .map { case (entity, header) =>
           (entity, header) shouldEqual (("foo", Some("a")))
         }
     }
 
     "Decode missing optional response headers" in {
-      client
-        .noneOptionalResponseHeader()
+      call(client.noneOptionalResponseHeader, ())
         .map { case (entity, header) =>
           (entity, header) shouldEqual (("foo", None))
         }
@@ -302,12 +282,10 @@ class FetchClientEndpointsTest
       val name = "name3"
 
       for {
-        _ <- client
-          .sumTypedEndpoint2(Left(user))
-          .map(_ shouldEqual ())
-        _ <- client
-          .sumTypedEndpoint2(Right(name))
-          .map(_ shouldEqual ())
+        _ <- call(client.sumTypedEndpoint2, Left(user))
+          .map(_.shouldEqual(()))
+        _ <- call(client.sumTypedEndpoint2, Right(name))
+          .map(_.shouldEqual(()))
       } yield succeed
     }
   }

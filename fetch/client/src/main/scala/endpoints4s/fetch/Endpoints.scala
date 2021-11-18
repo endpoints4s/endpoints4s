@@ -16,9 +16,9 @@ import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
 import org.scalajs.dom.experimental.{Response => FetchResponse}
 
 import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
 import scala.scalajs.js
-import scala.scalajs.js.Thenable.Implicits._
+import scala.scalajs.js.Promise
+import scala.scalajs.js.|
 
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
@@ -158,7 +158,7 @@ trait EndpointsWithCustomErrors
         xhr => fa(xhr).map(mapResponseEntity(_)(f))
     }
 
-  type ResponseEntity[A] = FetchResponse => Future[Either[Throwable, A]]
+  type ResponseEntity[A] = js.Function1[FetchResponse, js.Promise[Either[Throwable, A]]]
 
   implicit def responseEntityInvariantFunctor: InvariantFunctor[ResponseEntity] =
     new InvariantFunctor[ResponseEntity] {
@@ -178,19 +178,32 @@ trait EndpointsWithCustomErrors
   private[fetch] def mapPartialResponseEntity[A, B](
       entity: ResponseEntity[A]
   )(f: A => Either[Throwable, B]): ResponseEntity[B] =
-    response => entity(response).map(_.flatMap(f))
+    response =>
+      entity(response).`then`((responseEntity: Either[Throwable, A]) =>
+        responseEntity.flatMap(f): Either[Throwable, B] | js.Thenable[Either[Throwable, B]]
+      )
 
   def stringCodecResponse[A](implicit
       codec: Decoder[String, A]
-  ): ResponseEntity[A] = _.text().map(text =>
-    codec
-      .decode(text)
-      .fold(Right(_), errors => Left(new Exception(errors.mkString(". "))))
-  )
+  ): ResponseEntity[A] =
+    _.text()
+      .`then`((text: String) =>
+        codec
+          .decode(text)
+          .fold(
+            Right(_),
+            errors => Left(new Exception(errors.mkString(". ")))
+          ): Either[Throwable, A] | js.Thenable[Either[Throwable, A]]
+      )
 
-  def emptyResponse: ResponseEntity[Unit] = _ => Future.successful(Right(()))
+  def emptyResponse: ResponseEntity[Unit] = _ => Promise.resolve[Either[Throwable, Unit]](Right(()))
 
-  def textResponse: ResponseEntity[String] = response => response.text().map(Right(_))
+  def textResponse: ResponseEntity[String] = response =>
+    response
+      .text()
+      .`then`((text: String) =>
+        Right(text): Either[Throwable, String] | js.Thenable[Either[Throwable, String]]
+      )
 
   type ResponseHeaders[A] = FetchResponse => Validated[A]
 
@@ -242,7 +255,9 @@ trait EndpointsWithCustomErrors
         headers(response) match {
           case Valid(b) => Some(mapResponseEntity(entity)(tupler(_, b)))
           case Invalid(errors) =>
-            Some(_ => Future.successful(Left(new Exception(errors.mkString(". ")))))
+            Some(_ =>
+              js.Promise.resolve[Either[Throwable, R]](Left(new Exception(errors.mkString(". "))))
+            )
         }
       } else None
 
@@ -270,35 +285,57 @@ trait EndpointsWithCustomErrors
     val (url, requestInit) = request(a)
     val f = Fetch
       .fetch(endpointsSettings.host.getOrElse("") + url.underlying, requestInit)
-    f.foreach { fetchResponse =>
-      val maybeResponse = response(fetchResponse)
-      def maybeClientErrors =
-        clientErrorsResponse(fetchResponse)
-          .map(
-            mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
-              Left(
-                new Exception(
-                  clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+    f.`then`(
+      (fetchResponse: FetchResponse) => {
+        val maybeResponse = response(fetchResponse)
+
+        def maybeClientErrors =
+          clientErrorsResponse(fetchResponse)
+            .map(
+              mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
+                Left(
+                  new Exception(
+                    clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+                  )
                 )
               )
             )
-          )
-      def maybeServerError =
-        serverErrorResponse(fetchResponse).map(
-          mapPartialResponseEntity[ServerError, B](_)(serverError =>
-            Left(serverErrorToThrowable(serverError))
-          )
-        )
 
-      maybeResponse
-        .orElse(maybeClientErrors)
-        .orElse(maybeServerError) match {
-        case None =>
-          onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
-        case Some(entityB) =>
-          entityB(fetchResponse).foreach(onload)
-      }
-    }
-    f.failed.foreach(onerror)
+        def maybeServerError =
+          serverErrorResponse(fetchResponse).map(
+            mapPartialResponseEntity[ServerError, B](_)(serverError =>
+              Left(serverErrorToThrowable(serverError))
+            )
+          )
+
+        maybeResponse
+          .orElse(maybeClientErrors)
+          .orElse(maybeServerError) match {
+          case None =>
+            onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
+            Promise.resolve[Unit](()): Unit | js.Thenable[Unit]
+          case Some(entityB) =>
+            entityB(fetchResponse)
+              .`then`(
+                (v: Either[Throwable, B]) => onload(v): Unit | js.Thenable[Unit],
+                js.defined((e: Any) => {
+                  e match {
+                    case th: Throwable => onerror(th)
+                    case _             => js.JavaScriptException(e)
+                  }
+                  (): Unit | js.Thenable[Unit]
+                }): js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
+              ): Unit | js.Thenable[Unit]
+        }
+      },
+      js.defined { (e: Any) =>
+        e match {
+          case th: Throwable => onerror(th)
+          case _             => js.JavaScriptException(e)
+        }
+        (): Unit | js.Thenable[Unit]
+      }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
+    )
+    ()
   }
 }
