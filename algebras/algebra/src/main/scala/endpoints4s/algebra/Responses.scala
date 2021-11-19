@@ -145,6 +145,10 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
   )(implicit tupler: Tupler.Aux[A, B, R]): Response[R]
 
   /** Add the provided `headers` to the `response`.
+    *
+    * Note that if the `response` describes a choice of several
+    * possible responses (resulting from the `orElse` operation),
+    * the `headers` will be added to all the possible responses.
     */
   def addResponseHeaders[A, H](
       response: Response[A],
@@ -239,6 +243,10 @@ trait Responses extends StatusCodes with InvariantFunctorSyntax {
       choiceResponse(response, otherResponse)
 
     /** Add the provided `headers` to this response.
+      *
+      * Note that if the `response` describes a choice of several
+      * possible responses (resulting from the `orElse` operation),
+      * the `headers` will be added to all the possible responses.
       */
     final def addHeaders[H](headers: ResponseHeaders[H])(implicit
         tupler: Tupler[A, H]
