@@ -19,7 +19,7 @@ import scala.scalajs.concurrent.JSExecutionContext
 class TestClient(val settings: EndpointsSettings)(implicit val ec: ExecutionContext)
     extends Endpoints
     with BasicAuthentication
-    with algebra.EndpointsTestApi
+    with algebra.client.ClientEndpointsTestApi
     with algebra.BasicAuthenticationTestApi
     with BasicAuthenticationTestApi
     with algebra.TextEntitiesTestApi
