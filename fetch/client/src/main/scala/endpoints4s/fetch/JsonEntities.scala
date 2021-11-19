@@ -2,7 +2,7 @@ package endpoints4s.fetch
 
 import endpoints4s.Codec
 import endpoints4s.algebra
-import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
+import org.scalajs.dom.{RequestInit => FetchRequestInit}
 
 trait JsonEntitiesFromCodecs extends EndpointsWithCustomErrors with algebra.JsonEntitiesFromCodecs {
 

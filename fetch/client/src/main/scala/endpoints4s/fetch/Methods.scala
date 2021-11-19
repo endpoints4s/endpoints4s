@@ -1,7 +1,7 @@
 package endpoints4s.fetch
 
 import endpoints4s.algebra
-import org.scalajs.dom.experimental.{HttpMethod => FetchHttpMethod}
+import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 
 trait Methods extends algebra.Methods {
   type Method = FetchHttpMethod

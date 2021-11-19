@@ -5,7 +5,7 @@ import endpoints4s.fetch.EndpointsWithCustomErrors
 import io.circe.parser
 import io.circe.{Decoder => CirceDecoder}
 import io.circe.{Encoder => CirceEncoder}
-import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
+import org.scalajs.dom.{RequestInit => FetchRequestInit}
 
 import scala.scalajs.js
 import scala.scalajs.js.|

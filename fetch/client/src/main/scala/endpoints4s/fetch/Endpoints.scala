@@ -10,10 +10,10 @@ import endpoints4s.Valid
 import endpoints4s.Validated
 import endpoints4s.algebra
 import endpoints4s.algebra.Documentation
-import org.scalajs.dom.experimental.Fetch
-import org.scalajs.dom.experimental.{Headers => FetchHeaders}
-import org.scalajs.dom.experimental.{RequestInit => FetchRequestInit}
-import org.scalajs.dom.experimental.{Response => FetchResponse}
+import org.scalajs.dom.Fetch
+import org.scalajs.dom.{Headers => FetchHeaders}
+import org.scalajs.dom.{RequestInit => FetchRequestInit}
+import org.scalajs.dom.{Response => FetchResponse}
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
