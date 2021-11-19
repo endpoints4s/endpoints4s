@@ -702,16 +702,6 @@ object SecurityRequirement {
   ): SecurityRequirement =
     new SecurityRequirement(name, scheme, Nil)
 
-  @deprecated(
-    "Use `SecurityRequirement().withScopes(...)` instead of `SecurityRequirement(scopes = ...)`",
-    "1.0.0"
-  )
-  def apply(
-      name: String,
-      scheme: SecurityScheme,
-      scopes: List[String] = Nil
-  ): SecurityRequirement =
-    new SecurityRequirement(name, scheme, scopes)
 }
 
 final class RequestBody private (
