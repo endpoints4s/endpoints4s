@@ -143,23 +143,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         val isOptional: Boolean,
         val default: Option[ujson.Value],
         val documentation: Option[String]
-    ) extends Serializable
-        with Product
-        with Equals {
+    ) extends Serializable {
 
-      @deprecated("`Field` is no longer a `case class` and won't implement `Equals`", "3.1.0")
-      override def canEqual(other: Any): Boolean = other.isInstanceOf[Field]
-      @deprecated("`Field` is no longer a `case class` and won't implement `Product`", "3.1.0")
-      override def productArity: Int = 5
-      @deprecated("`Field` is no longer a `case class` and won't implement `Product`", "3.1.0")
-      override def productElement(idx: Int): Any = idx match {
-        case 0 => name
-        case 1 => tpe
-        case 2 => isOptional
-        case 3 => default
-        case 4 => documentation
-        case _ => throw new IndexOutOfBoundsException(idx.toString)
-      }
       override def toString: String = s"Field($name,$tpe,$isOptional,$default,$documentation)"
       override def hashCode: Int = Hashing.hash(name, tpe, isOptional, default, documentation)
       override def equals(other: Any): Boolean = other match {
@@ -169,51 +154,32 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case _ => false
       }
 
-      @deprecated("Use the Field apply method instead", "3.1.0")
-      def this(
-          name: String,
-          tpe: DocumentedJsonSchema,
-          isOptional: Boolean,
-          documentation: Option[String]
-      ) = this(name, tpe, isOptional, None, documentation)
-
-      @deprecated("Use `withName`, `withTpe`, etc. instead of `copy`", "3.1.0")
-      def copy(
+      private def copy(
           name: String = name,
           tpe: DocumentedJsonSchema = tpe,
           isOptional: Boolean = isOptional,
-          documentation: Option[String] = documentation
+          documentation: Option[String] = documentation,
+          default: Option[ujson.Value] = default
       ): Field =
         new Field(name, tpe, isOptional, default, documentation)
 
       def withName(name: String): Field =
-        new Field(name, tpe, isOptional, default, documentation)
+        copy(name = name)
 
       def withTpe(tpe: DocumentedJsonSchema): Field =
-        new Field(name, tpe, isOptional, default, documentation)
+        copy(tpe = tpe)
 
       def withIsOptional(isOptional: Boolean): Field =
-        new Field(name, tpe, isOptional, default, documentation)
+        copy(isOptional = isOptional)
 
       def withDocumentation(documentation: Option[String]): Field =
-        new Field(name, tpe, isOptional, default, documentation)
+        copy(documentation = documentation)
+
+      def withDefault(default: Option[ujson.Value]): Field =
+        copy(default = default)
     }
 
-    object Field
-        extends runtime.AbstractFunction4[String, DocumentedJsonSchema, Boolean, Option[
-          String
-        ], Field] {
-
-      @deprecated(
-        "The Field apply method now takes an additional parameter 'default'",
-        "3.1.0"
-      )
-      def apply(
-          name: String,
-          tpe: DocumentedJsonSchema,
-          isOptional: Boolean,
-          documentation: Option[String]
-      ): Field = new Field(name, tpe, isOptional, None, documentation)
+    object Field {
 
       def apply(
           name: String,
@@ -223,16 +189,6 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
           documentation: Option[String]
       ): Field = new Field(name, tpe, isOptional, defaultValue, documentation)
 
-      @deprecated("Use field extractors instead of unapply", "3.1.0")
-      def unapply(field: Field): Option[(String, DocumentedJsonSchema, Boolean, Option[String])] =
-        Some(
-          (
-            field.name,
-            field.tpe,
-            field.isOptional,
-            field.documentation
-          )
-        )
     }
 
     sealed abstract class DocumentedCoProd extends DocumentedJsonSchema {
