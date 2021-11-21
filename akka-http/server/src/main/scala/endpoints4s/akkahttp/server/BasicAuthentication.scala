@@ -17,31 +17,31 @@ import endpoints4s.{Tupler, Valid, Validated, algebra}
 trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWithCustomErrors {
 
   private[endpoints4s] def authenticatedRequest[U, E, H, UE, HCred, Out](
-      m: Method,
-      u: Url[U],
+      method: Method,
+      url: Url[U],
       entity: RequestEntity[E],
-      h: RequestHeaders[H],
+      headers: RequestHeaders[H],
       requestDocs: Documentation
   )(implicit
       tuplerUE: Tupler.Aux[U, E, UE],
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
-  ): Request[Out] =
+  ): Request[Out] = {
+    val (m, u, e, h) = (method, url, entity, headers)
     new Request[Out] {
       type UrlData = U
+      type HeadersData = (H, Option[Credentials])
+      type EntityData = E
+
       def url: Url[UrlData] = u
       def method: Method = m
-      type RequestEntityData = E
-      type HeaderData = (H, Option[Credentials])
-      def requestEntity: RequestEntity[RequestEntityData] = entity
-      def headers: RequestHeaders[HeaderData] = h ++ authHeader
-      def documentation: Documentation = requestDocs
+      def entity: RequestEntity[EntityData] = e
+      def headers: RequestHeaders[HeadersData] = h ++ authHeader
 
-      ///
       private[server] def aggregateAndValidate(
           urlData: UrlData,
-          entityData: RequestEntityData,
-          headersData: HeaderData
+          entityData: EntityData,
+          headersData: HeadersData
       ): Validated[Out] =
         headersData match {
           case (_, None) =>
@@ -54,7 +54,6 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
           case (h, Some(credentials)) =>
             Valid(tuplerUEHCred(tuplerUE(urlData, entityData), tuplerHCred(h, credentials)))
         }
-      ///
 
       lazy val authHeader: RequestHeaders[Option[Credentials]] =
         httpHeaders =>
@@ -67,7 +66,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
           )
 
       private[server] def matchAndParseHeadersDirective
-          : Directive1[Validated[(UrlData, HeaderData)]] =
+          : Directive1[Validated[(UrlData, HeadersData)]] =
         matchAndProvideParsedUrlAndHeadersData(method, url, headers).flatMap {
           case Valid((_, (_, None /* credentials */ ))) =>
             Directives.complete(
@@ -87,5 +86,6 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
         u
       }
     }
+  }
 
 }

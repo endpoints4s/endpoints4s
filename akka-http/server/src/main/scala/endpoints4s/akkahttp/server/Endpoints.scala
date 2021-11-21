@@ -24,6 +24,7 @@ trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with Bu
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
+    with algebra.internal.RequestData
     with Urls
     with Methods
     with StatusCodes {
@@ -32,18 +33,14 @@ trait EndpointsWithCustomErrors
     def decode(httpRequest: HttpRequest): Validated[A]
   }
 
-  trait Request[A] {
-
-    type UrlData
-    type RequestEntityData
-    type HeaderData
+  trait Request[A] extends RequestData[A] {
 
     /** A directive that extracts an `A` from an incoming request */
     final lazy val directive: Directive1[A] =
       matchAndParseHeadersDirective.flatMap {
         case invalid: Invalid => handleClientErrors(invalid)
         case Valid((urlData, headersData)) =>
-          requestEntity.flatMap { entityData =>
+          entity.flatMap { entityData =>
             val validated = aggregateAndValidate(urlData, entityData, headersData)
             validated match {
               case Valid(value)     => Directives.provide(value)
@@ -65,21 +62,15 @@ trait EndpointsWithCustomErrors
       *   - a value `Invalid(errors)` in case the URL and headers had validation
       *     errors.
       */
-    private[server] def matchAndParseHeadersDirective: Directive1[Validated[(UrlData, HeaderData)]]
+    private[server] def matchAndParseHeadersDirective: Directive1[Validated[(UrlData, HeadersData)]]
 
     /** The URI of a request carrying the given `a` parameter */
     final def uri(a: A): Uri = url.uri(urlData(a))
-    def url: Url[UrlData]
-    def urlData(a: A): UrlData
-    def method: Method
-    def documentation: Documentation
-    def requestEntity: RequestEntity[RequestEntityData]
-    def headers: RequestHeaders[HeaderData]
 
     private[server] def aggregateAndValidate(
         urlData: UrlData,
-        entityData: RequestEntityData,
-        headerData: HeaderData
+        entityData: EntityData,
+        headersData: HeadersData
     ): Validated[A]
   }
 
@@ -179,24 +170,23 @@ trait EndpointsWithCustomErrors
       def xmapPartial[A, B](fa: Request[A], f: A => Validated[B], g: B => A): Request[B] =
         new Request[B] {
           type UrlData = fa.UrlData
+          type HeadersData = fa.HeadersData
+          type EntityData = fa.EntityData
+
           def urlData(b: B): UrlData = fa.urlData(g(b))
           def url: Url[UrlData] = fa.url
           def method: Method = fa.method
-          def documentation: Documentation = fa.documentation
 
-          type RequestEntityData = fa.RequestEntityData
-          type HeaderData = fa.HeaderData
-          def requestEntity: RequestEntity[RequestEntityData] = fa.requestEntity
-          def headers: RequestHeaders[HeaderData] = fa.headers
-
+          def entity: RequestEntity[EntityData] = fa.entity
+          def headers: RequestHeaders[HeadersData] = fa.headers
           def aggregateAndValidate(
               urlData: fa.UrlData,
-              entityData: fa.RequestEntityData,
-              headerData: fa.HeaderData
-          ): Validated[B] = fa.aggregateAndValidate(urlData, entityData, headerData).flatMap(f)
+              entityData: fa.EntityData,
+              headersData: fa.HeadersData
+          ): Validated[B] = fa.aggregateAndValidate(urlData, entityData, headersData).flatMap(f)
 
           private[server] lazy val matchAndParseHeadersDirective
-              : Directive1[Validated[(UrlData, HeaderData)]] =
+              : Directive1[Validated[(UrlData, HeadersData)]] =
             matchAndProvideParsedUrlAndHeadersData(method, url, headers)
         }
     }
@@ -340,40 +330,43 @@ trait EndpointsWithCustomErrors
   }
 
   def request[A, B, C, AB, Out](
-      m: Method,
-      u: Url[A],
+      method: Method,
+      url: Url[A],
       entity: RequestEntity[B] = emptyRequest,
       docs: Documentation = None,
-      h: RequestHeaders[C] = emptyRequestHeaders
+      headers: RequestHeaders[C] = emptyRequestHeaders
   )(implicit
       tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
-  ): Request[Out] = new Request[Out] {
-    type UrlData = A
-    type RequestEntityData = B
-    type HeaderData = C
-    val url: Url[A] = u
-    def method: Method = m
-    def documentation: Documentation = docs
-    def requestEntity: RequestEntity[B] = entity
-    def headers: RequestHeaders[C] = h
+  ): Request[Out] = {
+    val (m, u, e, h) = (method, url, entity, headers)
+    new Request[Out] {
+      type UrlData = A
+      type HeadersData = C
+      type EntityData = B
 
-    def urlData(out: Out): UrlData = {
-      val (ab, _) = tuplerABC.unapply(out)
-      val (a, _) = tuplerAB.unapply(ab)
-      a
+      def url: Url[A] = u
+      def method: Method = m
+      def entity: RequestEntity[B] = e
+      def headers: RequestHeaders[C] = h
+
+      def urlData(out: Out): UrlData = {
+        val (ab, _) = tuplerABC.unapply(out)
+        val (a, _) = tuplerAB.unapply(ab)
+        a
+      }
+
+      private[server] def aggregateAndValidate(
+          urlData: UrlData,
+          entityData: EntityData,
+          headersData: HeadersData
+      ): Validated[Out] =
+        Valid(tuplerABC(tuplerAB(urlData, entityData), headersData))
+
+      private[server] lazy val matchAndParseHeadersDirective
+          : Directive1[Validated[(UrlData, HeadersData)]] =
+        matchAndProvideParsedUrlAndHeadersData(method, url, headers)
     }
-
-    private[server] def aggregateAndValidate(
-        urlData: UrlData,
-        entityData: RequestEntityData,
-        headerData: HeaderData
-    ): Validated[Out] =
-      Valid(tuplerABC(tuplerAB(urlData, entityData), headerData))
-
-    private[server] lazy val matchAndParseHeadersDirective
-        : Directive1[Validated[(UrlData, HeaderData)]] =
-      matchAndProvideParsedUrlAndHeadersData(method, url, headers)
   }
 
   def endpoint[A, B](
@@ -434,37 +427,29 @@ trait EndpointsWithCustomErrors
     new Request[tupler.Out] {
 
       type UrlData = currentRequest.UrlData
+      type HeadersData = (currentRequest.HeadersData, H)
+      type EntityData = currentRequest.EntityData
+
       def url: Url[UrlData] = currentRequest.url
-
-//      def directive: Directive1[tupler.Out] =
-//        (currentRequest.directive & requestHeadersDirective(headers))
-//          .tmap { case (a, (_, h2)) =>
-//            tupler(a, h2)
-//          }
-
       def urlData(a: tupler.Out): UrlData = currentRequest.urlData(tupler.unapply(a)._1)
       def method: Method = currentRequest.method
-      def documentation: Documentation = currentRequest.documentation
+      def entity: RequestEntity[EntityData] = currentRequest.entity
 
-      type RequestEntityData = currentRequest.RequestEntityData
-      type HeaderData = (currentRequest.HeaderData, H)
-      def requestEntity: RequestEntity[RequestEntityData] = currentRequest.requestEntity
-
-      def headers: RequestHeaders[HeaderData] =
+      def headers: RequestHeaders[HeadersData] =
         (httpRequest: HttpRequest) =>
           currentRequest.headers.decode(httpRequest).zip(heads.decode(httpRequest))
 
       def aggregateAndValidate(
           urlData: UrlData,
-          entityData: RequestEntityData,
-          headerData: HeaderData
+          entityData: EntityData,
+          headersData: HeadersData
       ): Validated[tupler.Out] =
         currentRequest
-          .aggregateAndValidate(urlData, entityData, headerData._1)
-          .map(tupler(_, headerData._2))
+          .aggregateAndValidate(urlData, entityData, headersData._1)
+          .map(tupler(_, headersData._2))
 
       private[server] lazy val matchAndParseHeadersDirective
-          : Directive1[Validated[(UrlData, HeaderData)]] =
+          : Directive1[Validated[(UrlData, HeadersData)]] =
         matchAndProvideParsedUrlAndHeadersData(method, url, headers)
     }
 
@@ -474,13 +459,13 @@ trait EndpointsWithCustomErrors
   )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
     new Request[tupler.Out] {
       type UrlData = (request.UrlData, Q)
-      def url: Url[UrlData] = request.url.addQueryString(qs)
+      type HeadersData = request.HeadersData
+      type EntityData = request.EntityData
 
-//      def directive: Directive1[tupler.Out] =
-//        (request.directive & qs.directive) // TODO: is this correct, seems to lose the information here
-//          .tmap { case (a, h) =>
-//            tupler(a, h)
-//          }
+      def method: Method = request.method
+      def url: Url[UrlData] = request.url.addQueryString(qs)
+      def entity: RequestEntity[EntityData] = request.entity
+      def headers: RequestHeaders[HeadersData] = request.headers
 
       def urlData(o: tupler.Out): UrlData = {
         val (a, q) = tupler.unapply(o)
@@ -488,23 +473,15 @@ trait EndpointsWithCustomErrors
         (urlData, q)
       }
 
-      def method: Method = request.method
-      def documentation: Documentation = request.documentation
-
-      type RequestEntityData = request.RequestEntityData
-      type HeaderData = request.HeaderData
-      def requestEntity: RequestEntity[RequestEntityData] = request.requestEntity
-      def headers: RequestHeaders[HeaderData] = request.headers
-
       private[server] def aggregateAndValidate(
           urlData: UrlData,
-          entityData: RequestEntityData,
-          headerData: HeaderData
+          entityData: EntityData,
+          headersData: HeadersData
       ): Validated[tupler.Out] =
-        request.aggregateAndValidate(urlData._1, entityData, headerData).map(tupler(_, urlData._2))
+        request.aggregateAndValidate(urlData._1, entityData, headersData).map(tupler(_, urlData._2))
 
       private[server] lazy val matchAndParseHeadersDirective
-          : Directive1[Validated[(UrlData, HeaderData)]] =
+          : Directive1[Validated[(UrlData, HeadersData)]] =
         matchAndProvideParsedUrlAndHeadersData(method, url, headers)
     }
 
