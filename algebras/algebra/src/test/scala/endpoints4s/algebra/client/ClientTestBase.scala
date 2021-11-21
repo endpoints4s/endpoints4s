@@ -1,50 +1,20 @@
 package endpoints4s.algebra.client
 
-import java.net.ServerSocket
-
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import endpoints4s.algebra
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatest.BeforeAndAfter
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AsyncWordSpec
 
 import scala.concurrent.Future
-import scala.concurrent.duration._
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
 trait ClientTestBase[T <: algebra.Endpoints]
-    extends AnyWordSpec
+    extends AsyncWordSpec
     with Matchers
-    with ScalaFutures
     with BeforeAndAfterAll
     with BeforeAndAfter {
 
-  override implicit def patienceConfig: PatienceConfig =
-    PatienceConfig(15.seconds, 10.millisecond)
-
-  val wiremockPort = findOpenPort
-  val wireMockServer =
-    new WireMockServer(
-      options()
-        .port(wiremockPort)
-        .gzipDisabled(true)
-//        .notifier(new com.github.tomakehurst.wiremock.common.ConsoleNotifier(true))
-    )
-
-  override def beforeAll(): Unit = wireMockServer.start()
-
-  override def afterAll(): Unit = wireMockServer.stop()
-
-  before {
-    wireMockServer.resetAll()
-  }
-
-  def findOpenPort: Int = {
-    val socket = new ServerSocket(0)
-    try socket.getLocalPort
-    finally if (socket != null) socket.close()
-  }
+  val stubServerPort = 8080
 
   val client: T
 
@@ -52,7 +22,4 @@ trait ClientTestBase[T <: algebra.Endpoints]
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp]
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String
-
 }

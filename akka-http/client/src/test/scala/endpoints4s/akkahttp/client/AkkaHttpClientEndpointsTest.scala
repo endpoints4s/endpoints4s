@@ -41,14 +41,14 @@ class AkkaHttpClientEndpointsTest
   val client: TestClient = new TestClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", wiremockPort)
+        .cachedHostConnectionPool("localhost", stubServerPort)
     )
   )
 
   val streamingClient: TestClient = new TestClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", streamingPort)
+        .cachedHostConnectionPool("localhost", stubServerPort)
     )
   )
 
@@ -56,8 +56,6 @@ class AkkaHttpClientEndpointsTest
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp] = endpoint(args)
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   def callStreamedEndpoint[A, B](
       endpoint: streamingClient.Endpoint[A, streamingClient.Chunks[B]],
@@ -71,9 +69,9 @@ class AkkaHttpClientEndpointsTest
 
   def callStreamedEndpoint[A, B](
       endpoint: streamingClient.Endpoint[streamingClient.Chunks[A], B],
-      req: Source[A, _]
+      req: Seq[A]
   ): Future[B] =
-    endpoint(req)
+    endpoint(Source.fromIterator(() => req.iterator))
 
   clientTestSuite()
   basicAuthSuite()

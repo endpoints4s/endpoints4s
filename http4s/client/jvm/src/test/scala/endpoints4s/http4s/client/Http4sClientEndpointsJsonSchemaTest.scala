@@ -8,9 +8,7 @@ import org.http4s.client.Client
 import cats.effect.IO
 import scala.concurrent.Future
 
-import akka.stream.scaladsl.Source
 import akka.actor.ActorSystem
-import ConverterSyntax._
 import akka.stream.Materializer
 import cats.effect
 
@@ -20,8 +18,11 @@ import org.http4s.Uri
 
 import cats.effect.unsafe.implicits.global
 
-class TestJsonSchemaClient[F[_]: Concurrent](authority: Uri.Authority, scheme: Uri.Scheme, client: Client[F])
-    extends Endpoints[F](authority, scheme, client)
+class TestJsonSchemaClient[F[_]: Concurrent](
+    authority: Uri.Authority,
+    scheme: Uri.Scheme,
+    client: Client[F]
+) extends Endpoints[F](authority, scheme, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
     with ChunkedJsonEntities
@@ -52,7 +53,7 @@ class Http4sClientEndpointsJsonSchemaTest
   val client = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(wiremockPort)
+      port = Some(stubServerPort)
     ),
     Uri.Scheme.http,
     ahc
@@ -68,22 +69,12 @@ class Http4sClientEndpointsJsonSchemaTest
     eventualResponse.unsafeToFuture()
   }
 
-  def encodeUrl[A](url: client.Url[A])(a: A): String = {
-    val (path, query) = url.encodeUrl(a)
-    (path.isEmpty, query.isEmpty) match {
-      case (true, true)   => ""
-      case (false, true)  => s"/${path.renderString}"
-      case (true, false)  => s"?${query.renderString}"
-      case (false, false) => s"/${path.renderString}?${query.renderString}"
-    }
-  }
-
   override def callStreamedEndpoint[A, B](
       endpoint: streamingClient.Endpoint[fs2.Stream[IO, A], B],
-      req: Source[A, _]
+      req: Seq[A]
   ): Future[B] =
     endpoint
-      .send(req.preMaterialize()._2.toStream)
+      .send(fs2.Stream.emits(req))
       .use(res => IO.pure(res))
       .unsafeToFuture()
 
@@ -99,7 +90,7 @@ class Http4sClientEndpointsJsonSchemaTest
   override val streamingClient = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(streamingPort)
+      port = Some(stubServerPort)
     ),
     Uri.Scheme.http,
     ahc

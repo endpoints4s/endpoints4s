@@ -19,6 +19,14 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
+    - run: sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080" &
+    - name: Wait for StubServer to be ready
+      uses: cygnetdigital/wait_for_response@v2.0.0
+      with:
+        url: 'http://localhost:8080/'
+        responseCode: '200'
+        timeout: 20000
+        interval: 100
     - run: sbt ++2.12.13 test
 
   test213:
@@ -33,6 +41,14 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
+    - run: sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080" &
+    - name: Wait for StubServer to be ready
+      uses: cygnetdigital/wait_for_response@v2.0.0
+      with:
+        url: 'http://localhost:8080/'
+        responseCode: '200'
+        timeout: 20000
+        interval: 100
     - run: sbt ++2.13.7 coverage test coverageReport coverageAggregate manual/makeSite
     - run: bash <(curl -s https://codecov.io/bash)
 
@@ -46,6 +62,14 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
+    - run: sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080" &
+    - name: Wait for StubServer to be ready
+      uses: cygnetdigital/wait_for_response@v2.0.0
+      with:
+        url: 'http://localhost:8080/'
+        responseCode: '200'
+        timeout: 20000
+        interval: 100
     - run: sbt "++ 3.0.2 compile" "++ 3.0.2 ;json-schemaJVM/test;json-schemaJS/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test"
 
   versionPolicy:

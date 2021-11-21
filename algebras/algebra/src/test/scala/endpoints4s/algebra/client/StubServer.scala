@@ -1,0 +1,437 @@
+package endpoints4s.algebra.client
+
+import java.net.ServerSocket
+
+import akka.actor.ActorSystem
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.model.headers._
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
+
+import scala.concurrent.ExecutionContextExecutor
+import scala.concurrent.Future
+import scala.util.Failure
+import scala.util.Success
+import scala.util.Try
+
+// can start with sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080"
+// Win - Start-Process -NoNewWindow sbt -ArgumentList "`"algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080`""
+// Linux - sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080" &
+// Use sbt-revolver in development - project algebraJVM; set test/reStartArgs := Seq("8080"); set test/reStart/mainClass := Some("endpoints4s.algebra.client.StubServer"); reStart.
+// sbt-revolver not work because of https://github.com/spray/sbt-revolver/issues/82.
+object StubServer extends App {
+
+  val port = args.headOption.map(_.toInt).getOrElse {
+    val socket = new ServerSocket(0)
+    try socket.getLocalPort
+    finally if (socket != null) socket.close()
+  }
+
+  implicit val actorSystem: ActorSystem = ActorSystem("StubServer")
+  implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
+
+  val serverSource = Http().newServerAt("localhost", 8080).connectionSource()
+
+  val requestHandler: HttpRequest => Future[HttpResponse] = {
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/user/f3ac9be0-6339-4650-afb6-7305ece8edce/description?name=name1&age=18"
+        ) =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/user/userId/description?name=name1&age=18") =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri("/user/userId/whatever?id=1bdae951-63ee-46b9-8ff0-4976acb8d48e") =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/user/userId/whatever?id=1bdae951-63ee-46b9-8ff0-4976acb8d48e&age=18"
+        ) =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/user/userId/whatever?name=name1"
+        ) =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/user/userId/whatever?name=name1&age=18"
+        ) =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/error/user/userId/description?name=name1&age=18"
+        ) =>
+      HttpResponse(StatusCodes.NotImplemented)
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/detailed/error/user/userId/description?name=name1&age=18"
+        ) =>
+      HttpResponse(StatusCodes.InternalServerError, entity = "[\"Unable to process your request\"]")
+    case HttpRequest(
+          GET,
+          uri,
+          headers,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/joinedHeadersEndpoint"
+        ) && headers.find(_.name == "A").exists(_.value == "a") && headers
+          .find(_.name == "B")
+          .exists(_.value == "b") =>
+      HttpResponse(entity = "29d15495-55ea-431e-bef3-392b05b14fef")
+    case HttpRequest(
+          GET,
+          uri,
+          headers,
+          _,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/xmapHeadersEndpoint"
+        ) && headers.find(_.name == "C").exists(_.value == "11") =>
+      HttpResponse(entity = "f2ed5a13-9113-4717-9b21-65cd72a5540e")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/xmapUrlEndpoint/11") =>
+      HttpResponse(entity = "f4e4ccbf-710a-4b38-bf8b-a9eb0a92382c")
+    case r @ HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        ) if uri.toRelative == Uri("/xmapReqBodyEndpoint") =>
+      Unmarshal(requestEntity)
+        .to[String]
+        .flatMap {
+          case value if value == "2018-04-14" =>
+            HttpResponse(entity = "dbb2297e-ae8c-4413-aab3-978833794c79")
+          case _ =>
+            matcherExhausted(r)
+        }
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/users/1") =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/not/found/users/1") =>
+      HttpResponse(StatusCodes.NotFound, entity = "")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/user/") =>
+      HttpResponse()
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/versioned-resource") =>
+      HttpResponse(
+        entity = "foo",
+        headers = Seq(
+          `Access-Control-Expose-Headers`("ETag"),
+          ETag("d88b0456-67cb-40e5-8f0a-7664f3e93348"),
+          `Last-Modified`(DateTime(2021, 1, 1, 12, 30))
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/optional-response-header/some") =>
+      HttpResponse(
+        entity = "foo",
+        headers = Seq(
+          `Access-Control-Expose-Headers`("A"), {
+            final class A(value: String) extends ModeledCustomHeader[A] {
+              override def renderInRequests = true
+              override def renderInResponses = true
+              override val companion = A
+              override def value: String = value
+            }
+            object A extends ModeledCustomHeaderCompanion[A] {
+              override val name = "A"
+              override def parse(value: String) = Try(new A(value))
+            }
+            A("a")
+          }
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/optional-response-header/none") =>
+      HttpResponse(entity = "foo")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/basic-auth/success") =>
+      HttpResponse(entity = "wiremockeResponse")
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/basic-auth/failure") =>
+      HttpResponse(StatusCodes.Forbidden)
+    case r @ HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        ) if uri.toRelative == Uri("/user-json-codec") =>
+      Unmarshal(requestEntity)
+        .to[String]
+        .flatMap {
+          case value if value == "{\"name\":\"name2\",\"age\":19}" =>
+            HttpResponse(entity = "{\"street\":\"avenue1\",\"city\":\"NY\"}")
+          case _ =>
+            matcherExhausted(r)
+        }
+    case r @ HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        ) if uri.toRelative == Uri("/user") =>
+      Unmarshal(requestEntity)
+        .to[String]
+        .flatMap {
+          case value if value == "{\"name\":\"name2\",\"age\":19}" =>
+            HttpResponse(entity = "{\"street\":\"avenue1\",\"city\":\"NY\"}")
+          case _ =>
+            matcherExhausted(r)
+        }
+    case HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/text"
+        ) && requestEntity.contentType == ContentTypes.`text/plain(UTF-8)` =>
+      HttpResponse(entity = "Oekraïene")
+    case HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        )
+        if uri.toRelative == Uri(
+          "/user-or-name"
+        ) && (requestEntity.contentType == ContentTypes.`application/json` || requestEntity.contentType == ContentTypes.`text/plain(UTF-8)`) =>
+      HttpResponse()
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/bytes") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(
+          ContentTypes.`application/octet-stream`,
+          Source(
+            List(
+              ByteString(0.toByte),
+              ByteString(1.toByte),
+              ByteString(2.toByte)
+            )
+          )
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/text") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(
+          ContentTypes.`text/plain(UTF-8)`,
+          Source(
+            List(
+              ByteString("aaa"),
+              ByteString("bbb"),
+              ByteString("ccc")
+            )
+          )
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/notifications") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(
+          ContentTypes.`application/json`,
+          Source(
+            List(
+              ByteString("{\"value\":1}"),
+              ByteString("{\"value\":2}"),
+              ByteString("{\"value\":3}")
+            )
+          )
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/notifications/error") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(
+          ContentTypes.`application/json`,
+          Source(
+            List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}"))
+          )
+        )
+      )
+    case r @ HttpRequest(
+          POST,
+          uri,
+          _,
+          requestEntity,
+          _
+        ) if uri.toRelative == Uri("/upload") =>
+      val bytes = requestEntity.dataBytes.map(_.toArray)
+      bytes
+        .runWith[Future[Seq[Array[Byte]]]](Sink.seq)
+        .map { result =>
+          // matching arrays is a bit funky without the help of scalatest utilities
+          if (
+            result.size == 2 &&
+            result.headOption.exists(_.sameElements(Array[Byte](1, 2, 3))) && result.lastOption
+              .exists(_.sameElements(Array[Byte](4, 5, 6)))
+          ) {
+            HttpResponse()
+          } else {
+            matcherExhausted(r)
+          }
+        }
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if Set(Uri("/"), Uri("")).contains(uri.toRelative) =>
+      HttpResponse(entity = "StubServer running!")
+    case r: HttpRequest =>
+      matcherExhausted(r)
+  }
+
+  private def matcherExhausted(r: HttpRequest) = {
+    val error = s"Request matcher exhausted for request [$r]."
+    println(error)
+    r.discardEntityBytes() // important to drain incoming HTTP Entity stream
+    HttpResponse(404, entity = error)
+  }
+
+  implicit def toFuture[T](value: T): Future[T] = Future.successful(value)
+
+  val bindingFuture: Future[Http.ServerBinding] =
+    serverSource
+      .to(Sink.foreach { connection => connection handleWithAsyncHandler requestHandler })
+      .run()
+
+  bindingFuture.onComplete {
+    case Success(binding) =>
+      val address = binding.localAddress
+      println(s"Stub server online at http://${address.getHostString}:${address.getPort}/")
+    case Failure(ex) =>
+      println(s"Failed to bind HTTP endpoint, terminating system ${ex.toString}")
+  }
+}

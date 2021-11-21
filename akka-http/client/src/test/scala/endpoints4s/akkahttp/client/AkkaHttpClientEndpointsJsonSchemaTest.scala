@@ -32,7 +32,7 @@ class AkkaHttpClientEndpointsJsonSchemaTest
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", wiremockPort)
+        .cachedHostConnectionPool("localhost", stubServerPort)
     )
   )
 

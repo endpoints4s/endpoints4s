@@ -218,4 +218,58 @@ trait EndpointsTestApi extends algebra.Endpoints {
         docs.withSummary(docs.summary.map(_ + " (mapped)"))
       }
 
+  val errorEndpoint = endpoint(
+    get(
+      path / "error" / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
+    ok(textResponse)
+  )
+
+  val emptyResponseErrorEndpoint = endpoint(
+    get(
+      path / "error" / "user" / segment[String]() / "description" /? (qs[String]("name") & qs[
+        Int
+      ]("age"))
+    ),
+    ok(emptyResponse)
+  )
+
+  val detailedErrorEndpoint = endpoint(
+    get(
+      path / "detailed" / "error" / "user" / segment[String]() / "description" /? (qs[String](
+        "name"
+      ) & qs[
+        Int
+      ]("age"))
+    ),
+    ok(textResponse)
+  )
+
+  val emptyResponseDetailedErrorEndpoint = endpoint(
+    get(
+      path / "detailed" / "error" / "user" / segment[String]() / "description" /? (qs[String](
+        "name"
+      ) & qs[
+        Int
+      ]("age"))
+    ),
+    ok(emptyResponse)
+  )
+
+  val notFoundOptionalEndpoint: Endpoint[Unit, Option[String]] = endpoint(
+    get(path / "not" / "found" / "users" / "1"),
+    wheneverFound(ok(textResponse))
+  )
+
+  val someOptionalResponseHeader = endpoint(
+    get(path / "optional-response-header" / "some"),
+    ok(textResponse, headers = optResponseHeader("A"))
+  )
+
+  val noneOptionalResponseHeader = endpoint(
+    get(path / "optional-response-header" / "none"),
+    ok(textResponse, headers = optResponseHeader("A"))
+  )
 }
