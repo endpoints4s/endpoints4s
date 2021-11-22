@@ -1,4 +1,4 @@
-package endpoints4s.algebra.client
+package endpoints4s.stubserver
 
 import java.net.ServerSocket
 
@@ -18,11 +18,14 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-// can start with sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080"
-// Win - Start-Process -NoNewWindow sbt -ArgumentList "`"algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080`""
-// Linux - sbt "algebraJVM/test:runMain endpoints4s.algebra.client.StubServer 8080" &
-// Use sbt-revolver in development - project algebraJVM; set test/reStartArgs := Seq("8080"); set test/reStart/mainClass := Some("endpoints4s.algebra.client.StubServer"); reStart.
-// sbt-revolver not work because of https://github.com/spray/sbt-revolver/issues/82.
+/** *
+  * Start detached:
+  * {{{sbt --client "stub-server/reStart 8080"}}}
+  * Win - {{{Start-Process -NoNewWindow sbt -ArgumentList "`"run 8080`""}}}
+  * Linux - {{{sbt "run 8080" &}}}
+  * In development:
+  * sbt "~stub-server/reStart 8080"
+  */
 object StubServer extends App {
 
   val port = args.headOption.map(_.toInt).getOrElse {
