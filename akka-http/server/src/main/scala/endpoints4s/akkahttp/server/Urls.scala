@@ -95,14 +95,6 @@ trait Urls extends algebra.Urls with StatusCodes {
   trait QueryString[T] {
     def validate(params: Map[String, List[String]]): Validated[T]
     def encode(t: T): Uri.Query
-
-    final def directive: Directive1[T] =
-      Directives.parameterMultiMap.tflatMap { query =>
-        validate(query._1) match {
-          case inv: Invalid => handleClientErrors(inv)
-          case Valid(a)     => Directives.provide(a)
-        }
-      }
   }
 
   implicit lazy val queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
