@@ -18,25 +18,15 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-/** Start detached:
-  * {{{sbt --client "stub-server/reStart 8080"}}}
-  * Win - {{{Start-Process -NoNewWindow sbt -ArgumentList "`"run 8080`""}}}
-  * Linux - {{{sbt "run 8080" &}}}
-  * In development:
-  * sbt "~stub-server/reStart 8080"
+/** In development:
+  * sbt "~stub-server/reStart"
   */
 object StubServer extends App {
-
-  val port = args.headOption.map(_.toInt).getOrElse {
-    val socket = new ServerSocket(0)
-    try socket.getLocalPort
-    finally if (socket != null) socket.close()
-  }
 
   implicit val actorSystem: ActorSystem = ActorSystem("StubServer")
   implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
-  val serverSource = Http().newServerAt("localhost", 8080).connectionSource()
+  val serverSource = Http().newServerAt("0.0.0.0", 8080).connectionSource()
 
   val requestHandler: HttpRequest => Future[HttpResponse] = {
     case HttpRequest(
