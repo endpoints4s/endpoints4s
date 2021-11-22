@@ -16,10 +16,27 @@ val `xhr-client` =
       libraryDependencies ++= Seq(
         "org.scala-js" %%% "scalajs-dom" % "2.0.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
+      ),
+      Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
+        new org.openqa.selenium.chrome.ChromeOptions().addArguments(
+          // recommended options
+          "--headless", // necessary for CI
+          "--disable-gpu",
+          "--window-size=1920,1200",
+          "--ignore-certificate-errors",
+          "--disable-extensions",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
     .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
     .dependsOn(LocalProject("openapiJS"))
+    .dependsOn(LocalProject("algebra-circeJS") % "test->test")
+    .dependsOn(LocalProject("json-schema-genericJS") % "test->test")
 
 val `xhr-client-faithful` =
   project
@@ -34,7 +51,23 @@ val `xhr-client-faithful` =
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
-      libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0").cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0")
+        .cross(CrossVersion.for3Use2_13),
+      Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
+        new org.openqa.selenium.chrome.ChromeOptions().addArguments(
+          // recommended options
+          "--headless", // necessary for CI
+          "--disable-gpu",
+          "--window-size=1920,1200",
+          "--ignore-certificate-errors",
+          "--disable-extensions",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
+      )
     )
     .dependsOn(`xhr-client`)
 
@@ -52,7 +85,21 @@ val `xhr-client-circe` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
-      jsEnv := new org.scalajs.jsenv.jsdomnodejs.JSDOMNodeJSEnv()
+      Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
+        new org.openqa.selenium.chrome.ChromeOptions().addArguments(
+          // recommended options
+          "--headless", // necessary for CI
+          "--disable-gpu",
+          "--window-size=1920,1200",
+          "--ignore-certificate-errors",
+          "--disable-extensions",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
+      )
     )
     .dependsOn(
       `xhr-client` % "test->test;compile->compile",
