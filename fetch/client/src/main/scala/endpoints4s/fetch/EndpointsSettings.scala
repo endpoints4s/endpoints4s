@@ -9,7 +9,6 @@ final class EndpointsSettings(val host: Option[String]) extends Serializable {
   override def toString =
     s"EndpointsSettings($host)"
 
-  @nowarn("cat=unchecked")
   override def equals(other: Any): Boolean =
     other match {
       case that: EndpointsSettings =>
@@ -19,6 +18,7 @@ final class EndpointsSettings(val host: Option[String]) extends Serializable {
 
   override def hashCode(): Int = Hashing.hash(host)
 
+  @nowarn("cat=unused")
   private[this] def copy(
       host: Option[String] = host
   ): EndpointsSettings =

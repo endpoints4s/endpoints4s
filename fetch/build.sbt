@@ -50,8 +50,7 @@ val `fetch-client-circe` =
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
-      libraryDependencies += ("io.circe" %%% "circe-parser" % circeVersion)
-        .cross(CrossVersion.for3Use2_13),
+      libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options

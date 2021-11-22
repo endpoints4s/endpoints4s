@@ -8,6 +8,7 @@ import endpoints4s.fetch.JsonEntitiesFromSchemas
 import endpoints4s.generic
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
@@ -27,7 +28,7 @@ class FetchClientEndpointsJsonSchemaTest
     extends ClientTestBase[TestJsonSchemaClient]
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 
-  implicit override def executionContext = JSExecutionContext.queue
+  implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings()
