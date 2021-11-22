@@ -24,7 +24,6 @@ trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with Bu
   */
 trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
-    with algebra.internal.RequestData
     with Urls
     with Methods
     with StatusCodes {
@@ -33,7 +32,31 @@ trait EndpointsWithCustomErrors
     def decode(httpRequest: HttpRequest): Validated[A]
   }
 
-  trait Request[A] extends RequestData[A] {
+  trait Request[A] {
+
+    /** The type parameter of the headers, part of the whole complete input type A. */
+    type HeadersData
+
+    /** The type parameter of the request entity, part of the whole complete input type A. */
+    type EntityData
+
+    /** The type parameter of the headers, part of the whole complete input type A. */
+    type UrlData
+
+    /** The URL component of this request */
+    def url: Url[UrlData]
+
+    /** The headers component of this request */
+    def headers: RequestHeaders[HeadersData]
+
+    /** The method of this request */
+    def method: Method
+
+    /* Extract the UrlData from the complete output type of this request */
+    def urlData(a: A): UrlData
+
+    /** The entity of this request */
+    def entity: RequestEntity[EntityData]
 
     /** A directive that extracts an `A` from an incoming request */
     final lazy val directive: Directive1[A] =
