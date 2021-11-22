@@ -4,20 +4,11 @@ import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.Future
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends ClientTestBase[T] {
-
+protected trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
+    extends ClientTestBase[T] {
   val streamingClient: T
 
-  import streamingClient.{
-    Counter,
-    Endpoint,
-    Chunks,
-    streamedEndpointTest,
-    streamedEndpointErrorTest,
-    uploadEndpointTest,
-    streamedTextEndpointTest,
-    streamedBytesEndpointTest
-  }
+  import streamingClient.{Endpoint, Chunks}
 
   /** Calls the endpoint and accumulates the messages sent by the server.
     * (only endpoints streaming a finite number of items can be tested)
@@ -30,6 +21,17 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
       endpoint: Endpoint[Chunks[A], B],
       req: Seq[A]
   ): Future[B]
+}
+
+trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonEntitiesTestApi]
+    extends ChunkedJsonEntitiesTestSuite[T] {
+  import streamingClient.{
+    Counter,
+    streamedEndpointTest,
+    streamedEndpointErrorTest,
+    streamedTextEndpointTest,
+    streamedBytesEndpointTest
+  }
 
   "Decode bytes chunks streamed by a server" in {
 
@@ -66,6 +68,11 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
     callStreamedEndpoint(streamedEndpointErrorTest, ())
       .map(_ shouldEqual expectedItems)
   }
+}
+
+trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonEntitiesTestApi]
+    extends ChunkedJsonEntitiesTestSuite[T] {
+  import streamingClient.{uploadEndpointTest}
 
   "Encode chunks uploaded to a server" in {
 
@@ -74,5 +81,4 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Clie
     callStreamedEndpoint(uploadEndpointTest, expectedItems)
       .map(_ => succeed)
   }
-
 }

@@ -40,7 +40,7 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
-    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
+    with client.ChunkedJsonEntitiesResponseTestSuite[TestJsonSchemaClient[IO]] {
 
   implicit val system = ActorSystem()
   implicit val materializer: Materializer = Materializer.createMaterializer(system)

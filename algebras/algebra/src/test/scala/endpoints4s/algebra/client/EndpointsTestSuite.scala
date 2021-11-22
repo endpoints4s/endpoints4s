@@ -5,7 +5,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.EndpointsTestApi
 
 trait ClientEndpointsTestApi extends EndpointsTestApi {
