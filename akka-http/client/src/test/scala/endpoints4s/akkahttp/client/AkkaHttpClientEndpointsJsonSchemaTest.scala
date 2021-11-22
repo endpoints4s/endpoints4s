@@ -41,8 +41,6 @@ class AkkaHttpClientEndpointsJsonSchemaTest
       args: Req
   ): Future[Resp] = endpoint(args)
 
-  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
-
   clientTestSuite()
   basicAuthSuite()
 
