@@ -139,10 +139,13 @@ trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] 
         call(client.versionedResource, ())
           .map { case (entity, cache) =>
             assert(entity == response)
+            assert(cache.etag == s""""$etag"""")
             assert(
-              cache.etag == (s"\"$etag\"")
+              ZonedDateTime.parse(
+                cache.lastModified,
+                DateTimeFormatter.RFC_1123_DATE_TIME
+              ) == lastModified
             )
-            assert(ZonedDateTime.parse(cache.lastModified, DateTimeFormatter.RFC_1123_DATE_TIME) == lastModified)
           }
       }
 

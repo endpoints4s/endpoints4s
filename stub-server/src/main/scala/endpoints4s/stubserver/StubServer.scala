@@ -18,8 +18,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-/** *
-  * Start detached:
+/** Start detached:
   * {{{sbt --client "stub-server/reStart 8080"}}}
   * Win - {{{Start-Process -NoNewWindow sbt -ArgumentList "`"run 8080`""}}}
   * Linux - {{{sbt "run 8080" &}}}
