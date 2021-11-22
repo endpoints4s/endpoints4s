@@ -10,18 +10,18 @@ class MiddlewaresTest extends AnyWordSpec with Matchers {
   object Documentation extends algebra.EndpointsTestApi with Endpoints
 
   "Documentation of mapped requests is enriched with additional information" in {
-    Documentation.mappedEndpointRight.request.headers.value shouldBe List(
+    Documentation.mappedEndpoint.request.headers.value shouldBe List(
       Documentation.DocumentedHeader("If-None-Match", None, true, Schema.simpleString),
       Documentation.DocumentedHeader("If-Modified-Since", None, true, Schema.simpleString)
     )
-    Documentation.mappedEndpointRight.request.url.queryParameters shouldBe List(
+    Documentation.mappedEndpoint.request.url.queryParameters shouldBe List(
       Documentation.DocumentedParameter("x", true, None, Schema.simpleInteger),
       Documentation.DocumentedParameter("y", true, None, Schema.simpleInteger)
     )
   }
 
   "Documentation of mapped response is enriched with additional information" in {
-    Documentation.mappedEndpointRight.response shouldBe List(
+    Documentation.mappedEndpoint.response shouldBe List(
       Documentation.DocumentedResponse(304, "", Documentation.DocumentedHeaders(Nil), Map.empty),
       Documentation.DocumentedResponse(
         200,
@@ -38,7 +38,7 @@ class MiddlewaresTest extends AnyWordSpec with Matchers {
   }
 
   "Documentation of mapped endpoints is transformed" in {
-    Documentation.mappedEndpointRight.docs.summary shouldBe Some("Initial summary (mapped)")
+    Documentation.mappedEndpoint.docs.summary shouldBe Some("Initial summary (mapped)")
   }
 
 }
