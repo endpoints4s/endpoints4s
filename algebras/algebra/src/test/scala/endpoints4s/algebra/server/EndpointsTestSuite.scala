@@ -3,7 +3,14 @@ package endpoints4s.algebra.server
 import java.time.LocalDate
 import java.util.UUID
 import akka.http.scaladsl.model.HttpMethods.{DELETE, GET, PUT}
-import akka.http.scaladsl.model.headers.{Authorization, BasicHttpCredentials, ETag, RawHeader, `Access-Control-Allow-Origin`, `Last-Modified`}
+import akka.http.scaladsl.model.headers.{
+  Authorization,
+  BasicHttpCredentials,
+  ETag,
+  RawHeader,
+  `Access-Control-Allow-Origin`,
+  `Last-Modified`
+}
 import akka.http.scaladsl.model.{DateTime, HttpMethods, HttpRequest, StatusCodes}
 import endpoints4s.{Invalid, Valid}
 
@@ -384,9 +391,13 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       }
 
       serveEndpoint(serverApi.putEndpointMapped, Some(())) { port =>
-      val header = Authorization(BasicHttpCredentials("user", "pass"))
+        val header = Authorization(BasicHttpCredentials("user", "pass"))
         val request =
-          HttpRequest(method = PUT, uri = s"http://localhost:$port/user/foo123", headers = List(header))
+          HttpRequest(
+            method = PUT,
+            uri = s"http://localhost:$port/user/foo123",
+            headers = List(header)
+          )
         whenReady(send(request)) { case (response, entity) =>
           assert(entity.isEmpty)
           assert(response.status.intValue() == 200)
@@ -630,7 +641,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
     }
 
     "handle mapped endpoints" in {
-      serveEndpoint(serverApi.mappedEndpoint, Left(())) { port =>
+      serveEndpoint(serverApi.mappedEndpointLeft, Left(())) { port =>
         // empty request
         val request1 =
           HttpRequest(method = GET, uri = s"http://localhost:$port/mapped")
@@ -644,13 +655,19 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
               "Missing value for query parameter 'x'",
               "Missing value for query parameter 'y'"
             )
-          assert(expectedErrors.forall(errors.contains(_)), s"Missing errors: ${expectedErrors.diff(errors)}")
+          assert(
+            expectedErrors.forall(errors.contains(_)),
+            s"Missing errors: ${expectedErrors.diff(errors)}"
+          )
           ()
         }
         // happy path
         val request2 =
           HttpRequest(method = GET, uri = s"http://localhost:$port/mapped?x=1&y=2")
-            .withHeaders(RawHeader("If-None-Match", "\"xxx\""), RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT"))
+            .withHeaders(
+              RawHeader("If-None-Match", "\"xxx\""),
+              RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")
+            )
         whenReady(sendAndDecodeEntityAsText(request2)) { case (response, entity) =>
           assert(response.status.intValue() == 304)
           assert(entity == "")
@@ -658,11 +675,17 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         }
       }
 
-      serveEndpoint(serverApi.mappedEndpoint, Right(("\"yyy\"", "Wed, 21 Oct 2015 17:28:00 GMT"))) { port =>
+      serveEndpoint(
+        serverApi.mappedEndpointRight,
+        Right(("\"yyy\"", "Wed, 21 Oct 2015 17:28:00 GMT"))
+      ) { port =>
         // happy path
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/mapped?x=1&y=2")
-            .withHeaders(RawHeader("If-None-Match", "\"xxx\""), RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT"))
+            .withHeaders(
+              RawHeader("If-None-Match", "\"xxx\""),
+              RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")
+            )
         whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
           assert(response.status.intValue() == 200)
           assert(response.headers.contains(ETag("yyy")))

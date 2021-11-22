@@ -191,10 +191,37 @@ trait EndpointsTestApi extends algebra.Endpoints {
     ).xmap((TransformedResponse.apply _).tupled)(r => (r.entity, r.etag))
   )
 
-  val mappedEndpoint: Endpoint[(Int, String, Int, String), Either[Unit, (String, String)]] =
+  val mappedEndpointLeft: Endpoint[(Int, String, Int, String), Either[Unit, (String, String)]] =
     endpoint(
       get(
-        path / "mapped" /? qs[Int]("x"),
+        path / "mapped-left" /? qs[Int]("x"),
+        headers = requestHeader("If-None-Match")
+      ),
+      ok(
+        emptyResponse,
+        headers = responseHeader("ETag")
+      ),
+      EndpointDocs().withSummary(Some("Initial summary"))
+    )
+      .mapRequest { endpointRequest =>
+        endpointRequest
+          .addQueryString(qs[Int]("y"))
+          .addHeaders(requestHeader("If-Modified-Since"))
+      }
+      .mapResponse { endpointResponse =>
+        response(NotModified, emptyResponse).orElse(
+          endpointResponse
+            .addHeaders(responseHeader("Last-Modified"))
+        )
+      }
+      .mapDocs { docs =>
+        docs.withSummary(docs.summary.map(_ + " (mapped)"))
+      }
+
+  val mappedEndpointRight: Endpoint[(Int, String, Int, String), Either[Unit, (String, String)]] =
+    endpoint(
+      get(
+        path / "mapped-right" /? qs[Int]("x"),
         headers = requestHeader("If-None-Match")
       ),
       ok(

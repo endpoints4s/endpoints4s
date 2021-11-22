@@ -13,8 +13,11 @@ import org.http4s.dom.FetchClientBuilder
 
 import scala.concurrent.Future
 
-class TestJsonSchemaClient[F[_]: Concurrent](host: Uri, client: Client[F])
-    extends Endpoints[F](host, client)
+class TestJsonSchemaClient[F[_]: Concurrent](
+    authority: Uri.Authority,
+    scheme: Uri.Scheme,
+    client: Client[F]
+) extends Endpoints[F](authority, scheme, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
     with algebra.BasicAuthenticationTestApi
@@ -33,7 +36,11 @@ class Http4sClientEndpointsJsonSchemaTest
   type EffectResource[A] = effect.Resource[IO, A]
 
   val client = new TestJsonSchemaClient[IO](
-    Uri.unsafeFromString(s"http://localhost:$stubServerPort"),
+    Uri.Authority(
+      host = Uri.RegName("localhost"),
+      port = Some(stubServerPort)
+    ),
+    Uri.Scheme.http,
     FetchClientBuilder[IO].create
   )
 

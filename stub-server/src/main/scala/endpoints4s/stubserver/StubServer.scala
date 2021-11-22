@@ -396,6 +396,38 @@ object StubServer extends App {
     case HttpRequest(
           GET,
           uri,
+          headers,
+          _,
+          _
+        )
+        if uri.toRelative == Uri("/mapped-left?x=1&y=2") && headers
+          .find(_.lowercaseName() == "If-None-Match".toLowerCase)
+          .exists(_.value == "\"xxx\"") && headers
+          .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
+          .exists(_.value == "Wed, 21 Oct 2015 07:28:00 GMT") =>
+      HttpResponse(StatusCodes.NotModified)
+    case HttpRequest(
+          GET,
+          uri,
+          headers,
+          _,
+          _
+        )
+        if uri.toRelative == Uri("/mapped-right?x=1&y=2") && headers
+          .find(_.lowercaseName() == "If-None-Match".toLowerCase)
+          .exists(_.value == "foo") && headers
+          .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
+          .exists(_.value == "bar") =>
+      HttpResponse(
+        headers = Seq(
+          `Access-Control-Expose-Headers`("ETag"),
+          ETag("xxx"),
+          `Last-Modified`(DateTime(2015, 10, 21, 7, 28))
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
           _,
           _,
           _
