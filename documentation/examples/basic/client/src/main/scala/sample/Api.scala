@@ -9,4 +9,6 @@ object Api
     with JsonEntitiesFromCodecs
     with Assets
     with thenable.Endpoints
-    with BasicAuthentication
+    with BasicAuthentication {
+  val settings: EndpointsSettings = EndpointsSettings()
+}

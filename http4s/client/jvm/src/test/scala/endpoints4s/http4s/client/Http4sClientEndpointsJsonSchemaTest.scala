@@ -8,8 +8,6 @@ import org.http4s.client.Client
 import cats.effect.IO
 import scala.concurrent.Future
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
 import cats.effect
 
 import _root_.org.http4s.asynchttpclient.client.AsyncHttpClient
@@ -41,9 +39,6 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
     with client.ChunkedJsonEntitiesResponseTestSuite[TestJsonSchemaClient[IO]] {
-
-  implicit val system = ActorSystem()
-  implicit val materializer: Materializer = Materializer.createMaterializer(system)
 
   type EffectResource[A] = effect.Resource[IO, A]
 
