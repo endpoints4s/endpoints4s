@@ -395,14 +395,12 @@ object StubServer extends App {
         }
     case HttpRequest(
           GET,
-          uri,
+          uri @ Uri.Path("/mapped-left"),
           headers,
           _,
           _
         )
-        if (uri.toRelative == Uri("/mapped-left?x=1&y=2") || uri.toRelative == Uri(
-          "/mapped-left?y=2&x=1"
-        )) && headers
+        if uri.query().get("x").contains("1") && uri.query().get("y").contains("2") && headers
           .find(_.lowercaseName() == "If-None-Match".toLowerCase)
           .exists(_.value == "\"xxx\"") && headers
           .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
@@ -410,14 +408,12 @@ object StubServer extends App {
       HttpResponse(StatusCodes.NotModified)
     case HttpRequest(
           GET,
-          uri,
+          uri @ Uri.Path("/mapped-right"),
           headers,
           _,
           _
         )
-        if (uri.toRelative == Uri("/mapped-right?x=1&y=2") || uri.toRelative == Uri(
-          "/mapped-right?y=2&x=1"
-        )) && headers
+        if uri.query().get("x").contains("1") && uri.query().get("y").contains("2") && headers
           .find(_.lowercaseName() == "If-None-Match".toLowerCase)
           .exists(_.value == "foo") && headers
           .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
