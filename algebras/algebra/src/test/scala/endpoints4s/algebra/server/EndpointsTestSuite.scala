@@ -663,7 +663,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
         }
         // happy path
         val request2 =
-          HttpRequest(method = GET, uri = s"http://localhost:$port/mapped?x=1&y=2")
+          HttpRequest(method = GET, uri = s"http://localhost:$port/mapped-left?x=1&y=2")
             .withHeaders(
               RawHeader("If-None-Match", "\"xxx\""),
               RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")
@@ -681,7 +681,7 @@ trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends Serv
       ) { port =>
         // happy path
         val request =
-          HttpRequest(method = GET, uri = s"http://localhost:$port/mapped?x=1&y=2")
+          HttpRequest(method = GET, uri = s"http://localhost:$port/mapped-right?x=1&y=2")
             .withHeaders(
               RawHeader("If-None-Match", "\"xxx\""),
               RawHeader("If-Modified-Since", "Wed, 21 Oct 2015 07:28:00 GMT")
