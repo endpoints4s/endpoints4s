@@ -100,4 +100,9 @@ trait Responses extends algebra.Responses with StatusCodes with Headers {
       List(DocumentedHeader(name, docs, required = false, Schema.simpleString))
     )
 
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    response.map(r => r.copy(headers = DocumentedHeaders(r.headers.value ++ headers.value)))
 }

@@ -7,11 +7,11 @@ import endpoints4s.algebra
   */
 trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
 
-  type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = DocumentedEndpoint
+  type MuxEndpoint[Req <: MuxRequest, Resp, Transport] = Endpoint[Req, Resp]
 
   def muxEndpoint[Req <: MuxRequest, Resp, Transport](
       request: Request[Transport],
       response: Response[Transport]
-  ): MuxEndpoint[Req, Resp, Transport] = endpoint(request, response)
+  ): MuxEndpoint[Req, Resp, Transport] = endpoint[Req, Resp](request, response)
 
 }

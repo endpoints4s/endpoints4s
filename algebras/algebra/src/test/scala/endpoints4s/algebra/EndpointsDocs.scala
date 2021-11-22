@@ -102,6 +102,76 @@ trait EndpointsDocs extends Endpoints {
       }
     }(_.toString)
   //#xmap-partial
+
+  locally {
+    //#without-middlewares
+    val xApiKeyHeader = requestHeader("X-API-Key", Some("API Key"))
+
+    val foo = endpoint(
+      get(path / "foo", headers = xApiKeyHeader),
+      ok(textResponse)
+    )
+
+    val bar = endpoint(
+      get(path / "bar", headers = xApiKeyHeader),
+      ok(textResponse)
+    )
+    //#without-middlewares
+  }: @nowarn("cat=unused-locals")
+
+  locally {
+    //#with-middlewares
+    def withApiKey[A](request: Request[A]): Request[(A, String)] =
+      request.addHeaders(requestHeader("X-API-Key", Some("API Key")))
+
+    val foo = endpoint(
+      withApiKey(get(path / "foo")),
+      ok(textResponse)
+    )
+
+    val bar = endpoint(
+      withApiKey(get(path / "bar")),
+      ok(textResponse)
+    )
+    //#with-middlewares
+  }: @nowarn("cat=unused-locals")
+
+  locally {
+    //#api-key-query
+    def withApiKey[A](request: Request[A]): Request[(A, String)] =
+      request.addQueryString(qs[String]("api_key"))
+    //#api-key-query
+  }: @nowarn("cat=unused-locals")
+
+  //#with-authentication-definition
+  def withAuthentication[A, B](
+      endpoint: Endpoint[A, B]
+  ): Endpoint[(A, String), Either[String, B]] =
+    endpoint
+      .mapRequest { (endpointRequest: Request[A]) =>
+        endpointRequest.addHeaders(requestHeader("Authorization"))
+      }
+      .mapResponse { (endpointResponse: Response[B]) =>
+        val unauthorizedResponse: Response[String] =
+          response(
+            Unauthorized,
+            emptyResponse,
+            headers = responseHeader("WWW-Authenticate")
+          )
+        unauthorizedResponse.orElse(endpointResponse)
+      }
+  //#with-authentication-definition
+
+  //#with-authentication-usage
+  val unauthenticatedEndpoint: Endpoint[Int, String] =
+    endpoint(
+      get(path / "foo" /? qs[Int]("n")),
+      ok(textResponse)
+    )
+  val authenticatedEndpoint: Endpoint[(Int, String), Either[String, String]] =
+    withAuthentication(unauthenticatedEndpoint)
+  //#with-authentication-usage
+
 }
 
 //#documented-endpoint-definition

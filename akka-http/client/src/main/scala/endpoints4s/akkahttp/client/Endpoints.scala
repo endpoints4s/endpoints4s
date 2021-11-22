@@ -95,7 +95,7 @@ trait EndpointsWithCustomErrors
       case x                             => throw InvalidHeaderDefinition(x)
     }
 
-  type Request[A] = A => Future[HttpResponse]
+  type Request[A] = A => Future[HttpRequest]
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
@@ -146,10 +146,35 @@ trait EndpointsWithCustomErrors
         if (settings.baseUri == Uri("/")) Uri(url.encode(a))
         else Uri(s"${settings.baseUri.path}${url.encode(a)}")
 
-      val request = method(entity(b, HttpRequest(uri = uri)))
-        .withHeaders(headers(c, List.empty))
+      Future.successful(
+        method(entity(b, HttpRequest(uri = uri)))
+          .withHeaders(headers(c, List.empty))
+      )
+    }
 
-      settings.requestExecutor(request)
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, h) = tupler.unapply(tuplerOut)
+      val httpRequest = request(a)
+      for (req <- httpRequest) yield req.withHeaders(headers(h, req.headers.toList))
+    }
+
+  override def addRequestQueryString[A, B](
+      request: Request[A],
+      qs: QueryString[B]
+  )(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, q) = tupler.unapply(tuplerOut)
+      val httpRequest = request(a)
+      for (req <- httpRequest)
+        yield req.withUri(
+          req.uri.withQuery(
+            Uri.Query(req.uri.query() ++ Uri.Query(qs.encodeQueryString(q)): _*)
+          )
+        )
     }
 
   // Defines how to decode the entity according to the status code value and response headers
@@ -157,6 +182,20 @@ trait EndpointsWithCustomErrors
       StatusCode,
       scala.collection.immutable.Seq[HttpHeader]
   ) => Option[ResponseEntity[A]]
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (status, httpHeaders) =>
+      response(status, httpHeaders).map(
+        mapPartialResponseEntity(_) { a =>
+          headers(httpHeaders) match {
+            case Valid(h)        => Right(tupler(a, h))
+            case Invalid(errors) => Left(new Exception(errors.mkString(". ")))
+          }
+        }
+      )
 
   implicit lazy val responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
@@ -276,17 +315,17 @@ trait EndpointsWithCustomErrors
         .orElse(responseB(status, headers).map(mapResponseEntity(_)(Right(_))))
 
   //#endpoint-type
-  type Endpoint[A, B] = A => Future[B]
-  //#endpoint-type
-
-  def endpoint[A, B](
+  case class Endpoint[A, B](
       request: Request[A],
-      response: Response[B],
-      docs: EndpointDocs = EndpointDocs()
-  ): Endpoint[A, B] =
-    a =>
-      request(a).flatMap { httpResponse =>
-        decodeResponse(response, httpResponse) match {
+      response: Response[B]
+  ) extends (A => Future[B])
+      //#endpoint-type
+      {
+    def apply(a: A): Future[B] =
+      for {
+        httpRequest <- request(a)
+        httpResponse <- settings.requestExecutor(httpRequest)
+        decodedResponse <- decodeResponse(response, httpResponse) match {
           case Some(entityB) =>
             entityB(httpResponse.entity).flatMap(futureFromEither)
           case None =>
@@ -298,7 +337,30 @@ trait EndpointsWithCustomErrors
               )
             )
         }
-      }
+      } yield decodedResponse
+  }
+
+  def endpoint[A, B](
+      request: Request[A],
+      response: Response[B],
+      docs: EndpointDocs = EndpointDocs()
+  ): Endpoint[A, B] =
+    Endpoint(request, response)
+
+  override def mapEndpointRequest[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = currentEndpoint.copy(request = func(currentEndpoint.request))
+
+  override def mapEndpointResponse[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = currentEndpoint.copy(response = func(currentEndpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      currentEndpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] = currentEndpoint
 
   // Make sure to try decoding client and error responses
   private[client] def decodeResponse[A](

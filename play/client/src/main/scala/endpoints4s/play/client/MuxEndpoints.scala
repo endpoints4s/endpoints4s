@@ -21,7 +21,7 @@ trait MuxEndpoints extends algebra.Endpoints {
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
     ): Future[req.Response] =
-      request(encoder.encode(req)).flatMap { wsResponse =>
+      request(encoder.encode(req)).execute().flatMap { wsResponse =>
         futureFromEither(
           decodeResponse(response, wsResponse).flatMap { entity =>
             entity(wsResponse).flatMap { t =>

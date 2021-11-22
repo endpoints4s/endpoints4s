@@ -90,9 +90,9 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  /** A function that takes an `A` information and eventually returns a `WSResponse`
+  /** A function that takes an `A` information returns the `WSRequest` to be executed
     */
-  type Request[A] = A => Future[WSResponse]
+  type Request[A] = A => WSRequest
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
@@ -144,10 +144,7 @@ trait EndpointsWithCustomErrors
     (abc: Out) => {
       val (ab, c) = tuplerABC.unapply(abc)
       val (a, b) = tuplerAB.unapply(ab)
-      val wsRequest = method(
-        entity(b, headers(c, wsClient.url(s"$host${url.encode(a)}")))
-      )
-      wsRequest.execute()
+      method(entity(b, headers(c, wsClient.url(s"$host${url.encode(a)}"))))
     }
 
   /** Function returning the entity decoder from the response status and headers
@@ -261,20 +258,24 @@ trait EndpointsWithCustomErrors
     * Communication failures and protocol failures are represented by a `Future.failed`.
     */
   //#concrete-carrier-type
-  type Endpoint[A, B] = A => Future[B]
-  //#concrete-carrier-type
+  case class Endpoint[A, B](request: Request[A], response: Response[B])
+      extends (A => Future[B])
+      //#concrete-carrier-type
+      {
+    def apply(a: A): Future[B] =
+      request(a).execute().flatMap { wsResp =>
+        futureFromEither(
+          decodeResponse(response, wsResp).flatMap(entity => entity(wsResp))
+        )
+      }
+  }
 
   def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] =
-    a =>
-      request(a).flatMap { wsResp =>
-        futureFromEither(
-          decodeResponse(response, wsResp).flatMap(entity => entity(wsResp))
-        )
-      }
+    Endpoint(request, response)
 
   // Make sure try decoding client error or server error responses
   private[client] def decodeResponse[A](
@@ -307,6 +308,64 @@ trait EndpointsWithCustomErrors
         new Throwable(s"Unexpected response status: ${wsResponse.status}")
       )
   }
+
+  override def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    endpoint.copy(request = f(endpoint.request))
+
+  override def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    endpoint.copy(response = f(endpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (status, httpHeaders) =>
+      response(status, httpHeaders).map(
+        mapPartialResponseEntity(_) { a =>
+          headers(httpHeaders) match {
+            case Valid(h)        => Right(tupler(a, h))
+            case Invalid(errors) => Left(new Exception(errors.mkString(". ")))
+          }
+        }
+      )
+
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, h) = tupler.unapply(tuplerOut)
+      headers(h, request(a))
+    }
+
+  override def addRequestQueryString[A, B](
+      request: Request[A],
+      qs: QueryString[B]
+  )(implicit tupler: Tupler[A, B]): Request[tupler.Out] =
+    tuplerOut => {
+      val (a, q) = tupler.unapply(tuplerOut)
+      val wsRequest = request(a)
+      qs.encodeQueryString(q) match {
+        case None => wsRequest
+        case Some(encodedQs) =>
+          if (Option(wsRequest.uri.getRawQuery()).isDefined)
+            wsRequest.withUrl(s"${wsRequest.url}&${encodedQs}")
+          else
+            wsRequest.withUrl(s"${wsRequest.url}?${encodedQs}")
+      }
+    }
 }
 
 object Endpoints {

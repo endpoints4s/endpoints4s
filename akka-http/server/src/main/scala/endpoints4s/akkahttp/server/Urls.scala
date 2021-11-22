@@ -54,13 +54,26 @@ trait Urls extends algebra.Urls with StatusCodes {
         }
     }
 
-  trait Url[A] {
+  trait Url[A] { outer =>
     def validateUrl(
         segments: List[String],
         query: Map[String, List[String]]
     ): Option[Validated[A]]
 
-    final def directive: Directive1[A] = {
+    private[server] final def addQueryString[B](queryString: QueryString[B]): Url[(A, B)] =
+      new Url[(A, B)] {
+        def validateUrl(
+            segments: List[String],
+            query: Map[String, List[String]]
+        ): Option[Validated[(A, B)]] =
+          outer.validateUrl(segments, query).map(_.zip(queryString.validate(query)))
+        def uri(ab: (A, B)): Uri = {
+          val outerUri = outer.uri(ab._1)
+          outerUri.withQuery(Uri.Query(outerUri.query() ++ queryString.encode(ab._2): _*))
+        }
+      }
+
+    final def directive: Directive1[Validated[A]] = {
       (Directives.extractUri & Directives.path(
         Directives.Segments ~ Directives.Slash.?
       ) & Directives.parameterMultiMap)
@@ -71,9 +84,8 @@ trait Urls extends algebra.Urls with StatusCodes {
             else Nil
           }
           validateUrl(segmentsLeadingTrailingSlash, query) match {
-            case None               => Directives.reject
-            case Some(inv: Invalid) => handleClientErrors(inv)
-            case Some(Valid(a))     => Directives.provide(a)
+            case None             => Directives.reject
+            case Some(validatedA) => Directives.provide(validatedA)
           }
         }
     }

@@ -104,4 +104,15 @@ trait Responses extends algebra.Responses with StatusCodes {
           responseB(resp).map(entity => (s: String) => entity(s).map(Right(_)))
         )
 
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    resp =>
+      response(resp).map(_.andThen(_.flatMap { a =>
+        headers(resp.headers) match {
+          case Valid(h)        => Right(tupler(a, h))
+          case Invalid(errors) => Left(new Exception(errors.mkString(". ")))
+        }
+      }))
 }

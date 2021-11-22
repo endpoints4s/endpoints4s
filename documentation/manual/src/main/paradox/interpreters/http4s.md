@@ -10,9 +10,8 @@ Client and server backed by [http4s](http://http4s.org).
 
 ### `endpoints4s.http4s.client.Endpoints`
 
-The `Endpoints` interpreter provides a trait `Endpoint[A, B]` defined as follows
-
-@@snip [Endpoints.scala](/http4s/client/shared/src/main/scala/endpoints4s/http4s/client/Endpoints.scala) { #endpoint-type }
+The `Endpoints` interpreter provides a trait `Endpoint[A, B]` with methods `send` and `sendAndConsume`,
+to invoke an endpoint.
 
 This means that, given the following endpoint definition:
 

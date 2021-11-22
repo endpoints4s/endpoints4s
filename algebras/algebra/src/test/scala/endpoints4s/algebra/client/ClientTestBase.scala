@@ -24,7 +24,13 @@ trait ClientTestBase[T <: algebra.Endpoints]
     PatienceConfig(15.seconds, 10.millisecond)
 
   val wiremockPort = findOpenPort
-  val wireMockServer = new WireMockServer(options().port(wiremockPort))
+  val wireMockServer =
+    new WireMockServer(
+      options()
+        .port(wiremockPort)
+        .gzipDisabled(true)
+//        .notifier(new com.github.tomakehurst.wiremock.common.ConsoleNotifier(true))
+    )
 
   override def beforeAll(): Unit = wireMockServer.start()
 

@@ -134,9 +134,9 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       tupler: Tupler[A, B]
   ): QueryString[tupler.Out] =
     new QueryString[tupler.Out] {
-      def decode(qs: Map[String, Seq[String]]) =
+      def decode(qs: Map[String, Seq[String]]): Validated[tupler.Out] =
         first.decode(qs).zip(second.decode(qs))
-      def encode(ab: tupler.Out) = {
+      def encode(ab: tupler.Out): Map[String, Seq[String]] = {
         val (a, b) = tupler.unapply(ab)
         first.encode(a) ++ second.encode(b)
       }
@@ -264,10 +264,10 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       *         if it matched and decoding succeeded
       */
     def decode(segments: List[String]): Option[(Validated[A], List[String])]
-    def encode(a: A): String
+    def encode(a: A): Seq[String]
 
     final def decodeUrl(request: RequestHeader) = pathExtractor(this, request)
-    final def encodeUrl(a: A) = encode(a)
+    final def encodeUrlComponents(a: A) = (encode(a), Map.empty)
   }
 
   implicit lazy val pathPartialInvariantFunctor: PartialInvariantFunctor[Path] =
@@ -284,7 +284,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
             fa.decode(segments).map { case (validA, rs) =>
               (validA.flatMap(f), rs)
             }
-          def encode(b: B): String = fa.encode(g(b))
+          def encode(b: B): Seq[String] = fa.encode(g(b))
         }
       override def xmap[A, B](fa: Path[A], f: A => B, g: B => A): Path[B] =
         new Path[B] {
@@ -292,7 +292,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
               segments: List[String]
           ): Option[(Validated[B], List[String])] =
             fa.decode(segments).map { case (validA, rs) => (validA.map(f), rs) }
-          def encode(b: B): String = fa.encode(g(b))
+          def encode(b: B): Seq[String] = fa.encode(g(b))
         }
     }
 
@@ -305,7 +305,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           case s :: ss if s == segment => Some((Valid(()), ss))
           case _                       => None
         }
-      def encode(unit: Unit): String = segment
+      def encode(unit: Unit): Seq[String] = segment :: Nil
     }
 
   def segment[A](name: String, docs: Documentation)(implicit
@@ -324,7 +324,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
           case Nil => None
         }
       }
-      def encode(a: A) = A.encode(a)
+      def encode(a: A): Seq[String] = A.encode(a) :: Nil
     }
 
   def remainingSegments(name: String, docs: Documentation): Path[String] =
@@ -340,8 +340,8 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
               Nil
             )
           )
-      def encode(s: String): String =
-        s // NO URL-encoding because the segments must already be URL-encoded
+      def encode(s: String): Seq[String] =
+        s :: Nil // NO URL-encoding because the segments must already be URL-encoded
     }
 
   def chainPaths[A, B](first: Path[A], second: Path[B])(implicit
@@ -356,7 +356,7 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         }
       def encode(ab: tupler.Out) = {
         val (a, b) = tupler.unapply(ab)
-        first.encode(a) ++ "/" ++ second.encode(b)
+        first.encode(a) ++ second.encode(b)
       }
     }
 
@@ -367,7 +367,23 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       *          if it matched and succeeded
       */
     def decodeUrl(req: RequestHeader): Option[Validated[A]]
-    def encodeUrl(a: A): String
+
+    /** @return a pair containing the URL-encoded segments, and
+      *         the URL-encoded query parameters
+      */
+    def encodeUrlComponents(a: A): (Seq[String], Map[String, Seq[String]])
+    final def encodeUrl(a: A): String = {
+      val (segments, parameters) = encodeUrlComponents(a)
+      val path = segments.mkString("/")
+      if (parameters.nonEmpty) {
+        val query =
+          parameters
+            .flatMap { case (k, vs) => vs.map((k, _)) }
+            .map { case (k, v) => s"$k=$v" }
+            .mkString("&")
+        s"$path?$query"
+      } else path
+    }
   }
 
   implicit lazy val urlPartialInvariantFunctor: PartialInvariantFunctor[Url] =
@@ -380,13 +396,15 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
         new Url[B] {
           def decodeUrl(req: RequestHeader): Option[Validated[B]] =
             fa.decodeUrl(req).map(_.flatMap(f))
-          def encodeUrl(b: B): String = fa.encodeUrl(g(b))
+          def encodeUrlComponents(b: B): (Seq[String], Map[String, Seq[String]]) =
+            fa.encodeUrlComponents(g(b))
         }
       override def xmap[A, B](fa: Url[A], f: A => B, g: B => A): Url[B] =
         new Url[B] {
           def decodeUrl(req: RequestHeader): Option[Validated[B]] =
             fa.decodeUrl(req).map(_.map(f))
-          def encodeUrl(b: B): String = fa.encodeUrl(g(b))
+          def encodeUrlComponents(b: B): (Seq[String], Map[String, Seq[String]]) =
+            fa.encodeUrlComponents(g(b))
         }
     }
 
@@ -398,14 +416,9 @@ trait Urls extends algebra.Urls { this: EndpointsWithCustomErrors =>
       def decodeUrl(req: RequestHeader): Option[Validated[tupler.Out]] =
         pathExtractor(path, req).map(_.zip(qs.decode(req.queryString))(tupler))
 
-      def encodeUrl(ab: tupler.Out) = {
+      def encodeUrlComponents(ab: tupler.Out): (Seq[String], Map[String, Seq[String]]) = {
         val (a, b) = tupler.unapply(ab)
-        val encodedQs =
-          qs.encode(b)
-            .flatMap { case (n, vs) => vs.map(v => (n, v)) }
-            .map { case (n, v) => s"$n=$v" }
-            .mkString("&")
-        s"${path.encode(a)}?$encodedQs"
+        (path.encode(a), qs.encode(b))
       }
     }
 

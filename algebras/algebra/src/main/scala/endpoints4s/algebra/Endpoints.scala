@@ -37,6 +37,7 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
     *
     * @tparam A Information carried by the request
     * @tparam B Information carried by the response
+    * @note This type has implicit methods provided by the [[EndpointSyntax]] class
     * @group types
     */
   type Endpoint[A, B]
@@ -53,6 +54,86 @@ trait EndpointsWithCustomErrors extends Requests with Responses with Errors {
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B]
+
+  /** Map the inner request of the endpoint to a new request. This is for example useful to add Auth headers to an
+    * existing endpoint.
+    *
+    * @param endpoint The current endpoint that is being mapped.
+    * @param func The function that maps the request to some new request.
+    * @group operations
+    * @return The endpoint with the mapped request.
+    * @example
+    * {{{
+    *   val myEndpoint: Endpoint[Input, Output] = ???
+    *   val basicAuthHeaders: RequestHeaders[Credentials] = ???
+    *
+    *   val endpointWithAuth: Endpoint[(Input, Credentials), Output] =
+    *     myEndpoint.mapRequest(_.addHeaders(basicAuthHeader))
+    * }}}
+    */
+  def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    unsupportedInterpreter("1.6.0")
+
+  /** Map the inner response of the endpoint to a new response. This is for example useful so you can add error handling
+    * to an existing endpoint.
+    *
+    * @param endpoint The current endpoint that is being mapped.
+    * @param func The function that maps the response to some new response.
+    * @group operations
+    * @return The endpoint with the mapped response.
+    * @example
+    * {{{
+    *   val myEndpoint: Endpoint[Input, Output] = ???
+    *   val errorResponse: Response[Error] = ???
+    *
+    *   val endpointWithErrorHandling: Endpoint[Input, Either[Error, Output]] =
+    *     myEndpoint.mapResponse(resp => resp orElse errorResponse)
+    * }}}
+    */
+  def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    unsupportedInterpreter("1.6.0")
+
+  /** Map the inner documentation of the endpoint to new documentation.
+    *
+    * @param endpoint The current endpoint that is being mapped.
+    * @param func The function that maps the documentation to some new documentation.
+    * @group operations
+    * @return The endpoint with the mapped documentation.
+    */
+  def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    unsupportedInterpreter("1.6.0")
+
+  /** Extension methods for [[Endpoint]].
+    *
+    * @group operations
+    */
+  implicit final class EndpointSyntax[A, B](endpoint: Endpoint[A, B]) {
+
+    /** Map the inner request of this endpoint, see [[mapEndpointRequest]]. */
+    //#map-request-signature
+    def mapRequest[C](func: Request[A] => Request[C]): Endpoint[C, B]
+    //#map-request-signature
+    = mapEndpointRequest(endpoint, func)
+
+    /** Map the inner response of this endpoint, see [[mapEndpointResponse]]. */
+    def mapResponse[C](func: Response[B] => Response[C]): Endpoint[A, C] =
+      mapEndpointResponse(endpoint, func)
+
+    /** Map the documentation of this endpoint, see [[mapEndpointDocs]].
+      */
+    def mapDocs(func: EndpointDocs => EndpointDocs): Endpoint[A, B] =
+      mapEndpointDocs(endpoint, func)
+
+  }
 
   /** @param operationId A unique identifier which identifies this operation
     * @param summary     Short description

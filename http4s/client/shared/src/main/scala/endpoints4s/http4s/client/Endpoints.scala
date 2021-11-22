@@ -18,8 +18,11 @@ import org.http4s.Status
 import org.http4s.Uri
 import cats.effect.Resource
 
-class Endpoints[F[_]: Concurrent](val host: Uri, val client: Client[F])
-    extends algebra.Endpoints
+class Endpoints[F[_]: Concurrent](
+    val authority: Uri.Authority,
+    val scheme: Uri.Scheme,
+    val client: Client[F]
+) extends algebra.Endpoints
     with EndpointsWithCustomErrors
     with BuiltInErrors {
   type Effect[A] = F[A]
@@ -35,7 +38,11 @@ trait EndpointsWithCustomErrors
   type Effect[A]
   implicit def effect: Concurrent[Effect]
 
-  def host: Uri
+  /** The authority to use to access the endpoints */
+  def authority: Uri.Authority
+
+  /** The scheme to use to access the endpoints */
+  def scheme: Uri.Scheme
   def client: Client[Effect]
 
   type RequestHeaders[A] = (A, Http4sRequest[Effect]) => Http4sRequest[Effect]
@@ -60,7 +67,6 @@ trait EndpointsWithCustomErrors
 
   implicit def requestHeadersSemigroupal: Semigroupal[RequestHeaders] =
     new Semigroupal[RequestHeaders] {
-
       override def product[A, B](fa: RequestHeaders[A], fb: RequestHeaders[B])(implicit
           tupler: Tupler[A, B]
       ): RequestHeaders[tupler.Out] =
@@ -73,7 +79,6 @@ trait EndpointsWithCustomErrors
 
   implicit def requestHeadersPartialInvariantFunctor: PartialInvariantFunctor[RequestHeaders] =
     new PartialInvariantFunctor[RequestHeaders] {
-
       override def xmapPartial[A, B](
           fa: RequestHeaders[A],
           f: A => Validated[B],
@@ -87,7 +92,6 @@ trait EndpointsWithCustomErrors
 
   implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =
     new PartialInvariantFunctor[RequestEntity] {
-
       override def xmapPartial[A, B](
           fa: RequestEntity[A],
           f: A => Validated[B],
@@ -133,27 +137,65 @@ trait EndpointsWithCustomErrors
     val (ub, headersP) = tuplerUBH.unapply(out)
     val (urlP, bodyP) = tuplerUB.unapply(ub)
 
-    effect.map(effect.fromEither(url.encodeUrl(urlP)))(uri =>
+    val (p, q) = url.encodeUrl(urlP)
+    effect.pure(
       entity(
         bodyP,
         headers(
           headersP,
           Http4sRequest(
             method,
-            host.withPath(Uri.Path.unsafeFromString(host.path.renderString + uri.renderString))
+            Uri(Some(scheme), Some(authority), p, q)
           )
         )
       )
     )
   }
 
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    out => {
+      val (a, q) = tupler.unapply(out)
+      request(a).map { http4sRequest =>
+        val updatedQueryParams =
+          http4sRequest.uri.query ++ qs(q).pairs
+        http4sRequest.withUri(
+          http4sRequest.uri.withMultiValueQueryParams(updatedQueryParams.multiParams)
+        )
+      }
+    }
+
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    out => {
+      val (a, h) = tupler.unapply(out)
+      request(a).map(headers(h, _))
+    }
+
   type Response[A] = (StatusCode, Headers) => Option[ResponseEntity[A]]
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (sc, hs) =>
+      response(sc, hs).flatMap { responseEntity =>
+        headers(hs) match {
+          case Valid(h) =>
+            Some(responseEntity.andThen(_.map(tupler(_, h))))
+          case Invalid(errors) =>
+            Some(_ => effect.raiseError(new Throwable(errors.mkString(", "))))
+        }
+      }
 
   type ResponseEntity[A] = Http4sResponse[Effect] => Effect[A]
 
   implicit def responseInvariantFunctor: InvariantFunctor[Response] =
     new InvariantFunctor[Response] {
-
       override def xmap[A, B](
           fa: (Status, Headers) => Option[Http4sResponse[Effect] => Effect[A]],
           f: A => B,
@@ -181,7 +223,6 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersSemigroupal: Semigroupal[ResponseHeaders] =
     new Semigroupal[ResponseHeaders] {
-
       override def product[A, B](
           fa: Headers => Validated[A],
           fb: Headers => Validated[B]
@@ -192,7 +233,6 @@ trait EndpointsWithCustomErrors
 
   implicit def responseHeadersInvariantFunctor: InvariantFunctor[ResponseHeaders] =
     new InvariantFunctor[ResponseHeaders] {
-
       override def xmap[A, B](
           fa: Headers => Validated[A],
           f: A => B,
@@ -243,12 +283,17 @@ trait EndpointsWithCustomErrors
       responseA(sc, hs)
         .map(_.andThen(_.map(_.asLeft[B])))
         .orElse(responseB(sc, hs).map(_.andThen(_.map(_.asRight[A]))))
-  //#endpoint-type
-  trait Endpoint[A, B] {
+
+  final class Endpoint[A, B](val request: Request[A], val response: Response[B]) {
 
     /** This method returns a Resource[Effect, B] unlike `sendAndConsume` this is always safe to use in regard to laziness
       */
-    def send(a: A): Resource[Effect, B]
+    def send(a: A): Resource[Effect, B] =
+      Resource.eval(request(a)).flatMap { req =>
+        client
+          .run(req)
+          .evalMap(res => decodeResponse(response, res).flatMap(_.apply(res)))
+      }
 
     /** This method might suffer from leaking resource if the handling of the underlying resource is lazy. Use `send` instead in this case.
       */
@@ -260,20 +305,27 @@ trait EndpointsWithCustomErrors
     )
     def apply(request: A): Effect[B] = sendAndConsume(request)
   }
-  //#endpoint-type
 
   override def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs
-  ): Endpoint[A, B] = new Endpoint[A, B] {
-    override def send(a: A): Resource[Effect, B] =
-      Resource.eval(request(a)).flatMap { req =>
-        client
-          .run(req)
-          .evalMap(res => decodeResponse(response, res).flatMap(_.apply(res)))
-      }
-  }
+  ): Endpoint[A, B] = new Endpoint[A, B](request, response)
+
+  override def mapEndpointRequest[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Request[A] => Request[C]
+  ): Endpoint[C, B] = endpoint(func(currentEndpoint.request), currentEndpoint.response)
+
+  override def mapEndpointResponse[A, B, C](
+      currentEndpoint: Endpoint[A, B],
+      func: Response[B] => Response[C]
+  ): Endpoint[A, C] = endpoint(currentEndpoint.request, func(currentEndpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      currentEndpoint: Endpoint[A, B],
+      func: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] = currentEndpoint
 
   private[client] def decodeResponse[A](
       response: Response[A],

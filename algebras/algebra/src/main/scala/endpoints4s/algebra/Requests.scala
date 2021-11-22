@@ -74,7 +74,8 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
     *     in a JSON array. Refer to the documentation of your server interpreter
     *     to customize this behavior.
     *
-    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]] class.
+    * @note This type has implicit methods provided by the [[PartialInvariantFunctorSyntax]]
+    *       and [[RequestSyntax]] classes.
     * @group types
     */
   type Request[A]
@@ -185,6 +186,22 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out]
 
+  /** Add the provided `headers` to the `request`.
+    */
+  def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    unsupportedInterpreter("1.6.0")
+
+  /** Add the provided `queryString` to the `request`.
+    */
+  def addRequestQueryString[A, Q](
+      request: Request[A],
+      queryString: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    unsupportedInterpreter("1.6.0")
+
   /** Helper method to perform GET request
     * @tparam UrlP Payload carried by url
     * @tparam HeadersP Payload carried by headers
@@ -264,5 +281,22 @@ trait Requests extends Urls with Methods with SemigroupalSyntax {
       tuplerUBH: Tupler.Aux[UrlAndBodyPTupled, HeadersP, Out]
   ): Request[Out] =
     request(Patch, url, entity, docs, headers)
+
+  /** Extension methods for [[Request]].
+    *
+    * @group operations
+    */
+  implicit final class RequestSyntax[A](request: Request[A]) {
+
+    def addHeaders[H](headers: RequestHeaders[H])(implicit
+        tupler: Tupler[A, H]
+    ): Request[tupler.Out] =
+      addRequestHeaders(request, headers)
+
+    def addQueryString[Q](qs: QueryString[Q])(implicit
+        tupler: Tupler[A, Q]
+    ): Request[tupler.Out] =
+      addRequestQueryString(request, qs)
+  }
 
 }

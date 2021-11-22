@@ -45,7 +45,7 @@ class SumTypedRequests extends AnyWordSpec with Matchers {
 
   trait Fixtures extends FixtureAlg with openapi.Endpoints with openapi.JsonEntitiesFromSchemas {
 
-    def checkRequestContentTypes[A](
+    def checkRequestContentTypes(
         endpoint: DocumentedEndpoint
     )(contentTypes: Set[String]) = {
       val foundContentTypes = endpoint.item.operations.values.iterator

@@ -1,10 +1,9 @@
 package authentication
 
 import java.time.Clock
-
-import endpoints4s.Valid
+import endpoints4s.{Valid, Validated}
 import play.api.libs.streams.Accumulator
-import play.api.mvc.BodyParser
+import play.api.mvc.{BodyParser, RequestHeader}
 //#enriched-algebra
 import endpoints4s.algebra
 
@@ -244,17 +243,46 @@ trait ServerAuthentication extends Authentication with server.Endpoints {
         )
     }
 
-    extractMethodUrlAndHeaders(method, url, authenticationTokenRequestHeaders)
-      .toRequest[UET] {
-        case (_, None) =>
-          _ => Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
-        case (u, Some(token)) =>
-          hdrs => entity(hdrs).map(_.map(e => tuplerUET(tuplerUE(u, e), token)))
-      } { uet =>
-        val (ue, t) = tuplerUET.unapply(uet)
+    // alias parameters to not clash with `Request` members
+    val urlArg = url
+    val methodArg = method
+    val entityArg = entity
+
+    new Request[UET] {
+      type UrlData = U
+      type HeadersData = Option[AuthenticationToken]
+      type EntityData = E
+
+      def url: Url[U] = urlArg
+      def headers: RequestHeaders[Option[UserInfo]] = authenticationTokenRequestHeaders
+      def method: Method = methodArg
+      def entity: RequestEntity[E] = entityArg
+
+      def aggregateAndValidate(
+          urlData: U,
+          headersData: Option[UserInfo],
+          entityData: E
+      ): Validated[UET] =
+        headersData match {
+          case None        => sys.error("Unsupported")
+          case Some(token) => Valid(tuplerUET(tuplerUE(urlData, entityData), token))
+        }
+
+      def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[UET]] =
+        matchRequestAndParseHeaders(requestHeader) {
+          case (_, None) =>
+            _ => Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
+          case (u, Some(token)) =>
+            hs => entity(hs).map(_.map(e => tuplerUET(tuplerUE(u, e), token)))
+        }
+
+      def urlData(a: UET): U = {
+        val (ue, _) = tuplerUET.unapply(a)
         val (u, _) = tuplerUE.unapply(ue)
-        (u, Some(t))
+        u
       }
+
+    }
   }
 
   // Does nothing because `authenticatedReqest` already
