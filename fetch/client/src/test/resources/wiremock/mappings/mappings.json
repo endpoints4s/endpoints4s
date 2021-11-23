@@ -291,6 +291,60 @@
       "response": {
         "status": 200
       }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/mapped-left",
+        "queryParameters" : {
+          "x" : {
+            "equalTo" : "1"
+          },
+          "y" : {
+            "equalTo" : "2"
+          }
+        },
+        "headers" : {
+          "If-None-Match" : {
+            "equalTo" : "\"xxx\""
+          },
+          "If-Modified-Since" : {
+            "equalTo" : "Wed, 21 Oct 2015 07:28:00 GMT"
+          }
+        }
+      },
+      "response": {
+        "status": 304
+      },
+    {
+      "request": {
+        "method": "GET",
+        "url": "/mapped-right",
+        "queryParameters" : {
+          "x" : {
+            "equalTo" : "1"
+          },
+          "y" : {
+            "equalTo" : "2"
+          }
+        },
+        "headers" : {
+          "If-None-Match" : {
+            "equalTo" : "foo"
+          },
+          "If-Modified-Since" : {
+            "equalTo" : "bar"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Access-Control-Expose-Headers": "ETag",
+          "ETag": "\"xxx\"",
+          "Last-Modified": "Wed, 21 Oct 2015 07:28:00 GMT"
+        }
+      }
     }
   ]
 }

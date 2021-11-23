@@ -1,6 +1,7 @@
 package endpoints4s.fetch
 
 import endpoints4s.Decoder
+import endpoints4s.Hashing
 import endpoints4s.Invalid
 import endpoints4s.InvariantFunctor
 import endpoints4s.PartialInvariantFunctor
@@ -14,6 +15,7 @@ import org.scalajs.dom.Fetch
 import org.scalajs.dom.{Headers => FetchHeaders}
 import org.scalajs.dom.{RequestInit => FetchRequestInit}
 import org.scalajs.dom.{Response => FetchResponse}
+import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 
 import scala.concurrent.ExecutionContext
 import scala.scalajs.js
@@ -81,7 +83,11 @@ trait EndpointsWithCustomErrors
         }
     }
 
-  type Request[A] = A => (FetchUrl, FetchRequestInit)
+  trait Request[A] {
+    def apply(a: A): RequestData
+
+    def href(a: A): String
+  }
 
   implicit def requestPartialInvariantFunctor: PartialInvariantFunctor[Request] =
     new PartialInvariantFunctor[Request] {
@@ -90,7 +96,10 @@ trait EndpointsWithCustomErrors
           f: A => Validated[B],
           g: B => A
       ): Request[B] =
-        (b: B) => fa(g(b))
+        new Request[B] {
+          def apply(b: B): RequestData = fa(g(b))
+          def href(b: B): String = fa.href(g(b))
+        }
     }
 
   type RequestEntity[A] = (A, FetchRequestInit) => Unit
@@ -129,26 +138,19 @@ trait EndpointsWithCustomErrors
       tuplerAB: Tupler.Aux[A, B, AB],
       tuplerABC: Tupler.Aux[AB, C, Out]
   ): Request[Out] =
-    (abc: Out) => {
-      val (ab, c) = tuplerABC.unapply(abc)
-      val (a, b) = tuplerAB.unapply(ab)
-      val (fetchUrl, requestInit) = makeFetch(method, url, a, headers, c)
-      entity(b, requestInit)
-      (fetchUrl, requestInit)
-    }
+    new Request[Out] {
+      def apply(abc: Out) = {
+        val (ab, c) = tuplerABC.unapply(abc)
+        val (_, b) = tuplerAB.unapply(ab)
+        RequestData(method, headers(c, _), requestInit => entity(b, requestInit))
+      }
 
-  private def makeFetch[A, B](
-      method: Method,
-      url: Url[A],
-      a: A,
-      headers: RequestHeaders[B],
-      b: B
-  ) = {
-    val requestInit = new FetchRequestInit {}
-    requestInit.method = method
-    headers(b, requestInit)
-    (FetchUrl(url.encode(a)), requestInit)
-  }
+      def href(abc: Out) = {
+        val (ab, _) = tuplerABC.unapply(abc)
+        val (a, _) = tuplerAB.unapply(ab)
+        url.encode(a)
+      }
+    }
 
   type Response[A] = js.Function1[FetchResponse, Option[ResponseEntity[A]]]
 
@@ -270,7 +272,8 @@ trait EndpointsWithCustomErrors
         .map(mapResponseEntity(_)(Left(_)))
         .orElse(responseB(response).map(mapResponseEntity(_)(Right(_))))
 
-  type Endpoint[A, B] = A => Result[B]
+  abstract class Endpoint[A, B](val request: Request[A], val response: Response[B])
+      extends (A => Result[B])
 
   type Result[A]
 
@@ -282,9 +285,12 @@ trait EndpointsWithCustomErrors
       onload: Either[Throwable, B] => Unit,
       onerror: Throwable => Unit
   ): Unit = {
-    val (url, requestInit) = request(a)
-    val f = Fetch
-      .fetch(settings.host.getOrElse("") + url.underlying, requestInit)
+    val requestData = request(a)
+    val requestInit = new FetchRequestInit {}
+    requestInit.method = requestData.method
+    requestData.prepare(requestInit)
+    requestData.entity(requestInit)
+    val f = Fetch.fetch(settings.host.getOrElse("") + request.href(a), requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
         val maybeResponse = response(fetchResponse)
@@ -338,4 +344,123 @@ trait EndpointsWithCustomErrors
     )
     ()
   }
+
+  override def mapEndpointRequest[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Request[A] => Request[C]
+  ): Endpoint[C, B] =
+    this.endpoint(f(endpoint.request), endpoint.response)
+
+  override def mapEndpointResponse[A, B, C](
+      endpoint: Endpoint[A, B],
+      f: Response[B] => Response[C]
+  ): Endpoint[A, C] =
+    this.endpoint(endpoint.request, f(endpoint.response))
+
+  override def mapEndpointDocs[A, B](
+      endpoint: Endpoint[A, B],
+      f: EndpointDocs => EndpointDocs
+  ): Endpoint[A, B] =
+    endpoint
+
+  override def addRequestHeaders[A, H](
+      request: Request[A],
+      headers: RequestHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      def apply(out: tupler.Out): RequestData = {
+        val (a, h) = tupler.unapply(out)
+        val requestData = request(a)
+        requestData.withPrepare(xhr => {
+          requestData.prepare(xhr)
+          headers(h, xhr)
+        })
+      }
+
+      def href(out: tupler.Out): String =
+        request.href(tupler.unapply(out)._1)
+    }
+
+  override def addRequestQueryString[A, Q](
+      request: Request[A],
+      qs: QueryString[Q]
+  )(implicit tupler: Tupler[A, Q]): Request[tupler.Out] =
+    new Request[tupler.Out] {
+      def apply(out: tupler.Out): RequestData =
+        request(tupler.unapply(out)._1)
+
+      def href(out: tupler.Out): String = {
+        val (a, q) = tupler.unapply(out)
+        val url = request.href(a)
+        qs.encode(q) match {
+          case Some(queryString) =>
+            if (url.contains('?')) s"$url&$queryString"
+            else s"$url?$queryString"
+          case None => url
+        }
+      }
+    }
+
+  override def addResponseHeaders[A, H](
+      response: Response[A],
+      headers: ResponseHeaders[H]
+  )(implicit tupler: Tupler[A, H]): Response[tupler.Out] =
+    (fetchResponse: FetchResponse) =>
+      response(fetchResponse).map[ResponseEntity[tupler.Out]] { a =>
+        headers(fetchResponse) match {
+          case Valid(h) =>
+            mapResponseEntity(a)(tupler(_, h))
+          case Invalid(errors) =>
+            (_: FetchResponse) =>
+              js.Promise.resolve[Either[Throwable, tupler.Out]](
+                Left(new Exception(errors.mkString(". ")))
+              )
+        }
+      }
+}
+
+final class RequestData private (
+    val method: FetchHttpMethod,
+    val prepare: js.Function1[FetchRequestInit, Unit],
+    val entity: js.Function1[FetchRequestInit, Unit]
+) extends Serializable {
+
+  override def toString: String =
+    s"RequestData($method, $prepare, $entity)"
+
+  override def equals(obj: Any): Boolean = obj match {
+    case other: RequestData =>
+      method == other.method && prepare == other.prepare && entity == other.entity
+    case _ =>
+      false
+  }
+
+  override def hashCode(): Int =
+    Hashing.hash(method, prepare, entity)
+
+  def withMethod(method: FetchHttpMethod): RequestData =
+    copy(method = method)
+
+  def withPrepare(prepare: js.Function1[FetchRequestInit, Unit]): RequestData =
+    copy(prepare = prepare)
+
+  def withEntity(entity: js.Function1[FetchRequestInit, Unit]): RequestData =
+    copy(entity = entity)
+
+  private def copy(
+      method: FetchHttpMethod = method,
+      prepare: js.Function1[FetchRequestInit, Unit] = prepare,
+      entity: js.Function1[FetchRequestInit, Unit] = entity
+  ): RequestData = new RequestData(method, prepare, entity)
+
+}
+
+object RequestData {
+
+  def apply(
+      method: FetchHttpMethod,
+      prepare: js.Function1[FetchRequestInit, Unit],
+      entity: js.Function1[FetchRequestInit, Unit]
+  ): RequestData =
+    new RequestData(method, prepare, entity)
 }

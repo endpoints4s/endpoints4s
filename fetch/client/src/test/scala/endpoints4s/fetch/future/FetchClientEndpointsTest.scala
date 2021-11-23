@@ -251,6 +251,16 @@ class FetchClientEndpointsTest
           (entity, header) shouldEqual (("foo", None))
         }
     }
+
+    "Handle mapped endpoint left response" in {
+      call(client.mappedEndpointLeft, (1, "\"xxx\"", 2, "Wed, 21 Oct 2015 07:28:00 GMT"))
+        .map(response => assert(response == Left(())))
+    }
+
+    "Handle mapped endpoint right response" in {
+      call(client.mappedEndpointRight, (1, "foo", 2, "bar"))
+        .map(response => assert(response == Right(("\"xxx\"", "Wed, 21 Oct 2015 07:28:00 GMT"))))
+    }
   }
 
   "Client interpreter" should {
