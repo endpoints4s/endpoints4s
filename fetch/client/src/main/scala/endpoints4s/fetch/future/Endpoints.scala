@@ -18,7 +18,7 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
   ): Endpoint[A, B] = new Endpoint[A, B](request, response) {
     def apply(a: A) = {
       val promise = Promise[B]()
-      performFetch(request, response, a)(
+      performFetch(this.request, this.response, a)(
         _.fold(
           exn => { promise.failure(exn); () },
           b => {
