@@ -4,6 +4,7 @@ services:
     image: wiremock/wiremock:2.31.0-alpine
     command:
       - --enable-stub-cors
+      - --disable-gzip
     volumes:
       - ./:/home/wiremock
     ports:
