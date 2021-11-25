@@ -13,7 +13,7 @@ trait ChunkedJsonEntitiesTestApi
     endpoint(get(path / "notifications"), ok(jsonChunksResponse[Counter]))
 
   val streamedEndpointErrorTest: Endpoint[Unit, Chunks[Counter]] =
-    endpoint(get(path / "notifications/error"), ok(jsonChunksResponse[Counter]))
+    endpoint(get(path / "notifications" / "error"), ok(jsonChunksResponse[Counter]))
 
   val streamedTextEndpointTest: Endpoint[Unit, Chunks[String]] =
     endpoint(get(path / "text"), ok(textChunksResponse))
