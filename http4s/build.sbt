@@ -1,4 +1,5 @@
 import EndpointsSettings._
+import LocalCrossProject._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
@@ -68,12 +69,13 @@ val `http4s-client` =
       )
     )
     .jvmConfigure(
-      _.dependsOn(`algebra-jvm` % "test->test;compile->compile")
-        .dependsOn(`openapi-jvm`)
+      _.dependsOn(`openapi-jvm`)
         .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
     )
     .jsConfigure(
-      _.dependsOn(`algebra-js` % "test->test;compile->compile")
-        .dependsOn(`openapi-js`)
+      _.dependsOn(`openapi-js`)
         .dependsOn(`algebra-circe-js` % "test->compile;test->test")
+    )
+    .dependsOnLocalCrossProjectsWithScope(
+      "algebra" -> "test->test;compile->compile"
     )

@@ -2,13 +2,12 @@ package endpoints4s.http4s.client
 
 import cats.effect.IO
 import cats.effect.unsafe.implicits.global
-import endpoints4s.algebra
 import org.http4s.Uri
 import org.http4s.asynchttpclient.client.AsyncHttpClient
 import org.scalatest.BeforeAndAfterAll
 
-class Http4sClientUrlEncodingTest
-    extends algebra.client.UrlEncodingTestSuite[TestJsonSchemaClient[IO]]
+class Http4sClientUrlEncodingTestJVM
+    extends Http4sClientUrlEncodingTest[IO, TestJsonSchemaClient[IO]]
     with BeforeAndAfterAll {
 
   val (ahc, shutdown) =
@@ -22,16 +21,6 @@ class Http4sClientUrlEncodingTest
     Uri.Scheme.http,
     ahc
   )
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String = {
-    val (path, query) = url.encodeUrl(a)
-    (path.isEmpty, query.isEmpty) match {
-      case (true, true)   => ""
-      case (false, true)  => s"/${path.renderString}"
-      case (true, false)  => s"?${query.renderString}"
-      case (false, false) => s"/${path.renderString}?${query.renderString}"
-    }
-  }
 
   override def afterAll(): Unit = {
     shutdown.unsafeRunSync()
