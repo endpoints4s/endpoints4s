@@ -31,7 +31,7 @@ class XhrClientEndpointsTest
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestClient = new TestClient(
-    EndpointsSettings().withHost(Some("http://localhost:8080"))
+    EndpointsSettings().withBaseUri(Some("http://localhost:8080"))
   )
 
   def call[Req, Resp](

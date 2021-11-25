@@ -300,7 +300,7 @@ trait EndpointsWithCustomErrors
   ): Unit = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
-    xhr.open(requestData.method, settings.host.getOrElse("") + request.href(a))
+    xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
     requestData.prepare(xhr)
     val maybeEntity = requestData.entity(xhr)
 
