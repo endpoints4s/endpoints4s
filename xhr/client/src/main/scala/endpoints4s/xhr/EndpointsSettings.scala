@@ -4,6 +4,9 @@ import endpoints4s.Hashing
 
 import scala.annotation.nowarn
 
+/** Settings for XHR interpreter.
+  * @param baseUri Base of the URI of the service that implements the endpoints, can be absolute or relative (e.g. "http://foo.com" or "/bar")
+  */
 final class EndpointsSettings private (val baseUri: Option[String]) extends Serializable {
 
   override def toString =
