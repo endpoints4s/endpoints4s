@@ -55,5 +55,6 @@ class Http4sClientEndpointsJsonSchemaTest
   clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
+  sumTypedRequestsTestSuite()
 
 }
