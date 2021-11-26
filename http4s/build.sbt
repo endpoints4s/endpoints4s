@@ -2,12 +2,13 @@ import EndpointsSettings._
 import LocalCrossProject._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
-val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
+val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
 val `algebra-js` = LocalProject("algebraJS")
-val `algebra-circe-js` = LocalProject("algebra-circeJS")
+val `algebra-circe-testkit-js` = LocalProject("algebra-circe-testkitJS")
 val `json-schema-circe-js` = LocalProject("json-schema-circeJS")
 val `openapi-js` = LocalProject("openapiJS")
 
@@ -26,9 +27,12 @@ val `http4s-server` =
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test
       )
     )
-    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
-    .dependsOn(`openapi-jvm`)
-    .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
+    .dependsOn(
+      `algebra-jvm`,
+      `openapi-jvm`,
+      `algebra-testkit-jvm` % Test,
+      `algebra-circe-testkit-jvm` % Test
+    )
 
 val `http4s-client` =
   crossProject(JSPlatform, JVMPlatform)
@@ -68,14 +72,8 @@ val `http4s-client` =
         //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
-    .jvmConfigure(
-      _.dependsOn(`openapi-jvm`)
-        .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
-    )
-    .jsConfigure(
-      _.dependsOn(`openapi-js`)
-        .dependsOn(`algebra-circe-js` % "test->compile;test->test")
-    )
+    .dependsOnLocalCrossProjects("algebra", "openapi")
     .dependsOnLocalCrossProjectsWithScope(
-      "algebra" -> "test->test;compile->compile"
+      "algebra-testkit" -> Test,
+      "algebra-circe-testkit" -> Test
     )

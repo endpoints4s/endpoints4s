@@ -2,7 +2,14 @@ package endpoints4s.akkahttp.client
 
 import endpoints4s.algebra
 
-trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
+trait ChunkedEntitiesDefinitions extends algebra.ChunkedEntities {
+  //#streamed-endpoint
+  val logo: Endpoint[Unit, Chunks[Array[Byte]]] =
+    endpoint(get(path / "logo.png"), ok(bytesChunksResponse))
+  //#streamed-endpoint
+}
+
+trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntities {
   this: Endpoints =>
 
   //#invocation

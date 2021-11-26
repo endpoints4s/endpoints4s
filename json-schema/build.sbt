@@ -18,14 +18,31 @@ val `json-schema` =
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .jsConfigure(
-      _.settings(
-        libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0" % Test
-      ).disablePlugins(ScoverageSbtPlugin)
-    )
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
+
+val `json-schema-testkit` =
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("testkit"))
+    .settings(
+      publishSettings,
+      `scala 2.12 to dotty`,
+      name := "algebra-json-schema-testkit",
+      version := "1.0.0",
+      versionPolicyIntention := Compatibility.None,
+      libraryDependencies ++= Seq(
+        "org.scalatest" %%% "scalatest" % scalaTestVersion,
+        "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+      )
+    )
+    .dependsOn(`json-schema`)
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+
+val `json-schema-testkit-js` = `json-schema-testkit`.js
+val `json-schema-testkit-jvm` = `json-schema-testkit`.jvm
 
 lazy val `json-schema-generic` =
   crossProject(JSPlatform, JVMPlatform)
@@ -69,10 +86,11 @@ lazy val `json-schema-circe` =
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects(
-      "algebra-circe"
-    ) // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
+      "algebra-circe", // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
+      "json-schema"
+    )
     .dependsOnLocalCrossProjectsWithScope(
-      "json-schema" -> "test->test;compile->compile"
+      "json-schema-testkit" -> Test
     )
 
 lazy val `json-schema-circe-js` = `json-schema-circe`.js
@@ -93,8 +111,9 @@ lazy val `json-schema-playjson` =
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .dependsOnLocalCrossProjects("json-schema")
     .dependsOnLocalCrossProjectsWithScope(
-      "json-schema" -> "test->test;compile->compile"
+      "json-schema-testkit" -> Test
     )
 
 lazy val `json-schema-playjson-js` = `json-schema-playjson`.js

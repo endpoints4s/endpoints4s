@@ -33,10 +33,13 @@ val `xhr-client` =
         //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
-    .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
-    .dependsOn(LocalProject("openapiJS"))
-    .dependsOn(LocalProject("algebra-circeJS") % "test->test")
-    .dependsOn(LocalProject("json-schema-genericJS") % "test->test")
+    .dependsOn(
+      LocalProject("algebraJS"),
+      LocalProject("openapiJS"),
+      LocalProject("algebra-testkitJS") % Test,
+      LocalProject("algebra-circe-testkitJS") % Test,
+      LocalProject("json-schema-genericJS") % Test
+    )
 
 val `xhr-client-faithful` =
   project

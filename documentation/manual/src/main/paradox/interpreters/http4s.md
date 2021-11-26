@@ -15,7 +15,7 @@ to invoke an endpoint.
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/http4s/client/shared/src/test/scala/endpoints4s/http4s/client/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows using `IO`:
 
@@ -29,7 +29,7 @@ The `ChunkedEntities` interpreter fixes the `Chunks[A]` type to `fs2.Stream[Effe
 
 This means that, given the following endpoint definition:
 
-@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+@@snip [ChunkedEntitiesDocs.scala](/http4s/client/shared/src/test/scala/endpoints4s/http4s/client/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
 
 It can be invoked as follows:
 
@@ -49,7 +49,7 @@ value that can be integrated to your http4s application.
 
 For instance, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/http4s/server/src/test/scala/endpoints4s/http4s/server/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be implemented as follows:
 

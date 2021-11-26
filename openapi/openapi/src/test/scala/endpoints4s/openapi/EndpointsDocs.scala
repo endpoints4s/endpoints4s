@@ -1,6 +1,18 @@
 package endpoints4s.openapi
 
-import endpoints4s.algebra.DocumentedEndpoints
+//#documented-endpoint-definition
+import endpoints4s.algebra
+
+trait DocumentedEndpoints extends algebra.Endpoints {
+
+  val someDocumentedResource: Endpoint[Int, String] =
+    endpoint(
+      get(path / "some-resource" / segment[Int]("id")),
+      ok(textResponse, docs = Some("The content of the resource"))
+    )
+
+}
+//#documented-endpoint-definition
 
 //#documentation
 import endpoints4s.openapi

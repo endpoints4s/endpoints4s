@@ -1,7 +1,8 @@
 import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
-val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
+val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
@@ -34,9 +35,10 @@ val `akka-http-client` =
         "com.twitter" % "hpack"
       )
     )
-    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
+    .dependsOn(`algebra-jvm`)
     .dependsOn(`openapi-jvm`)
-    .dependsOn(`algebra-circe-jvm` % "test->test")
+    .dependsOn(`algebra-testkit-jvm` % Test)
+    .dependsOn(`algebra-circe-testkit-jvm` % Test)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
 
 val `akka-http-server` =
@@ -54,29 +56,13 @@ val `akka-http-server` =
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.softwaremill.sttp.client" %% "core" % "2.2.10" % Test).cross(CrossVersion.for3Use2_13), // Temporary
-        scalaTestDependency.cross(CrossVersion.for3Use2_13)
+        scalaTestDependency
       ),
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(
             ExclusionRule("org.scala-lang.modules", "scala-xml_3"),
-            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-featurespec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-shouldmatchers_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-matchers-core_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-diagrams_2.13"),
-            ExclusionRule("org.scalatest", "scalatest_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-core_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-refspec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-funspec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-freespec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-propspec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-flatspec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-funsuite_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-wordspec_2.13"),
-            ExclusionRule("org.scalatest", "scalatest-mustmatchers_2.13"),
-            ExclusionRule("org.scalactic", "scalactic_2.13")
+            ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
           )
         } else Nil
       },
@@ -85,6 +71,7 @@ val `akka-http-server` =
         "com.twitter" % "hpack"
       )
     )
-    .dependsOn(`algebra-jvm` % "test->test;compile->compile", `openapi-jvm`)
-    .dependsOn(`algebra-circe-jvm` % "test->test")
+    .dependsOn(`algebra-jvm`, `openapi-jvm`)
+    .dependsOn(`algebra-testkit-jvm` % Test)
+    .dependsOn(`algebra-circe-testkit-jvm` % Test)
     .dependsOn(`json-schema-generic-jvm` % "test->test")

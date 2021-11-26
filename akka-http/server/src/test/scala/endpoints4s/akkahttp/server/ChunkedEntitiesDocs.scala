@@ -2,10 +2,15 @@ package endpoints4s.akkahttp.server
 
 import akka.http.scaladsl.server.Route
 import endpoints4s.algebra
-import endpoints4s.algebra.JsonStreamingExample
 
-trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntities {
+trait ChunkedEntitiesDefinitions extends algebra.ChunkedEntities {
+  //#streamed-endpoint
+  val logo: Endpoint[Unit, Chunks[Array[Byte]]] =
+    endpoint(get(path / "logo.png"), ok(bytesChunksResponse))
+  //#streamed-endpoint
+}
 
+trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntities {
   //#implementation
   import java.nio.file.Paths
   import akka.stream.scaladsl.FileIO
@@ -15,10 +20,18 @@ trait ChunkedEntitiesDocs extends algebra.ChunkedEntitiesDocs with ChunkedEntiti
       FileIO.fromPath(Paths.get("/foo/bar/logo.png")).map(_.toArray)
     }
   //#implementation
-
 }
 
 import scala.concurrent.duration.DurationInt
+
+trait JsonStreamingExample
+  extends algebra.Endpoints
+    with algebra.ChunkedJsonEntities
+    with algebra.JsonEntitiesFromSchemas {
+
+  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit]))
+
+}
 
 //#json-streaming
 import akka.stream.scaladsl.Source

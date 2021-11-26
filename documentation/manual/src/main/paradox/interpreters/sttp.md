@@ -15,7 +15,7 @@ The `Endpoint[A, B]` type is fixed as follows:
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/sttp/client/src/test/scala/endpoints4s/sttp/client/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows with the `HttpURLConnectionBackend`,
 for instance:
