@@ -121,8 +121,8 @@ object StubServer extends App {
         )
         if uri.toRelative == Uri(
           "/joinedHeadersEndpoint"
-        ) && headers.find(_.name == "A").exists(_.value == "a") && headers
-          .find(_.name == "B")
+        ) && headers.find(_.is("a")).exists(_.value == "a") && headers
+          .find(_.is("b"))
           .exists(_.value == "b") =>
       HttpResponse(entity = "29d15495-55ea-431e-bef3-392b05b14fef")
     case HttpRequest(
@@ -134,7 +134,7 @@ object StubServer extends App {
         )
         if uri.toRelative == Uri(
           "/xmapHeadersEndpoint"
-        ) && headers.find(_.name == "C").exists(_.value == "11") =>
+        ) && headers.find(_.is("c")).exists(_.value == "11") =>
       HttpResponse(entity = "f2ed5a13-9113-4717-9b21-65cd72a5540e")
     case HttpRequest(
           GET,
@@ -401,9 +401,9 @@ object StubServer extends App {
           _
         )
         if uri.query().get("x").contains("1") && uri.query().get("y").contains("2") && headers
-          .find(_.lowercaseName() == "If-None-Match".toLowerCase)
+          .find(_.is("if-none-match"))
           .exists(_.value == "\"xxx\"") && headers
-          .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
+          .find(_.is("if-modified-since"))
           .exists(_.value == "Wed, 21 Oct 2015 07:28:00 GMT") =>
       HttpResponse(StatusCodes.NotModified)
     case HttpRequest(
@@ -414,9 +414,9 @@ object StubServer extends App {
           _
         )
         if uri.query().get("x").contains("1") && uri.query().get("y").contains("2") && headers
-          .find(_.lowercaseName() == "If-None-Match".toLowerCase)
+          .find(_.is("if-none-match"))
           .exists(_.value == "foo") && headers
-          .find(_.lowercaseName() == "If-Modified-Since".toLowerCase)
+          .find(_.is("if-modified-since"))
           .exists(_.value == "bar") =>
       HttpResponse(
         headers = Seq(

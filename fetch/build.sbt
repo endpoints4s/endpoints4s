@@ -26,7 +26,8 @@ val `fetch-client` =
           "--ignore-certificate-errors",
           "--disable-extensions",
           "--no-sandbox",
-          "--disable-dev-shm-usage"
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
         )
         // useful for development
         //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
@@ -60,7 +61,8 @@ val `fetch-client-circe` =
           "--ignore-certificate-errors",
           "--disable-extensions",
           "--no-sandbox",
-          "--disable-dev-shm-usage"
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
         )
         // useful for development
         //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
