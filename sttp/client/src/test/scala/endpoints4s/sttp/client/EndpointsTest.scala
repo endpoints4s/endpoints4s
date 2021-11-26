@@ -40,7 +40,7 @@ class EndpointsTestSync
   val backend = TryHttpURLConnectionBackend()
 
   val client: TestClient[Try] =
-    new TestClient[Try](s"http://localhost:$wiremockPort", backend)
+    new TestClient[Try](s"http://localhost:$stubServerPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
@@ -65,12 +65,10 @@ class EndpointsTestAkka
   val backend = AkkaHttpBackend()
 
   val client: TestClient[Future] =
-    new TestClient(s"http://localhost:$wiremockPort", backend)
+    new TestClient(s"http://localhost:$stubServerPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) =
     endpoint(args)
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
   basicAuthSuite()
