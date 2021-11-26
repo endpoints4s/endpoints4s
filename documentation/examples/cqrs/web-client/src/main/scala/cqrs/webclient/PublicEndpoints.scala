@@ -7,5 +7,5 @@ object PublicEndpoints
     extends cqrs.publicserver.PublicEndpoints
     with xhr.faithful.Endpoints
     with xhr.JsonEntitiesFromCodecs {
-  val settings: EndpointsSettings = EndpointsSettings()
+  lazy val settings: EndpointsSettings = EndpointsSettings()
 }

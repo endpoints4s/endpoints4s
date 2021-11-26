@@ -12,6 +12,6 @@ object CounterClient
     extends CounterEndpoints
     with xhr.thenable.Endpoints
     with xhr.JsonEntitiesFromSchemas {
-  val settings: EndpointsSettings = EndpointsSettings()
+  lazy val settings: EndpointsSettings = EndpointsSettings()
 }
 //#relevant-code

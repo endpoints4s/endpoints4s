@@ -10,5 +10,5 @@ object Api
     with Assets
     with thenable.Endpoints
     with BasicAuthentication {
-  val settings: EndpointsSettings = EndpointsSettings()
+  lazy val settings: EndpointsSettings = EndpointsSettings()
 }
