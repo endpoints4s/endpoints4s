@@ -1,7 +1,9 @@
 package endpoints4s.fetch.future
 
 import endpoints4s.algebra.JsonTestApi
-import endpoints4s.algebra.{Address, User}
+import endpoints4s.algebra.client.JsonTestSuite
+import endpoints4s.algebra.Address
+import endpoints4s.algebra.User
 import endpoints4s.fetch.BasicAuthentication
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromSchemas
@@ -25,7 +27,7 @@ class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
 }
 
 class FetchClientEndpointsJsonSchemaTest
-    extends ClientTestBase[TestJsonSchemaClient]
+    extends JsonTestSuite[TestJsonSchemaClient]
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
@@ -39,14 +41,4 @@ class FetchClientEndpointsJsonSchemaTest
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp] = endpoint(args)
-
-  "Client interpreter" should {
-
-    "return server json response" in {
-      val user = User("name2", 19)
-      val address = Address("avenue1", "NY")
-
-      client.jsonEndpoint(user).map(_ shouldEqual address)
-    }
-  }
 }
