@@ -18,7 +18,7 @@ class JsonEntitiesFromCodecTest
     extends JsonFromCodecTestSuite[TestJsonClient]
     with TextEntitiesTestSuite[TestJsonClient] {
 
-  val client: TestJsonClient = new TestJsonClient(s"localhost:$wiremockPort")
+  val client: TestJsonClient = new TestJsonClient(s"localhost:$stubServerPort")
   implicit val ec: ExecutionContext = ExecutionContext.Implicits.global
 
   def call[Req, Resp](
@@ -32,7 +32,7 @@ class JsonEntitiesFromCodecTest
     val encodedUrl = req.urlBuilder(req)
     val pathAndQuery =
       encodedUrl.drop(
-        s"http://localhost:$wiremockPort".size
+        s"http://localhost:$stubServerPort".size
       ) // Remove scheme, host and port from URL
     if (pathAndQuery.startsWith("/?") || pathAndQuery == "/")
       pathAndQuery.drop(

@@ -1,4 +1,5 @@
 import EndpointsSettings._
+import LocalCrossProject._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
@@ -47,13 +48,34 @@ val `http4s-client` =
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test
       )
     )
+    .jsSettings(
+      libraryDependencies ++= Seq(
+        "org.http4s" %%% "http4s-dom" % http4sDomVersion % Test
+      ),
+      Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
+        new org.openqa.selenium.chrome.ChromeOptions().addArguments(
+          // recommended options
+          "--headless", // necessary for CI
+          "--disable-gpu",
+          "--window-size=1920,1200",
+          "--ignore-certificate-errors",
+          "--disable-extensions",
+          "--no-sandbox",
+          "--disable-dev-shm-usage",
+          "--disable-web-security" // for CORS
+        )
+        // useful for development
+        //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
+      )
+    )
     .jvmConfigure(
-      _.dependsOn(`algebra-jvm` % "test->test;compile->compile")
-        .dependsOn(`openapi-jvm`)
+      _.dependsOn(`openapi-jvm`)
         .dependsOn(`algebra-circe-jvm` % "test->compile;test->test")
     )
     .jsConfigure(
-      _.dependsOn(`algebra-js` % "test->test;compile->compile")
-        .dependsOn(`openapi-js`)
+      _.dependsOn(`openapi-js`)
         .dependsOn(`algebra-circe-js` % "test->compile;test->test")
+    )
+    .dependsOnLocalCrossProjectsWithScope(
+      "algebra" -> "test->test;compile->compile"
     )

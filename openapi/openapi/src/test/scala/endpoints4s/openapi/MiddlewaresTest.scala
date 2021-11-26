@@ -26,10 +26,12 @@ class MiddlewaresTest extends AnyWordSpec with Matchers {
       Documentation.DocumentedResponse(
         200,
         "",
-        Documentation.DocumentedHeaders(List(
-          Documentation.DocumentedHeader("ETag", None, true, Schema.simpleString),
-          Documentation.DocumentedHeader("Last-Modified", None, true, Schema.simpleString),
-        )),
+        Documentation.DocumentedHeaders(
+          List(
+            Documentation.DocumentedHeader("ETag", None, true, Schema.simpleString),
+            Documentation.DocumentedHeader("Last-Modified", None, true, Schema.simpleString)
+          )
+        ),
         Map.empty
       )
     )

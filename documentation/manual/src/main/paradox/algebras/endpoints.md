@@ -71,13 +71,13 @@ All the data types involved in a URL description (`Path[A]`, `Segment[A]`, `Quer
 
 For instance, consider the following user-defined `Location` type, containing a `longitude` and a `latitude`:
 
-@@snip [EndpointsTestSuite.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/client/EndpointsTestSuite.scala) { #location-type }
+@@snip [EndpointsTestSuite.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/client/UrlEncodingTestSuite.scala) { #location-type }
 
 The `QueryString[Location]` type means “a query string that carries a `Location`”. We can define a value of
 type `QueryString[Location]` by *transforming* a query string that carries the longitude and latitude parameters
 as follows:
 
-@@snip [EndpointsTestSuite.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/client/EndpointsTestSuite.scala) { #xmap }
+@@snip [EndpointsTestSuite.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/client/UrlEncodingTestSuite.scala) { #xmap }
 
 The `xmap` operation requires the source type and the target type to be equivalent (in the above case, the
 source type is `(Double, Double)` and the target type is `Location`).

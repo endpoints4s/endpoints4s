@@ -1,0 +1,30 @@
+package endpoints4s.akkahttp.client
+
+import akka.actor.ActorSystem
+import akka.testkit.TestKit
+import endpoints4s.algebra
+import org.scalatest.BeforeAndAfterAll
+
+import scala.concurrent.ExecutionContext
+
+class AkkaHttpClientUrlEncodingTest
+    extends algebra.client.UrlEncodingTestSuite[TestClient]
+    with BeforeAndAfterAll {
+
+  implicit val system: ActorSystem = ActorSystem()
+  implicit val ec: ExecutionContext = system.dispatcher
+
+  val client: TestClient = new TestClient(
+    EndpointsSettings(
+      AkkaHttpRequestExecutor
+        .cachedHostConnectionPool("localhost", 8080)
+    )
+  )
+
+  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
+
+  override def afterAll(): Unit = {
+    TestKit.shutdownActorSystem(system)
+    super.afterAll()
+  }
+}

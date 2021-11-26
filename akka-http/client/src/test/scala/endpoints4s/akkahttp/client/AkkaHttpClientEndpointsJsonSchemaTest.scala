@@ -32,7 +32,7 @@ class AkkaHttpClientEndpointsJsonSchemaTest
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", wiremockPort)
+        .cachedHostConnectionPool("localhost", stubServerPort)
     )
   )
 
@@ -40,8 +40,6 @@ class AkkaHttpClientEndpointsJsonSchemaTest
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp] = endpoint(args)
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
   basicAuthSuite()

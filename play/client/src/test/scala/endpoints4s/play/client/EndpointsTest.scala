@@ -28,18 +28,14 @@ class EndpointsTest
     with client.SumTypedEntitiesTestSuite[TestClient]
     with client.TextEntitiesTestSuite[TestClient] {
 
-  import ExecutionContext.Implicits.global
-
-  val wsClient = new WsTestClient.InternalWSClient("http", wiremockPort)
+  val wsClient = new WsTestClient.InternalWSClient("http", stubServerPort)
   val client: TestClient =
-    new TestClient(s"http://localhost:$wiremockPort", wsClient)
+    new TestClient(s"http://localhost:$stubServerPort", wsClient)
 
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp] = endpoint(args)
-
-  def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 
   clientTestSuite()
   basicAuthSuite()

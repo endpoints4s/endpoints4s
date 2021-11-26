@@ -18,6 +18,9 @@ val http4s = project.in(file("http4s")).settings(noPublishSettings)
 val documentation =
   project.in(file("documentation")).settings(noPublishSettings)
 
+// Stub server for client interpreter tests
+val stubServer = project.in(file("stub-server")).settings(noPublishSettings)
+
 noPublishSettings
 
 ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
