@@ -3,10 +3,7 @@ package endpoints4s.fetch.future
 import endpoints4s.algebra.JsonTestApi
 import endpoints4s.algebra.client.JsonTestSuite
 import endpoints4s.algebra.Address
-import endpoints4s.algebra.BasicAuthenticationTestApi
 import endpoints4s.algebra.User
-import endpoints4s.algebra.client.BasicAuthTestSuite
-import endpoints4s.fetch.BasicAuthentication
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromSchemas
 import endpoints4s.generic
@@ -19,8 +16,6 @@ import scala.scalajs.concurrent.JSExecutionContext
 class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
     val ec: ExecutionContext
 ) extends Endpoints
-    with BasicAuthentication
-    with BasicAuthenticationTestApi
     with generic.JsonSchemas
     with JsonTestApi
     with JsonEntitiesFromSchemas {
@@ -29,8 +24,7 @@ class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
 }
 
 class FetchClientEndpointsJsonSchemaTest
-    extends JsonTestSuite[TestJsonSchemaClient]
-    with BasicAuthTestSuite[TestJsonSchemaClient] {
+    extends JsonTestSuite[TestJsonSchemaClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
@@ -45,5 +39,4 @@ class FetchClientEndpointsJsonSchemaTest
   ): Future[Resp] = endpoint(args)
 
   clientTestSuite()
-  basicAuthSuite()
 }
