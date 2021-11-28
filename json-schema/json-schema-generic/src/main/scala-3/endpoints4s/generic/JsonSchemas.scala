@@ -119,7 +119,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * @param  defaultValues  List of the possible default values of the record fields (e.g.,
     *                        `(Some(42), None)`)
     */
-  private[generic] inline def summonRecord[
+  inline def summonRecord[
     Types <: Tuple,
     Labels <: Tuple,
     Docs <: Tuple,
@@ -167,7 +167,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[title @title]] annotation, it is used as a title, otherwise
     * the schema has no title
     */
-  private[generic] inline def summonTitle[A]: Option[String] =
+  inline def summonTitle[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`title`, A] => Some(annotation().value)
       case _                                  => None
@@ -179,7 +179,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * name, otherwise it has the result of calling [[classTagToSchemaName]]
     * with a `ClassTag[A]`.
     */
-  private[generic] inline def summonName[A]: Option[String] =
+  inline def summonName[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`name`, A]    => Some(annotation().value)
       case annotation: Annotation[`unnamed`, A] => None
@@ -190,7 +190,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[docs @docs]] annotation, it is used as a description,
     * otherwise the schema has no description.
     */
-  private[generic] inline def summonDescription[A]: Option[String] =
+  inline def summonDescription[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`docs`, A] => Some(annotation().text)
       case _                                 => None

@@ -33,6 +33,9 @@ val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 
+val `fetch-client` = LocalProject("fetch-client")
+val `fetch-client-circe` = LocalProject("fetch-client-circe")
+
 val apiDoc =
   project
     .in(file("api-doc"))
@@ -69,7 +72,9 @@ val apiDoc =
         `json-schema-jvm`,
         `json-schema-circe-jvm`,
         `json-schema-playjson-jvm`,
-        `json-schema-generic-jvm`
+        `json-schema-generic-jvm`,
+        `fetch-client`,
+        `fetch-client-circe`
       )
     )
 
@@ -98,15 +103,17 @@ val manual =
           .withCustomStylesheet("snippets.css")
       },
       paradoxProperties ++= Map(
-        "version"                  -> version.value,
+        "version" -> version.value,
         "akka-http-server-version" -> (`akka-http-server` / version).value,
-        "xhr-client-version"       -> (`xhr-client` / version).value,
-        "akka-version"             -> akkaActorVersion,
-        "akka-http-version"        -> akkaHttpVersion,
-        "scaladoc.base_url"        -> s".../${(packageDoc / siteSubdirName).value}",
-        "github.base_url"          -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
+        "xhr-client-version" -> (`xhr-client` / version).value,
+        "akka-version" -> akkaActorVersion,
+        "akka-http-version" -> akkaHttpVersion,
+        "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
+        "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
       ),
-      paradoxDirectives += ((_: Writer.Context) => org.endpoints4s.paradox.coordinates.CoordinatesDirective),
+      paradoxDirectives += ((_: Writer.Context) =>
+        org.endpoints4s.paradox.coordinates.CoordinatesDirective
+      ),
       packageDoc / siteSubdirName := "api",
       addMappingsToSiteDir(
         apiDoc / ScalaUnidoc / packageDoc / mappings,
@@ -118,14 +125,13 @@ val manual =
         (gvSourceDirectory ** "*.gv")
           .get()
           .pair(Path.relativeTo(gvSourceDirectory))
-          .map {
-            case (sourceFile, relativePath) =>
-              import scala.sys.process._
-              val targetRelativePath = s"${relativePath.stripSuffix(".gv")}.svg"
-              val targetFile = gvTargetDirectory / targetRelativePath
-              IO.createDirectory(targetFile.getParentFile)
-              assert(s"dot -Tsvg -o${targetFile} ${sourceFile}".! == 0)
-              (targetFile, targetRelativePath)
+          .map { case (sourceFile, relativePath) =>
+            import scala.sys.process._
+            val targetRelativePath = s"${relativePath.stripSuffix(".gv")}.svg"
+            val targetFile = gvTargetDirectory / targetRelativePath
+            IO.createDirectory(targetFile.getParentFile)
+            assert(s"dot -Tsvg -o${targetFile} ${sourceFile}".! == 0)
+            (targetFile, targetRelativePath)
           }
       },
       previewLaunchBrowser := false
@@ -308,8 +314,7 @@ val `example-cqrs-public-server` =
       Compile / sourceGenerators += Def
         .task {
           assets.AssetsTasks.generateDigests(
-            baseDirectory =
-              (`example-cqrs-web-client` / fastOptJS / crossTarget).value,
+            baseDirectory = (`example-cqrs-web-client` / fastOptJS / crossTarget).value,
             targetDirectory = (Compile / sourceManaged).value,
             generatedObjectName = "BootstrapDigests",
             generatedPackage = Some("cqrs.publicserver"),

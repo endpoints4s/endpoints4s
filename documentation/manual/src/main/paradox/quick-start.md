@@ -64,7 +64,7 @@ in addition to the required algebra interface @ref[`algebra`](algebras/endpoints
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
 
-The `client` project uses a @ref[Scala.js web](interpreters/scalajs-web.md) client interpreter.
+The `client` project uses a @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md) client interpreter.
 
 Finally, the `server` project uses a server interpreter backed by @ref[Akka HTTP](interpreters/akka-http.md).
 It also uses the scala-stm library for implementing the business logic.

@@ -1,4 +1,4 @@
-# Scala.js web client
+# Scala.js web client (XHR)
 
 Web client using `XMLHttpRequest`.
 
