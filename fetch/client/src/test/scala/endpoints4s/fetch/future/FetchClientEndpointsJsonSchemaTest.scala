@@ -3,7 +3,9 @@ package endpoints4s.fetch.future
 import endpoints4s.algebra.JsonTestApi
 import endpoints4s.algebra.client.JsonTestSuite
 import endpoints4s.algebra.Address
+import endpoints4s.algebra.BasicAuthenticationTestApi
 import endpoints4s.algebra.User
+import endpoints4s.algebra.client.BasicAuthTestSuite
 import endpoints4s.fetch.BasicAuthentication
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromSchemas
@@ -34,11 +36,14 @@ class FetchClientEndpointsJsonSchemaTest
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings()
-      .withHost(Some("http://localhost:8080"))
+      .withBaseUri(Some("http://localhost:8080"))
   )
 
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
   ): Future[Resp] = endpoint(args)
+
+  clientTestSuite()
+  basicAuthSuite()
 }

@@ -290,7 +290,7 @@ trait EndpointsWithCustomErrors
     requestInit.method = requestData.method
     requestData.prepare(requestInit)
     requestData.entity(requestInit)
-    val f = Fetch.fetch(settings.host.getOrElse("") + request.href(a), requestInit)
+    val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
         val maybeResponse = response(fetchResponse)

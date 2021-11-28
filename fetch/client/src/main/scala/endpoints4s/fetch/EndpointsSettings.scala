@@ -4,30 +4,33 @@ import endpoints4s.Hashing
 
 import scala.annotation.nowarn
 
-final class EndpointsSettings private (val host: Option[String]) extends Serializable {
+/** Settings for XHR interpreter.
+  * @param baseUri Base of the URI of the service that implements the endpoints, can be absolute or relative (e.g. "http://foo.com" or "/bar")
+  */
+final class EndpointsSettings private (val baseUri: Option[String]) extends Serializable {
 
   override def toString =
-    s"EndpointsSettings($host)"
+    s"EndpointsSettings($baseUri)"
 
   override def equals(other: Any): Boolean =
     other match {
       case that: EndpointsSettings =>
-        host == that.host
+        baseUri == that.baseUri
       case _ => false
     }
 
-  override def hashCode(): Int = Hashing.hash(host)
+  override def hashCode(): Int = Hashing.hash(baseUri)
 
   @nowarn("cat=unused")
   private[this] def copy(
-      host: Option[String] = host
+      baseUri: Option[String] = baseUri
   ): EndpointsSettings =
     new EndpointsSettings(
-      host
+      baseUri
     )
 
-  def withHost(host: Option[String]): EndpointsSettings = {
-    copy(host = host)
+  def withBaseUri(baseUri: Option[String]): EndpointsSettings = {
+    copy(baseUri = baseUri)
   }
 }
 

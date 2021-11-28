@@ -23,19 +23,4 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
         )
       })
   }
-
-  override def mapEndpointRequest[A, B, C](
-      e: Endpoint[A, B],
-      func: Request[A] => Request[C]
-  ): Endpoint[C, B] = endpoint(func(e.request), e.response)
-
-  override def mapEndpointResponse[A, B, C](
-      e: Endpoint[A, B],
-      func: Response[B] => Response[C]
-  ): Endpoint[A, C] = endpoint(e.request, func(e.response))
-
-  override def mapEndpointDocs[A, B](
-      endpoint: Endpoint[A, B],
-      func: EndpointDocs => EndpointDocs
-  ): Endpoint[A, B] = endpoint
 }
