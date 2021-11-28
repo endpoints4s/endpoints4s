@@ -30,5 +30,4 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
       promise.future
     }
   }
-  1
 }
