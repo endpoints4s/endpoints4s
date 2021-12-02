@@ -28,11 +28,7 @@ val `akka-http-client` =
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
         } else Nil
-      },
-      versionPolicyIgnored ++= Seq(
-        // Was removed from akka-http https://github.com/akka/akka-http/pull/3849
-        "com.twitter" % "hpack"
-      )
+      }
     )
     .dependsOn(`algebra-jvm` % "test->test;compile->compile")
     .dependsOn(`openapi-jvm`)
