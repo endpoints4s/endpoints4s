@@ -53,6 +53,7 @@ val `http4s-client` =
       )
     )
     .jsSettings(
+      coverageEnabled := false,
       libraryDependencies ++= Seq(
         "org.http4s" %%% "http4s-dom" % http4sDomVersion % Test
       ),
