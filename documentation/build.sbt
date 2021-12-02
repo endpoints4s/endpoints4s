@@ -169,6 +169,7 @@ val `example-quickstart-server` =
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         scalaTestDependency
       )
     )
@@ -258,6 +259,7 @@ val `example-basic-akkahttp-server` =
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
+      libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
       publishArtifact := false
     )
     .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)

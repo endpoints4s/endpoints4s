@@ -52,6 +52,7 @@ val server =
   project.settings(
     libraryDependencies ++= Seq(
       "org.endpoints4s" %% "akka-http-server" % "$akka-http-server-version$",
+      "com.typesafe.akka" %% "akka-stream" % "$akka-version$",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
   ).dependsOn(sharedJVM)

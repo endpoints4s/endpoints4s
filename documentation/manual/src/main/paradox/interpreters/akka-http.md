@@ -2,6 +2,27 @@
 
 Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/).
 
+@@@ warning
+
+As explained in the section
+[Mixed versioning is not allowed](https://doc.akka.io/docs/akka/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed)
+in the Akka documentation, you have to make sure that all the
+Akka modules of your application have the same version.
+
+For this reason, the interpreters `akka-http-server` and
+`akka-http-client` have marked their dependency to Akka as “provided”.
+
+As a consequence, to use these interpreters you will have to
+explicitly add a dependency on `akka-stream`:
+
+~~~ scala
+"com.typesafe.akka" %% "akka-stream" % "<akka-version>"
+~~~
+
+Where `<akka-version>` is higher or equal to @var[akka-version].
+
+@@@
+
 ## Client
 
 @coordinates[akka-http-client]
@@ -42,21 +63,6 @@ It can be invoked as follows:
 @coordinates[akka-http-server]
 
 @scaladoc[API documentation](endpoints4s.akkahttp.server.index)
-
-@@@ warning
-
-As explained in the section
-[Mixed versioning is not allowed](https://doc.akka.io/docs/akka/current/common/binary-compatibility-rules.html#mixed-versioning-is-not-allowed)
-in the Akka documentation, you have to make sure that all the
-Akka modules of your application depend on the same version of
-Akka, and that all the Akka HTTP modules of your application depend
-of the same version of Akka HTTP.
-
-For your information, the `akka-http-server` module of endpoints4s
-depends on Akka @var[akka-version] and Akka HTTP
-@var[akka-http-version].
-
-@@@
 
 ### `endpoints4s.akkahttp.server.Endpoints`
 
