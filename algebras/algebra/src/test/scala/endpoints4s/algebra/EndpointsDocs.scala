@@ -82,12 +82,6 @@ trait EndpointsDocs extends Endpoints {
   )
   //#documented-response
 
-  // Shared definition used by the documentation of interpreters
-  //#endpoint-definition
-  val someResource: Endpoint[Int, String] =
-    endpoint(get(path / "some-resource" / segment[Int]()), ok(textResponse))
-  //#endpoint-definition
-
   //#xmap-partial
   import java.time.LocalDate
   import endpoints4s.{Invalid, Valid}
@@ -173,17 +167,3 @@ trait EndpointsDocs extends Endpoints {
   //#with-authentication-usage
 
 }
-
-//#documented-endpoint-definition
-import endpoints4s.algebra
-
-trait DocumentedEndpoints extends algebra.Endpoints {
-
-  val someDocumentedResource: Endpoint[Int, String] =
-    endpoint(
-      get(path / "some-resource" / segment[Int]("id")),
-      ok(textResponse, docs = Some("The content of the resource"))
-    )
-
-}
-//#documented-endpoint-definition

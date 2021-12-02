@@ -1,6 +1,7 @@
 import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
+val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
@@ -30,8 +31,9 @@ val `sttp-client` =
         } else Nil
       }
     )
-    .dependsOn(`openapi-jvm`)
     .dependsOn(
-      `algebra-jvm` % "compile->compile;test->test",
+      `algebra-jvm`,
+      `openapi-jvm`,
+      `algebra-testkit-jvm` % Test,
       `algebra-playjson-jvm` % "test->test"
     )

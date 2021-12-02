@@ -15,7 +15,7 @@ The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to a function from
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/play/client/src/test/scala/endpoints4s/play/client/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows:
 
@@ -35,7 +35,7 @@ value that can be integrated to your Play application.
 
 For instance, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/play/server/src/test/scala/endpoints4s/play/server/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be implemented as follows:
 
@@ -52,7 +52,7 @@ The `ChunkedEntities` interpreter fixes the type `Chunks[A]` to `akka.stream.sca
 
 For instance, given the following chunked endpoint definition:
 
-@@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
+@@snip [ChunkedEntitiesDocs.scala](/play/server/src/test/scala/endpoints4s/play/server/ChunkedEntitiesDocs.scala) { #streamed-endpoint }
 
 It can be implemented as follows:
 

@@ -11,7 +11,8 @@ import org.http4s.Uri
 import org.http4s.client.Client
 import org.http4s.dom.FetchClientBuilder
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.scalajs.concurrent.JSExecutionContext
 
 class TestJsonSchemaClient[F[_]: Concurrent](
     authority: Uri.Authority,
@@ -51,6 +52,8 @@ class Http4sClientEndpointsJsonSchemaTest
     val eventualResponse = endpoint.sendAndConsume(args)
     eventualResponse.unsafeToFuture()
   }
+
+  implicit override def executionContext: ExecutionContext = JSExecutionContext.queue
 
   clientTestSuite()
   basicAuthSuite()

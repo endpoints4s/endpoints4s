@@ -2,7 +2,7 @@ import sbtcrossproject.CrossProject
 import sbtcrossproject.CrossPlugin.autoImport._
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
 
-import sbt.{ClasspathDependency, LocalProject}
+import sbt.{ClasspathDependency, Configuration, LocalProject}
 
 object LocalCrossProject {
 
@@ -24,16 +24,16 @@ object LocalCrossProject {
         )
 
     def dependsOnLocalCrossProjectsWithScope(
-        namesAndScopes: (String, String)*
+        namesAndScopes: (String, Configuration)*
     ): CrossProject =
       crossProject
         .jsConfigure(_.dependsOn(namesAndScopes.map {
-          case (name, scope) =>
-            LocalProject(s"${name}JS") % scope: ClasspathDependency
+          case (name, configuration) =>
+            LocalProject(s"${name}JS") % configuration: ClasspathDependency
         }: _*))
         .jvmConfigure(_.dependsOn(namesAndScopes.map {
-          case (name, scope) =>
-            LocalProject(s"${name}JVM") % scope: ClasspathDependency
+          case (name, configuration) =>
+            LocalProject(s"${name}JVM") % configuration: ClasspathDependency
         }: _*))
 
   }

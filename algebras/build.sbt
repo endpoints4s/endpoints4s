@@ -9,28 +9,37 @@ val algebra =
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "algebra",
-      libraryDependencies ++= Seq(
-        "com.github.tomakehurst" % "wiremock" % "2.26.1" % Test,
-        scalaTestDependency,
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.lihaoyi" %% "ujson" % ujsonVersion % Test).cross(CrossVersion.for3Use2_13)
-      ),
-      excludeDependencies ++= {
-        if (scalaBinaryVersion.value.startsWith("3")) {
-          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
-        } else Nil
-      }
+      name := "algebra"
     )
-    .dependsOnLocalCrossProjectsWithScope(
-      "json-schema" -> "test->test;compile->compile"
-    )
+    .dependsOnLocalCrossProjects("json-schema")
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
+
+val `algebra-testkit` =
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("testkit"))
+    .settings(
+      publishSettings,
+      `scala 2.12 to dotty`,
+      name := "algebra-testkit",
+      version := "1.0.0",
+      versionPolicyIntention := Compatibility.None,
+      libraryDependencies ++= Seq(
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        "com.lihaoyi" %% "ujson" % ujsonVersion
+      )
+    )
+    .dependsOn(algebra)
+    .dependsOnLocalCrossProjects("json-schema-testkit")
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+
+val `algebra-testkit-js` = algebra.js
+val `algebra-testkit-jvm` = algebra.jvm
 
 val `algebra-circe` =
   crossProject(JSPlatform, JVMPlatform)
@@ -47,11 +56,26 @@ val `algebra-circe` =
         "io.circe" %%% "circe-generic" % circeVersion % Test
       )
     )
-    .dependsOn(`algebra` % "test->test;compile->compile")
+    .dependsOn(`algebra`, `algebra-testkit` % Test)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
+
+val `algebra-circe-testkit` =
+  crossProject(JSPlatform, JVMPlatform)
+    .crossType(CrossType.Pure)
+    .in(file("algebra-circe-testkit"))
+    .settings(
+      publishSettings,
+      `scala 2.12 to dotty`,
+      name := "algebra-circe-testkit",
+      version := "1.0.0",
+      versionPolicyIntention := Compatibility.None,
+      libraryDependencies ++= Seq()
+    )
+    .dependsOn(`algebra-circe`, `algebra-testkit`)
+    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-playjson` =
   crossProject(JSPlatform, JVMPlatform)
@@ -63,7 +87,7 @@ val `algebra-playjson` =
       name := "algebra-playjson",
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13)
     )
-    .dependsOn(`algebra` % "test->test;compile->compile")
+    .dependsOn(`algebra`, `algebra-testkit` % Test)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-playjson-js` = `algebra-playjson`.js

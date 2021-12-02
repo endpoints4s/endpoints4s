@@ -27,12 +27,16 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
   val wsClient =
     AhcWSClient(AhcWSClientConfig())(Materializer.matFromSystem(actorSystem))
 
-  object commandsServer extends PlayService(9000, Mode.Test) {
+  val commandsServerPort = 9090
+  val queriesServerPort = 9091
+  val publicServerPort = 9092
+
+  object commandsServer extends PlayService(commandsServerPort, Mode.Test) {
     lazy val commands = new Commands(playComponents)
     lazy val router = Router.from(commands.routes)
   }
 
-  object queriesServer extends PlayService(9001, Mode.Test) {
+  object queriesServer extends PlayService(queriesServerPort, Mode.Test) {
     lazy val service = new QueriesService(
       baseUrl(commandsServer.port),
       wsClient,
@@ -42,7 +46,7 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
     lazy val router = Router.from(queries.routes)
   }
 
-  object publicServer extends PlayService(9002, Mode.Test) {
+  object publicServer extends PlayService(publicServerPort, Mode.Test) {
     lazy val routes =
       new cqrs.publicserver.Router(
         new PublicServer(

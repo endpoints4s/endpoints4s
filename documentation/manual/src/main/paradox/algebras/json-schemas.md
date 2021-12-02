@@ -92,7 +92,7 @@ The examples above show how to use `xmap` to transform a `JsonSchema[A]` into a 
 case the transformation function from `A` to `B` can fail (for example, if it applies additional
 validation), you can use `xmapPartial` instead of `xmap`:
 
-@@snip [JsonSchemasFixtures.scala](/json-schema/json-schema/src/test/scala/endpoints4s/algebra/JsonSchemasFixtures.scala) { #refined }
+@@snip [JsonSchemasFixtures.scala](/json-schema/testkit/src/main/scala/endpoints4s/algebra/JsonSchemasFixtures.scala) { #refined }
 
 In this example, we check that the decoded integer is even. If it is not, we return an error message.
 
@@ -143,7 +143,7 @@ by wrapping it in the `lazyRecord` or `lazyTagged` constructor:
 You can define a schema as an alternative between other schemas with the operation
 `orFallbackTo`:
 
-@@snip [JsonSchemasFixtures.scala](/json-schema/json-schema/src/test/scala/endpoints4s/algebra/JsonSchemasFixtures.scala) { #one-of }
+@@snip [JsonSchemasFixtures.scala](/json-schema/testkit/src/main/scala/endpoints4s/algebra/JsonSchemasFixtures.scala) { #one-of }
 
 @@@warning
 Because decoders derived from schemas defined with the operation `orFallbackTo` literally

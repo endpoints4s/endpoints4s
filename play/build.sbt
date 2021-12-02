@@ -1,7 +1,9 @@
 import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
+val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
+val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
@@ -34,9 +36,12 @@ val `play-server` =
         } else Nil
       }
     )
-    .dependsOn(`algebra-jvm` % "test->test;compile->compile")
-    .dependsOn(`openapi-jvm`)
-    .dependsOn(`algebra-circe-jvm` % "test->test")
+    .dependsOn(
+      `algebra-jvm`,
+      `openapi-jvm`,
+      `algebra-testkit-jvm` % Test,
+      `algebra-circe-testkit-jvm` % Test
+    )
 
 val `play-server-circe` =
   project
@@ -77,8 +82,9 @@ val `play-client` =
       }
     )
     .dependsOn(
-      `algebra-jvm` % "test->test;compile->compile",
-      `algebra-circe-jvm` % "test->test"
+      `algebra-jvm`,
+      `openapi-jvm`,
+      `algebra-testkit-jvm` % Test,
+      `algebra-circe-testkit-jvm` % Test,
+      `json-schema-generic-jvm` % Test
     )
-    .dependsOn(`openapi-jvm`)
-    .dependsOn(`json-schema-generic-jvm` % "test->test")

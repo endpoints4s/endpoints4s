@@ -9,7 +9,8 @@ trait JsonFromCirceCodecTestApi
   import io.circe._
 
   implicit lazy val userDecoder: Decoder[User] =
-    Decoder.instance(_.get[String]("name"))
+    Decoder
+      .instance(_.get[String]("name"))
       .product(Decoder.instance(_.get[Int]("age")))
       .map { case (name, age) => User(name, age) }
   implicit lazy val userEncoder: Encoder[User] =
@@ -20,7 +21,8 @@ trait JsonFromCirceCodecTestApi
       )
     }
   implicit lazy val addressDecoder: Decoder[Address] =
-    Decoder.instance(_.get[String]("street"))
+    Decoder
+      .instance(_.get[String]("street"))
       .product(Decoder.instance(_.get[String]("city")))
       .map { case (street, city) => Address(street, city) }
   implicit lazy val addressEncoder: Encoder[Address] =

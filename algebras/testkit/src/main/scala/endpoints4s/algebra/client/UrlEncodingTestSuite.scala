@@ -37,17 +37,12 @@ trait UrlEncodingTestSuite[T <: algebra.client.ClientEndpointsTestApi]
     }
 
     "escaping" in {
-      val encoded = encodeUrl(path /? qs[String]("q"))("foo bar/baz")
-      //FIXME
-      // This assertion looks suspicious - space should be encoded as + only if content type is application/x-www-form-urlencoded.
-      // URLEncoder is known to not encode according to the standard - https://github.com/sksamuel/elastic4s/issues/2352.
-      // JS assertion should be the only one that is correct.
-      VM.current match {
-        case VM.JS =>
-          assert(encoded == "?q=foo%20bar%2Fbaz")
-        case VM.JVM =>
-          assert(encoded == "?q=foo+bar%2Fbaz" || encoded == "?q=foo%20bar/baz")
-      }
+      // Clients may encode space as '+' or '%20' (see https://stackoverflow.com/questions/2678551/when-should-space-be-encoded-to-plus-or-20)
+      val encodedSpace = encodeUrl(path /? qs[String]("q"))("foo bar")
+      assert(encodedSpace == "?q=foo%20bar" || encodedSpace == "?q=foo+bar")
+      // Clients may or may not encode slashes (see https://datatracker.ietf.org/doc/html/rfc3986#section-2.4)
+      val encodedSlash = encodeUrl(path /? qs[String]("q"))("foo/bar")
+      assert(encodedSlash == "?q=foo/bar" || encodedSlash == "?q=foo%2Fbar")
     }
 
     "multiple parameters" in {

@@ -17,7 +17,7 @@ from `A` to `Future[B]`:
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/akka-http/client/src/test/scala/endpoints4s/akkahttp/client/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows:
 
@@ -66,7 +66,7 @@ that can be integrated to your Akka HTTP application.
 
 For instance, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/akka-http/server/src/test/scala/endpoints4s/akkahttp/server/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be implemented as follows:
 

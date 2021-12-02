@@ -15,7 +15,7 @@ to generate an OpenAPI document.
 
 Given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #documented-endpoint-definition }
+@@snip [EndpointsDocs.scala](/openapi/openapi/src/test/scala/endpoints4s/openapi/EndpointsDocs.scala) { #documented-endpoint-definition }
 
 It can be documented as follows:
 
