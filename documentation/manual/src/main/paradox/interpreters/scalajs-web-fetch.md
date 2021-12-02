@@ -15,7 +15,7 @@ which fixes the `Result[A]` type to `scala.concurrent.Future[A]`.
 
 This means that, given the following endpoint definition:
 
-@@snip [EndpointsDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/EndpointsDocs.scala) { #endpoint-definition }
+@@snip [EndpointsDocs.scala](/fetch/client/src/test/scala/endpoints4s/fetch/future/EndpointsDocs.scala) { #endpoint-definition }
 
 It can be invoked as follows:
 

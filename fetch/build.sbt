@@ -33,10 +33,11 @@ val `fetch-client` =
         //org.scalajs.jsenv.selenium.SeleniumJSEnv.Config().withKeepAlive(true)
       )
     )
-    .dependsOn(LocalProject("algebraJS") % "test->test;compile->compile")
+    .dependsOn(LocalProject("algebraJS"))
     .dependsOn(LocalProject("openapiJS"))
-    .dependsOn(LocalProject("algebra-circeJS") % "test->test")
-    .dependsOn(LocalProject("json-schema-genericJS") % "test->test")
+    .dependsOn(LocalProject("algebra-testkitJS") % Test)
+    .dependsOn(LocalProject("algebra-circe-testkitJS") % Test)
+    .dependsOn(LocalProject("json-schema-genericJS") % Test)
 
 val `fetch-client-circe` =
   project
