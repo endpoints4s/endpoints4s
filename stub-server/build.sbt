@@ -10,8 +10,7 @@ val `stub-server` =
       publishSettings,
       `scala 2.13`,
       name := "stub-server",
-      version := "1.0.0",
-      versionPolicyIntention := Compatibility.None,
+      version := "1.0.0+n",
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion
