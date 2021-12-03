@@ -19,7 +19,7 @@ explicitly add a dependency on `akka-stream`:
 "com.typesafe.akka" %% "akka-stream" % "<akka-version>"
 ~~~
 
-Where `<akka-version>` is higher or equal to @var[akka-version].
+Where `<akka-version>` is binary compatible and higher or equal to @var[akka-version].
 
 @@@
 
