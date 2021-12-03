@@ -1,7 +1,5 @@
 package endpoints4s.stubserver
 
-import java.net.ServerSocket
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods._
