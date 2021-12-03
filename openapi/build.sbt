@@ -13,7 +13,7 @@ lazy val openapi =
     .crossType(CrossType.Pure)
     .in(file("openapi"))
     .settings(
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       publishSettings,
       `scala 2.12 to dotty`,

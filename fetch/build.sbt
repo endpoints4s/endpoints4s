@@ -9,7 +9,7 @@ val `fetch-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client",
-      version := "3.1.0+n",
+      version := "1.0.0",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -48,7 +48,7 @@ val `fetch-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client-circe",
-      version := "3.1.0+n",
+      version := "1.0.0",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,

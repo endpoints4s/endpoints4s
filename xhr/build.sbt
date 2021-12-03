@@ -9,7 +9,7 @@ val `xhr-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -50,7 +50,7 @@ val `xhr-client-faithful` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-faithful",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -83,7 +83,7 @@ val `xhr-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-circe",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,

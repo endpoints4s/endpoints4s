@@ -16,7 +16,7 @@ val `play-server` =
       publishSettings,
       `scala 2.12 to dotty`, // Note that we could support 2.11. Only our tests use circe (which has dropped 2.11)
       name := "play-server",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-netty-server" % playVersion).cross(CrossVersion.for3Use2_13),
@@ -50,7 +50,7 @@ val `play-server-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "play-server-circe",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies += "io.circe" %% "circe-parser" % circeVersion
     )
@@ -63,7 +63,7 @@ val `play-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "play-client",
-      version := "3.1.0+n",
+      version := "4.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.play" %% "play-ahc-ws" % playVersion).cross(CrossVersion.for3Use2_13),

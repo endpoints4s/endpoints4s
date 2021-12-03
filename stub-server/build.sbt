@@ -7,6 +7,7 @@ val `stub-server` =
     .in(file("."))
     .enablePlugins(JavaAppPackaging, DockerPlugin)
     .settings(
+      publishSettings,
       `scala 2.13`,
       name := "stub-server",
       version := "1.0.0",
