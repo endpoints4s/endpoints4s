@@ -7,6 +7,7 @@ class EndpointsCodecsTestApi
     extends EndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
+    with algebra.ChunkedEntitiesTestApi
     with algebra.ChunkedJsonEntitiesTestApi
     with algebra.circe.ChunkedJsonEntitiesTestApi
     with algebra.BasicAuthenticationTestApi

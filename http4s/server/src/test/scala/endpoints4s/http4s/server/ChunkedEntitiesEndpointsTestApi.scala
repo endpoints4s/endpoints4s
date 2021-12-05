@@ -11,5 +11,6 @@ class ChunkedEntitiesEndpointsTestApi
     with algebra.EndpointsTestApi
     with algebra.BasicAuthenticationTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
+    with algebra.ChunkedEntitiesTestApi
     with algebra.ChunkedJsonEntitiesTestApi
     with algebra.circe.ChunkedJsonEntitiesTestApi

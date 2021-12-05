@@ -10,8 +10,15 @@ trait ChunkedJsonEntitiesTestSuite[
 
 trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonRequestEntitiesTestApi]
     extends StreamedEndpointCalls[T] {
+  import streamingClient.{Counter, streamedJsonUpload}
 
-  //TODO add test
+  "Encode chunks streamed to server" in {
+    val expectedItems =
+      Counter(1) :: Counter(2) :: Counter(3) :: Nil
+
+    callStreamedEndpoint(streamedJsonUpload, expectedItems)
+      .map(_ => succeed)
+  }
 }
 
 trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestApi]

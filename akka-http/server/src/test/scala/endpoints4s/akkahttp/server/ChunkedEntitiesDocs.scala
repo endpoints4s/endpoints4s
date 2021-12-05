@@ -25,11 +25,12 @@ trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntitie
 import scala.concurrent.duration.DurationInt
 
 trait JsonStreamingExample
-  extends algebra.Endpoints
+    extends algebra.Endpoints
     with algebra.ChunkedJsonEntities
-    with algebra.JsonEntitiesFromSchemas {
+    with algebra.JsonEntitiesFromSchemas
+    with algebra.NewLineResponseChunkCodec {
 
-  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit]))
+  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineResponseChunkCodec)))
 
 }
 

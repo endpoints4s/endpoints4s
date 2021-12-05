@@ -103,7 +103,7 @@ trait ChunkedJsonEntities
   }
 
   def newLineRequestChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
-    Flow[ByteString].map(chunk => chunk ++ ByteString("\n"))
+    Flow[ByteString].intersperse(ByteString("\n"))
 
   def newLineResponseChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
     Flow[ByteString].via(

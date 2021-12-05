@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
@@ -328,13 +329,48 @@ object StubServer extends App {
           ContentTypes.`text/plain(UTF-8)`,
           Source(
             List(
-              ByteString("aaa"),
-              ByteString("bbb"),
-              ByteString("ccc")
+              ByteString("a"),
+              ByteString("a"),
+              ByteString("a"),
+              ByteString("b"),
+              ByteString("b"),
+              ByteString("b"),
+              ByteString("c"),
+              ByteString("c"),
+              ByteString("c")
             )
           )
         )
       )
+    case r @ HttpRequest(
+          POST,
+          Uri.Path("/counter-values"),
+          _,
+          requestEntity,
+          _
+        ) =>
+      requestEntity.dataBytes
+        .via(
+          Framing.delimiter(
+            ByteString("\n"),
+            maximumFrameLength = Int.MaxValue,
+            allowTruncation = true
+          )
+        )
+        .runWith(Sink.seq)
+        .map { result =>
+          if (
+            result == Seq(
+              ByteString("{\"value\":1}"),
+              ByteString("{\"value\":2}"),
+              ByteString("{\"value\":3}")
+            )
+          ) {
+            HttpResponse()
+          } else {
+            matcherExhausted(r)
+          }
+        }
     case HttpRequest(
           GET,
           uri,
@@ -351,7 +387,7 @@ object StubServer extends App {
               ByteString("{\"value\":2}"),
               ByteString("{\"value\":3}")
             )
-          ).map(byteString => byteString ++ ByteString("\n"))
+          ).intersperse(ByteString("\n"))
         )
       )
     case HttpRequest(
@@ -366,7 +402,7 @@ object StubServer extends App {
           ContentTypes.`application/json`,
           Source(
             List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}"))
-          ).map(byteString => byteString ++ ByteString("\n"))
+          ).intersperse(ByteString("\n"))
         )
       )
     case r @ HttpRequest(
@@ -376,16 +412,11 @@ object StubServer extends App {
           requestEntity,
           _
         ) if uri.toRelative == Uri("/upload") =>
-      val bytes = requestEntity.dataBytes.map(_.toArray)
-      bytes
-        .runWith[Future[Seq[Array[Byte]]]](Sink.seq)
+      requestEntity.dataBytes
+        .mapConcat(_.toSeq)
+        .runWith(Sink.seq)
         .map { result =>
-          // matching arrays is a bit funky without the help of scalatest utilities
-          if (
-            result.size == 2 &&
-            result.headOption.exists(_.sameElements(Array[Byte](1, 2, 3))) && result.lastOption
-              .exists(_.sameElements(Array[Byte](4, 5, 6)))
-          ) {
+          if (result == Seq[Byte](1, 2, 3, 4, 5, 6)) {
             HttpResponse()
           } else {
             matcherExhausted(r)

@@ -1,5 +1,10 @@
 package endpoints4s.http4s.client
 
+import endpoints4s.algebra.NewLineChunkCodec
+import fs2.Chunk
+import fs2.Pipe
+import fs2.Pull
+import fs2.Stream
 import org.http4s.{Request => Http4sRequest, Response => Http4sResponse}
 
 trait ChunkedEntities extends endpoints4s.algebra.ChunkedEntities with EndpointsWithCustomErrors {
@@ -26,30 +31,59 @@ trait ChunkedEntities extends endpoints4s.algebra.ChunkedEntities with Endpoints
 trait ChunkedJsonEntities
     extends endpoints4s.algebra.ChunkedJsonEntities
     with ChunkedEntities
-    with JsonEntitiesFromCodecs {
+    with JsonEntitiesFromCodecs
+    with NewLineChunkCodec {
 
-  def jsonChunksRequest[A](implicit
+  type RequestChunkCodec = Pipe[Effect, String, String]
+
+  type ResponseChunkCodec = Pipe[Effect, String, String]
+
+  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = { (stream, req) =>
     val encoder = stringCodec(codec)
-    req.withEntity(stream.map(encoder.encode))
+    req.withEntity(stream.map(encoder.encode).through(chunkCodec))
   }
 
-  def jsonChunksResponse[A](implicit
+  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = { response =>
     val decoder = stringCodec[A](codec)
 
-    val stream = response.bodyText.evalMap(s =>
-      decoder
-        .decode(s)
-        .fold(
-          effect.pure,
-          es => effect.raiseError[A](new Throwable(es.mkString(", ")))
-        )
-    )
+    val stream = response.bodyText
+      .through(chunkCodec)
+      .evalMap(s =>
+        decoder
+          .decode(s)
+          .fold(
+            effect.pure,
+            es => effect.raiseError[A](new Throwable(es.mkString(", ")))
+          )
+      )
     effect.pure(stream)
 
   }
 
+  def newLineRequestChunkCodec[A]: Pipe[Effect, String, String] = in => in.intersperse("\n")
+
+  def newLineResponseChunkCodec[A]: Pipe[Effect, String, String] = {
+    def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
+      stream.pull.uncons.flatMap {
+        case Some((head, tail)) =>
+          val (pull, newBuffer) = buffer
+            .append(head.iterator.mkString)
+            .foldLeft((Pull.output(Chunk.empty[String]), new StringBuilder)) {
+              case ((pullAcc, tmpBuffer), char) =>
+                if (char == '\n') {
+                  (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)
+                } else {
+                  (pullAcc, tmpBuffer.append(char))
+                }
+            }
+          pull >> go(tail, newBuffer)
+        case None => Pull.output(Chunk(buffer.toString()))
+      }
+    }
+    in => go(in, new StringBuilder).stream
+  }
 }

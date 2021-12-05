@@ -2,6 +2,7 @@ package endpoints4s.algebra.client
 
 import endpoints4s.algebra.ChunkedRequestEntitiesTestApi
 import endpoints4s.algebra.ChunkedResponseEntitiesTestApi
+import org.scalatest.EitherValues
 
 trait ChunkedEntitiesTestSuite[
     T <: ChunkedRequestEntitiesTestApi with ChunkedResponseEntitiesTestApi
@@ -14,7 +15,14 @@ trait ChunkedEntitiesRequestTestSuite[T <: ChunkedRequestEntitiesTestApi]
 
   "Encode chunks uploaded to a server" in {
 
-    val expectedItems = List(Array[Byte](1, 2, 3), Array[Byte](4, 5, 6))
+    val expectedItems = List(
+      Array[Byte](1),
+      Array[Byte](2),
+      Array[Byte](3),
+      Array[Byte](4),
+      Array[Byte](5),
+      Array[Byte](6)
+    )
 
     callStreamedEndpoint(uploadEndpointTest, expectedItems)
       .map(_ => succeed)
@@ -22,23 +30,24 @@ trait ChunkedEntitiesRequestTestSuite[T <: ChunkedRequestEntitiesTestApi]
 }
 
 trait ChunkedEntitiesResponseTestSuite[T <: ChunkedResponseEntitiesTestApi]
-    extends StreamedEndpointCalls[T] {
+    extends StreamedEndpointCalls[T]
+    with EitherValues {
   import streamingClient.{streamedTextEndpointTest, streamedBytesEndpointTest}
 
   "Decode bytes chunks streamed by a server" in {
 
-    val expectedItems =
-      Right(List(0.toByte)) :: Right(List(1.toByte)) :: Right(List(2.toByte)) :: Nil
+    val expectedItems = List(0.toByte, 1.toByte, 2.toByte)
 
     callStreamedEndpoint(streamedBytesEndpointTest, ())
-      .map(res => res.map(_.map(_.toList)) shouldEqual expectedItems)
+      .map(res => res.map(_.value.toList).flatten shouldEqual expectedItems)
   }
 
   "Decode string chunks streamed by a server" in {
 
-    val expectedItems =
-      Right("aaa") :: Right("bbb") :: Right("ccc") :: Nil
+    val expectedItems = "aaabbbccc"
 
-    callStreamedEndpoint(streamedTextEndpointTest, ()).map(_ shouldEqual expectedItems)
+    callStreamedEndpoint(streamedTextEndpointTest, ()).map(res =>
+      res.map(_.value).mkString shouldEqual expectedItems
+    )
   }
 }
