@@ -351,7 +351,7 @@ object StubServer extends App {
               ByteString("{\"value\":2}"),
               ByteString("{\"value\":3}")
             )
-          )
+          ).map(byteString => byteString ++ ByteString("\n"))
         )
       )
     case HttpRequest(
@@ -366,7 +366,7 @@ object StubServer extends App {
           ContentTypes.`application/json`,
           Source(
             List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}"))
-          )
+          ).map(byteString => byteString ++ ByteString("\n"))
         )
       )
     case r @ HttpRequest(

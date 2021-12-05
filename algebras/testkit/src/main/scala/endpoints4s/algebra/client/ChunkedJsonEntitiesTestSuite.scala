@@ -1,54 +1,22 @@
 package endpoints4s.algebra.client
 
-import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
+import endpoints4s.algebra.ChunkedJsonRequestEntitiesTestApi
+import endpoints4s.algebra.ChunkedJsonResponseEntitiesTestApi
 
-import scala.concurrent.Future
+trait ChunkedJsonEntitiesTestSuite[
+    T <: ChunkedJsonRequestEntitiesTestApi with ChunkedJsonResponseEntitiesTestApi
+] extends ChunkedJsonEntitiesRequestTestSuite[T]
+    with ChunkedJsonEntitiesResponseTestSuite[T]
 
-protected trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi]
-    extends ClientTestBase[T] {
-  val streamingClient: T
+trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonRequestEntitiesTestApi]
+    extends StreamedEndpointCalls[T] {
 
-  import streamingClient.{Endpoint, Chunks}
-
-  /** Calls the endpoint and accumulates the messages sent by the server.
-    * (only endpoints streaming a finite number of items can be tested)
-    */
-  def callStreamedEndpoint[A, B](
-      endpoint: Endpoint[A, Chunks[B]],
-      req: A
-  ): Future[Seq[Either[String, B]]]
-  def callStreamedEndpoint[A, B](
-      endpoint: Endpoint[Chunks[A], B],
-      req: Seq[A]
-  ): Future[B]
+  //TODO add test
 }
 
-trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonEntitiesTestApi]
-    extends ChunkedJsonEntitiesTestSuite[T] {
-  import streamingClient.{
-    Counter,
-    streamedEndpointTest,
-    streamedEndpointErrorTest,
-    streamedTextEndpointTest,
-    streamedBytesEndpointTest
-  }
-
-  "Decode bytes chunks streamed by a server" in {
-
-    val expectedItems =
-      Right(List(0.toByte)) :: Right(List(1.toByte)) :: Right(List(2.toByte)) :: Nil
-
-    callStreamedEndpoint(streamedBytesEndpointTest, ())
-      .map(res => res.map(_.map(_.toList)) shouldEqual expectedItems)
-  }
-
-  "Decode string chunks streamed by a server" in {
-
-    val expectedItems =
-      Right("aaa") :: Right("bbb") :: Right("ccc") :: Nil
-
-    callStreamedEndpoint(streamedTextEndpointTest, ()).map(_ shouldEqual expectedItems)
-  }
+trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestApi]
+    extends StreamedEndpointCalls[T] {
+  import streamingClient.{Counter, streamedEndpointTest, streamedEndpointErrorTest}
 
   "Decode chunks streamed by a server" in {
 
@@ -67,18 +35,5 @@ trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonEntitiesTestApi]
 
     callStreamedEndpoint(streamedEndpointErrorTest, ())
       .map(_ shouldEqual expectedItems)
-  }
-}
-
-trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonEntitiesTestApi]
-    extends ChunkedJsonEntitiesTestSuite[T] {
-  import streamingClient.{uploadEndpointTest}
-
-  "Encode chunks uploaded to a server" in {
-
-    val expectedItems = List(Array[Byte](1, 2, 3), Array[Byte](4, 5, 6))
-
-    callStreamedEndpoint(uploadEndpointTest, expectedItems)
-      .map(_ => succeed)
   }
 }

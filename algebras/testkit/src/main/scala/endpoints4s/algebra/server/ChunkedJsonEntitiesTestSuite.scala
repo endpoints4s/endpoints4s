@@ -11,12 +11,17 @@ import akka.http.scaladsl.model.{
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import endpoints4s.Codec
-import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
+import endpoints4s.algebra.ChunkedJsonRequestEntitiesTestApi
+import endpoints4s.algebra.ChunkedJsonResponseEntitiesTestApi
+import endpoints4s.algebra.ChunkedRequestEntitiesTestApi
+import endpoints4s.algebra.ChunkedResponseEntitiesTestApi
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends EndpointsTestSuite[T] {
+trait ChunkedJsonEntitiesTestSuite[
+    T <: ChunkedRequestEntitiesTestApi with ChunkedResponseEntitiesTestApi with ChunkedJsonRequestEntitiesTestApi with ChunkedJsonResponseEntitiesTestApi
+] extends EndpointsTestSuite[T] {
 
   def serveStreamedEndpoint[Req, Resp, Mat](
       endpoint: serverApi.Endpoint[Req, serverApi.Chunks[Resp]],
