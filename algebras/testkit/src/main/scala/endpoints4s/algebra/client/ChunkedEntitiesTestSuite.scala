@@ -10,7 +10,7 @@ trait ChunkedEntitiesTestSuite[
     with ChunkedEntitiesResponseTestSuite[T]
 
 trait ChunkedEntitiesRequestTestSuite[T <: ChunkedRequestEntitiesTestApi]
-    extends StreamedEndpointCalls[T] {
+    extends StreamedRequestEndpointCalls[T] {
   import streamingClient.{uploadEndpointTest}
 
   "Encode chunks uploaded to a server" in {
@@ -30,7 +30,7 @@ trait ChunkedEntitiesRequestTestSuite[T <: ChunkedRequestEntitiesTestApi]
 }
 
 trait ChunkedEntitiesResponseTestSuite[T <: ChunkedResponseEntitiesTestApi]
-    extends StreamedEndpointCalls[T]
+    extends StreamedResponseEndpointCalls[T]
     with EitherValues {
   import streamingClient.{streamedTextEndpointTest, streamedBytesEndpointTest}
 

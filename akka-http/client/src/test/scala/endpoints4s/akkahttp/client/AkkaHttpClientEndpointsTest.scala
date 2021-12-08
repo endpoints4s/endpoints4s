@@ -27,7 +27,7 @@ class TestClient(settings: EndpointsSettings)(implicit
     with ChunkedJsonEntities
     with ChunkedEntitiesTestApi
     with ChunkedJsonEntitiesTestApi
-    with algebra.circe.ChunkedJsonEntitiesTestApi
+    with algebra.circe.CounterCodecCirce
 
 class AkkaHttpClientEndpointsTest
     extends algebra.client.EndpointsTestSuite[TestClient]

@@ -9,7 +9,7 @@ trait ChunkedJsonEntitiesTestSuite[
     with ChunkedJsonEntitiesResponseTestSuite[T]
 
 trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonRequestEntitiesTestApi]
-    extends StreamedEndpointCalls[T] {
+    extends StreamedRequestEndpointCalls[T] {
   import streamingClient.{Counter, streamedJsonUpload}
 
   "Encode chunks streamed to server" in {
@@ -22,7 +22,7 @@ trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonRequestEntitiesTestApi
 }
 
 trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestApi]
-    extends StreamedEndpointCalls[T] {
+    extends StreamedResponseEndpointCalls[T] {
   import streamingClient.{Counter, streamedEndpointTest, streamedEndpointErrorTest}
 
   "Decode chunks streamed by a server" in {

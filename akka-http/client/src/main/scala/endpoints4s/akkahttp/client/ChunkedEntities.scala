@@ -102,10 +102,10 @@ trait ChunkedJsonEntities
     )
   }
 
-  def newLineRequestChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
+  def newLineRequestChunkCodec[A]: RequestChunkCodec =
     Flow[ByteString].intersperse(ByteString("\n"))
 
-  def newLineResponseChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
+  def newLineResponseChunkCodec[A]: ResponseChunkCodec =
     Flow[ByteString].via(
       Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true)
     )

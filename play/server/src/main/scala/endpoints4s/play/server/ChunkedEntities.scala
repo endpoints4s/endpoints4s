@@ -100,11 +100,11 @@ trait ChunkedJsonEntities
     chunkedResponseEntity(ContentTypes.JSON, a => ByteString(encoder.encode(a)), chunkCodec)
   }
 
-  def newLineRequestChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
+  def newLineRequestChunkCodec[A]: ResponseChunkCodec =
     Flow[ByteString].via(
       Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true)
     )
 
-  def newLineResponseChunkCodec[A]: Flow[ByteString, ByteString, NotUsed] =
+  def newLineResponseChunkCodec[A]: RequestChunkCodec =
     Flow[ByteString].intersperse(ByteString("\n"))
 }

@@ -9,7 +9,7 @@ class EndpointsCodecsTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
     with algebra.ChunkedEntitiesTestApi
     with algebra.ChunkedJsonEntitiesTestApi
-    with algebra.circe.ChunkedJsonEntitiesTestApi
+    with algebra.circe.CounterCodecCirce
     with algebra.BasicAuthenticationTestApi
     with algebra.SumTypedEntitiesTestApi
     with JsonEntitiesFromCodecs

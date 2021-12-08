@@ -64,9 +64,9 @@ trait ChunkedJsonEntities
 
   }
 
-  def newLineRequestChunkCodec[A]: Pipe[Effect, String, String] = in => in.intersperse("\n")
+  def newLineRequestChunkCodec[A]: RequestChunkCodec = in => in.intersperse("\n")
 
-  def newLineResponseChunkCodec[A]: Pipe[Effect, String, String] = {
+  def newLineResponseChunkCodec[A]: ResponseChunkCodec = {
     def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
       stream.pull.uncons.flatMap {
         case Some((head, tail)) =>
