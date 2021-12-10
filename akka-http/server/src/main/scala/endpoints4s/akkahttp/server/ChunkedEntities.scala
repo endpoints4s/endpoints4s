@@ -10,7 +10,6 @@ import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import endpoints4s.algebra
-import endpoints4s.algebra.NewLineChunkCodec
 
 import scala.concurrent.Future
 
@@ -42,7 +41,7 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 
   private[server] def chunkedRequestEntity[A](
       fromByteString: ByteString => Either[Throwable, A],
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
   ): RequestEntity[Chunks[A]] =
     Directives.entity(Unmarshaller[HttpRequest, Chunks[A]] { _ => request =>
       val source = request.entity.dataBytes.via(chunkCodec).map(fromByteString).flatMapConcat {
@@ -55,7 +54,7 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   private[server] def chunkedResponseEntity[A](
       contentType: ContentType,
       toByteString: A => ByteString,
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
   ): ResponseEntity[Chunks[A]] =
     Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) { as =>
       val byteStrings = as.map(toByteString)
@@ -71,14 +70,17 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 trait ChunkedJsonEntities
     extends algebra.ChunkedJsonEntities
     with ChunkedEntities
-    with JsonEntitiesFromCodecs
-    with NewLineChunkCodec {
+    with JsonEntitiesFromCodecs {
 
-  type RequestChunkCodec = Flow[ByteString, ByteString, NotUsed]
+  type RequestFraming = Flow[ByteString, ByteString, NotUsed]
 
-  type ResponseChunkCodec = Flow[ByteString, ByteString, NotUsed]
+  type ResponseFraming = Flow[ByteString, ByteString, NotUsed]
 
-  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(Flow.apply[ByteString])
+
+  def jsonChunksRequest[A](framing: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -91,26 +93,30 @@ trait ChunkedJsonEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      chunkCodec
+      framing
     )
   }
 
-  def jsonChunksResponse[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(Flow.apply[ByteString])
+
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedResponseEntity(
       ContentTypes.`application/json`,
       a => ByteString(encoder.encode(a)),
-      chunkCodec
+      framing
     )
   }
 
-  def newLineRequestChunkCodec[A]: RequestChunkCodec =
+  def newLineDelimiterRequestFraming[A]: RequestFraming =
     Flow[ByteString].via(
       Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true)
     )
 
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec =
+  def newLineDelimiterResponseFraming[A]: ResponseFraming =
     Flow[ByteString].intersperse(ByteString("\n"))
 }

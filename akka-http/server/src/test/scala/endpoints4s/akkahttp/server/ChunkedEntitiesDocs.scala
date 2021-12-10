@@ -27,10 +27,10 @@ import scala.concurrent.duration.DurationInt
 trait JsonStreamingExample
     extends algebra.Endpoints
     with algebra.ChunkedJsonEntities
-    with algebra.JsonEntitiesFromSchemas
-    with algebra.NewLineResponseChunkCodec {
+    with algebra.JsonEntitiesFromSchemas {
 
-  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineResponseChunkCodec)))
+  val ticks =
+    endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineDelimiterResponseFraming)))
 
 }
 

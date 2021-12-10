@@ -98,14 +98,22 @@ trait ChunkedJsonEntities extends ChunkedJsonRequestEntities with ChunkedJsonRes
 trait ChunkedJsonRequestEntities
     extends ChunkedRequestEntities
     with JsonCodecs
-    with RequestChunkCodec {
+    with RequestFraming {
+
+  @deprecated(
+    "Use jsonChunksRequest[A](framing: RequestFraming) instead to explicitly provide chunk framing",
+    "1.6.1"
+  )
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]]
 
   /** A request entity carrying chunks of JSON values
     *
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksRequest[A](chunkCodec: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]]
 }
@@ -113,36 +121,34 @@ trait ChunkedJsonRequestEntities
 trait ChunkedJsonResponseEntities
     extends ChunkedResponseEntities
     with JsonCodecs
-    with ResponseChunkCodec {
+    with ResponseFraming {
+
+  @deprecated(
+    "Use jsonChunksResponse[A](framing: ResponseFraming) instead to explicitly provide chunk framing",
+    "1.6.1"
+  )
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]]
 
   /** A response entity carrying chunks of JSON values
     *
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]]
 }
 
-trait RequestChunkCodec {
+trait RequestFraming {
 
-  type RequestChunkCodec
+  type RequestFraming
+  def newLineDelimiterRequestFraming[A]: RequestFraming
 }
 
-trait ResponseChunkCodec {
+trait ResponseFraming {
 
-  type ResponseChunkCodec
-}
-
-trait NewLineChunkCodec extends NewLineRequestChunkCodec with NewLineResponseChunkCodec
-
-trait NewLineRequestChunkCodec extends RequestChunkCodec {
-
-  def newLineRequestChunkCodec[A]: RequestChunkCodec
-}
-
-trait NewLineResponseChunkCodec extends ResponseChunkCodec {
-
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec
+  type ResponseFraming
+  def newLineDelimiterResponseFraming[A]: ResponseFraming
 }

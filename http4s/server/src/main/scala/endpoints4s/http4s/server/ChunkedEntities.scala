@@ -1,7 +1,6 @@
 package endpoints4s.http4s.server
 
 import endpoints4s.algebra
-import endpoints4s.algebra.NewLineChunkCodec
 import org.http4s.EntityEncoder
 import org.http4s.MediaType
 import org.http4s.Entity
@@ -34,14 +33,17 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 trait ChunkedJsonEntities
     extends algebra.ChunkedJsonEntities
     with ChunkedEntities
-    with JsonEntitiesFromCodecs
-    with NewLineChunkCodec {
+    with JsonEntitiesFromCodecs {
 
-  type RequestChunkCodec = Pipe[Effect, String, String]
+  type RequestFraming = Pipe[Effect, String, String]
 
-  type ResponseChunkCodec = Pipe[Effect, String, String]
+  type ResponseFraming = Pipe[Effect, String, String]
 
-  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(identity(_))
+
+  def jsonChunksRequest[A](framing: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -49,7 +51,7 @@ trait ChunkedJsonEntities
       Effect.pure(
         Right(
           req.bodyText
-            .through(chunkCodec)
+            .through(framing)
             .evalMap(s =>
               decoder
                 .decode(s)
@@ -62,16 +64,20 @@ trait ChunkedJsonEntities
       )
   }
 
-  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
+
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     EntityEncoder.encodeBy(`Content-Type`(MediaType.application.`json`))(stream =>
-      Entity(stream.map(encoder.encode).through(chunkCodec).through(fs2.text.utf8.encode))
+      Entity(stream.map(encoder.encode).through(framing).through(fs2.text.utf8.encode))
     )
   }
 
-  def newLineRequestChunkCodec[A]: RequestChunkCodec = {
+  def newLineDelimiterRequestFraming[A]: RequestFraming = {
     def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
       stream.pull.uncons.flatMap {
         case Some((head, tail)) =>
@@ -92,5 +98,5 @@ trait ChunkedJsonEntities
     in => go(in, new StringBuilder).stream
   }
 
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec = in => in.intersperse("\n")
+  def newLineDelimiterResponseFraming[A]: ResponseFraming = in => in.intersperse("\n")
 }

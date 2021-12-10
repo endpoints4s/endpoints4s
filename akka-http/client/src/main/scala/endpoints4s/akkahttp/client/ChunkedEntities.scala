@@ -7,7 +7,6 @@ import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import endpoints4s.algebra
-import endpoints4s.algebra.NewLineChunkCodec
 
 import scala.concurrent.Future
 
@@ -67,25 +66,32 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 trait ChunkedJsonEntities
     extends algebra.ChunkedJsonEntities
     with ChunkedEntities
-    with JsonEntitiesFromCodecs
-    with NewLineChunkCodec {
+    with JsonEntitiesFromCodecs {
 
-  type RequestChunkCodec = Flow[ByteString, ByteString, NotUsed]
+  type RequestFraming = Flow[ByteString, ByteString, NotUsed]
 
-  type ResponseChunkCodec = Flow[ByteString, ByteString, NotUsed]
+  type ResponseFraming = Flow[ByteString, ByteString, NotUsed]
 
-  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(Flow.apply[ByteString])
+
+  def jsonChunksRequest[A](framing: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedRequestEntity(
       ContentTypes.`application/json`,
       a => ByteString.fromString(encoder.encode(a)),
-      chunkCodec
+      framing
     )
   }
 
-  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(Flow.apply[ByteString])
+
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -98,14 +104,14 @@ trait ChunkedJsonEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      chunkCodec
+      framing
     )
   }
 
-  def newLineRequestChunkCodec[A]: RequestChunkCodec =
+  def newLineDelimiterRequestFraming[A]: RequestFraming =
     Flow[ByteString].intersperse(ByteString("\n"))
 
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec =
+  def newLineDelimiterResponseFraming[A]: ResponseFraming =
     Flow[ByteString].via(
       Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true)
     )

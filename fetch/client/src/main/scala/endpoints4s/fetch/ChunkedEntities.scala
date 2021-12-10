@@ -1,7 +1,6 @@
 package endpoints4s.fetch
 
 import endpoints4s.algebra
-import endpoints4s.algebra.NewLineResponseChunkCodec
 import org.scalajs.dom
 import org.scalajs.dom.ReadableStreamReader
 
@@ -59,12 +58,15 @@ trait ChunkedResponseEntities
 trait ChunkedJsonResponseEntities
     extends algebra.ChunkedJsonResponseEntities
     with ChunkedResponseEntities
-    with JsonEntitiesFromCodecs
-    with NewLineResponseChunkCodec {
+    with JsonEntitiesFromCodecs {
 
-  type ResponseChunkCodec = dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array]
+  type ResponseFraming = dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array]
 
-  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
+
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -77,11 +79,11 @@ trait ChunkedJsonResponseEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      chunkCodec
+      framing
     )
   }
 
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec = { readableStream =>
+  def newLineDelimiterResponseFraming[A]: ResponseFraming = { readableStream =>
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {

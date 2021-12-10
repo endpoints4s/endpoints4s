@@ -1,6 +1,5 @@
 package endpoints4s.http4s.client
 
-import endpoints4s.algebra.NewLineChunkCodec
 import fs2.Chunk
 import fs2.Pipe
 import fs2.Pull
@@ -31,27 +30,34 @@ trait ChunkedEntities extends endpoints4s.algebra.ChunkedEntities with Endpoints
 trait ChunkedJsonEntities
     extends endpoints4s.algebra.ChunkedJsonEntities
     with ChunkedEntities
-    with JsonEntitiesFromCodecs
-    with NewLineChunkCodec {
+    with JsonEntitiesFromCodecs {
 
-  type RequestChunkCodec = Pipe[Effect, String, String]
+  type RequestFraming = Pipe[Effect, String, String]
 
-  type ResponseChunkCodec = Pipe[Effect, String, String]
+  type ResponseFraming = Pipe[Effect, String, String]
 
-  def jsonChunksRequest[A](chunkCodec: RequestChunkCodec)(implicit
+  def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(identity(_))
+
+  def jsonChunksRequest[A](framing: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = { (stream, req) =>
     val encoder = stringCodec(codec)
-    req.withEntity(stream.map(encoder.encode).through(chunkCodec))
+    req.withEntity(stream.map(encoder.encode).through(framing))
   }
 
-  def jsonChunksResponse[A](chunkCodec: ResponseChunkCodec)(implicit
+  def jsonChunksResponse[A](implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
+
+  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = { response =>
     val decoder = stringCodec[A](codec)
 
     val stream = response.bodyText
-      .through(chunkCodec)
+      .through(framing)
       .evalMap(s =>
         decoder
           .decode(s)
@@ -64,9 +70,9 @@ trait ChunkedJsonEntities
 
   }
 
-  def newLineRequestChunkCodec[A]: RequestChunkCodec = in => in.intersperse("\n")
+  def newLineDelimiterRequestFraming[A]: RequestFraming = in => in.intersperse("\n")
 
-  def newLineResponseChunkCodec[A]: ResponseChunkCodec = {
+  def newLineDelimiterResponseFraming[A]: ResponseFraming = {
     def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
       stream.pull.uncons.flatMap {
         case Some((head, tail)) =>
