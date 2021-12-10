@@ -3,6 +3,7 @@ package endpoints4s.fetch
 import org.scalajs.dom.ReadableStreamReader
 import org.scalajs.dom.WriteableStream
 
+import scala.annotation.nowarn
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSGlobal
 
@@ -15,6 +16,7 @@ import scala.scalajs.js.annotation.JSGlobal
   *   Type of the Chunks returned by the Stream. Can't make it coveriant, due to T
   */
 @js.native
+@nowarn
 private[fetch] trait ReadableStream[+T] extends js.Object {
 
   /** The locked getter returns whether or not the readable stream is locked to a reader.
@@ -213,6 +215,7 @@ private[fetch] object ReadableStreamType {
   */
 @js.native
 @JSGlobal
+@nowarn
 private[fetch] class ReadableStreamController[-T] private[this] () extends js.Object {
 
   /** The desiredSize getter returns the desired size to fill the controlled stream’s internal queue. It can be
