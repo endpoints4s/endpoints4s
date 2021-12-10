@@ -34,13 +34,13 @@ trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEnti
 
   private[server] def chunkedRequestEntity[A](
       fromByteString: ByteString => Either[Throwable, A],
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
   ): RequestEntity[Chunks[A]] =
     _ => {
       Some(BodyParser.apply { _ =>
         Accumulator.source[ByteString].map { byteStrings =>
           val source: Source[A, _] =
-            byteStrings.via(chunkCodec).map(fromByteString).flatMapConcat {
+            byteStrings.via(framing).map(fromByteString).flatMapConcat {
               case Left(error)  => Source.failed(error)
               case Right(value) => Source.single(value)
             }
@@ -52,10 +52,10 @@ trait ChunkedEntities extends EndpointsWithCustomErrors with algebra.ChunkedEnti
   private[server] def chunkedResponseEntity[A](
       contentType: String,
       toByteString: A => ByteString,
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
   ): ResponseEntity[Chunks[A]] =
     as => {
-      val byteStrings = as.map(toByteString).via(chunkCodec).map(a => HttpChunk.Chunk(a))
+      val byteStrings = as.map(toByteString).via(framing).map(a => HttpChunk.Chunk(a))
       HttpEntity.Chunked(byteStrings, Some(contentType))
     }
 

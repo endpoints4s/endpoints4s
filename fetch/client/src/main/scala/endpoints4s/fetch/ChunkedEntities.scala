@@ -22,7 +22,7 @@ trait ChunkedResponseEntities
 
   private[fetch] def chunkedResponseEntity[A](
       fromUint8Array: Uint8Array => Either[Throwable, A],
-      chunkCodec: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array] = identity
+      framing: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array] = identity
   ): ResponseEntity[Chunks[A]] = { response =>
     val readableStream = ReadableStream[A](
       new ReadableStreamUnderlyingSource[A] {
@@ -45,7 +45,7 @@ trait ChunkedResponseEntities
                 }
               })
           }
-          read(chunkCodec(response.body).getReader()): js.UndefOr[js.Promise[Unit]]
+          read(framing(response.body).getReader()): js.UndefOr[js.Promise[Unit]]
         }): js.UndefOr[js.Function1[ReadableStreamController[A], js.UndefOr[js.Promise[Unit]]]]
       }
     )

@@ -113,7 +113,7 @@ trait ChunkedJsonRequestEntities
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksRequest[A](chunkCodec: RequestFraming)(implicit
+  def jsonChunksRequest[A](framing: RequestFraming)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]]
 }

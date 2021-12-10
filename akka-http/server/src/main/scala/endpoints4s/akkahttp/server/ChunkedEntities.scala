@@ -41,10 +41,10 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
 
   private[server] def chunkedRequestEntity[A](
       fromByteString: ByteString => Either[Throwable, A],
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
   ): RequestEntity[Chunks[A]] =
     Directives.entity(Unmarshaller[HttpRequest, Chunks[A]] { _ => request =>
-      val source = request.entity.dataBytes.via(chunkCodec).map(fromByteString).flatMapConcat {
+      val source = request.entity.dataBytes.via(framing).map(fromByteString).flatMapConcat {
         case Left(error)  => Source.failed(error)
         case Right(value) => Source.single(value)
       }
@@ -54,11 +54,11 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   private[server] def chunkedResponseEntity[A](
       contentType: ContentType,
       toByteString: A => ByteString,
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
   ): ResponseEntity[Chunks[A]] =
     Marshaller.withFixedContentType[Chunks[A], MessageEntity](contentType) { as =>
       val byteStrings = as.map(toByteString)
-      HttpEntity.Chunked.fromData(contentType, byteStrings.via(chunkCodec))
+      HttpEntity.Chunked.fromData(contentType, byteStrings.via(framing))
     }
 
 }

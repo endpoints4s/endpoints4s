@@ -38,20 +38,20 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   private[client] def chunkedRequestEntity[A](
       contentType: ContentType,
       toByteString: A => ByteString,
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
   ): RequestEntity[Chunks[A]] =
     (as, httpRequest) =>
       httpRequest.withEntity(
-        HttpEntity.Chunked.fromData(contentType, as.map(toByteString).via(chunkCodec))
+        HttpEntity.Chunked.fromData(contentType, as.map(toByteString).via(framing))
       )
 
   private[client] def chunkedResponseEntity[A](
       fromByteString: ByteString => Either[Throwable, A],
-      chunkCodec: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
+      framing: Flow[ByteString, ByteString, NotUsed] = Flow[ByteString].map(identity)
   ): ResponseEntity[Chunks[A]] =
     httpEntity =>
       Future.successful(
-        Right(httpEntity.dataBytes.via(chunkCodec).map(fromByteString).flatMapConcat {
+        Right(httpEntity.dataBytes.via(framing).map(fromByteString).flatMapConcat {
           case Left(error)  => Source.failed(error)
           case Right(value) => Source.single(value)
         })
