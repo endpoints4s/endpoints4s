@@ -11,9 +11,8 @@ trait EndpointDefinitions extends algebra.Endpoints {
   //#endpoint-definition
 }
 
-
 trait EndpointsDocs extends EndpointDefinitions with Endpoints {
   //#invocation
-  val eventuallyString: Future[String] = someResource(42)
+  val eventuallyString: Future[String] = someResource(42).value
   //#invocation
 }

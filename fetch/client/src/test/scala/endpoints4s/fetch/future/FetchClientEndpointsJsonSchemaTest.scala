@@ -23,8 +23,7 @@ class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
   implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
 }
 
-class FetchClientEndpointsJsonSchemaTest
-    extends JsonTestSuite[TestJsonSchemaClient] {
+class FetchClientEndpointsJsonSchemaTest extends JsonTestSuite[TestJsonSchemaClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
@@ -36,7 +35,7 @@ class FetchClientEndpointsJsonSchemaTest
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
-  ): Future[Resp] = endpoint(args)
+  ): Future[Resp] = endpoint(args).value
 
   clientTestSuite()
 }

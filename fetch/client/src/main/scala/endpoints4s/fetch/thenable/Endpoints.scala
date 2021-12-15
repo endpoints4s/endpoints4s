@@ -8,19 +8,16 @@ trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
 trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
-  type Result[A] = js.Thenable[A]
+  case class Result[A](value: js.Thenable[A], abort: Unit => Unit)
 
   def endpoint[A, B](
       request: Request[A],
       response: Response[B],
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] = new Endpoint[A, B](request, response) {
-    def apply(a: A) =
-      new js.Promise[B]((resolve, error) => {
-        performFetch(this.request, this.response, a)(
-          _.fold(exn => error(exn.getMessage), b => resolve(b)): Unit,
-          ex => error(ex): Unit
-        )
-      })
+    def apply(a: A) = {
+      val (value, abort) = performFetch(this.request, this.response, a)
+      Result(value, abort)
+    }
   }
 }

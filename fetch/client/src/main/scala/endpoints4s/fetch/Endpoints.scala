@@ -11,6 +11,7 @@ import endpoints4s.Valid
 import endpoints4s.Validated
 import endpoints4s.algebra
 import endpoints4s.algebra.Documentation
+import org.scalajs.dom.AbortController
 import org.scalajs.dom.Fetch
 import org.scalajs.dom.{Headers => FetchHeaders}
 import org.scalajs.dom.{RequestInit => FetchRequestInit}
@@ -281,68 +282,78 @@ trait EndpointsWithCustomErrors
       request: Request[A],
       response: Response[B],
       a: A
-  )(
-      onload: Either[Throwable, B] => Unit,
-      onerror: Throwable => Unit
-  ): Unit = {
+  ): (js.Promise[B], Unit => Unit) = {
     val requestData = request(a)
     val requestInit = new FetchRequestInit {}
     requestInit.method = requestData.method
     requestData.prepare(requestInit)
     requestData.entity(requestInit)
-    val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
-    f.`then`(
-      (fetchResponse: FetchResponse) => {
-        val maybeResponse = response(fetchResponse)
+    val abortController = new AbortController
+    requestInit.signal = abortController.signal
 
-        def maybeClientErrors =
-          clientErrorsResponse(fetchResponse)
-            .map(
-              mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
-                Left(
-                  new Exception(
-                    clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+    (
+      new js.Promise[B]((resolve, error) => {
+        val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
+        f.`then`(
+          (fetchResponse: FetchResponse) => {
+            val maybeResponse = response(fetchResponse)
+
+            def maybeClientErrors =
+              clientErrorsResponse(fetchResponse)
+                .map(
+                  mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
+                    Left(
+                      new Exception(
+                        clientErrorsToInvalid(clientErrors).errors.mkString(". ")
+                      )
+                    )
                   )
                 )
+
+            def maybeServerError =
+              serverErrorResponse(fetchResponse).map(
+                mapPartialResponseEntity[ServerError, B](_)(serverError =>
+                  Left(serverErrorToThrowable(serverError))
+                )
               )
-            )
 
-        def maybeServerError =
-          serverErrorResponse(fetchResponse).map(
-            mapPartialResponseEntity[ServerError, B](_)(serverError =>
-              Left(serverErrorToThrowable(serverError))
-            )
-          )
-
-        maybeResponse
-          .orElse(maybeClientErrors)
-          .orElse(maybeServerError) match {
-          case None =>
-            onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
-            Promise.resolve[Unit](()): Unit | js.Thenable[Unit]
-          case Some(entityB) =>
-            entityB(fetchResponse)
-              .`then`(
-                (v: Either[Throwable, B]) => onload(v): Unit | js.Thenable[Unit],
-                js.defined((e: Any) => {
-                  e match {
-                    case th: Throwable => onerror(th)
-                    case _             => js.JavaScriptException(e)
-                  }
-                  (): Unit | js.Thenable[Unit]
-                }): js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
-              ): Unit | js.Thenable[Unit]
-        }
-      },
-      js.defined { (e: Any) =>
-        e match {
-          case th: Throwable => onerror(th)
-          case _             => js.JavaScriptException(e)
-        }
-        (): Unit | js.Thenable[Unit]
-      }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
+            maybeResponse
+              .orElse(maybeClientErrors)
+              .orElse(maybeServerError) match {
+              case None =>
+                error(new Exception(s"Unexpected response status: ${fetchResponse.status}"))
+                Promise.resolve[Unit](()): Unit | js.Thenable[Unit]
+              case Some(entityB) =>
+                entityB(fetchResponse)
+                  .`then`(
+                    (v: Either[Throwable, B]) => {
+                      v match {
+                        case Left(th)     => error(th)
+                        case Right(value) => resolve(value)
+                      }
+                      (): Unit | js.Thenable[Unit]
+                    },
+                    js.defined((e: Any) => {
+                      e match {
+                        case th: Throwable => error(th)
+                        case _             => js.JavaScriptException(e)
+                      }
+                      (): Unit | js.Thenable[Unit]
+                    }): js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
+                  ): Unit | js.Thenable[Unit]
+            }
+          },
+          js.defined { (e: Any) =>
+            e match {
+              case th: Throwable => error(th)
+              case _             => js.JavaScriptException(e)
+            }
+            (): Unit | js.Thenable[Unit]
+          }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
+        )
+      }),
+      _ => abortController.abort()
     )
-    ()
   }
 
   override def mapEndpointRequest[A, B, C](

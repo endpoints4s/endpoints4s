@@ -38,7 +38,7 @@ class FetchClientEndpointsTest
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
-  ): Future[Resp] = endpoint(args)
+  ): Future[Resp] = endpoint(args).value
 
   clientTestSuite()
   basicAuthSuite()
