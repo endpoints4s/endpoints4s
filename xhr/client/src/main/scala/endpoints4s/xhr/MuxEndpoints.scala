@@ -1,8 +1,12 @@
 package endpoints4s.xhr
 
-import endpoints4s.{Decoder, Encoder, algebra}
 import endpoints4s.algebra.MuxRequest
-import org.scalajs.dom.XMLHttpRequest
+import endpoints4s.Decoder
+import endpoints4s.Encoder
+import endpoints4s.algebra
+
+import scala.scalajs.js
+import scala.scalajs.js.|
 
 /** @group interpreters
   */
@@ -12,21 +16,24 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
       request: Request[Transport],
       response: Response[Transport],
       req: Req
-  )(
-      onload: Either[Throwable, req.Response] => Unit,
-      onError: XMLHttpRequest => Unit
   )(implicit
       encoder: Encoder[Req, Transport],
       decoder: Decoder[Transport, Resp]
-  ): Unit =
-    performXhr(request, response, encoder.encode(req))(
-      errorOrResp =>
-        onload(
-          errorOrResp.flatMap(
-            decoder.decode(_).asInstanceOf[Either[Throwable, req.Response]]
-          )
-        ),
-      onError
-    )
+  ): js.Promise[req.Response] = {
+    val (value, _) = performXhr(request, response, encoder.encode(req))
+    value
+      .`then`(
+        (b: Transport) => {
+          decoder
+            .decode(b)
+            .asInstanceOf[Either[Throwable, req.Response]]
+            .fold(
+              th => js.Promise.reject(th),
+              r => js.Promise.resolve[req.Response](r)
+            ): req.Response | js.Thenable[req.Response]
+        },
+        js.undefined
+      )
+  }
 
 }

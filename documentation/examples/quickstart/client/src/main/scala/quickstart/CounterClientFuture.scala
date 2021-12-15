@@ -13,7 +13,7 @@ object CounterClientFuture
   lazy val settings: EndpointsSettings = EndpointsSettings()
 
   //#endpoint-invocation
-  val eventuallyDone: Future[Unit] = increment(Increment(step = 42))
+  val eventuallyDone: Future[Unit] = increment(Increment(step = 42)).value
   //#endpoint-invocation
 
 }

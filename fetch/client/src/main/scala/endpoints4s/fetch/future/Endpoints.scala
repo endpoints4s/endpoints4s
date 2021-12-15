@@ -3,12 +3,13 @@ package endpoints4s.fetch.future
 import endpoints4s.fetch
 
 import scala.concurrent.Future
+import scala.scalajs.js
 
 trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
 trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
-  case class Result[A](value: Future[A], abort: Unit => Unit)
+  case class Result[A](value: Future[A], abort: js.Function1[Unit, Unit])
 
   def endpoint[A, B](
       request: Request[A],

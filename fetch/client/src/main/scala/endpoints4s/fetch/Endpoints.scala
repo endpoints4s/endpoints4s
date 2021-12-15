@@ -282,7 +282,7 @@ trait EndpointsWithCustomErrors
       request: Request[A],
       response: Response[B],
       a: A
-  ): (js.Promise[B], Unit => Unit) = {
+  ): (js.Promise[B], js.Function1[Unit, Unit]) = {
     val requestData = request(a)
     val requestInit = new FetchRequestInit {}
     requestInit.method = requestData.method
@@ -327,16 +327,13 @@ trait EndpointsWithCustomErrors
                 entityB(fetchResponse)
                   .`then`(
                     (v: Either[Throwable, B]) => {
-                      v match {
-                        case Left(th)     => error(th)
-                        case Right(value) => resolve(value)
-                      }
+                      v.fold(error(_), resolve(_))
                       (): Unit | js.Thenable[Unit]
                     },
                     js.defined((e: Any) => {
                       e match {
                         case th: Throwable => error(th)
-                        case _             => js.JavaScriptException(e)
+                        case _             => error(js.JavaScriptException(e))
                       }
                       (): Unit | js.Thenable[Unit]
                     }): js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]

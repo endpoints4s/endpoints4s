@@ -8,7 +8,7 @@ trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
 trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
-  case class Result[A](value: js.Thenable[A], abort: Unit => Unit)
+  case class Result[A](value: js.Thenable[A], abort: js.Function1[Unit, Unit])
 
   def endpoint[A, B](
       request: Request[A],

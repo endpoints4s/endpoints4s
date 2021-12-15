@@ -11,6 +11,7 @@ object Main {
   def main(args: Array[String]): Unit = {
     Api
       .index(("Julien", 30, "foo&bar+baz"))
+      .value
       .`then`[Unit](
         { user =>
           val p = document.createElement("p")
@@ -23,6 +24,7 @@ object Main {
 
     Api
       .action(ActionParameter())
+      .value
       .`then`[Unit](
         { result =>
           val p = document.createElement("p")
@@ -35,6 +37,7 @@ object Main {
 
     Api
       .assets(Api.asset("medias", "chopin--funeral-march.mp3"))
+      .value
       .`then`[Unit](
         { arrayBuffer =>
           val audioCtx = new AudioContext
@@ -52,6 +55,7 @@ object Main {
 
     Api
       .auth(Credentials("foo", "bar"))
+      .value
       .`then`[Unit](
         { maybeResponse =>
           println(s"Access granted: ${maybeResponse.isDefined}")

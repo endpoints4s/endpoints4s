@@ -17,7 +17,7 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
   /** Maps a `Result` to a `js.Thenable` */
-  type Result[A] = js.Thenable[A]
+  case class Result[A](value: js.Thenable[A], abort: js.Function1[Unit, Unit])
 
   def endpoint[A, B](
       request: Request[A],
@@ -26,13 +26,10 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
   ): Endpoint[A, B] =
     new Endpoint[A, B](request, response) {
 
-      def apply(a: A) =
-        new js.Promise[B]((resolve, error) => {
-          performXhr(this.request, this.response, a)(
-            _.fold(exn => error(exn.getMessage), b => resolve(b)): Unit,
-            xhr => error(xhr.responseText): Unit
-          )
-        })
+      def apply(a: A) = {
+        val (value, abort) = performXhr(this.request, this.response, a)
+        Result(value, abort)
+      }
     }
 
   override def mapEndpointRequest[A, B, C](
