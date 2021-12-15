@@ -20,9 +20,10 @@ trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
     )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
-    ): Future[req.Response] = {
+    ): (Future[req.Response], js.Function1[Unit, Unit]) = {
       val promise = new Promise[req.Response]()
-      muxPerformXhr(request, response, req).`then`(
+      val (value, abort) = muxPerformXhr(request, response, req)
+      value.`then`(
         (b: req.Response) => promise.success(b): Unit | js.Thenable[Unit],
         js.defined((e: Any) => {
           e match {
@@ -34,7 +35,7 @@ trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
           js.Function1[Any, Unit | js.Thenable[Unit]]
         ]
       )
-      promise.future
+      (promise.future, abort)
     }
   }
 

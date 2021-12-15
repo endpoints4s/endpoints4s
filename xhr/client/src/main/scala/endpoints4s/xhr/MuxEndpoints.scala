@@ -19,21 +19,24 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   )(implicit
       encoder: Encoder[Req, Transport],
       decoder: Decoder[Transport, Resp]
-  ): js.Promise[req.Response] = {
-    val (value, _) = performXhr(request, response, encoder.encode(req))
-    value
-      .`then`(
-        (b: Transport) => {
-          decoder
-            .decode(b)
-            .asInstanceOf[Either[Throwable, req.Response]]
-            .fold(
-              th => js.Promise.reject(th),
-              r => js.Promise.resolve[req.Response](r)
-            ): req.Response | js.Thenable[req.Response]
-        },
-        js.undefined
-      )
+  ): (js.Promise[req.Response], js.Function1[Unit, Unit]) = {
+    val (value, abort) = performXhr(request, response, encoder.encode(req))
+    (
+      value
+        .`then`(
+          (b: Transport) => {
+            decoder
+              .decode(b)
+              .asInstanceOf[Either[Throwable, req.Response]]
+              .fold(
+                th => js.Promise.reject(th),
+                r => js.Promise.resolve[req.Response](r)
+              ): req.Response | js.Thenable[req.Response]
+          },
+          js.undefined
+        ),
+      abort
+    )
   }
 
 }
