@@ -30,7 +30,7 @@ trait JsonStreamingExample
     with algebra.JsonEntitiesFromSchemas {
 
   val ticks =
-    endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineDelimiterResponseFraming)))
+    endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineDelimiterFraming)))
 
 }
 

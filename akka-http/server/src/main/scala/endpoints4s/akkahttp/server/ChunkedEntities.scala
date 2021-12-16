@@ -72,15 +72,11 @@ trait ChunkedJsonEntities
     with ChunkedEntities
     with JsonEntitiesFromCodecs {
 
-  type RequestFraming = Flow[ByteString, ByteString, NotUsed]
-
-  type ResponseFraming = Flow[ByteString, ByteString, NotUsed]
-
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]] = jsonChunksRequest(Flow.apply[ByteString])
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(noopFraming)
 
-  def jsonChunksRequest[A](framing: RequestFraming)(implicit
+  def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -93,30 +89,45 @@ trait ChunkedJsonEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      framing
+      framing.request
     )
   }
 
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(Flow.apply[ByteString])
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
 
-  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
+  def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedResponseEntity(
       ContentTypes.`application/json`,
       a => ByteString(encoder.encode(a)),
-      framing
+      framing.response
     )
   }
 
-  def newLineDelimiterRequestFraming[A]: RequestFraming =
-    Flow[ByteString].via(
-      Framing.delimiter(ByteString("\n"), maximumFrameLength = Int.MaxValue, allowTruncation = true)
+  trait Framing {
+    def request: Flow[ByteString, ByteString, NotUsed]
+    def response: Flow[ByteString, ByteString, NotUsed]
+  }
+
+  def newLineDelimiterFraming: Framing = new Framing {
+    def request = Flow[ByteString].via(
+      Framing.delimiter(
+        ByteString("\n"),
+        maximumFrameLength = Int.MaxValue,
+        allowTruncation = true
+      )
     )
 
-  def newLineDelimiterResponseFraming[A]: ResponseFraming =
-    Flow[ByteString].intersperse(ByteString("\n"))
+    def response =
+      Flow[ByteString].intersperse(ByteString("\n"))
+  }
+
+  private def noopFraming: Framing = new Framing {
+    def request: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
+    def response: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
+  }
 }

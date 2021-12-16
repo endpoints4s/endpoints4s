@@ -12,7 +12,7 @@ trait ChunkedJsonRequestEntitiesTestApi
 
   val streamedJsonUpload: Endpoint[Chunks[Counter], String] =
     endpoint(
-      post(path / "counter-values", jsonChunksRequest[Counter](newLineDelimiterRequestFraming)),
+      post(path / "counter-values", jsonChunksRequest[Counter](newLineDelimiterFraming)),
       ok(textResponse)
     )
 }
@@ -26,12 +26,12 @@ trait ChunkedJsonResponseEntitiesTestApi
   val streamedEndpointTest: Endpoint[Unit, Chunks[Counter]] =
     endpoint(
       get(path / "notifications"),
-      ok(jsonChunksResponse[Counter](newLineDelimiterResponseFraming))
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
     )
 
   val streamedEndpointErrorTest: Endpoint[Unit, Chunks[Counter]] =
     endpoint(
       get(path / "notifications" / "error"),
-      ok(jsonChunksResponse[Counter](newLineDelimiterResponseFraming))
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
     )
 }

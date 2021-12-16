@@ -35,15 +35,11 @@ trait ChunkedJsonEntities
     with ChunkedEntities
     with JsonEntitiesFromCodecs {
 
-  type RequestFraming = Pipe[Effect, String, String]
-
-  type ResponseFraming = Pipe[Effect, String, String]
-
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]] = jsonChunksRequest(identity(_))
+  ): RequestEntity[Chunks[A]] = jsonChunksRequest(noopFraming)
 
-  def jsonChunksRequest[A](framing: RequestFraming)(implicit
+  def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -51,7 +47,7 @@ trait ChunkedJsonEntities
       Effect.pure(
         Right(
           req.bodyText
-            .through(framing)
+            .through(framing.request)
             .evalMap(s =>
               decoder
                 .decode(s)
@@ -66,37 +62,51 @@ trait ChunkedJsonEntities
 
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
 
-  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
+  def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
     EntityEncoder.encodeBy(`Content-Type`(MediaType.application.`json`))(stream =>
-      Entity(stream.map(encoder.encode).through(framing).through(fs2.text.utf8.encode))
+      Entity(
+        stream.map(encoder.encode).through(framing.response).through(fs2.text.utf8.encode)
+      )
     )
   }
 
-  def newLineDelimiterRequestFraming[A]: RequestFraming = {
-    def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
-      stream.pull.uncons.flatMap {
-        case Some((head, tail)) =>
-          val (pull, newBuffer) = buffer
-            .append(head.iterator.mkString)
-            .foldLeft((Pull.output(Chunk.empty[String]), new StringBuilder)) {
-              case ((pullAcc, tmpBuffer), char) =>
-                if (char == '\n') {
-                  (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)
-                } else {
-                  (pullAcc, tmpBuffer.append(char))
-                }
-            }
-          pull >> go(tail, newBuffer)
-        case None => Pull.output(Chunk(buffer.toString()))
-      }
-    }
-    in => go(in, new StringBuilder).stream
+  trait Framing {
+    def request: Pipe[Effect, String, String]
+    def response: Pipe[Effect, String, String]
   }
 
-  def newLineDelimiterResponseFraming[A]: ResponseFraming = in => in.intersperse("\n")
+  def newLineDelimiterFraming: Framing = new Framing {
+    def request = {
+      def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
+        stream.pull.uncons.flatMap {
+          case Some((head, tail)) =>
+            val (pull, newBuffer) = buffer
+              .append(head.iterator.mkString)
+              .foldLeft((Pull.output(Chunk.empty[String]), new StringBuilder)) {
+                case ((pullAcc, tmpBuffer), char) =>
+                  if (char == '\n') {
+                    (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)
+                  } else {
+                    (pullAcc, tmpBuffer.append(char))
+                  }
+              }
+            pull >> go(tail, newBuffer)
+          case None => Pull.output(Chunk(buffer.toString()))
+        }
+      }
+      in => go(in, new StringBuilder).stream
+    }
+
+    def response = in => in.intersperse("\n")
+  }
+
+  private def noopFraming: Framing = new Framing {
+    def request: Pipe[Effect, String, String] = identity
+    def response: Pipe[Effect, String, String] = identity
+  }
 }

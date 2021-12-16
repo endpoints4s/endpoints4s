@@ -5,6 +5,9 @@ package endpoints4s.algebra
   * It introduces a type `Chunks[A]`, which models a stream of chunks of type `A`.
   * It also introduces constructors for chunked request and response entities.
   *
+  * Chunk re-framing can happen during transport and is dependant on the specific implementation. It is known that
+  * browser clients re-frame chunks received from the server.
+  *
   * Example:
   *
   * {{{
@@ -45,14 +48,12 @@ trait Chunks {
 trait ChunkedRequestEntities extends Chunks {
   this: EndpointsWithCustomErrors =>
 
-  //TODO mention reframing
   /** A request entity carrying chunks of `String` values
     *
     * @group operations
     */
   def textChunksRequest: RequestEntity[Chunks[String]]
 
-  //TODO mention reframing
   /** A request entity carrying chunks of `Array[Byte]` values
     *
     * @group operations
@@ -63,14 +64,12 @@ trait ChunkedRequestEntities extends Chunks {
 trait ChunkedResponseEntities extends Chunks {
   this: EndpointsWithCustomErrors =>
 
-  //TODO mention reframing
   /** A response entity carrying chunks of `String` values
     *
     * @group operations
     */
   def textChunksResponse: ResponseEntity[Chunks[String]]
 
-  //TODO mention reframing
   /** A response entity carrying chunks of `Array[Byte]` values
     *
     * @group operations
@@ -95,10 +94,7 @@ trait ChunkedResponseEntities extends Chunks {
   */
 trait ChunkedJsonEntities extends ChunkedJsonRequestEntities with ChunkedJsonResponseEntities
 
-trait ChunkedJsonRequestEntities
-    extends ChunkedRequestEntities
-    with JsonCodecs
-    with RequestFraming {
+trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs with Framing {
 
   @deprecated(
     "Use jsonChunksRequest[A](framing: RequestFraming) instead to explicitly provide chunk framing",
@@ -113,15 +109,12 @@ trait ChunkedJsonRequestEntities
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksRequest[A](framing: RequestFraming)(implicit
+  def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]]
 }
 
-trait ChunkedJsonResponseEntities
-    extends ChunkedResponseEntities
-    with JsonCodecs
-    with ResponseFraming {
+trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodecs with Framing {
 
   @deprecated(
     "Use jsonChunksResponse[A](framing: ResponseFraming) instead to explicitly provide chunk framing",
@@ -136,19 +129,16 @@ trait ChunkedJsonResponseEntities
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
+  def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]]
 }
 
-trait RequestFraming {
+/** Algebra interface for describing how chunks of chunked transfer-encoding requests and responses should be framed.
+  * Being explicit about how chunks are framed solves the issue of re-framing happening during transport.
+  */
+trait Framing {
 
-  type RequestFraming
-  def newLineDelimiterRequestFraming[A]: RequestFraming
-}
-
-trait ResponseFraming {
-
-  type ResponseFraming
-  def newLineDelimiterResponseFraming[A]: ResponseFraming
+  type Framing
+  def newLineDelimiterFraming: Framing
 }

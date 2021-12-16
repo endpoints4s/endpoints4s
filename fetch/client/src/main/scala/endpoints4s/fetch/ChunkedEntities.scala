@@ -60,13 +60,13 @@ trait ChunkedJsonResponseEntities
     with ChunkedResponseEntities
     with JsonEntitiesFromCodecs {
 
-  type ResponseFraming = dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array]
+  type Framing = dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array]
 
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
 
-  def jsonChunksResponse[A](framing: ResponseFraming)(implicit
+  def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -83,7 +83,7 @@ trait ChunkedJsonResponseEntities
     )
   }
 
-  def newLineDelimiterResponseFraming[A]: ResponseFraming = { readableStream =>
+  def newLineDelimiterFraming: Framing = { readableStream =>
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {
