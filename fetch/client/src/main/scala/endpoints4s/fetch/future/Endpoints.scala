@@ -9,7 +9,7 @@ trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
   abstract class Result[A](val future: Future[A]) {
-    def abort: Unit
+    def abort(): Unit
   }
 
   def endpoint[A, B](
