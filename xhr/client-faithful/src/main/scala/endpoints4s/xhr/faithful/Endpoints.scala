@@ -13,7 +13,9 @@ import scala.scalajs.js.|
 trait Endpoints extends xhr.Endpoints {
 
   /** Maps `Result` to `Future` */
-  case class Result[A](value: Future[A], abort: js.Function1[Unit, Unit])
+  abstract class Result[A](val future: Future[A]) {
+    def abort(): Unit
+  }
 
   def endpoint[A, B](
       request: Request[A],
@@ -24,7 +26,7 @@ trait Endpoints extends xhr.Endpoints {
 
       def apply(a: A): Result[B] = {
         val promise = new Promise[B]()
-        val (value, abort) = performXhr(this.request, this.response, a)
+        val (value, jsAbort) = performXhr(this.request, this.response, a)
         value.`then`(
           (b: B) => promise.success(b): Unit | js.Thenable[Unit],
           js.defined((e: Any) => {
@@ -37,10 +39,8 @@ trait Endpoints extends xhr.Endpoints {
             js.Function1[Any, Unit | js.Thenable[Unit]]
           ]
         )
-        Result(
-          promise.future,
-          abort
-        )
+
+        new Result(promise.future) { def abort() = jsAbort(()) }
       }
     }
 

@@ -35,7 +35,7 @@ class FetchClientEndpointsJsonSchemaTest extends JsonTestSuite[TestJsonSchemaCli
   def call[Req, Resp](
       endpoint: client.Endpoint[Req, Resp],
       args: Req
-  ): Future[Resp] = endpoint(args).value
+  ): Future[Resp] = endpoint(args).future
 
   clientTestSuite()
 }
