@@ -18,7 +18,7 @@ trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
     )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
-    ): (js.Thenable[req.Response], js.Function1[Unit, Unit]) = {
+    ): (js.Thenable[req.Response], js.Function0[Unit]) = {
       muxPerformXhr(request, response, req)
     }
   }

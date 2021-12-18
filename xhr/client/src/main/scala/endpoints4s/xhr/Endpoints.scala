@@ -38,7 +38,8 @@ trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
     with Urls
     with Methods
-    with StatusCodes {
+    with StatusCodes
+    with FutureLike {
 
   def settings: EndpointsSettings
 
@@ -290,11 +291,13 @@ trait EndpointsWithCustomErrors
     */
   type Result[A]
 
+  type FutureLike[A]
+
   protected final def performXhr[A, B](
       request: Request[A],
       response: Response[B],
       a: A
-  ): (js.Promise[B], Unit => Unit) = {
+  ): (FutureLike[B], js.Function0[Unit]) = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
     xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
@@ -302,7 +305,7 @@ trait EndpointsWithCustomErrors
     val maybeEntity = requestData.entity(xhr)
 
     (
-      new js.Promise[B]((resolve, error) => {
+      futureLike[B] { (resolve, error) =>
         xhr.onload = _ => {
           val maybeResponse = response(xhr)
 
@@ -332,10 +335,10 @@ trait EndpointsWithCustomErrors
             .flatMap(_(xhr))
             .fold(error(_), resolve(_))
         }
-        xhr.onerror = _ => error(xhr.responseText)
+        xhr.onerror = _ => error(new Exception(xhr.responseText))
         xhr.send(maybeEntity.orNull)
-      }),
-      _ => xhr.abort()
+      },
+      () => xhr.abort()
     )
   }
 

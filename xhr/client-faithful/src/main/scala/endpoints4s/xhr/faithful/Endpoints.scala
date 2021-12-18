@@ -4,17 +4,16 @@ import endpoints4s.xhr
 import faithful.{Future, Promise}
 
 import scala.scalajs.js
-import scala.scalajs.js.|
 
 /** Implements [[xhr.Endpoints]] by using faithful.
   *
   * @group interpreters
   */
-trait Endpoints extends xhr.Endpoints {
+trait Endpoints extends xhr.Endpoints with FaithfulBasedFutureLike {
 
   /** Maps `Result` to `Future` */
   abstract class Result[A](val future: Future[A]) {
-    def abort(): Unit
+    val abort: js.Function0[Unit]
   }
 
   def endpoint[A, B](
@@ -27,20 +26,8 @@ trait Endpoints extends xhr.Endpoints {
       def apply(a: A): Result[B] = {
         val promise = new Promise[B]()
         val (value, jsAbort) = performXhr(this.request, this.response, a)
-        value.`then`(
-          (b: B) => promise.success(b): Unit | js.Thenable[Unit],
-          js.defined((e: Any) => {
-            e match {
-              case th: Throwable => promise.failure(th)
-              case _             => promise.failure(js.JavaScriptException(e))
-            }
-            (): Unit | js.Thenable[Unit]
-          }): js.UndefOr[
-            js.Function1[Any, Unit | js.Thenable[Unit]]
-          ]
-        )
-
-        new Result(promise.future) { def abort() = jsAbort(()) }
+        value.onComplete(promise.success(_), promise.failure(_))
+        new Result(promise.future) { val abort = jsAbort }
       }
     }
 

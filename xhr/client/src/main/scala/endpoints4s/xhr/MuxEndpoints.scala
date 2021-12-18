@@ -6,11 +6,10 @@ import endpoints4s.Encoder
 import endpoints4s.algebra
 
 import scala.scalajs.js
-import scala.scalajs.js.|
 
 /** @group interpreters
   */
-trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
+trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors with FutureLike {
 
   protected final def muxPerformXhr[Req <: MuxRequest, Resp, Transport](
       request: Request[Transport],
@@ -19,22 +18,21 @@ trait MuxEndpoints extends algebra.MuxEndpoints with EndpointsWithCustomErrors {
   )(implicit
       encoder: Encoder[Req, Transport],
       decoder: Decoder[Transport, Resp]
-  ): (js.Promise[req.Response], js.Function1[Unit, Unit]) = {
+  ): (FutureLike[req.Response], js.Function0[Unit]) = {
     val (value, abort) = performXhr(request, response, encoder.encode(req))
+
     (
-      value
-        .`then`(
-          (b: Transport) => {
-            decoder
-              .decode(b)
-              .asInstanceOf[Either[Throwable, req.Response]]
-              .fold(
-                th => js.Promise.reject(th),
-                r => js.Promise.resolve[req.Response](r)
-              ): req.Response | js.Thenable[req.Response]
-          },
-          js.undefined
-        ),
+      value.flatMap((b: Transport) => {
+        futureLike[req.Response] { (resolve, error) =>
+          decoder
+            .decode(b)
+            .asInstanceOf[Either[Throwable, req.Response]]
+            .fold(
+              th => error(th),
+              r => resolve(r)
+            )
+        }
+      }),
       abort
     )
   }

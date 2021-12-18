@@ -29,7 +29,8 @@ trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
     with Urls
     with Methods
-    with StatusCodes {
+    with StatusCodes
+    with FutureLike {
 
   def settings: EndpointsSettings
   implicit def ec: ExecutionContext
@@ -282,7 +283,7 @@ trait EndpointsWithCustomErrors
       request: Request[A],
       response: Response[B],
       a: A
-  ): (js.Promise[B], js.Function1[Unit, Unit]) = {
+  ): (FutureLike[B], js.Function0[Unit]) = {
     val requestData = request(a)
     val requestInit = new FetchRequestInit {}
     requestInit.method = requestData.method
@@ -292,7 +293,7 @@ trait EndpointsWithCustomErrors
     requestInit.signal = abortController.signal
 
     (
-      new js.Promise[B]((resolve, error) => {
+      futureLike[B] { (resolve, error) =>
         val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
         f.`then`(
           (fetchResponse: FetchResponse) => {
@@ -348,8 +349,8 @@ trait EndpointsWithCustomErrors
             (): Unit | js.Thenable[Unit]
           }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
         )
-      }),
-      _ => abortController.abort()
+      },
+      () => abortController.abort()
     )
   }
 

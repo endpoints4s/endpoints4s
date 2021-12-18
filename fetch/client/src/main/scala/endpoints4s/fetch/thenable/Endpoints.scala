@@ -6,10 +6,12 @@ import scala.scalajs.js
 
 trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
-trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
+trait EndpointsWithCustomErrors
+    extends fetch.EndpointsWithCustomErrors
+    with ThenableBasedFutureLike {
 
   abstract class Result[A](val thenable: js.Thenable[A]) {
-    def abort(): Unit
+    val abort: js.Function0[Unit]
   }
 
   def endpoint[A, B](
@@ -19,7 +21,7 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
   ): Endpoint[A, B] = new Endpoint[A, B](request, response) {
     def apply(a: A) = {
       val (value, jsAbort) = performFetch(this.request, this.response, a)
-      new Result(value) { def abort() = jsAbort(()) }
+      new Result(value) { val abort = jsAbort }
     }
   }
 }

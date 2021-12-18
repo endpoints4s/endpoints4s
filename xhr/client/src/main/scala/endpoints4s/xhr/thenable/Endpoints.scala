@@ -14,11 +14,11 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 /** Implements [[xhr.Endpoints]] by using JavaScript promises
   * @group interpreters
   */
-trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
+trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors with ThenableBasedFutureLike {
 
   /** Maps a `Result` to a `js.Thenable` */
   abstract class Result[A](val thenable: js.Thenable[A]) {
-    def abort(): Unit
+    val abort: js.Function0[Unit]
   }
 
   def endpoint[A, B](
@@ -30,7 +30,7 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
       def apply(a: A) = {
         val (value, jsAbort) = performXhr(this.request, this.response, a)
-        new Result(value) { def abort() = jsAbort(()) }
+        new Result(value) { val abort = jsAbort }
       }
     }
 
