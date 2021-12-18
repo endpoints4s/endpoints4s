@@ -2,13 +2,11 @@ package endpoints4s.fetch.future
 
 import endpoints4s.fetch.FutureLike
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.scalajs.js
 
 trait FutureBasedFutureLike extends FutureLike {
-  implicit val ec: ExecutionContext
 
   override type FutureLike[A] = Future[A]
 
