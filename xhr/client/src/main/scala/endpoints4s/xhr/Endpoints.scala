@@ -38,8 +38,7 @@ trait EndpointsWithCustomErrors
     extends algebra.EndpointsWithCustomErrors
     with Urls
     with Methods
-    with StatusCodes
-    with FutureLike {
+    with StatusCodes {
 
   def settings: EndpointsSettings
 
@@ -291,55 +290,53 @@ trait EndpointsWithCustomErrors
     */
   type Result[A]
 
-  type FutureLike[A]
-
   protected final def performXhr[A, B](
       request: Request[A],
       response: Response[B],
       a: A
-  ): (FutureLike[B], js.Function0[Unit]) = {
+  )(
+      onload: Either[Throwable, B] => Unit,
+      onerror: Throwable => Unit
+  ): js.Function0[Unit] = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
     xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
     requestData.prepare(xhr)
     val maybeEntity = requestData.entity(xhr)
 
-    (
-      futureLike[B] { (resolve, error) =>
-        xhr.onload = _ => {
-          val maybeResponse = response(xhr)
+    xhr.onload = _ => {
+      val maybeResponse = response(xhr)
 
-          def maybeClientErrors =
-            clientErrorsResponse(xhr)
-              .map(
-                mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
-                  Left(
-                    new Exception(
-                      clientErrorsToInvalid(clientErrors).errors.mkString(". ")
-                    )
-                  )
+      def maybeClientErrors =
+        clientErrorsResponse(xhr)
+          .map(
+            mapPartialResponseEntity[ClientErrors, B](_)(clientErrors =>
+              Left(
+                new Exception(
+                  clientErrorsToInvalid(clientErrors).errors.mkString(". ")
                 )
               )
-
-          def maybeServerError =
-            serverErrorResponse(xhr).map(
-              mapPartialResponseEntity[ServerError, B](_)(serverError =>
-                Left(serverErrorToThrowable(serverError))
-              )
             )
+          )
 
-          maybeResponse
-            .orElse(maybeClientErrors)
-            .orElse(maybeServerError)
-            .toRight(new Exception(s"Unexpected response status: ${xhr.status}"))
-            .flatMap(_(xhr))
-            .fold(error(_), resolve(_))
-        }
-        xhr.onerror = _ => error(new Exception(xhr.responseText))
-        xhr.send(maybeEntity.orNull)
-      },
-      () => xhr.abort()
-    )
+      def maybeServerError =
+        serverErrorResponse(xhr).map(
+          mapPartialResponseEntity[ServerError, B](_)(serverError =>
+            Left(serverErrorToThrowable(serverError))
+          )
+        )
+
+      val maybeB =
+        maybeResponse
+          .orElse(maybeClientErrors)
+          .orElse(maybeServerError)
+          .toRight(new Exception(s"Unexpected response status: ${xhr.status}"))
+          .flatMap(_(xhr))
+      onload(maybeB)
+    }
+    xhr.onerror = _ => onerror(new Exception(xhr.responseText))
+    xhr.send(maybeEntity.orNull)
+    () => xhr.abort()
   }
 
   override def mapEndpointRequest[A, B, C](

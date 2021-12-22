@@ -18,8 +18,17 @@ trait MuxEndpoints extends xhr.MuxEndpoints with EndpointsWithCustomErrors {
     )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
-    ): (js.Thenable[req.Response], js.Function0[Unit]) = {
-      muxPerformXhr(request, response, req)
+    ): Result[req.Response] = {
+      var jsAbort: js.Function0[Unit] = null
+      val promise = new js.Promise[req.Response]((resolve, error) => {
+        jsAbort = muxPerformXhr(request, response, req)(
+          _.fold(exn => { error(exn.getMessage); () }, resp => { resolve(resp); () }),
+          throwable => { error(throwable.toString); () }
+        )
+      })
+      new Result(promise) {
+        def abort(): Unit = jsAbort()
+      }
     }
   }
 

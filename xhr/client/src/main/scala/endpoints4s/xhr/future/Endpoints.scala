@@ -2,8 +2,7 @@ package endpoints4s.xhr.future
 
 import endpoints4s.xhr
 
-import scala.concurrent.Future
-import scala.scalajs.js
+import scala.concurrent.{Future, Promise}
 
 /** Implements [[xhr.Endpoints]] by using Scala’s `Futures`, and uses [[endpoints4s.algebra.BuiltInErrors]]
   * to model client and server errors.
@@ -15,11 +14,11 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 /** Implements [[xhr.Endpoints]] by using Scala’s `Future`s.
   * @group interpreters
   */
-trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors with FutureBasedFutureLike {
+trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
   /** Maps `Result` to `Future` */
   abstract class Result[A](val future: Future[A]) {
-    val abort: js.Function0[Unit]
+    def abort(): Unit
   }
 
   def endpoint[A, B](
@@ -30,8 +29,17 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors with Futur
     new Endpoint[A, B](request, response) {
 
       def apply(a: A) = {
-        val (value, jsAbort) = performXhr(this.request, this.response, a)
-        new Result(value) { val abort = jsAbort }
+        val promise = Promise[B]()
+        val jsAbort = performXhr(this.request, this.response, a)(
+          _.fold(
+            exn => { promise.failure(exn); () },
+            b => { promise.success(b); () }
+          ),
+          throwable => { promise.failure(throwable); () }
+        )
+        new Result(promise.future) {
+          def abort(): Unit = jsAbort()
+        }
       }
     }
 
