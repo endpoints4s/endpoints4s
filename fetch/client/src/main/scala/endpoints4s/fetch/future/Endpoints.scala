@@ -3,14 +3,14 @@ package endpoints4s.fetch.future
 import endpoints4s.fetch
 
 import scala.concurrent.Future
-import scala.scalajs.js
+import scala.concurrent.Promise
 
 trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
-trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors with FutureBasedFutureLike {
+trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
   abstract class Result[A](val future: Future[A]) {
-    val abort: js.Function0[Unit]
+    def abort(): Unit
   }
 
   def endpoint[A, B](
@@ -19,8 +19,17 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors with Fut
       docs: EndpointDocs = EndpointDocs()
   ): Endpoint[A, B] = new Endpoint[A, B](request, response) {
     def apply(a: A) = {
-      val (value, jsAbort) = performFetch(this.request, this.response, a)
-      new Result(value) { val abort = jsAbort }
+      val promise = Promise[B]()
+      val jsAbort = performFetch(this.request, this.response, a)(
+        _.fold(
+          exn => { promise.failure(exn); () },
+          b => { promise.success(b); () }
+        ),
+        throwable => { promise.failure(throwable); () }
+      )
+      new Result(promise.future) {
+        def abort(): Unit = jsAbort()
+      }
     }
   }
 }

@@ -9,7 +9,7 @@ import scala.scalajs.js
   *
   * @group interpreters
   */
-trait Endpoints extends xhr.Endpoints with FaithfulBasedFutureLike {
+trait Endpoints extends xhr.Endpoints {
 
   /** Maps `Result` to `Future` */
   abstract class Result[A](val future: Future[A]) {
@@ -25,8 +25,10 @@ trait Endpoints extends xhr.Endpoints with FaithfulBasedFutureLike {
 
       def apply(a: A): Result[B] = {
         val promise = new Promise[B]()
-        val (value, jsAbort) = performXhr(this.request, this.response, a)
-        value.onComplete(promise.success(_), promise.failure(_))
+        val jsAbort = performXhr(this.request, this.response, a)(
+          _.fold(promise.failure, promise.success),
+          promise.failure
+        )
         new Result(promise.future) { val abort = jsAbort }
       }
     }

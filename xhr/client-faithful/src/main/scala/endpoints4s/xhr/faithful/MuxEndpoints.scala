@@ -21,8 +21,10 @@ trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
         decoder: Decoder[Transport, Resp]
     ): (Future[req.Response], js.Function0[Unit]) = {
       val promise = new Promise[req.Response]()
-      val (value, abort) = muxPerformXhr(request, response, req)
-      value.onComplete(promise.success(_), promise.failure(_))
+      val abort = muxPerformXhr(request, response, req)(
+        _.fold(promise.failure, promise.success),
+        promise.failure
+      )
       (promise.future, abort)
     }
   }
