@@ -11,12 +11,11 @@ import endpoints4s.xhr.BasicAuthentication
 import endpoints4s.xhr.EndpointsSettings
 import endpoints4s.xhr.JsonEntitiesFromSchemas
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit val ec: ExecutionContext)
+class TestJsonSchemaClient(val settings: EndpointsSettings)
     extends Endpoints
     with BasicAuthentication
     with BasicAuthenticationTestApi

@@ -322,7 +322,7 @@ trait EndpointsWithCustomErrors
           .orElse(maybeClientErrors)
           .orElse(maybeServerError) match {
           case None =>
-            onerror(new Exception(s"Unexpected response status: ${fetchResponse.status}"))
+            onload(Left(new Exception(s"Unexpected response status: ${fetchResponse.status}")))
             Promise.resolve[Unit](()): Unit | js.Thenable[Unit]
           case Some(entityB) =>
             entityB(fetchResponse)
