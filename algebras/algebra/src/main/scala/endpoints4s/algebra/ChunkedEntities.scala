@@ -101,7 +101,7 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
 
   @deprecated(
     "Use jsonChunksRequest[A](framing: RequestFraming) instead to explicitly provide chunk framing",
-    "1.6.1"
+    "1.7.0"
   )
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
