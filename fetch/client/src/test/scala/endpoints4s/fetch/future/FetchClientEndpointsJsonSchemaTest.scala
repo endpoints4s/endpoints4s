@@ -1,14 +1,13 @@
 package endpoints4s.fetch.future
 
-import endpoints4s.algebra.JsonTestApi
-import endpoints4s.algebra.client.JsonTestSuite
 import endpoints4s.algebra.Address
+import endpoints4s.algebra.JsonTestApi
 import endpoints4s.algebra.User
+import endpoints4s.algebra.client.JsonTestSuite
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromSchemas
 import endpoints4s.generic
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
