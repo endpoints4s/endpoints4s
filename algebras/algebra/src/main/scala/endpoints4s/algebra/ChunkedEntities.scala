@@ -96,6 +96,7 @@ trait ChunkedResponseEntities extends Chunks {
   */
 trait ChunkedJsonEntities extends ChunkedJsonRequestEntities with ChunkedJsonResponseEntities
 
+/** @group algebras */
 trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs with Framing {
 
   @deprecated(
