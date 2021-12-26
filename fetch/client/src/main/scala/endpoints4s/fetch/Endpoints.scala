@@ -14,11 +14,10 @@ import endpoints4s.algebra.Documentation
 import org.scalajs.dom.AbortController
 import org.scalajs.dom.Fetch
 import org.scalajs.dom.{Headers => FetchHeaders}
+import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 import org.scalajs.dom.{RequestInit => FetchRequestInit}
 import org.scalajs.dom.{Response => FetchResponse}
-import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 
-import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.Promise
 import scala.scalajs.js.|
@@ -32,7 +31,6 @@ trait EndpointsWithCustomErrors
     with StatusCodes {
 
   def settings: EndpointsSettings
-  implicit def ec: ExecutionContext
 
   type RequestHeaders[A] = js.Function2[A, FetchRequestInit, Unit]
 

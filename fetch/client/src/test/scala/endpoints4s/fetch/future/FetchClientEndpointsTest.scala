@@ -5,12 +5,11 @@ import endpoints4s.fetch.BasicAuthentication
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromCodecs
 
-import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-class TestClient(val settings: EndpointsSettings)(implicit val ec: ExecutionContext)
+class TestClient(val settings: EndpointsSettings)
     extends Endpoints
     with BasicAuthentication
     with algebra.client.ClientEndpointsTestApi
