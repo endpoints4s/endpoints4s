@@ -141,5 +141,8 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
 trait Framing {
 
   type Framing
+  /** Frames are delimited by a new-line separator
+    * @group operations
+    */
   def newLineDelimiterFraming: Framing
 }
