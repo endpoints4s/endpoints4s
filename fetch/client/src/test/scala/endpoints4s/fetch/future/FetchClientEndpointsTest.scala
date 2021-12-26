@@ -58,7 +58,7 @@ class FetchClientEndpointsTest
       endpoint: streamingClient.Endpoint[A, dom.ReadableStream[B]],
       req: A
   ): Future[Seq[Either[String, B]]] = {
-    endpoint(req)
+    endpoint(req).future
       .flatMap { readableStream =>
         def read(
             reader: dom.ReadableStreamReader[B]
