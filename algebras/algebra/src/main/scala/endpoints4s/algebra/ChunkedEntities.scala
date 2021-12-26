@@ -121,7 +121,7 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
 
   @deprecated(
     "Use jsonChunksResponse[A](framing: ResponseFraming) instead to explicitly provide chunk framing",
-    "1.6.1"
+    "1.7.0"
   )
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
@@ -143,7 +143,12 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
   */
 trait Framing {
 
+  /** A strategy for delimiting chunk frames in a stream of chunks. Framing has to be consistent between client and server -
+    * server interpreter must be able to decode chunks encoded by the client, and vice versa.
+    * @group types
+    */
   type Framing
+
   /** Frames are delimited by a new-line separator
     * @group operations
     */

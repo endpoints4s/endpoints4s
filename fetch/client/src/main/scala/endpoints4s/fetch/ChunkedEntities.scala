@@ -83,7 +83,7 @@ trait ChunkedJsonResponseEntities
     )
   }
 
-  def newLineDelimiterFraming: Framing = { readableStream =>
+  lazy val newLineDelimiterFraming: Framing = { readableStream =>
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {

@@ -106,26 +106,22 @@ trait ChunkedJsonEntities
     )
   }
 
-  trait Framing {
-    def request: Flow[ByteString, ByteString, NotUsed]
-    def response: Flow[ByteString, ByteString, NotUsed]
-  }
+  class Framing(
+      val request: Flow[ByteString, ByteString, NotUsed],
+      val response: Flow[ByteString, ByteString, NotUsed]
+  )
 
-  def newLineDelimiterFraming: Framing = new Framing {
-    def request = Flow[ByteString].via(
+  lazy val newLineDelimiterFraming: Framing = new Framing(
+    Flow[ByteString].via(
       Framing.delimiter(
         ByteString("\n"),
         maximumFrameLength = Int.MaxValue,
         allowTruncation = true
       )
-    )
+    ),
+    Flow[ByteString].intersperse(ByteString("\n"))
+  )
 
-    def response =
-      Flow[ByteString].intersperse(ByteString("\n"))
-  }
-
-  private def noopFraming: Framing = new Framing {
-    def request: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
-    def response: Flow[ByteString, ByteString, NotUsed] = Flow.apply[ByteString]
-  }
+  private lazy val noopFraming: Framing =
+    new Framing(Flow.apply[ByteString], Flow.apply[ByteString])
 }

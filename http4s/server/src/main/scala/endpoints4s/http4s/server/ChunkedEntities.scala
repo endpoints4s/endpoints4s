@@ -75,13 +75,13 @@ trait ChunkedJsonEntities
     )
   }
 
-  trait Framing {
-    def request: Pipe[Effect, String, String]
-    def response: Pipe[Effect, String, String]
-  }
+  class Framing(
+      val request: Pipe[Effect, String, String],
+      val response: Pipe[Effect, String, String]
+  )
 
-  def newLineDelimiterFraming: Framing = new Framing {
-    def request = {
+  lazy val newLineDelimiterFraming: Framing = new Framing(
+    {
       def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
         stream.pull.uncons.flatMap {
           case Some((head, tail)) =>
@@ -100,13 +100,9 @@ trait ChunkedJsonEntities
         }
       }
       in => go(in, new StringBuilder).stream
-    }
+    },
+    in => in.intersperse("\n")
+  )
 
-    def response = in => in.intersperse("\n")
-  }
-
-  private def noopFraming: Framing = new Framing {
-    def request: Pipe[Effect, String, String] = identity
-    def response: Pipe[Effect, String, String] = identity
-  }
+  private lazy val noopFraming: Framing = new Framing(identity, identity)
 }
