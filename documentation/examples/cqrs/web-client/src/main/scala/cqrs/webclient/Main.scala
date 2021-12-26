@@ -18,7 +18,7 @@ object Main {
 
   def main(args: Array[String]): Unit = {
     //#list-meters-invocation
-    PublicEndpoints.listMeters(()).map { fetchedMeters =>
+    PublicEndpoints.listMeters(()).future.map { fetchedMeters =>
       metersVar.set(fetchedMeters.map(meter => meter.id -> meter).toMap)
     }
     //#list-meters-invocation
@@ -34,7 +34,7 @@ object Main {
       else {
         //#webapps-invocation
         val eventuallyCreatedMeter: Future[Meter] =
-          PublicEndpoints.createMeter(CreateMeter(name))
+          PublicEndpoints.createMeter(CreateMeter(name)).future
         //#webapps-invocation
         eventuallyCreatedMeter
           .map { createdMeter =>
@@ -58,6 +58,7 @@ object Main {
           case Some(decimal) =>
             PublicEndpoints
               .addRecord((meter.id, AddRecord(Instant.now(), decimal)))
+              .future
               .map { updatedMeter =>
                 metersVar.update(_ + (updatedMeter.id -> updatedMeter))
               }

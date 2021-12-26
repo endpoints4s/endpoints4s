@@ -4,6 +4,8 @@ import endpoints4s.algebra.MuxRequest
 import endpoints4s.{Decoder, Encoder, xhr}
 import faithful.{Future, Promise}
 
+import scala.scalajs.js
+
 /** @group interpreters
   */
 trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
@@ -17,13 +19,13 @@ trait MuxEndpoints extends xhr.MuxEndpoints with Endpoints {
     )(implicit
         encoder: Encoder[Req, Transport],
         decoder: Decoder[Transport, Resp]
-    ): Future[req.Response] = {
+    ): (Future[req.Response], js.Function0[Unit]) = {
       val promise = new Promise[req.Response]()
-      muxPerformXhr(request, response, req)(
+      val abort = muxPerformXhr(request, response, req)(
         _.fold(promise.failure, promise.success),
-        xhr => promise.failure(new Exception(xhr.responseText))
+        promise.failure
       )
-      promise.future
+      (promise.future, abort)
     }
   }
 
