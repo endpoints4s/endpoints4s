@@ -1,7 +1,8 @@
 package endpoints4s.xhr.faithful
 
 import endpoints4s.xhr
-import faithful.{Future, Promise}
+import faithful.Future
+import faithful.Promise
 
 /** Implements [[xhr.Endpoints]] by using faithful.
   *
@@ -10,7 +11,9 @@ import faithful.{Future, Promise}
 trait Endpoints extends xhr.Endpoints {
 
   /** Maps `Result` to `Future` */
-  type Result[A] = Future[A]
+  abstract class Result[A](val future: Future[A]) {
+    def abort(): Unit
+  }
 
   def endpoint[A, B](
       request: Request[A],
@@ -19,13 +22,15 @@ trait Endpoints extends xhr.Endpoints {
   ): Endpoint[A, B] =
     new Endpoint[A, B](request, response) {
 
-      def apply(a: A): Future[B] = {
+      def apply(a: A): Result[B] = {
         val promise = new Promise[B]()
-        performXhr(this.request, this.response, a)(
+        val jsAbort = performXhr(this.request, this.response, a)(
           _.fold(promise.failure, promise.success),
-          xhr => promise.failure(new Exception(xhr.responseText))
+          promise.failure
         )
-        promise.future
+        new Result(promise.future) {
+          def abort(): Unit = jsAbort()
+        }
       }
     }
 

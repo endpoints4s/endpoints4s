@@ -296,8 +296,8 @@ trait EndpointsWithCustomErrors
       a: A
   )(
       onload: Either[Throwable, B] => Unit,
-      onerror: XMLHttpRequest => Unit
-  ): Unit = {
+      onerror: Throwable => Unit
+  ): js.Function0[Unit] = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
     xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
@@ -306,6 +306,7 @@ trait EndpointsWithCustomErrors
 
     xhr.onload = _ => {
       val maybeResponse = response(xhr)
+
       def maybeClientErrors =
         clientErrorsResponse(xhr)
           .map(
@@ -317,12 +318,14 @@ trait EndpointsWithCustomErrors
               )
             )
           )
+
       def maybeServerError =
         serverErrorResponse(xhr).map(
           mapPartialResponseEntity[ServerError, B](_)(serverError =>
             Left(serverErrorToThrowable(serverError))
           )
         )
+
       val maybeB =
         maybeResponse
           .orElse(maybeClientErrors)
@@ -331,8 +334,9 @@ trait EndpointsWithCustomErrors
           .flatMap(_(xhr))
       onload(maybeB)
     }
-    xhr.onerror = _ => onerror(xhr)
+    xhr.onerror = _ => onerror(new Exception(xhr.responseText))
     xhr.send(maybeEntity.orNull)
+    () => xhr.abort()
   }
 
   override def mapEndpointRequest[A, B, C](

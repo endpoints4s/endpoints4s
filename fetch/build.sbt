@@ -10,6 +10,7 @@ val `fetch-client` =
       `scala 2.12 to dotty`,
       name := "fetch-client",
       version := "1.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
@@ -48,6 +49,7 @@ val `fetch-client-circe` =
       `scala 2.12 to dotty`,
       name := "fetch-client-circe",
       version := "1.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,

@@ -17,7 +17,9 @@ trait Endpoints extends xhr.Endpoints with EndpointsWithCustomErrors
 trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
   /** Maps `Result` to `Future` */
-  type Result[A] = Future[A]
+  abstract class Result[A](val future: Future[A]) {
+    def abort(): Unit
+  }
 
   def endpoint[A, B](
       request: Request[A],
@@ -28,16 +30,16 @@ trait EndpointsWithCustomErrors extends xhr.EndpointsWithCustomErrors {
 
       def apply(a: A) = {
         val promise = Promise[B]()
-        performXhr(this.request, this.response, a)(
+        val jsAbort = performXhr(this.request, this.response, a)(
           _.fold(
             exn => { promise.failure(exn); () },
-            b => {
-              promise.success(b); ()
-            }
+            b => { promise.success(b); () }
           ),
-          xhr => { promise.failure(new Exception(xhr.responseText)); () }
+          throwable => { promise.failure(throwable); () }
         )
-        promise.future
+        new Result(promise.future) {
+          def abort(): Unit = jsAbort()
+        }
       }
     }
 
