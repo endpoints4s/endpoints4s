@@ -23,7 +23,12 @@ trait ChunkedJsonEntitiesRequestTestSuite[T <: ChunkedJsonRequestEntitiesTestApi
 
 trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestApi]
     extends StreamedResponseEndpointCalls[T] {
-  import streamingClient.{Counter, streamedEndpointTest, streamedEndpointErrorTest}
+  import streamingClient.{
+    Counter,
+    streamedEndpointTest,
+    streamedEndpointErrorTest,
+    streamedEndpointEmptyTest
+  }
 
   "Decode chunks streamed by a server" in {
 
@@ -41,6 +46,14 @@ trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestA
     ) :: Nil
 
     callStreamedEndpoint(streamedEndpointErrorTest, ())
+      .map(_ shouldEqual expectedItems)
+  }
+
+  "Succeed if server streams no chunks" in {
+
+    val expectedItems = List.empty
+
+    callStreamedEndpoint(streamedEndpointEmptyTest, ())
       .map(_ shouldEqual expectedItems)
   }
 }

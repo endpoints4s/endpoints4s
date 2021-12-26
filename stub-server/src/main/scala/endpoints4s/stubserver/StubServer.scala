@@ -405,6 +405,16 @@ object StubServer extends App {
           ).intersperse(ByteString("\n"))
         )
       )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
+        ) if uri.toRelative == Uri("/notifications/empty") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(ContentTypes.`application/json`, Source(List.empty))
+      )
     case r @ HttpRequest(
           POST,
           uri,

@@ -34,4 +34,10 @@ trait ChunkedJsonResponseEntitiesTestApi
       get(path / "notifications" / "error"),
       ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
     )
+
+  val streamedEndpointEmptyTest: Endpoint[Unit, Chunks[Counter]] =
+    endpoint(
+      get(path / "notifications" / "error"),
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
+    )
 }
