@@ -46,6 +46,7 @@ trait Chunks {
   type Chunks[A]
 }
 
+/** @group algebras */
 trait ChunkedRequestEntities extends Chunks {
   this: EndpointsWithCustomErrors =>
 
