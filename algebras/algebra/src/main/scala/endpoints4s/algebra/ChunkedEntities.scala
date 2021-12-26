@@ -136,6 +136,7 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
 
 /** Algebra interface for describing how chunks of chunked transfer-encoding requests and responses should be framed.
   * Being explicit about how chunks are framed solves the issue of re-framing happening during transport.
+  * @group algebras
   */
 trait Framing {
 
