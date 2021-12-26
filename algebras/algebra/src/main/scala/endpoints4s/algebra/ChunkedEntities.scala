@@ -35,6 +35,7 @@ trait ChunkedEntities
     with ChunkedRequestEntities
     with ChunkedResponseEntities
 
+/** @group algebras */
 trait Chunks {
 
   /** A stream of chunks of type `A`.
