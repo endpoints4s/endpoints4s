@@ -13,9 +13,8 @@ import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
 import scala.scalajs.concurrent.JSExecutionContext
 
-class TestJsonSchemaClient(val settings: EndpointsSettings)(implicit
-    val ec: ExecutionContext
-) extends Endpoints
+class TestJsonSchemaClient(val settings: EndpointsSettings)
+    extends Endpoints
     with generic.JsonSchemas
     with JsonTestApi
     with JsonEntitiesFromSchemas {
