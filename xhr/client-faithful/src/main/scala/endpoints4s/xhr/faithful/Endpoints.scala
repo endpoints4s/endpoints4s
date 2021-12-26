@@ -28,7 +28,9 @@ trait Endpoints extends xhr.Endpoints {
           _.fold(promise.failure, promise.success),
           promise.failure
         )
-        new Result(promise.future) { val abort = jsAbort }
+        new Result(promise.future) {
+          def abort(): Unit = jsAbort()
+        }
       }
     }
 
