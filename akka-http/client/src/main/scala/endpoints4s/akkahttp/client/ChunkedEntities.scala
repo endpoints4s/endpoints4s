@@ -3,7 +3,7 @@ package endpoints4s.akkahttp.client
 import akka.NotUsed
 import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
 import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.Framing
+import akka.stream.scaladsl.{Framing => AkkaFraming}
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import endpoints4s.algebra
@@ -112,7 +112,7 @@ trait ChunkedJsonEntities
   lazy val newLineDelimiterFraming: Framing = new Framing(
     Flow[ByteString].intersperse(ByteString("\n")),
     Flow[ByteString].via(
-      Framing.delimiter(
+      AkkaFraming.delimiter(
         ByteString("\n"),
         maximumFrameLength = Int.MaxValue,
         allowTruncation = true
