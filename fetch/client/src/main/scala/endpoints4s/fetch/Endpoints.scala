@@ -11,13 +11,13 @@ import endpoints4s.Valid
 import endpoints4s.Validated
 import endpoints4s.algebra
 import endpoints4s.algebra.Documentation
+import org.scalajs.dom.AbortController
 import org.scalajs.dom.Fetch
 import org.scalajs.dom.{Headers => FetchHeaders}
+import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 import org.scalajs.dom.{RequestInit => FetchRequestInit}
 import org.scalajs.dom.{Response => FetchResponse}
-import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 
-import scala.concurrent.ExecutionContext
 import scala.scalajs.js
 import scala.scalajs.js.Promise
 import scala.scalajs.js.|
@@ -31,7 +31,6 @@ trait EndpointsWithCustomErrors
     with StatusCodes {
 
   def settings: EndpointsSettings
-  implicit def ec: ExecutionContext
 
   type RequestHeaders[A] = js.Function2[A, FetchRequestInit, Unit]
 
@@ -284,12 +283,15 @@ trait EndpointsWithCustomErrors
   )(
       onload: Either[Throwable, B] => Unit,
       onerror: Throwable => Unit
-  ): Unit = {
+  ): js.Function0[Unit] = {
     val requestData = request(a)
     val requestInit = new FetchRequestInit {}
     requestInit.method = requestData.method
     requestData.prepare(requestInit)
     requestData.entity(requestInit)
+    val abortController = new AbortController
+    requestInit.signal = abortController.signal
+
     val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
@@ -327,7 +329,7 @@ trait EndpointsWithCustomErrors
                 js.defined((e: Any) => {
                   e match {
                     case th: Throwable => onerror(th)
-                    case _             => js.JavaScriptException(e)
+                    case _             => onerror(js.JavaScriptException(e))
                   }
                   (): Unit | js.Thenable[Unit]
                 }): js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
@@ -337,12 +339,12 @@ trait EndpointsWithCustomErrors
       js.defined { (e: Any) =>
         e match {
           case th: Throwable => onerror(th)
-          case _             => js.JavaScriptException(e)
+          case _             => onerror(js.JavaScriptException(e))
         }
         (): Unit | js.Thenable[Unit]
       }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
     )
-    ()
+    () => abortController.abort()
   }
 
   override def mapEndpointRequest[A, B, C](

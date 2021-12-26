@@ -9,7 +9,9 @@ trait Endpoints extends fetch.Endpoints with EndpointsWithCustomErrors
 
 trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
 
-  type Result[A] = Future[A]
+  abstract class Result[A](val future: Future[A]) {
+    def abort(): Unit
+  }
 
   def endpoint[A, B](
       request: Request[A],
@@ -18,16 +20,16 @@ trait EndpointsWithCustomErrors extends fetch.EndpointsWithCustomErrors {
   ): Endpoint[A, B] = new Endpoint[A, B](request, response) {
     def apply(a: A) = {
       val promise = Promise[B]()
-      performFetch(this.request, this.response, a)(
+      val jsAbort = performFetch(this.request, this.response, a)(
         _.fold(
           exn => { promise.failure(exn); () },
-          b => {
-            promise.success(b); ()
-          }
+          b => { promise.success(b); () }
         ),
-        ex => { promise.failure(ex); () }
+        throwable => { promise.failure(throwable); () }
       )
-      promise.future
+      new Result(promise.future) {
+        def abort(): Unit = jsAbort()
+      }
     }
   }
 }
