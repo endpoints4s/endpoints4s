@@ -55,16 +55,19 @@ trait ChunkedResponseEntities
   }
 }
 
+trait Framing extends algebra.Framing {
+  class Framing(val response: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array])
+}
+
 trait ChunkedJsonResponseEntities
     extends algebra.ChunkedJsonResponseEntities
     with ChunkedResponseEntities
-    with JsonEntitiesFromCodecs {
-
-  type Framing = dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array]
+    with JsonEntitiesFromCodecs
+    with Framing {
 
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(identity(_))
+  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
 
   def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
@@ -79,11 +82,11 @@ trait ChunkedJsonResponseEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      framing
+      noopFraming.response
     )
   }
 
-  lazy val newLineDelimiterFraming: Framing = { readableStream =>
+  lazy val newLineDelimiterFraming: Framing = new Framing(readableStream =>
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {
@@ -120,5 +123,7 @@ trait ChunkedJsonResponseEntities
         ]
       }
     ).asInstanceOf[dom.ReadableStream[Uint8Array]]
-  }
+  )
+
+  private lazy val noopFraming: Framing = new Framing(identity)
 }
