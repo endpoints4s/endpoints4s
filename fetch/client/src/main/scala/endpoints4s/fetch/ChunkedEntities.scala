@@ -87,12 +87,18 @@ trait ChunkedJsonResponseEntities
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {
-          def read(reader: ReadableStreamReader[Uint8Array], buffer: String): js.Promise[Unit] = {
+          def read(
+              reader: ReadableStreamReader[Uint8Array],
+              buffer: String,
+              firstChunk: Boolean
+          ): js.Promise[Unit] = {
             reader
               .read()
               .`then`((chunk: dom.Chunk[Uint8Array]) => {
                 if (chunk.done) {
-                  controller.enqueue(new TextEncoder("utf-8").encode(buffer))
+                  if (!firstChunk) {
+                    controller.enqueue(new TextEncoder("utf-8").encode(buffer))
+                  }
                   controller.close(): Unit | js.Thenable[Unit]
                 } else {
                   val newBuffer = (buffer + new TextDecoder("utf-8").decode(chunk.value))
@@ -104,11 +110,11 @@ trait ChunkedJsonResponseEntities
                         tmpBuffer + char
                       }
                     }
-                  read(reader, newBuffer): Unit | js.Thenable[Unit]
+                  read(reader, newBuffer, firstChunk = false): Unit | js.Thenable[Unit]
                 }
               })
           }
-          read(readableStream.getReader(), ""): js.UndefOr[js.Promise[Unit]]
+          read(readableStream.getReader(), "", firstChunk = true): js.UndefOr[js.Promise[Unit]]
         }): js.UndefOr[
           js.Function1[ReadableStreamController[Uint8Array], js.UndefOr[js.Promise[Unit]]]
         ]

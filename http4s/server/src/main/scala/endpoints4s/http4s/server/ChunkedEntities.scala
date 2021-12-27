@@ -82,7 +82,11 @@ trait ChunkedJsonEntities
 
   lazy val newLineDelimiterFraming: Framing = new Framing(
     {
-      def go(stream: Stream[Effect, String], buffer: StringBuilder): Pull[Effect, String, Unit] = {
+      def go(
+          stream: Stream[Effect, String],
+          buffer: StringBuilder,
+          firstChunk: Boolean
+      ): Pull[Effect, String, Unit] = {
         stream.pull.uncons.flatMap {
           case Some((head, tail)) =>
             val (pull, newBuffer) = buffer
@@ -95,11 +99,16 @@ trait ChunkedJsonEntities
                     (pullAcc, tmpBuffer.append(char))
                   }
               }
-            pull >> go(tail, newBuffer)
-          case None => Pull.output(Chunk(buffer.toString()))
+            pull >> go(tail, newBuffer, firstChunk = false)
+          case None =>
+            if (firstChunk) {
+              Pull.output(Chunk.empty[String])
+            } else {
+              Pull.output(Chunk(buffer.toString()))
+            }
         }
       }
-      in => go(in, new StringBuilder).stream
+      in => go(in, new StringBuilder, firstChunk = true).stream
     },
     in => in.intersperse("\n")
   )

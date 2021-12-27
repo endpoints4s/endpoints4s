@@ -396,6 +396,23 @@ object StubServer extends App {
           _,
           _,
           _
+        ) if uri.toRelative == Uri("/notifications/single") =>
+      HttpResponse(entity =
+        HttpEntity.Chunked.fromData(
+          ContentTypes.`application/json`,
+          Source(
+            List(
+              ByteString("{\"value\":1}")
+            )
+          ).intersperse(ByteString("\n"))
+        )
+      )
+    case HttpRequest(
+          GET,
+          uri,
+          _,
+          _,
+          _
         ) if uri.toRelative == Uri("/notifications/error") =>
       HttpResponse(entity =
         HttpEntity.Chunked.fromData(

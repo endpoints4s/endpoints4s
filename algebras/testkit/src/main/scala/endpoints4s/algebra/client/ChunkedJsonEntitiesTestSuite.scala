@@ -27,7 +27,8 @@ trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestA
     Counter,
     streamedEndpointTest,
     streamedEndpointErrorTest,
-    streamedEndpointEmptyTest
+    streamedEndpointEmptyTest,
+    streamedEndpointSingleTest
   }
 
   "Decode chunks streamed by a server" in {
@@ -51,9 +52,17 @@ trait ChunkedJsonEntitiesResponseTestSuite[T <: ChunkedJsonResponseEntitiesTestA
 
   "Succeed if server streams no chunks" in {
 
-    val expectedItems = List.empty
+    val expectedItems = Nil
 
     callStreamedEndpoint(streamedEndpointEmptyTest, ())
+      .map(_ shouldEqual expectedItems)
+  }
+
+  "Succeed if server streams a single chunk" in {
+
+    val expectedItems = Right(Counter(1)) :: Nil
+
+    callStreamedEndpoint(streamedEndpointSingleTest, ())
       .map(_ shouldEqual expectedItems)
   }
 }
