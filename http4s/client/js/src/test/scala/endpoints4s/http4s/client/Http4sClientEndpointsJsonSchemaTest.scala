@@ -21,18 +21,24 @@ class TestJsonSchemaClient[F[_]: Concurrent](
 ) extends Endpoints[F](authority, scheme, client)
     with BasicAuthentication
     with JsonEntitiesFromCodecs
+    with ChunkedJsonEntities
     with algebra.BasicAuthenticationTestApi
     with algebra.client.ClientEndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.SumTypedEntitiesTestApi
+    with algebra.ChunkedEntitiesTestApi
+    with algebra.ChunkedJsonEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodecs
+    with algebra.circe.CounterCodecCirce
 
 class Http4sClientEndpointsJsonSchemaTest
     extends client.EndpointsTestSuite[TestJsonSchemaClient[IO]]
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
-    with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]] {
+    with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
+    with client.ChunkedEntitiesTestSuite[TestJsonSchemaClient[IO]]
+    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
   type EffectResource[A] = effect.Resource[IO, A]
 
@@ -52,6 +58,33 @@ class Http4sClientEndpointsJsonSchemaTest
     val eventualResponse = endpoint.sendAndConsume(args)
     eventualResponse.unsafeToFuture()
   }
+
+  override def callStreamedEndpoint[A, B](
+      endpoint: streamingClient.Endpoint[fs2.Stream[IO, A], B],
+      req: Seq[A]
+  ): Future[B] =
+    endpoint
+      .send(fs2.Stream.emits(req))
+      .use(res => IO.pure(res))
+      .unsafeToFuture()
+
+  override def callStreamedEndpoint[A, B](
+      endpoint: streamingClient.Endpoint[A, fs2.Stream[IO, B]],
+      req: A
+  ): Future[Seq[Either[String, B]]] =
+    endpoint
+      .send(req)
+      .use(stream => stream.attempt.map(_.left.map(_.toString)).compile.toList)
+      .unsafeToFuture()
+
+  override val streamingClient = new TestJsonSchemaClient[IO](
+    Uri.Authority(
+      host = Uri.RegName("localhost"),
+      port = Some(stubServerPort)
+    ),
+    Uri.Scheme.http,
+    FetchClientBuilder[IO].create
+  )
 
   implicit override def executionContext: ExecutionContext = JSExecutionContext.queue
 

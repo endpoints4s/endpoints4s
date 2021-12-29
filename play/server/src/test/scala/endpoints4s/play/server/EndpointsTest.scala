@@ -19,4 +19,6 @@ class EndpointsTestApi(
     with algebra.TextEntitiesTestApi
     with algebra.Assets
     with JsonFromCirceCodecTestApi
-    with algebra.circe.ChunkedJsonEntitiesTestApi
+    with algebra.ChunkedEntitiesTestApi
+    with algebra.ChunkedJsonEntitiesTestApi
+    with algebra.circe.CounterCodecCirce

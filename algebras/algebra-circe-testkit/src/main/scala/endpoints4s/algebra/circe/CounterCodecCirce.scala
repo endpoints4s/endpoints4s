@@ -3,9 +3,7 @@ package endpoints4s.algebra.circe
 import endpoints4s.algebra
 import io.circe.{Decoder, Encoder, Json}
 
-trait ChunkedJsonEntitiesTestApi
-    extends algebra.ChunkedJsonEntitiesTestApi
-    with JsonEntitiesFromCodecs {
+trait CounterCodecCirce extends algebra.CounterCodec with JsonEntitiesFromCodecs {
 
   implicit lazy val counterEncoder: Encoder[Counter] =
     Encoder.instance(counter => Json.obj("value" -> Json.fromInt(counter.value)))

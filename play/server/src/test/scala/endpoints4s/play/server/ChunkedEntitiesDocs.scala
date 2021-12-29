@@ -2,6 +2,7 @@ package endpoints4s.play.server
 
 import akka.stream.scaladsl.Source
 import endpoints4s.algebra
+
 import scala.concurrent.duration.DurationInt
 
 trait ChunkedEntitiesDefinitions extends algebra.ChunkedEntities {
@@ -24,10 +25,11 @@ trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntitie
 }
 
 trait JsonStreamingExample
-  extends algebra.Endpoints
+    extends algebra.Endpoints
     with algebra.ChunkedJsonEntities
     with algebra.JsonEntitiesFromSchemas {
-  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit]))
+  val ticks =
+    endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineDelimiterFraming)))
 }
 
 //#json-streaming
