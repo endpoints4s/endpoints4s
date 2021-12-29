@@ -74,7 +74,7 @@ trait ChunkedJsonEntities
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = jsonChunksRequest(noopFraming)
 
-  def jsonChunksRequest[A](framing: Framing)(implicit
+  override def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -95,7 +95,7 @@ trait ChunkedJsonEntities
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
 
-  def jsonChunksResponse[A](framing: Framing)(implicit
+  override def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val encoder = stringCodec(codec)
@@ -111,7 +111,7 @@ trait ChunkedJsonEntities
       val response: Flow[ByteString, ByteString, NotUsed]
   )
 
-  lazy val newLineDelimiterFraming: Framing = new Framing(
+  override lazy val newLineDelimiterFraming: Framing = new Framing(
     Flow[ByteString].via(
       AkkaFraming.delimiter(
         ByteString("\n"),

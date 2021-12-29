@@ -95,7 +95,10 @@ trait ChunkedResponseEntities extends Chunks {
   *
   * @group algebras
   */
-trait ChunkedJsonEntities extends ChunkedJsonRequestEntities with ChunkedJsonResponseEntities
+trait ChunkedJsonEntities
+    extends ChunkedEntities
+    with ChunkedJsonRequestEntities
+    with ChunkedJsonResponseEntities
 
 /** @group algebras */
 trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs with Framing {
@@ -115,8 +118,8 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
     * @group operations
     */
   def jsonChunksRequest[A](framing: Framing)(implicit
-      codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]]
+      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 
 /** @group algebras */
@@ -137,8 +140,8 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
     * @group operations
     */
   def jsonChunksResponse[A](framing: Framing)(implicit
-      codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]]
+      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 
 /** Algebra interface for describing how chunks of chunked transfer-encoding requests and responses should be framed.
@@ -156,5 +159,5 @@ trait Framing {
   /** Frames are delimited by a new-line separator
     * @group operations
     */
-  def newLineDelimiterFraming: Framing
+  def newLineDelimiterFraming: Framing = unsupportedInterpreter(algebraVersion = "1.7.0")
 }

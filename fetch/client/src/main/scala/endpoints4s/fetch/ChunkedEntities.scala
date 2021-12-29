@@ -69,7 +69,7 @@ trait ChunkedJsonResponseEntities
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
 
-  def jsonChunksResponse[A](framing: Framing)(implicit
+  override def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = {
     val decoder = stringCodec(codec)
@@ -86,7 +86,7 @@ trait ChunkedJsonResponseEntities
     )
   }
 
-  lazy val newLineDelimiterFraming: Framing = new Framing(readableStream =>
+  override lazy val newLineDelimiterFraming: Framing = new Framing(readableStream =>
     ReadableStream[Uint8Array](
       new ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: ReadableStreamController[Uint8Array]) => {

@@ -47,7 +47,7 @@ trait ChunkedJsonEntities
   ): RequestEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
-  def jsonChunksRequest[A](framing: Framing)(implicit
+  override def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] =
     jsonChunksEntity(codec)
@@ -57,10 +57,10 @@ trait ChunkedJsonEntities
   ): ResponseEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
-  def jsonChunksResponse[A](framing: Framing)(implicit
+  override def jsonChunksResponse[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
-  def newLineDelimiterFraming: Framing = ()
+  override def newLineDelimiterFraming: Framing = ()
 }

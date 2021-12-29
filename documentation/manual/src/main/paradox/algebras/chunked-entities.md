@@ -36,7 +36,7 @@ entities carrying streams of values that are serialized into JSON. In addition, 
 must also be provided with an implementation of chunk framing, which is defined by the `Framing` module.
 This is required to compensate for the fact that the chunks of “chunked transfer-encoding” can be re-framed 
 during transport, and thus cannot solely be relied on as a method of framing. 
-The library provides the constructor for `newLineDelimiterFraming`:
+The library provides the constructor for `newLineDelimiterFraming`, which delimits each frame by a new-line character:
 
 @@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #json-streaming }
 
