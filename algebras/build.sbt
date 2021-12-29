@@ -26,6 +26,7 @@ val `algebra-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
       version := "1.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
@@ -69,6 +70,7 @@ val `algebra-circe-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
       version := "1.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq()
     )
     .dependsOn(`algebra-circe`, `algebra-testkit`)

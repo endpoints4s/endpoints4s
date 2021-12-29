@@ -28,17 +28,19 @@ class TestJsonSchemaClient[F[_]: Concurrent](
     with algebra.client.ClientEndpointsTestApi
     with algebra.JsonFromCodecTestApi
     with algebra.SumTypedEntitiesTestApi
+    with algebra.ChunkedEntitiesTestApi
     with algebra.ChunkedJsonEntitiesTestApi
     with circe.JsonFromCirceCodecTestApi
     with circe.JsonEntitiesFromCodecs
-    with algebra.circe.ChunkedJsonEntitiesTestApi
+    with algebra.circe.CounterCodecCirce
 
 class Http4sClientEndpointsJsonSchemaTest
     extends client.EndpointsTestSuite[TestJsonSchemaClient[IO]]
     with client.BasicAuthTestSuite[TestJsonSchemaClient[IO]]
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
-    with client.ChunkedJsonEntitiesResponseTestSuite[TestJsonSchemaClient[IO]] {
+    with client.ChunkedEntitiesTestSuite[TestJsonSchemaClient[IO]]
+    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
 
   type EffectResource[A] = effect.Resource[IO, A]
 
