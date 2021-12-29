@@ -82,7 +82,7 @@ trait ChunkedJsonResponseEntities
           .left
           .map(errors => new Throwable(errors.mkString(". ")))
       },
-      noopFraming.response
+      framing.response
     )
   }
 
