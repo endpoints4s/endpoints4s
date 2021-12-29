@@ -63,6 +63,7 @@ trait ChunkedRequestEntities extends Chunks {
   def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]]
 }
 
+/** @group algebras */
 trait ChunkedResponseEntities extends Chunks {
   this: EndpointsWithCustomErrors =>
 
@@ -109,6 +110,7 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
 
   /** A request entity carrying chunks of JSON values
     *
+    * @param framing Framing applied to chunks
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
@@ -117,6 +119,7 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
   ): RequestEntity[Chunks[A]]
 }
 
+/** @group algebras */
 trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodecs with Framing {
 
   @deprecated(
@@ -129,6 +132,7 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
 
   /** A response entity carrying chunks of JSON values
     *
+    * @param framing Framing applied to chunks
     * @tparam A Type of values serialized into JSON
     * @group operations
     */

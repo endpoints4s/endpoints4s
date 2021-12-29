@@ -32,7 +32,11 @@ which is supported by most HTTP 1.1 clients and servers.
 Clients and servers have to agree on the serialization format used by response
 chunks and WebSocket messages. The `ChunkedJsonEntities` module provides a `jsonChunksRequest`
 constructor and a `jsonChunksResponse` constructor for defining request entities and response
-entities carrying streams of values that are serialized into JSON:
+entities carrying streams of values that are serialized into JSON. In addition, entity constructors
+must also be provided with an implementation of chunk framing, which is defined by the `Framing` module.
+This is required to compensate for the fact that the chunks of “chunked transfer-encoding” can be re-framed 
+during transport, and thus cannot solely be relied on as a method of framing. 
+The library provides the constructor for `newLineDelimiterFraming`:
 
 @@snip [ChunkedEntitiesDocs.scala](/algebras/algebra/src/test/scala/endpoints4s/algebra/ChunkedEntitiesDocs.scala) { #json-streaming }
 
