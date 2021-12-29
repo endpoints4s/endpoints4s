@@ -8,15 +8,19 @@ import akka.http.scaladsl.model.{
   HttpResponse,
   StatusCodes
 }
+import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.{Sink, Source}
 import akka.util.ByteString
 import endpoints4s.Codec
+import endpoints4s.algebra.ChunkedEntitiesTestApi
 import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends EndpointsTestSuite[T] {
+trait ChunkedJsonEntitiesTestSuite[
+    T <: ChunkedEntitiesTestApi with ChunkedJsonEntitiesTestApi
+] extends EndpointsTestSuite[T] {
 
   def serveStreamedEndpoint[Req, Resp, Mat](
       endpoint: serverApi.Endpoint[Req, serverApi.Chunks[Resp]],
@@ -49,6 +53,13 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
     httpClient.singleRequest(request).flatMap { response =>
       val chunksSource =
         response.entity.dataBytes
+          .via(
+            Framing.delimiter(
+              ByteString("\n"),
+              maximumFrameLength = Int.MaxValue,
+              allowTruncation = true
+            )
+          )
           .map(chunk =>
             Right(
               jsonCodec
@@ -114,10 +125,19 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
 
     "stream request entities" in {
       val requestItems =
-        Source(List(Array[Byte](1, 2, 3), Array[Byte](4, 5, 6)))
+        Source(
+          List(
+            Array[Byte](1),
+            Array[Byte](2),
+            Array[Byte](3),
+            Array[Byte](4),
+            Array[Byte](5),
+            Array[Byte](6)
+          )
+        )
       serveStreamedEndpoint[Array[Byte], String](
         serverApi.uploadEndpointTest,
-        bytes => bytes.runWith(Sink.seq).map(_.map(_.toList).mkString(";"))
+        bytes => bytes.runWith(Sink.seq).map(_.flatten.mkString(";"))
       ) { port =>
         val request = HttpRequest(
           method = HttpMethods.POST,
@@ -128,7 +148,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
           )
         )
         whenReady(send(request)) { case (_, byteString) =>
-          assert(byteString.utf8String == "List(1, 2, 3);List(4, 5, 6)")
+          assert(byteString.utf8String == "1;2;3;4;5;6")
           ()
         }
       }
@@ -151,7 +171,7 @@ trait ChunkedJsonEntitiesTestSuite[T <: ChunkedJsonEntitiesTestApi] extends Endp
             ContentTypes.`application/json`,
             Source(
               List(ByteString("{\"value\":1}"), ByteString("{\"value\":true}"))
-            )
+            ).intersperse(ByteString("\n"))
           )
         )
         whenReady(send(request)) { case (response, byteString) =>

@@ -6,7 +6,8 @@ trait JsonStreamingExample
     with endpoints4s.algebra.ChunkedJsonEntities
     with endpoints4s.algebra.JsonEntitiesFromSchemas {
 
-  val ticks = endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit]))
+  val ticks =
+    endpoint(get(path / "ticks"), ok(jsonChunksResponse[Unit](newLineDelimiterFraming)))
 
 }
 //#json-streaming

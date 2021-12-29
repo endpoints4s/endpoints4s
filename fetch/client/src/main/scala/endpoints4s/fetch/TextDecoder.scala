@@ -6,6 +6,6 @@ import scala.scalajs.js.typedarray.ArrayBufferView
 
 @js.native
 @JSGlobal
-class TextDecoder(utfLabel: js.UndefOr[String] = js.undefined) extends js.Object {
+private[fetch] class TextDecoder(utfLabel: js.UndefOr[String] = js.undefined) extends js.Object {
   def decode(data: ArrayBufferView): String = js.native
 }

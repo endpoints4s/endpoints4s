@@ -5,6 +5,7 @@ import akka.stream.Materializer
 import akka.stream.scaladsl.{Sink, Source}
 import akka.testkit.TestKit
 import endpoints4s.algebra
+import endpoints4s.algebra.ChunkedEntitiesTestApi
 import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -24,8 +25,9 @@ class TestClient(settings: EndpointsSettings)(implicit
     with JsonEntitiesFromCodecs
     with algebra.circe.JsonEntitiesFromCodecs
     with ChunkedJsonEntities
+    with ChunkedEntitiesTestApi
     with ChunkedJsonEntitiesTestApi
-    with algebra.circe.ChunkedJsonEntitiesTestApi
+    with algebra.circe.CounterCodecCirce
 
 class AkkaHttpClientEndpointsTest
     extends algebra.client.EndpointsTestSuite[TestClient]
@@ -33,8 +35,8 @@ class AkkaHttpClientEndpointsTest
     with algebra.client.JsonFromCodecTestSuite[TestClient]
     with algebra.client.TextEntitiesTestSuite[TestClient]
     with algebra.client.SumTypedEntitiesTestSuite[TestClient]
-    with algebra.client.ChunkedJsonEntitiesResponseTestSuite[TestClient]
-    with algebra.client.ChunkedJsonEntitiesRequestTestSuite[TestClient] {
+    with algebra.client.ChunkedEntitiesTestSuite[TestClient]
+    with algebra.client.ChunkedJsonEntitiesTestSuite[TestClient] {
 
   implicit val system: ActorSystem = ActorSystem()
   implicit val ec: ExecutionContext = system.dispatcher

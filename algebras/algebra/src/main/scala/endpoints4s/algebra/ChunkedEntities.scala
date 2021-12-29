@@ -5,6 +5,9 @@ package endpoints4s.algebra
   * It introduces a type `Chunks[A]`, which models a stream of chunks of type `A`.
   * It also introduces constructors for chunked request and response entities.
   *
+  * Chunk re-framing can happen during transport and is dependant on the specific implementation. It is known that
+  * browser clients re-frame chunks received from the server.
+  *
   * Example:
   *
   * {{{
@@ -27,7 +30,13 @@ package endpoints4s.algebra
   *
   * @group algebras
   */
-trait ChunkedEntities extends EndpointsWithCustomErrors {
+trait ChunkedEntities
+    extends EndpointsWithCustomErrors
+    with ChunkedRequestEntities
+    with ChunkedResponseEntities
+
+/** @group algebras */
+trait Chunks {
 
   /** A stream of chunks of type `A`.
     *
@@ -35,6 +44,11 @@ trait ChunkedEntities extends EndpointsWithCustomErrors {
     * @group types
     */
   type Chunks[A]
+}
+
+/** @group algebras */
+trait ChunkedRequestEntities extends Chunks {
+  this: EndpointsWithCustomErrors =>
 
   /** A request entity carrying chunks of `String` values
     *
@@ -42,24 +56,28 @@ trait ChunkedEntities extends EndpointsWithCustomErrors {
     */
   def textChunksRequest: RequestEntity[Chunks[String]]
 
+  /** A request entity carrying chunks of `Array[Byte]` values
+    *
+    * @group operations
+    */
+  def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]]
+}
+
+/** @group algebras */
+trait ChunkedResponseEntities extends Chunks {
+  this: EndpointsWithCustomErrors =>
+
   /** A response entity carrying chunks of `String` values
     *
     * @group operations
     */
   def textChunksResponse: ResponseEntity[Chunks[String]]
 
-  /** A request entity carrying chunks of `Array[Byte]` values
-    *
-    * @group operations
-    */
-  def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]]
-
   /** A response entity carrying chunks of `Array[Byte]` values
     *
     * @group operations
     */
   def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]]
-
 }
 
 /** Enriches the [[ChunkedEntities]] algebra with constructors of request
@@ -77,24 +95,69 @@ trait ChunkedEntities extends EndpointsWithCustomErrors {
   *
   * @group algebras
   */
-trait ChunkedJsonEntities extends ChunkedEntities with JsonCodecs {
+trait ChunkedJsonEntities
+    extends ChunkedEntities
+    with ChunkedJsonRequestEntities
+    with ChunkedJsonResponseEntities
 
-  /** A request entity carrying chunks of JSON values
-    *
-    * @tparam A Type of values serialized into JSON
-    * @group operations
-    */
+/** @group algebras */
+trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs with Framing {
+
+  @deprecated(
+    "Use jsonChunksRequest[A](framing: RequestFraming) instead to explicitly provide chunk framing",
+    "1.7.0"
+  )
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]]
 
-  /** A response entity carrying chunks of JSON values
+  /** A request entity carrying chunks of JSON values
     *
+    * @param framing Framing applied to chunks
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
+  def jsonChunksRequest[A](framing: Framing)(implicit
+      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
+}
+
+/** @group algebras */
+trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodecs with Framing {
+
+  @deprecated(
+    "Use jsonChunksResponse[A](framing: ResponseFraming) instead to explicitly provide chunk framing",
+    "1.7.0"
+  )
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]]
 
+  /** A response entity carrying chunks of JSON values
+    *
+    * @param framing Framing applied to chunks
+    * @tparam A Type of values serialized into JSON
+    * @group operations
+    */
+  def jsonChunksResponse[A](framing: Framing)(implicit
+      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
+}
+
+/** Algebra interface for describing how chunks of chunked transfer-encoding requests and responses should be framed.
+  * Being explicit about how chunks are framed solves the issue of re-framing happening during transport.
+  * @group algebras
+  */
+trait Framing {
+
+  /** A strategy for delimiting chunk frames in a stream of chunks. Framing has to be consistent between client and server -
+    * server interpreter must be able to decode chunks encoded by the client, and vice versa.
+    * @group types
+    */
+  type Framing
+
+  /** Frames are delimited by a new-line separator
+    * @group operations
+    */
+  def newLineDelimiterFraming: Framing = unsupportedInterpreter(algebraVersion = "1.7.0")
 }

@@ -1,33 +1,49 @@
 package endpoints4s.algebra
 
 trait ChunkedJsonEntitiesTestApi
+    extends ChunkedJsonRequestEntitiesTestApi
+    with ChunkedJsonResponseEntitiesTestApi
+
+trait ChunkedJsonRequestEntitiesTestApi
     extends EndpointsTestApi
-    with ChunkedJsonEntities
-    with JsonEntitiesFromCodecs {
-
-  case class Counter(value: Int)
-
-  implicit def counterCodec: JsonCodec[Counter]
-
-  val streamedEndpointTest: Endpoint[Unit, Chunks[Counter]] =
-    endpoint(get(path / "notifications"), ok(jsonChunksResponse[Counter]))
-
-  val streamedEndpointErrorTest: Endpoint[Unit, Chunks[Counter]] =
-    endpoint(get(path / "notifications" / "error"), ok(jsonChunksResponse[Counter]))
-
-  val streamedTextEndpointTest: Endpoint[Unit, Chunks[String]] =
-    endpoint(get(path / "text"), ok(textChunksResponse))
-
-  val streamedBytesEndpointTest: Endpoint[Unit, Chunks[Array[Byte]]] =
-    endpoint(get(path / "bytes"), ok(bytesChunksResponse))
-
-  val uploadEndpointTest: Endpoint[Chunks[Array[Byte]], String] =
-    endpoint(post(path / "upload", bytesChunksRequest), ok(textResponse))
+    with ChunkedJsonRequestEntities
+    with JsonEntitiesFromCodecs
+    with CounterCodec {
 
   val streamedJsonUpload: Endpoint[Chunks[Counter], String] =
     endpoint(
-      post(path / "counter-values", jsonChunksRequest[Counter]),
+      post(path / "counter-values", jsonChunksRequest[Counter](newLineDelimiterFraming)),
       ok(textResponse)
     )
+}
 
+trait ChunkedJsonResponseEntitiesTestApi
+    extends EndpointsTestApi
+    with ChunkedJsonResponseEntities
+    with JsonEntitiesFromCodecs
+    with CounterCodec {
+
+  val streamedEndpointTest: Endpoint[Unit, Chunks[Counter]] =
+    endpoint(
+      get(path / "notifications"),
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
+    )
+
+  val streamedEndpointErrorTest: Endpoint[Unit, Chunks[Counter]] =
+    endpoint(
+      get(path / "notifications" / "error"),
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
+    )
+
+  val streamedEndpointEmptyTest: Endpoint[Unit, Chunks[Counter]] =
+    endpoint(
+      get(path / "notifications" / "empty"),
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
+    )
+
+  val streamedEndpointSingleTest: Endpoint[Unit, Chunks[Counter]] =
+    endpoint(
+      get(path / "notifications" / "single"),
+      ok(jsonChunksResponse[Counter](newLineDelimiterFraming))
+    )
 }

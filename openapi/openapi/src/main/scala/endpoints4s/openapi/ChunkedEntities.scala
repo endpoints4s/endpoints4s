@@ -40,7 +40,14 @@ trait ChunkedJsonEntities
   private def jsonChunksEntity[A](codec: JsonCodec[A]) =
     Map("application/json" -> MediaType(Some(toSchema(codec.docs))))
 
+  type Framing = Unit
+
   def jsonChunksRequest[A](implicit
+      codec: JsonCodec[A]
+  ): RequestEntity[Chunks[A]] =
+    jsonChunksEntity(codec)
+
+  override def jsonChunksRequest[A](framing: Framing)(implicit
       codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] =
     jsonChunksEntity(codec)
@@ -50,4 +57,10 @@ trait ChunkedJsonEntities
   ): ResponseEntity[Chunks[A]] =
     jsonChunksEntity(codec)
 
+  override def jsonChunksResponse[A](framing: Framing)(implicit
+      codec: JsonCodec[A]
+  ): ResponseEntity[Chunks[A]] =
+    jsonChunksEntity(codec)
+
+  override def newLineDelimiterFraming: Framing = ()
 }
