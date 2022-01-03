@@ -2,7 +2,6 @@ package endpoints4s.fetch
 
 import endpoints4s.algebra
 import org.scalajs.dom
-import org.scalajs.dom.ReadableStreamReader
 
 import scala.scalajs.js
 import scala.scalajs.js.typedarray.Uint8Array
@@ -24,10 +23,10 @@ trait ChunkedResponseEntities
       fromUint8Array: Uint8Array => Either[Throwable, A],
       framing: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array] = identity
   ): ResponseEntity[Chunks[A]] = { response =>
-    val readableStream = ReadableStream[A](
-      new ReadableStreamUnderlyingSource[A] {
-        start = js.defined((controller: ReadableStreamController[A]) => {
-          def read(reader: ReadableStreamReader[Uint8Array]): js.Promise[Unit] = {
+    val readableStream = dom.ReadableStream[A](
+      new dom.ReadableStreamUnderlyingSource[A] {
+        start = js.defined((controller: dom.ReadableStreamController[A]) => {
+          def read(reader: dom.ReadableStreamReader[Uint8Array]): js.Promise[Unit] = {
             reader
               .read()
               .`then`((chunk: dom.Chunk[Uint8Array]) => {
@@ -46,11 +45,11 @@ trait ChunkedResponseEntities
               })
           }
           read(framing(response.body).getReader()): js.UndefOr[js.Promise[Unit]]
-        }): js.UndefOr[js.Function1[ReadableStreamController[A], js.UndefOr[js.Promise[Unit]]]]
+        }): js.UndefOr[js.Function1[dom.ReadableStreamController[A], js.UndefOr[js.Promise[Unit]]]]
       }
     )
     js.Promise.resolve[Either[Throwable, dom.ReadableStream[A]]](
-      Right(readableStream.asInstanceOf[dom.ReadableStream[A]])
+      Right(readableStream)
     )
   }
 }
@@ -87,11 +86,11 @@ trait ChunkedJsonResponseEntities
   }
 
   override lazy val newLineDelimiterFraming: Framing = new Framing(readableStream =>
-    ReadableStream[Uint8Array](
-      new ReadableStreamUnderlyingSource[Uint8Array] {
-        start = js.defined((controller: ReadableStreamController[Uint8Array]) => {
+    dom.ReadableStream[Uint8Array](
+      new dom.ReadableStreamUnderlyingSource[Uint8Array] {
+        start = js.defined((controller: dom.ReadableStreamController[Uint8Array]) => {
           def read(
-              reader: ReadableStreamReader[Uint8Array],
+              reader: dom.ReadableStreamReader[Uint8Array],
               buffer: String,
               firstChunk: Boolean
           ): js.Promise[Unit] = {
@@ -119,10 +118,10 @@ trait ChunkedJsonResponseEntities
           }
           read(readableStream.getReader(), "", firstChunk = true): js.UndefOr[js.Promise[Unit]]
         }): js.UndefOr[
-          js.Function1[ReadableStreamController[Uint8Array], js.UndefOr[js.Promise[Unit]]]
+          js.Function1[dom.ReadableStreamController[Uint8Array], js.UndefOr[js.Promise[Unit]]]
         ]
       }
-    ).asInstanceOf[dom.ReadableStream[Uint8Array]]
+    )
   )
 
   private lazy val noopFraming: Framing = new Framing(identity)
