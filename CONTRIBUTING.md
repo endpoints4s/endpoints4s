@@ -8,11 +8,12 @@ algebras/                   Algebra interfaces
 akka-http/                  Interpreters based on Akka-http
 http4s/                     Interpreters based on http4s
 play/                       Interpreters based on Play framework
-scalaj/                     Interpreters based on Scalaj
 sttp/                       Interpreters based on sttp
 xhr/                        Scala.js interpreters based on XMLHttpRequest
+fetch/                      Scala.js interpreters based on Fetch
 openapi/                    Interpreters generating OpenAPI documentation
 documentation/              User manual and examples
+stub-server/                HTTP server used for testing client interpreters
 sbt-assets/                 Sbt plugin to help handling assets
 ~~~
 
