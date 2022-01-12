@@ -13,7 +13,6 @@
 * [http4s](interpreters/http4s.md)
 * [Scala.js web client (XHR)](interpreters/scalajs-web-xhr.md)
 * [Scala.js web client (Fetch)](interpreters/scalajs-web-fetch.md)
-* [scalaj-http](interpreters/scalaj-http.md)
 * [sttp](interpreters/sttp.md)
 * [OpenAPI documentation](interpreters/openapi.md)
 * [circe codecs](interpreters/circe.md)
@@ -110,18 +109,18 @@ Interpreters give a concrete meaning to the vocabulary and operations provided
 by the algebras. They usually rely on other libraries (e.g. circe, Akka HTTP, etc.)
 to do so. Pick the interpreters that fit your existing stack!
 
-| Family | Description |
-|---|---|
-|@ref[Akka HTTP](interpreters/akka-http.md)|Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)|
-|@ref[Play framework](interpreters/play.md)|Client and server backed by [Play framework](https://www.playframework.com/)|
-|@ref[http4s](interpreters/http4s.md)|Client and server backed by [http4s](https://http4s.org)|
-|@ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md)|Scala.js web client using `XMLHttpRequest`|
-|@ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md)|Scala.js web client using `Fetch`|
-|@ref[scalaj-http](interpreters/scalaj-http.md)|JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)|
-|@ref[sttp](interpreters/sttp.md)|JVM client backed by [sttp](https://github.com/softwaremill/sttp)|
-|@ref[OpenAPI](interpreters/openapi.md)|Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions|
-|@ref[circe](interpreters/circe.md)|Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions|
-|@ref[Play JSON](interpreters/play-json.md)|Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions|
+| Family                                                        | Description                                                                                                   |
+|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| @ref[Akka HTTP](interpreters/akka-http.md)                    | Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)                          |
+| @ref[Play framework](interpreters/play.md)                    | Client and server backed by [Play framework](https://www.playframework.com/)                                  |
+| @ref[http4s](interpreters/http4s.md)                          | Client and server backed by [http4s](https://http4s.org)                                                      |
+| @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md)     | Scala.js web client using `XMLHttpRequest`                                                                    |
+| @ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md) | Scala.js web client using `Fetch`                                                                             |
+| [scalaj-http](https://endpoints4s.github.io/scalaj)           | JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)                                     |
+| @ref[sttp](interpreters/sttp.md)                              | JVM client backed by [sttp](https://github.com/softwaremill/sttp)                                             |
+| @ref[OpenAPI](interpreters/openapi.md)                        | Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions         |
+| @ref[circe](interpreters/circe.md)                            | Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions                           |
+| @ref[Play JSON](interpreters/play-json.md)                    | Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions |
 
 @@@note
 You can have different stacks on the client-side and the server-side. For instance,

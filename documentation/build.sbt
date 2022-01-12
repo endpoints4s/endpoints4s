@@ -23,8 +23,6 @@ val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")
 val `xhr-client-faithful` = LocalProject("xhr-client-faithful")
 
-val `scalaj-client` = LocalProject("scalaj-client")
-
 val `sttp-client` = LocalProject("sttp-client")
 
 val `openapi-jvm` = LocalProject("openapiJVM")
@@ -68,7 +66,6 @@ val apiDoc =
         `xhr-client`,
         `xhr-client-circe`,
         `xhr-client-faithful`,
-        `scalaj-client`,
         `sttp-client`,
         `openapi-jvm`,
         `json-schema-jvm`,
