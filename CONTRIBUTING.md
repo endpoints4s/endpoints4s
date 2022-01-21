@@ -35,7 +35,7 @@ Or, for a specific Scala version:
 
 ~~~ sh
 $ sbt "++ 2.12.13 test"
-$ sbt "++ 2.13.7 test"
+$ sbt "++ 2.13.8 test"
 ~~~
 
 ### Introduction of source or binary incompatibilities
@@ -98,7 +98,7 @@ $ sbt manual/ghpagesPushSite
 ### Run the examples 
 
 ~~~ sh
-++ 2.13.7 example-basic-play-server/run
+++ 2.13.8 example-basic-play-server/run
 ~~~
 
 ## Working with mill
@@ -134,7 +134,7 @@ After generating intellij project you may need to navigate to Settings -> Langua
    ~~~
 5. Upload the bundles to sonatype, release them, and publish the documentation website
    ~~~ sh
-   sbt "++ 2.12.13 publishSigned" "++ 2.13.7 publishSigned" sonatypeReleaseAll "++ 2.13.7 manual/makeSite" manual/ghpagesPushSite
+   sbt "++ 2.12.13 publishSigned" "++ 2.13.8 publishSigned" sonatypeReleaseAll "++ 2.13.8 manual/makeSite" manual/ghpagesPushSite
    ~~~
 6. Create a tag `vx.y.z`
    ~~~ sh

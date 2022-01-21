@@ -37,7 +37,7 @@ jobs:
     - run: sudo apt-get install graphviz
     - run: sbt stub-server/docker:publishLocal
     - run: docker run -d -p 8080:8080 stubserver:1.0.1
-    - run: sbt ++2.13.7 coverage test coverageReport coverageAggregate manual/makeSite
+    - run: sbt ++2.13.8 coverage test coverageReport coverageAggregate manual/makeSite
     - run: bash <(curl -s https://codecov.io/bash)
 
   test3:
