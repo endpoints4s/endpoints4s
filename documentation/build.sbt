@@ -241,7 +241,7 @@ val `example-basic-play-server` =
       Compile / unmanagedResources += (`example-basic-client` / Compile / fastOptJS)
         .map(_.data)
         .value,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.33",
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.34",
       libraryDependencies += "com.typesafe.play" %% "play" % playVersion
     )
     .dependsOn(
