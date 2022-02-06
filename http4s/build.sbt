@@ -20,6 +20,7 @@ val `http4s-server` =
       `scala 2.12 to dotty`,
       name := "http4s-server",
       version := "8.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.http4s" %% "http4s-core" % http4sVersion,
         "org.http4s" %% "http4s-dsl" % http4sVersion,

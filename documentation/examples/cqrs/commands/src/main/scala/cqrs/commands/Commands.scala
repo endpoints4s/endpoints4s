@@ -1,15 +1,12 @@
 package cqrs.commands
 
 //#server
-import endpoints4s.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
-import play.api.routing.Router
+import cats.effect.IO
+import endpoints4s.http4s.server.{Endpoints, JsonEntitiesFromCodecs}
 
-class Commands(val playComponents: PlayComponents)
-    extends CommandsEndpoints
-    with Endpoints
-    with JsonEntitiesFromCodecs {
+class Commands extends Endpoints[IO] with JsonEntitiesFromCodecs with CommandsEndpoints {
 
-  val routes: Router.Routes = routesFromEndpoints(
+  val routes = routesFromEndpoints(
     command.implementedBy(CommandsService.apply),
     events.implementedBy(CommandsService.events)
   )
