@@ -9,10 +9,6 @@ val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
-val `play-client` = LocalProject("play-client")
-val `play-server` = LocalProject("play-server")
-val `play-server-circe` = LocalProject("play-server-circe")
-
 val `akka-http-client` = LocalProject("akka-http-client")
 val `akka-http-server` = LocalProject("akka-http-server")
 
@@ -58,9 +54,6 @@ val apiDoc =
         `algebra-playjson-jvm`,
         `akka-http-client`,
         `akka-http-server`,
-        `play-client`,
-        `play-server`,
-        `play-server-circe`,
         `http4s-client-jvm`,
         `http4s-server`,
         `xhr-client`,
@@ -232,26 +225,6 @@ val `example-basic-client` =
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
-val `example-basic-play-server` =
-  project
-    .in(file("examples/basic/play-server"))
-    .settings(
-      noPublishSettings,
-      `scala 2.12 to 2.13`,
-      Compile / unmanagedResources += (`example-basic-client` / Compile / fastOptJS)
-        .map(_.data)
-        .value,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.35",
-      libraryDependencies += "com.typesafe.play" %% "play" % playVersion
-    )
-    .dependsOn(
-      `example-basic-shared-jvm`,
-      `play-server`,
-      `algebra-playjson-jvm`,
-      `json-schema-playjson-jvm`,
-      `openapi-jvm`
-    )
-
 val `example-basic-akkahttp-server` =
   project
     .in(file("examples/basic/akkahttp-server"))
@@ -325,7 +298,7 @@ val `example-cqrs-public-server` =
         .dependsOn(`example-cqrs-web-client` / Compile / fastOptJS)
         .taskValue
     )
-    .dependsOn(`play-server-circe`, `play-client`, `openapi-jvm`)
+    .dependsOn(`http4s-server`, `http4s-client-jvm`, `openapi-jvm`)
     .dependsOn(
       `example-cqrs-public-endpoints-jvm`,
       `example-cqrs-commands-endpoints`,
@@ -355,10 +328,13 @@ val `example-cqrs-commands` =
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
+        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
+        "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         scalaTestDependency
       )
     )
-    .dependsOn(`play-server-circe`, `play-client` % Test)
+    .dependsOn(`http4s-server`, `http4s-client-jvm` % Test)
     .dependsOn(`example-cqrs-commands-endpoints`)
 
 // queries endpoints definitions
@@ -376,7 +352,7 @@ val `example-cqrs-queries` =
   project
     .in(file("examples/cqrs/queries"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
-    .dependsOn(`play-server-circe`, `play-client`)
+    .dependsOn(`http4s-server`, `http4s-client-jvm`)
     .dependsOn(
       `example-cqrs-queries-endpoints`,
       `example-cqrs-commands-endpoints`
@@ -390,6 +366,9 @@ val `example-cqrs` =
     .settings(
       Global / cancelable := true,
       libraryDependencies ++= Seq(
+        "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+        "org.http4s" %% "http4s-async-http-client" % http4sVersion,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         "org.scalacheck" %% "scalacheck" % "1.15.4" % Test,
         scalaTestDependency
       )
@@ -405,6 +384,7 @@ val `example-documented` =
     .in(file("examples/documented"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
+      libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
 // Temporary: the sbt-heroku plugin seems to conflict with sbt-dotty
 //      herokuAppName in Compile := "documented-counter",
 //      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
@@ -415,26 +395,26 @@ val `example-documented` =
 //          .get
 //          .toString)
 //      ),
-      assembly / assemblyMergeStrategy := {
-        case x if x.endsWith("io.netty.versions.properties") =>
-          MergeStrategy.first
-        case x if x.endsWith("module-info.class") =>
-          MergeStrategy.first
-        case x =>
-          val oldStrategy = (assembly / assemblyMergeStrategy).value
-          oldStrategy(x)
-      },
-      Compile / sourceGenerators += Def.task {
-        assets.AssetsTasks.generateDigests(
-          baseDirectory = baseDirectory.value,
-          targetDirectory = (Compile / sourceManaged).value,
-          generatedObjectName = "AssetsDigests",
-          generatedPackage = Some("counter"),
-          assetsPath = _ / "src" / "main" / "resources" / "public"
-        )
-      }.taskValue
+//      assembly / assemblyMergeStrategy := {
+//        case x if x.endsWith("io.netty.versions.properties") =>
+//          MergeStrategy.first
+//        case x if x.endsWith("module-info.class") =>
+//          MergeStrategy.first
+//        case x =>
+//          val oldStrategy = (assembly / assemblyMergeStrategy).value
+//          oldStrategy(x)
+//      },
+//      Compile / sourceGenerators += Def.task {
+//        assets.AssetsTasks.generateDigests(
+//          baseDirectory = baseDirectory.value,
+//          targetDirectory = (Compile / sourceManaged).value,
+//          generatedObjectName = "AssetsDigests",
+//          generatedPackage = Some("counter"),
+//          assetsPath = _ / "src" / "main" / "resources" / "public"
+//        )
+//      }.taskValue
     )
-    .dependsOn(`play-server`, `json-schema-generic-jvm`)
+    .dependsOn(`http4s-server`, `json-schema-generic-jvm`)
 
 val `example-authentication` =
   project
@@ -442,11 +422,14 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.jwt-scala" %% "jwt-play" % "9.0.3",
+        "com.github.jwt-scala" %% "jwt-circe" % "9.0.3",
+        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
+        "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         scalaTestDependency
       )
     )
-    .dependsOn(`play-server`, `play-client`, `algebra-playjson-jvm`)
+    .dependsOn(`http4s-server`, `http4s-client-jvm`)
 
 val `example-basic-http4s-server` =
   project

@@ -1,122 +1,111 @@
 package authentication
 
-import endpoints4s.play.server.PlayComponents
+import cats.effect.IO
+import org.http4s.{AuthScheme, Credentials, Header, HttpRoutes, Request, Status, Uri}
+import org.http4s.asynchttpclient.client.AsyncHttpClient
+import org.http4s.blaze.server.BlazeServerBuilder
 import org.scalatest.BeforeAndAfterAll
-import pdi.jwt.JwtSession
-import play.api.{Configuration, Mode}
-import play.api.http.{HeaderNames, Status}
-import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.core.server.{NettyServer, ServerConfig}
 import org.scalatest.freespec.AsyncFreeSpec
+import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.effect.unsafe.IORuntime
+import org.http4s.headers.Authorization
+import org.typelevel.ci.CIString
+import pdi.jwt.JwtCirce
 
-class AuthenticationTest extends AsyncFreeSpec with BeforeAndAfterAll {
+import scala.concurrent.ExecutionContext
+
+class AuthenticationTest extends AsyncFreeSpec with AsyncIOSpec with BeforeAndAfterAll {
+
+  // See https://github.com/typelevel/cats-effect-testing/issues/145
+  override implicit def executionContext: ExecutionContext = IORuntime.global.compute
 
   val host = "0.0.0.0"
   val port = 8765
-  val playConfig =
-    ServerConfig(port = Some(port), mode = Mode.Test, address = host)
-  val server = NettyServer
-    .fromRouterWithComponents(playConfig) { components =>
-      new Server(
-        PlayComponents.fromBuiltInComponents(components),
-        components.configuration
-      ).routes
-    }
-    .asInstanceOf[NettyServer]
-  import server.materializer
-  import server.actorSystem.dispatcher
-  import ClockSettings._
-  implicit val playConfiguration: Configuration = Configuration.reference
-  val wsClient = AhcWSClient(AhcWSClientConfig())
-  val client = new Client(s"http://$host:$port", wsClient, playConfiguration)
+  val (server, shutdownServer) = BlazeServerBuilder[IO]
+    .bindHttp(port, host)
+    .withHttpApp(HttpRoutes.of((new Server).routes).orNotFound)
+    .allocated
+    .unsafeRunSync()
+  val (ahc, shutdownClient) = AsyncHttpClient.allocate[IO]().unsafeRunSync()
+  val client = new Client(
+    Uri.Authority(host = Uri.RegName(host), port = Some(port)),
+    Uri.Scheme.http,
+    ahc
+  )
 
-  def uri(path: String): String = s"http://$host:$port$path"
+  def uri(path: String): Uri = Uri.unsafeFromString(s"http://$host:$port$path")
 
   override def afterAll(): Unit = {
-    wsClient.close()
-    server.stop()
+    shutdownClient.unsafeRunSync()
+    shutdownServer.unsafeRunSync()
     super.afterAll()
   }
 
   "authentication" - {
     "unauthenticated request gets rejected" in {
       for {
-        response <- wsClient.url(uri("/some-resource")).get()
-      } yield assert(response.status == Status.UNAUTHORIZED)
+        status <- ahc.statusFromUri(uri("/some-resource"))
+      } yield assert(status == Status.Unauthorized)
     }
     "invalid authenticated request gets rejected" in {
+      val request = Request[IO]()
+        .withUri(uri("/some-resource"))
+        .putHeaders(Header.Raw(CIString("Authorization"), "lol"))
       for {
-        response <-
-          wsClient
-            .url(uri("/some-resource"))
-            .withHttpHeaders(HeaderNames.AUTHORIZATION -> "lol")
-            .get()
-      } yield assert(response.status == Status.UNAUTHORIZED)
+        status <- ahc.status(request)
+      } yield assert(status == Status.Unauthorized)
     }
     "invalid json token gets rejected" in {
       val token =
         """eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"""
+      val request = Request[IO]()
+        .withUri(uri("/some-resource"))
+        .putHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
       for {
-        response <-
-          wsClient
-            .url(uri("/some-resource"))
-            .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
-            .get()
-      } yield assert(response.status == Status.UNAUTHORIZED)
+        status <- ahc.status(request)
+      } yield assert(status == Status.Unauthorized)
     }
     "wrong login is rejected" in {
+      val request = Request[IO]()
+        .withUri(uri("/login").withQueryParam("apiKey", "unknown"))
       for {
-        loginResponse <-
-          wsClient
-            .url(uri("/login"))
-            .withQueryStringParameters("apiKey" -> "unknown")
-            .get()
-      } yield assert(loginResponse.status == Status.BAD_REQUEST)
+        status <- ahc.status(request)
+      } yield assert(status == Status.BadRequest)
     }
     "login gives a valid json token" in {
-      for {
-        loginResponse <-
-          wsClient
-            .url(uri("/login"))
-            .withQueryStringParameters("apiKey" -> "foobar")
-            .get()
-        token =
-          loginResponse
-            .headers(HeaderNames.AUTHORIZATION)
-            .head
-            .drop("Bearer ".length)
-        _ = {
-          assert(loginResponse.status == Status.OK)
-          val jwtSession = JwtSession.deserialize(token)
-          val user = jwtSession.getAs[UserInfo]("user").get
-          assert(user == UserInfo("Alice"))
-        }
-        response <-
-          wsClient
-            .url(uri("/some-resource"))
-            .withHttpHeaders(HeaderNames.AUTHORIZATION -> s"Bearer $token")
-            .get()
-      } yield assert(response.status == Status.OK)
+      ahc.get(uri("/login").withQueryParam("apiKey", "foobar")) { response =>
+        assert(response.status == Status.Ok)
+        val responseJson = io.circe.parser.parse(response.as[String].unsafeRunSync()).toOption.get
+        val token = responseJson.hcursor.downField("jwt_token").as[String].toOption.get
+        val claim = JwtCirce.decode(token, Keys.pair.getPublic).get
+        val userInfo = io.circe.parser.parse(claim.content).flatMap(_.as[UserInfo]).toOption.get
+        assert(userInfo == UserInfo("Alice"))
+
+        val authenticatedRequest = Request[IO]()
+          .withUri(uri("/some-resource"))
+          .putHeaders(Authorization(Credentials.Token(AuthScheme.Bearer, token)))
+        IO.pure(assert(ahc.successful(authenticatedRequest).unsafeRunSync()))
+      }
     }
     //#login-test-client
     "wrong login using client" in {
       for {
-        loginResult <- client.login("unknown")
+        loginResult <- client.login.sendAndConsume("unknown")
       } yield assert(loginResult.isEmpty)
     }
     "valid login using client" in {
       for {
-        loginResult <- client.login("foobar")
+        loginResult <- client.login.sendAndConsume("foobar")
       } yield assert(loginResult.nonEmpty)
     }
     //#login-test-client
     //#protected-endpoint-test
     "login and access protected resource" in {
       for {
-        maybeToken <- client.login("foobar")
+        maybeToken <- client.login.sendAndConsume("foobar")
         token = maybeToken.get
         _ = assert(token.decoded == UserInfo("Alice"))
-        resource <- client.someResource(token)
+        resource <- client.someResource.sendAndConsume(token)
       } yield assert(resource == "Hello Alice!")
     }
     //#protected-endpoint-test

@@ -1,43 +1,41 @@
 package cqrs.queries
 
+import cats.effect.IO
+
 import java.util.UUID
+import org.http4s.client.{Client => Http4sClient}
 
-import akka.actor.Scheduler
-import play.api.libs.ws.WSClient
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import cqrs.commands.{CommandsEndpoints, MeterCreated, RecordAdded, StoredEvent}
+import org.http4s.Uri
 
 import scala.collection.immutable.SortedMap
 import scala.concurrent.duration.DurationInt
-import scala.concurrent.Future
 import scala.concurrent.stm.{Ref, atomic}
 
 /** Implementation of the queries service
   */
 class QueriesService(
-    commandsBaseUrl: String,
-    wsClient: WSClient,
-    scheduler: Scheduler
+    commandsAuthority: Uri.Authority,
+    http4sClient: Http4sClient[IO]
 ) {
 
   // --- public API
 
-  def findById(id: UUID, maybeAfter: Option[Long]): Future[Option[Meter]] =
+  def findById(id: UUID, maybeAfter: Option[Long]): IO[Option[Meter]] =
     updateIfRequired(maybeAfter)(_.meters.get(id))
 
-  def findAll(): Future[List[Meter]] =
-    Future.successful(stateRef.single.get.meters.values.toList)
+  def findAll(): IO[List[Meter]] =
+    IO.pure(stateRef.single.get.meters.values.toList)
 
   // --- internals
 
   //#event-log-client
-  import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
+  import endpoints4s.http4s.client
 
   /** Client for the event log */
   private object eventLog
-      extends Endpoints(commandsBaseUrl, wsClient)
-      with JsonEntitiesFromCodecs
+      extends client.Endpoints(commandsAuthority, Uri.Scheme.http, http4sClient)
+      with client.JsonEntitiesFromCodecs
       with CommandsEndpoints
   //#event-log-client
 
@@ -50,10 +48,13 @@ class QueriesService(
   )
 
   // periodically poll the event log to keep our state up to date
-  scheduler.scheduleAtFixedRate(0.seconds, 5.seconds) { () =>
-    update()
-    ()
-  }
+  def pollEventLog: IO[Unit] =
+    for {
+      _ <- update()
+      _ <- IO.sleep(5.seconds)
+      _ <- pollEventLog
+    } yield ()
+  pollEventLog.background.use(_ => IO.never)
 
   /** Internal state */
   case class State(
@@ -68,16 +69,16 @@ class QueriesService(
     */
   private def updateIfRequired[A](
       maybeTimestamp: Option[Long]
-  )(f: State => A): Future[A] = {
+  )(f: State => A): IO[A] = {
     val currentState = stateRef.single()
     maybeTimestamp.filter(t => currentState.lastEventTimestamp.forall(_ < t)) match {
-      case None    => Future.successful(f(currentState))
+      case None    => IO.pure(f(currentState))
       case Some(_) => update().map(f)
     }
   }
 
   /** Update the projection by fetching the last events from the event store and applying them to our state */
-  private def update(): Future[State] = {
+  private def update(): IO[State] = {
 
     val maybeLastEventTimestamp = stateRef.single.get.lastEventTimestamp
 
@@ -95,10 +96,12 @@ class QueriesService(
       }
 
     //#invocation
-    val eventuallyUpdatedState: Future[State] =
-      eventLog.events(maybeLastEventTimestamp).map { (newEvents: Seq[StoredEvent]) =>
-        atomicallyApplyEvents(newEvents)
-      }
+    val eventuallyUpdatedState: IO[State] =
+      eventLog.events
+        .sendAndConsume(maybeLastEventTimestamp)
+        .map { (newEvents: Seq[StoredEvent]) =>
+          atomicallyApplyEvents(newEvents)
+        }
     //#invocation
     eventuallyUpdatedState
   }

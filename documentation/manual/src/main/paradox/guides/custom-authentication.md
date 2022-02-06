@@ -4,7 +4,7 @@ This page explains how to extend the `Endpoints` algebra with vocabulary specifi
 to the authentication mechanism used by an application, and how to extend interpreters
 to implement this authentication mechanism for the server side and the client side.
 
-We will be using Play framework but the same approach can be used for other
+We will be using http4s but the same approach can be used for other
 HTTP libraries.
 
 We focus on authentication but the same approach can be used for any other
@@ -71,23 +71,17 @@ parameter `apiKey` containing the credentials. The returned response is either a
 ### Authentication server interpreter
 
 The server interpreter fixes the `AuthenticationToken` type member to `UserInfo`
-and implements the `authenticationToken` and `wheneverValid` methods:
+and implements the `authenticationTokenCodec` method:
 
 @@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #server-interpreter }
 
 The `ServerAuthentication` trait extends the `Authentication` algebra as well
-as a server `Endpoints` interpreter based on Play framework.
+as a server `Endpoints` interpreter based on http4s.
 
-The `authenticationToken` operation is straightforwardly implemented by
-building an `Ok` response and adding it a JWT session containing a `user`
-property with the contents of our `UserInfo`. The management of the JWT
-session is delegated to the [pauldijou/jwt-scala](https://github.com/pauldijou/jwt-scala)
-library, which attaches the issued JWT to the `Authorization` header
-of the response.
-
-The `wheneverValid` operation checks whether the response value is defined
-or not. In case it is empty, it returns a `BadRequest` response, otherwise
-it calls the underlying response.
+The `authenticationTokenCodec` operation is implemented with the help of the library
+[pauldijou/jwt-scala](https://github.com/pauldijou/jwt-scala). It serializes the user
+info into JSON (via `UserInfo.codec`), and then creates a signed JWT from it with a
+private key.
 
 With this interpreter, the implementation of the login endpoint looks like
 the following:
@@ -95,20 +89,20 @@ the following:
 @@snip [Usage.scala](/documentation/examples/authentication/src/main/scala/authentication/Usage.scala) { #login-implementation }
 
 Our `Server` class extends the traits that defines the `login` endpoint,
-namely the `AuthenticationEndpoints`, and mixes the Play-based server
+namely the `AuthenticationEndpoints`, and mixes the http4s-based server
 interpreter as well as our `ServerAuthentication` interpreter.
 
 In this simplified example, we only have one valid API key, `"foobar"`, belonging
 to Alice. The `login` endpoint is implemented by a function that checks
-whether the supplied `apiKey` is equal to `"foobar"`, in which case we return
-a `UserInfo` object wrapped in a `Some`. Otherwise we return `None` to signal
+whether the supplied `apiKey` is equal to `"foobar"`, in which case it returns
+a `UserInfo` object wrapped in a `Some`. Otherwise, it returns `None` to signal
 that the API key is invalid.
 
 ### Mid-way summary
 
 What have we learnt so far?
 
-We are only halfway trough this document but the first sections already
+We are only halfway through this document but the first sections already
 showed the key aspects of enriching endpoints4s for
 application-specific needs:
 
@@ -145,19 +139,20 @@ The `AuthenticationToken` type is implemented as a class whose
 constructor is private. If it was public, clients could build
 a fake authentication token which would then fail at runtime
 because the server would reject it when seeing that it is not
-correctly signed. By making the constructor private, we simply
+correctly signed. By making the constructor private, we
 make it impossible to reach such a runtime error.
 
 The `AuthenticationToken` class contains the serialized token
 as well as the decoded `UserInfo`.
 
-The `authenticationToken` operation is implemented as the dual
-of the server interpreter: it checks that there is an `Authorization`
-response header, and that it contains a valid `UserInfo` object.
-In case of failure, this method returns an exception that
-will be eventually thrown by the base client interpreter. One could
-argue that we should model the fact that decoding the response can
-fail by returning an `Option` instead of throwing an exception.
+The `authenticationTokenCodec` operation is implemented as the dual
+of the server interpreter: it tries to decode the JWT, and then tries
+to parse its content and to decode it as a `UserInfo` object.
+
+In case of failure, it returns an @scaladoc[Invalid](endpoints4s.Invalid) value, which
+will ultimately been reported to the user by throwing an exception. One could
+argue that we should model the fact that decoding
+the response can fail by returning an `Option` instead of throwing an exception.
 However, the philosophy of endpoints4s is that client and
 server interpreters implement a same HTTP protocol, therefore we
 expect (and assume) the interpreters to be consistent together.
@@ -167,9 +162,7 @@ Thus, we assume that  don’t need to surface that kind of failures
 This contrasts with the `wheneverValid` operation, which
 models the fact that the API key supplied by the user can be invalid.
 In such a case, we really want the failure to surface to the end-user,
-hence the usage of `Option`. The implementation checks whether
-the status is 400, in which case it returns `None`, otherwise it
-returns the underlying response wrapped in a `Some`.
+hence the usage of `Option`.
 
 ### Putting things together (authentication)
 
@@ -243,7 +236,7 @@ by the request is just the `AuthenticationToken`.
 
 ### Protected endpoints server interpreter
 
-Our Play-based server is implemented as follows:
+Our http4s-based server is implemented as follows:
 
 @@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-server }
 
@@ -253,7 +246,7 @@ And the protected endpoint can be implemented as follows:
 
 ### Protected endpoints client interpreter
 
-And our Play-based client is implemented as follows:
+And our http4s-based client is implemented as follows:
 
 @@snip [Authentication.scala](/documentation/examples/authentication/src/main/scala/authentication/Authentication.scala) { #protected-endpoints-client }
 

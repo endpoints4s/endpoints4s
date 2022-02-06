@@ -59,7 +59,7 @@ trait BasicAuthentication
       def url: Url[UrlData] = urlArg
       def headers: RequestHeaders[HeadersData] = headersArg ++ basicAuthenticationHeader
       def entity: RequestEntity[EntityData] = entityArg
-      private[server] def aggregateAndValidate(
+      def aggregateAndValidate(
           urlData: UrlData,
           headersData: HeadersData,
           entityData: EntityData
@@ -75,7 +75,7 @@ trait BasicAuthentication
           case (h, Some(credentials)) =>
             Valid(tuplerUEHC(tuplerUE(urlData, entityData), tuplerHC(h, credentials)))
         }
-      private[server] def matchAndParseHeaders(
+      def matchAndParseHeaders(
           http4sRequest: Http4sRequest
       ): Option[Either[Http4sResponse, Validated[(U, (H, Option[Credentials]))]]] = {
         matchAndParseHeadersAsRight(method, url, headers, http4sRequest).map(_.flatMap {

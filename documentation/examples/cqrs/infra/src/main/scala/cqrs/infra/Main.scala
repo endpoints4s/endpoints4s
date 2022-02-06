@@ -1,13 +1,14 @@
 package cqrs.infra
 
+import cats.effect.IO
 import cqrs.commands.Commands
 import cqrs.publicserver.{BootstrapEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints4s.play.server.PlayComponents
-import play.api.Mode
-import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.api.routing.Router
-import play.core.server.{DefaultNettyServerComponents, ServerConfig}
+import org.http4s.{HttpRoutes, Request => Http4sRequest, Response => Http4sResponse, Uri}
+import org.http4s.asynchttpclient.client.AsyncHttpClient
+import org.http4s.blaze.server.BlazeServerBuilder
+
+import cats.effect.unsafe.implicits.global
 
 /** In the real world we would run the different services on distinct
   * machines.
@@ -18,59 +19,79 @@ import play.core.server.{DefaultNettyServerComponents, ServerConfig}
   */
 object Main extends App {
 
-  object commandsService extends PlayService(port = 9001, Mode.Prod) {
-    lazy val commands = new Commands(playComponents)
-    lazy val router = Router.from(commands.routes)
+  val localhost = "0.0.0.0"
+
+  val (ahc, shutdownClient) =
+    AsyncHttpClient.allocate[IO]().unsafeRunSync()
+
+  object commandsService {
+    val port = 9001
+    val shutdown = Server.start(port, localhost, (new Commands).routes)
   }
 
-  object queriesService extends PlayService(port = 9002, Mode.Prod) {
-    lazy val wsClient = AhcWSClient(AhcWSClientConfig())
-    lazy val service = new QueriesService(
-      baseUrl(commandsService.port),
-      wsClient,
-      actorSystem.scheduler
+  object queriesService {
+    val port = 9002
+    val shutdown =
+      Server.start(
+        port,
+        localhost, {
+          val service = new QueriesService(
+            Uri.Authority(host = Uri.RegName(localhost), port = Some(commandsService.port)),
+            ahc
+          )
+          new Queries(service).routes
+        }
+      )
+  }
+
+  object publicService {
+    val port = 9090
+    val shutdown = Server.start(
+      port,
+      localhost, {
+        new cqrs.publicserver.Router(
+          new PublicServer(
+            Uri.Authority(host = Uri.RegName(localhost), port = Some(commandsService.port)),
+            Uri.Authority(host = Uri.RegName(localhost), port = Some(queriesService.port)),
+            ahc
+          ),
+          new BootstrapEndpoints
+        ).routes
+      }
     )
-    lazy val queries = new Queries(service, playComponents)
-    lazy val router = Router.from(queries.routes)
   }
-
-  object publicService extends PlayService(port = 9000, Mode.Prod) {
-    lazy val routes =
-      new cqrs.publicserver.Router(
-        new PublicServer(
-          baseUrl(commandsService.port),
-          baseUrl(queriesService.port),
-          queriesService.wsClient,
-          playComponents
-        ),
-        new BootstrapEndpoints(playComponents)
-      ).routes
-    lazy val router = Router.from(routes)
-  }
-
-  def baseUrl(port: Int): String = s"http://localhost:$port"
 
   // Start the commands service
-  commandsService.server
+  commandsService
   // Start the queries service
-  queriesService.server
+  queriesService
   // Start the public server
-  publicService.server
+  publicService
 
   // …
 
   Runtime.getRuntime.addShutdownHook(new Thread {
     override def run(): Unit = {
-      queriesService.wsClient.close()
-      commandsService.server.stop()
-      queriesService.server.stop()
-      publicService.server.stop()
+      shutdownClient.unsafeRunSync()
+      commandsService.shutdown.unsafeRunSync()
+      queriesService.shutdown.unsafeRunSync()
+      publicService.shutdown.unsafeRunSync()
     }
   })
 
 }
 
-abstract class PlayService(val port: Int, mode: Mode) extends DefaultNettyServerComponents {
-  override lazy val serverConfig = ServerConfig(port = Some(port), mode = mode)
-  lazy val playComponents = PlayComponents.fromBuiltInComponents(this)
+object Server {
+  def start(
+      port: Int,
+      host: String,
+      routes: PartialFunction[Http4sRequest[IO], IO[Http4sResponse[IO]]]
+  ): IO[Unit] =
+    BlazeServerBuilder[IO]
+      .bindHttp(port, host)
+      .withHttpApp(HttpRoutes.of(routes).orNotFound)
+      .allocated
+      .unsafeRunSync()
+      ._2
+
 }
