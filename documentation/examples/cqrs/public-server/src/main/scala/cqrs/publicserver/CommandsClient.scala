@@ -1,13 +1,15 @@
 package cqrs.publicserver
 
-import endpoints4s.play.client.{JsonEntitiesFromCodecs, Endpoints}
+import cats.effect.Concurrent
+import endpoints4s.http4s.client
 import cqrs.commands.CommandsEndpoints
-import play.api.libs.ws.WSClient
+import org.http4s.Uri
+import org.http4s.client.{Client => Http4sClient}
 
-import scala.concurrent.ExecutionContext
-
-class CommandsClient(baseUrl: String, wsClient: WSClient)(implicit
-    ec: ExecutionContext
-) extends Endpoints(baseUrl, wsClient)
-    with JsonEntitiesFromCodecs
+class CommandsClient[F[_]: Concurrent](
+    authority: Uri.Authority,
+    scheme: Uri.Scheme,
+    http4sClient: Http4sClient[F]
+) extends client.Endpoints(authority, scheme, http4sClient)
+    with client.JsonEntitiesFromCodecs
     with CommandsEndpoints

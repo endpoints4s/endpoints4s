@@ -1,37 +1,50 @@
 package cqrs.commands
 
+import cats.effect.IO
+
 import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
-
 import org.scalatest.BeforeAndAfterAll
-import endpoints4s.play.client.{Endpoints, JsonEntitiesFromCodecs}
-import endpoints4s.play.server.PlayComponents
-import play.api.Mode
-import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.core.server.{NettyServer, ServerConfig}
+import endpoints4s.http4s.client.{Endpoints, JsonEntitiesFromCodecs}
+import org.http4s.{HttpRoutes, Uri}
 
-import scala.concurrent.Future
 import scala.math.BigDecimal
 import org.scalatest.freespec.AsyncFreeSpec
+import cats.effect.testing.scalatest.AsyncIOSpec
+import cats.effect.unsafe.IORuntime
+import org.http4s.asynchttpclient.client.AsyncHttpClient
+import org.http4s.blaze.server.BlazeServerBuilder
 
-class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
+import scala.concurrent.ExecutionContext
 
-  private val server =
-    NettyServer.fromRouterWithComponents(ServerConfig(mode = Mode.Test)) { components =>
-      new Commands(PlayComponents.fromBuiltInComponents(components)).routes
-    }
-  val app = server.applicationProvider.get.get
-  import app.materializer
-  private val wsClient = AhcWSClient(AhcWSClientConfig())
+class CommandsTest extends AsyncFreeSpec with AsyncIOSpec with BeforeAndAfterAll {
+
+  // See https://github.com/typelevel/cats-effect-testing/issues/145
+  override implicit def executionContext: ExecutionContext = IORuntime.global.compute
+
+  val host = "0.0.0.0"
+  val port = 9000
+  val (server, shutdownServer) = BlazeServerBuilder[IO]
+    .bindHttp(port, host)
+    .withHttpApp(HttpRoutes.of((new Commands).routes).orNotFound)
+    .allocated
+    .unsafeRunSync()
+  val (ahc, shutdownClient) =
+    AsyncHttpClient.allocate[IO]().unsafeRunSync()
 
   object client
-      extends Endpoints("http://localhost:9000", wsClient)
+      extends Endpoints(
+        Uri.Authority(host = Uri.RegName(host), port = Some(port)),
+        Uri.Scheme.http,
+        ahc
+      )
       with JsonEntitiesFromCodecs
       with CommandsEndpoints
 
   override def afterAll(): Unit = {
-    server.stop()
-    wsClient.close()
+    shutdownClient.unsafeRunSync()
+    shutdownServer.unsafeRunSync()
+    super.afterAll()
   }
 
   "Commands" - {
@@ -42,7 +55,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     val arbitraryValue = BigDecimal(10)
 
     "create a new meter" in {
-      client.command(CreateMeter("electricity")).map { maybeEvent =>
+      client.command.sendAndConsume(CreateMeter("electricity")).map { maybeEvent =>
         assert(maybeEvent.collect { case StoredEvent(_, MeterCreated(_, "electricity")) =>
           ()
         }.nonEmpty)
@@ -50,14 +63,12 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
     }
     "create a meter and add readings to it" in {
       for {
-        maybeCreatedEvent <- client.command(CreateMeter("water"))
+        maybeCreatedEvent <- client.command.sendAndConsume(CreateMeter("water"))
         id <-
           maybeCreatedEvent
             .collect { case StoredEvent(_, MeterCreated(id, _)) => id }
-            .fold[Future[UUID]](Future.failed(new NoSuchElementException))(
-              Future.successful
-            )
-        maybeAddedEvent <- client.command(
+            .fold[IO[UUID]](IO.raiseError(new NoSuchElementException))(IO.pure)
+        maybeAddedEvent <- client.command.sendAndConsume(
           AddRecord(id, arbitraryDate, arbitraryValue)
         )
         _ <-
@@ -69,9 +80,7 @@ class CommandsTest extends AsyncFreeSpec with BeforeAndAfterAll {
                   ) =>
                 ()
             }
-            .fold[Future[Unit]](Future.failed(new NoSuchElementException))(
-              Future.successful
-            )
+            .fold[IO[Unit]](IO.raiseError(new NoSuchElementException))(IO.pure)
       } yield assert(true)
     }
   }

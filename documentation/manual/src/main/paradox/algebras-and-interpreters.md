@@ -9,7 +9,6 @@
 * [Assets](algebras/assets.md)
 * [Multiplexed endpoints](algebras/mux-endpoints.md)
 * [Akka HTTP](interpreters/akka-http.md)
-* [Play framework](interpreters/play.md)
 * [http4s](interpreters/http4s.md)
 * [Scala.js web client (XHR)](interpreters/scalajs-web-xhr.md)
 * [Scala.js web client (Fetch)](interpreters/scalajs-web-fetch.md)
@@ -40,12 +39,12 @@ In practice, we have three kinds of interpreters:
 - interpreters are traits that have the same name as the algebra they
   implement (they can be found by looking at the “known subclasses”
   of an algebra, in the Scaladoc) ;
-    - e.g. the @scaladoc[`endpoints4s.play.client.Urls`](endpoints4s.play.client.Urls) trait
-      defines a Play-based interpreter for the `Urls` algebra.
+    - e.g. the @scaladoc[`endpoints4s.http4s.client.Urls`](endpoints4s.http4s.client.Urls) trait
+      defines an http4s-based interpreter for the `Urls` algebra.
 - compatible interpreters are in the same package ;
-  - e.g. the @scaladoc[`endpoints4s.play.client`](endpoints4s.play.client.index)
-    package provides interpreters that are all based on
-    [Play WS](https://github.com/playframework/play-ws) under the hood.
+  - e.g. the @scaladoc[`endpoints4s.http4s.client`](endpoints4s.http4s.client.index)
+    package provides client interpreters that are all based on
+    [http4s](https://http4s.org) under the hood.
 
 ## Matching Algebras and Interpreters
 
@@ -109,18 +108,18 @@ Interpreters give a concrete meaning to the vocabulary and operations provided
 by the algebras. They usually rely on other libraries (e.g. circe, Akka HTTP, etc.)
 to do so. Pick the interpreters that fit your existing stack!
 
-| Family                                                        | Description                                                                                                   |
-|---------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| @ref[Akka HTTP](interpreters/akka-http.md)                    | Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)                          |
-| @ref[Play framework](interpreters/play.md)                    | Client and server backed by [Play framework](https://www.playframework.com/)                                  |
-| @ref[http4s](interpreters/http4s.md)                          | Client and server backed by [http4s](https://http4s.org)                                                      |
-| @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md)     | Scala.js web client using `XMLHttpRequest`                                                                    |
+| Family                                                    | Description                                                                                                   |
+|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
+| @ref[Akka HTTP](interpreters/akka-http.md)                | Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)                          |
+| @ref[http4s](interpreters/http4s.md)                      | Client and server backed by [http4s](https://http4s.org)                                                      |
+| [Play framework](https://endpoints.github.io/play)        | Client and server backed by [Play framework](https://www.playframework.com/)                                  |
+| @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md) | Scala.js web client using `XMLHttpRequest`                                                                    |
 | @ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md) | Scala.js web client using `Fetch`                                                                             |
-| [scalaj-http](https://endpoints4s.github.io/scalaj)           | JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)                                     |
-| @ref[sttp](interpreters/sttp.md)                              | JVM client backed by [sttp](https://github.com/softwaremill/sttp)                                             |
-| @ref[OpenAPI](interpreters/openapi.md)                        | Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions         |
-| @ref[circe](interpreters/circe.md)                            | Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions                           |
-| @ref[Play JSON](interpreters/play-json.md)                    | Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions |
+| [scalaj-http](https://endpoints4s.github.io/scalaj)       | JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)                                     |
+| @ref[sttp](interpreters/sttp.md)                          | JVM client backed by [sttp](https://github.com/softwaremill/sttp)                                             |
+| @ref[OpenAPI](interpreters/openapi.md)                    | Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions         |
+| @ref[circe](interpreters/circe.md)                        | Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions                           |
+| @ref[Play JSON](interpreters/play-json.md)                | Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions |
 
 @@@note
 You can have different stacks on the client-side and the server-side. For instance,
