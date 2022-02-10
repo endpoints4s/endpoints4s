@@ -1,78 +1,76 @@
 package cqrs
 
-import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
+import cats.effect.IO
+import cats.effect.unsafe.IORuntime
+import cats.effect.testing.scalatest.AsyncIOSpec
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
+import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import cqrs.commands.Commands
-import cqrs.infra.PlayService
+import cqrs.infra.Server
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import cqrs.publicserver.{BootstrapEndpoints, PublicEndpoints, PublicServer}
 import cqrs.queries.{Queries, QueriesService}
-import endpoints4s.play.client.{Endpoints, JsonEntitiesFromCodecs}
+import endpoints4s.http4s.client.{Endpoints, JsonEntitiesFromCodecs}
+import org.http4s.Uri
+import org.http4s.asynchttpclient.client.AsyncHttpClient
 import org.scalatest.BeforeAndAfterAll
-import play.api.Mode
-import play.api.libs.ws.ahc.{AhcWSClient, AhcWSClientConfig}
-import play.api.routing.Router
 
 import scala.collection.immutable.SortedMap
 import scala.math.BigDecimal
 import org.scalatest.freespec.AsyncFreeSpec
 
-class Test extends AsyncFreeSpec with BeforeAndAfterAll {
+import scala.concurrent.ExecutionContext
 
-  def baseUrl(port: Int): String = s"http://localhost:$port"
+class Test extends AsyncFreeSpec with AsyncIOSpec with BeforeAndAfterAll {
 
-  val actorSystem: ActorSystem = ActorSystem()
-  val wsClient =
-    AhcWSClient(AhcWSClientConfig())(Materializer.matFromSystem(actorSystem))
+  // See https://github.com/typelevel/cats-effect-testing/issues/145
+  override implicit def executionContext: ExecutionContext = IORuntime.global.compute
+
+  val (ahc, shutdownClient) =
+    AsyncHttpClient.allocate[IO]().unsafeRunSync()
 
   val commandsServerPort = 9090
   val queriesServerPort = 9091
   val publicServerPort = 9092
+  val localhost = "0.0.0.0"
 
-  object commandsServer extends PlayService(commandsServerPort, Mode.Test) {
-    lazy val commands = new Commands(playComponents)
-    lazy val router = Router.from(commands.routes)
-  }
+  val commandsShutdown: IO[Unit] =
+    Server.start(commandsServerPort, localhost, (new Commands).routes)
 
-  object queriesServer extends PlayService(queriesServerPort, Mode.Test) {
-    lazy val service = new QueriesService(
-      baseUrl(commandsServer.port),
-      wsClient,
-      actorSystem.scheduler
-    )
-    lazy val queries = new Queries(service, playComponents)
-    lazy val router = Router.from(queries.routes)
-  }
+  val queriesShutdown: IO[Unit] =
+    Server.start(queriesServerPort, localhost, {
+      val service = new QueriesService(
+        Uri.Authority(host = Uri.RegName(localhost), port = Some(commandsServerPort)),
+        ahc
+      )
+      new Queries(service).routes
+    })
 
-  object publicServer extends PlayService(publicServerPort, Mode.Test) {
-    lazy val routes =
+  val publicServerShutdown: IO[Unit] =
+    Server.start(publicServerPort, localhost, {
       new cqrs.publicserver.Router(
         new PublicServer(
-          baseUrl(commandsServer.port),
-          baseUrl(queriesServer.port),
-          wsClient,
-          playComponents
+          Uri.Authority(host = Uri.RegName(localhost), port = Some(commandsServerPort)),
+          Uri.Authority(host = Uri.RegName(localhost), port = Some(queriesServerPort)),
+          ahc
         ),
-        new BootstrapEndpoints(playComponents)
+        new BootstrapEndpoints
       ).routes
-    lazy val router = Router.from(routes)
-  }
-
-  commandsServer.server
-  queriesServer.server
-  publicServer.server
+    })
 
   override def afterAll(): Unit = {
-    publicServer.server.stop()
-    queriesServer.server.stop()
-    wsClient.close()
-    commandsServer.server.stop()
+    shutdownClient.unsafeRunSync()
+    publicServerShutdown.unsafeRunSync()
+    queriesShutdown.unsafeRunSync()
+    commandsShutdown.unsafeRunSync()
   }
 
   object api
-      extends Endpoints(baseUrl(publicServer.port), wsClient)
+      extends Endpoints(
+        Uri.Authority(host = Uri.RegName(localhost), port = Some(publicServerPort)),
+        Uri.Scheme.http,
+        ahc
+      )
       with JsonEntitiesFromCodecs
       with PublicEndpoints
 
@@ -80,8 +78,8 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
 
     "create a new meter and query it" in {
       for {
-        meter <- api.createMeter(CreateMeter("Electricity"))
-        allMeters <- api.listMeters(())
+        meter <- api.createMeter.sendAndConsume(CreateMeter("Electricity"))
+        allMeters <- api.listMeters.sendAndConsume(())
       } yield assert(allMeters contains meter)
     }
 
@@ -91,11 +89,11 @@ class Test extends AsyncFreeSpec with BeforeAndAfterAll {
         .toInstant
       val arbitraryValue = BigDecimal(10)
       for {
-        created <- api.createMeter(CreateMeter("Water"))
-        _ <- api.addRecord(
+        created <- api.createMeter.sendAndConsume(CreateMeter("Water"))
+        _ <- api.addRecord.sendAndConsume(
           (created.id, AddRecord(arbitraryDate, arbitraryValue))
         )
-        updated <- api.getMeter(created.id)
+        updated <- api.getMeter.sendAndConsume(created.id)
       } yield assert(
         updated
           .exists(_.timeSeries == SortedMap(arbitraryDate -> arbitraryValue))

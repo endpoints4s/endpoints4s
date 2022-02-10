@@ -1,45 +1,52 @@
 package authentication
 
-import java.time.Clock
 import endpoints4s.{Valid, Validated}
-import play.api.libs.streams.Accumulator
-import play.api.mvc.{BodyParser, RequestHeader}
+import pdi.jwt.JwtAlgorithm
+
+import java.security.{PrivateKey, PublicKey}
+
 //#enriched-algebra
 import endpoints4s.algebra
+import endpoints4s.Codec
 
 //#enriched-algebra
 
 //#server-interpreter
-import endpoints4s.play.server
-import pdi.jwt.JwtSession
-import pdi.jwt.JwtSession.RichResult
+import endpoints4s.http4s.server
+import pdi.jwt.JwtCirce
 
 //#server-interpreter
 //#client-interpreter
-import endpoints4s.play.client
+import endpoints4s.http4s.client
 
 //#client-interpreter
 import endpoints4s.Tupler
-import play.api.Configuration
-import play.api.http.{HeaderNames, Status}
-import play.api.libs.json.{OFormat, __}
-import play.api.libs.functional.syntax._
-import play.api.mvc.Results
+import io.circe.{Codec => CirceCodec, Json, HCursor, Decoder}
+import org.http4s.headers.Authorization
+import org.http4s.{Credentials, AuthScheme}
 
 //#enriched-algebra
 /** Algebra interface for defining authenticated endpoints using JWT.
   */
-trait Authentication extends algebra.Endpoints {
+trait Authentication extends algebra.Endpoints with algebra.JsonEntitiesFromSchemas {
 
-  /** Authentication information */
+  /** Authentication information. It is left abstract because clients and
+    * servers may want to use different representations
+    */
   type AuthenticationToken
 
-  /** A response entity containing the authenticated user info
-    *
-    * Clients decode the JWT attached to the response.
-    * Servers encode the authentication information as a JWT and attach it to their response.
+  /** A response containing a JWT in a JSON document. */
+  final def authenticationToken: Response[AuthenticationToken] = {
+    val authenticationTokenSchema =
+      field[String]("jwt_token")
+        .xmapWithCodec(authenticationTokenCodec)
+    ok(jsonResponse(authenticationTokenSchema))
+  }
+
+  /** Logic for decoding the JWT.
+    * Servers validate the token signature, clients just decode without validating.
     */
-  def authenticationToken: Response[AuthenticationToken]
+  def authenticationTokenCodec: Codec[String, AuthenticationToken]
 
   /** A response that might signal to the client that his request was invalid using
     * a `BadRequest` status.
@@ -115,31 +122,25 @@ case class UserInfo(name: String)
 //#user-info-type
 
 object UserInfo {
-  import ClockSettings._
 
-  implicit val oformat: OFormat[UserInfo] =
-    (__ \ "name").format[String].inmap(UserInfo(_), (_: UserInfo).name)
-
-  def decodeToken(
-      token: String
-  )(implicit conf: Configuration): Option[UserInfo] =
-    JwtSession.deserialize(token.trim).getAs[UserInfo]("user")
-
-}
-
-object ClockSettings {
-
-  implicit val clock: Clock = Clock.systemUTC
+  implicit val codec: CirceCodec[UserInfo] = new CirceCodec[UserInfo] {
+    def apply(info: UserInfo): Json = Json.obj("name" -> Json.fromString(info.name))
+    def apply(cursor: HCursor): Decoder.Result[UserInfo] =
+      cursor.downField("name").as[String].map(UserInfo(_))
+  }
 
 }
 
 //#client-interpreter
 /** Interpreter for the [[Authentication]] algebra interface that produces
-  * a Play client (using `play.api.libs.ws.WSClient`).
+  * an http4s client (using `org.http4s.client.Client`).
   */
-trait ClientAuthentication extends client.Endpoints with Authentication {
+trait ClientAuthentication[F[_]]
+    extends client.Endpoints[F]
+    with client.JsonEntitiesFromSchemas
+    with Authentication {
 
-  implicit protected def playConfiguration: Configuration
+  def publicKey: PublicKey
 
   // The constructor is private so that users can not
   // forge instances themselves
@@ -149,23 +150,22 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
   )
 
   // Decodes the user info from an OK response
-  def authenticationToken: Response[AuthenticationToken] = { (status, headers) =>
-    if (status == OK) {
-      headers.get(HeaderNames.AUTHORIZATION) match {
-        case Some(Seq(headerValue)) =>
-          val token = headerValue.stripPrefix("Bearer ")
-          // Note: the default implementation of `JwtSession.deserialize`
-          // returns an “empty” JwtSession object when it is invalid.
-          // You might want to tweak the logic to return an error in such a case.
-          UserInfo.decodeToken(token) match {
-            case Some(user) =>
-              Some(_ => Right(new AuthenticationToken(token, user)))
-            case None => Some(_ => Left(new Exception("Invalid JWT session")))
-          }
-        case _ => Some(_ => Left(new Exception("Missing JWT session")))
-      }
-    } else None
-  }
+  def authenticationTokenCodec: Codec[String, AuthenticationToken] =
+    Codec.fromEncoderAndDecoder[String, AuthenticationToken](_.token) { token =>
+      Validated.fromTry(
+        JwtCirce
+          .decode(token, publicKey)
+          .flatMap(claim =>
+            io.circe.parser
+              .parse(claim.content)
+              .toTry
+              .flatMap(
+                _.as[UserInfo].toTry.map(userInfo => new AuthenticationToken(token, userInfo))
+              )
+          )
+      )
+    }
+
 //#client-interpreter
 //#protected-endpoints-client
   def authenticatedRequest[U, E, UE, UET](
@@ -178,9 +178,9 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
   ): Request[UET] = {
     // Encodes the user info as a JWT object in the `Authorization` request header
     val authenticationTokenRequestHeaders: RequestHeaders[AuthenticationToken] = {
-      (user, wsRequest) =>
-        wsRequest.withHttpHeaders(
-          HeaderNames.AUTHORIZATION -> s"Bearer ${user.token}"
+      (user, http4sRequest) =>
+        http4sRequest.putHeaders(
+          Authorization(Credentials.Token(AuthScheme.Bearer, user.token))
         )
     }
     request(method, url, entity, headers = authenticationTokenRequestHeaders)
@@ -188,8 +188,8 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
 
   // Checks that the response is not `Unauthorized` before continuing
   def wheneverAuthenticated[A](response: Response[A]): Response[A] = { (status, headers) =>
-    if (status == Status.UNAUTHORIZED) {
-      Some(_ => Left(new Exception("Unauthorized")))
+    if (status == Unauthorized) {
+      Some(_ => effect.raiseError(new Exception("Unauthorized")))
     } else {
       response(status, headers)
     }
@@ -201,22 +201,34 @@ trait ClientAuthentication extends client.Endpoints with Authentication {
 //#client-interpreter
 
 /** Interpreter for the [[Authentication]] algebra interface that produces
-  * a Play server.
+  * an http4s server.
   */
 //#server-interpreter
-trait ServerAuthentication extends Authentication with server.Endpoints {
+trait ServerAuthentication[F[_]]
+    extends server.Endpoints[F]
+    with server.JsonEntitiesFromSchemas
+    with Authentication {
 
-  import ClockSettings._
-  import playComponents.executionContext
-
-  protected implicit def playConfiguration: Configuration
+  def privateKey: PrivateKey
+  def publicKey: PublicKey
 
   // On server side, we build the token ourselves so we only care about the user information
   type AuthenticationToken = UserInfo
 
+  def decodeToken(token: String): Validated[UserInfo] =
+    Validated.fromTry(
+      JwtCirce
+        .decode(token, publicKey)
+        .flatMap { claim =>
+          io.circe.parser.parse(claim.content).toTry.flatMap(_.as[UserInfo].toTry)
+        }
+    )
+
   // Encodes the user info in the JWT session
-  def authenticationToken: Response[UserInfo] =
-    userInfo => Results.Ok.withJwtSession(JwtSession().+("user", userInfo))
+  def authenticationTokenCodec: Codec[String, AuthenticationToken] =
+    Codec.fromEncoderAndDecoder[String, AuthenticationToken] { authenticationToken =>
+      JwtCirce.encode(UserInfo.codec(authenticationToken), privateKey, JwtAlgorithm.RS256)
+    }(decodeToken(_))
 //#server-interpreter
 
 //#protected-endpoints-server
@@ -231,16 +243,17 @@ trait ServerAuthentication extends Authentication with server.Endpoints {
     // Extracts and validates user info from a request header
     val authenticationTokenRequestHeaders: RequestHeaders[Option[AuthenticationToken]] = {
       headers =>
-        Valid(
-          headers
-            .get(HeaderNames.AUTHORIZATION)
-            .flatMap(headerValue =>
-              UserInfo.decodeToken(headerValue.stripPrefix("Bearer "))
-            ) match {
-            case Some(token) => Some(token)
-            case None        => None
-          }
-        )
+        {
+          Valid(
+            headers
+              .get[Authorization]
+              .flatMap {
+                case Authorization(Credentials.Token(AuthScheme.Bearer, token)) =>
+                  decodeToken(token).toEither.toOption
+                case _ => None
+              }
+          )
+        }
     }
 
     // alias parameters to not clash with `Request` members
@@ -268,19 +281,13 @@ trait ServerAuthentication extends Authentication with server.Endpoints {
           case Some(token) => Valid(tuplerUET(tuplerUE(urlData, entityData), token))
         }
 
-      def matchRequest(requestHeader: RequestHeader): Option[RequestEntity[UET]] =
-        matchRequestAndParseHeaders(requestHeader) {
-          case (_, None) =>
-            _ => Some(BodyParser(_ => Accumulator.done(Left(Results.Unauthorized))))
-          case (u, Some(token)) =>
-            hs => entity(hs).map(_.map(e => tuplerUET(tuplerUE(u, e), token)))
-        }
-
-      def urlData(a: UET): U = {
-        val (ue, _) = tuplerUET.unapply(a)
-        val (u, _) = tuplerUE.unapply(ue)
-        u
-      }
+      def matchAndParseHeaders(
+          http4sRequest: org.http4s.Request[F]
+      ): Option[Either[org.http4s.Response[F], Validated[(UrlData, HeadersData)]]] =
+        matchAndParseHeadersAsRight(method, url, headers, http4sRequest).map(_.flatMap {
+          case Valid((_, None /* credentials */ )) => Left(org.http4s.Response(Unauthorized))
+          case validatedUrlAndHeaders              => Right(validatedUrlAndHeaders)
+        })
 
     }
   }

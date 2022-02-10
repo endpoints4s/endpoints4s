@@ -6,10 +6,10 @@
 
 package counter
 
-import java.util.concurrent.atomic.AtomicInteger
+import cats.effect.Sync
+import org.http4s.Headers
 
-import endpoints4s.play.server.PlayComponents
-import play.core.server.{NettyServer, ServerConfig}
+import java.util.concurrent.atomic.AtomicInteger
 
 // Our domain model just contains a counter value
 case class Counter(value: Int)
@@ -35,12 +35,13 @@ trait CounterEndpoints
   // HTTP endpoint for querying the current value of the counter. Uses the HTTP
   // verb ''GET'' and the path ''/counter''. Returns the current value of the counter
   // in a JSON object. (see below for the `counterJson` definition)
-  val currentValue = endpoint(get(path / "counter"), counterJsonResponse)
+  val currentValue: Endpoint[Unit, Counter] =
+    endpoint(get(path / "counter"), counterJsonResponse)
 
   // HTTP endpoint for updating the value of the counter. Uses the HTTP verb ''POST''
   // and the path ''/counter''. The request entity contains an `Operation` object encoded
   // in JSON. The endpoint returns the current value of the counter in a JSON object.
-  val update = endpoint(
+  val update: Endpoint[Operation, Counter] = endpoint(
     post(
       path / "counter",
       jsonRequest[Operation],
@@ -53,7 +54,7 @@ trait CounterEndpoints
   // information, we define it once and just reuse it. Here, we say
   // that they return an HTTP response whose entity contains a JSON document
   // with the counter value
-  lazy val counterJsonResponse =
+  lazy val counterJsonResponse: Response[Counter] =
     ok(jsonResponse[Counter], docs = Some("The counter current value"))
 
   // We generically derive a data type schema. This schema
@@ -87,12 +88,14 @@ object CounterDocumentation
 }
 
 // Implementation of the HTTP API and its business logic
-import endpoints4s.play
+import cats.effect.IO
+import endpoints4s.http4s.server
+import org.http4s.HttpRoutes
 
-class CounterServer(val playComponents: PlayComponents)
-    extends CounterEndpoints
-    with play.server.Endpoints
-    with play.server.JsonEntitiesFromSchemas { parent =>
+object CounterServer
+    extends server.Endpoints[IO]
+    with server.JsonEntitiesFromSchemas
+    with CounterEndpoints { parent =>
 
   // Internal state of our counter
   private val value = new AtomicInteger(0)
@@ -117,25 +120,37 @@ class CounterServer(val playComponents: PlayComponents)
   )
 }
 
+import cats.effect.{ExitCode, IOApp}
+import org.http4s.blaze.server._
+import org.http4s.dsl.io._
+import org.http4s.headers.Location
+import org.http4s.implicits._
+import org.http4s.Response
+
 //#main-only
-object Main {
+object Main extends IOApp {
   // JVM entry point that starts the HTTP server
-  def main(args: Array[String]): Unit = {
-    val playConfig = ServerConfig(port = sys.props.get("http.port").map(_.toInt).orElse(Some(9000)))
-    NettyServer.fromRouterWithComponents(playConfig) { components =>
-      val playComponents = PlayComponents.fromBuiltInComponents(components)
-      new CounterServer(playComponents).routes orElse new DocumentationServer(
-        playComponents
-      ).routes
-    }
-    ()
+  override def run(args: List[String]): IO[ExitCode] = {
+    BlazeServerBuilder[IO]
+      .bindHttp(sys.props.get("http.port").map(_.toInt).getOrElse(8080))
+      .withHttpApp(
+        HttpRoutes.of(CounterServer.routes.orElse(DocumentationServer.routes)).orNotFound
+      )
+      .resource
+      .use(_ => IO.never)
+      .as(ExitCode.Success)
   }
 
   //#main-only
-  class DocumentationServer(val playComponents: PlayComponents)
-      extends play.server.Endpoints
-      with play.server.JsonEntitiesFromEncodersAndDecoders
-      with play.server.Assets {
+  private val redirectToIndex: Response[IO] =
+    Response(TemporaryRedirect, headers = Headers(Location(uri"/assets/index.html")))
+
+  object DocumentationServer
+      extends server.Endpoints[IO]
+      with server.JsonEntitiesFromEncodersAndDecoders
+      with server.Assets {
+
+    def EffectSync: Sync[Effect] = Sync[IO]
 
     // HTTP endpoint serving documentation. Uses the HTTP verb ''GET'' and the path
     // ''/documentation.json''. Returns an OpenAPI document.
@@ -148,15 +163,14 @@ object Main {
     val assets = assetsEndpoint(path / "assets" / assetSegments())
 
     // Redirect the root URL “/” to the “index.html” asset for convenience
-    val root = endpoint(get(path), redirect(assets)(asset("index.html")))
+    val root: Endpoint[Unit, Unit] = endpoint(get(path), _ => redirectToIndex)
 
     val routes = routesFromEndpoints(
       documentation.implementedBy(_ => CounterDocumentation.api),
       assets.implementedBy(assetsResources(pathPrefix = Some("/public"))),
-      root
+      root.implementedBy(_ => ())
     )
 
-    lazy val digests = AssetsDigests.digests
   }
   //#main-only
 }
