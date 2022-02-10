@@ -9,7 +9,6 @@ val jsonSchema = project.in(file("json-schema")).settings(noPublishSettings)
 val openapi = project.in(file("openapi")).settings(noPublishSettings)
 val xhr = project.in(file("xhr")).settings(noPublishSettings)
 val fetch = project.in(file("fetch")).settings(noPublishSettings)
-val play = project.in(file("play")).settings(noPublishSettings)
 val `akka-http` = project.in(file("akka-http")).settings(noPublishSettings)
 val sttp = project.in(file("sttp")).settings(noPublishSettings)
 val http4s = project.in(file("http4s")).settings(noPublishSettings)
@@ -39,12 +38,12 @@ ThisBuild / sonatypeProjectHosting := Some(
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
-ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
+ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
-ThisBuild / version := "1.6.0+n"
+ThisBuild / version := "1.7.0+n"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.softwaremill.sttp.client3" %%% "core" % "semver-spec",

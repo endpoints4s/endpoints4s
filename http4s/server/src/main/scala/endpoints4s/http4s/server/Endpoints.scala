@@ -67,6 +67,8 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   // Convenient type aliases
   private[server] type Http4sRequest = http4s.Request[Effect]
   private[server] type Http4sResponse = http4s.Response[Effect]
+  private[server] type Http4sRoute =
+    PartialFunction[http4s.Request[Effect], Effect[http4s.Response[Effect]]]
 
   type RequestHeaders[A] = http4s.Headers => Validated[A]
 
@@ -79,7 +81,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     def headers: RequestHeaders[HeadersData]
     def entity: RequestEntity[EntityData]
 
-    private[server] def aggregateAndValidate(
+    def aggregateAndValidate(
         urlData: UrlData,
         headersData: HeadersData,
         entityData: EntityData
@@ -95,7 +97,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       *             successfully parsed,
       *           - `Some(Right(Invalid(errors)))` in case the URL and headers had validation errors
       */
-    private[server] def matchAndParseHeaders(
+    def matchAndParseHeaders(
         http4sRequest: Http4sRequest
     ): Option[Either[Http4sResponse, Validated[(UrlData, HeadersData)]]]
 
@@ -339,13 +341,13 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
           def url = fa.url
           def headers = fa.headers
           def entity = fa.entity
-          private[server] def aggregateAndValidate(
+          def aggregateAndValidate(
               urlData: UrlData,
               headersData: HeadersData,
               entityData: EntityData
           ): Validated[B] =
             fa.aggregateAndValidate(urlData, headersData, entityData).flatMap(f)
-          private[server] def matchAndParseHeaders(
+          def matchAndParseHeaders(
               http4sRequest: Http4sRequest
           ): Option[Either[Http4sResponse, Validated[(UrlData, HeadersData)]]] =
             matchAndParseHeadersAsRight(method, url, headers, http4sRequest)
@@ -401,13 +403,13 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       def url: Url[UrlData] = urlArg
       def headers: RequestHeaders[HeadersData] = headersArg
       def entity: RequestEntity[EntityData] = entityArg
-      private[server] def aggregateAndValidate(
+      def aggregateAndValidate(
           urlData: UrlData,
           headersData: HeadersData,
           entityData: EntityData
       ): Validated[Out] =
         Valid(tuplerUBH(tuplerUB(urlData, entityData), headersData))
-      private[server] def matchAndParseHeaders(
+      def matchAndParseHeaders(
           http4sRequest: Http4sRequest
       ): Option[Either[Http4sResponse, Validated[(UrlData, HeadersData)]]] =
         matchAndParseHeadersAsRight(method, url, headers, http4sRequest)
@@ -425,7 +427,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     def url = request.url
     def headers = request.headers ++ headersP
     def entity = request.entity
-    private[server] def aggregateAndValidate(
+    def aggregateAndValidate(
         urlData: request.UrlData,
         headersData: (request.HeadersData, H),
         entityData: request.EntityData
@@ -433,7 +435,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       request
         .aggregateAndValidate(urlData, headersData._1, entityData)
         .map(tupler(_, headersData._2))
-    private[server] def matchAndParseHeaders(
+    def matchAndParseHeaders(
         http4sRequest: Http4sRequest
     ): Option[Either[Http4sResponse, Validated[(UrlData, HeadersData)]]] =
       matchAndParseHeadersAsRight(method, url, headers, http4sRequest)
@@ -454,13 +456,13 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       }
       def headers = request.headers
       def entity = request.entity
-      private[server] def aggregateAndValidate(
+      def aggregateAndValidate(
           urlData: (request.UrlData, Q),
           headersData: request.HeadersData,
           entityData: request.EntityData
       ): Validated[tupler.Out] =
         request.aggregateAndValidate(urlData._1, headersData, entityData).map(tupler(_, urlData._2))
-      private[server] def matchAndParseHeaders(
+      def matchAndParseHeaders(
           http4sRequest: Http4sRequest
       ): Option[Either[Http4sResponse, Validated[(UrlData, HeadersData)]]] =
         matchAndParseHeadersAsRight(method, url, headers, http4sRequest)
@@ -468,7 +470,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
   }
 
   // Default implementation for `matchAndParseHeaders` which never returns a `Left(response)`
-  private[server] def matchAndParseHeadersAsRight[U, H](
+  protected final def matchAndParseHeadersAsRight[U, H](
       method: Method,
       url: Url[U],
       headers: RequestHeaders[H],

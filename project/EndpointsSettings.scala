@@ -92,7 +92,7 @@ object EndpointsSettings {
     publishArtifact := false,
     publish := { () },
     publishLocal := { () },
-    mimaPreviousArtifacts := Set.empty
+    publish / skip := true
   )
 
   // --- Common dependencies

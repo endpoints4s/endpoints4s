@@ -1,28 +1,24 @@
 package cqrs.queries
 
-import endpoints4s.play.server.{BuiltInErrors, JsonEntitiesFromCodecs, MuxEndpoints, PlayComponents}
-import play.api.routing.Router
-
-import scala.concurrent.Future
+import cats.effect.IO
+import endpoints4s.http4s.server
 
 /** Implementation of the queries service.
   */
-class Queries(service: QueriesService, val playComponents: PlayComponents)
-    extends QueriesEndpoints
-    with MuxEndpoints
-    with BuiltInErrors
-    with JsonEntitiesFromCodecs {
-
-  import playComponents.executionContext
+class Queries(service: QueriesService)
+    extends server.Endpoints[IO]
+    with server.MuxEndpoints
+    with server.JsonEntitiesFromCodecs
+    with QueriesEndpoints {
 
   //#multiplexed-impl
-  import endpoints4s.play.server.MuxHandlerAsync
+  import endpoints4s.http4s.server.MuxHandlerEffect
 
-  val routes: Router.Routes = routesFromEndpoints(
-    query.implementedByAsync(new MuxHandlerAsync[QueryReq, QueryResp] {
+  val routes = routesFromEndpoints(
+    query.implementedByEffect(new MuxHandlerEffect[Effect, QueryReq, QueryResp] {
       def apply[R <: QueryResp](
           query: QueryReq { type Response = R }
-      ): Future[R] =
+      ): IO[R] =
         //#multiplexed-impl-essence
         query match {
           case FindById(id, t) => service.findById(id, t).map(MaybeResource)
