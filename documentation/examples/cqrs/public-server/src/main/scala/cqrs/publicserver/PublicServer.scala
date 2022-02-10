@@ -1,80 +1,80 @@
 package cqrs.publicserver
 
 import cats.Traverse
+import cats.effect.{IO, Resource}
+import cats.implicits._
 import cqrs.queries._
 import cqrs.commands.{AddRecord, CreateMeter, MeterCreated, StoredEvent}
-import play.api.libs.ws.WSClient
-import play.api.routing.{Router => PlayRouter}
-import cats.instances.option._
-import cats.instances.future._
-import endpoints4s.play.server.{Endpoints, JsonEntitiesFromCodecs, PlayComponents}
-
-import scala.concurrent.Future
+import endpoints4s.http4s.server
+import org.http4s.Uri
+import org.http4s.client.{Client => Http4sClient}
 
 /** Implementation of the public API based on our “commands” and “queries” microservices.
   */
 class PublicServer(
-    commandsBaseUrl: String,
-    queriesBaseUrl: String,
-    wsClient: WSClient,
-    val playComponents: PlayComponents
-) extends PublicEndpoints
-    with Endpoints
-    with JsonEntitiesFromCodecs {
+    commandsAuthority: Uri.Authority,
+    queriesAuthority: Uri.Authority,
+    http4sClient: Http4sClient[IO]
+) extends server.Endpoints[IO]
+    with server.JsonEntitiesFromCodecs
+    with PublicEndpoints {
 
-  import playComponents.executionContext
-
-  private val commandsClient = new CommandsClient(commandsBaseUrl, wsClient)
+  private val commandsClient =
+    new CommandsClient(commandsAuthority, Uri.Scheme.http, http4sClient)
   //#invocation
-  private val queriesClient = new QueriesClient(queriesBaseUrl, wsClient)
+  private val queriesClient =
+    new QueriesClient(queriesAuthority, Uri.Scheme.http, http4sClient)
   //#invocation
 
-  val routes: PlayRouter.Routes =
+  val routes =
     routesFromEndpoints(
-      listMeters.implementedByAsync { _ =>
+      listMeters.implementedByEffect { _ =>
         //#invocation
-        val metersList: Future[ResourceList] = queriesClient.query(FindAll)
+        val metersList: Resource[IO, ResourceList] = queriesClient.query.send(FindAll)
         //#invocation
-        metersList.map(_.value)
+        metersList.use(resourceList => IO.pure(resourceList.value))
       },
-      getMeter.implementedByAsync { id =>
-        queriesClient.query(FindById(id, None)).map(_.value)
+      getMeter.implementedByEffect { id =>
+        queriesClient.query
+          .send(FindById(id, None))
+          .use(maybeResource => IO.pure(maybeResource.value))
       },
-      createMeter.implementedByAsync { createData =>
+      createMeter.implementedByEffect { createData =>
         //#microservice-endpoint-invocation
-        val eventuallyMaybeEvent: Future[Option[StoredEvent]] =
-          commandsClient.command(CreateMeter(createData.label))
+        val eventuallyMaybeEvent: IO[Option[StoredEvent]] =
+          commandsClient.command.sendAndConsume(CreateMeter(createData.label))
         //#microservice-endpoint-invocation
         for {
           maybeEvent <- eventuallyMaybeEvent
           maybeMeter <- Traverse[Option].flatSequence(
             maybeEvent.collect { case StoredEvent(t, MeterCreated(id, _)) =>
               //#invocation-find-by-id
-              val maybeMeter: Future[MaybeResource] =
-                queriesClient.query(FindById(id, after = Some(t)))
+              val maybeMeter: IO[MaybeResource] =
+                queriesClient.query.send(FindById(id, after = Some(t))).use(IO.pure)
               //#invocation-find-by-id
               maybeMeter.map(_.value)
             }
           )
-          meter <- maybeMeter.fold[Future[Meter]](
-            Future.failed(new NoSuchElementException)
-          )(Future.successful)
+          meter <- maybeMeter.fold[IO[Meter]](
+            IO.raiseError(new NoSuchElementException)
+          )(IO.pure)
         } yield meter
       },
-      addRecord.implementedByAsync { case (id, addData) =>
+      addRecord.implementedByEffect { case (id, addData) =>
         for {
-          maybeEvent <- commandsClient.command(
+          maybeEvent <- commandsClient.command.sendAndConsume(
             AddRecord(id, addData.date, addData.value)
           )
           findMeter =
             (evt: StoredEvent) =>
-              queriesClient
-                .query(FindById(id, after = Some(evt.timestamp)))
+              queriesClient.query
+                .send(FindById(id, after = Some(evt.timestamp)))
+                .use(IO.pure)
                 .map(_.value)
           maybeMeter <- Traverse[Option].flatTraverse(maybeEvent)(findMeter)
-          meter <- maybeMeter.fold[Future[Meter]](
-            Future.failed(new NoSuchElementException)
-          )(Future.successful)
+          meter <- maybeMeter.fold[IO[Meter]](
+            IO.raiseError(new NoSuchElementException)
+          )(IO.pure)
         } yield meter
       }
     )

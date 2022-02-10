@@ -5,15 +5,14 @@ import endpoints4s.algebra
 
 //#login-endpoint
 //#login-implementation
-import endpoints4s.play.server
+import endpoints4s.http4s.server
 
 //#login-implementation
-import endpoints4s.play.client
-import endpoints4s.play.server.PlayComponents
-import play.api.Configuration
-import play.api.libs.ws.WSClient
-
-import scala.concurrent.ExecutionContext
+import java.security.KeyPairGenerator
+import endpoints4s.http4s.client
+import org.http4s.client.{Client => Http4sClient}
+import org.http4s.Uri
+import cats.effect.IO
 
 /** Example of endpoints making use of authentication */
 //#login-endpoint
@@ -22,7 +21,7 @@ trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
   /** Login endpoint: takes the API key in a query string parameter and returns either `Some(authenticationToken)`
     * if the credentials are valid, or `None` otherwise
     */
-  val login = endpoint(
+  val login: Endpoint[String, Option[AuthenticationToken]] = endpoint(
     get(path / "login" /? qs[String]("apiKey")),
     wheneverValid(authenticationToken)
   )
@@ -46,29 +45,40 @@ trait AuthenticationEndpoints extends algebra.Endpoints with Authentication {
 }
 //#login-endpoint
 
+// (In practice these would be provided via environment variables)
+object Keys {
+  val generator = KeyPairGenerator.getInstance("RSA")
+  generator.initialize(2048)
+  val pair = generator.generateKeyPair()
+}
+
 /** Client for the `AuthenticationEndpoints`, using the `ClientAuthentication`
   * interpreter (implementing the authentication logic), defined below.
   */
 class Client(
-    host: String,
-    wsClient: WSClient,
-    val playConfiguration: Configuration
-)(implicit ec: ExecutionContext)
-    extends client.Endpoints(host, wsClient)
+    authority: Uri.Authority,
+    scheme: Uri.Scheme,
+    http4sClient: Http4sClient[IO]
+) extends client.Endpoints[IO](authority, scheme, http4sClient)
     with AuthenticationEndpoints
-    with ClientAuthentication
+    with ClientAuthentication[IO] {
+
+  lazy val publicKey = Keys.pair.getPublic
+
+}
 
 /** Example of server implementing the `AuthenticationEndpoints`
   */
 //#login-implementation
-class Server(
-    val playComponents: PlayComponents,
-    val playConfiguration: Configuration
-) extends AuthenticationEndpoints
-    with server.Endpoints
-    with ServerAuthentication {
+class Server
+    extends server.Endpoints[IO]
+    with AuthenticationEndpoints
+    with ServerAuthentication[IO] {
 
-  //#login-implementation
+//#login-implementation
+  // In practice, this secret would be ... secret, it would be retrieved from some configuration
+  lazy val privateKey = Keys.pair.getPrivate
+  lazy val publicKey = Keys.pair.getPublic
 
   val routes = routesFromEndpoints(
 //#login-implementation
