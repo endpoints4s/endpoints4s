@@ -19,7 +19,7 @@ val `http4s-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      version := "8.0.0+n",
+      version := "9.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.http4s" %% "http4s-core" % http4sVersion,
@@ -41,7 +41,7 @@ val `http4s-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-client",
-      version := "6.0.0+n",
+      version := "6.1.0",
       libraryDependencies ++= Seq(
         "org.http4s" %%% "http4s-client" % http4sVersion
       )
