@@ -384,7 +384,7 @@ val `example-documented` =
     .in(file("examples/documented"))
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
-      libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion,
+      libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion
 // Temporary: the sbt-heroku plugin seems to conflict with sbt-dotty
 //      herokuAppName in Compile := "documented-counter",
 //      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
@@ -438,7 +438,7 @@ val `example-basic-http4s-server` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       publishArtifact := false,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.25",
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.36",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
       libraryDependencies += "org.http4s" %% "http4s-circe" % http4sVersion
     )
