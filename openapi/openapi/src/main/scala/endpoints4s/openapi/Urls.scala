@@ -83,6 +83,20 @@ trait Urls extends algebra.Urls {
   )
   type QueryStringParam[A] = DocumentedQueryStringParam[A]
 
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = DocumentedQueryStringParam[Either[A,B]](
+    schema = Schema.OneOf(
+      alternatives = Schema.EnumeratedAlternatives(
+        qspa.schema :: qspb.schema :: Nil 
+      ),
+      description = None, //TODO: What to put here?
+      example = None, //TODO: What to put here?
+      title = None,//TODO: What to put here?
+    ),
+    isRequired = qspa.isRequired || qspb.isRequired, //TODO: This feels wrong?
+    encoder = ???, 
+
+  )
+
   implicit def optionalQueryStringParam[A](implicit
       param: QueryStringParam[A]
   ): QueryStringParam[Option[A]] =

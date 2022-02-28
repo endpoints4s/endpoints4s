@@ -28,6 +28,18 @@ trait Urls extends algebra.Urls with StatusCodes {
     def decode(name: String, params: Params): Validated[A]
   }
 
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = new QueryStringParam[Either[A,B]] {
+    def decode(name: String, params: Params): Validated[Either[A,B]] = {
+      qspa.decode(name, params) match {
+        case valid@Valid(_) => valid.map(Left(_))
+        case Invalid(errA) => qspb.decode(name,params) match {
+          case valid@Valid(_) => valid.map(Right(_))
+          case Invalid(errB) => Invalid(errA ++ errB)
+        }
+      }
+    }
+  }
+
   trait Url[A] {
     def decodeUrl(uri: http4s.Uri): Option[Validated[A]]
   }

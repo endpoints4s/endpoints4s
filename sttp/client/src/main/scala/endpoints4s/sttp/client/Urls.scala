@@ -59,6 +59,8 @@ trait Urls extends algebra.Urls {
   /** a query string parameter can have zero or several values */
   type QueryStringParam[A] = A => List[String]
 
+  override def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = (either:Either[A,B]) => either.fold(qspa, qspb)
+
   implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
