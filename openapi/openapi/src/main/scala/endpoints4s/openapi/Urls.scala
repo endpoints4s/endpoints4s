@@ -83,19 +83,31 @@ trait Urls extends algebra.Urls {
   )
   type QueryStringParam[A] = DocumentedQueryStringParam[A]
 
-  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = DocumentedQueryStringParam[Either[A,B]](
-    schema = Schema.OneOf(
-      alternatives = Schema.EnumeratedAlternatives(
-        qspa.schema :: qspb.schema :: Nil 
-      ),
-      description = None, //TODO: What to put here?
-      example = None, //TODO: What to put here?
-      title = None,//TODO: What to put here?
-    ),
-    isRequired = qspa.isRequired || qspb.isRequired, //TODO: This feels wrong?
-    encoder = ???, 
+  //TODO: This is kinda ugly. But discriminated schemas make little sense on query strings?
+  //Stil maybe this should be done better, but I haven't yet fully understood the openapi schema to figure out how to deal with nesting here
+  private def unpackSchema[A](qsp:QueryStringParam[A]):List[Schema] = qsp.schema match {
+      case oneOf : Schema.OneOf => oneOf.alternatives match {
+        case enumerated: Schema.EnumeratedAlternatives => enumerated.alternatives 
+        case _ => List(qsp.schema)
+      }
+      case _ => List(qsp.schema)
+    }
 
-  )
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = { 
+    DocumentedQueryStringParam[Either[A,B]](
+      schema = Schema.OneOf(
+        alternatives = Schema.EnumeratedAlternatives(
+          unpackSchema(qspa) ::: unpackSchema(qspb)
+        ),
+        description = None, //TODO: What to put here?
+        example = None, //TODO: What to put here?
+        title = None,//TODO: What to put here?
+      ),
+      isRequired = qspa.isRequired || qspb.isRequired, //TODO: This feels wrong?
+      encoder = (either:Either[A,B]) => either.fold(qspa.encoder.encode, qspb.encoder.encode),
+
+    )
+  }
 
   implicit def optionalQueryStringParam[A](implicit
       param: QueryStringParam[A]
