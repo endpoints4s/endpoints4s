@@ -1,5 +1,6 @@
 package endpoints4s
 
+import scala.collection.compat._
 import scala.util.{Failure, Success, Try}
 
 /** A validated value of type `A` can either be `Valid` or `Invalid`
@@ -101,7 +102,8 @@ object Validated {
       case Right(a)     => Valid(a)
     }
 
-  /** Turns a `Success[A]` into a `Validated[A]`
+  /** Turns a `Success[A]` into a `Valid[A]`
+    *
     * Turns a `Failure[A]` into an invalid value, using the exception message as an 'error' message
     */
   def fromTry[A](tryA: Try[A]): Validated[A] =
@@ -109,5 +111,60 @@ object Validated {
       case Success(value) => Valid(value)
       case Failure(error) => Invalid(error.getMessage)
     }
+
+  /** Turns a collection of valid values into a valid collection of values.
+    * If all the values in the collection are `Valid`, the result will be `Valid`.
+    * If there is at least one `Invalid`, the result will be an `Invalid` containing the error messages of all `Invalid`s
+    * If the collection is empty, it will return a `Valid` empty collection.
+    *
+    * @see [[scala.concurrent.Future.sequence]]
+    *
+    * @param in   the collection of `Validated` values that will be sequenced
+    * @tparam A   the type of the `Validated` values (e.g. `Int`)
+    * @tparam CC  the type of the collection of `Validated` values (e.g. `List`)
+    * @return     the `Validated` of the resulting collection
+    */
+  def sequence[A, CC[X] <: IterableOnce[X]](
+      in: CC[Validated[A]]
+  )(implicit bf: BuildFrom[CC[Validated[A]], A, CC[A]]): Validated[CC[A]] = {
+    val builder = bf.newBuilder(in)
+
+    in.iterator
+      .foldLeft[Validated[Unit]](Valid(())) { case (folded, next) =>
+        folded.zip(next).map { n => builder += n; () }
+      }
+      .map(_ => builder.result())
+  }
+
+  /** Validates a collection of values using the provided function `A => Validated[B]` to validate every value.
+    * If all the values in the collection are `Valid`, the result will be `Valid`.
+    * If there is at least one `Invalid`, the result will be an `Invalid` containing the error messages of all `Invalid`s
+    * If the collection is empty, it will return a `Valid` empty collection.
+    *
+    *  {{{
+    *    val myValidatedList = Validated.traverse(myList)(x => myValidateFunc(x))
+    *  }}}
+    *
+    * @see [[scala.concurrent.Future.traverse]]
+    *
+    * @param in        the collection of values to be validated with the provided function
+    * @param fn        the validation function
+    * @tparam A        the type of the values to be validated (e.g. `String`)
+    * @tparam B        the type of the returned validated values (e.g. `Int`)
+    * @tparam CC       the type of the collection of `Validated` (e.g. `List`)
+    * @return          the `Validated` of the resulting collection
+    */
+  def traverse[A, B, CC[X] <: IterableOnce[X]](
+      in: CC[A]
+  )(fn: A => Validated[B])(implicit bf: BuildFrom[CC[A], B, CC[B]]): Validated[CC[B]] = {
+    val builder = bf.newBuilder(in)
+
+    in.iterator
+      .foldLeft[Validated[Unit]](Valid(())) { case (folded, next) =>
+        folded.zip(fn(next)).map { n => builder += n; () }
+      }
+      .map(_ => builder.result())
+
+  }
 
 }
