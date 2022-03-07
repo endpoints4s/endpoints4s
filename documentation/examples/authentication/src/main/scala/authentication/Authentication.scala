@@ -24,6 +24,7 @@ import endpoints4s.Tupler
 import io.circe.{Codec => CirceCodec, Json, HCursor, Decoder}
 import org.http4s.headers.Authorization
 import org.http4s.{Credentials, AuthScheme}
+import cats.syntax.functor._
 
 //#enriched-algebra
 /** Algebra interface for defining authenticated endpoints using JWT.
@@ -256,37 +257,37 @@ trait ServerAuthentication[F[_]]
         }
     }
 
-    // alias parameters to not clash with `Request` members
-    val urlArg = url
-    val methodArg = method
-    val entityArg = entity
-
     new Request[UET] {
-      type UrlData = U
-      type HeadersData = Option[AuthenticationToken]
-      type EntityData = E
 
-      def url: Url[U] = urlArg
-      def headers: RequestHeaders[Option[UserInfo]] = authenticationTokenRequestHeaders
-      def method: Method = methodArg
-      def entity: RequestEntity[E] = entityArg
-
-      def aggregateAndValidate(
-          urlData: U,
-          headersData: Option[UserInfo],
-          entityData: E
-      ): Validated[UET] =
-        headersData match {
-          case None        => sys.error("Unsupported")
-          case Some(token) => Valid(tuplerUET(tuplerUE(urlData, entityData), token))
-        }
+      // Data extracted from the incoming request
+      type UrlAndHeaders = (U, AuthenticationToken)
 
       def matchAndParseHeaders(
           http4sRequest: org.http4s.Request[F]
-      ): Option[Either[org.http4s.Response[F], Validated[(UrlData, HeadersData)]]] =
-        matchAndParseHeadersAsRight(method, url, headers, http4sRequest).map(_.flatMap {
-          case Valid((_, None /* credentials */ )) => Left(org.http4s.Response(Unauthorized))
-          case validatedUrlAndHeaders              => Right(validatedUrlAndHeaders)
+      ): Option[Either[org.http4s.Response[F], Validated[UrlAndHeaders]]] =
+        // First, check whether the incoming request matches this request description
+        matchAndParseHeadersAsRight(method, url, emptyRequestHeaders, http4sRequest)
+          // If this is the case, check whether there is a token in the request headers or not
+          .map { errorResponseOrValidatedUrl =>
+            authenticationTokenRequestHeaders(http4sRequest.headers) match {
+              // There is a token, just add it to the data parsed from the URL
+              case Valid(Some(token)) =>
+                errorResponseOrValidatedUrl
+                  .map { validatedUrl =>
+                    validatedUrl.map { case (urlData, _) => (urlData, token) }
+                  }
+              // Otherwise, return an Unauthorized response
+              case _ => Left(org.http4s.Response(Unauthorized))
+            }
+          }
+
+      def parseEntity(
+          urlAndHeaders: UrlAndHeaders,
+          http4sRequest: org.http4s.Request[F]
+      ): Effect[Either[org.http4s.Response[F], UET]] =
+        entity(http4sRequest).map(_.map { entityData =>
+          val (urlData, token) = urlAndHeaders
+          tuplerUET(tuplerUE(urlData, entityData), token)
         })
 
     }

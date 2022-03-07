@@ -4,7 +4,6 @@ import java.net.ServerSocket
 
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.server.{
-  BasicAuthenticationTestSuite,
   ChunkedJsonEntitiesTestSuite,
   DecodedUrl,
   EndpointsTestSuite
@@ -26,7 +25,6 @@ import cats.effect.IO
 
 class ChunkedEntitiesServerInterpreterTest
     extends EndpointsTestSuite[ChunkedEntitiesEndpointsTestApi]
-    with BasicAuthenticationTestSuite[ChunkedEntitiesEndpointsTestApi]
     with ChunkedJsonEntitiesTestSuite[ChunkedEntitiesEndpointsTestApi] {
 
   val serverApi = new ChunkedEntitiesEndpointsTestApi()

@@ -1,6 +1,7 @@
 package endpoints4s.http4s.server
 
 import cats.data.NonEmptyList
+import cats.implicits._
 import endpoints4s.{Tupler, Valid, Validated}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
@@ -47,42 +48,34 @@ trait BasicAuthentication
       tuplerHC: Tupler.Aux[H, Credentials, HC],
       tuplerUEHC: Tupler.Aux[UE, HC, Out]
   ): Request[Out] = {
-    val methodArg = method
-    val urlArg = url
-    val entityArg = entity
-    val headersArg = headers
     new Request[Out] {
-      type UrlData = U
-      type HeadersData = (H, Option[Credentials])
-      type EntityData = E
-      def method: Method = methodArg
-      def url: Url[UrlData] = urlArg
-      def headers: RequestHeaders[HeadersData] = headersArg ++ basicAuthenticationHeader
-      def entity: RequestEntity[EntityData] = entityArg
-      def aggregateAndValidate(
-          urlData: UrlData,
-          headersData: HeadersData,
-          entityData: EntityData
-      ): Validated[Out] =
-        headersData match {
-          case (_, None) =>
-            // Note: in practice that should not happen because the method `aggregateAndValidate` is
-            // only called from the final method `matches`, if `matchAndParseHeaders` succeeded.
-            // However, here we override `matchAndParseHeaders` to fail in case the credentials are missing.
-            sys.error(
-              "This request transformation is currently unsupported. You can't transform further an authenticated request."
-            )
-          case (h, Some(credentials)) =>
-            Valid(tuplerUEHC(tuplerUE(urlData, entityData), tuplerHC(h, credentials)))
-        }
+
+      type UrlAndHeaders = (U, H, Credentials)
+
       def matchAndParseHeaders(
           http4sRequest: Http4sRequest
-      ): Option[Either[Http4sResponse, Validated[(U, (H, Option[Credentials]))]]] = {
-        matchAndParseHeadersAsRight(method, url, headers, http4sRequest).map(_.flatMap {
-          case Valid((_, (_, None /* credentials */ ))) => Left(unauthorizedRequestResponse)
-          case validatedUrlAndHeaders                   => Right(validatedUrlAndHeaders)
+      ): Option[Either[Http4sResponse, Validated[UrlAndHeaders]]] =
+        matchAndParseHeadersAsRight(method, url, headers, http4sRequest)
+          .map { errorResponseOrValidatedUrlAndHeaders =>
+            basicAuthenticationHeader(http4sRequest.headers) match {
+              case Valid(Some(credentials)) =>
+                errorResponseOrValidatedUrlAndHeaders
+                  .map(_.map { case (u, h) => (u, h, credentials) })
+              case _ => Left(unauthorizedRequestResponse)
+            }
+          }
+
+      def parseEntity(
+          urlAndHeaders: UrlAndHeaders,
+          http4sRequest: Http4sRequest
+      ): Effect[Either[Http4sResponse, Out]] =
+        entity(http4sRequest).map(_.map { entityData =>
+          tuplerUEHC(
+            tuplerUE(urlAndHeaders._1, entityData),
+            tuplerHC(urlAndHeaders._2, urlAndHeaders._3)
+          )
         })
-      }
+
     }
   }
 

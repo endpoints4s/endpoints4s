@@ -14,6 +14,7 @@ class RequestUriTest extends AnyWordSpec {
       ]("s", 1) & qs[List[String]]("t"))
     val p4 = path / "a" /? qs[Option[Int]]("x")
     val e = endpoint(get(p4), ok(textResponse))
+    val f = endpoint(get(p4).addQueryString(qs[Int]("y")), ok(emptyResponse))
   }
 
   object Fixtures extends Fixtures with Endpoints
@@ -30,6 +31,10 @@ class RequestUriTest extends AnyWordSpec {
       )
       assert(p4.uri(None).toString == "/a")
       assert(e.uri(Some(42)).toString == "/a?x=42")
+    }
+    "properly encode URIs of transformed endpoint descriptions" in {
+      import Fixtures.f
+      assert(f.uri((Some(42), 0)).toString == "/a?x=42&y=0")
     }
   }
 
