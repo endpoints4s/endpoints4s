@@ -175,6 +175,25 @@ object OpenApi {
          * See <https://stackoverflow.com/a/41752575/3072788>.
          */
         val refSchemaName = ujson.Str(Schema.Reference.toRefPath(reference.name))
+
+        /*
+         * Set sibling schema fields
+         */
+        for (
+          description <- reference.description orElse reference.original.flatMap(_.description)
+        ) {
+          fields += "description" -> ujson.Str(description)
+        }
+        for (example <- reference.example orElse reference.original.flatMap(_.example)) {
+          fields += "example" -> example
+        }
+        for (title <- reference.title orElse reference.original.flatMap(_.title)) {
+          fields += "title" -> title
+        }
+        for (default <- reference.default orElse reference.original.flatMap(_.default)) {
+          fields += "default" -> default
+        }
+
         if (fields.isEmpty) {
           fields += "$ref" -> refSchemaName
         } else {

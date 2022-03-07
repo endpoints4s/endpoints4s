@@ -49,6 +49,22 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       with algebra.BasicAuthentication
       with algebra.JsonSchemasFixtures {
 
+    val bookExample = Book(
+      id = UUID.fromString("44c159ed-cb8b-464e-ad02-644c36ed0b3f"),
+      title = "Programming in Scala, First Edition",
+      author = Author("Martin Odersky, Lex Spoon, and Bill Venners"),
+      isbnCodes = Nil,
+      storage = Storage.Online("https://www.artima.com/pins1ed/")
+    )
+
+    val bookExample2 = Book(
+      id = UUID.fromString("2cb38bf2-ecbf-401c-be37-9ec325ae91a0"),
+      title = "Essential Scala",
+      author = Author("Noel Welsh and Dave Gurnell"),
+      isbnCodes = Nil,
+      storage = Storage.Online("https://underscore.io/books/essential-scala/")
+    )
+
     implicit private val schemaStorage: JsonSchema[Storage] =
       genericTagged[Storage]
 
@@ -58,6 +74,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
     )
 
     implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
+      .withExample(bookExample)
 
     val bookTag = Tag("Books")
       .withDescription(Some("A book is something you can read."))
@@ -78,8 +95,8 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       authenticatedEndpoint(
         Post,
         path / "books",
-        ok(jsonResponse(ColorEnum.colorSchema)),
-        jsonRequest[Book],
+        ok(jsonResponse(ColorEnum.colorSchema.withExample(ColorEnum.Blue))),
+        jsonRequest[Book](schemaBook.withExample(bookExample2)),
         requestDocs = Some("Books list"),
         endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
       )
@@ -88,106 +105,150 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
   "OpenApi" should {
 
     val expectedSchema =
-      """{
-        |  "openapi" : "3.0.0",
-        |  "info" : {
-        |    "title" : "TestFixturesOpenApi",
-        |    "version" : "0.0.0",
+        """{
+        |  "openapi": "3.0.0",
+        |  "info": {
+        |    "title": "TestFixturesOpenApi",
+        |    "version": "0.0.0",
         |    "description": "This is a top level description."
         |  },
-        |  "paths" : {
-        |    "/books" : {
-        |      "get" : {
-        |        "responses" : {
-        |          "400" : {
-        |            "description" : "Client error",
-        |            "content" : {
-        |              "application/json" : {
-        |                "schema" : {
-        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |  "paths": {
+        |    "/books": {
+        |      "get": {
+        |        "responses": {
+        |          "400": {
+        |            "description": "Client error",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "$ref": "#/components/schemas/endpoints.Errors"
         |                }
         |              }
         |            }
         |          },
-        |          "500" : {
-        |            "description" : "Server error",
-        |            "content" : {
-        |              "application/json" : {
-        |                "schema" : {
-        |                  "$ref" : "#/components/schemas/endpoints.Errors"
+        |          "500": {
+        |            "description": "Server error",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "$ref": "#/components/schemas/endpoints.Errors"
         |                }
         |              }
         |            }
         |          },
-        |          "200" : {
-        |            "description" : "Books list",
-        |            "content" : {
-        |              "application/json" : {
-        |                "schema" : {
-        |                  "type" : "array",
-        |                  "items" : {
-        |                    "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
+        |          "200": {
+        |            "description": "Books list",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "type": "array",
+        |                  "items": {
+        |                    "example": {
+        |                      "id": "44c159ed-cb8b-464e-ad02-644c36ed0b3f",
+        |                      "title": "Programming in Scala, First Edition",
+        |                      "author": {
+        |                        "name": "Martin Odersky, Lex Spoon, and Bill Venners"
+        |                      },
+        |                      "isbnCodes": [
+        |
+        |                      ],
+        |                      "storage": {
+        |                        "link": "https://www.artima.com/pins1ed/",
+        |                        "storageType": "Online"
+        |                      }
+        |                    },
+        |                    "allOf": [
+        |                      {
+        |                        "$ref": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
+        |                      }
+        |                    ]
         |                  }
         |                }
         |              }
         |            }
         |          }
         |        },
-        |        "tags" : [
+        |        "tags": [
         |          "Books"
         |        ]
         |      },
-        |      "post" : {
-        |        "requestBody" : {
-        |          "content" : {
-        |            "application/json" : {
-        |              "schema" : {
-        |                "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
-        |              }
-        |            }
-        |          },
-        |          "description" : "Books list"
-        |        },
-        |        "responses" : {
-        |          "400" : {
-        |            "description" : "Client error",
-        |            "content" : {
-        |              "application/json" : {
-        |                "schema" : {
-        |                  "$ref" : "#/components/schemas/endpoints.Errors"
-        |                }
-        |              }
-        |            }
-        |          },
-        |          "500" : {
-        |            "description" : "Server error",
-        |            "content" : {
-        |              "application/json" : {
-        |                "schema" : {
-        |                  "$ref" : "#/components/schemas/endpoints.Errors"
-        |                }
-        |              }
-        |            }
-        |          },
-        |          "200" : {
-        |            "description" : "",
+        |      "post": {
+        |        "responses": {
+        |          "400": {
+        |            "description": "Client error",
         |            "content": {
         |              "application/json": {
-        |                "schema": { "$ref": "#/components/schemas/Color" }
+        |                "schema": {
+        |                  "$ref": "#/components/schemas/endpoints.Errors"
+        |                }
         |              }
         |            }
         |          },
-        |          "403" : {
-        |            "description" : ""
+        |          "500": {
+        |            "description": "Server error",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "$ref": "#/components/schemas/endpoints.Errors"
+        |                }
+        |              }
+        |            }
+        |          },
+        |          "200": {
+        |            "description": "",
+        |            "content": {
+        |              "application/json": {
+        |                "schema": {
+        |                  "example": "Blue",
+        |                  "allOf": [
+        |                    {
+        |                      "$ref": "#/components/schemas/Color"
+        |                    }
+        |                  ]
+        |                }
+        |              }
+        |            }
+        |          },
+        |          "403": {
+        |            "description": ""
         |          }
         |        },
-        |        "tags" : [
+        |        "requestBody": {
+        |          "content": {
+        |            "application/json": {
+        |              "schema": {
+        |                "example": {
+        |                  "id": "2cb38bf2-ecbf-401c-be37-9ec325ae91a0",
+        |                  "title": "Essential Scala",
+        |                  "author": {
+        |                    "name": "Noel Welsh and Dave Gurnell"
+        |                  },
+        |                  "isbnCodes": [
+        |
+        |                  ],
+        |                  "storage": {
+        |                    "link": "https://underscore.io/books/essential-scala/",
+        |                    "storageType": "Online"
+        |                  }
+        |                },
+        |                "allOf": [
+        |                  {
+        |                    "$ref": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
+        |                  }
+        |                ]
+        |              }
+        |            }
+        |          },
+        |          "description": "Books list"
+        |        },
+        |        "tags": [
         |          "Books",
         |          "Another tag"
         |        ],
-        |        "security" : [
+        |        "security": [
         |          {
-        |            "HttpBasic" : [
+        |            "HttpBasic": [
+        |
         |            ]
         |          }
         |        ]
@@ -196,130 +257,152 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |  },
         |  "tags": [
         |    {
-        |      "name":"Books",
-        |      "description":"A book is something you can read.",
+        |      "name": "Books",
+        |      "description": "A book is something you can read.",
         |      "externalDocs": {
-        |        "url":"moreinfo@books.nl",
-        |        "description":"The official website about books."
+        |        "url": "moreinfo@books.nl",
+        |        "description": "The official website about books."
         |      }
         |    }
         |  ],
-        |  "components" : {
-        |    "schemas" : {
-        |      "Color" : {
-        |        "type" : "string",
-        |        "enum" : ["Red", "Blue"]
-        |      },
-        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage.Online" : {
-        |        "type" : "object",
-        |        "properties" : {
-        |          "storageType" : {
-        |            "type" : "string",
-        |            "enum" : ["Online"],
-        |            "example" : "Online"
+        |  "components": {
+        |    "schemas": {
+        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage.Online": {
+        |        "type": "object",
+        |        "properties": {
+        |          "storageType": {
+        |            "example": "Online",
+        |            "type": "string",
+        |            "enum": [
+        |              "Online"
+        |            ]
         |          },
-        |          "link" : {
-        |            "type" : "string"
+        |          "link": {
+        |            "type": "string"
         |          }
         |        },
-        |        "required" : [
+        |        "required": [
         |          "storageType",
         |          "link"
         |        ]
         |      },
-        |      "endpoints4s.openapi.ReferencedSchemaTest.Book" : {
-        |        "type" : "object",
-        |        "properties" : {
-        |          "isbnCodes" : {
-        |            "type" : "array",
-        |            "items" : {
-        |              "type" : "string"
-        |            }
+        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage": {
+        |        "oneOf": [
+        |          {
+        |            "$ref": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library"
         |          },
-        |          "author" : {
-        |            "type" : "object",
-        |            "properties" : {
-        |              "name" : {
-        |                "type" : "string",
-        |                "description" : "Author name"
+        |          {
+        |            "$ref": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
+        |          }
+        |        ],
+        |        "discriminator": {
+        |          "propertyName": "storageType",
+        |          "mapping": {
+        |            "Library": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library",
+        |            "Online": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
+        |          }
+        |        }
+        |      },
+        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage.Library": {
+        |        "type": "object",
+        |        "properties": {
+        |          "storageType": {
+        |            "example": "Library",
+        |            "type": "string",
+        |            "enum": [
+        |              "Library"
+        |            ]
+        |          },
+        |          "room": {
+        |            "type": "string"
+        |          },
+        |          "shelf": {
+        |            "type": "integer",
+        |            "format": "int32"
+        |          }
+        |        },
+        |        "required": [
+        |          "storageType",
+        |          "room",
+        |          "shelf"
+        |        ]
+        |      },
+        |      "Color": {
+        |        "example": "Blue",
+        |        "type": "string",
+        |        "enum": [
+        |          "Red",
+        |          "Blue"
+        |        ]
+        |      },
+        |      "endpoints.Errors": {
+        |        "type": "array",
+        |        "items": {
+        |          "type": "string"
+        |        }
+        |      },
+        |      "endpoints4s.openapi.ReferencedSchemaTest.Book": {
+        |        "example": {
+        |          "id": "2cb38bf2-ecbf-401c-be37-9ec325ae91a0",
+        |          "title": "Essential Scala",
+        |          "author": {
+        |            "name": "Noel Welsh and Dave Gurnell"
+        |          },
+        |          "isbnCodes": [
+        |
+        |          ],
+        |          "storage": {
+        |            "link": "https://underscore.io/books/essential-scala/",
+        |            "storageType": "Online"
+        |          }
+        |        },
+        |        "type": "object",
+        |        "properties": {
+        |          "id": {
+        |            "description": "Universally unique identifier (RFC 4122)",
+        |            "example": "5f27b818-027a-4008-b410-de01e1dd3a93",
+        |            "type": "string",
+        |            "format": "uuid"
+        |          },
+        |          "title": {
+        |            "type": "string"
+        |          },
+        |          "author": {
+        |            "type": "object",
+        |            "properties": {
+        |              "name": {
+        |                "description": "Author name",
+        |                "type": "string"
         |              }
         |            },
-        |            "required" : [
+        |            "required": [
         |              "name"
         |            ]
         |          },
-        |          "id" : {
-        |            "type" : "string",
-        |            "format" : "uuid",
-        |            "description": "Universally unique identifier (RFC 4122)",
-        |            "example": "5f27b818-027a-4008-b410-de01e1dd3a93"
+        |          "isbnCodes": {
+        |            "type": "array",
+        |            "items": {
+        |              "type": "string"
+        |            }
         |          },
-        |          "storage" : {
-        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage"
-        |          },
-        |          "title" : {
-        |            "type" : "string"
+        |          "storage": {
+        |            "$ref": "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage"
         |          }
         |        },
-        |        "required" : [
+        |        "required": [
         |          "id",
         |          "title",
         |          "author",
         |          "isbnCodes",
         |          "storage"
         |        ]
-        |      },
-        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage" : {
-        |        "oneOf" : [
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library"
-        |          },
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
-        |          }
-        |        ],
-        |        "discriminator" : {
-        |          "propertyName" : "storageType",
-        |          "mapping" : {
-        |            "Library" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library",
-        |            "Online" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
-        |          }
-        |        }
-        |      },
-        |      "endpoints.Errors" : {
-        |        "type" : "array",
-        |        "items" : {
-        |          "type" : "string"
-        |        }
-        |      },
-        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage.Library" : {
-        |        "type" : "object",
-        |        "properties" : {
-        |          "storageType" : {
-        |            "type" : "string",
-        |            "enum" : ["Library"],
-        |            "example" : "Library"
-        |          },
-        |          "room" : {
-        |            "type" : "string"
-        |          },
-        |          "shelf" : {
-        |            "type" : "integer",
-        |            "format" : "int32"
-        |          }
-        |        },
-        |        "required" : [
-        |          "storageType",
-        |          "room",
-        |          "shelf"
-        |        ]
         |      }
         |    },
-        |    "securitySchemes" : {
-        |      "HttpBasic" : {
-        |        "type" : "http",
-        |        "description" : "Http Basic Authentication",
-        |        "scheme" : "basic"
+        |    "securitySchemes": {
+        |      "HttpBasic": {
+        |        "type": "http",
+        |        "description": "Http Basic Authentication",
+        |        "scheme": "basic"
         |      }
         |    }
         |  }
