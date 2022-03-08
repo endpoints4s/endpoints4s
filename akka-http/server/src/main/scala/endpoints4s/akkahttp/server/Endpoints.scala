@@ -37,7 +37,24 @@ trait EndpointsWithCustomErrors
     /** Information extracted from the URL and the headers */
     type UrlAndHeaders
 
-    /** A directive that extracts an `A` from an incoming request */
+    /** Directive matching and parsing the content of an incoming request.
+      *
+      * First, it checks whether the incoming request matches the request URL
+      * and method. If this is the case, it parses the request headers and
+      * proceeds to the second step.
+      *
+      * If there were no validation errors when parsing the request URL and
+      * headers, it parses the request entity.
+      *
+      * The directive can produce:
+      *
+      *   - a ''rejection'' to signal that the incoming request does not
+      *     match this request description,
+      *   - a ''completion'' containing an error response (e.g., in case
+      *     of validation errors),
+      *   - a value of type `A` parsed from the request content (URL, headers,
+      *     and entity).
+      */
     final lazy val directive: Directive1[A] =
       matchAndParseHeadersDirective.flatMap {
         case invalid: Invalid     => handleClientErrors(invalid)

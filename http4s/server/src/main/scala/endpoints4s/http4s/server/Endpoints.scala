@@ -390,9 +390,11 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
           http4sRequest: Http4sRequest
       ): Effect[Either[Http4sResponse, Out]] =
         entity(http4sRequest)
-          .map(
-            _.map(entityData => tuplerUBH(tuplerUB(urlAndHeaders._1, entityData), urlAndHeaders._2))
-          )
+          .map { errorResponseOrEntityData =>
+            errorResponseOrEntityData.map(entityData =>
+              tuplerUBH(tuplerUB(urlAndHeaders._1, entityData), urlAndHeaders._2)
+            )
+          }
 
     }
   }
@@ -408,9 +410,11 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     ): Option[Either[Http4sResponse, Validated[UrlAndHeaders]]] =
       request
         .matchAndParseHeaders(http4sRequest)
-        .map(_.map { validatedUrlAndHeaders =>
-          validatedUrlAndHeaders.zip(headersP(http4sRequest.headers))
-        })
+        .map { errorResponseOrValidatedUrlAndHeaders =>
+          errorResponseOrValidatedUrlAndHeaders.map { validatedUrlAndHeaders =>
+            validatedUrlAndHeaders.zip(headersP(http4sRequest.headers))
+          }
+        }
 
     def parseEntity(
         urlAndHeaders: UrlAndHeaders,
@@ -418,7 +422,9 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     ): Effect[Either[Http4sResponse, tupler.Out]] =
       request
         .parseEntity(urlAndHeaders._1, http4sRequest)
-        .map(_.map(a => tupler(a, urlAndHeaders._2)))
+        .map { errorResponseOrA =>
+          errorResponseOrA.map(a => tupler(a, urlAndHeaders._2))
+        }
 
   }
 
@@ -433,22 +439,33 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
       ): Option[Either[Http4sResponse, Validated[UrlAndHeaders]]] =
         request
           .matchAndParseHeaders(http4sRequest)
-          .map(_.map { validatedUrlAndHeaders =>
-            val addedQuery = qs(http4sRequest.uri.multiParams)
-            validatedUrlAndHeaders.zip(addedQuery)
-          })
+          .map { errorResponseOrValidatedUrlAndHeaders =>
+            errorResponseOrValidatedUrlAndHeaders.map { validatedUrlAndHeaders =>
+              val addedQuery = qs(http4sRequest.uri.multiParams)
+              validatedUrlAndHeaders.zip(addedQuery)
+            }
+          }
       def parseEntity(
           urlAndHeaders: UrlAndHeaders,
           http4sRequest: Http4sRequest
       ): Effect[Either[Http4sResponse, tupler.Out]] =
         request
           .parseEntity(urlAndHeaders._1, http4sRequest)
-          .map(_.map(a => tupler(a, urlAndHeaders._2)))
+          .map { errorResponseOrA =>
+            errorResponseOrA.map(a => tupler(a, urlAndHeaders._2))
+          }
 
     }
   }
 
-  // Default implementation for `matchAndParseHeaders` which never returns a `Left(response)`
+  /** Default implementation for `matchAndParseHeaders` which never returns a `Left(response)`.
+    * It checks that the incoming request matches the given `method` and `url`. If this is the
+    * case, it parses the request headers.
+    * @return - `None` if the incoming `http4sRequest` did not match the `method` and `url`
+    *         - `Some(Right(validatedUrlAndHeaders))` if the incoming `http4sRequest` did
+    *           match the `method` and `url`. The value `validatedUrlAndHeaders` contains
+    *           the validation errors of both the URL and the headers.
+    */
   protected final def matchAndParseHeadersAsRight[U, H](
       method: Method,
       url: Url[U],
@@ -458,7 +475,9 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
     if (http4sRequest.method == method) {
       url
         .decodeUrl(http4sRequest.uri)
-        .map(_.zip(headers(http4sRequest.headers)).asRight)
+        .map { validatedUrl =>
+          validatedUrl.zip(headers(http4sRequest.headers)).asRight
+        }
     } else None
 
   implicit def requestEntityPartialInvariantFunctor: PartialInvariantFunctor[RequestEntity] =

@@ -59,8 +59,11 @@ trait BasicAuthentication
           .map { errorResponseOrValidatedUrlAndHeaders =>
             basicAuthenticationHeader(http4sRequest.headers) match {
               case Valid(Some(credentials)) =>
-                errorResponseOrValidatedUrlAndHeaders
-                  .map(_.map { case (u, h) => (u, h, credentials) })
+                errorResponseOrValidatedUrlAndHeaders.map { validatedUrlAndHeaders =>
+                  validatedUrlAndHeaders.map { case (urlData, headersData) =>
+                    (urlData, headersData, credentials)
+                  }
+                }
               case _ => Left(unauthorizedRequestResponse)
             }
           }
@@ -69,12 +72,15 @@ trait BasicAuthentication
           urlAndHeaders: UrlAndHeaders,
           http4sRequest: Http4sRequest
       ): Effect[Either[Http4sResponse, Out]] =
-        entity(http4sRequest).map(_.map { entityData =>
-          tuplerUEHC(
-            tuplerUE(urlAndHeaders._1, entityData),
-            tuplerHC(urlAndHeaders._2, urlAndHeaders._3)
-          )
-        })
+        entity(http4sRequest).map { errorResponseOrEntityData =>
+          errorResponseOrEntityData.map { entityData =>
+            val (urlData, headersData, credentials) = urlAndHeaders
+            tuplerUEHC(
+              tuplerUE(urlData, entityData),
+              tuplerHC(headersData, credentials)
+            )
+          }
+        }
 
     }
   }

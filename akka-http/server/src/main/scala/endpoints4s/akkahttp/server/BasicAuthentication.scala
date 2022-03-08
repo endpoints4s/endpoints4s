@@ -53,20 +53,24 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
             )
           case Valid(Some(credentials)) =>
             matchAndProvideParsedUrlAndHeadersData(method, url, headers)
-              .map(_.map { case (u, h) => (u, h, credentials) })
+              .map { validatedUrlAndHeaders =>
+                validatedUrlAndHeaders.map { case (urlData, headersData) =>
+                  (urlData, headersData, credentials)
+                }
+              }
           case invalid: Invalid => Directives.provide(invalid)
         }
 
       def parseEntityDirective(urlAndHeaders: UrlAndHeaders): Directive1[Out] =
-        entity.map { e =>
-          val (u, h, c) = urlAndHeaders
-          tuplerUEHCred(tuplerUE(u, e), tuplerHCred(h, c))
+        entity.map { entityData =>
+          val (urlData, headersData, credentials) = urlAndHeaders
+          tuplerUEHCred(tuplerUE(urlData, entityData), tuplerHCred(headersData, credentials))
         }
 
       def uri(out: Out): Uri = {
-        val (ue, _) = tuplerUEHCred.unapply(out)
-        val (u, _) = tuplerUE.unapply(ue)
-        url.uri(u)
+        val (urlAndEntityData, _) = tuplerUEHCred.unapply(out)
+        val (urlData, _) = tuplerUE.unapply(urlAndEntityData)
+        url.uri(urlData)
       }
 
     }
