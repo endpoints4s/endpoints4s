@@ -60,19 +60,6 @@ trait Urls extends algebra.Urls with StatusCodes {
         query: Map[String, List[String]]
     ): Option[Validated[A]]
 
-    private[server] final def addQueryString[B](queryString: QueryString[B]): Url[(A, B)] =
-      new Url[(A, B)] {
-        def validateUrl(
-            segments: List[String],
-            query: Map[String, List[String]]
-        ): Option[Validated[(A, B)]] =
-          outer.validateUrl(segments, query).map(_.zip(queryString.validate(query)))
-        def uri(ab: (A, B)): Uri = {
-          val outerUri = outer.uri(ab._1)
-          outerUri.withQuery(Uri.Query(outerUri.query() ++ queryString.encode(ab._2): _*))
-        }
-      }
-
     final def directive: Directive1[Validated[A]] = {
       (Directives.extractUri & Directives.path(
         Directives.Segments ~ Directives.Slash.?

@@ -6,11 +6,11 @@ import akka.http.scaladsl.model.headers.{
   HttpChallenges,
   `WWW-Authenticate`
 }
-import akka.http.scaladsl.model.{HttpHeader, HttpResponse, StatusCodes => AkkaStatusCodes}
+import akka.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
 import akka.http.scaladsl.server.{Directive1, Directives}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
-import endpoints4s.{Tupler, Valid, Validated, algebra}
+import endpoints4s.{Invalid, Tupler, Valid, Validated, algebra}
 
 /** @group interpreters
   */
@@ -27,33 +27,8 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
       tuplerHCred: Tupler.Aux[H, Credentials, HCred],
       tuplerUEHCred: Tupler.Aux[UE, HCred, Out]
   ): Request[Out] = {
-    val (m, u, e, h) = (method, url, entity, headers)
     new Request[Out] {
-      type UrlData = U
-      type HeadersData = (H, Option[Credentials])
-      type EntityData = E
-
-      def url: Url[UrlData] = u
-      def method: Method = m
-      def entity: RequestEntity[EntityData] = e
-      def headers: RequestHeaders[HeadersData] = h ++ authHeader
-
-      private[server] def aggregateAndValidate(
-          urlData: UrlData,
-          entityData: EntityData,
-          headersData: HeadersData
-      ): Validated[Out] =
-        headersData match {
-          case (_, None) =>
-            // Note: in practice that should not happen because the method `aggregateAndValidate` is
-            // only called from the final method `matches`, if `matchAndParseHeaders` succeeded.
-            // However, here we override `matchAndParseHeaders` to fail in case the credentials are missing.
-            sys.error(
-              "This request transformation is currently unsupported. You can't transform further an authenticated request."
-            )
-          case (h, Some(credentials)) =>
-            Valid(tuplerUEHCred(tuplerUE(urlData, entityData), tuplerHCred(h, credentials)))
-        }
+      type UrlAndHeaders = (U, H, Credentials)
 
       lazy val authHeader: RequestHeaders[Option[Credentials]] =
         httpHeaders =>
@@ -65,10 +40,9 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
             }
           )
 
-      private[server] def matchAndParseHeadersDirective
-          : Directive1[Validated[(UrlData, HeadersData)]] =
-        matchAndProvideParsedUrlAndHeadersData(method, url, headers).flatMap {
-          case Valid((_, (_, None /* credentials */ ))) =>
+      lazy val matchAndParseHeadersDirective: Directive1[Validated[UrlAndHeaders]] =
+        Directives.extractRequest.map(authHeader.decode).flatMap {
+          case Valid(None) =>
             Directives.complete(
               HttpResponse(
                 AkkaStatusCodes.Unauthorized,
@@ -77,14 +51,28 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
                 )
               )
             )
-          case validatedUrlAndHeaders => Directives.provide(validatedUrlAndHeaders)
+          case Valid(Some(credentials)) =>
+            matchAndProvideParsedUrlAndHeadersData(method, url, headers)
+              .map { validatedUrlAndHeaders =>
+                validatedUrlAndHeaders.map { case (urlData, headersData) =>
+                  (urlData, headersData, credentials)
+                }
+              }
+          case invalid: Invalid => Directives.provide(invalid)
         }
 
-      def urlData(out: Out): UrlData = {
-        val (ue, _) = tuplerUEHCred.unapply(out)
-        val (u, _) = tuplerUE.unapply(ue)
-        u
+      def parseEntityDirective(urlAndHeaders: UrlAndHeaders): Directive1[Out] =
+        entity.map { entityData =>
+          val (urlData, headersData, credentials) = urlAndHeaders
+          tuplerUEHCred(tuplerUE(urlData, entityData), tuplerHCred(headersData, credentials))
+        }
+
+      def uri(out: Out): Uri = {
+        val (urlAndEntityData, _) = tuplerUEHCred.unapply(out)
+        val (urlData, _) = tuplerUE.unapply(urlAndEntityData)
+        url.uri(urlData)
       }
+
     }
   }
 
