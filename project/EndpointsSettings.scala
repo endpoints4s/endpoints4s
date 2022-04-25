@@ -107,7 +107,7 @@ object EndpointsSettings {
   val http4sDomVersion = "0.2.0"
   val ujsonVersion = "1.4.0"
 
-  val scalaTestVersion = "3.2.10"
+  val scalaTestVersion = "3.2.12"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(
