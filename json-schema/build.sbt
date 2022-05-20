@@ -35,8 +35,13 @@ val `json-schema-testkit` =
       version := "1.1.0+n",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M2"
       )
+    )
+    .jsSettings(
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+    )
+    .nativeSettings(
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
     )
     .dependsOn(`json-schema`)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
