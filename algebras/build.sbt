@@ -11,6 +11,9 @@ val algebra =
       `scala 2.12 to dotty`,
       name := "algebra"
     )
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("1.8.0")
+    )
     .dependsOnLocalCrossProjectsWithNative("json-schema")
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
@@ -33,6 +36,9 @@ val `algebra-testkit` =
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
+    )
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("2.1.0")
     )
     .dependsOn(algebra)
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")

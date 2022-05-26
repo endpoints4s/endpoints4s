@@ -17,6 +17,9 @@ val `json-schema` =
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("1.8.0")
+    )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
@@ -41,7 +44,8 @@ val `json-schema-testkit` =
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
+      versionPolicyFirstVersion := Some("1.2.0")
     )
     .dependsOn(`json-schema`)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
