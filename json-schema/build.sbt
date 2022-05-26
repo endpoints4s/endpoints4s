@@ -37,7 +37,7 @@ val `json-schema-testkit` =
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
       )
     )
-    .jsSettings(
+    .platformsSettings(JVMPlatform, JSPlatform)(
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .nativeSettings(
