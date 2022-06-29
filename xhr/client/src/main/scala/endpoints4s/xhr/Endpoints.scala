@@ -300,6 +300,7 @@ trait EndpointsWithCustomErrors
   ): js.Function0[Unit] = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
+    settings.timeout.foreach(t => xhr.timeout = t.toMillis.toDouble)
     xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
     requestData.prepare(xhr)
     val maybeEntity = requestData.entity(xhr)

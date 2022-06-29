@@ -3,11 +3,12 @@ package endpoints4s.xhr
 import endpoints4s.Hashing
 
 import scala.annotation.nowarn
+import scala.concurrent.duration.{FiniteDuration}
 
 /** Settings for XHR interpreter.
   * @param baseUri Base of the URI of the service that implements the endpoints, can be absolute or relative (e.g. "http://foo.com" or "/bar")
   */
-final class EndpointsSettings private (val baseUri: Option[String]) extends Serializable {
+final class EndpointsSettings private (val baseUri: Option[String], val timeout: Option[FiniteDuration]) extends Serializable {
 
   override def toString =
     s"EndpointsSettings($baseUri)"
@@ -23,18 +24,24 @@ final class EndpointsSettings private (val baseUri: Option[String]) extends Seri
 
   @nowarn("cat=unused")
   private[this] def copy(
-      baseUri: Option[String] = baseUri
+      baseUri: Option[String] = baseUri,
+      timeout: Option[FiniteDuration] = timeout
   ): EndpointsSettings =
     new EndpointsSettings(
-      baseUri
+      baseUri,
+      timeout
     )
 
   def withBaseUri(baseUri: Option[String]): EndpointsSettings = {
     copy(baseUri = baseUri)
   }
+
+  def withTimetou(timeout: Option[FiniteDuration]) = {
+    copy(timeout = timeout)
+  }
 }
 
 object EndpointsSettings {
 
-  def apply(): EndpointsSettings = new EndpointsSettings(None)
+  def apply(): EndpointsSettings = new EndpointsSettings(None, None)
 }
