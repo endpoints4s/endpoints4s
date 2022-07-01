@@ -36,7 +36,7 @@ final class EndpointsSettings private (val baseUri: Option[String], val timeout:
     copy(baseUri = baseUri)
   }
 
-  def withTimetou(timeout: Option[FiniteDuration]) = {
+  def withTimeout(timeout: Option[FiniteDuration]) = {
     copy(timeout = timeout)
   }
 }
