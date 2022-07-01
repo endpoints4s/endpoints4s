@@ -291,10 +291,12 @@ trait EndpointsWithCustomErrors
     requestData.entity(requestInit)
     val abortController = new AbortController
     requestInit.signal = abortController.signal
+    val timeoutId = settings.timeout.map(t => scala.scalajs.js.timers.setTimeout(t)(() => abortController.abort()))
 
     val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
+        timeoutId.foreach(scala.scalajs.js.timers.clearTimeout)
         val maybeResponse = response(fetchResponse)
 
         def maybeClientErrors =
