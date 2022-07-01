@@ -11,7 +11,7 @@ import scala.concurrent.duration.{FiniteDuration}
 final class EndpointsSettings private (val baseUri: Option[String], val timeout: Option[FiniteDuration]) extends Serializable {
 
   override def toString =
-    s"EndpointsSettings($baseUri)"
+    s"EndpointsSettings($baseUri, $timeout)"
 
   override def equals(other: Any): Boolean =
     other match {
