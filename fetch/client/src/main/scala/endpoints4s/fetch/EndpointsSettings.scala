@@ -20,7 +20,7 @@ final class EndpointsSettings private (val baseUri: Option[String], val timeout:
       case _ => false
     }
 
-  override def hashCode(): Int = Hashing.hash(baseUri)
+  override def hashCode(): Int = Hashing.hash(baseUri, timeout)
 
   @nowarn("cat=unused")
   private[this] def copy(
