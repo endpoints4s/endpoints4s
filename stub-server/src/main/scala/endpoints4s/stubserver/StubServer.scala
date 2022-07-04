@@ -482,6 +482,15 @@ object StubServer extends App {
         )
       )
     case HttpRequest(
+      GET,
+      uri,
+      _,
+      _,
+      _
+      ) if uri.toRelative == Uri("/slow-response") =>
+        Thread.sleep(10000)
+        HttpResponse(entity = "It was slow!")
+    case HttpRequest(
           GET,
           uri,
           _,

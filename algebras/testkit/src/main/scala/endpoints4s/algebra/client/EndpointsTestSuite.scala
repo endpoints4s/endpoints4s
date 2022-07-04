@@ -81,6 +81,12 @@ trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] 
         } yield succeed
       }
 
+      "timeout in" in {
+        for {
+          _ <- call(client.slowResponseEndpoint, ()).failed.map(_ shouldBe a [scala.concurrent.TimeoutException])
+        } yield succeed
+      }
+
       "properly handle joined headers" in {
         val response = UUID.fromString("29d15495-55ea-431e-bef3-392b05b14fef").toString
 
