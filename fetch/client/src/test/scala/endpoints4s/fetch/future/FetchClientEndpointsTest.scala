@@ -11,8 +11,10 @@ import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromCodecs
 import org.scalajs.dom
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.concurrent.JSExecutionContext
 import scala.scalajs.js.Thenable.Implicits._
 import scala.util.control.NonFatal
@@ -46,7 +48,7 @@ class FetchClientEndpointsTest
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestClient = new TestClient(
-    EndpointsSettings().withBaseUri(Some("http://localhost:8080"))
+    EndpointsSettings().withBaseUri(Some("http://localhost:8080")).withTimeout(Some(FiniteDuration(2, TimeUnit.SECONDS)))
   )
 
   def call[Req, Resp](
