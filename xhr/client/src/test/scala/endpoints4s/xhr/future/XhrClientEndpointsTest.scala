@@ -5,8 +5,10 @@ import endpoints4s.xhr.BasicAuthentication
 import endpoints4s.xhr.EndpointsSettings
 import endpoints4s.xhr.JsonEntitiesFromCodecs
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 import scala.scalajs.concurrent.JSExecutionContext
 
 class TestClient(val settings: EndpointsSettings)
@@ -31,7 +33,7 @@ class XhrClientEndpointsTest
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestClient = new TestClient(
-    EndpointsSettings().withBaseUri(Some("http://localhost:8080"))
+    EndpointsSettings().withBaseUri(Some("http://localhost:8080")).withTimeout(Some(FiniteDuration.apply(2, TimeUnit.SECONDS)))
   )
 
   def call[Req, Resp](
