@@ -81,7 +81,7 @@ trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] 
         } yield succeed
       }
 
-      "timeout in" in {
+      "timeout" in {
         for {
           _ <- call(client.slowResponseEndpoint, ()).failed.map(_ shouldBe a [scala.concurrent.TimeoutException])
         } yield succeed

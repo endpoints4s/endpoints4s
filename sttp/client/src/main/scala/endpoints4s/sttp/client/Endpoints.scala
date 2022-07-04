@@ -1,28 +1,12 @@
 package endpoints4s.sttp.client
 
 import java.net.URI
-
-import endpoints4s.{
-  Codec,
-  Invalid,
-  InvariantFunctor,
-  PartialInvariantFunctor,
-  Semigroupal,
-  Tupler,
-  Valid,
-  Validated,
-  algebra
-}
+import endpoints4s.{Codec, Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
 import endpoints4s.algebra.Documentation
 import _root_.sttp.model.{Uri => SUri}
-import _root_.sttp.client3.{
-  Identity,
-  SttpBackend,
-  asStringAlways,
-  basicRequest,
-  Request => SRequest,
-  Response => SResponse
-}
+import _root_.sttp.client3.{Identity, SttpBackend, asStringAlways, basicRequest, Request => SRequest, Response => SResponse}
+
+import scala.concurrent.duration.FiniteDuration
 
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client
@@ -37,7 +21,8 @@ import _root_.sttp.client3.{
   */
 class Endpoints[R[_]](
     val host: String,
-    val backend: SttpBackend[R, Any]
+    val backend: SttpBackend[R, Any],
+    val timeout: Option[FiniteDuration] = None
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors[R]
     with BuiltInErrors[R]
@@ -56,6 +41,7 @@ trait EndpointsWithCustomErrors[R[_]]
 
   val host: String
   val backend: SttpBackend[R, Any]
+  val timeout: Option[FiniteDuration]
 
   type SttpRequest = SRequest[_, Any]
 
@@ -159,7 +145,12 @@ trait EndpointsWithCustomErrors[R[_]]
       val (a, b) = tuplerAB.unapply(ab)
 
       val uri: Identity[SUri] = SUri(new URI(s"${host}${url.encode(a)}"))
-      val sttpRequest: SttpRequest = method(basicRequest.get(uri = uri))
+      val sttpRequest: SttpRequest =
+        timeout match {
+          case Some(timeout) => method(basicRequest.get (uri = uri)).readTimeout(timeout)
+          case None => method(basicRequest.get (uri = uri))
+        }
+
       entity(b, headers(c, sttpRequest))
     }
 
@@ -332,11 +323,15 @@ trait EndpointsWithCustomErrors[R[_]]
       //#endpoint-type
       {
     def apply(a: A): R[B] = {
-      val result = backend.send(request(a).response(asStringAlways))
-      backend.responseMonad.flatMap(result) { sttpResponse =>
-        decodeResponse(response, sttpResponse)
+        val result = backend.send(request(a).response(asStringAlways))
+        val responseFuture = backend.responseMonad.handleError(result) {
+          case e if e != null && e.getCause.getClass.getName.toLowerCase.contains("timeout") =>
+            backend.responseMonad.error(new scala.concurrent.TimeoutException(s"Server didn't respond in before the request timed out: ${timeout}"))
+        }
+        backend.responseMonad.flatMap(responseFuture) { sttpResponse =>
+          decodeResponse(response, sttpResponse)
+        }
       }
-    }
   }
 
   def endpoint[A, B](
