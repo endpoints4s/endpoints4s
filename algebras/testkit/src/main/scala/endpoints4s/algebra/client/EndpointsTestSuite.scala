@@ -13,7 +13,7 @@ trait ClientEndpointsTestApi extends EndpointsTestApi {
 
 trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] {
 
-  def clientTestSuite() = {
+  def clientTestSuite(timeoutTest: Boolean = true) = {
 
     "Client interpreted" should {
 
@@ -81,10 +81,12 @@ trait EndpointsTestSuite[T <: ClientEndpointsTestApi] extends ClientTestBase[T] 
         } yield succeed
       }
 
-      "timeout" in {
-        for {
-          _ <- call(client.slowResponseEndpoint, ()).failed.map(_ shouldBe a [scala.concurrent.TimeoutException])
-        } yield succeed
+      if(timeoutTest) {
+        "timeout" in {
+          for {
+            _ <- call(client.slowResponseEndpoint, ()).failed.map(_ shouldBe a[scala.concurrent.TimeoutException])
+          } yield succeed
+        }
       }
 
       "properly handle joined headers" in {

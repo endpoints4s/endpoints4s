@@ -93,7 +93,7 @@ class Http4sClientEndpointsJsonSchemaTest
     ahc
   )
 
-  clientTestSuite()
+  clientTestSuite(timeoutTest = false)
   basicAuthSuite()
   jsonFromCodecTestSuite()
 
