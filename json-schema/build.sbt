@@ -3,7 +3,7 @@ import EndpointsSettings._
 import LocalCrossProject._
 
 val `json-schema` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema"))
     .settings(
@@ -11,20 +11,24 @@ val `json-schema` =
       publishSettings,
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.6.0",
-        "org.scalacheck" %%% "scalacheck" % "1.15.4" % Test,
+        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
+        "org.scalacheck" %%% "scalacheck" % "1.16.0" % Test,
         scalaTestDependency
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("1.8.0")
+    )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
 val `json-schema-js` = `json-schema`.js
 val `json-schema-jvm` = `json-schema`.jvm
+val `json-schema-native` = `json-schema`.native
 
 val `json-schema-testkit` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("testkit"))
     .settings(
@@ -34,14 +38,21 @@ val `json-schema-testkit` =
       version := "1.1.0+n",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
       )
     )
+    .platformsSettings(JVMPlatform, JSPlatform)(
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+    )
+    .nativeSettings(
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
+      versionPolicyFirstVersion := Some("1.2.0")
+    )
     .dependsOn(`json-schema`)
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
 val `json-schema-testkit-js` = `json-schema-testkit`.js
 val `json-schema-testkit-jvm` = `json-schema-testkit`.jvm
+val `json-schema-testkit-native` = `json-schema-testkit`.native
 
 lazy val `json-schema-generic` =
   crossProject(JSPlatform, JVMPlatform)

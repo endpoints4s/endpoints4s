@@ -3,7 +3,7 @@ import EndpointsSettings._
 import LocalCrossProject._
 
 val algebra =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("algebra"))
     .settings(
@@ -11,14 +11,18 @@ val algebra =
       `scala 2.12 to dotty`,
       name := "algebra"
     )
-    .dependsOnLocalCrossProjects("json-schema")
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("1.8.0")
+    )
+    .dependsOnLocalCrossProjectsWithNative("json-schema")
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-js` = algebra.js
 val `algebra-jvm` = algebra.jvm
+val `algebra-native` = algebra.native
 
 val `algebra-testkit` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("testkit"))
     .settings(
@@ -33,12 +37,16 @@ val `algebra-testkit` =
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
+    .nativeSettings(
+      versionPolicyFirstVersion := Some("2.1.0")
+    )
     .dependsOn(algebra)
-    .dependsOnLocalCrossProjects("json-schema-testkit")
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-testkit-js` = algebra.js
 val `algebra-testkit-jvm` = algebra.jvm
+val `algebra-testkit-native` = algebra.native
 
 val `algebra-circe` =
   crossProject(JSPlatform, JVMPlatform)
