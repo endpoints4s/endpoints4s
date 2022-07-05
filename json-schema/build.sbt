@@ -44,7 +44,7 @@ val `json-schema-testkit` =
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0"
     )
     .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
       versionPolicyFirstVersion := Some("1.2.0")
     )
     .dependsOn(`json-schema`)
