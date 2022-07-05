@@ -2,7 +2,6 @@ package endpoints4s.xhr
 
 import endpoints4s.Hashing
 
-import scala.annotation.nowarn
 import scala.concurrent.duration.{FiniteDuration}
 
 /** Settings for XHR interpreter.
@@ -22,7 +21,6 @@ final class EndpointsSettings private (val baseUri: Option[String], val timeout:
 
   override def hashCode(): Int = Hashing.hash(baseUri, timeout)
 
-  @nowarn("cat=unused")
   private[this] def copy(
       baseUri: Option[String] = baseUri,
       timeout: Option[FiniteDuration] = timeout
