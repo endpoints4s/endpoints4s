@@ -9,6 +9,8 @@ import scala.concurrent.duration.{FiniteDuration}
   */
 final class EndpointsSettings private (val baseUri: Option[String], val timeout: Option[FiniteDuration]) extends Serializable {
 
+  def this(baseUri: Option[String]) = this(baseUri, timeout = None)
+
   override def toString =
     s"EndpointsSettings($baseUri, $timeout)"
 

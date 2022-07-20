@@ -22,10 +22,12 @@ import scala.concurrent.duration.FiniteDuration
 class Endpoints[R[_]](
     val host: String,
     val backend: SttpBackend[R, Any],
-    val timeout: Option[FiniteDuration] = None
+    val timeout: Option[FiniteDuration]
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors[R]
-    with BuiltInErrors[R]
+    with BuiltInErrors[R] {
+  def this(host: String, backend: SttpBackend[R, Any]) = this(host, backend, timeout = None)
+}
 
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`.
