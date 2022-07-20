@@ -28,7 +28,8 @@ class XhrClientEndpointsTest
     with algebra.client.BasicAuthTestSuite[TestClient]
     with algebra.client.JsonFromCodecTestSuite[TestClient]
     with algebra.client.TextEntitiesTestSuite[TestClient]
-    with algebra.client.SumTypedEntitiesTestSuite[TestClient] {
+    with algebra.client.SumTypedEntitiesTestSuite[TestClient]
+    with algebra.client.TimeoutTestSuite[TestClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 

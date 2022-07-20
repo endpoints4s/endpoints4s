@@ -40,7 +40,8 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
     with client.ChunkedEntitiesTestSuite[TestJsonSchemaClient[IO]]
-    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
+    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]]
+    with client.TimeoutTestSuite[TestJsonSchemaClient[IO]] {
 
   type EffectResource[A] = effect.Resource[IO, A]
 

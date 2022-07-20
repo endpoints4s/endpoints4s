@@ -43,7 +43,8 @@ class FetchClientEndpointsTest
     with algebra.client.TextEntitiesTestSuite[TestClient]
     with algebra.client.SumTypedEntitiesTestSuite[TestClient]
     with algebra.client.ChunkedEntitiesResponseTestSuite[TestClient]
-    with algebra.client.ChunkedJsonEntitiesResponseTestSuite[TestClient] {
+    with algebra.client.ChunkedJsonEntitiesResponseTestSuite[TestClient]
+    with algebra.client.TimeoutTestSuite[TestClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 

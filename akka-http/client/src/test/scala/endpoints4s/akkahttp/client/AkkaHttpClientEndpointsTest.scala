@@ -76,7 +76,7 @@ class AkkaHttpClientEndpointsTest
   ): Future[B] =
     endpoint(Source.fromIterator(() => req.iterator))
 
-  clientTestSuite(timeoutTest = false)
+  clientTestSuite()
   basicAuthSuite()
   jsonFromCodecTestSuite()
   textEntitiesTestSuite()
