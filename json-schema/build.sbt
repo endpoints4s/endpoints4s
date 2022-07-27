@@ -37,14 +37,14 @@ val `json-schema-testkit` =
       name := "algebra-json-schema-testkit",
       version := "1.1.0+n",
       libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % scalaTestVersion
+        "org.scalatest" %%% "scalatest" % scalaTestVersion,
       )
     )
     .platformsSettings(JVMPlatform, JSPlatform)(
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
       versionPolicyFirstVersion := Some("1.2.0")
     )
     .dependsOn(`json-schema`)
