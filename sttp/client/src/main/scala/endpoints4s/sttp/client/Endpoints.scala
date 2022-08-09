@@ -6,8 +6,6 @@ import endpoints4s.algebra.Documentation
 import _root_.sttp.model.{Uri => SUri}
 import _root_.sttp.client3.{Identity, SttpBackend, asStringAlways, basicRequest, Request => SRequest, Response => SResponse}
 
-import scala.concurrent.duration.FiniteDuration
-
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`, and uses [[algebra.BuiltInErrors]] to model client
   * and server errors.
@@ -21,13 +19,10 @@ import scala.concurrent.duration.FiniteDuration
   */
 class Endpoints[R[_]](
     val host: String,
-    val backend: SttpBackend[R, Any],
-    val timeout: Option[FiniteDuration]
+    val backend: SttpBackend[R, Any]
 ) extends algebra.Endpoints
     with EndpointsWithCustomErrors[R]
-    with BuiltInErrors[R] {
-  def this(host: String, backend: SttpBackend[R, Any]) = this(host, backend, timeout = None)
-}
+    with BuiltInErrors[R]
 
 /** An interpreter for [[endpoints4s.algebra.Endpoints]] that builds a client issuing requests using
   * a sttp’s `com.softwaremill.sttp.SttpBackend`.
@@ -43,7 +38,6 @@ trait EndpointsWithCustomErrors[R[_]]
 
   val host: String
   val backend: SttpBackend[R, Any]
-  val timeout: Option[FiniteDuration]
 
   type SttpRequest = SRequest[_, Any]
 
@@ -147,11 +141,7 @@ trait EndpointsWithCustomErrors[R[_]]
       val (a, b) = tuplerAB.unapply(ab)
 
       val uri: Identity[SUri] = SUri(new URI(s"${host}${url.encode(a)}"))
-      val sttpRequest: SttpRequest =
-        timeout match {
-          case Some(timeout) => method(basicRequest.get (uri = uri)).readTimeout(timeout)
-          case None => method(basicRequest.get (uri = uri))
-        }
+      val sttpRequest: SttpRequest = method(basicRequest.get (uri = uri))
 
       entity(b, headers(c, sttpRequest))
     }
@@ -328,7 +318,7 @@ trait EndpointsWithCustomErrors[R[_]]
         val result = backend.send(request(a).response(asStringAlways))
         val responseFuture = backend.responseMonad.handleError(result) {
           case e if e != null && e.getCause.getClass.getName.toLowerCase.contains("timeout") =>
-            backend.responseMonad.error(new scala.concurrent.TimeoutException(s"Server didn't respond in before the request timed out: ${timeout}"))
+            backend.responseMonad.error(new scala.concurrent.TimeoutException(s"Server didn't respond in before the request timed out."))
         }
         backend.responseMonad.flatMap(responseFuture) { sttpResponse =>
           decodeResponse(response, sttpResponse)

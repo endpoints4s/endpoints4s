@@ -11,8 +11,8 @@ import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
-class TestClient[R[_]](address: String, backend: SttpBackend[R, Any], timeout: Option[FiniteDuration] = None)
-    extends Endpoints(address, backend, timeout)
+class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
+    extends Endpoints(address, backend)
     with BasicAuthentication[R]
     with JsonEntitiesFromCodecs[R]
     with BasicAuthenticationTestApi
@@ -29,10 +29,10 @@ class EndpointsTestSync
     with TextEntitiesTestSuite[TestClient[Try]]
     with TimeoutTestSuite[TestClient[Try]] {
 
-  val backend = TryHttpURLConnectionBackend()
+  val backend = TryHttpURLConnectionBackend(customizeConnection = _.setReadTimeout(FiniteDuration(2, TimeUnit.SECONDS).toMillis.toInt))
 
   val client: TestClient[Try] =
-    new TestClient[Try](s"http://localhost:$stubServerPort", backend, Some(FiniteDuration(2, TimeUnit.SECONDS)))
+    new TestClient[Try](s"http://localhost:$stubServerPort", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
