@@ -294,7 +294,12 @@ trait EndpointsWithCustomErrors
     requestInit.signal = abortController.signal
 
     @volatile var timedOut = false
-    val timeoutId = settings.timeout.map { t => scala.scalajs.js.timers.setTimeout(t) { timedOut = true ; abortController.abort() } }
+    val timeoutId = settings.timeout.map { t =>
+      scala.scalajs.js.timers.setTimeout(t) {
+        timedOut = true
+        abortController.abort()
+      }
+    }
 
     val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
     f.`then`(
@@ -344,8 +349,13 @@ trait EndpointsWithCustomErrors
       js.defined { (e: Any) =>
         e match {
           case th: Throwable => onerror(th)
-          case _             =>
-            if(timedOut) onerror(new TimeoutException(s"Server didn't respond in before the request timed out: ${settings.timeout}"))
+          case _ =>
+            if (timedOut)
+              onerror(
+                new TimeoutException(
+                  s"Server didn't respond in before the request timed out: ${settings.timeout}"
+                )
+              )
             else onerror(js.JavaScriptException(e))
         }
         (): Unit | js.Thenable[Unit]

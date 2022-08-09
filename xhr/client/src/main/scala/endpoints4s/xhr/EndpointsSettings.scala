@@ -7,7 +7,10 @@ import scala.concurrent.duration.{FiniteDuration}
 /** Settings for XHR interpreter.
   * @param baseUri Base of the URI of the service that implements the endpoints, can be absolute or relative (e.g. "http://foo.com" or "/bar")
   */
-final class EndpointsSettings private (val baseUri: Option[String], val timeout: Option[FiniteDuration]) extends Serializable {
+final class EndpointsSettings private (
+    val baseUri: Option[String],
+    val timeout: Option[FiniteDuration]
+) extends Serializable {
 
   override def toString =
     s"EndpointsSettings($baseUri, $timeout)"
