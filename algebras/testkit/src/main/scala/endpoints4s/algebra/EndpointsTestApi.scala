@@ -326,4 +326,10 @@ trait EndpointsTestApi extends algebra.Endpoints {
     get(path / "optional-response-header" / "none"),
     ok(textResponse, headers = optResponseHeader("A"))
   )
+
+  val slowResponseEndpoint = endpoint(
+    get(path / "slow-response"),
+    ok(textResponse)
+  )
+
 }
