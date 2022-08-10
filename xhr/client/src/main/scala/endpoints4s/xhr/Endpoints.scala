@@ -1,6 +1,17 @@
 package endpoints4s.xhr
 
-import endpoints4s.{Decoder, Hashing, Invalid, InvariantFunctor, PartialInvariantFunctor, Semigroupal, Tupler, Valid, Validated, algebra}
+import endpoints4s.{
+  Decoder,
+  Hashing,
+  Invalid,
+  InvariantFunctor,
+  PartialInvariantFunctor,
+  Semigroupal,
+  Tupler,
+  Valid,
+  Validated,
+  algebra
+}
 import endpoints4s.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
@@ -326,7 +337,12 @@ trait EndpointsWithCustomErrors
       onload(maybeB)
     }
     xhr.onerror = _ => onerror(new Exception(xhr.responseText))
-    xhr.ontimeout = _ => onerror(new TimeoutException(s"Server didn't respond in before the request timed out: ${settings.timeout}"))
+    xhr.ontimeout = _ =>
+      onerror(
+        new TimeoutException(
+          s"Server didn't respond in before the request timed out: ${settings.timeout}"
+        )
+      )
     xhr.send(maybeEntity.orNull)
     () => xhr.abort()
   }
