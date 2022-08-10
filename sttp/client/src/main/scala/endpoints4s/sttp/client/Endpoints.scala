@@ -1,7 +1,6 @@
 package endpoints4s.sttp.client
 
 import java.net.URI
-
 import endpoints4s.{
   Codec,
   Invalid,
@@ -160,6 +159,7 @@ trait EndpointsWithCustomErrors[R[_]]
 
       val uri: Identity[SUri] = SUri(new URI(s"${host}${url.encode(a)}"))
       val sttpRequest: SttpRequest = method(basicRequest.get(uri = uri))
+
       entity(b, headers(c, sttpRequest))
     }
 
@@ -333,7 +333,15 @@ trait EndpointsWithCustomErrors[R[_]]
       {
     def apply(a: A): R[B] = {
       val result = backend.send(request(a).response(asStringAlways))
-      backend.responseMonad.flatMap(result) { sttpResponse =>
+      val responseFuture = backend.responseMonad.handleError(result) {
+        case e if e != null && e.getCause.getClass.getName.toLowerCase.contains("timeout") =>
+          backend.responseMonad.error(
+            new scala.concurrent.TimeoutException(
+              s"Server didn't respond in before the request timed out."
+            )
+          )
+      }
+      backend.responseMonad.flatMap(responseFuture) { sttpResponse =>
         decodeResponse(response, sttpResponse)
       }
     }

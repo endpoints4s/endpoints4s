@@ -18,6 +18,7 @@ import org.scalajs.dom.{HttpMethod => FetchHttpMethod}
 import org.scalajs.dom.{RequestInit => FetchRequestInit}
 import org.scalajs.dom.{Response => FetchResponse}
 
+import scala.concurrent.TimeoutException
 import scala.scalajs.js
 import scala.scalajs.js.Promise
 import scala.scalajs.js.|
@@ -292,9 +293,18 @@ trait EndpointsWithCustomErrors
     val abortController = new AbortController
     requestInit.signal = abortController.signal
 
+    @volatile var timedOut = false
+    val timeoutId = settings.timeout.map { t =>
+      scala.scalajs.js.timers.setTimeout(t) {
+        timedOut = true
+        abortController.abort()
+      }
+    }
+
     val f = Fetch.fetch(settings.baseUri.getOrElse("") + request.href(a), requestInit)
     f.`then`(
       (fetchResponse: FetchResponse) => {
+        timeoutId.foreach(scala.scalajs.js.timers.clearTimeout)
         val maybeResponse = response(fetchResponse)
 
         def maybeClientErrors =
@@ -339,7 +349,14 @@ trait EndpointsWithCustomErrors
       js.defined { (e: Any) =>
         e match {
           case th: Throwable => onerror(th)
-          case _             => onerror(js.JavaScriptException(e))
+          case _ =>
+            if (timedOut)
+              onerror(
+                new TimeoutException(
+                  s"Server didn't respond in before the request timed out: ${settings.timeout}"
+                )
+              )
+            else onerror(js.JavaScriptException(e))
         }
         (): Unit | js.Thenable[Unit]
       }: js.UndefOr[js.Function1[Any, Unit | js.Thenable[Unit]]]
