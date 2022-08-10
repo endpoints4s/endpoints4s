@@ -43,4 +43,4 @@ ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
 addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "2.0.1")
 
-addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.9")
+addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.10")
