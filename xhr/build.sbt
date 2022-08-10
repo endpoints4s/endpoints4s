@@ -1,4 +1,5 @@
 import EndpointsSettings._
+import com.typesafe.tools.mima.core.{ ProblemFilters, DirectMissingMethodProblem }
 
 val `xhr-client` =
   project
@@ -10,6 +11,10 @@ val `xhr-client` =
       `scala 2.12 to dotty`,
       name := "xhr-client",
       version := "5.0.0+n",
+      mimaBinaryIssueFilters ++= Seq(
+        // Was private to Scala users
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.xhr.EndpointsSettings.this")
+      ),
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(

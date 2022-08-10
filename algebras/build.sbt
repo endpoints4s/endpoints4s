@@ -30,6 +30,7 @@ val `algebra-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
       version := "2.0.0+n",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),

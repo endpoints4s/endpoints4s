@@ -15,6 +15,7 @@ import endpoints4s.{
 import endpoints4s.algebra.Documentation
 import org.scalajs.dom.XMLHttpRequest
 
+import scala.concurrent.TimeoutException
 import scala.scalajs.js
 
 /** Partial interpreter for [[algebra.Endpoints]] that builds a client issuing requests
@@ -300,6 +301,7 @@ trait EndpointsWithCustomErrors
   ): js.Function0[Unit] = {
     val requestData = request(a)
     val xhr = new XMLHttpRequest
+    settings.timeout.foreach(t => xhr.timeout = t.toMillis.toDouble)
     xhr.open(requestData.method, settings.baseUri.getOrElse("") + request.href(a))
     requestData.prepare(xhr)
     val maybeEntity = requestData.entity(xhr)
@@ -335,6 +337,12 @@ trait EndpointsWithCustomErrors
       onload(maybeB)
     }
     xhr.onerror = _ => onerror(new Exception(xhr.responseText))
+    xhr.ontimeout = _ =>
+      onerror(
+        new TimeoutException(
+          s"Server didn't respond in before the request timed out: ${settings.timeout}"
+        )
+      )
     xhr.send(maybeEntity.orNull)
     () => xhr.abort()
   }
