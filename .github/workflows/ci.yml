@@ -20,7 +20,7 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sbt stub-server/docker:publishLocal
-    - run: docker run -d -p 8080:8080 stubserver:1.1.0
+    - run: docker run -d -p 8080:8080 stubserver:1.1.1
     - run: sbt ++2.12.13 test
 
   test213:
@@ -36,7 +36,7 @@ jobs:
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
     - run: sbt stub-server/docker:publishLocal
-    - run: docker run -d -p 8080:8080 stubserver:1.1.0
+    - run: docker run -d -p 8080:8080 stubserver:1.1.1
     - run: sbt ++2.13.8 coverage test coverageReport coverageAggregate manual/makeSite
     - run: bash <(curl -s https://codecov.io/bash)
 
@@ -51,7 +51,7 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sbt stub-server/docker:publishLocal
-    - run: docker run -d -p 8080:8080 stubserver:1.1.0
+    - run: docker run -d -p 8080:8080 stubserver:1.1.1
     - run: sbt "++ 3.1.2 compile" "++ 3.1.2 ;json-schemaJVM/test;json-schemaJS/test;json-schemaNative/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test;algebraNative/test;fetch-client/test;fetch-client-circe/test"
 
   versionPolicy:
