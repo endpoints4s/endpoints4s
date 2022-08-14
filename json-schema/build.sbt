@@ -17,9 +17,6 @@ val `json-schema` =
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
-    .nativeSettings(
-      versionPolicyFirstVersion := Some("1.8.0")
-    )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
@@ -35,7 +32,7 @@ val `json-schema-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-json-schema-testkit",
-      version := "1.1.0+n",
+      version := "1.2.0+n",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
       )
@@ -44,8 +41,7 @@ val `json-schema-testkit` =
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
-      versionPolicyFirstVersion := Some("1.2.0")
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
     )
     .dependsOn(`json-schema`)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
@@ -88,7 +84,7 @@ lazy val `json-schema-circe` =
       `scala 2.12 to dotty`,
       publishSettings,
       name := "json-schema-circe",
-      version := "2.1.0+n",
+      version := "2.2.0+n",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
