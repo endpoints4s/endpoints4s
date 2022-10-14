@@ -1,5 +1,5 @@
 import EndpointsSettings._
-import com.typesafe.tools.mima.core.{ProblemFilters, DirectMissingMethodProblem}
+import com.typesafe.tools.mima.core.{ ProblemFilters, DirectMissingMethodProblem }
 
 val `fetch-client` =
   project
@@ -13,14 +13,12 @@ val `fetch-client` =
       version := "2.1.0+n",
       mimaBinaryIssueFilters ++= Seq(
         // Was private to Scala users
-        ProblemFilters.exclude[DirectMissingMethodProblem](
-          "endpoints4s.fetch.EndpointsSettings.this"
-        )
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.fetch.EndpointsSettings.this")
       ),
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "2.3.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.2.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
