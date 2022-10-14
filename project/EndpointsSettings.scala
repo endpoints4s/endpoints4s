@@ -98,7 +98,7 @@ object EndpointsSettings {
   // --- Common dependencies
 
   val circeVersion = "0.14.1"
-  val playjsonVersion = "2.9.3"
+  val playjsonVersion = "2.9.2"
   val playVersion = "2.8.13"
   val sttpVersion = "3.3.15"
   val akkaActorVersion = "2.6.15"
