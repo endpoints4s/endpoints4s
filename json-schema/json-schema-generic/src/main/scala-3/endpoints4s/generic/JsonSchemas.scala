@@ -98,8 +98,8 @@ trait JsonSchemas extends algebra.JsonSchemas:
     *     trait’s `ClassTag`.
     */
   inline def genericTagged[A](using sumOf: Mirror.SumOf[A]): Tagged[A] =
-    summonTagged[sumOf.MirroredElemTypes, sumOf.MirroredElemLabels](0).asInstanceOf[Tagged[sumOf.MirroredElemTypes]] // FIXME Remove asInstanceOf
-      .xmap[A](tuple => last(tuple).asInstanceOf[A])(a => asTuple(sumOf.ordinal(a), a).asInstanceOf[sumOf.MirroredElemTypes])
+    summonTagged[A, sumOf.MirroredElemTypes, sumOf.MirroredElemLabels](0).asInstanceOf[Tagged[(Int, A)]] // FIXME Remove asInstanceOf
+      .xmap[A]{case (_, a) => a}(a => sumOf.ordinal(a) -> a)
       .pipe(tagged => summonName[A].fold(tagged)(tagged.named))
       .withDiscriminator(summonDiscriminator[A])
       .pipe(tagged => summonDescription[A].fold(tagged)(tagged.withDescription))
@@ -212,18 +212,6 @@ trait JsonSchemas extends algebra.JsonSchemas:
       case _                                          => defaultDiscriminatorName
     }
 
-  /** Retrieve the last element of a tuple */
-  private def last(tuple: Tuple): Any =
-    tuple match
-      case h *: EmptyTuple => h
-      case () *: t         => last(t)
-
-  /** Build a tuple with `n` elements, the last one containing the value `a` */
-  private def asTuple[A](n: Int, a: A): Tuple =
-    n match
-      case 0 => a *: EmptyTuple
-      case _ => () *: asTuple(n - 1, a)
-
   /** Summon the [[Record]] schema of a concrete type of a sealed trait.
     * If there is a given instance of `GenericJsonSchema.GenericRecord[A]`,
     * it is used as the schema, otherwise we derive the schema.
@@ -235,33 +223,29 @@ trait JsonSchemas extends algebra.JsonSchemas:
     }
 
   /** Summon a [[Tagged]] schema for the alternatives `Types`.
+    * @tparam A      The sum type
     * @tparam Types  List of record types (e.g. `(Circle, Rectangle)`)
     * @tparam Labels List of record labels’ types (e.g. `("Circle".type, "Rectangle".type)`)
     * @param  i      Index of the head alternative
-    *
-    * We encode the ordinal `i` of each alternative as a tuple containing `i - 1` `Unit`
-    * followed by the actual value.
     */
-  private[generic] inline def summonTagged[Types <: Tuple, Labels <: Tuple](i: Int): Tagged[Types] =
+  private[generic] inline def summonTagged[A, Types <: Tuple, Labels <: Tuple](i: Int): Tagged[(Int, A)] =
     inline erasedValue[(Types, Labels)] match
       // Last alternative
       case _: (head *: EmptyTuple, labelHead *: EmptyTuple) =>
         summonTaggedRecord[head].asInstanceOf[Record[head]] // FIXME Remove asInstanceOf
-          .tagged(constValue[labelHead].asInstanceOf[String]) // TODO Remove asInstanceOf
-          .xmap[head *: EmptyTuple](h => h *: EmptyTuple) { case h *: EmptyTuple => h }
-          .asInstanceOf[Tagged[Types]] // FIXME Remove asInstanceOf
+          .tagged(constValue[labelHead].asInstanceOf[String])
+          .xmap(h => i -> h.asInstanceOf[A]) { case (_, h) => h.asInstanceOf[head] }
       case _: (head *: tail, labelHead *: labelsTail) =>
         summonTaggedRecord[head].asInstanceOf[Record[head]] // FIXME Remove asInstanceOf
-          .tagged(constValue[labelHead].asInstanceOf[String]) // TODO Remove asInstanceOf
-          .orElse(summonTagged[tail, labelsTail](i + 1).asInstanceOf[Tagged[tail]]) // FIXME Remove asInstanceOf
+          .tagged(constValue[labelHead].asInstanceOf[String])
+          .orElse(summonTagged[A, tail, labelsTail](i + 1).asInstanceOf[Tagged[(Int, tail)]]) // FIXME Remove asInstanceOf
           .xmap {
-            case Left(h)  => h *: EmptyTuple
-            case Right(t) => () *: t
+            case Left(h) => i -> h.asInstanceOf[A]
+            case Right(t) => t.asInstanceOf[(Int, A)]
           } {
-            case h *: EmptyTuple => Left(h.asInstanceOf[head])
-            case () *: t         => Right(t.asInstanceOf[tail])
+            case (`i`, h) => Left(h.asInstanceOf[head])
+            case t => Right(t.asInstanceOf[(Int, tail)])
           }
-          .asInstanceOf[Tagged[Types]]
 
   extension [A <: Product](schema: JsonSchema[A])
     /**
