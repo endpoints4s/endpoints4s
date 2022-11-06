@@ -119,7 +119,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * @param  defaultValues  List of the possible default values of the record fields (e.g.,
     *                        `(Some(42), None)`)
     */
-  inline def summonRecord[
+  private[generic] inline def summonRecord[
     Types <: Tuple,
     Labels <: Tuple,
     Docs <: Tuple,
@@ -173,7 +173,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[title @title]] annotation, it is used as a title, otherwise
     * the schema has no title
     */
-  inline def summonTitle[A]: Option[String] =
+  private[generic] inline def summonTitle[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`title`, A] => Some(annotation().value)
       case _                                  => None
@@ -185,7 +185,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * name, otherwise it has the result of calling [[classTagToSchemaName]]
     * with a `ClassTag[A]`.
     */
-  inline def summonName[A]: Option[String] =
+  private[generic] inline def summonName[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`name`, A]    => Some(annotation().value)
       case annotation: Annotation[`unnamed`, A] => None
@@ -196,7 +196,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[docs @docs]] annotation, it is used as a description,
     * otherwise the schema has no description.
     */
-  inline def summonDescription[A]: Option[String] =
+  private[generic] inline def summonDescription[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`docs`, A] => Some(annotation().text)
       case _                                 => None
@@ -344,7 +344,7 @@ private object Defaults:
                 type DefaultValues = defaultValuesType
                 val defaultValues: DefaultValues = $defaultValuesValue
             }
-      case _ => report.throwError(s"Invalid type ${tpe.show}. Expecting a case class.")
+      case _ => report.errorAndAbort(s"Invalid type ${tpe.show}. Expecting a case class.")
   end summonDefaultsMacro
 
 end Defaults
