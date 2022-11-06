@@ -34,7 +34,7 @@ val `json-schema-testkit` =
       name := "algebra-json-schema-testkit",
       version := "1.2.0+n",
       libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % scalaTestVersion,
+        "org.scalatest" %%% "scalatest" % scalaTestVersion
       )
     )
     .platformsSettings(JVMPlatform, JSPlatform)(
@@ -72,6 +72,9 @@ lazy val `json-schema-generic` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjects("json-schema")
+    .dependsOnLocalCrossProjectsWithScope(
+      "json-schema-circe" -> Test
+    )
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
