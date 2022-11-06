@@ -220,6 +220,7 @@ trait EndpointsWithCustomErrors
       recSchema <- captureReferencedSchemasRec(schema)
     } yield recSchema
 
+    allReferencedSchemas.filter(_.name.contains("Book"))
     allReferencedSchemas.collect {
       case ref: Schema.Reference if ref.original.isDefined =>
         ref.name -> ref.original.get

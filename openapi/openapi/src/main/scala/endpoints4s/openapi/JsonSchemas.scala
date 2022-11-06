@@ -44,6 +44,19 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
       val docs: DocumentedJsonSchema
   )
 
+  class RecordReference[A](
+      val name: String,
+      referencedRecord: Record[A]
+  ) extends Record[A](referencedRecord.ujsonSchema, referencedRecord.docs.withName(name)) {
+    def withName(name: String) = new RecordReference(name, referencedRecord)
+
+    def withExample(example: => ujson.Value): RecordReference[A] =
+      new RecordReference(
+        name,
+        new Record(referencedRecord.ujsonSchema, referencedRecord.docs.withExample(example))
+      )
+  }
+
   class Record[A](
       override val ujsonSchema: ujsonSchemas.Record[A],
       override val docs: DocumentedRecord
@@ -399,7 +412,8 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
   }
 
   def namedRecord[A](schema: Record[A], name: String): Record[A] =
-    new Record(schema.ujsonSchema, schema.docs.withName(name))
+    new RecordReference(name, schema)
+    //new Record(schema.ujsonSchema, schema.docs.withName(name))
 
   def namedTagged[A](schema: Tagged[A], name: String): Tagged[A] =
     new Tagged(schema.ujsonSchema, schema.docs.withName(name))
@@ -539,10 +553,16 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
         case s: LazySchema       => LazySchema(s.name, updatedDocs(s.value))
         case s: OneOf            => s.copy(example = Some(exampleJson))
       }
-    new JsonSchema(
-      schema.ujsonSchema,
-      updatedDocs(schema.docs)
-    )
+    schema match {
+      case s: RecordReference[A] =>
+        println(s"RECORDREFERENCE ${s.name}")
+        s.withName(s.name + "$").withExample(exampleJson)
+      case _ =>
+        new JsonSchema(
+          schema.ujsonSchema,
+          updatedDocs(schema.docs)
+        )
+    }
   }
 
   def withTitleRecord[A](
