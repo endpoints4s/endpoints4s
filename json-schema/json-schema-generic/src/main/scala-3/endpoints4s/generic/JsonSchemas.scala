@@ -137,11 +137,17 @@ trait JsonSchemas extends algebra.JsonSchemas:
             case docHead *: docsTail =>
               // TODO Remove asInstanceOf, but the compiler crashes if the above line is `case (docHead: Option[docs]) *: docsTail`
               (docHead.asInstanceOf[Option[docs]].map(_.text), docsTail)
+            case EmptyTuple => 
+              // Should not happen if Docs has the same length as Types and Labels
+              (None, EmptyTuple)
         val (maybeDefaultValue, defaultValuesTail) =
           /*inline*/ defaultValues match
             case defaultValueHead *: defaultValuesTail =>
               // TODO Remove asInstanceOf
               (defaultValueHead.asInstanceOf[Option[head]], defaultValuesTail)
+            case EmptyTuple => 
+              // Should not happen if Docs has the same length as Types and Labels
+              (None, EmptyTuple)
         val labelHead = constValue[labelHead].asInstanceOf[String] // TODO Remove asInstanceOf
         val recordHead: Record[head] =
           inline erasedValue[head] match
