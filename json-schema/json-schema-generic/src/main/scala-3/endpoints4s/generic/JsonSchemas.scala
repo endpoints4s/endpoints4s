@@ -99,7 +99,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     */
   inline def genericTagged[A](using sumOf: Mirror.SumOf[A]): Tagged[A] =
     summonTagged[A, sumOf.MirroredElemTypes, sumOf.MirroredElemLabels](0).asInstanceOf[Tagged[(Int, A)]] // FIXME Remove asInstanceOf
-      .xmap[A]{case (_, a) => a}(a => sumOf.ordinal(a) -> a)
+      .xmap[A]((_, a) => a)(a => sumOf.ordinal(a) -> a)
       .pipe(tagged => summonName[A].fold(tagged)(tagged.named))
       .withDiscriminator(summonDiscriminator[A])
       .pipe(tagged => summonDescription[A].fold(tagged)(tagged.withDescription))
