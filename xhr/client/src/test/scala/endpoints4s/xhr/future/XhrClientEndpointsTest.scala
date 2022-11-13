@@ -34,7 +34,7 @@ class XhrClientEndpointsTest
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestClient = new TestClient(
-    EndpointsSettings().withBaseUri(Some("http://localhost:8080")).withTimeout(Some(FiniteDuration.apply(2, TimeUnit.SECONDS)))
+    EndpointsSettings().withBaseUri(Some(s"http://localhost:$stubServerPort")).withTimeout(Some(FiniteDuration.apply(2, TimeUnit.SECONDS)))
   )
 
   def call[Req, Resp](

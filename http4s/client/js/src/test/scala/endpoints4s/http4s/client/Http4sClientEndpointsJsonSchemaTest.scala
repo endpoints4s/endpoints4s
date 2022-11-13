@@ -50,7 +50,7 @@ class Http4sClientEndpointsJsonSchemaTest
       host = Uri.RegName("localhost"),
       port = Some(stubServerPort)
     ),
-    Uri.Scheme.http,
+    Uri.Scheme.https,
     FetchClientBuilder[IO].withRequestTimeout(FiniteDuration(2, TimeUnit.SECONDS)).create
   )
 

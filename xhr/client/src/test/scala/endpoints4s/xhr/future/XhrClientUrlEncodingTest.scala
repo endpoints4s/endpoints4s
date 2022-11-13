@@ -14,7 +14,7 @@ class XhrClientUrlEncodingTest
   implicit def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestClient = new TestClient(
-    EndpointsSettings().withBaseUri(Some("http://localhost:8080"))
+    EndpointsSettings().withBaseUri(Some(s"http://localhost:$stubServerPort"))
   )
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)

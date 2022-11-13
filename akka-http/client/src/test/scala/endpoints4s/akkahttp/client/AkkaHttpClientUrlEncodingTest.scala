@@ -17,7 +17,7 @@ class AkkaHttpClientUrlEncodingTest
   val client: TestClient = new TestClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", 8080)
+        .cachedHostConnectionPool("localhost", stubServerPort)
     )
   )
 
