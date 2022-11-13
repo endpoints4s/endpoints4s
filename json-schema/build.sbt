@@ -72,6 +72,9 @@ lazy val `json-schema-generic` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjects("json-schema")
+    .dependsOnLocalCrossProjectsWithScope(
+      "json-schema-circe" -> Test
+    )
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
