@@ -33,7 +33,7 @@ class XhrClientEndpointsJsonSchemaTest
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
-    EndpointsSettings().withBaseUri(Some(s"http://localhost:$stubServerPort"))
+    EndpointsSettings().withBaseUri(Some(s"http://localhost:$stubServerPortHTTP"))
   )
 
   def call[Req, Resp](

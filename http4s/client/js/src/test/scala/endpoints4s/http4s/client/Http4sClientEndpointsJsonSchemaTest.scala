@@ -48,9 +48,9 @@ class Http4sClientEndpointsJsonSchemaTest
   val client = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(stubServerPort)
+      port = Some(stubServerPortHTTP)
     ),
-    Uri.Scheme.https,
+    Uri.Scheme.http,
     FetchClientBuilder[IO].withRequestTimeout(FiniteDuration(2, TimeUnit.SECONDS)).create
   )
 
@@ -83,7 +83,7 @@ class Http4sClientEndpointsJsonSchemaTest
   override val streamingClient = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(stubServerPort)
+      port = Some(stubServerPortHTTP)
     ),
     Uri.Scheme.http,
     FetchClientBuilder[IO].create

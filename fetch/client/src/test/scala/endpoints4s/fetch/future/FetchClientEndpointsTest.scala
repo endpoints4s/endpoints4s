@@ -60,7 +60,7 @@ class FetchClientEndpointsTest
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue
 
-  val baseUrl = s"https://localhost:$stubServerPort"
+  val baseUrl = s"https://localhost:$stubServerPortHTTPS"
 
   val client: TestClient = new TestClient(
     EndpointsSettings()

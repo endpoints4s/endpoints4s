@@ -11,7 +11,7 @@ trait UrlEncodingTestSuite[T <: algebra.client.ClientEndpointsTestApi]
     extends AnyWordSpecLike
     with Matchers {
 
-  val stubServerPort = 8080
+  val stubServerPortHTTP = 8080
 
   val client: T
 

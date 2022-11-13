@@ -16,7 +16,7 @@ class Http4sClientUrlEncodingTestJVM
   val client = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(stubServerPort)
+      port = Some(stubServerPortHTTP)
     ),
     Uri.Scheme.http,
     ahc

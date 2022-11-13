@@ -543,14 +543,23 @@ object StubServer extends App {
     ConnectionContext.httpsServer(context)
   }
 
-  val bindingFuture =
-    Http().newServerAt("0.0.0.0", 8080).enableHttps(exampleServerContext).bind(requestHandler)
-
-  bindingFuture.onComplete {
+  Http().newServerAt("0.0.0.0", 8080).bind(requestHandler).onComplete {
     case Success(binding) =>
       val address = binding.localAddress
-      println(s"Stub server online at https://${address.getHostName}:${address.getPort}/")
+      println(s"Stub server online at http://${address.getHostName}:${address.getPort}/")
     case Failure(ex) =>
       println(s"Failed to bind HTTP endpoint, terminating system ${ex.toString}")
   }
+
+  Http()
+    .newServerAt("0.0.0.0", 8081)
+    .enableHttps(exampleServerContext)
+    .bind(requestHandler)
+    .onComplete {
+      case Success(binding) =>
+        val address = binding.localAddress
+        println(s"Stub server online at https://${address.getHostName}:${address.getPort}/")
+      case Failure(ex) =>
+        println(s"Failed to bind HTTPS endpoint, terminating system ${ex.toString}")
+    }
 }
