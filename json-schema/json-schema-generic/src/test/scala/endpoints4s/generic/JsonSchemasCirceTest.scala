@@ -6,11 +6,11 @@ import org.scalatest.freespec.AnyFreeSpec
 
 class JsonSchemasCirceTest extends AnyFreeSpec {
 
-  object GenecirCodec extends JsonSchemasDocs with JsonSchemas with circe.JsonSchemas
+  object GenericCodec extends JsonSchemasDocs with JsonSchemas with circe.JsonSchemas
 
   "sealed trait" in {
 
-    import GenecirCodec._
+    import GenericCodec._
 
     val circle = Circle(42)
     val circleJson = Json.obj(
