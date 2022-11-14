@@ -98,8 +98,8 @@ trait JsonSchemas extends algebra.JsonSchemas:
     *     trait’s `ClassTag`.
     */
   inline def genericTagged[A](using sumOf: Mirror.SumOf[A]): Tagged[A] =
-    summonTagged[sumOf.MirroredElemTypes, sumOf.MirroredElemLabels](0).asInstanceOf[Tagged[sumOf.MirroredElemTypes]] // FIXME Remove asInstanceOf
-      .xmap[A](tuple => last(tuple).asInstanceOf[A])(a => asTuple(sumOf.ordinal(a), a).asInstanceOf[sumOf.MirroredElemTypes])
+    summonTagged[A, sumOf.MirroredElemTypes, sumOf.MirroredElemLabels](0).asInstanceOf[Tagged[(Int, A)]] // FIXME Remove asInstanceOf
+      .xmap[A]((_, a) => a)(a => sumOf.ordinal(a) -> a)
       .pipe(tagged => summonName[A].fold(tagged)(tagged.named))
       .withDiscriminator(summonDiscriminator[A])
       .pipe(tagged => summonDescription[A].fold(tagged)(tagged.withDescription))
@@ -119,7 +119,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * @param  defaultValues  List of the possible default values of the record fields (e.g.,
     *                        `(Some(42), None)`)
     */
-  inline def summonRecord[
+  private[generic] inline def summonRecord[
     Types <: Tuple,
     Labels <: Tuple,
     Docs <: Tuple,
@@ -137,11 +137,17 @@ trait JsonSchemas extends algebra.JsonSchemas:
             case docHead *: docsTail =>
               // TODO Remove asInstanceOf, but the compiler crashes if the above line is `case (docHead: Option[docs]) *: docsTail`
               (docHead.asInstanceOf[Option[docs]].map(_.text), docsTail)
+            case EmptyTuple => 
+              // Should not happen if Docs has the same length as Types and Labels
+              (None, EmptyTuple)
         val (maybeDefaultValue, defaultValuesTail) =
           /*inline*/ defaultValues match
             case defaultValueHead *: defaultValuesTail =>
               // TODO Remove asInstanceOf
               (defaultValueHead.asInstanceOf[Option[head]], defaultValuesTail)
+            case EmptyTuple => 
+              // Should not happen if Docs has the same length as Types and Labels
+              (None, EmptyTuple)
         val labelHead = constValue[labelHead].asInstanceOf[String] // TODO Remove asInstanceOf
         val recordHead: Record[head] =
           inline erasedValue[head] match
@@ -167,7 +173,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[title @title]] annotation, it is used as a title, otherwise
     * the schema has no title
     */
-  inline def summonTitle[A]: Option[String] =
+  private[generic] inline def summonTitle[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`title`, A] => Some(annotation().value)
       case _                                  => None
@@ -179,7 +185,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * name, otherwise it has the result of calling [[classTagToSchemaName]]
     * with a `ClassTag[A]`.
     */
-  inline def summonName[A]: Option[String] =
+  private[generic] inline def summonName[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`name`, A]    => Some(annotation().value)
       case annotation: Annotation[`unnamed`, A] => None
@@ -190,7 +196,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
     * has a [[docs @docs]] annotation, it is used as a description,
     * otherwise the schema has no description.
     */
-  inline def summonDescription[A]: Option[String] =
+  private[generic] inline def summonDescription[A]: Option[String] =
     summonFrom {
       case annotation: Annotation[`docs`, A] => Some(annotation().text)
       case _                                 => None
@@ -206,18 +212,6 @@ trait JsonSchemas extends algebra.JsonSchemas:
       case _                                          => defaultDiscriminatorName
     }
 
-  /** Retrieve the last element of a tuple */
-  private def last(tuple: Tuple): Any =
-    tuple match
-      case h *: EmptyTuple => h
-      case () *: t         => last(t)
-
-  /** Build a tuple with `n` elements, the last one containing the value `a` */
-  private def asTuple[A](n: Int, a: A): Tuple =
-    n match
-      case 0 => a *: EmptyTuple
-      case _ => () *: asTuple(n - 1, a)
-
   /** Summon the [[Record]] schema of a concrete type of a sealed trait.
     * If there is a given instance of `GenericJsonSchema.GenericRecord[A]`,
     * it is used as the schema, otherwise we derive the schema.
@@ -229,33 +223,29 @@ trait JsonSchemas extends algebra.JsonSchemas:
     }
 
   /** Summon a [[Tagged]] schema for the alternatives `Types`.
+    * @tparam A      The sum type
     * @tparam Types  List of record types (e.g. `(Circle, Rectangle)`)
     * @tparam Labels List of record labels’ types (e.g. `("Circle".type, "Rectangle".type)`)
     * @param  i      Index of the head alternative
-    *
-    * We encode the ordinal `i` of each alternative as a tuple containing `i - 1` `Unit`
-    * followed by the actual value.
     */
-  private[generic] inline def summonTagged[Types <: Tuple, Labels <: Tuple](i: Int): Tagged[Types] =
+  private[generic] inline def summonTagged[A, Types <: Tuple, Labels <: Tuple](i: Int): Tagged[(Int, A)] =
     inline erasedValue[(Types, Labels)] match
       // Last alternative
       case _: (head *: EmptyTuple, labelHead *: EmptyTuple) =>
         summonTaggedRecord[head].asInstanceOf[Record[head]] // FIXME Remove asInstanceOf
-          .tagged(constValue[labelHead].asInstanceOf[String]) // TODO Remove asInstanceOf
-          .xmap[head *: EmptyTuple](h => h *: EmptyTuple) { case h *: EmptyTuple => h }
-          .asInstanceOf[Tagged[Types]] // FIXME Remove asInstanceOf
+          .tagged(constValue[labelHead].asInstanceOf[String])
+          .xmap(h => i -> h.asInstanceOf[A]) { case (_, h) => h.asInstanceOf[head] }
       case _: (head *: tail, labelHead *: labelsTail) =>
         summonTaggedRecord[head].asInstanceOf[Record[head]] // FIXME Remove asInstanceOf
-          .tagged(constValue[labelHead].asInstanceOf[String]) // TODO Remove asInstanceOf
-          .orElse(summonTagged[tail, labelsTail](i + 1).asInstanceOf[Tagged[tail]]) // FIXME Remove asInstanceOf
+          .tagged(constValue[labelHead].asInstanceOf[String])
+          .orElse(summonTagged[A, tail, labelsTail](i + 1).asInstanceOf[Tagged[(Int, tail)]]) // FIXME Remove asInstanceOf
           .xmap {
-            case Left(h)  => h *: EmptyTuple
-            case Right(t) => () *: t
+            case Left(h) => i -> h.asInstanceOf[A]
+            case Right(t) => t.asInstanceOf[(Int, A)]
           } {
-            case h *: EmptyTuple => Left(h.asInstanceOf[head])
-            case () *: t         => Right(t.asInstanceOf[tail])
+            case (`i`, h) => Left(h.asInstanceOf[head])
+            case t => Right(t.asInstanceOf[(Int, tail)])
           }
-          .asInstanceOf[Tagged[Types]]
 
   extension [A <: Product](schema: JsonSchema[A])
     /**
@@ -354,7 +344,7 @@ private object Defaults:
                 type DefaultValues = defaultValuesType
                 val defaultValues: DefaultValues = $defaultValuesValue
             }
-      case _ => report.throwError(s"Invalid type ${tpe.show}. Expecting a case class.")
+      case _ => report.errorAndAbort(s"Invalid type ${tpe.show}. Expecting a case class.")
   end summonDefaultsMacro
 
 end Defaults
