@@ -38,7 +38,7 @@ val `json-schema-testkit` =
       )
     )
     .platformsSettings(JVMPlatform, JSPlatform)(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0"
     )
     .nativeSettings(
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
