@@ -105,7 +105,7 @@ trait Converter {
         })
         callback.map(_ => stream)
       }
-    } yield { in: Stream[IO, A] =>
+    } yield { (in: Stream[IO, A]) =>
       {
         // Async wait on the promise to be completed
         val materializedResultStream = Stream.eval(promise.get)
@@ -265,10 +265,10 @@ trait Converter {
       .interruptWhen(watchCompletion.attempt)
       .evalMap(publish)
       .unNoneTerminate
-      .onFinalizeCase { 
-	case Canceled => complete
-	case Errored(e) => fail(e)
-	case Succeeded => complete
+      .onFinalizeCase {
+        case Canceled => complete
+        case Errored(e) => fail(e)
+        case Succeeded => complete
       }
   }
 
