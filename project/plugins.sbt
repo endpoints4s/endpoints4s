@@ -42,5 +42,3 @@ val build = project.in(file(".")).dependsOn(`sbt-assets`)
 ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
 addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "2.1.0")
-
-addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.9")
