@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit
 
 import endpoints4s.algebra.ChunkedJsonRequestEntitiesTestApi
 import endpoints4s.fetch.ChunkedJsonRequestEntities
+import endpoints4s.fetch.ChunksRequestDuplex
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
@@ -44,7 +45,9 @@ class TestClient(val settings: EndpointsSettings)
     with ChunkedResponseEntitiesTestApi
     with ChunkedJsonRequestEntitiesTestApi
     with ChunkedJsonResponseEntitiesTestApi
-    with CounterCodecCirce
+    with CounterCodecCirce {
+  def chunksRequestDuplex: ChunksRequestDuplex = ChunksRequestDuplex.half
+}
 
 class FetchClientEndpointsTest
     extends algebra.client.EndpointsTestSuite[TestClient]

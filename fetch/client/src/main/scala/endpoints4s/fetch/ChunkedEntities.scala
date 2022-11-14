@@ -16,6 +16,8 @@ trait ChunkedRequestEntities
     with EndpointsWithCustomErrors
     with Chunks {
 
+  def chunksRequestDuplex: ChunksRequestDuplex
+
   def textChunksRequest: RequestEntity[Chunks[String]] =
     chunkedRequestEntity(string => new TextEncoder("utf-8").encode(string))
 
@@ -56,7 +58,7 @@ trait ChunkedRequestEntities
       new PropertyDescriptor {
         configurable = true
         enumerable = true
-        value = "half"
+        value = chunksRequestDuplex
         writable = true
       }
     )
