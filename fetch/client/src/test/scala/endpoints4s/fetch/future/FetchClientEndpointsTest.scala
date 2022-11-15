@@ -1,22 +1,18 @@
 package endpoints4s.fetch.future
 
 import endpoints4s.algebra
-import endpoints4s.algebra.ChunkedJsonResponseEntitiesTestApi
-import endpoints4s.algebra.ChunkedRequestEntitiesTestApi
-import endpoints4s.algebra.ChunkedResponseEntitiesTestApi
+import endpoints4s.algebra.ChunkedEntitiesTestApi
 import endpoints4s.algebra.circe.CounterCodecCirce
 import endpoints4s.fetch.BasicAuthentication
-import endpoints4s.fetch.ChunkedJsonResponseEntities
-import endpoints4s.fetch.ChunkedRequestEntities
-import endpoints4s.fetch.ChunkedResponseEntities
+import endpoints4s.fetch.ChunkedJsonEntities
+import endpoints4s.fetch.ChunkedEntities
 import endpoints4s.fetch.EndpointsSettings
 import endpoints4s.fetch.JsonEntitiesFromCodecs
 import org.scalajs.dom
 import java.util.concurrent.TimeUnit
 
-import endpoints4s.algebra.ChunkedJsonRequestEntitiesTestApi
-import endpoints4s.fetch.ChunkedJsonRequestEntities
-import endpoints4s.fetch.ChunksRequestDuplex
+import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
+import org.scalajs.dom.RequestDuplex
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
@@ -36,17 +32,13 @@ class TestClient(val settings: EndpointsSettings)
     with algebra.SumTypedEntitiesTestApi
     with algebra.circe.JsonFromCirceCodecTestApi
     with JsonEntitiesFromCodecs
-    with ChunkedRequestEntities
-    with ChunkedResponseEntities
-    with ChunkedJsonRequestEntities
-    with ChunkedJsonResponseEntities
+    with ChunkedEntities
+    with ChunkedJsonEntities
     with algebra.circe.JsonEntitiesFromCodecs
-    with ChunkedRequestEntitiesTestApi
-    with ChunkedResponseEntitiesTestApi
-    with ChunkedJsonRequestEntitiesTestApi
-    with ChunkedJsonResponseEntitiesTestApi
+    with ChunkedEntitiesTestApi
+    with ChunkedJsonEntitiesTestApi
     with CounterCodecCirce {
-  def chunksRequestDuplex: ChunksRequestDuplex = ChunksRequestDuplex.half
+  def chunksRequestDuplex: RequestDuplex = RequestDuplex.half
 }
 
 class FetchClientEndpointsTest
@@ -55,10 +47,8 @@ class FetchClientEndpointsTest
     with algebra.client.JsonFromCodecTestSuite[TestClient]
     with algebra.client.TextEntitiesTestSuite[TestClient]
     with algebra.client.SumTypedEntitiesTestSuite[TestClient]
-    with algebra.client.ChunkedEntitiesRequestTestSuite[TestClient]
-    with algebra.client.ChunkedEntitiesResponseTestSuite[TestClient]
-    with algebra.client.ChunkedJsonEntitiesRequestTestSuite[TestClient]
-    with algebra.client.ChunkedJsonEntitiesResponseTestSuite[TestClient]
+    with algebra.client.ChunkedEntitiesTestSuite[TestClient]
+    with algebra.client.ChunkedJsonEntitiesTestSuite[TestClient]
     with algebra.client.TimeoutTestSuite[TestClient] {
 
   implicit override def executionContext: ExecutionContextExecutor = JSExecutionContext.queue

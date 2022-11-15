@@ -2,10 +2,10 @@ package endpoints4s.fetch
 
 import endpoints4s.algebra
 import org.scalajs.dom
+import org.scalajs.dom.RequestDuplex
 
 import scala.scalajs.js
 import scala.scalajs.js.JSConverters._
-import scala.scalajs.js.PropertyDescriptor
 import scala.scalajs.js.typedarray.Uint8Array
 import scala.scalajs.js.|
 
@@ -16,7 +16,7 @@ trait ChunkedRequestEntities
     with EndpointsWithCustomErrors
     with Chunks {
 
-  def chunksRequestDuplex: ChunksRequestDuplex
+  def chunksRequestDuplex: RequestDuplex
 
   def textChunksRequest: RequestEntity[Chunks[String]] =
     chunkedRequestEntity(string => new TextEncoder("utf-8").encode(string))
@@ -51,18 +51,7 @@ trait ChunkedRequestEntities
       }
     )
     request.body = framing(readableStream)
-    // https://developer.chrome.com/articles/fetch-streaming-requests/#half-duplex
-    js.Object.defineProperty(
-      request,
-      "duplex",
-      new PropertyDescriptor {
-        configurable = true
-        enumerable = true
-        value = chunksRequestDuplex
-        writable = true
-      }
-    )
-    ()
+    request.duplex = chunksRequestDuplex
   }
 }
 
