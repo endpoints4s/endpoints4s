@@ -13,7 +13,7 @@ class SttpEndpointsUrlEncodingTest
   val backend = AkkaHttpBackend()
 
   val client: TestClient[Future] =
-    new TestClient(s"http://localhost:8080", backend)
+    new TestClient(s"http://localhost:$stubServerPortHTTP", backend)
 
   def encodeUrl[A](url: client.Url[A])(a: A): String = url.encode(a)
 

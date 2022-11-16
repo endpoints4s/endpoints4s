@@ -14,7 +14,8 @@ trait ClientTestBase[T <: algebra.Endpoints]
     with BeforeAndAfterAll
     with BeforeAndAfter {
 
-  val stubServerPort = 8080
+  val stubServerPortHTTP = 8080
+  val stubServerPortHTTPS = 8081
 
   val client: T
 
