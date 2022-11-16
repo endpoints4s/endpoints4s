@@ -62,7 +62,7 @@ lazy val `json-schema-generic` =
         val commonDependencies = Seq(scalaTestDependency)
         val shapelessDependency =
           if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.7"
-          else "org.typelevel" %%% "shapeless3-deriving" % "3.2.0"
+          else "org.typelevel" %%% "shapeless3-deriving" % "3.0.4"
         shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
