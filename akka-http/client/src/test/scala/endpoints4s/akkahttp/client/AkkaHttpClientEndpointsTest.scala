@@ -44,14 +44,14 @@ class AkkaHttpClientEndpointsTest
   val client: TestClient = new TestClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", stubServerPort)
+        .cachedHostConnectionPool("localhost", stubServerPortHTTP)
     )
   )
 
   val streamingClient: TestClient = new TestClient(
     EndpointsSettings(
       AkkaHttpRequestExecutor
-        .cachedHostConnectionPool("localhost", stubServerPort)
+        .cachedHostConnectionPool("localhost", stubServerPortHTTP)
     )
   )
 
