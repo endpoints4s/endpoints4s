@@ -7,8 +7,6 @@ trait Http4sClientUrlEncodingTest[F[_], T <: Endpoints[
 ] with algebra.client.ClientEndpointsTestApi]
     extends algebra.client.UrlEncodingTestSuite[T] {
 
-  val client: T
-
   def encodeUrl[A](url: client.Url[A])(a: A): String = {
     val (path, query) = url.encodeUrl(a)
     (path.isEmpty, query.isEmpty) match {
