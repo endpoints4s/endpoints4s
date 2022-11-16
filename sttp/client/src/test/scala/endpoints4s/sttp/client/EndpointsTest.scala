@@ -32,7 +32,7 @@ class EndpointsTestSync
   val backend = TryHttpURLConnectionBackend(customizeConnection = _.setReadTimeout(FiniteDuration(2, TimeUnit.SECONDS).toMillis.toInt))
 
   val client: TestClient[Try] =
-    new TestClient[Try](s"http://localhost:$stubServerPort", backend)
+    new TestClient[Try](s"http://localhost:$stubServerPortHTTP", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
@@ -57,7 +57,7 @@ class EndpointsTestAkka
   val backend = AkkaHttpBackend()
 
   val client: TestClient[Future] =
-    new TestClient(s"http://localhost:$stubServerPort", backend)
+    new TestClient(s"http://localhost:$stubServerPortHTTP", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) =
     endpoint(args)
