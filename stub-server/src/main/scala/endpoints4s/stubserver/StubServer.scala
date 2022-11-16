@@ -1,6 +1,13 @@
 package endpoints4s.stubserver
 
+import java.io.InputStream
+import java.security.KeyStore
+import java.security.SecureRandom
+import javax.net.ssl.KeyManagerFactory
+import javax.net.ssl.SSLContext
+
 import akka.actor.ActorSystem
+import akka.http.scaladsl.ConnectionContext
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.HttpMethods._
 import akka.http.scaladsl.model._
@@ -10,6 +17,7 @@ import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.Sink
 import akka.stream.scaladsl.Source
 import akka.util.ByteString
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.ExecutionContextExecutor
 import scala.concurrent.Future
@@ -22,10 +30,12 @@ import scala.util.Try
   */
 object StubServer extends App {
 
-  implicit val actorSystem: ActorSystem = ActorSystem("StubServer")
-  implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
+  val conf = ConfigFactory
+    .parseString("akka.http.server.preview.enable-http2 = on")
+    .withFallback(ConfigFactory.defaultApplication())
 
-  val serverSource = Http().newServerAt("0.0.0.0", 8080).connectionSource()
+  implicit val actorSystem: ActorSystem = ActorSystem("StubServer", conf)
+  implicit val executionContext: ExecutionContextExecutor = actorSystem.dispatcher
 
   val requestHandler: HttpRequest => Future[HttpResponse] = {
     case HttpRequest(
@@ -511,16 +521,45 @@ object StubServer extends App {
 
   implicit def toFuture[T](value: T): Future[T] = Future.successful(value)
 
-  val bindingFuture: Future[Http.ServerBinding] =
-    serverSource
-      .to(Sink.foreach { connection => connection handleWithAsyncHandler requestHandler })
-      .run()
+  val exampleServerContext = {
+    def resourceStream(resourceName: String): InputStream = {
+      val is = getClass.getClassLoader.getResourceAsStream(resourceName)
+      require(is ne null, s"Resource $resourceName not found")
+      is
+    }
 
-  bindingFuture.onComplete {
+    // never put passwords into code!
+    val password = "abcdef".toCharArray
+
+    val ks = KeyStore.getInstance("PKCS12")
+    ks.load(resourceStream("keys/server.p12"), password)
+
+    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val context = SSLContext.getInstance("TLS")
+    context.init(keyManagerFactory.getKeyManagers, null, new SecureRandom)
+
+    ConnectionContext.httpsServer(context)
+  }
+
+  Http().newServerAt("0.0.0.0", 8080).bind(requestHandler).onComplete {
     case Success(binding) =>
       val address = binding.localAddress
-      println(s"Stub server online at http://${address.getHostString}:${address.getPort}/")
+      println(s"Stub server online at http://${address.getHostName}:${address.getPort}/")
     case Failure(ex) =>
       println(s"Failed to bind HTTP endpoint, terminating system ${ex.toString}")
   }
+
+  Http()
+    .newServerAt("0.0.0.0", 8081)
+    .enableHttps(exampleServerContext)
+    .bind(requestHandler)
+    .onComplete {
+      case Success(binding) =>
+        val address = binding.localAddress
+        println(s"Stub server online at https://${address.getHostName}:${address.getPort}/")
+      case Failure(ex) =>
+        println(s"Failed to bind HTTPS endpoint, terminating system ${ex.toString}")
+    }
 }

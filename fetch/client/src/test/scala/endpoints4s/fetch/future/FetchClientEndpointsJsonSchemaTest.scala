@@ -27,7 +27,7 @@ class FetchClientEndpointsJsonSchemaTest extends JsonTestSuite[TestJsonSchemaCli
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings()
-      .withBaseUri(Some("http://localhost:8080"))
+      .withBaseUri(Some(s"http://localhost:$stubServerPortHTTP"))
   )
 
   def call[Req, Resp](
