@@ -25,7 +25,7 @@ import akka.stream._
 import akka.stream.scaladsl.{Flow => AkkaFlow, Sink => AkkaSink, Source => AkkaSource, _}
 import akka.{Done, NotUsed}
 import cats.effect._
-import cats.syntax.all._ 
+import cats.syntax.all._
 import fs2._
 import scala.annotation.implicitNotFound
 import cats.effect.unsafe.implicits.global
@@ -94,7 +94,7 @@ trait Converter {
     */
   def akkaSinkToFs2PipeMat[A, M](
       akkaSink: Graph[SinkShape[A], Future[M]]
-  )(implicit ec: ExecutionContext, m: Materializer): IO[Pipe[IO, A, Either[Throwable, M]]] = 
+  )(implicit ec: ExecutionContext, m: Materializer): IO[Pipe[IO, A, Either[Throwable, M]]] =
     for {
       promise <- Deferred[IO, Either[Throwable, M]]
       fs2Sink <- akkaSinkToFs2PipeMat[A, Future[M]](akkaSink).flatMap { case (stream, mat) =>
@@ -156,13 +156,13 @@ trait Converter {
     val sink = AkkaSink.foreach[SourceQueueWithComplete[A]] { p =>
       // Fire and forget Future so it runs in the background
       import cats.effect.unsafe.implicits.global
-       
+
        publisherStream[A](p, stream).compile.drain.unsafeToFuture()
       ()
     }
 
     AkkaSource
-      .fromGraph(GraphDSL.create(source) { implicit builder => source =>
+      .fromGraph(GraphDSL.createGraph(source) { implicit builder => source =>
         import GraphDSL.Implicits._
         builder.materializedValue ~> sink
         SourceShape(source.out)
@@ -190,7 +190,7 @@ trait Converter {
     // because the future value is already strict by the time we get it.
 
     AkkaSink
-      .fromGraph(GraphDSL.create(sink1, sink2)(Keep.both) { implicit builder => (sink1, sink2) =>
+      .fromGraph(GraphDSL.createGraph(sink1, sink2)(Keep.both) { implicit builder => (sink1, sink2) =>
         import GraphDSL.Implicits._
         builder.materializedValue ~> AkkaFlow[(SinkQueueWithCancel[A], _)].map(_._1) ~> sink2
         SinkShape(sink1.in)
@@ -215,7 +215,7 @@ trait Converter {
     }
 
     AkkaFlow
-      .fromGraph(GraphDSL.create(source, sink1)(Keep.both) { implicit builder => (source, sink1) =>
+      .fromGraph(GraphDSL.createGraph(source, sink1)(Keep.both) { implicit builder => (source, sink1) =>
         import GraphDSL.Implicits._
         builder.materializedValue ~> sink2
         FlowShape(sink1.in, source.out)
