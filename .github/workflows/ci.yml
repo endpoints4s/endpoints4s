@@ -19,7 +19,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt stub-server/bgRun ++2.12.13 test
+    - run: sbt stub-server/bgRun "++ 2.12 test"
 
   test213:
     name: Test (Scala 2.13)
@@ -33,7 +33,7 @@ jobs:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
-    - run: sbt stub-server/bgRun ++2.13.8 coverage test coverageReport coverageAggregate manual/makeSite
+    - run: sbt stub-server/bgRun "++ 2.13 ;coverage ;test ;coverageReport ;coverageAggregate ;manual/makeSite"
     - run: bash <(curl -s https://codecov.io/bash)
 
   test3:
@@ -46,7 +46,7 @@ jobs:
       with:
         java-version: adopt@1.11
     - run: npm install jsdom@12.2.0
-    - run: sbt "++ 3.1.2 compile" "stub-server/bgRun; ++ 3.1.2 ;json-schemaJVM/test;json-schemaJS/test;json-schemaNative/test;json-schema-playjsonJVM/test;json-schema-playjsonJS/test;json-schema-genericJVM/test;json-schema-genericJS/test;algebraJVM/test;algebraJS/test;algebraNative/test;fetch-client/test;fetch-client-circe/test"
+    - run: sbt stub-server/bgRun "++ 3 test"
 
   versionPolicy:
     name: Check versioning policy and code style
