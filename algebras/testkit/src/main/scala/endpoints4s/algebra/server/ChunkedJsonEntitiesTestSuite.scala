@@ -10,12 +10,14 @@ import akka.http.scaladsl.model.{
 }
 import akka.stream.scaladsl.Framing
 import akka.stream.scaladsl.{Sink, Source}
+import akka.pattern.{after => akkaAfter}
 import akka.util.ByteString
 import endpoints4s.Codec
 import endpoints4s.algebra.ChunkedEntitiesTestApi
 import endpoints4s.algebra.ChunkedJsonEntitiesTestApi
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 trait ChunkedJsonEntitiesTestSuite[
@@ -100,10 +102,16 @@ trait ChunkedJsonEntitiesTestSuite[
 
     "close connection in case of error" in {
       val source: Source[serverApi.Counter, _] =
-        Source((1 to 3).map(serverApi.Counter(_))).flatMapConcat {
-          case serverApi.Counter(3) =>
-            Source.failed(new Exception("Something went wrong"))
-          case serverApi.Counter(n) => Source.single(serverApi.Counter(n))
+        Source((1 to 3).map(serverApi.Counter(_))).flatMapConcat { case serverApi.Counter(n) =>
+          // adding a bit of delay to make sure connection does not fail before emitting chunks
+          val delay = 1.second
+          Source.futureSource(akkaAfter(delay)(Future.successful {
+            if (n == 3) {
+              Source.failed(new Exception("Something went wrong"))
+            } else {
+              Source.single(serverApi.Counter(n))
+            }
+          }))
         }
       serveStreamedEndpoint(serverApi.streamedEndpointTest, source) { port =>
         val request = HttpRequest(uri = s"http://localhost:$port/notifications")
@@ -112,8 +120,11 @@ trait ChunkedJsonEntitiesTestSuite[
             assert(response.status == StatusCodes.OK)
             chunks.toList match {
               // Ideally, we would check that the first two elements were sent by the client
-              // However, the Akka HTTP server interpreter does seem to close the connection very early
-              // and we receive no item.
+              // However, Akka HTTP server implementation seems to always keep at least one chunk in the buffer,
+              // meaning that a chunk is only emitted over TCP once a subsequent chunk is received by the
+              // underlying buffer implementation.
+              // Settings under akka.stream.materializer.io.tcp are documented to allow disabling this behavior,
+              // but they do not seem to actually allow that.
               // case Right(serverApi.Counter(1)) :: Right(serverApi.Counter(2)) :: Left(_) :: Nil => ()
               case chunks if chunks.exists(_.isLeft) => ()
               case chunks                            => fail(s"Unexpected chunks: $chunks")
