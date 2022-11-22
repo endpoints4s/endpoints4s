@@ -19,7 +19,7 @@ addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.0")
 addSbtPlugin("com.dwijnand" % "sbt-dynver" % "4.1.1")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.1")
-addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.10.3")
+addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.9.2")
 addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
