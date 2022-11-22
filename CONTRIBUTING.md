@@ -134,7 +134,7 @@ After generating intellij project you may need to navigate to Settings -> Langua
    ~~~
 5. Upload the bundles to sonatype, release them, and publish the documentation website
    ~~~ sh
-   sbt "++ 2.12.13 publishSigned" "++ 2.13.8 publishSigned" sonatypeReleaseAll "++ 2.13.8 manual/makeSite" manual/ghpagesPushSite
+   sbt "+publishSigned" sonatypeReleaseAll "++ 2.13 manual/makeSite" manual/ghpagesPushSite
    ~~~
 6. Create a tag `vx.y.z`
    ~~~ sh
