@@ -2,7 +2,13 @@ package endpoints4s.akkahttp.server
 
 import java.net.ServerSocket
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpEntity, HttpRequest, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
+import akka.http.scaladsl.model.{
+  HttpEntity,
+  HttpRequest,
+  HttpResponse,
+  Uri,
+  StatusCodes => AkkaStatusCodes
+}
 import akka.http.scaladsl.server.{Directives, Route}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import akka.stream.scaladsl.Source
@@ -72,10 +78,12 @@ class ServerInterpreterTest
     import java.io._
 
     val directive =
-      url.directive.map {
-        case Valid(a)        => DecodedUrl.Matched(a)
-        case Invalid(errors) => DecodedUrl.Malformed(errors)
-      }.or[Tuple1[DecodedUrl[A]]](Directives.provide(DecodedUrl.NotMatched))
+      url.directive
+        .map {
+          case Valid(a)        => DecodedUrl.Matched(a)
+          case Invalid(errors) => DecodedUrl.Malformed(errors)
+        }
+        .or[Tuple1[DecodedUrl[A]]](Directives.provide(DecodedUrl.NotMatched))
 
     val route = directive { decodedA => req =>
       val baos = new ByteArrayOutputStream
