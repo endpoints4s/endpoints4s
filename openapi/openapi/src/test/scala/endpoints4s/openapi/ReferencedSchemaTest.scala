@@ -10,80 +10,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class ReferencedSchemaTest extends AnyWordSpec with Matchers {
-
-  @discriminator("storageType")
-  sealed trait Storage
-
-  object Storage {
-    case class Library(room: String, shelf: Int) extends Storage
-    case class Online(link: String) extends Storage
-  }
-
-  case class Author(name: String)
-
-  case class Book(
-      id: UUID,
-      title: String,
-      author: Author,
-      isbnCodes: List[String],
-      storage: Storage
-  )
-
-  object Fixtures
-      extends Fixtures
-      with openapi.Endpoints
-      with openapi.JsonEntitiesFromSchemas
-      with openapi.BasicAuthentication {
-
-    def openApiDocument: OpenApi =
-      openApi(
-        Info(title = "TestFixturesOpenApi", version = "0.0.0")
-          .withDescription(Some("This is a top level description."))
-      )(Fixtures.listBooks, Fixtures.postBook)
-  }
-
-  trait Fixtures
-      extends algebra.Endpoints
-      with algebra.JsonEntitiesFromSchemas
-      with generic.JsonSchemas
-      with algebra.BasicAuthentication
-      with algebra.JsonSchemasFixtures {
-
-    implicit private val schemaStorage: JsonSchema[Storage] =
-      genericTagged[Storage]
-
-    implicit val schemaAuthor: JsonSchema[Author] = (
-      field[String]("name", documentation = Some("Author name"))
-        .xmap[Author](Author(_))(_.name)
-    )
-
-    implicit private val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
-
-    val bookTag = Tag("Books")
-      .withDescription(Some("A book is something you can read."))
-      .withExternalDocs(
-        Some(
-          ExternalDocumentationObject("moreinfo@books.nl")
-            .withDescription(Some("The official website about books."))
-        )
-      )
-
-    val listBooks = endpoint(
-      get(path / "books"),
-      ok(jsonResponse[List[Book]], Some("Books list")),
-      docs = EndpointDocs().withTags(List(bookTag))
-    )
-
-    val postBook =
-      authenticatedEndpoint(
-        Post,
-        path / "books",
-        ok(jsonResponse(ColorEnum.colorSchema)),
-        jsonRequest[Book],
-        requestDocs = Some("Books list"),
-        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
-      )
-  }
+  import ReferencedSchemaTest._
 
   "OpenApi" should {
 
@@ -331,5 +258,82 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
       actual shouldBe ujson.read(expectedSchema)
     }
 
+  }
+}
+
+object ReferencedSchemaTest {
+  @discriminator("storageType")
+  sealed trait Storage
+
+  object Storage {
+    case class Library(room: String, shelf: Int) extends Storage
+
+    case class Online(link: String) extends Storage
+  }
+
+  case class Author(name: String)
+
+  case class Book(
+                   id: UUID,
+                   title: String,
+                   author: Author,
+                   isbnCodes: List[String],
+                   storage: Storage
+                 )
+
+  object Fixtures
+    extends Fixtures
+      with openapi.Endpoints
+      with openapi.JsonEntitiesFromSchemas
+      with openapi.BasicAuthentication {
+
+    def openApiDocument: OpenApi =
+      openApi(
+        Info(title = "TestFixturesOpenApi", version = "0.0.0")
+          .withDescription(Some("This is a top level description."))
+      )(Fixtures.listBooks, Fixtures.postBook)
+  }
+
+  trait Fixtures
+    extends algebra.Endpoints
+      with algebra.JsonEntitiesFromSchemas
+      with generic.JsonSchemas
+      with algebra.BasicAuthentication
+      with algebra.JsonSchemasFixtures {
+
+    implicit val schemaStorage: JsonSchema[Storage] =
+      genericTagged[Storage]
+
+    implicit val schemaAuthor: JsonSchema[Author] = (
+      field[String]("name", documentation = Some("Author name"))
+        .xmap[Author](Author(_))(_.name)
+      )
+
+    implicit val schemaBook: JsonSchema[Book] = genericJsonSchema[Book]
+
+    val bookTag = Tag("Books")
+      .withDescription(Some("A book is something you can read."))
+      .withExternalDocs(
+        Some(
+          ExternalDocumentationObject("moreinfo@books.nl")
+            .withDescription(Some("The official website about books."))
+        )
+      )
+
+    val listBooks = endpoint(
+      get(path / "books"),
+      ok(jsonResponse[List[Book]], Some("Books list")),
+      docs = EndpointDocs().withTags(List(bookTag))
+    )
+
+    val postBook =
+      authenticatedEndpoint(
+        Post,
+        path / "books",
+        ok(jsonResponse(ColorEnum.colorSchema)),
+        jsonRequest[Book],
+        requestDocs = Some("Books list"),
+        endpointDocs = EndpointDocs().withTags(List(bookTag, Tag("Another tag")))
+      )
   }
 }

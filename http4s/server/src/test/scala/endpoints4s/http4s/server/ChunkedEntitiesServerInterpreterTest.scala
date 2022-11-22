@@ -29,7 +29,7 @@ class ChunkedEntitiesServerInterpreterTest
 
   val serverApi = new ChunkedEntitiesEndpointsTestApi()
 
-  implicit val system = ActorSystem()
+  implicit val system: ActorSystem = ActorSystem()
   implicit val materializer: Materializer = Materializer.createMaterializer(system)
 
   override def serveStreamedEndpoint[Req, Resp, Mat](
