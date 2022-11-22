@@ -29,9 +29,9 @@ val `algebra-testkit` =
       versionPolicyIntention := Compatibility.None,
       version := "4.0.0",
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
@@ -86,7 +86,8 @@ val `algebra-playjson` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-playjson",
-      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion).cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion)
+        .cross(CrossVersion.for3Use2_13)
     )
     .dependsOn(`algebra`, `algebra-testkit` % Test)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))

@@ -18,10 +18,10 @@ val `akka-http-client` =
       name := "akka-http-client",
       version := "5.2.0+n",
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,
+        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -45,11 +45,11 @@ val `akka-http-server` =
       name := "akka-http-server",
       version := "7.0.0+n",
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,
+        "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test,
+        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
+        "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
