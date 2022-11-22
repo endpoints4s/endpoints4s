@@ -330,7 +330,7 @@ val `example-cqrs-commands` =
         "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
-        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         scalaTestDependency
       )
     )
@@ -368,7 +368,7 @@ val `example-cqrs` =
       libraryDependencies ++= Seq(
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion,
-        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
         scalaTestDependency
       )
@@ -425,7 +425,7 @@ val `example-authentication` =
         "com.github.jwt-scala" %% "jwt-circe" % "9.1.2",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
-        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
+        "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
         scalaTestDependency
       )
     )
