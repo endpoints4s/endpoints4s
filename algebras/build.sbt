@@ -11,9 +11,6 @@ val algebra =
       `scala 2.12 to dotty`,
       name := "algebra"
     )
-    .nativeSettings(
-      versionPolicyFirstVersion := Some("1.8.0")
-    )
     .dependsOnLocalCrossProjectsWithNative("json-schema")
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
@@ -29,16 +26,14 @@ val `algebra-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
-      version := "2.0.0+n",
+      versionPolicyIntention := Compatibility.None,
+      version := "4.0.0",
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
-    )
-    .nativeSettings(
-      versionPolicyFirstVersion := Some("2.1.0")
     )
     .dependsOn(algebra)
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
@@ -56,7 +51,7 @@ val `algebra-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe",
-      version := "2.1.0+n",
+      version := "2.2.0+n",
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-parser" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion % Test
@@ -76,7 +71,8 @@ val `algebra-circe-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
-      version := "2.0.0+n",
+      versionPolicyIntention := Compatibility.None,
+      version := "4.0.0",
       libraryDependencies ++= Seq()
     )
     .dependsOn(`algebra-circe`, `algebra-testkit`)

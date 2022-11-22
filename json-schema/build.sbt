@@ -12,13 +12,10 @@ val `json-schema` =
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
         "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
-        "org.scalacheck" %%% "scalacheck" % "1.16.0" % Test,
+        "org.scalacheck" %%% "scalacheck" % "1.17.0" % Test,
         scalaTestDependency
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
-    )
-    .nativeSettings(
-      versionPolicyFirstVersion := Some("1.8.0")
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
@@ -35,17 +32,16 @@ val `json-schema-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-json-schema-testkit",
-      version := "1.1.0+n",
+      version := "1.2.0+n",
       libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % scalaTestVersion,
+        "org.scalatest" %%% "scalatest" % scalaTestVersion
       )
     )
     .platformsSettings(JVMPlatform, JSPlatform)(
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3",
-      versionPolicyFirstVersion := Some("1.2.0")
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
     )
     .dependsOn(`json-schema`)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
@@ -76,6 +72,9 @@ lazy val `json-schema-generic` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjects("json-schema")
+    .dependsOnLocalCrossProjectsWithScope(
+      "json-schema-circe" -> Test
+    )
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
@@ -88,7 +87,7 @@ lazy val `json-schema-circe` =
       `scala 2.12 to dotty`,
       publishSettings,
       name := "json-schema-circe",
-      version := "2.1.0+n",
+      version := "2.2.0+n",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )

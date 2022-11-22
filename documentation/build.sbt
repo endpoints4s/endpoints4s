@@ -266,7 +266,7 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.14.0",
+        "com.raquo" %%% "laminar" % "0.14.5",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.2"
       ),
@@ -327,7 +327,7 @@ val `example-cqrs-commands` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.16.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
@@ -369,7 +369,7 @@ val `example-cqrs` =
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
-        "org.scalacheck" %% "scalacheck" % "1.16.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
         scalaTestDependency
       )
     )
@@ -422,7 +422,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.jwt-scala" %% "jwt-circe" % "9.0.5",
+        "com.github.jwt-scala" %% "jwt-circe" % "9.1.2",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.4.0" % Test,
@@ -438,7 +438,7 @@ val `example-basic-http4s-server` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       publishArtifact := false,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "1.7.36",
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.4",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
       libraryDependencies += "org.http4s" %% "http4s-circe" % http4sVersion
     )

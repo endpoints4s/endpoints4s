@@ -101,13 +101,13 @@ object EndpointsSettings {
   val playjsonVersion = "2.9.2"
   val playVersion = "2.8.13"
   val sttpVersion = "3.3.15"
-  val akkaActorVersion = "2.6.15"
+  val akkaActorVersion = "2.6.17"
   val akkaHttpVersion = "10.2.6"
   val http4sVersion = "0.23.6"
   val http4sDomVersion = "0.2.0"
   val ujsonVersion = "1.4.0"
 
-  val scalaTestVersion = "3.2.12"
+  val scalaTestVersion = "3.2.13"
   val scalaTestDependency =
     "org.scalatest" %% "scalatest" % scalaTestVersion % Test
   val macroParadiseDependency = Seq(

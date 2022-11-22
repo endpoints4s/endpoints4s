@@ -1,4 +1,5 @@
 import EndpointsSettings._
+import com.typesafe.tools.mima.core.{ ProblemFilters, DirectMissingMethodProblem }
 
 val `fetch-client` =
   project
@@ -9,11 +10,16 @@ val `fetch-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client",
-      version := "2.0.0+n",
+      versionPolicyIntention := Compatibility.None,
+      version := "3.0.0",
+      mimaBinaryIssueFilters ++= Seq(
+        // Was private to Scala users
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.fetch.EndpointsSettings.this")
+      ),
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.3.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
@@ -47,7 +53,8 @@ val `fetch-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client-circe",
-      version := "2.0.0+n",
+      versionPolicyIntention := Compatibility.None,
+      version := "3.0.0",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,

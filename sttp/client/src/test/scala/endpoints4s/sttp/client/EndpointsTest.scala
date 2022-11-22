@@ -2,22 +2,13 @@ package endpoints4s.sttp.client
 
 import _root_.sttp.client3.{SttpBackend, TryHttpURLConnectionBackend}
 import _root_.sttp.client3.akkahttp.AkkaHttpBackend
-import endpoints4s.algebra.client.{
-  BasicAuthTestSuite,
-  EndpointsTestSuite,
-  JsonFromCodecTestSuite,
-  SumTypedEntitiesTestSuite,
-  TextEntitiesTestSuite,
-  ClientEndpointsTestApi
-}
-import endpoints4s.algebra.{
-  BasicAuthenticationTestApi,
-  SumTypedEntitiesTestApi,
-  TextEntitiesTestApi
-}
+import endpoints4s.algebra.client.{BasicAuthTestSuite, ClientEndpointsTestApi, EndpointsTestSuite, JsonFromCodecTestSuite, SumTypedEntitiesTestSuite, TextEntitiesTestSuite, TimeoutTestSuite}
+import endpoints4s.algebra.{BasicAuthenticationTestApi, SumTypedEntitiesTestApi, TextEntitiesTestApi}
 import endpoints4s.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
+import java.util.concurrent.TimeUnit
 import scala.concurrent.Future
+import scala.concurrent.duration.FiniteDuration
 import scala.util.Try
 
 class TestClient[R[_]](address: String, backend: SttpBackend[R, Any])
@@ -35,12 +26,13 @@ class EndpointsTestSync
     with BasicAuthTestSuite[TestClient[Try]]
     with JsonFromCodecTestSuite[TestClient[Try]]
     with SumTypedEntitiesTestSuite[TestClient[Try]]
-    with TextEntitiesTestSuite[TestClient[Try]] {
+    with TextEntitiesTestSuite[TestClient[Try]]
+    with TimeoutTestSuite[TestClient[Try]] {
 
-  val backend = TryHttpURLConnectionBackend()
+  val backend = TryHttpURLConnectionBackend(customizeConnection = _.setReadTimeout(FiniteDuration(2, TimeUnit.SECONDS).toMillis.toInt))
 
   val client: TestClient[Try] =
-    new TestClient[Try](s"http://localhost:$stubServerPort", backend)
+    new TestClient[Try](s"http://localhost:$stubServerPortHTTP", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) = {
     Future.fromTry(endpoint(args))
@@ -65,7 +57,7 @@ class EndpointsTestAkka
   val backend = AkkaHttpBackend()
 
   val client: TestClient[Future] =
-    new TestClient(s"http://localhost:$stubServerPort", backend)
+    new TestClient(s"http://localhost:$stubServerPortHTTP", backend)
 
   def call[Req, Resp](endpoint: client.Endpoint[Req, Resp], args: Req) =
     endpoint(args)

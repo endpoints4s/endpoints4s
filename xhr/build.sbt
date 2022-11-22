@@ -1,4 +1,5 @@
 import EndpointsSettings._
+import com.typesafe.tools.mima.core.{ ProblemFilters, DirectMissingMethodProblem }
 
 val `xhr-client` =
   project
@@ -9,11 +10,16 @@ val `xhr-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client",
-      version := "5.0.0+n",
+      versionPolicyIntention := Compatibility.BinaryCompatible,
+      version := "5.2.0",
+      mimaBinaryIssueFilters ++= Seq(
+        // Was private to Scala users
+        ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.xhr.EndpointsSettings.this")
+      ),
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "2.2.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.3.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
@@ -49,7 +55,8 @@ val `xhr-client-faithful` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-faithful",
-      version := "5.0.0+n",
+      versionPolicyIntention := Compatibility.BinaryCompatible,
+      version := "5.2.0",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0")
@@ -81,7 +88,8 @@ val `xhr-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-circe",
-      version := "5.0.0+n",
+      versionPolicyIntention := Compatibility.BinaryCompatible,
+      version := "5.2.0",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,

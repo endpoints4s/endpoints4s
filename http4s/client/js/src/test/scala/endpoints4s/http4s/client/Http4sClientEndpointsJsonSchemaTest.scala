@@ -11,6 +11,8 @@ import org.http4s.Uri
 import org.http4s.client.Client
 import org.http4s.dom.FetchClientBuilder
 
+import java.util.concurrent.TimeUnit
+import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.scalajs.concurrent.JSExecutionContext
 
@@ -38,17 +40,18 @@ class Http4sClientEndpointsJsonSchemaTest
     with client.JsonFromCodecTestSuite[TestJsonSchemaClient[IO]]
     with client.SumTypedEntitiesTestSuite[TestJsonSchemaClient[IO]]
     with client.ChunkedEntitiesTestSuite[TestJsonSchemaClient[IO]]
-    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]] {
+    with client.ChunkedJsonEntitiesTestSuite[TestJsonSchemaClient[IO]]
+    with client.TimeoutTestSuite[TestJsonSchemaClient[IO]] {
 
   type EffectResource[A] = effect.Resource[IO, A]
 
   val client = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(stubServerPort)
+      port = Some(stubServerPortHTTP)
     ),
     Uri.Scheme.http,
-    FetchClientBuilder[IO].create
+    FetchClientBuilder[IO].withRequestTimeout(FiniteDuration(2, TimeUnit.SECONDS)).create
   )
 
   def call[Req, Resp](
@@ -80,7 +83,7 @@ class Http4sClientEndpointsJsonSchemaTest
   override val streamingClient = new TestJsonSchemaClient[IO](
     Uri.Authority(
       host = Uri.RegName("localhost"),
-      port = Some(stubServerPort)
+      port = Some(stubServerPortHTTP)
     ),
     Uri.Scheme.http,
     FetchClientBuilder[IO].create
