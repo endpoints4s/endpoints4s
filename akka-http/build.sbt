@@ -55,7 +55,6 @@ val `akka-http-server` =
       excludeDependencies ++= {
         if (scalaBinaryVersion.value.startsWith("3")) {
           List(
-            ExclusionRule("org.scala-lang.modules", "scala-xml_3"),
             ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
           )
         } else Nil
