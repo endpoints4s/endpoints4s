@@ -29,7 +29,7 @@ val `algebra-testkit` =
       versionPolicyIntention := Compatibility.None,
       version := "4.0.0",
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
+        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
         "com.lihaoyi" %% "ujson" % ujsonVersion
