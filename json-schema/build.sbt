@@ -88,6 +88,7 @@ lazy val `json-schema-circe` =
       publishSettings,
       name := "json-schema-circe",
       version := "2.2.0+n",
+      versionPolicyIntention := Compatibility.BinaryCompatible,
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
