@@ -17,6 +17,7 @@ val `akka-http-client` =
       `scala 2.12 to dotty`,
       name := "akka-http-client",
       version := "5.2.0+n",
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
@@ -44,6 +45,7 @@ val `akka-http-server` =
       `scala 2.12 to dotty`,
       name := "akka-http-server",
       version := "7.0.0+n",
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,

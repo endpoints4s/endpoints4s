@@ -86,6 +86,7 @@ val `algebra-playjson` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-playjson",
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies += ("com.typesafe.play" %%% "play-json" % playjsonVersion)
         .cross(CrossVersion.for3Use2_13)
     )
