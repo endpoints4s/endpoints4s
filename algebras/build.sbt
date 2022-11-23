@@ -28,10 +28,11 @@ val `algebra-testkit` =
       name := "algebra-testkit",
       versionPolicyIntention := Compatibility.None,
       version := "4.0.0",
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        "com.typesafe.akka" %% "akka-actor" % akkaActorVersion,
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
+        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
@@ -72,6 +73,7 @@ val `algebra-circe-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
       versionPolicyIntention := Compatibility.None,
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       version := "4.0.0",
       libraryDependencies ++= Seq()
     )

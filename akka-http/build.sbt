@@ -3,10 +3,7 @@ import EndpointsSettings._
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
 val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
-val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
-val `json-schema-circe-jvm` = LocalProject("json-schema-circeJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
-val `json-schema-playjson-jvm` = LocalProject("json-schema-playjsonJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
 val `akka-http-client` =
@@ -19,10 +16,10 @@ val `akka-http-client` =
       version := "5.2.0+n",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -48,10 +45,10 @@ val `akka-http-server` =
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided,
+        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
         ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        "com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test,
-        "com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test,
+        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
         scalaTestDependency
       ),
       excludeDependencies ++= {
