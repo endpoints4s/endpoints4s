@@ -118,7 +118,7 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
     * @group operations
     */
   def jsonChunksRequest[A](framing: Framing)(implicit
-      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+      codec: JsonCodec[A]
   ): RequestEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 
@@ -140,7 +140,7 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
     * @group operations
     */
   def jsonChunksResponse[A](framing: Framing)(implicit
-      @annotation.nowarn("msg=never used") codec: JsonCodec[A]
+      codec: JsonCodec[A]
   ): ResponseEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 

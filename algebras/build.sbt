@@ -36,6 +36,9 @@ val `algebra-testkit` =
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
+    .jsSettings(
+      libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
+    )
     .dependsOn(algebra)
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))

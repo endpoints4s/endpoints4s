@@ -33,15 +33,12 @@ val `json-schema-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-json-schema-testkit",
       version := "1.2.0+n",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
-        "org.scalatest" %%% "scalatest" % scalaTestVersion
+        "org.scalatest" %%% "scalatest" % scalaTestVersion,
+        "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
+        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
       )
-    )
-    .platformsSettings(JVMPlatform, JSPlatform)(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
-    )
-    .nativeSettings(
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.4.0-M3"
     )
     .dependsOn(`json-schema`)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
