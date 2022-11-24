@@ -49,6 +49,5 @@ ThisBuild / libraryDependencySchemes ++= Seq(
   "com.typesafe.akka" %%% "akka-http" % "semver-spec",
   "com.typesafe.akka" %%% "akka-http-core" % "semver-spec",
   "com.typesafe.akka" %%% "akka-parsing" % "semver-spec",
-  "org.log4s" %%% "log4s" % "semver-spec",
-  "org.scala-lang.modules" %%% "scala-xml" % "always" // Temporary (to remove after 1.8.0 release)
+  "org.log4s" %%% "log4s" % "semver-spec"
 )
