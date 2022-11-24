@@ -4,7 +4,6 @@ import java.util.UUID
 
 import endpoints4s.{Codec, PartialInvariantFunctor, PartialInvariantFunctorSyntax, Tupler}
 
-import scala.annotation.nowarn
 import scala.collection.compat.Factory
 
 /** Algebra interface for describing URLs made of a path and a query string.
@@ -133,7 +132,6 @@ trait Urls extends PartialInvariantFunctorSyntax {
     * @tparam A Type of the value carried by the parameter
     * @group operations
     */
-  @nowarn("cat=unused-params")
   def optQsWithDefault[A](name: String, default: A, docs: Documentation = None)(implicit
       value: QueryStringParam[A]
   ): QueryString[WithDefault[A]] = unsupportedInterpreter("1.6.0")
