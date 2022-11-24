@@ -10,7 +10,6 @@ val `xhr-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
       version := "5.2.0",
       mimaBinaryIssueFilters ++= Seq(
         // Was private to Scala users
@@ -55,7 +54,6 @@ val `xhr-client-faithful` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-faithful",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
       version := "5.2.0",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
@@ -88,7 +86,6 @@ val `xhr-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-circe",
-      versionPolicyIntention := Compatibility.BinaryCompatible,
       version := "5.2.0",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
