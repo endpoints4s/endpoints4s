@@ -19,11 +19,6 @@ lazy val openapi =
       name := "openapi",
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
       libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion,
-      excludeDependencies ++= {
-        if (scalaBinaryVersion.value.startsWith("3")) {
-          List(ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13"))
-        } else Nil
-      }
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjects("algebra", "json-schema")
