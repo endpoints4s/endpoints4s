@@ -55,7 +55,7 @@ val `algebra-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe",
-      version := "2.2.0+n",
+      version := "2.3.0",
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-parser" % circeVersion,
         "io.circe" %%% "circe-generic" % circeVersion % Test

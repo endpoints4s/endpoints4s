@@ -43,7 +43,7 @@ ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 // Default version, used by the algebra modules, and by the interpreters,
 // unless they override it.
-ThisBuild / version := "1.8.0+n"
+ThisBuild / version := "1.9.0"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.typesafe.akka" %%% "akka-http" % "semver-spec",

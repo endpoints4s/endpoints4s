@@ -59,6 +59,7 @@ val `xhr-client-faithful` =
       coverageEnabled := false,
       libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0")
         .cross(CrossVersion.for3Use2_13),
+      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
         new org.openqa.selenium.chrome.ChromeOptions().addArguments(
           // recommended options

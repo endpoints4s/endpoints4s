@@ -32,7 +32,7 @@ val `json-schema-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-json-schema-testkit",
-      version := "1.2.0+n",
+      version := "2.0.0",
       versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
@@ -84,7 +84,7 @@ lazy val `json-schema-circe` =
       `scala 2.12 to dotty`,
       publishSettings,
       name := "json-schema-circe",
-      version := "2.2.0+n",
+      version := "2.3.0",
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
