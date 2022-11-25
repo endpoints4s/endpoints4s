@@ -119,11 +119,11 @@ object EndpointsSettings {
     },
     libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => Nil
-        case _ =>
+        case Some((2, n)) if n <= 12 =>
           compilerPlugin(
             "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full
           ) :: Nil
+        case _ => Nil
       }
     }
   )

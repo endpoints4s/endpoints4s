@@ -135,7 +135,7 @@ val `example-quickstart-endpoints` =
     .crossType(CrossType.Pure)
     .in(file("examples/quickstart/endpoints"))
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .jvmSettings(coverageEnabled := true)
     .dependsOnLocalCrossProjects("algebra", "json-schema-generic")
 
@@ -149,7 +149,7 @@ val `example-quickstart-client` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`
+      `scala 2.12 to dotty`
     )
     .dependsOn(`example-quickstart-endpoints-js`, `xhr-client`)
 
@@ -221,7 +221,7 @@ val `example-basic-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       scalaJSUseMainModuleInitializer := true,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.2.2"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -242,13 +242,13 @@ val `example-cqrs-public-endpoints` =
   crossProject(JSPlatform, JVMPlatform)
     .crossType(CrossType.Pure)
     .in(file("examples/cqrs/public-endpoints"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
     .jvmSettings(coverageEnabled := true)
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.2.2"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
       )
     )
     .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
@@ -312,7 +312,7 @@ lazy val `example-cqrs-commands-endpoints` =
     .in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`, // Blocked by https://github.com/lampepfl/dotty-feature-requests/issues/161
+      `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
         "io.circe" %% "circe-generic" % circeVersion
@@ -342,7 +342,7 @@ val `example-cqrs-commands` =
 lazy val `example-cqrs-queries-endpoints` =
   project
     .in(file("examples/cqrs/queries-endpoints"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .dependsOn(
       `algebra-circe-jvm`,
       `example-cqrs-public-endpoints-jvm` /* because we reuse the DTOs */
@@ -383,37 +383,9 @@ val `example-cqrs` =
 val `example-documented` =
   project
     .in(file("examples/documented"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .settings(
       libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion
-// Temporary: the sbt-heroku plugin seems to conflict with sbt-dotty
-//      herokuAppName in Compile := "documented-counter",
-//      herokuFatJar in Compile := Some((assemblyOutputPath in assembly).value),
-//      herokuSkipSubProjects in Compile := false,
-//      herokuProcessTypes in Compile := Map(
-//        "web" -> ("java -Dhttp.port=$PORT -jar " ++ (crossTarget.value / s"${name.value}-assembly-${version.value}.jar")
-//          .relativeTo(baseDirectory.value)
-//          .get
-//          .toString)
-//      ),
-//      assembly / assemblyMergeStrategy := {
-//        case x if x.endsWith("io.netty.versions.properties") =>
-//          MergeStrategy.first
-//        case x if x.endsWith("module-info.class") =>
-//          MergeStrategy.first
-//        case x =>
-//          val oldStrategy = (assembly / assemblyMergeStrategy).value
-//          oldStrategy(x)
-//      },
-//      Compile / sourceGenerators += Def.task {
-//        assets.AssetsTasks.generateDigests(
-//          baseDirectory = baseDirectory.value,
-//          targetDirectory = (Compile / sourceManaged).value,
-//          generatedObjectName = "AssetsDigests",
-//          generatedPackage = Some("counter"),
-//          assetsPath = _ / "src" / "main" / "resources" / "public"
-//        )
-//      }.taskValue
     )
     .dependsOn(`http4s-server`, `json-schema-generic-jvm`)
 
