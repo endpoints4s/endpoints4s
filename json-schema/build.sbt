@@ -35,8 +35,8 @@ val `json-schema-testkit` =
       version := "2.0.0+n",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
-        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
+        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0"
       )
     )
     .dependsOn(`json-schema`)
