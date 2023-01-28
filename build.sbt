@@ -59,8 +59,8 @@ releaseProcess := Seq[ReleaseStep](
   releaseStepTaskAggregated(versionPolicyCheck),
   releaseStepTaskAggregated(versionCheck),
   releaseStepCommand("+publishSigned"),
-  releaseStepCommand("sonatypeReleaseAll"),
+  //releaseStepCommand("sonatypeReleaseAll"),
   releaseStepCommand("++ 2.13 ;manual/makeSite; manual/compile"),
   tagRelease,
-  pushChanges
+  //pushChanges
 )
