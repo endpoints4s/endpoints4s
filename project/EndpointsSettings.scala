@@ -1,7 +1,7 @@
 import sbt._
 import sbt.Keys._
+import sbtversionpolicy.SbtVersionPolicyPlugin.autoImport.versionPolicyIntention
 import scalajscrossproject.ScalaJSCrossPlugin.autoImport._
-import com.typesafe.tools.mima.plugin.MimaPlugin.autoImport.mimaPreviousArtifacts
 
 object EndpointsSettings {
 
@@ -85,6 +85,13 @@ object EndpointsSettings {
     homepage := Some(url(s"https://github.com/endpoints4s/endpoints4s")),
     licenses := Seq(
       "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
+    ),
+    version := Versioning.computeVersion(
+      name.value,
+      crossVersion.value,
+      scalaBinaryVersion.value,
+      scalaVersion.value,
+      versionPolicyIntention.value
     )
   )
 

@@ -34,6 +34,10 @@ ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
 
+// Set the version of the root project so that it is pushed
+// as a tag by sbt-release.
+version := (LocalProject("algebraJVM") / version).value
+
 // Default intention: binary compatibility between releases.
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
@@ -41,13 +45,22 @@ ThisBuild / sonatypeProjectHosting := Some(
 ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
-// Default version, used by the algebra modules, and by the interpreters,
-// unless they override it.
-ThisBuild / version := "1.9.0+n"
 
 ThisBuild / libraryDependencySchemes ++= Seq(
   "com.typesafe.akka" %%% "akka-http" % "semver-spec",
   "com.typesafe.akka" %%% "akka-http-core" % "semver-spec",
   "com.typesafe.akka" %%% "akka-parsing" % "semver-spec",
   "org.log4s" %%% "log4s" % "semver-spec"
+)
+
+import ReleaseTransformations._
+
+releaseProcess := Seq[ReleaseStep](
+  releaseStepTaskAggregated(versionPolicyCheck),
+  releaseStepTaskAggregated(versionCheck),
+  releaseStepCommand("+publishSigned"),
+  releaseStepCommand("sonatypeReleaseAll"),
+  releaseStepCommand("++ 2.13 ;manual/makeSite; manual/compile"),
+  tagRelease,
+  pushChanges
 )

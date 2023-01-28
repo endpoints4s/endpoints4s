@@ -19,23 +19,27 @@ sbt-assets/                 Sbt plugin to help handling assets
 
 ## Cheat sheet
 
+Start the `sbt` shell from the project root directory. Then run the following command from
+the sbt prompt.
+
 ### Compile the project with the default Scala version
 
-~~~ sh
-$ sbt compile
+~~~
+> compile
 ~~~
 
 ### Run the tests
 
-~~~ sh
-$ sbt test
+~~~
+> sbt test
 ~~~
 
 Or, for a specific Scala version:
 
-~~~ sh
-$ sbt "++ 2.12.13 test"
-$ sbt "++ 2.13.8 test"
+~~~
+> ++ 2.12 test
+> ++ 2.13 test
+> ++ 3 test
 ~~~
 
 ### Introduction of source or binary incompatibilities
@@ -65,8 +69,8 @@ and to manage the release versions accordingly.
 To check that your changes don’t break the versioning policy, run the task
 `versionPolicyCheck`:
 
-~~~ sh
-$ sbt versionPolicyCheck
+~~~
+> versionPolicyCheck
 ~~~
 
 If this task fails, either find a way to implement your contribution in a
@@ -77,88 +81,61 @@ by changing its setting `versionPolicyIntention`.
 
 We use Scalafmt. You can use the `scalafmt` sbt task like the following:
 
-~~~ sh
+~~~
 > scalafmt
 ~~~
 
 ### Preview the documentation
 
-~~~ sh
-$ sbt manual/previewSite
+~~~
+> manual/previewSite
 ~~~
 
 And then go to http://localhost:4000.
 
 ### Publish the documentation
 
-~~~ sh
-$ sbt manual/ghpagesPushSite
+~~~
+> manual/ghpagesPushSite
 ~~~
 
 ### Run the examples 
 
-~~~ sh
-++ 2.13.8 example-basic-play-server/run
 ~~~
-
-## Working with mill
-
-Endpoints comes with experimental mill build which is meant for evaluating mill as a replacecement for sbt
-
-~~~sh
-mill genidea #generate idea project config
-mill all __.compile #compile everything
-mill all __.test #test everything
+> ++ 2.13 example-basic-play-server/run
 ~~~
-After generating intellij project you may need to navigate to Settings -> Languages & Frameworks -> Worksheet and set inteprpretation mode to "Always Ammonite"
 
 ## Release process
 
-1. Make sure the release notes for the next release are ready (https://github.com/endpoints4s/endpoints4s/releases)
-   Every PR should be listed (except @scala-steward’s PRs), and there should be a table at the
-   beginning of the release notes, summarizing the modules’ versions and their dependencies’
+We use `sbt-release`, and we cut a release by manually triggering the `release` GitHub workflow.
+
+1. Make sure the draft release notes for the next release (https://github.com/endpoints4s/endpoints4s/releases)
+   list all the PRs that have been merged (except @scala-steward’s PRs).
+2. Run the [release](https://github.com/endpoints4s/endpoints4s/actions/workflows/release.yml) workflow from the GitHub UI.
+3. The workflow will compute the next release version for every artifact, run the compatibility checks, publish
+   the artifacts, push a Git tag (matching the version of the algebra), and update the documentation website.
+4. In the GitHub [releases](https://github.com/endpoints4s/endpoints4s/releases) page, associate the draft
+   release with the tag that has just been pushed, and update it to include a table at the
+   beginning of the release notes summarizing the modules’ versions and their dependencies’
    versions.
-2. Bump the version of every module (e.g., change `1.0.0+n` into `1.0.1`, `1.1.0`, or `2.0.0`,
-   according to the compatibility guarantees of the module). If a module does not define its
-   version (this is the case for all the modules that only provide algebras), it uses the one
-   defined in the root file `build.sbt`. All the interpreters have their own version numbers
-   and compatibility guarantees, so they all define both settings `versionPolicyIntention` and
-   `version`.
-3. Commit the new versions
-   ~~~ sh
-   git commit -a -m "Set release versions"
-   ~~~
-4. Run `versionPolicyCheck` and `versionCheck`
-   ~~~ sh
-   sbt versionPolicyCheck versionCheck
-   ~~~
-5. Upload the bundles to sonatype, release them, and publish the documentation website
-   ~~~ sh
-   sbt "+publishSigned" sonatypeReleaseAll "++ 2.13 manual/makeSite" manual/ghpagesPushSite
-   ~~~
-6. Create a tag `vx.y.z`
-   ~~~ sh
-   git tag vx.y.z
-   ~~~
-7. Reset the compatibility intention to `Compatibility.BinaryAndSourceCompatible`,
-   and add a `+n` suffix to the version of every module (e.g., change `1.0.0`
-   into `1.0.0+n`). In case a module used its own value for `versionPolicyIntention`
-   instead of reusing the one defined at the build level, comment it out.
-8. Commit the changes
+5. Manually reset the compatibility intention of all the modules to `Compatibility.BinaryAndSourceCompatible`.
+   In case a module used its own value for `versionPolicyIntention` instead of reusing the one defined at the
+   build level, comment it out.
+6. Commit the changes
    ~~~ sh
    git commit -a -m "Reset compatibility intention"
    ~~~
-9. Push
+7. Push
    ~~~ sh
-   git push --tags origin master
+   git push origin master
    ~~~
-10. Publish the release notes on GitHub
+8. Publish the release notes on GitHub
 
 ## Breakage policy
 
 Our goal is to publish backward binary compatible releases of the algebra modules for as long
 as possible. It is OK to break compatibility in interpreter modules, but if possible we
-should keep backward compatibility.
+should keep backwards compatibility.
 
 So, algebra and interpreters have different version numbers and compatibility guarantees
 across releases.
@@ -167,9 +144,7 @@ After every release, the level of compatibility is reset to `Compatibility.Binar
 in every module.
 
 If necessary, we can relax this constraint to `Compatibility.BinaryCompatible` in modules that
-need to introduce potential source incompatibilities. In such a case, we can also preset the
-version number of the module (e.g., we can change `1.0.0+n` into `1.1.0`).
+need to introduce potential source incompatibilities.
 
 If necessary, we can relax this constraint to `Compatibility.None` in interpreter modules that
-need to break binary compatibility. In such a case, we can also preset the version number of
-the module (e.g., we can change `1.0.0+n` into `2.0.0`).
+need to break binary compatibility.
