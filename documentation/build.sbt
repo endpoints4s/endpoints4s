@@ -37,6 +37,7 @@ val apiDoc =
     .enablePlugins(ScalaUnidocPlugin)
     .settings(
       noPublishSettings,
+      version := (`algebra-jvm` / version).value,
       `scala 2.13`,
       coverageEnabled := false,
       ScalaUnidoc / unidoc / scalacOptions ++= Seq(
@@ -82,6 +83,7 @@ val manual =
     .settings(
       noPublishSettings,
       `scala 2.13`,
+      version := (`algebra-jvm` / version).value,
       coverageEnabled := false,
       git.remoteRepo := "git@github.com:endpoints4s/endpoints4s.github.io.git",
       ghpagesBranch := "master",
