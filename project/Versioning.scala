@@ -5,8 +5,6 @@ import sbtversionpolicy.Compatibility
 
 object Versioning {
 
-  private val versions = Versions.create()
-
   /**
     * @param module             Module name (without “cross-version suffix”), e.g. "algebra"
     * @param crossVersion       CrossVersion of the module
@@ -20,7 +18,8 @@ object Versioning {
         .getOrElse(sys.error(s"Unable to compute the artifact name of the module ${module}"))
         .apply(module)
     val version =
-      versions
+      Versions
+        .create()
         .withModule(Module.of("org.endpoints4s", artifactName))
         .versions()
         .getMergedListings
