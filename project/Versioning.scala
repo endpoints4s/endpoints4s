@@ -19,12 +19,14 @@ object Versioning {
       CrossVersion(crossVersion, scalaFullVersion, scalaBinaryVersion)
         .getOrElse(sys.error(s"Unable to compute the artifact name of the module ${module}"))
         .apply(module)
-    versions
-      .withModule(Module.of("org.endpoints4s", artifactName))
-      .versions()
-      .getMergedListings
-      .getRelease
-      .ensuring(_.nonEmpty, s"No release found for module ${module}")
+    val version =
+      versions
+        .withModule(Module.of("org.endpoints4s", artifactName))
+        .versions()
+        .getMergedListings
+        .getRelease
+    if (version.isEmpty) "0.0.0" // fallback in case the module has not been published yet
+    else version
   }
 
   /**
