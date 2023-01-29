@@ -10,7 +10,6 @@ val `xhr-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client",
-      version := "5.2.0+n",
       mimaBinaryIssueFilters ++= Seq(
         // Was private to Scala users
         ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.xhr.EndpointsSettings.this")
@@ -54,7 +53,6 @@ val `xhr-client-faithful` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-faithful",
-      version := "5.2.0+n",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += ("org.julienrf" %%% "faithful" % "2.0.0")
@@ -87,7 +85,6 @@ val `xhr-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "xhr-client-circe",
-      version := "5.2.0+n",
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
