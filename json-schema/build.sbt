@@ -34,8 +34,8 @@ val `json-schema-testkit` =
       name := "algebra-json-schema-testkit",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
-        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
+        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.5.0"
       )
     )
     .dependsOn(`json-schema`)
