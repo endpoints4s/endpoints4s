@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       versionQualifier:
-        description: 'Version qualifier (e.g. "-RC1")'
+        description: 'Optional version qualifier (e.g. "-RC1")'
         required: false
         type: string
 
@@ -25,4 +25,6 @@ jobs:
         run: |
           echo "VERSION_QUALIFIER=${{ inputs.versionQualifier }}" >> $GITHUB_ENV
         if: ${{ inputs.versionQualifier != '' }}
+      - run: git config user.email "release-bot@endpoints4s.org"
+      - run: git config user.name "endpoints4s release bot"
       - run: sbt release
