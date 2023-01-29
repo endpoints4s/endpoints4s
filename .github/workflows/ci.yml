@@ -1,10 +1,8 @@
-name: CI
+name: Continuous Integration
 on:
   push:
     branches:
     - master
-    tags:
-    - "v*"
   pull_request:
 
 jobs:
@@ -12,12 +10,12 @@ jobs:
     name: Test (Scala 2.12)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: coursier/cache-action@v5
-    - uses: actions/setup-node@v2
-    - uses: olafurpg/setup-scala@v10
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
       with:
-        java-version: adopt@1.11
+        distribution: temurin
+        java-version: 11
+        cache: sbt
     - run: npm install jsdom@12.2.0
     - run: sbt stub-server/bgRun "++ 2.12 test"
 
@@ -25,12 +23,12 @@ jobs:
     name: Test (Scala 2.13)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: coursier/cache-action@v5
-    - uses: actions/setup-node@v2
-    - uses: olafurpg/setup-scala@v10
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
       with:
-        java-version: adopt@1.11
+        distribution: temurin
+        java-version: 11
+        cache: sbt
     - run: npm install jsdom@12.2.0
     - run: sudo apt-get install graphviz
     - run: sbt stub-server/bgRun "++ 2.13 ;coverage ;test ;coverageReport ;coverageAggregate ;manual/makeSite"
@@ -40,11 +38,12 @@ jobs:
     name: Test (Scala 3)
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: coursier/cache-action@v5
-    - uses: olafurpg/setup-scala@v10
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
       with:
-        java-version: adopt@1.11
+        distribution: temurin
+        java-version: 11
+        cache: sbt
     - run: npm install jsdom@12.2.0
     - run: sbt stub-server/bgRun "++ 3 test"
 
@@ -52,11 +51,10 @@ jobs:
     name: Check versioning policy and code style
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-java@v3
       with:
-        fetch-depth: 0
-    - uses: coursier/cache-action@v5
-    - uses: olafurpg/setup-scala@v10
-      with:
-        java-version: adopt@1.11
+        distribution: temurin
+        java-version: 11
+        cache: sbt
     - run: sbt versionPolicyCheck scalafmtCheck

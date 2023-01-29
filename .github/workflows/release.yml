@@ -1,0 +1,28 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      versionQualifier:
+        description: 'Version qualifier (e.g. "-RC1")'
+        required: false
+        type: string
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      RELEASE: true
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+      - run: npm install jsdom@12.2.0
+      - name: Set version qualifier
+        run: |
+          echo "VERSION_QUALIFIER=${{ inputs.versionQualifier }}" >> $GITHUB_ENV
+        if: ${{ inputs.versionQualifier != '' }}
+      - run: sbt release
