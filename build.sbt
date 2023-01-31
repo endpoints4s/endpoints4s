@@ -56,11 +56,6 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 import ReleaseTransformations._
 
 releaseProcess := Seq[ReleaseStep](
-  releaseStepTaskAggregated(versionPolicyCheck),
-  releaseStepTaskAggregated(versionCheck),
-  releaseStepCommand("+publishSigned"),
-  //releaseStepCommand("sonatypeReleaseAll"),
-  releaseStepCommand("++ 2.13 ;manual/makeSite; manual/compile"),
   tagRelease,
   //pushChanges
 )
