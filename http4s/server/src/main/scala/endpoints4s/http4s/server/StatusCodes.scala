@@ -23,6 +23,9 @@ trait StatusCodes extends algebra.StatusCodes {
   override def IMUsed = Http4sStatus.IMUsed
 
   override def NotModified = Http4sStatus.NotModified
+  override def TemporaryRedirect = Http4sStatus.TemporaryRedirect
+  override def PermanentRedirect = Http4sStatus.PermanentRedirect
+
   def BadRequest = Http4sStatus.BadRequest
   def Unauthorized = Http4sStatus.Unauthorized
   override def PaymentRequired = Http4sStatus.PaymentRequired
