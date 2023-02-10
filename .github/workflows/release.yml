@@ -27,6 +27,7 @@ jobs:
           gpg-private-key: ${{ secrets.PGP_SECRET }}
           gpg-passphrase: PGP_PASSPHRASE
       - run: npm install jsdom@12.2.0
+      - run: sudo apt-get install graphviz
       - name: Set version qualifier
         if: ${{ inputs.versionQualifier != '' }}
         run: |
@@ -36,6 +37,8 @@ jobs:
       - run: sbt versionPolicyCheck
       - run: sbt versionCheck
       - run: sbt +publishSigned
-#      - run: sbt sonatypeReleaseAll
-      - run: sbt "++ 2.13 ;manual/makeSite; manual/compile"
-      - run: sbt release
+      - run: sbt sonatypePrepare sonatypeBundleUpload
+      - name: Publish documentation
+        run: sbt "++ 2.13 ;manual/makeSite; manual/compile"
+      - name: Push tag
+        run: sbt release

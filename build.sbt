@@ -34,9 +34,8 @@ ThisBuild / sonatypeProjectHosting := Some(
   GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
 )
 
-// Set the version of the root project so that it is pushed
-// as a tag by sbt-release.
-version := (LocalProject("algebraJVM") / version).value
+// Set the default version so that it is pushed as a tag by sbt-release.
+ThisBuild / version := (LocalProject("algebraJVM") / version).value
 
 // Default intention: binary compatibility between releases.
 // We want to keep binary compatibility as long as we can for the algebra,
