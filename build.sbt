@@ -24,7 +24,7 @@ noPublishSettings
 
 ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
-ThisBuild / publishTo := sonatypePublishTo.value
+ThisBuild / publishTo := sonatypePublishToBundle.value
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
