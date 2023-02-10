@@ -37,8 +37,8 @@ jobs:
       - run: sbt versionPolicyCheck
       - run: sbt versionCheck
       - run: sbt +publishSigned
-      - run: sbt ; sonatypePrepare; sonatypeBundleUpload
+      - run: sbt sonatypeBundleRelease
       - name: Publish documentation
-        run: sbt ++ 2.13 ;manual/makeSite; manual/compile
+        run: sbt ++ 2.13 ;manual/makeSite ;manual/ghpagesPushSite
       - name: Push tag
         run: sbt release

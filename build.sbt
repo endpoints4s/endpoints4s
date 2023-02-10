@@ -56,5 +56,5 @@ import ReleaseTransformations._
 
 releaseProcess := Seq[ReleaseStep](
   tagRelease,
-  //pushChanges
+  pushChanges
 )
