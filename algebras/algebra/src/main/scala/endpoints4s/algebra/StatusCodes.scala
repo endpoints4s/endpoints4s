@@ -50,6 +50,12 @@ trait StatusCodes {
   /** @group operations */
   def NotModified: StatusCode = unsupportedInterpreter("1.2.0")
 
+  /** @group operations */
+  def TemporaryRedirect: StatusCode = unsupportedInterpreter("1.10.0")
+
+  /** @group operations */
+  def PermanentRedirect: StatusCode = unsupportedInterpreter("1.10.0")
+
   // 4xx Client Error
   /** @note You should use the `badRequest` constructor provided by the [[endpoints4s.algebra.Responses]]
     *       trait to ensure that errors produced by endpoints4s are consistently
