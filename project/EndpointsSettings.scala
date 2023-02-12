@@ -82,6 +82,7 @@ object EndpointsSettings {
       url(s"http://endpoints4s.github.io/api")
     ),
     autoAPIMappings := true,
+    Compile / doc / scalacOptions += "-no-link-warnings",
     homepage := Some(url(s"https://github.com/endpoints4s/endpoints4s")),
     licenses := Seq(
       "MIT License" -> url("http://opensource.org/licenses/mit-license.php")
