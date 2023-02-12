@@ -22,6 +22,8 @@ trait StatusCodes extends algebra.StatusCodes {
   override def IMUsed = 226
 
   override def NotModified = 304
+  override def TemporaryRedirect = 307
+  override def PermanentRedirect = 308
 
   def BadRequest = 400
   def Unauthorized = 401
