@@ -1,5 +1,5 @@
 import EndpointsSettings._
-import com.typesafe.tools.mima.core.{ ProblemFilters, DirectMissingMethodProblem }
+import com.typesafe.tools.mima.core.{ProblemFilters, DirectMissingMethodProblem}
 
 val `xhr-client` =
   project
@@ -17,7 +17,7 @@ val `xhr-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "2.3.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.4.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
