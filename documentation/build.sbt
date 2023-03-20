@@ -268,7 +268,7 @@ val `example-cqrs-web-client` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "com.raquo" %%% "laminar" % "0.14.5",
+        "com.raquo" %%% "laminar" % "15.0.0",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
         ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
