@@ -27,7 +27,7 @@ addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.7.0")
 //addSbtPlugin(
 //  "com.heroku" % "sbt-heroku" % "2.1.4"
 //) // Used by the example-documented project
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.14.10")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.1.1")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.0.7")
 
