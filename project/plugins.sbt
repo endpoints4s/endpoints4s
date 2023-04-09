@@ -10,7 +10,7 @@ addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % sbtCrossProject
 addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.4")
 addSbtPlugin("org.portable-scala" % "sbt-scala-native-crossproject" % sbtCrossProjectVersion)
 
-addSbtPlugin("io.spray" % "sbt-revolver" % "0.9.1")
+addSbtPlugin("io.spray" % "sbt-revolver" % "0.10.0")
 
 addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.18")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
