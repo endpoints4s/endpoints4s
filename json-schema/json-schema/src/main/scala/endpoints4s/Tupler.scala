@@ -19,6 +19,7 @@ package endpoints4s
   *  - A, B               -> (A, B)
   *  - A, (B, C)          -> (A, B, C)
   *  - (A, B), C          -> (A, B, C)
+  *  - A, (B, C, D)       -> (A, B, C, D)
   *  - (A, B), (C, D)     -> (A, B, C, D)
   *  - A, (B, C, D, E)    -> (A, B, C, D, E)
   *  - (A, B), (C, D, E)  -> (A, B, C, D, E)
@@ -71,6 +72,16 @@ trait Tupler2 extends Tupler1 {
       def unapply(out: (A, B, C)): ((A, B), C) = {
         val (a, b, c) = out
         ((a, b), c)
+      }
+    }
+
+  implicit def tupler1And3[A, B, C, D]: Aux[A, (B, C, D), (A, B, C, D)] =
+    new Tupler[A, (B, C, D)] {
+      type Out = (A, B, C, D)
+      def apply(a: A, bcd: (B, C, D)): (A, B, C, D) = (a, bcd._1, bcd._2, bcd._3)
+      def unapply(out: (A, B, C, D)): (A, (B, C, D)) = {
+        val (a, b, c, d) = out
+        (a, (b, c, d))
       }
     }
 
