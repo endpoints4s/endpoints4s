@@ -14,6 +14,7 @@ class TuplerTests {
     // Tupler
     tupling(a, b): (A, B)
     tupling(a, (b, c)): (A, B, C)
+    tupling(a, (b, c, d)): (A, B, C, D)
     tupling((a, b), (c, d)): (A, B, C, D)
     tupling(a, (b, c, d, e)): (A, B, C, D, E)
     tupling((a, b), (c, d, e)): (A, B, C, D, E)
@@ -28,7 +29,6 @@ class TuplerTests {
     tupling((a, b, c, d, e, f, g, h), i): (A, B, C, D, E, F, G, H, I)
 
     // Stability tests
-    tupling(a, (b, c, d))                 : (A, (B, C, D))
     tupling((a, b, c), (d, e))            : (A, B, C, (D, E))
     tupling((a, b, c, d), (e, f))         : (A, B, C, D, (E, F))
     tupling((a, b, c), (d, e, f))         : (A, B, C, (D, E, F))
