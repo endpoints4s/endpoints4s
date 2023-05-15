@@ -58,3 +58,9 @@ releaseProcess := Seq[ReleaseStep](
   tagRelease,
   pushChanges
 )
+
+import com.typesafe.tools.mima.core._
+ThisBuild / mimaBinaryIssueFilters ++= Seq(
+  // OK, constructor is private (but accessed from within the companion)
+  ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.OpenApi.this")
+)
