@@ -39,6 +39,6 @@ jobs:
       - run: sbt +publishSigned
       - run: sbt sonatypeBundleRelease
       - name: Publish documentation
-        run: sbt ++ 2.13 ;manual/makeSite ;manual/ghpagesPushSite
+        run: sbt "++ 2.13 ;manual/makeSite ;manual/ghpagesPushSite"
       - name: Push tag
         run: sbt release
