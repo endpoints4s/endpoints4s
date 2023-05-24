@@ -41,7 +41,7 @@ ThisBuild / version := (LocalProject("algebraJVM") / version).value
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
-ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
+ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
@@ -57,4 +57,10 @@ import ReleaseTransformations._
 releaseProcess := Seq[ReleaseStep](
   tagRelease,
   pushChanges
+)
+
+import com.typesafe.tools.mima.core._
+ThisBuild / mimaBinaryIssueFilters ++= Seq(
+  // OK, constructor is private (but accessed from within the companion)
+  ProblemFilters.exclude[DirectMissingMethodProblem]("endpoints4s.openapi.model.OpenApi.this")
 )
