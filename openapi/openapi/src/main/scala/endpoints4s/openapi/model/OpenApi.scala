@@ -11,31 +11,33 @@ import scala.collection.mutable
 final class OpenApi private (
     val info: Info,
     private val innerPaths: collection.Map[String, PathItem],
-    val components: Components
+    val components: Components,
+    val servers: Seq[Server]
 ) extends Serializable {
 
   def paths: Map[String, PathItem] = innerPaths.toMap
 
   override def toString =
-    s"OpenApi($info, $paths, $components)"
+    s"OpenApi($info, $paths, $components, $servers)"
 
   override def equals(other: Any): Boolean =
     other match {
       case that: OpenApi =>
-        info == that.info && paths == that.paths && components == that.components
+        info == that.info && paths == that.paths && components == that.components && servers == that.servers
       case _ => false
     }
 
-  override def hashCode(): Int = Hashing.hash(info, paths, components)
+  override def hashCode(): Int = Hashing.hash(info, paths, components, servers)
 
   val tags: Set[Tag] = OpenApi.extractTags(innerPaths)
 
   private[this] def copy(
       info: Info = info,
       paths: collection.Map[String, PathItem] = innerPaths,
-      components: Components = components
+      components: Components = components,
+      servers: Seq[Server] = servers
   ): OpenApi =
-    new OpenApi(info, paths, components)
+    new OpenApi(info, paths, components, servers)
 
   def withInfo(info: Info): OpenApi =
     copy(info = info)
@@ -45,17 +47,28 @@ final class OpenApi private (
 
   def withComponents(components: Components): OpenApi =
     copy(components = components)
+
+  def withServers(servers: Seq[Server]): OpenApi =
+    copy(servers = servers)
 }
 
 object OpenApi {
 
   val openApiVersion = "3.0.0"
 
-  def apply(info: Info, paths: Map[String, PathItem], components: Components) =
-    new OpenApi(info, paths, components)
+  def apply(info: Info, paths: Map[String, PathItem], components: Components): OpenApi =
+    new OpenApi(info, paths, components, Nil)
 
-  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components) =
-    new OpenApi(info, paths, components)
+  def apply(info: Info, paths: collection.Map[String, PathItem], components: Components): OpenApi =
+    new OpenApi(info, paths, components, Nil)
+
+  def apply(
+      info: Info,
+      paths: collection.Map[String, PathItem],
+      components: Components,
+      servers: Seq[Server]
+  ): OpenApi =
+    new OpenApi(info, paths, components, servers)
 
   private def mapJson[A](map: collection.Map[String, A])(f: A => ujson.Value): ujson.Obj =
     new ujson.Obj(mutable.LinkedHashMap(map.iterator.map { case (k, v) =>
@@ -347,6 +360,32 @@ object OpenApi {
     new ujson.Obj(fields)
   }
 
+  private def serverJson(server: Server): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] = mutable.LinkedHashMap(
+      "url" -> ujson.Str(server.url)
+    )
+    for (description <- server.description) {
+      fields += "description" -> ujson.Str(description)
+    }
+    if (server.variables.nonEmpty) {
+      fields += "variables" -> mapJson(server.variables)(serverVariableJson)
+    }
+    ujson.Obj(fields)
+  }
+
+  private def serverVariableJson(variable: ServerVariable): ujson.Value = {
+    val fields: mutable.LinkedHashMap[String, ujson.Value] = mutable.LinkedHashMap(
+      "default" -> ujson.Str(variable.default)
+    )
+    for (description <- variable.description) {
+      fields += "description" -> ujson.Str(description)
+    }
+    for (alternatives <- variable.`enum`) {
+      fields += "enum" -> ujson.Arr(alternatives.map(alternative => ujson.Str(alternative)): _*)
+    }
+    ujson.Obj(fields)
+  }
+
   private def externalDocumentationObjectJson(
       externalDoc: ExternalDocumentationObject
   ): ujson.Value = {
@@ -380,6 +419,10 @@ object OpenApi {
           "info" -> infoJson(openApi.info),
           "paths" -> pathsJson(openApi.innerPaths)
         )
+      if (openApi.servers.nonEmpty) {
+        val serversAsJson = openApi.servers.map(server => serverJson(server))
+        fields += "servers" -> ujson.Arr(serversAsJson: _*)
+      }
       if (openApi.tags.nonEmpty) {
         val tagsAsJson = openApi.tags.map(tag => tagJson(tag)).toList
         fields += "tags" -> ujson.Arr(tagsAsJson: _*)
@@ -461,6 +504,89 @@ object Info {
 
   def apply(title: String, version: String): Info =
     new Info(title, version, None)
+
+}
+
+/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-object]] */
+final class Server private (
+    val url: String,
+    val description: Option[String],
+    val variables: Map[String, ServerVariable]
+) extends Serializable {
+
+  override def toString: String = s"Server($url, $description, $variables)"
+
+  override def equals(other: Any): Boolean =
+    other match {
+      case that: Server =>
+        url == that.url && description == that.description && variables == that.variables
+      case _ => false
+    }
+
+  override def hashCode(): Int = Hashing.hash(url, description, variables)
+
+  private[this] def copy(
+      url: String = url,
+      description: Option[String] = description,
+      variables: Map[String, ServerVariable] = variables
+  ): Server =
+    new Server(url, description, variables)
+
+  def withUrl(url: String): Server = copy(url = url)
+
+  def withDescription(description: Option[String]): Server = copy(description = description)
+
+  def withVariables(variables: Map[String, ServerVariable]): Server = copy(variables = variables)
+}
+
+object Server {
+
+  def apply(url: String): Server =
+    new Server(url, None, Map.empty)
+
+}
+
+/** @see [[https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#server-variable-object]] */
+final class ServerVariable private (
+    val default: String,
+    val `enum`: Option[Seq[String]],
+    val description: Option[String]
+) extends Serializable {
+  assert(
+    `enum`.forall(_.nonEmpty),
+    "The enumeration of the values to be used in the substitution must not be empty."
+  )
+
+  override def toString = s"ServerVariable($default, ${`enum`}, $description)"
+
+  override def equals(other: Any): Boolean = other match {
+    case that: ServerVariable =>
+      default == that.default &&
+        `enum` == that.`enum` &&
+        description == that.description
+    case _ => false
+  }
+
+  override def hashCode(): Int = Hashing.hash(default, `enum`, description)
+
+  private[this] def copy(
+      default: String = default,
+      `enum`: Option[Seq[String]] = `enum`,
+      description: Option[String] = description
+  ): ServerVariable =
+    new ServerVariable(default, `enum`, description)
+
+  def withDefault(default: String): ServerVariable = copy(default = default)
+
+  def withEnum(`enum`: Option[Seq[String]]): ServerVariable = copy(`enum` = `enum`)
+
+  def withDescription(description: Option[String]): ServerVariable = copy(description = description)
+
+}
+
+object ServerVariable {
+  def apply(default: String): ServerVariable =
+    new ServerVariable(default, None, None)
 
 }
 
