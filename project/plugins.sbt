@@ -16,7 +16,7 @@ addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.9.20")
 addSbtPlugin("com.github.sbt" % "sbt-pgp" % "2.2.1")
 addSbtPlugin("com.github.sbt" % "sbt-release" % "1.1.0")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-site" % "1.4.1")
+addSbtPlugin("com.github.sbt" % "sbt-site" % "1.5.0")
 addSbtPlugin("com.lightbend.paradox" % "sbt-paradox" % "0.10.3")
 addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
