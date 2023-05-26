@@ -78,6 +78,7 @@ val manual =
       ParadoxMaterialThemePlugin,
       ParadoxPlugin,
       ParadoxSitePlugin,
+      SitePreviewPlugin,
       GhpagesPlugin
     )
     .settings(
