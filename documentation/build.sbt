@@ -397,7 +397,7 @@ val `example-authentication` =
     .settings(noPublishSettings, `scala 2.12 to 2.13`)
     .settings(
       libraryDependencies ++= Seq(
-        "com.github.jwt-scala" %% "jwt-circe" % "9.2.0",
+        "com.github.jwt-scala" %% "jwt-circe" % "9.3.0",
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
