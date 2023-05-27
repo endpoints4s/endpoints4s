@@ -19,7 +19,7 @@ val `fetch-client` =
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies ++= Seq(
-        "org.scala-js" %%% "scalajs-dom" % "2.6.0",
+        "org.scala-js" %%% "scalajs-dom" % "2.4.0",
         "org.scalatest" %%% "scalatest" % scalaTestVersion % Test
       ),
       Test / jsEnv := new org.scalajs.jsenv.selenium.SeleniumJSEnv(
