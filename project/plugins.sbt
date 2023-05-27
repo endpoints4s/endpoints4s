@@ -1,4 +1,4 @@
-val sbtCrossProjectVersion = "1.3.1"
+val sbtCrossProjectVersion = "1.2.0"
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
 
