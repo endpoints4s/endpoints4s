@@ -22,7 +22,7 @@ addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
 
-addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.8.0")
+addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.7.0")
 
 //addSbtPlugin(
 //  "com.heroku" % "sbt-heroku" % "2.1.4"
