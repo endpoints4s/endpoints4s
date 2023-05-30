@@ -1,0 +1,169 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API to manipulate a counter",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/counter": {
+      "get": {
+        "responses": {
+          "400": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The counter current value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/counter.Counter"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "responses": {
+          "400": {
+            "description": "Client error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/endpoints.Errors"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "The counter current value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/counter.Counter"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/counter.Operation"
+              }
+            }
+          },
+          "description": "The operation to apply to the counter"
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "counter.Operation.Set": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "example": "Set",
+            "type": "string",
+            "enum": [
+              "Set"
+            ]
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "type",
+          "value"
+        ]
+      },
+      "counter.Counter": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      },
+      "counter.Operation": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/counter.Operation.Add"
+          },
+          {
+            "$ref": "#/components/schemas/counter.Operation.Set"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "Add": "#/components/schemas/counter.Operation.Add",
+            "Set": "#/components/schemas/counter.Operation.Set"
+          }
+        }
+      },
+      "counter.Operation.Add": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "example": "Add",
+            "type": "string",
+            "enum": [
+              "Add"
+            ]
+          },
+          "delta": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "type",
+          "delta"
+        ]
+      },
+      "endpoints.Errors": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "securitySchemes": {}
+  }
+}

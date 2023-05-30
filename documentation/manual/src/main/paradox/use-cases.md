@@ -44,4 +44,4 @@ For instance, given the following endpoints descriptions:
 @@snip [Counter.scala](/documentation/examples/documented/src/main/scala/counter/Counter.scala) { #documented-endpoints }
 
 endpoints4s can produce the
-[following OpenApi document](https://documented-counter.herokuapp.com/documentation.json).
+[following OpenApi document](./documented-counter-openapi.json).
