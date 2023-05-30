@@ -10,6 +10,5 @@ val `stub-server` =
       libraryDependencies ++= Seq(
         "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
         "com.typesafe.akka" %% "akka-stream" % akkaActorVersion
-      ),
-      mainClass := Some("endpoints4s.stubserver.StubServer")
+      )
     )
