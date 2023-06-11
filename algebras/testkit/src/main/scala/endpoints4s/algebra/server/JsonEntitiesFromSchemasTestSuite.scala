@@ -74,6 +74,21 @@ trait JsonEntitiesFromSchemasTestSuite[
           )
         }
 
+        whenReady(
+          sendAndDecodeEntityAsText(
+            request(
+              s"http://localhost:$port/user/42",
+              ""
+            )
+          )
+        ) { case (response, entity) =>
+          print(response)
+          assert(response.status.intValue() == 400)
+          ujson.read(entity) shouldBe ujson.Arr(
+            ujson.Str("Invalid JSON document")
+          )
+        }
+
         // Valid URL and invalid entity (2)
         whenReady(
           sendAndDecodeEntityAsText(
