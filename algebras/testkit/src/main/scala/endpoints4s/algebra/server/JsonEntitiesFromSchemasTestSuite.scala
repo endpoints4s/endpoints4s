@@ -74,12 +74,11 @@ trait JsonEntitiesFromSchemasTestSuite[
           )
         }
 
+        // Valid URL, empty entity with no content-type
         whenReady(
           sendAndDecodeEntityAsText(
-            request(
-              s"http://localhost:$port/user/42",
-              ""
-            )
+            HttpRequest(HttpMethods.PUT, s"http://localhost:$port/user/42")
+              .withEntity(ContentTypes.NoContentType, "".getBytes)
           )
         ) { case (response, entity) =>
           print(response)
