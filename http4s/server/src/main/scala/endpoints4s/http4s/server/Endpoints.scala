@@ -167,7 +167,7 @@ trait EndpointsWithCustomErrors extends algebra.EndpointsWithCustomErrors with M
                   case NonFatal(t) => handleServerError(http4sRequest, t)
                 }
               case Left(errorResponse) => errorResponse.pure[Effect]
-            })
+            }.recoverWith { case NonFatal(t) => handleServerError(http4sRequest, t) })
         } catch {
           case NonFatal(t) => Some(handleServerError(http4sRequest, t))
         }
