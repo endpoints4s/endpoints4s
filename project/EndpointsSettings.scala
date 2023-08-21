@@ -111,6 +111,8 @@ object EndpointsSettings {
   val sttpVersion = "3.3.15"
   val akkaActorVersion = "2.6.17"
   val akkaHttpVersion = "10.2.6"
+  val pekkoActorVersion = "1.0.1"
+  val pekkoHttpVersion = "1.0.0"
   val http4sVersion = "0.23.6"
   val http4sDomVersion = "0.2.3"
   val ujsonVersion = "1.4.0"

@@ -1,6 +1,6 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.model.HttpMethods.{GET}
+import akka.http.scaladsl.model.HttpMethods.GET
 import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.model.headers.{`Last-Modified`, `Content-Type`, `Content-Encoding`}
 import akka.http.scaladsl.model.DateTime
