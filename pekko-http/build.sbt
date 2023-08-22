@@ -2,6 +2,7 @@ import EndpointsSettings._
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
+val `algebra-pekko-testkit-jvm` = LocalProject("algebra-pekko-testkitJVM")
 val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
@@ -15,10 +16,10 @@ val `pekko-http-client` =
       name := "pekko-http-client",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided),
-        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion),
-        ("org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test),
-        ("org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test),
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
+        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -29,7 +30,7 @@ val `pekko-http-client` =
     )
     .dependsOn(`algebra-jvm`)
     .dependsOn(`openapi-jvm`)
-    .dependsOn(`algebra-testkit-jvm` % Test)
+    .dependsOn(`algebra-pekko-testkit-jvm` % Test)
     .dependsOn(`algebra-circe-testkit-jvm` % Test)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
 
@@ -42,11 +43,11 @@ val `pekko-http-server` =
       name := "pekko-http-server",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion),
-        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided),
-        ("org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test),
-        ("org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test),
-        ("org.apache.pekko" %% "pekko-testkit" % pekkoActorVersion % Test),
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
+        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
+        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
+        "org.apache.pekko" %% "pekko-testkit" % pekkoActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
