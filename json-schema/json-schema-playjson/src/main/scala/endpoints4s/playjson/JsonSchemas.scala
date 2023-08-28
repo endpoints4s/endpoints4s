@@ -1,5 +1,6 @@
 package endpoints4s.playjson
 
+import endpoints4s.algebra.JsonSchemas.RawField
 import endpoints4s.{
   MultipleOf,
   NumericConstraints,
@@ -177,6 +178,27 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       (__ \ name).readNullable(tpe.reads),
       (__ \ name).writeNullable(tpe.writes)
     )
+
+  def rawField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
+  ): Record[RawField[A]] = {
+    val path = __ \ name
+    Record(
+      Reads[RawField[A]] { json =>
+        path.asSingleJson(json) match {
+          case _: JsUndefined    => JsSuccess(RawField.Absent)
+          case JsDefined(JsNull) => JsSuccess(RawField.Null)
+          case JsDefined(value)  => tpe.reads.reads(value).repath(path).map(RawField.Present.apply)
+        }
+      },
+      OWrites[RawField[A]] {
+        case RawField.Absent         => JsObject.empty
+        case RawField.Null           => JsPath.createObj(path -> JsNull)
+        case RawField.Present(value) => JsPath.createObj(path -> tpe.writes.writes(value))
+
+      }
+    )
+  }
 
   def orFallbackToJsonSchema[A, B](
       schemaA: JsonSchema[A],

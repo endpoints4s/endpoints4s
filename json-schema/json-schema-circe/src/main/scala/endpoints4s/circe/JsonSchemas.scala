@@ -1,6 +1,7 @@
 package endpoints4s
 package circe
 
+import endpoints4s.algebra.JsonSchemas.RawField
 import endpoints4s.algebra.circe.CirceCodec
 import io.circe._
 
@@ -238,6 +239,24 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         io.circe.Decoder
           .decodeOption(tpe.decoder)
           .tryDecode(cursor.downField(name))
+      )
+    )
+
+  def rawField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
+  ): Record[RawField[A]] =
+    Record(
+      io.circe.Encoder.AsObject.instance[RawField[A]] {
+        case RawField.Absent         => JsonObject.empty
+        case RawField.Null           => JsonObject(name -> Json.Null)
+        case RawField.Present(value) => JsonObject(name -> tpe.encoder.apply(value))
+      },
+      io.circe.Decoder.instance[RawField[A]](cursor =>
+        cursor.downField(name).focus match {
+          case None            => Right(RawField.Absent)
+          case Some(Json.Null) => Right(RawField.Null)
+          case Some(value)     => tpe.decoder.decodeJson(value).map(RawField.Present.apply)
+        }
       )
     )
 
