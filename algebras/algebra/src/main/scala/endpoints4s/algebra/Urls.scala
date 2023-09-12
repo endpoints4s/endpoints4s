@@ -90,6 +90,7 @@ trait Urls extends PartialInvariantFunctorSyntax {
       tupler: Tupler[A, B]
   ): QueryString[tupler.Out]
 
+
   /** Builds a `QueryString` with one parameter.
     *
     * Examples:
@@ -220,6 +221,13 @@ trait Urls extends PartialInvariantFunctorSyntax {
     */
   implicit def doubleQueryString: QueryStringParam[Double] =
     stringQueryString.xmapWithCodec(Codec.doubleCodec)
+
+
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] 
+
+  implicit class QueryStringParamSyntax[A](qspa: QueryStringParam[A]) {
+    def orElse[B](qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = oneOfQueryStringParam(qspa, qspb) 
+  } 
 
   /** An URL path segment codec for type `A`.
     *

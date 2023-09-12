@@ -1,5 +1,7 @@
 package endpoints4s.openapi
 
+import endpoints4s.Valid 
+import endpoints4s.Invalid 
 import endpoints4s.algebra
 import endpoints4s.algebra.{ExternalDocumentationObject, Tag}
 import org.scalatest.OptionValues
@@ -49,6 +51,24 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
             required = false,
             description = None,
             schema = Schema.Array(Left(Schema.simpleLong), None, None, None)
+          ) ::
+            Parameter(
+            "enum",
+            In.Query,
+            required = true,
+            description = None,
+            schema = Schema.OneOf(
+              Schema.EnumeratedAlternatives(
+                List(
+                  Schema.simpleString,
+                  Schema.simpleString,
+                  Schema.simpleString,
+                )
+              ), 
+              None, 
+              None, 
+              None
+            )
           ) ::
           Nil
       Fixtures.quux.item
@@ -459,7 +479,35 @@ class EndpointsTest extends AnyWordSpec with Matchers with OptionValues {
   }
 }
 
+sealed trait TestEnum
+object TestEnum {
+  object TestEnumA extends TestEnum
+  object TestEnumB extends TestEnum 
+  object TestEnumC extends TestEnum
+}
+
 trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
+
+
+  implicit def testEnumQueryStringParam:QueryStringParam[TestEnum] = {
+    val testEnumA = stringQueryString.xmapPartial[TestEnum.TestEnumA.type]{
+      case "enum_A" => Valid(TestEnum.TestEnumA)
+      case  s => Invalid(Seq(s"Not TestEnum.TestEnumA, was: $s"))
+    }{_ => "enum_A"}
+    val testEnumB = stringQueryString.xmapPartial[TestEnum.TestEnumB.type]{
+      case "enum_B" => Valid(TestEnum.TestEnumB)
+      case  s => Invalid(Seq(s"Not TestEnum.TestEnumB, was: $s"))
+    }{_ => "enum_B"}
+    val testEnumC = stringQueryString.xmapPartial[TestEnum.TestEnumC.type]{
+      case "enum_C" => Valid(TestEnum.TestEnumC)
+      case  s => Invalid(Seq(s"Not TestEnum.TestEnumC, was: $s"))
+    }{_ => "enum_C"}
+    testEnumA.orElse(testEnumB).orElse(testEnumC).xmap[TestEnum]{_.left.map(_.merge).merge}{
+      case TestEnum.TestEnumA => Left(Left(TestEnum.TestEnumA))
+      case TestEnum.TestEnumB => Left(Right(TestEnum.TestEnumB))
+      case TestEnum.TestEnumC => Right(TestEnum.TestEnumC)
+    }
+  }
 
   val fooTag = Tag("foo")
   val barTag = Tag("bar").withDescription(Some("This is a bar."))
@@ -519,7 +567,8 @@ trait Fixtures extends algebra.Endpoints with algebra.ChunkedEntities {
         qs[Double]("n") &
           qs[Option[String]]("lang") &
           optQsWithDefault[Int]("page", 1) &
-          qs[List[Long]]("ids")
+          qs[List[Long]]("ids") &
+          qs[TestEnum]("enum")
       )
     ),
     ok(emptyResponse)

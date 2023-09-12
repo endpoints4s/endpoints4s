@@ -16,6 +16,10 @@ trait Urls extends endpoints4s.algebra.Urls with StatusCodes {
     def encode(a: A): List[String]
   }
 
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = new QueryStringParam[Either[A,B]] {
+    def encode(either: Either[A,B]):List[String] = either.fold(qspa.encode, qspb.encode)
+  }
+
   override def queryStringPartialInvariantFunctor: PartialInvariantFunctor[QueryString] =
     new PartialInvariantFunctor[QueryString] {
       override def xmapPartial[A, B](

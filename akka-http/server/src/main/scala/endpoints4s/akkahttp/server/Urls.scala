@@ -113,6 +113,20 @@ trait Urls extends algebra.Urls with StatusCodes {
     def encode(name: String, value: T): Uri.Query
   }
 
+  def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = new QueryStringParam[Either[A,B]] {
+    def decode(name: String, params: Map[String, Seq[String]]): Validated[Either[A,B]] = {
+      qspa.decode(name, params) match {
+        case valid@Valid(_) => valid.map(Left(_))
+        case Invalid(errA) => qspb.decode(name,params) match {
+          case valid@Valid(_) => valid.map(Right(_))
+          case Invalid(errB) => Invalid(errA ++ errB)
+        }
+      }
+    }
+
+    def encode(name:String, value: Either[A,B]): Uri.Query = value.fold(qspa.encode(name, _), qspb.encode(name, _))
+  }
+
   implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {

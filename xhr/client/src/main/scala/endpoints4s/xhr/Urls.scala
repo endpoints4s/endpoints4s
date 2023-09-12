@@ -86,6 +86,10 @@ trait Urls extends algebra.Urls {
     def encode(a: A): List[String]
   }
 
+  override def oneOfQueryStringParam[A,B](qspa: QueryStringParam[A], qspb: QueryStringParam[B]): QueryStringParam[Either[A,B]] = new QueryStringParam[Either[A,B]] {
+    override def encode(either: Either[A,B]) = either.fold(qspa.encode, qspb.encode)
+  }
+
   implicit lazy val queryStringParamPartialInvariantFunctor
       : PartialInvariantFunctor[QueryStringParam] =
     new PartialInvariantFunctor[QueryStringParam] {
