@@ -19,7 +19,7 @@ trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomEr
   def textChunksResponse: ResponseEntity[Chunks[String]] = textChunksEntity
 
   private lazy val bytesChunksEntity =
-    Map("application/octet-stream" -> MediaType(None))
+    Map("application/octet-stream" -> MediaType(Some(Schema.simpleString.withFormat(Some("binary")))))
 
   def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]] = bytesChunksEntity
 
