@@ -411,7 +411,7 @@ object OpenApi {
   private def pathsJson(paths: collection.Map[String, PathItem]): ujson.Obj =
     mapJson(paths)(pathItem => mapJson(pathItem.operations)(operationJson))
 
-  private val jsonEncoder: Encoder[OpenApi, ujson.Value] =
+  val jsonEncoder: Encoder[OpenApi, ujson.Value] =
     openApi => {
       val fields: mutable.LinkedHashMap[String, ujson.Value] =
         mutable.LinkedHashMap(
