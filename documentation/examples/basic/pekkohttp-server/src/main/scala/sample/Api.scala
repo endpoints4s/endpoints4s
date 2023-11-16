@@ -1,6 +1,6 @@
 package sample
 
-import endpoints4s.akkahttp.server._
+import endpoints4s.pekkohttp.server._
 
 import scala.concurrent.Future
 import scala.util.Random

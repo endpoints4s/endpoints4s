@@ -3,7 +3,7 @@ package quickstart
 //#relevant-code
 import org.apache.pekko.http.scaladsl.server.Directives._
 import org.apache.pekko.http.scaladsl.server.Route
-import endpoints4s.akkahttp.server
+import endpoints4s.pekkohttp.server
 
 import scala.concurrent.stm.Ref
 

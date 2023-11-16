@@ -14,7 +14,7 @@ object Main extends App {
 // Additional route for serving the OpenAPI documentation
 //#serving-documentation
 import endpoints4s.openapi.model.OpenApi
-import endpoints4s.akkahttp.server
+import endpoints4s.pekkohttp.server
 
 object DocumentationServer
     extends server.Endpoints
