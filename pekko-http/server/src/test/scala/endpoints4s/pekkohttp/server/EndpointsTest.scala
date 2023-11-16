@@ -15,7 +15,7 @@ trait EndpointsTestApi
     with algebra.EndpointsTestApi
     with algebra.TextEntitiesTestApi
 
-/* implements the endpoint using an akka-based custom json handling */
+/* implements the endpoint using an pekko-based custom json handling */
 class EndpointsEntitiesTestApi extends EndpointsTestApi with JsonEntities
 
 class EndpointsTest extends AnyWordSpec with Matchers with ScalatestRouteTest {

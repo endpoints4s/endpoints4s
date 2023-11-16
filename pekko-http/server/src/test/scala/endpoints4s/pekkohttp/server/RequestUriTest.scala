@@ -19,7 +19,7 @@ class RequestUriTest extends AnyWordSpec {
 
   object Fixtures extends Fixtures with Endpoints
 
-  "akka-http-server request interpreter" should {
+  "pekko-http-server request interpreter" should {
     "properly encode URIs" in {
       import Fixtures.{p1, p2, p3, p4, e}
       assert(p1.uri("d/e").toString == "/a/b%2Fc/d%2Fe")

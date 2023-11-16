@@ -29,7 +29,7 @@ class TestClient(settings: EndpointsSettings)(implicit
     with ChunkedJsonEntitiesTestApi
     with algebra.circe.CounterCodecCirce
 
-class AkkaHttpClientEndpointsTest
+class PekkoHttpClientEndpointsTest
     extends algebra.client.EndpointsTestSuite[TestClient]
     with algebra.client.BasicAuthTestSuite[TestClient]
     with algebra.client.JsonFromCodecTestSuite[TestClient]

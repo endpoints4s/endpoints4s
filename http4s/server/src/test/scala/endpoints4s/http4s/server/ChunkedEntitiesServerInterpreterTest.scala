@@ -42,7 +42,7 @@ class ChunkedEntitiesServerInterpreterTest
       finally if (socket != null) socket.close()
     }
 
-    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    // Pekko Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
     val stream =
       response
         .preMaterialize()
@@ -68,7 +68,7 @@ class ChunkedEntitiesServerInterpreterTest
       finally if (socket != null) socket.close()
     }
 
-    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    // Pekko Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
 //    val stream = response.preMaterialize._2.toStream[IO]//(cs, implicitly[Async[IO]], implicitly[Materializer], ???)
 
     val service = HttpRoutes.of[IO](

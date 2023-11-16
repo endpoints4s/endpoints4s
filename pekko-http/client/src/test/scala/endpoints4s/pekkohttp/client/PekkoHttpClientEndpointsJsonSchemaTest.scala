@@ -22,7 +22,7 @@ class TestJsonSchemaClient(settings: EndpointsSettings)(implicit
   implicit def addresCodec: JsonSchema[Address] = genericJsonSchema[Address]
 }
 
-class AkkaHttpClientEndpointsJsonSchemaTest
+class PekkoHttpClientEndpointsJsonSchemaTest
     extends JsonTestSuite[TestJsonSchemaClient]
     with BasicAuthTestSuite[TestJsonSchemaClient] {
 

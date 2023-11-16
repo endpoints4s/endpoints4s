@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.model.{
   HttpRequest,
   HttpResponse,
   Uri,
-  StatusCodes => AkkaStatusCodes
+  StatusCodes => Pekko
 }
 import org.apache.pekko.http.scaladsl.server.{Directives, Route}
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
@@ -99,7 +99,7 @@ class ServerInterpreterTest
     }
     val request = HttpRequest(uri = Uri(rawValue))
     request ~> route ~> check {
-      if (status == AkkaStatusCodes.BadRequest) {
+      if (status == Pekko.BadRequest) {
         val s = responseAs[String]
         val errors =
           endpoints4s.ujson.codecs.invalidCodec

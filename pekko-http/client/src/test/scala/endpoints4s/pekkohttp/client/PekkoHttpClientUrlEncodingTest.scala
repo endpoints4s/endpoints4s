@@ -7,7 +7,7 @@ import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.ExecutionContext
 
-class AkkaHttpClientUrlEncodingTest
+class PekkoHttpClientUrlEncodingTest
     extends algebra.client.UrlEncodingTestSuite[TestClient]
     with BeforeAndAfterAll {
 
