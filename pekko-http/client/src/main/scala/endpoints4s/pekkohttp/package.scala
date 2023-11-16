@@ -1,4 +1,4 @@
 package endpoints4s
 
-/** Interpreters producing Akka-HTTP servers and clients */
+/** Interpreters producing Pekko-HTTP servers and clients */
 package object pekkohttp

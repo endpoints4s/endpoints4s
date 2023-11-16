@@ -31,7 +31,7 @@ import scala.util.Try
 object StubServer extends App {
 
   val conf = ConfigFactory
-    .parseString("akka.http.server.preview.enable-http2 = on")
+    .parseString("pekko.http.server.preview.enable-http2 = on")
     .withFallback(ConfigFactory.defaultApplication())
 
   implicit val actorSystem: ActorSystem = ActorSystem("StubServer", conf)

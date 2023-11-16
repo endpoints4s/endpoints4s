@@ -4,7 +4,7 @@ import org.apache.pekko.http.scaladsl.model.{ContentTypes, HttpEntity}
 import endpoints4s.{Codec, algebra, ujson}
 
 /** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromCodecs]] that encodes JSON requests
-  * and decodes JSON responses using Akka HTTP.
+  * and decodes JSON responses using Pekko HTTP.
   *
   * @group interpreters
   */
@@ -25,7 +25,7 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 }
 
 /** Interpreter for [[endpoints4s.algebra.JsonEntitiesFromSchemas]] that encodes JSON requests
-  * and decodes JSON responses using Akka HTTP.
+  * and decodes JSON responses using Pekko HTTP.
   *
   * @group interpreters
   */

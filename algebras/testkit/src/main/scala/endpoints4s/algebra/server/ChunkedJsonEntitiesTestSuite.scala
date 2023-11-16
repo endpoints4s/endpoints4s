@@ -10,7 +10,7 @@ import org.apache.pekko.http.scaladsl.model.{
 }
 import org.apache.pekko.stream.scaladsl.Framing
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
-import org.apache.pekko.pattern.{after => akkaAfter}
+import org.apache.pekko.pattern.{after => pekkoAfter}
 import org.apache.pekko.util.ByteString
 import endpoints4s.Codec
 import endpoints4s.algebra.ChunkedEntitiesTestApi
@@ -105,7 +105,7 @@ trait ChunkedJsonEntitiesTestSuite[
         Source((1 to 3).map(serverApi.Counter(_))).flatMapConcat { case serverApi.Counter(n) =>
           // adding a bit of delay to make sure connection does not fail before emitting chunks
           val delay = 1.second
-          Source.futureSource(akkaAfter(delay)(Future.successful {
+          Source.futureSource(pekkoAfter(delay)(Future.successful {
             if (n == 3) {
               Source.failed(new Exception("Something went wrong"))
             } else {
@@ -120,10 +120,10 @@ trait ChunkedJsonEntitiesTestSuite[
             assert(response.status == StatusCodes.OK)
             chunks.toList match {
               // Ideally, we would check that the first two elements were sent by the client
-              // However, Akka HTTP server implementation seems to always keep at least one chunk in the buffer,
+              // However, Pekko HTTP server implementation seems to always keep at least one chunk in the buffer,
               // meaning that a chunk is only emitted over TCP once a subsequent chunk is received by the
               // underlying buffer implementation.
-              // Settings under akka.stream.materializer.io.tcp are documented to allow disabling this behavior,
+              // Settings under pekko.stream.materializer.io.tcp are documented to allow disabling this behavior,
               // but they do not seem to actually allow that.
               // case Right(serverApi.Counter(1)) :: Right(serverApi.Counter(2)) :: Left(_) :: Nil => ()
               case chunks if chunks.exists(_.isLeft) => ()

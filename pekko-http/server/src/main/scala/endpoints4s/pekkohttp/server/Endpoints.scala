@@ -12,14 +12,14 @@ import scala.concurrent.Future
 import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
-/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP and uses [[algebra.BuiltInErrors]]
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Pekko-HTTP and uses [[algebra.BuiltInErrors]]
   * to model client and server errors.
   *
   * @group interpreters
   */
 trait Endpoints extends algebra.Endpoints with EndpointsWithCustomErrors with BuiltInErrors
 
-/** Interpreter for [[algebra.Endpoints]] that performs routing using Akka-HTTP.
+/** Interpreter for [[algebra.Endpoints]] that performs routing using Pekko-HTTP.
   * @group interpreters
   */
 trait EndpointsWithCustomErrors
@@ -143,7 +143,7 @@ trait EndpointsWithCustomErrors
 
   case class Endpoint[A, B](request: Request[A], response: Response[B]) {
 
-    /** @return An Akka HTTP `Route` for this endpoint
+    /** @return An Pekko HTTP `Route` for this endpoint
       * @param implementation Function that transforms the `A` value carried in
       *                       the request into a `B` value to send in the response.
       */
@@ -156,7 +156,7 @@ trait EndpointsWithCustomErrors
         }
       }
 
-    /** @return An Akka HTTP `Route` for this endpoint
+    /** @return An Pekko HTTP `Route` for this endpoint
       * @param implementation Asynchronous function that transforms the `A` value
       *                       carried in the request into a `B` value to send in
       *                       the response.

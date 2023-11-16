@@ -43,14 +43,14 @@ class AkkaHttpClientEndpointsTest
 
   val client: TestClient = new TestClient(
     EndpointsSettings(
-      AkkaHttpRequestExecutor
+      PekkoHttpRequestExecutor
         .cachedHostConnectionPool("localhost", stubServerPortHTTP)
     )
   )
 
   val streamingClient: TestClient = new TestClient(
     EndpointsSettings(
-      AkkaHttpRequestExecutor
+      PekkoHttpRequestExecutor
         .cachedHostConnectionPool("localhost", stubServerPortHTTP)
     )
   )

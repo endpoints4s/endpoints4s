@@ -1,6 +1,6 @@
 package endpoints4s.pekkohttp
 
-/** Server interpreters backed by Akka HTTP
+/** Server interpreters backed by Pekko HTTP
   *
   * @groupname interpreters Interpreters
   */

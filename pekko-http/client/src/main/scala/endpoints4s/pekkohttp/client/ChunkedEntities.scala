@@ -3,7 +3,7 @@ package endpoints4s.pekkohttp.client
 import org.apache.pekko.NotUsed
 import org.apache.pekko.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
 import org.apache.pekko.stream.scaladsl.Flow
-import org.apache.pekko.stream.scaladsl.{Framing => AkkaFraming}
+import org.apache.pekko.stream.scaladsl.{Framing => PekkoFraming}
 import org.apache.pekko.stream.scaladsl.Source
 import org.apache.pekko.util.ByteString
 import endpoints4s.algebra
@@ -112,7 +112,7 @@ trait ChunkedJsonEntities
   override lazy val newLineDelimiterFraming: Framing = new Framing(
     Flow[ByteString].intersperse(ByteString("\n")),
     Flow[ByteString].via(
-      AkkaFraming.delimiter(
+      PekkoFraming.delimiter(
         ByteString("\n"),
         maximumFrameLength = Int.MaxValue,
         allowTruncation = true

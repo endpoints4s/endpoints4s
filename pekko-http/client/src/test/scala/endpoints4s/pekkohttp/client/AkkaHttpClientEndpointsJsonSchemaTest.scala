@@ -31,7 +31,7 @@ class AkkaHttpClientEndpointsJsonSchemaTest
 
   val client: TestJsonSchemaClient = new TestJsonSchemaClient(
     EndpointsSettings(
-      AkkaHttpRequestExecutor
+      PekkoHttpRequestExecutor
         .cachedHostConnectionPool("localhost", stubServerPortHTTP)
     )
   )

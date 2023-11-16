@@ -13,7 +13,7 @@ import endpoints4s.{Codec, Decoder, Encoder, Invalid, Valid, Validated, algebra}
 /** Interpreter for [[algebra.JsonEntities]]
   *
   * To use it mix in support for your favourite Json library
-  * You can use one of [[https://github.com/hseeberger/akka-http-json hseeberger/akka-http-json]] modules
+  * You can use one of [[https://github.com/pjfanning/pekko-http-json pjfanning/pekko-http-json]] modules
   *
   * @group interpreters
   */
@@ -32,7 +32,7 @@ trait JsonEntities extends algebra.JsonEntities with EndpointsWithCustomErrors {
 }
 
 /** Interpreter for [[algebra.JsonEntitiesFromCodecs]] that decodes JSON requests and
-  * encodes JSON responses using Akka HTTP.
+  * encodes JSON responses using Pekko HTTP.
   *
   * @group interpreters
   */
@@ -47,7 +47,7 @@ trait JsonEntitiesFromCodecs extends algebra.JsonEntitiesFromCodecs with Endpoin
 }
 
 /** Interpreter for [[algebra.JsonEntitiesFromSchemas]] that decodes JSON requests and
-  * encodes JSON responses using Akka HTTP.
+  * encodes JSON responses using Pekko HTTP.
   *
   * @group interpreters
   */

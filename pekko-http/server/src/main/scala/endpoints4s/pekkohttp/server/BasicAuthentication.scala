@@ -6,7 +6,7 @@ import org.apache.pekko.http.scaladsl.model.headers.{
   HttpChallenges,
   `WWW-Authenticate`
 }
-import org.apache.pekko.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
+import org.apache.pekko.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => PekkoStatusCodes}
 import org.apache.pekko.http.scaladsl.server.{Directive1, Directives}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
@@ -45,7 +45,7 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
           case Valid(None) =>
             Directives.complete(
               HttpResponse(
-                AkkaStatusCodes.Unauthorized,
+                PekkoStatusCodes.Unauthorized,
                 collection.immutable.Seq[HttpHeader](
                   `WWW-Authenticate`(HttpChallenges.basic("Realm"))
                 )
