@@ -9,8 +9,8 @@ val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-circe-jvm` = LocalProject("algebra-circeJVM")
 val `algebra-playjson-jvm` = LocalProject("algebra-playjsonJVM")
 
-val `akka-http-client` = LocalProject("akka-http-client")
-val `akka-http-server` = LocalProject("akka-http-server")
+val `pekko-http-client` = LocalProject("pekko-http-client")
+val `pekko-http-server` = LocalProject("pekko-http-server")
 
 val `http4s-client-jvm` = LocalProject("http4s-clientJVM")
 val `http4s-server` = LocalProject("http4s-server")
@@ -53,8 +53,8 @@ val apiDoc =
         `algebra-jvm`,
         `algebra-circe-jvm`,
         `algebra-playjson-jvm`,
-        `akka-http-client`,
-        `akka-http-server`,
+        `pekko-http-client`,
+        `pekko-http-server`,
         `http4s-client-jvm`,
         `http4s-server`,
         `xhr-client`,
@@ -99,10 +99,10 @@ val manual =
       },
       paradoxProperties ++= Map(
         "version" -> version.value,
-        "akka-http-server-version" -> (`akka-http-server` / version).value,
+        "pekko-http-server-version" -> (`pekko-http-server` / version).value,
         "xhr-client-version" -> (`xhr-client` / version).value,
-        "akka-version" -> akkaActorVersion,
-        "akka-http-version" -> akkaHttpVersion,
+        "pekko-version" -> pekkoActorVersion,
+        "pekko-http-version" -> pekkoHttpVersion,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
         "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
       ),
@@ -164,13 +164,13 @@ val `example-quickstart-server` =
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
-        "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
         scalaTestDependency
       )
     )
     .dependsOn(
       `example-quickstart-endpoints-jvm`,
-      `akka-http-server`,
+      `pekko-http-server`,
       `openapi-jvm`
     )
 
@@ -228,16 +228,16 @@ val `example-basic-client` =
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
-val `example-basic-akkahttp-server` =
+val `example-basic-pekkohttp-server` =
   project
-    .in(file("examples/basic/akkahttp-server"))
+    .in(file("examples/basic/pekkohttp-server"))
     .settings(
       noPublishSettings,
       `scala 2.12 to 2.13`,
-      libraryDependencies += "com.typesafe.akka" %% "akka-stream" % akkaActorVersion,
+      libraryDependencies += "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
       publishArtifact := false
     )
-    .dependsOn(`example-basic-shared-jvm`, `akka-http-server`)
+    .dependsOn(`example-basic-shared-jvm`, `pekko-http-server`)
 
 // CQRS Example
 // public endpoints definitions

@@ -28,9 +28,9 @@ val `algebra-testkit` =
       name := "algebra-testkit",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-actor" % pekkoActorVersion,
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )

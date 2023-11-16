@@ -6,19 +6,19 @@ val `algebra-circe-testkit-jvm` = LocalProject("algebra-circe-testkitJVM")
 val `json-schema-generic-jvm` = LocalProject("json-schema-genericJVM")
 val `openapi-jvm` = LocalProject("openapiJVM")
 
-val `akka-http-client` =
+val `pekko-http-client` =
   project
     .in(file("client"))
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "akka-http-client",
+      name := "pekko-http-client",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
+        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -33,20 +33,20 @@ val `akka-http-client` =
     .dependsOn(`algebra-circe-testkit-jvm` % Test)
     .dependsOn(`json-schema-generic-jvm` % "test->test")
 
-val `akka-http-server` =
+val `pekko-http-server` =
   project
     .in(file("server"))
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
-      name := "akka-http-server",
+      name := "pekko-http-server",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion % Provided).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-testkit" % akkaActorVersion % Test).cross(CrossVersion.for3Use2_13),
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
+        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
+        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
+        "org.apache.pekko" %% "pekko-testkit" % pekkoActorVersion % Test,
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -55,11 +55,7 @@ val `akka-http-server` =
             ExclusionRule("org.scala-lang.modules", "scala-collection-compat_2.13")
           )
         } else Nil
-      },
-      versionPolicyIgnored ++= Seq(
-        // Was removed from akka-http https://github.com/akka/akka-http/pull/3849
-        "com.twitter" % "hpack"
-      )
+      }
     )
     .dependsOn(`algebra-jvm`, `openapi-jvm`)
     .dependsOn(`algebra-testkit-jvm` % Test)
