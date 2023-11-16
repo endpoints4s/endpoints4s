@@ -44,9 +44,9 @@ This example uses the `JsonEntitiesFromSchemas` algebra to derive the JSON seria
 format from a JSON schema, which can also be reused by the OpenAPI interpreter.
 
 Eventually, mix a `JsonEntitiesFromSchemas` interpreter of your choice to turn the JSON
-schemas into proper JSON codecs. For instance, for Akka-Http:
+schemas into proper JSON codecs. For instance, for Pekko-Http:
 
-@@snip [ChunkedEntitiesDocs.scala](/akka-http/server/src/test/scala/endpoints4s/akkahttp/server/ChunkedEntitiesDocs.scala) { #json-streaming }
+@@snip [ChunkedEntitiesDocs.scala](/pekko-http/server/src/test/scala/endpoints4s/pekkohttp/server/ChunkedEntitiesDocs.scala) { #json-streaming }
 
 ## Custom Serialization Format
 

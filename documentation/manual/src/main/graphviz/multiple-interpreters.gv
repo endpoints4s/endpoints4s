@@ -5,10 +5,10 @@ digraph {
 
   algebra [ label="algebra.Endpoints" ]
   playServer [ label="play.server.Endpoints" ]
-  akkaClient [ label="akkahttp.client.Endpoints" ]
+  pekkoClient [ label="pekkohttp.client.Endpoints" ]
   openapi [ label="openapi.Endpoints" ]
 
   playServer -> algebra
-  akkaClient -> algebra
+  pekkoClient -> algebra
   openapi -> algebra
 }

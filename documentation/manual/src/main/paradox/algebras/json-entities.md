@@ -114,7 +114,7 @@ the `JsonSchemas` documentation) for each type `A` that you want to carry as a J
 
 These schemas can then be interpreted as documentation (by applying the `endpoints4s.openapi.JsonEntitiesFromSchemas`
 interpreter), or codecs (by applying a corresponding interpreter for your client or server, e.g.
-`endpoints4s.akkahttp.server.JsonEntitiesFromSchemas` to use an Akka HTTP server).
+`endpoints4s.pekkohttp.server.JsonEntitiesFromSchemas` to use an Pekko HTTP server).
 
 ## `JsonEntitiesFromCodecs`
 

@@ -52,7 +52,7 @@ val server =
   project.settings(
     libraryDependencies ++= Seq(
       "org.endpoints4s" %% "pekko-http-server" % "$pekko-http-server-version$",
-      "com.typesafe.akka" %% "pekko-stream" % "$pekko-version$",
+      "org.apache.pekko" %% "pekko-stream" % "$pekko-version$",
       "org.scala-stm" %% "scala-stm" % "0.8"
     )
   ).dependsOn(sharedJVM)
@@ -67,7 +67,7 @@ JSON schemas of the entities from their Scala type definitions.
 
 The `client` project uses a @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md) client interpreter.
 
-Finally, the `server` project uses a server interpreter backed by @ref[Akka HTTP](interpreters/akka-http.md).
+Finally, the `server` project uses a server interpreter backed by @ref[Pekko HTTP](interpreters/pekko-http.md).
 It also uses the scala-stm library for implementing the business logic.
 
 ## Description of the HTTP endpoints
@@ -106,14 +106,14 @@ it to the server, and eventually decodes the HTTP response (according to the end
 
 Similarly, a server implementation of the endpoints can be obtained by mixing the appropriate
 interpreters to the `CounterEndpoints` trait. In this example, you want to get a JVM server
-that uses Akka HTTP under the hood. Create the following `CounterServer` class in the
+that uses Pekko HTTP under the hood. Create the following `CounterServer` class in the
 `server` project:
 
 
 @@snip [CounterServer.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/CounterServer.scala) { #relevant-code }
 
 The `routes` value produced by endpoints4s is a `Route` value directly
-usable by Akka HTTP. The last section shows how to setup an Akka HTTP server that
+usable by Pekko HTTP. The last section shows how to setup an Pekko HTTP server that
 uses these routes.
 
 The routes implementations provided by endpoints4s decode the incoming HTTP requests, call the corresponding logic
@@ -132,7 +132,7 @@ the `currentValue` and `increment` endpoints.
 
 ## Running the application
 
-Finally, to run your application you need to build a proper Akka HTTP server serving your routes.
+Finally, to run your application you need to build a proper Pekko HTTP server serving your routes.
 Define the following `Main` object:
 
 @@snip [Main.scala](/documentation/examples/quickstart/server/src/main/scala/quickstart/Main.scala) { #relevant-code }

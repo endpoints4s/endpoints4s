@@ -104,7 +104,7 @@ The separation between descriptions and interpretations provides one dimension o
 modularity: a same endpoint description can be interpreted with a client interpreter,
 a server interpreter, or documentation interpreter. Even more, the client and server
 stacks can be completely different (one can use Play framework while the other uses
-Akka, for instance). Here is a diagram illustrating the fact that multiple
+Pekko, for instance). Here is a diagram illustrating the fact that multiple
 interpreters can be applied to a same algebra:
 
 ![multiple-interpreters](multiple-interpreters.svg)
