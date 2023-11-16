@@ -1,6 +1,6 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.Route
 import endpoints4s.algebra
 
 trait EndpointDefinitions extends algebra.Endpoints {

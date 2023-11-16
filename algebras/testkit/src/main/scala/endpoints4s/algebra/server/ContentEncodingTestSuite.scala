@@ -1,9 +1,9 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.coding.Coders.Gzip
-import akka.http.scaladsl.model.headers.HttpEncodings.gzip
-import akka.http.scaladsl.model.headers.{HttpEncoding, `Accept-Encoding`, `Content-Encoding`}
-import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
+import org.apache.pekko.http.scaladsl.coding.Coders.Gzip
+import org.apache.pekko.http.scaladsl.model.headers.HttpEncodings.gzip
+import org.apache.pekko.http.scaladsl.model.headers.{HttpEncoding, `Accept-Encoding`, `Content-Encoding`}
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, StatusCodes}
 import endpoints4s.algebra.EndpointsTestApi
 
 trait ContentEncodingTestSuite[T <: EndpointsTestApi] extends EndpointsTestSuite[T] {

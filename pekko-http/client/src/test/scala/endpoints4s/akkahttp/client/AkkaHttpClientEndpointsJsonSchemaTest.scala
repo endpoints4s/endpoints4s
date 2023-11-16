@@ -1,8 +1,8 @@
 package endpoints4s.akkahttp.client
 
-import akka.actor.ActorSystem
-import akka.stream.Materializer
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.testkit.TestKit
 import endpoints4s.algebra.client.{BasicAuthTestSuite, JsonTestSuite}
 import endpoints4s.algebra.{Address, BasicAuthenticationTestApi, JsonTestApi, User}
 import endpoints4s.generic

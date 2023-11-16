@@ -7,7 +7,7 @@ import scala.util.Random
 
 object Api extends ApiAlg with Endpoints with JsonEntitiesFromCodecs with BasicAuthentication {
 
-  import akka.http.scaladsl.server.Directives._
+  import org.apache.pekko.http.scaladsl.server.Directives._
 
   val routes =
     index.implementedBy { case (name, age, _) =>

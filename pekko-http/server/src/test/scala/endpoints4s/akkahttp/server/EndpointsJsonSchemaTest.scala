@@ -1,9 +1,9 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.model.ContentTypes
-import akka.http.scaladsl.model.StatusCodes.{BadRequest, OK}
-import akka.http.scaladsl.server.UnsupportedRequestContentTypeRejection
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.http.scaladsl.model.ContentTypes
+import org.apache.pekko.http.scaladsl.model.StatusCodes.{BadRequest, OK}
+import org.apache.pekko.http.scaladsl.server.UnsupportedRequestContentTypeRejection
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import endpoints4s.algebra.User
 import endpoints4s.generic
 import org.scalatest.matchers.should.Matchers

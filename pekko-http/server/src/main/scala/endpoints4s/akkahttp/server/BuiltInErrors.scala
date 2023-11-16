@@ -1,7 +1,7 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.marshalling.Marshaller
-import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
+import org.apache.pekko.http.scaladsl.marshalling.Marshaller
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, MediaTypes}
 import endpoints4s.{Invalid, algebra}
 
 /** @group interpreters

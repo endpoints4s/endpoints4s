@@ -1,13 +1,13 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.http.scaladsl.model.headers.{
   Authorization,
   BasicHttpCredentials,
   HttpChallenges,
   `WWW-Authenticate`
 }
-import akka.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
-import akka.http.scaladsl.server.{Directive1, Directives}
+import org.apache.pekko.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => AkkaStatusCodes}
+import org.apache.pekko.http.scaladsl.server.{Directive1, Directives}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation
 import endpoints4s.{Invalid, Tupler, Valid, Validated, algebra}

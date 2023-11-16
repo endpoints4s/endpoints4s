@@ -1,8 +1,8 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.model.StatusCodes.InternalServerError
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.http.scaladsl.model.StatusCodes.InternalServerError
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import endpoints4s.algebra
 
 import scala.concurrent.Future

@@ -1,6 +1,6 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.server.Route
+import org.apache.pekko.http.scaladsl.server.Route
 import endpoints4s.algebra
 
 trait ChunkedEntitiesDefinitions extends algebra.ChunkedEntities {
@@ -13,7 +13,7 @@ trait ChunkedEntitiesDefinitions extends algebra.ChunkedEntities {
 trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntities {
   //#implementation
   import java.nio.file.Paths
-  import akka.stream.scaladsl.FileIO
+  import org.apache.pekko.stream.scaladsl.FileIO
 
   val logoRoute: Route =
     logo.implementedBy { _ =>
@@ -35,7 +35,7 @@ trait JsonStreamingExample
 }
 
 //#json-streaming
-import akka.stream.scaladsl.Source
+import org.apache.pekko.stream.scaladsl.Source
 import endpoints4s.akkahttp.server
 
 object JsonStreamingExampleServer

@@ -1,9 +1,9 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
-import akka.http.scaladsl.model.{HttpEntity, MediaTypes}
-import akka.http.scaladsl.server.{Directive1, Directives}
-import akka.http.scaladsl.unmarshalling.{
+import org.apache.pekko.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller}
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, MediaTypes}
+import org.apache.pekko.http.scaladsl.server.{Directive1, Directives}
+import org.apache.pekko.http.scaladsl.unmarshalling.{
   FromEntityUnmarshaller,
   FromRequestUnmarshaller,
   Unmarshaller

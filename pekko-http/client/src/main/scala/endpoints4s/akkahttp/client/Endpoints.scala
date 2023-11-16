@@ -1,8 +1,8 @@
 package endpoints4s.akkahttp.client
 
-import akka.http.scaladsl.model.HttpHeader.ParsingResult
-import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
-import akka.stream.Materializer
+import org.apache.pekko.http.scaladsl.model.HttpHeader.ParsingResult
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, HttpResponse, Uri}
+import org.apache.pekko.stream.Materializer
 import endpoints4s.algebra.Documentation
 import endpoints4s.{
   Decoder,

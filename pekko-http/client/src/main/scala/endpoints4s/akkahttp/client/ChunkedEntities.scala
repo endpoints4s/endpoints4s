@@ -1,11 +1,11 @@
 package endpoints4s.akkahttp.client
 
-import akka.NotUsed
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.{Framing => AkkaFraming}
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity}
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.stream.scaladsl.{Framing => AkkaFraming}
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import endpoints4s.algebra
 
 import scala.concurrent.Future
@@ -17,7 +17,7 @@ import scala.concurrent.Future
 trait ChunkedEntities extends algebra.ChunkedEntities with EndpointsWithCustomErrors {
 
   //#stream-type
-  type Chunks[A] = akka.stream.scaladsl.Source[A, _]
+  type Chunks[A] = org.apache.pekko.stream.scaladsl.Source[A, _]
   //#stream-type
 
   def textChunksRequest: RequestEntity[Chunks[String]] =

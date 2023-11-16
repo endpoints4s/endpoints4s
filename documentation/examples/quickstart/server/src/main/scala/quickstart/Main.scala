@@ -1,9 +1,9 @@
 package quickstart
 
 //#relevant-code
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.server.Directives._
 
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("server-system")

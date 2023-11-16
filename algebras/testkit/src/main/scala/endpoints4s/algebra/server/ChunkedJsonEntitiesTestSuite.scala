@@ -1,6 +1,6 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.{
   ContentTypes,
   HttpEntity,
   HttpMethods,
@@ -8,10 +8,10 @@ import akka.http.scaladsl.model.{
   HttpResponse,
   StatusCodes
 }
-import akka.stream.scaladsl.Framing
-import akka.stream.scaladsl.{Sink, Source}
-import akka.pattern.{after => akkaAfter}
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.Framing
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import org.apache.pekko.pattern.{after => akkaAfter}
+import org.apache.pekko.util.ByteString
 import endpoints4s.Codec
 import endpoints4s.algebra.ChunkedEntitiesTestApi
 import endpoints4s.algebra.ChunkedJsonEntitiesTestApi

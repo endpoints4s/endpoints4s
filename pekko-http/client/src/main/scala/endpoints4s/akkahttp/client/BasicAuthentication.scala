@@ -1,6 +1,6 @@
 package endpoints4s.akkahttp.client
 
-import akka.http.scaladsl.model.headers._
+import org.apache.pekko.http.scaladsl.model.headers._
 import endpoints4s.{Tupler, algebra}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation

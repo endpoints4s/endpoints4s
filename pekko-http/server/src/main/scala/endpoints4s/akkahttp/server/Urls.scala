@@ -1,11 +1,11 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
 import scala.collection.compat._
-import akka.http.scaladsl.server._
+import org.apache.pekko.http.scaladsl.server._
 import endpoints4s.algebra.Documentation
 import endpoints4s.{Invalid, PartialInvariantFunctor, Tupler, Valid, Validated, algebra}
 

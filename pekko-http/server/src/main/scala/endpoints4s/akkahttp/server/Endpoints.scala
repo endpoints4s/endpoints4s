@@ -1,10 +1,10 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
-import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes, Uri}
-import akka.http.scaladsl.server._
-import akka.http.scaladsl.unmarshalling._
+import org.apache.pekko.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
+import org.apache.pekko.http.scaladsl.model.headers.RawHeader
+import org.apache.pekko.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes, Uri}
+import org.apache.pekko.http.scaladsl.server._
+import org.apache.pekko.http.scaladsl.unmarshalling._
 import endpoints4s.algebra.Documentation
 import endpoints4s._
 

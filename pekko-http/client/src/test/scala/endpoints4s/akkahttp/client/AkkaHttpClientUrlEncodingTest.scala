@@ -1,7 +1,7 @@
 package endpoints4s.akkahttp.client
 
-import akka.actor.ActorSystem
-import akka.testkit.TestKit
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.testkit.TestKit
 import endpoints4s.algebra
 import org.scalatest.BeforeAndAfterAll
 

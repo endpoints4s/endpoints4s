@@ -1,17 +1,17 @@
 package endpoints4s.akkahttp.server
 
 import java.net.ServerSocket
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.{
   HttpEntity,
   HttpRequest,
   HttpResponse,
   Uri,
   StatusCodes => AkkaStatusCodes
 }
-import akka.http.scaladsl.server.{Directives, Route}
-import akka.http.scaladsl.testkit.ScalatestRouteTest
-import akka.stream.scaladsl.Source
+import org.apache.pekko.http.scaladsl.server.{Directives, Route}
+import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
+import org.apache.pekko.stream.scaladsl.Source
 import endpoints4s.{Invalid, Valid, algebra}
 import endpoints4s.algebra.server.DecodedUrl
 

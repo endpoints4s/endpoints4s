@@ -1,6 +1,6 @@
 package endpoints4s.akkahttp.server
 
-import akka.http.scaladsl.model.{HttpMethod, HttpMethods}
+import org.apache.pekko.http.scaladsl.model.{HttpMethod, HttpMethods}
 import endpoints4s.algebra
 
 /** [[algebra.Methods]] interpreter that decodes and encodes methods.

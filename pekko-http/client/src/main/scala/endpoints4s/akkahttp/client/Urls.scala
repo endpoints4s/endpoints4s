@@ -3,7 +3,7 @@ package endpoints4s.akkahttp.client
 import scala.collection.compat.Factory
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets.UTF_8
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 
 import endpoints4s.{PartialInvariantFunctor, Tupler, Validated, algebra}
 import endpoints4s.algebra.Documentation

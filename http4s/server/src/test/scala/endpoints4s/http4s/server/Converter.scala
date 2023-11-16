@@ -21,9 +21,9 @@ package endpoints4s.http4s.server
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-import akka.stream._
-import akka.stream.scaladsl.{Flow => AkkaFlow, Sink => AkkaSink, Source => AkkaSource, _}
-import akka.{Done, NotUsed}
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl.{Flow => AkkaFlow, Sink => AkkaSink, Source => AkkaSource, _}
+import org.apache.pekko.{Done, NotUsed}
 import cats.effect._
 import cats.syntax.all._
 import fs2._

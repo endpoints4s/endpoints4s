@@ -1,7 +1,7 @@
 package endpoints4s
 package akkahttp.server
 
-import akka.http.scaladsl.server.{Directives, Route}
+import org.apache.pekko.http.scaladsl.server.{Directives, Route}
 import endpoints4s.algebra.MuxRequest
 
 import scala.concurrent.Future

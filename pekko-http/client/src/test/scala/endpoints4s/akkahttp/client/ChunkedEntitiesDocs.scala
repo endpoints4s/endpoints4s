@@ -13,7 +13,7 @@ trait ChunkedEntitiesDocs extends ChunkedEntitiesDefinitions with ChunkedEntitie
   this: Endpoints =>
 
   //#invocation
-  import akka.stream.scaladsl.Source
+  import org.apache.pekko.stream.scaladsl.Source
 
   val bytesSource: Source[Array[Byte], _] =
     Source.futureSource(logo(()))

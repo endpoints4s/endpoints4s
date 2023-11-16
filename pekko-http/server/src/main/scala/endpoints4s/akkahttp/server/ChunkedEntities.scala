@@ -1,14 +1,14 @@
 package endpoints4s.akkahttp.server
 
-import akka.NotUsed
-import akka.http.scaladsl.marshalling.Marshaller
-import akka.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, MessageEntity}
-import akka.http.scaladsl.server.Directives
-import akka.http.scaladsl.unmarshalling.Unmarshaller
-import akka.stream.scaladsl.Flow
-import akka.stream.scaladsl.{Framing => AkkaFraming}
-import akka.stream.scaladsl.Source
-import akka.util.ByteString
+import org.apache.pekko.NotUsed
+import org.apache.pekko.http.scaladsl.marshalling.Marshaller
+import org.apache.pekko.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, MessageEntity}
+import org.apache.pekko.http.scaladsl.server.Directives
+import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshaller
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.stream.scaladsl.{Framing => AkkaFraming}
+import org.apache.pekko.stream.scaladsl.Source
+import org.apache.pekko.util.ByteString
 import endpoints4s.algebra
 
 import scala.concurrent.Future

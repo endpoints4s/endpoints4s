@@ -1,6 +1,6 @@
 package endpoints4s.akkahttp.client
 
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
+import org.apache.pekko.http.scaladsl.model.{HttpMethods, HttpRequest}
 import endpoints4s.algebra
 
 /** @group interpreters
