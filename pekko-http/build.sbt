@@ -15,10 +15,16 @@ val `pekko-http-client` =
       name := "pekko-http-client",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
-        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
-        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
-        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
+        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
         scalaTestDependency
       ),
       excludeDependencies ++= {
@@ -42,11 +48,19 @@ val `pekko-http-server` =
       name := "pekko-http-server",
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
-        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
-        "org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test,
-        "org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test,
-        "org.apache.pekko" %% "pekko-testkit" % pekkoActorVersion % Test,
+        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("org.apache.pekko" %% "pekko-http-testkit" % pekkoHttpVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("org.apache.pekko" %% "pekko-stream-testkit" % pekkoActorVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
+        ("org.apache.pekko" %% "pekko-testkit" % pekkoActorVersion % Test).cross(
+          CrossVersion.for3Use2_13
+        ),
         scalaTestDependency
       ),
       excludeDependencies ++= {
