@@ -2,7 +2,7 @@ package endpoints4s.sttp.client
 
 import endpoints4s.algebra
 import org.scalatest.BeforeAndAfterAll
-import sttp.client3.pekkohttp.PekkoHttpBackend
+import sttp.client3.akkahttp.AkkaHttpBackend
 
 import scala.concurrent.Future
 
@@ -10,7 +10,7 @@ class SttpEndpointsUrlEncodingTest
     extends algebra.client.UrlEncodingTestSuite[TestClient[Future]]
     with BeforeAndAfterAll {
 
-  val backend = PekkoHttpBackend()
+  val backend = AkkaHttpBackend()
 
   val client: TestClient[Future] =
     new TestClient(s"http://localhost:$stubServerPortHTTP", backend)

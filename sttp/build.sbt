@@ -14,9 +14,10 @@ val `sttp-client` =
       name := "sttp-client",
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
-        ("com.softwaremill.sttp.client3" %% "pekko-http-backend" % sttpVersion % Test)
+        ("com.softwaremill.sttp.client3" %% "akka-http-backend" % sttpVersion % Test)
           .cross(CrossVersion.for3Use2_13),
-        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Test
+        ("com.typesafe.akka" %% "akka-stream" % "2.6.17" % Test)
+          .cross(CrossVersion.for3Use2_13)
       ),
       // FIXME Why is this necessary?
       excludeDependencies ++= {
