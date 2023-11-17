@@ -1,9 +1,21 @@
 package endpoints4s.sttp.client
 
 import _root_.sttp.client3.{SttpBackend, TryHttpURLConnectionBackend}
-import _root_.sttp.client3.akkahttp.AkkaHttpBackend
-import endpoints4s.algebra.client.{BasicAuthTestSuite, ClientEndpointsTestApi, EndpointsTestSuite, JsonFromCodecTestSuite, SumTypedEntitiesTestSuite, TextEntitiesTestSuite, TimeoutTestSuite}
-import endpoints4s.algebra.{BasicAuthenticationTestApi, SumTypedEntitiesTestApi, TextEntitiesTestApi}
+import _root_.sttp.client3.httpclient.HttpClientFutureBackend
+import endpoints4s.algebra.client.{
+  BasicAuthTestSuite,
+  ClientEndpointsTestApi,
+  EndpointsTestSuite,
+  JsonFromCodecTestSuite,
+  SumTypedEntitiesTestSuite,
+  TextEntitiesTestSuite,
+  TimeoutTestSuite
+}
+import endpoints4s.algebra.{
+  BasicAuthenticationTestApi,
+  SumTypedEntitiesTestApi,
+  TextEntitiesTestApi
+}
 import endpoints4s.algebra.playjson.JsonFromPlayJsonCodecTestApi
 
 import java.util.concurrent.TimeUnit
@@ -29,7 +41,9 @@ class EndpointsTestSync
     with TextEntitiesTestSuite[TestClient[Try]]
     with TimeoutTestSuite[TestClient[Try]] {
 
-  val backend = TryHttpURLConnectionBackend(customizeConnection = _.setReadTimeout(FiniteDuration(2, TimeUnit.SECONDS).toMillis.toInt))
+  val backend = TryHttpURLConnectionBackend(customizeConnection =
+    _.setReadTimeout(FiniteDuration(2, TimeUnit.SECONDS).toMillis.toInt)
+  )
 
   val client: TestClient[Try] =
     new TestClient[Try](s"http://localhost:$stubServerPortHTTP", backend)
@@ -47,14 +61,14 @@ class EndpointsTestSync
   textEntitiesTestSuite()
 }
 
-class EndpointsTestAkka
+class EndpointsTestHttpClient
     extends EndpointsTestSuite[TestClient[Future]]
     with BasicAuthTestSuite[TestClient[Future]]
     with JsonFromCodecTestSuite[TestClient[Future]]
     with SumTypedEntitiesTestSuite[TestClient[Future]]
     with TextEntitiesTestSuite[TestClient[Future]] {
 
-  val backend = AkkaHttpBackend()
+  val backend = HttpClientFutureBackend()
 
   val client: TestClient[Future] =
     new TestClient(s"http://localhost:$stubServerPortHTTP", backend)
