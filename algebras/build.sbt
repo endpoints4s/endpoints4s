@@ -26,6 +26,7 @@ val `algebra-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),
@@ -35,7 +36,9 @@ val `algebra-testkit` =
       )
     )
     .jsSettings(
-      libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(
+        CrossVersion.for3Use2_13
+      )
     )
     .dependsOn(algebra)
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
@@ -72,6 +75,7 @@ val `algebra-circe-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq()
     )
