@@ -6,7 +6,12 @@ import org.apache.pekko.http.scaladsl.model.headers.{
   HttpChallenges,
   `WWW-Authenticate`
 }
-import org.apache.pekko.http.scaladsl.model.{HttpHeader, HttpResponse, Uri, StatusCodes => PekkoStatusCodes}
+import org.apache.pekko.http.scaladsl.model.{
+  HttpHeader,
+  HttpResponse,
+  Uri,
+  StatusCodes => PekkoStatusCodes
+}
 import org.apache.pekko.http.scaladsl.server.{Directive1, Directives}
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra.Documentation

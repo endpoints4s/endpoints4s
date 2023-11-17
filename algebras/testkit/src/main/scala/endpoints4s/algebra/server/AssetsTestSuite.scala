@@ -2,7 +2,11 @@ package endpoints4s.algebra.server
 
 import org.apache.pekko.http.scaladsl.model.HttpMethods.{GET}
 import org.apache.pekko.http.scaladsl.model.HttpRequest
-import org.apache.pekko.http.scaladsl.model.headers.{`Last-Modified`, `Content-Type`, `Content-Encoding`}
+import org.apache.pekko.http.scaladsl.model.headers.{
+  `Last-Modified`,
+  `Content-Type`,
+  `Content-Encoding`
+}
 import org.apache.pekko.http.scaladsl.model.DateTime
 import org.apache.pekko.http.scaladsl.model.ContentType
 import org.apache.pekko.http.scaladsl.model.MediaTypes

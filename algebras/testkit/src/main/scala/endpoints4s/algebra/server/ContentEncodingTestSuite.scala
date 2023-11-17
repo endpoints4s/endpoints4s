@@ -2,7 +2,11 @@ package endpoints4s.algebra.server
 
 import org.apache.pekko.http.scaladsl.coding.Coders.Gzip
 import org.apache.pekko.http.scaladsl.model.headers.HttpEncodings.gzip
-import org.apache.pekko.http.scaladsl.model.headers.{HttpEncoding, `Accept-Encoding`, `Content-Encoding`}
+import org.apache.pekko.http.scaladsl.model.headers.{
+  HttpEncoding,
+  `Accept-Encoding`,
+  `Content-Encoding`
+}
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, StatusCodes}
 import endpoints4s.algebra.EndpointsTestApi
 

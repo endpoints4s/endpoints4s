@@ -1,6 +1,9 @@
 package endpoints4s.pekkohttp.server
 
-import org.apache.pekko.http.scaladsl.model.{StatusCode => PekkoStatusCode, StatusCodes => PekkoStatusCodes}
+import org.apache.pekko.http.scaladsl.model.{
+  StatusCode => PekkoStatusCode,
+  StatusCodes => PekkoStatusCodes
+}
 import endpoints4s.algebra
 
 /** [[algebra.StatusCodes]] interpreter that decodes and encodes methods.

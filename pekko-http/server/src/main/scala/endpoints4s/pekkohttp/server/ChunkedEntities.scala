@@ -2,7 +2,13 @@ package endpoints4s.pekkohttp.server
 
 import org.apache.pekko.NotUsed
 import org.apache.pekko.http.scaladsl.marshalling.Marshaller
-import org.apache.pekko.http.scaladsl.model.{ContentType, ContentTypes, HttpEntity, HttpRequest, MessageEntity}
+import org.apache.pekko.http.scaladsl.model.{
+  ContentType,
+  ContentTypes,
+  HttpEntity,
+  HttpRequest,
+  MessageEntity
+}
 import org.apache.pekko.http.scaladsl.server.Directives
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshaller
 import org.apache.pekko.stream.scaladsl.Flow

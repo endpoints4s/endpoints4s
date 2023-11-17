@@ -1,6 +1,10 @@
 package endpoints4s.pekkohttp.server
 
-import org.apache.pekko.http.scaladsl.marshalling.{Marshaller, ToEntityMarshaller, ToResponseMarshaller}
+import org.apache.pekko.http.scaladsl.marshalling.{
+  Marshaller,
+  ToEntityMarshaller,
+  ToResponseMarshaller
+}
 import org.apache.pekko.http.scaladsl.model.headers.RawHeader
 import org.apache.pekko.http.scaladsl.model.{HttpEntity, HttpHeader, HttpRequest, MediaTypes, Uri}
 import org.apache.pekko.http.scaladsl.server._
