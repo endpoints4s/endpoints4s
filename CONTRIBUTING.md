@@ -5,7 +5,7 @@ Contributing
 
 ~~~
 algebras/                   Algebra interfaces
-pekko-http/                  Interpreters based on Pekko-http
+pekko-http/                 Interpreters based on Pekko-http
 http4s/                     Interpreters based on http4s
 play/                       Interpreters based on Play framework
 sttp/                       Interpreters based on sttp
