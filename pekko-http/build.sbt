@@ -13,6 +13,7 @@ val `pekko-http-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "pekko-http-client",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided).cross(
@@ -46,6 +47,7 @@ val `pekko-http-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "pekko-http-server",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
         ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),

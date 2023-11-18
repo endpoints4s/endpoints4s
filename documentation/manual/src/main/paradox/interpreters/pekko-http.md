@@ -67,7 +67,7 @@ It can be invoked as follows:
 ### `endpoints4s.pekkohttp.server.Endpoints`
 
 The `Endpoints` interpreter fixes the `Endpoint[A, B]` type to something that,
-given an implementation function `A => B`, returns an `pekko.http.scaladsl.server.Route`
+given an implementation function `A => B`, returns an `org.apache.pekko.http.scaladsl.server.Route`
 that can be integrated to your Pekko HTTP application.
 
 For instance, given the following endpoint definition:
@@ -102,7 +102,7 @@ an exception is thrown.
 #### The incoming request doesn’t match any endpoint
 
 In that case, the routes constructed by endpoints4s can’t do anything. You have to deal with such
-errors in the usual Pekko HTTP way: by using an implicit `pekko.http.scaladsl.server.RejectionHandler`
+errors in the usual Pekko HTTP way: by using an implicit `org.apache.pekko.http.scaladsl.server.RejectionHandler`
 having a `handleNotFound` clause.
 
 #### The incoming request is invalid
