@@ -43,8 +43,8 @@ which can be reused, combined, and abstracted over.
 
 The library currently supports the following backends:
 
-- clients: Pekko-Http, http4s, Play-WS, sttp, scalaj, XMLHttpRequest (Scala.js), and Fetch (Scala.js) ;
-- servers: Pekko-Http, http4s, and Play ;
+- clients: Pekko HTTP, Akka HTTP, http4s, Play-WS, sttp, scalaj, XMLHttpRequest (Scala.js), and Fetch (Scala.js) ;
+- servers: Pekko HTTP, Akka HTTP, http4s, and Play ;
 - documentation: OpenAPI ;
 - JSON is supported via Circe, Play-Json, or ujson ;
 
