@@ -1,7 +1,7 @@
 package endpoints4s.algebra.server
 
 import endpoints4s.algebra.TextEntitiesTestApi
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.{
   HttpMethods,
   HttpEntity,
   HttpRequest,

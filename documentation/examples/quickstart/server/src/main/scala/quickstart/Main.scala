@@ -1,9 +1,9 @@
 package quickstart
 
 //#relevant-code
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Directives._
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.server.Directives._
 
 object Main extends App {
   implicit val system: ActorSystem = ActorSystem("server-system")
@@ -14,7 +14,7 @@ object Main extends App {
 // Additional route for serving the OpenAPI documentation
 //#serving-documentation
 import endpoints4s.openapi.model.OpenApi
-import endpoints4s.akkahttp.server
+import endpoints4s.pekkohttp.server
 
 object DocumentationServer
     extends server.Endpoints

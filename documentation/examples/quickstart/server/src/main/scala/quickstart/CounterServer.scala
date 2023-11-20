@@ -1,9 +1,9 @@
 package quickstart
 
 //#relevant-code
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
-import endpoints4s.akkahttp.server
+import org.apache.pekko.http.scaladsl.server.Directives._
+import org.apache.pekko.http.scaladsl.server.Route
+import endpoints4s.pekkohttp.server
 
 import scala.concurrent.stm.Ref
 

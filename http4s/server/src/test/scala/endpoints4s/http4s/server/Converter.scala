@@ -21,9 +21,9 @@ package endpoints4s.http4s.server
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-import akka.stream._
-import akka.stream.scaladsl.{Flow => AkkaFlow, Sink => AkkaSink, Source => AkkaSource, _}
-import akka.{Done, NotUsed}
+import org.apache.pekko.stream._
+import org.apache.pekko.stream.scaladsl.{Flow => PekkoFlow, Sink => PekkoSink, Source => PekkoSource, _}
+import org.apache.pekko.{Done, NotUsed}
 import cats.effect._
 import cats.syntax.all._
 import fs2._
@@ -35,70 +35,70 @@ import cats.effect.kernel.Resource.ExitCase.Succeeded
 
 trait Converter {
 
-  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]].
-    * If the materialized value needs be obtained, use [[akkaSourceToFs2StreamMat]].
+  /** Converts an Pekko Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]].
+    * If the materialized value needs be obtained, use [[pekkoSourceToFs2StreamMat]].
     */
-  def akkaSourceToFs2Stream[A](
+  def pekkoSourceToFs2Stream[A](
       source: Graph[SourceShape[A], NotUsed]
   )(implicit materializer: Materializer): Stream[IO, A] =
     Stream.force {
       Async[IO].delay {
-        val subscriber = AkkaSource.fromGraph(source).toMat(AkkaSink.queue[A]())(Keep.right).run()
+        val subscriber = PekkoSource.fromGraph(source).toMat(PekkoSink.queue[A]())(Keep.right).run()
         subscriberStream[A](subscriber)
       }
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]]. This method returns the FS2 [[Stream]]
+  /** Converts an Pekko Stream [[Graph]] of [[SourceShape]] to an FS2 [[Stream]]. This method returns the FS2 [[Stream]]
     * and the materialized value of the [[Graph]].
     */
-  def akkaSourceToFs2StreamMat[A, M](
+  def pekkoSourceToFs2StreamMat[A, M](
       source: Graph[SourceShape[A], M]
   )(implicit materializer: Materializer): IO[(Stream[IO, A], M)] =
     Async[IO].delay {
       val (mat, subscriber) =
-        AkkaSource.fromGraph(source).toMat(AkkaSink.queue[A]())(Keep.both).run()
+        PekkoSource.fromGraph(source).toMat(PekkoSink.queue[A]())(Keep.both).run()
       (subscriberStream[A](subscriber), mat)
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]].
-    * If the materialized value needs be obtained, use [[akkaSinkToFs2PipeMat]].
+  /** Converts an Pekko Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]].
+    * If the materialized value needs be obtained, use [[pekkoSinkToFs2PipeMat]].
     */
-  def akkaSinkToFs2Pipe[A](
+  def pekkoSinkToFs2Pipe[A](
       sink: Graph[SinkShape[A], NotUsed]
   )(implicit materializer: Materializer): Pipe[IO, A, Unit] =
     (s: Stream[IO, A]) =>
       Stream.force {
         Async[IO].delay {
           val publisher =
-            AkkaSource.queue[A](0, OverflowStrategy.backpressure).toMat(sink)(Keep.left).run()
+            PekkoSource.queue[A](0, OverflowStrategy.backpressure).toMat(sink)(Keep.left).run()
           publisherStream[A](publisher, s)
         }
       }
 
-  /** Converts an Akka Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
+  /** Converts an Pekko Stream [[Graph]] of [[SinkShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
     * and the materialized value of the [[Graph]].
     */
-  def akkaSinkToFs2PipeMat[A, M](
+  def pekkoSinkToFs2PipeMat[A, M](
       sink: Graph[SinkShape[A], M]
   )(implicit materializer: Materializer): IO[(Pipe[IO, A, Unit], M)] =
     Async[IO].delay {
       val (publisher, mat) =
-        AkkaSource.queue[A](0, OverflowStrategy.backpressure).toMat(sink)(Keep.both).run()
+        PekkoSource.queue[A](0, OverflowStrategy.backpressure).toMat(sink)(Keep.both).run()
       ((s: Stream[IO, A]) => publisherStream[A](publisher, s), mat)
     }
 
-  /** Converts an akka sink with a success-status-indicating Future[M]
+  /** Converts an pekko sink with a success-status-indicating Future[M]
     * materialized result into an fs2 Pipe which will fail if the Future fails.
     * The stream returned by this will emit the Future's value one time at the end,
     * then terminate.
     */
-  def akkaSinkToFs2PipeMat[A, M](
-      akkaSink: Graph[SinkShape[A], Future[M]]
+  def pekkoSinkToFs2PipeMat[A, M](
+      pekkoSink: Graph[SinkShape[A], Future[M]]
   )(implicit ec: ExecutionContext, m: Materializer): IO[Pipe[IO, A, Either[Throwable, M]]] =
     for {
       promise <- Deferred[IO, Either[Throwable, M]]
-      fs2Sink <- akkaSinkToFs2PipeMat[A, Future[M]](akkaSink).flatMap { case (stream, mat) =>
-        // This callback tells the akka materialized future to store its result status into the Promise
+      fs2Sink <- pekkoSinkToFs2PipeMat[A, Future[M]](pekkoSink).flatMap { case (stream, mat) =>
+        // This callback tells the pekko materialized future to store its result status into the Promise
         val callback = Async[IO].delay(mat.onComplete {
           case Failure(ex)    => promise.complete(ex.asLeft).unsafeRunSync()
           case Success(value) => promise.complete(value.asRight).unsafeRunSync()
@@ -111,49 +111,49 @@ trait Converter {
         val materializedResultStream = Stream.eval(promise.get)
         val fs2Stream: Stream[IO, Unit] = fs2Sink.apply(in)
 
-        // Run the akka sink for its effects and then run stream containing the effect of getting the Promise results
+        // Run the pekko sink for its effects and then run stream containing the effect of getting the Promise results
         fs2Stream.drain ++ materializedResultStream
       }
     }
 
-  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]].
-    * If the materialized value needs be obtained, use [[akkaSinkToFs2PipeMat]].
+  /** Converts an Pekko Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]].
+    * If the materialized value needs be obtained, use [[pekkoSinkToFs2PipeMat]].
     */
-  def akkaFlowToFs2Pipe[A, B](
+  def pekkoFlowToFs2Pipe[A, B](
       flow: Graph[FlowShape[A, B], NotUsed]
   )(implicit materializer: Materializer): Pipe[IO, A, B] =
     (s: Stream[IO, A]) =>
       Stream.force {
         Async[IO].delay {
-          val src = AkkaSource.queue[A](0, OverflowStrategy.backpressure)
-          val snk = AkkaSink.queue[B]()
+          val src = PekkoSource.queue[A](0, OverflowStrategy.backpressure)
+          val snk = PekkoSink.queue[B]()
           val (publisher, subscriber) = src.viaMat(flow)(Keep.left).toMat(snk)(Keep.both).run()
           transformerStream[A, B](subscriber, publisher, s)
         }
       }
 
-  /** Converts an Akka Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
+  /** Converts an Pekko Stream [[Graph]] of [[FlowShape]] to an FS2 [[Pipe]]. This method returns the FS2 [[Pipe]]
     * and the materialized value of the [[Graph]].
     */
-  def akkaFlowToFs2PipeMat[A, B, M](
+  def pekkoFlowToFs2PipeMat[A, B, M](
       flow: Graph[FlowShape[A, B], M]
   )(implicit materializer: Materializer): IO[(Pipe[IO, A, B], M)] =
     Async[IO].delay {
-      val src = AkkaSource.queue[A](0, OverflowStrategy.backpressure)
-      val snk = AkkaSink.queue[B]()
+      val src = PekkoSource.queue[A](0, OverflowStrategy.backpressure)
+      val snk = PekkoSink.queue[B]()
       val ((publisher, mat), subscriber) = src.viaMat(flow)(Keep.both).toMat(snk)(Keep.both).run()
       ((s: Stream[IO, A]) => transformerStream[A, B](subscriber, publisher, s), mat)
     }
 
-  /** Converts an FS2 [[Stream]] to an Akka Stream [[Graph]] of [[SourceShape]]. The [[Stream]] is run when the
+  /** Converts an FS2 [[Stream]] to an Pekko Stream [[Graph]] of [[SourceShape]]. The [[Stream]] is run when the
     * [[Graph]] is materialized.
     */
-  def fs2StreamToAkkaSource[A](
+  def fs2StreamToPekkoSource[A](
       stream: Stream[IO, A]
   ): Graph[SourceShape[A], NotUsed] = {
-    val source = AkkaSource.queue[A](0, OverflowStrategy.backpressure)
+    val source = PekkoSource.queue[A](0, OverflowStrategy.backpressure)
     // A sink that runs an FS2 publisherStream when consuming the publisher actor (= materialized value) of source
-    val sink = AkkaSink.foreach[SourceQueueWithComplete[A]] { p =>
+    val sink = PekkoSink.foreach[SourceQueueWithComplete[A]] { p =>
       // Fire and forget Future so it runs in the background
       import cats.effect.unsafe.implicits.global
 
@@ -161,7 +161,7 @@ trait Converter {
       ()
     }
 
-    AkkaSource
+    PekkoSource
       .fromGraph(GraphDSL.createGraph(source) { implicit builder => source =>
         import GraphDSL.Implicits._
         builder.materializedValue ~> sink
@@ -170,51 +170,51 @@ trait Converter {
       .mapMaterializedValue(_ => NotUsed)
   }
 
-  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[SinkShape]]. The [[Sink]] is run when the
+  /** Converts an FS2 [[Pipe]] to an Pekko Stream [[Graph]] of [[SinkShape]]. The [[Sink]] is run when the
     * [[Graph]] is materialized.
     */
-  def fs2PipeToAkkaSink[A](
+  def fs2PipeToPekkoSink[A](
       sink: Pipe[IO, A, Unit]
   ): Graph[SinkShape[A], Future[Done]] = {
-    val sink1: AkkaSink[A, SinkQueueWithCancel[A]] = AkkaSink.queue[A]()
+    val sink1: PekkoSink[A, SinkQueueWithCancel[A]] = PekkoSink.queue[A]()
     // A sink that runs an FS2 subscriberStream when consuming the subscriber actor (= materialized value) of sink1.
     // The future returned from unsafeToFuture() completes when the subscriber stream completes and is made
     // available as materialized value of this sink.
-    val sink2: AkkaSink[SinkQueueWithCancel[A], Future[Done]] = AkkaFlow[SinkQueueWithCancel[A]]
+    val sink2: PekkoSink[SinkQueueWithCancel[A], Future[Done]] = PekkoFlow[SinkQueueWithCancel[A]]
       .map(s =>
         subscriberStream[A](s).through(sink).compile.drain.as(Done: Done).unsafeToFuture()
       )
-      .toMat(AkkaSink.head)(Keep.right)
+      .toMat(PekkoSink.head)(Keep.right)
       .mapMaterializedValue(ffd => ffd.flatten)
     // fromFuture dance above is because scala 2.11 lacks Future#flatten. `pure` instead of `delay`
     // because the future value is already strict by the time we get it.
 
-    AkkaSink
+    PekkoSink
       .fromGraph(GraphDSL.createGraph(sink1, sink2)(Keep.both) { implicit builder => (sink1, sink2) =>
         import GraphDSL.Implicits._
-        builder.materializedValue ~> AkkaFlow[(SinkQueueWithCancel[A], _)].map(_._1) ~> sink2
+        builder.materializedValue ~> PekkoFlow[(SinkQueueWithCancel[A], _)].map(_._1) ~> sink2
         SinkShape(sink1.in)
       })
       .mapMaterializedValue(_._2)
   }
 
-  /** Converts an FS2 [[Pipe]] to an Akka Stream [[Graph]] of [[FlowShape]]. The [[Pipe]] is run when the
+  /** Converts an FS2 [[Pipe]] to an Pekko Stream [[Graph]] of [[FlowShape]]. The [[Pipe]] is run when the
     * [[Graph]] is materialized.
     */
-  def fs2PipeToAkkaFlow[A, B](
+  def fs2PipeToPekkoFlow[A, B](
       pipe: Pipe[IO, A, B]
   ): Graph[FlowShape[A, B], NotUsed] = {
-    val source = AkkaSource.queue[B](0, OverflowStrategy.backpressure)
-    val sink1: AkkaSink[A, SinkQueueWithCancel[A]] = AkkaSink.queue[A]()
+    val source = PekkoSource.queue[B](0, OverflowStrategy.backpressure)
+    val sink1: PekkoSink[A, SinkQueueWithCancel[A]] = PekkoSink.queue[A]()
     // A sink that runs an FS2 transformerStream when consuming the publisher actor (= materialized value) of source
     // and the subscriber actor (= materialized value) of sink1
-    val sink2 = AkkaSink.foreach[(SourceQueueWithComplete[B], SinkQueueWithCancel[A])] { ps =>
+    val sink2 = PekkoSink.foreach[(SourceQueueWithComplete[B], SinkQueueWithCancel[A])] { ps =>
       // Fire and forget Future so it runs in the background
       transformerStream(ps._2, ps._1, pipe).compile.drain.unsafeToFuture()
       ()
     }
 
-    AkkaFlow
+    PekkoFlow
       .fromGraph(GraphDSL.createGraph(source, sink1)(Keep.both) { implicit builder => (source, sink1) =>
         import GraphDSL.Implicits._
         builder.materializedValue ~> sink2
@@ -250,7 +250,7 @@ trait Converter {
       }
       .recover {
         // This handles a race condition between `interruptWhen` and `publish`.
-        // There's no guarantee that, when the akka sink is terminated, we will observe the
+        // There's no guarantee that, when the pekko sink is terminated, we will observe the
         // `interruptWhen` termination before calling publish one last time.
         // Such a call fails with StreamDetachedException
         case _: StreamDetachedException => none[Unit]
@@ -289,9 +289,9 @@ trait Converter {
 
 trait ConverterDsl extends Converter {
 
-  implicit class AkkaSourceDsl[A, M](source: Graph[SourceShape[A], M]) {
+  implicit class PekkoSourceDsl[A, M](source: Graph[SourceShape[A], M]) {
 
-    /** @see [[Converter#akkaSourceToFs2Stream]] */
+    /** @see [[Converter#pekkoSourceToFs2Stream]] */
     def toStream(implicit
         materializer: Materializer,
         @implicitNotFound(
@@ -300,14 +300,14 @@ trait ConverterDsl extends Converter {
     ): Stream[IO, A] = {
       val _ =
         ev // to suppress 'never used' warning. The warning fires on 2.12 but not on 2.13, so I can't use `nowarn`
-      akkaSourceToFs2Stream(source.asInstanceOf[Graph[SourceShape[A], NotUsed]])
+      pekkoSourceToFs2Stream(source.asInstanceOf[Graph[SourceShape[A], NotUsed]])
     }
 
-    /** @see [[Converter#akkaSourceToFs2StreamMat]] */
+    /** @see [[Converter#pekkoSourceToFs2StreamMat]] */
     def toStreamMat(implicit
         materializer: Materializer
     ): IO[(Stream[IO, A], M)] =
-      akkaSourceToFs2StreamMat(source)
+      pekkoSourceToFs2StreamMat(source)
 
     @deprecated(
       message =
@@ -317,26 +317,26 @@ trait ConverterDsl extends Converter {
     def toStream(onMaterialization: M => Unit = _ => ())(implicit
         materializer: Materializer
     ): Stream[IO, A] =
-      Stream.force(akkaSourceToFs2StreamMat(source).map { case (akkaStream, mat) =>
+      Stream.force(pekkoSourceToFs2StreamMat(source).map { case (pekkoStream, mat) =>
         onMaterialization(mat)
-        akkaStream
+        pekkoStream
       })
   }
 
-  implicit class AkkaSinkFutureDsl[A, M](sink: Graph[SinkShape[A], Future[M]]) {
+  implicit class PekkoSinkFutureDsl[A, M](sink: Graph[SinkShape[A], Future[M]]) {
 
-    /** @see [[Converter#akkaSinkToFs2SinkMat]] */
+    /** @see [[Converter#pekkoSinkToFs2SinkMat]] */
     def toPipeMatWithResult(implicit
         ec: ExecutionContext,
         m: Materializer
     ): IO[Pipe[IO, A, Either[Throwable, M]]] =
-      akkaSinkToFs2PipeMat[A, M](sink)
+      pekkoSinkToFs2PipeMat[A, M](sink)
 
   }
 
-  implicit class AkkaSinkDsl[A, M](sink: Graph[SinkShape[A], M]) {
+  implicit class PekkoSinkDsl[A, M](sink: Graph[SinkShape[A], M]) {
 
-    /** @see [[Converter#akkaSinkToFs2Sink]] */
+    /** @see [[Converter#pekkoSinkToFs2Sink]] */
     def toPipe(implicit
         materializer: Materializer,
         @implicitNotFound(
@@ -345,14 +345,14 @@ trait ConverterDsl extends Converter {
     ): Pipe[IO, A, Unit] = {
       val _ =
         ev // to suppress 'never used' warning. The warning fires on 2.12 but not on 2.13, so I can't use `nowarn`
-      akkaSinkToFs2Pipe(sink.asInstanceOf[Graph[SinkShape[A], NotUsed]])
+      pekkoSinkToFs2Pipe(sink.asInstanceOf[Graph[SinkShape[A], NotUsed]])
     }
 
-    /** @see [[Converter#akkaSinkToFs2SinkMat]] */
+    /** @see [[Converter#pekkoSinkToFs2SinkMat]] */
     def toPipeMat(implicit
         materializer: Materializer
     ): IO[(Pipe[IO, A, Unit], M)] =
-      akkaSinkToFs2PipeMat(sink)
+      pekkoSinkToFs2PipeMat(sink)
 
     @deprecated(
       message =
@@ -364,7 +364,7 @@ trait ConverterDsl extends Converter {
     )(implicit materializer: Materializer): Pipe[IO, A, Unit] =
       (s: Stream[IO, A]) =>
         Stream.force {
-          akkaSinkToFs2PipeMat(sink).map { case (fs2Sink, mat) =>
+          pekkoSinkToFs2PipeMat(sink).map { case (fs2Sink, mat) =>
             onMaterialization(mat)
             s.through(fs2Sink)
           }
@@ -372,9 +372,9 @@ trait ConverterDsl extends Converter {
 
   }
 
-  implicit class AkkaFlowDsl[A, B, M](flow: Graph[FlowShape[A, B], M]) {
+  implicit class PekkoFlowDsl[A, B, M](flow: Graph[FlowShape[A, B], M]) {
 
-    /** @see [[Converter#akkaFlowToFs2Pipe]] */
+    /** @see [[Converter#pekkoFlowToFs2Pipe]] */
     def toPipe(implicit
         materializer: Materializer,
         @implicitNotFound(
@@ -383,14 +383,14 @@ trait ConverterDsl extends Converter {
     ): Pipe[IO, A, B] = {
       val _ =
         ev // to suppress 'never used' warning. The warning fires on 2.12 but not on 2.13, so I can't use `nowarn`
-      akkaFlowToFs2Pipe(flow.asInstanceOf[Graph[FlowShape[A, B], NotUsed]])
+      pekkoFlowToFs2Pipe(flow.asInstanceOf[Graph[FlowShape[A, B], NotUsed]])
     }
 
-    /** @see [[Converter#akkaFlowToFs2PipeMat]] */
+    /** @see [[Converter#pekkoFlowToFs2PipeMat]] */
     def toPipeMat(implicit
         materializer: Materializer
     ): IO[(Pipe[IO, A, B], M)] =
-      akkaFlowToFs2PipeMat(flow)
+      pekkoFlowToFs2PipeMat(flow)
 
     @deprecated(
       message =
@@ -402,7 +402,7 @@ trait ConverterDsl extends Converter {
     )(implicit materializer: Materializer): Pipe[IO, A, B] =
       (s: Stream[IO, A]) =>
         Stream.force {
-          akkaFlowToFs2PipeMat(flow).map { case (fs2Pipe, mat) =>
+          pekkoFlowToFs2PipeMat(flow).map { case (fs2Pipe, mat) =>
             onMaterialization(mat)
             s.through(fs2Pipe)
           }
@@ -411,39 +411,39 @@ trait ConverterDsl extends Converter {
 
   implicit class FS2StreamNothingDsl[A](stream: Stream[Nothing, A]) {
 
-    /** @see [[Converter#fs2StreamToAkkaSource]] */
+    /** @see [[Converter#fs2StreamToPekkoSource]] */
     @deprecated("Use `stream.covary[F].toSource` instead", "0.10")
     def toSource(implicit contextShift: Async[IO]): Graph[SourceShape[A], NotUsed] =
-      fs2StreamToAkkaSource(stream: Stream[IO, A])
+      fs2StreamToPekkoSource(stream: Stream[IO, A])
   }
 
   implicit class FS2StreamPureDsl[A](stream: Stream[Pure, A]) {
 
-    /** @see [[Converter#fs2StreamToAkkaSource]] */
+    /** @see [[Converter#fs2StreamToPekkoSource]] */
     @deprecated("Use `stream.covary[F].toSource` instead", "0.10")
     def toSource(implicit contextShift: Async[IO]): Graph[SourceShape[A], NotUsed] =
-      fs2StreamToAkkaSource(stream: Stream[IO, A])
+      fs2StreamToPekkoSource(stream: Stream[IO, A])
   }
 
   implicit class FS2StreamIODsl[A](stream: Stream[IO, A]) {
 
-    /** @see [[Converter#fs2StreamToAkkaSource]] */
+    /** @see [[Converter#fs2StreamToPekkoSource]] */
     def toSource: Graph[SourceShape[A], NotUsed] =
-      fs2StreamToAkkaSource(stream)
+      fs2StreamToPekkoSource(stream)
   }
 
   implicit class FS2SinkIODsl[A](sink: Pipe[IO, A, Unit]) {
 
-    /** @see [[Converter#fs2PipeToAkkaSink]] */
+    /** @see [[Converter#fs2PipeToPekkoSink]] */
     def toSink: Graph[SinkShape[A], Future[Done]] =
-      fs2PipeToAkkaSink(sink)
+      fs2PipeToPekkoSink(sink)
   }
 
   implicit class FS2PipeIODsl[A, B](pipe: Pipe[IO, A, B]) {
 
-    /** @see [[Converter#fs2PipeToAkkaFlow]] */
+    /** @see [[Converter#fs2PipeToPekkoFlow]] */
     def toFlow: Graph[FlowShape[A, B], NotUsed] =
-      fs2PipeToAkkaFlow(pipe)
+      fs2PipeToPekkoFlow(pipe)
   }
 }
 

@@ -2,8 +2,8 @@ package endpoints4s.algebra.server
 
 import java.time.LocalDate
 import java.util.UUID
-import akka.http.scaladsl.model.HttpMethods.{DELETE, GET, PUT}
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.http.scaladsl.model.HttpMethods.{DELETE, GET, PUT}
+import org.apache.pekko.http.scaladsl.model.headers.{
   Authorization,
   BasicHttpCredentials,
   ETag,
@@ -11,7 +11,7 @@ import akka.http.scaladsl.model.headers.{
   `Access-Control-Allow-Origin`,
   `Last-Modified`
 }
-import akka.http.scaladsl.model.{DateTime, HttpMethods, HttpRequest, StatusCodes}
+import org.apache.pekko.http.scaladsl.model.{DateTime, HttpMethods, HttpRequest, StatusCodes}
 import endpoints4s.{Invalid, Valid}
 
 trait EndpointsTestSuite[T <: endpoints4s.algebra.EndpointsTestApi] extends ServerTestBase[T] {

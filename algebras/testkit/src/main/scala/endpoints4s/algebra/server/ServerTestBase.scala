@@ -2,11 +2,11 @@ package endpoints4s.algebra.server
 
 import java.nio.charset.StandardCharsets
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.headers.`Content-Type`
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.util.ByteString
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.headers.`Content-Type`
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.util.ByteString
 import endpoints4s.algebra
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfter, BeforeAndAfterAll}

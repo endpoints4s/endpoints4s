@@ -11,13 +11,13 @@ import endpoints4s.algebra.server.{
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 
-import akka.stream.scaladsl.Source
+import org.apache.pekko.stream.scaladsl.Source
 
 import scala.concurrent.Future
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 
 import ConverterSyntax._
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 
 import cats.effect.unsafe.implicits.global
 import org.http4s.blaze.server.BlazeServerBuilder
@@ -42,7 +42,7 @@ class ChunkedEntitiesServerInterpreterTest
       finally if (socket != null) socket.close()
     }
 
-    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    // Pekko Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
     val stream =
       response
         .preMaterialize()
@@ -68,12 +68,12 @@ class ChunkedEntitiesServerInterpreterTest
       finally if (socket != null) socket.close()
     }
 
-    // Akka Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
+    // Pekko Stream to fs2 stream conversion based on https://github.com/krasserm/streamz
 //    val stream = response.preMaterialize._2.toStream[IO]//(cs, implicitly[Async[IO]], implicitly[Materializer], ???)
 
     val service = HttpRoutes.of[IO](
       endpoint.implementedByEffect((reqStream: fs2.Stream[IO, Req]) => {
-        IO.fromFuture(IO.delay(logic(akka.stream.scaladsl.Source.fromGraph(reqStream.toSource))))
+        IO.fromFuture(IO.delay(logic(org.apache.pekko.stream.scaladsl.Source.fromGraph(reqStream.toSource))))
       })
     )
     val httpApp = Router("/" -> service).orNotFound

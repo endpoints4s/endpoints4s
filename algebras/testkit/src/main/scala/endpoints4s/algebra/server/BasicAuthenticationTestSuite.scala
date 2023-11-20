@@ -1,7 +1,7 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
-import akka.http.scaladsl.model.headers.{BasicHttpCredentials, `WWW-Authenticate`}
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, StatusCodes}
+import org.apache.pekko.http.scaladsl.model.headers.{BasicHttpCredentials, `WWW-Authenticate`}
 import endpoints4s.algebra.BasicAuthenticationTestApi
 
 trait BasicAuthenticationTestSuite[T <: BasicAuthenticationTestApi] extends EndpointsTestSuite[T] {

@@ -1,6 +1,6 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.model.{ContentTypes, HttpMethods, HttpRequest}
+import org.apache.pekko.http.scaladsl.model.{ContentTypes, HttpMethods, HttpRequest}
 import endpoints4s.algebra
 
 trait SumTypedEntitiesTestSuite[

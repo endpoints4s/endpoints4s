@@ -2,10 +2,10 @@ package quickstart
 
 import java.net.ServerSocket
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
-import akka.http.scaladsl.server.Directives._
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.{ContentTypes, HttpEntity, HttpMethods, HttpRequest, StatusCodes}
+import org.apache.pekko.http.scaladsl.server.Directives._
 import org.scalatest.BeforeAndAfterAll
 
 import scala.concurrent.Await

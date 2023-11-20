@@ -26,16 +26,19 @@ val `algebra-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("com.typesafe.akka" %% "akka-http" % akkaHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-actor" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
-        ("com.typesafe.akka" %% "akka-stream" % akkaActorVersion).cross(CrossVersion.for3Use2_13),
+        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),
+        ("org.apache.pekko" %% "pekko-actor" % pekkoActorVersion).cross(CrossVersion.for3Use2_13),
+        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion).cross(CrossVersion.for3Use2_13),
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
     .jsSettings(
-      libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
+      libraryDependencies += ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(
+        CrossVersion.for3Use2_13
+      )
     )
     .dependsOn(algebra)
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
@@ -72,6 +75,7 @@ val `algebra-circe-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
+      versionPolicyIntention := Compatibility.None,
       publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq()
     )

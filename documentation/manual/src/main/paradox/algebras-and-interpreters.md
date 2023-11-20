@@ -8,7 +8,7 @@
 * [Middlewares](algebras/middlewares.md)
 * [Assets](algebras/assets.md)
 * [Multiplexed endpoints](algebras/mux-endpoints.md)
-* [Akka HTTP](interpreters/akka-http.md)
+* [Pekko HTTP](interpreters/pekko-http.md)
 * [http4s](interpreters/http4s.md)
 * [Scala.js web client (XHR)](interpreters/scalajs-web-xhr.md)
 * [Scala.js web client (Fetch)](interpreters/scalajs-web-fetch.md)
@@ -63,13 +63,13 @@ Then, to interpret the endpoint descriptions you need to build an
 interpreter that matches this algebra. By following the aforementioned
 naming conventions, you should be looking for all the traits that
 have the same names as your algebra modules and that are in the package
-of the interpreter you want to use. For instance, to build an Akka-HTTP
+of the interpreter you want to use. For instance, to build an Pekko-HTTP
 server:
 
 ~~~ scala
-import endpoints4s.akkahttp.server
+import endpoints4s.pekkohttp.server
 
-trait MyAkkaHttpServer extends MyCustomAlgebra
+trait MyPekkoHttpServer extends MyCustomAlgebra
   with server.Endpoints
   with server.JsonEntitiesFromSchemas
   with server.BasicAuthentication
@@ -105,24 +105,25 @@ work with JSON.
 ## Interpreters
 
 Interpreters give a concrete meaning to the vocabulary and operations provided
-by the algebras. They usually rely on other libraries (e.g. circe, Akka HTTP, etc.)
+by the algebras. They usually rely on other libraries (e.g. circe, Pekko HTTP, etc.)
 to do so. Pick the interpreters that fit your existing stack!
 
-| Family                                                    | Description                                                                                                   |
-|-----------------------------------------------------------|---------------------------------------------------------------------------------------------------------------|
-| @ref[Akka HTTP](interpreters/akka-http.md)                | Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)                          |
-| @ref[http4s](interpreters/http4s.md)                      | Client and server backed by [http4s](https://http4s.org)                                                      |
-| [Play framework](https://endpoints.github.io/play)        | Client and server backed by [Play framework](https://www.playframework.com/)                                  |
-| @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md) | Scala.js web client using `XMLHttpRequest`                                                                    |
-| @ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md) | Scala.js web client using `Fetch`                                                                             |
-| [scalaj-http](https://endpoints4s.github.io/scalaj)       | JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)                                     |
-| @ref[sttp](interpreters/sttp.md)                          | JVM client backed by [sttp](https://github.com/softwaremill/sttp)                                             |
-| @ref[OpenAPI](interpreters/openapi.md)                    | Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions         |
-| @ref[circe](interpreters/circe.md)                        | Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions                           |
-| @ref[Play JSON](interpreters/play-json.md)                | Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions |
+| Family                                                        | Description                                                                                                    |
+|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| @ref[Pekko HTTP](interpreters/pekko-http.md)                  | Client and server backed by [Pekko HTTP](https://pekko.apache.org/docs/pekko/current/)                         |
+| [Akka HTTP](https://endpoints4s.github.io/akka-http)          | Client and server backed by [Akka HTTP](https://doc.akka.io/docs/akka-http/current/)                           |
+| @ref[http4s](interpreters/http4s.md)                          | Client and server backed by [http4s](https://http4s.org)                                                       |
+| [Play framework](https://endpoints4s.github.io/play)          | Client and server backed by [Play framework](https://www.playframework.com/)                                   |
+| @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md)     | Scala.js web client using `XMLHttpRequest`                                                                     |
+| @ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md) | Scala.js web client using `Fetch`                                                                              |
+| [scalaj-http](https://endpoints4s.github.io/scalaj)           | JVM client backed by [scalaj-http](https://github.com/scalaj/scalaj-http)                                      |
+| @ref[sttp](interpreters/sttp.md)                              | JVM client backed by [sttp](https://github.com/softwaremill/sttp)                                              |
+| @ref[OpenAPI](interpreters/openapi.md)                        | Generates [OpenAPI](https://github.com/OAI/OpenAPI-Specification) documents for endpoints definitions          |
+| @ref[circe](interpreters/circe.md)                            | Builds [circe](http://circe.github.io/circe/) codecs out of JSON schema definitions                            |
+| @ref[Play JSON](interpreters/play-json.md)                    | Builds [Play JSON](https://github.com/playframework/play-json) Reads and Writes out of JSON schema definitions |
 
 @@@note
 You can have different stacks on the client-side and the server-side. For instance,
-you can have a server backed by Play framework, a client backed by Akka HTTP, and another
+you can have a server backed by Play framework, a client backed by Pekko HTTP, and another
 client backed by Scala.js (for web browsers).
 @@@

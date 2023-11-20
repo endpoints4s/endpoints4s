@@ -1,12 +1,16 @@
 package endpoints4s.algebra.server
 
-import akka.http.scaladsl.model.HttpMethods.{GET}
-import akka.http.scaladsl.model.HttpRequest
-import akka.http.scaladsl.model.headers.{`Last-Modified`, `Content-Type`, `Content-Encoding`}
-import akka.http.scaladsl.model.DateTime
-import akka.http.scaladsl.model.ContentType
-import akka.http.scaladsl.model.MediaTypes
-import akka.http.scaladsl.model.headers.HttpEncodings
+import org.apache.pekko.http.scaladsl.model.HttpMethods.{GET}
+import org.apache.pekko.http.scaladsl.model.HttpRequest
+import org.apache.pekko.http.scaladsl.model.headers.{
+  `Last-Modified`,
+  `Content-Type`,
+  `Content-Encoding`
+}
+import org.apache.pekko.http.scaladsl.model.DateTime
+import org.apache.pekko.http.scaladsl.model.ContentType
+import org.apache.pekko.http.scaladsl.model.MediaTypes
+import org.apache.pekko.http.scaladsl.model.headers.HttpEncodings
 
 trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAssetTest[T] {
 
