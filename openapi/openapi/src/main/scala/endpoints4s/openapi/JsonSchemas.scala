@@ -9,7 +9,7 @@ import endpoints4s.{
   algebra
 }
 import endpoints4s.algebra.Documentation
-import endpoints4s.algebra.JsonSchemas.RawField
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.openapi.model.Schema
 import endpoints4s.openapi.model.Schema.{DiscriminatedAlternatives, EnumeratedAlternatives}
 
@@ -463,11 +463,11 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
-  def rawField[A](name: String, docs: Documentation)(implicit
+  def preciseField[A](name: String, docs: Documentation)(implicit
       tpe: JsonSchema[A]
-  ): Record[RawField[A]] =
+  ): Record[PreciseField[A]] =
     new Record(
-      ujsonSchemas.rawField(name, docs)(tpe.ujsonSchema),
+      ujsonSchemas.preciseField(name, docs)(tpe.ujsonSchema),
       DocumentedRecord(Field(name, tpe.docs, isOptional = true, defaultValue = None, docs) :: Nil)
     )
 

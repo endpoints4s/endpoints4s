@@ -362,9 +362,9 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     *
     * @group operations
     */
-  def rawField[A](name: String, documentation: Option[String] = None)(implicit
+  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
-  ): Record[JsonSchemas.RawField[A]]
+  ): Record[JsonSchemas.PreciseField[A]]
 
   /** The JSON schema of a record with a single optional field with the given `name`
     *
@@ -886,11 +886,11 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
 }
 
 object JsonSchemas {
-  sealed trait RawField[+A]
+  sealed trait PreciseField[+A]
 
-  object RawField {
-    case object Absent extends RawField[Nothing]
-    case object Null extends RawField[Nothing]
-    case class Present[A](value: A) extends RawField[A]
+  object PreciseField {
+    case object Absent extends PreciseField[Nothing]
+    case object Null extends PreciseField[Nothing]
+    case class Present[A](value: A) extends PreciseField[A]
   }
 }

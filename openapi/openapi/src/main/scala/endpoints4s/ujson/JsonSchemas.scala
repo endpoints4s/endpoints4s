@@ -1,6 +1,6 @@
 package endpoints4s.ujson
 
-import endpoints4s.algebra.JsonSchemas.RawField
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.{ujson => _, _}
 
 import scala.collection.compat._
@@ -273,28 +273,28 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           value => ujson.Obj(name -> tpe.encoder.encode(value))
     }
 
-  def rawField[A](name: String, documentation: Option[String] = None)(implicit
+  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
-  ): Record[RawField[A]] =
-    new Record[RawField[A]] {
+  ): Record[PreciseField[A]] =
+    new Record[PreciseField[A]] {
 
       val decoder = {
         case ujson.Obj(fields) =>
           fields.get(name) match {
-            case Some(ujson.Null) => Valid(RawField.Null)
-            case Some(json)       => tpe.decoder.decode(json).map(RawField.Present.apply)
-            case None             => Valid(RawField.Absent)
+            case Some(ujson.Null) => Valid(PreciseField.Null)
+            case Some(json)       => tpe.decoder.decode(json).map(PreciseField.Present.apply)
+            case None             => Valid(PreciseField.Absent)
           }
         case json => Invalid(s"Invalid JSON object: $json")
       }
 
-      val encoder = new Encoder[RawField[A], ujson.Obj] {
+      val encoder = new Encoder[PreciseField[A], ujson.Obj] {
 
-        def encode(maybeValue: RawField[A]) =
+        def encode(maybeValue: PreciseField[A]) =
           maybeValue match {
-            case RawField.Absent         => ujson.Obj()
-            case RawField.Null           => ujson.Obj(name -> ujson.Null)
-            case RawField.Present(value) => ujson.Obj(name -> tpe.codec.encode(value))
+            case PreciseField.Absent         => ujson.Obj()
+            case PreciseField.Null           => ujson.Obj(name -> ujson.Null)
+            case PreciseField.Present(value) => ujson.Obj(name -> tpe.codec.encode(value))
           }
       }
     }

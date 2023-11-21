@@ -1,6 +1,6 @@
 package endpoints4s.playjson
 
-import endpoints4s.algebra.JsonSchemas.RawField
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.{
   MultipleOf,
   NumericConstraints,
@@ -179,22 +179,23 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       (__ \ name).writeNullable(tpe.writes)
     )
 
-  def rawField[A](name: String, documentation: Option[String] = None)(implicit
+  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
-  ): Record[RawField[A]] = {
+  ): Record[PreciseField[A]] = {
     val path = __ \ name
     Record(
-      Reads[RawField[A]] { json =>
+      Reads[PreciseField[A]] { json =>
         path.asSingleJson(json) match {
-          case _: JsUndefined    => JsSuccess(RawField.Absent)
-          case JsDefined(JsNull) => JsSuccess(RawField.Null)
-          case JsDefined(value)  => tpe.reads.reads(value).repath(path).map(RawField.Present.apply)
+          case _: JsUndefined    => JsSuccess(PreciseField.Absent)
+          case JsDefined(JsNull) => JsSuccess(PreciseField.Null)
+          case JsDefined(value) =>
+            tpe.reads.reads(value).repath(path).map(PreciseField.Present.apply)
         }
       },
-      OWrites[RawField[A]] {
-        case RawField.Absent         => JsObject.empty
-        case RawField.Null           => JsPath.createObj(path -> JsNull)
-        case RawField.Present(value) => JsPath.createObj(path -> tpe.writes.writes(value))
+      OWrites[PreciseField[A]] {
+        case PreciseField.Absent         => JsObject.empty
+        case PreciseField.Null           => JsPath.createObj(path -> JsNull)
+        case PreciseField.Present(value) => JsPath.createObj(path -> tpe.writes.writes(value))
 
       }
     )

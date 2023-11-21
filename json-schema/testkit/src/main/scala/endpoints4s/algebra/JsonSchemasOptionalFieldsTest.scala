@@ -2,7 +2,7 @@ package endpoints4s.algebra
 
 import java.time.{Duration, Instant, OffsetDateTime, ZoneOffset}
 
-import endpoints4s.algebra.JsonSchemas.RawField
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.{Invalid, Valid, Validated}
 import org.scalatest.freespec.AnyFreeSpec
 
@@ -173,20 +173,24 @@ trait JsonSchemasOptionalFieldsTest extends AnyFreeSpec with JsonSchemasFixtures
     checkRoundTrip[Set[Int]](implicitly, Json.arr(Json.num(1)), Set(1))
   }
 
-  "raw field present" in {
+  "precise field present" in {
     checkRoundTrip(
-      rawField[Int]("relevant"),
+      preciseField[Int]("relevant"),
       Json.obj("relevant" -> Json.num(123)),
-      RawField.Present(123)
+      PreciseField.Present(123)
     )
   }
 
-  "raw field null" in {
-    checkRoundTrip(rawField[Int]("relevant"), Json.obj("relevant" -> Json.`null`), RawField.Null)
+  "precise field null" in {
+    checkRoundTrip(
+      preciseField[Int]("relevant"),
+      Json.obj("relevant" -> Json.`null`),
+      PreciseField.Null
+    )
   }
 
-  "raw field absent" in {
-    checkRoundTrip(rawField[Int]("relevant"), Json.obj(), RawField.Absent)
+  "precise field absent" in {
+    checkRoundTrip(preciseField[Int]("relevant"), Json.obj(), PreciseField.Absent)
   }
 
   def checkRoundTrip[A](schema: JsonSchema[A], json: Json.Json, decoded: A) =

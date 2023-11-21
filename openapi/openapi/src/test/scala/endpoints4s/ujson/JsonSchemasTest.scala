@@ -75,27 +75,27 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
-  "raw field" in {
+  "precise field" in {
     checkRoundTrip(
-      rawField[Int]("x"),
+      preciseField[Int]("x"),
       ujson.Obj("x" -> ujson.Num(42)),
-      algebra.JsonSchemas.RawField.Present(42)
+      algebra.JsonSchemas.PreciseField.Present(42)
     )
     checkRoundTrip(
-      rawField[Int]("x"),
+      preciseField[Int]("x"),
       ujson.Obj(),
-      algebra.JsonSchemas.RawField.Absent
+      algebra.JsonSchemas.PreciseField.Absent
     )
     checkRoundTrip(
-      rawField[Int]("x"),
+      preciseField[Int]("x"),
       ujson.Obj("x" -> ujson.Null),
-      algebra.JsonSchemas.RawField.Null
+      algebra.JsonSchemas.PreciseField.Null
     )
   }
 
-  "invalid raw field" in {
+  "invalid precise field" in {
     checkDecodingFailure(
-      rawField[Int]("x"),
+      preciseField[Int]("x"),
       ujson.Obj("x" -> ujson.Str("foo")),
       "Invalid integer value: \"foo\"" :: Nil
     )
