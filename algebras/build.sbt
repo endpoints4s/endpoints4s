@@ -27,11 +27,10 @@ val `algebra-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
       versionPolicyIntention := Compatibility.None,
-      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq(
-        ("org.apache.pekko" %% "pekko-http" % pekkoHttpVersion).cross(CrossVersion.for3Use2_13),
-        ("org.apache.pekko" %% "pekko-actor" % pekkoActorVersion).cross(CrossVersion.for3Use2_13),
-        ("org.apache.pekko" %% "pekko-stream" % pekkoActorVersion).cross(CrossVersion.for3Use2_13),
+        "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
+        "org.apache.pekko" %% "pekko-actor" % pekkoActorVersion,
+        "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
         "com.lihaoyi" %% "ujson" % ujsonVersion
       )
     )
@@ -76,7 +75,6 @@ val `algebra-circe-testkit` =
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
       versionPolicyIntention := Compatibility.None,
-      publish / skip := scalaBinaryVersion.value.startsWith("3"),
       libraryDependencies ++= Seq()
     )
     .dependsOn(`algebra-circe`, `algebra-testkit`)
