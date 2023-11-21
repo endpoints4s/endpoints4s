@@ -44,6 +44,9 @@ and then we combine them into a single JSON object schema by using the `zip` ope
 to turn the `Record[(Double, Double)]` value returned by the `zip` operation into
 a `Record[Rectangle]`.
 
+The `preciseField` constructor defines a JSON object schema similar to `optField`. `preciseField` allows finer control 
+by making a distinction between the property set with a `null` value and the absence of the property. 
+
 ### Sum types (sealed traits)
 
 It is also possible to define schemas for sum types. Consider the following type definition,
