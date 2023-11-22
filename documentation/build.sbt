@@ -161,7 +161,7 @@ val `example-quickstart-server` =
     .in(file("examples/quickstart/server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
         "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
@@ -183,7 +183,7 @@ val `example-basic-shared` = {
   ).crossType(CrossType.Pure)
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       macroParadiseDependency,
       Compile / sourceGenerators += Def.task {
         assets.AssetsTasks.generateDigests(
@@ -222,9 +222,9 @@ val `example-basic-client` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       scalaJSUseMainModuleInitializer := true,
-      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
     )
     .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
 
@@ -233,7 +233,7 @@ val `example-basic-pekkohttp-server` =
     .in(file("examples/basic/pekkohttp-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       libraryDependencies += "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion,
       publishArtifact := false
     )
@@ -251,7 +251,7 @@ val `example-cqrs-public-endpoints` =
     .settings(
       libraryDependencies ++= Seq(
         "io.circe" %%% "circe-generic" % circeVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.5.0"
       )
     )
     .dependsOnLocalCrossProjects("json-schema-generic", "algebra-circe")
@@ -267,11 +267,11 @@ val `example-cqrs-web-client` =
     .configure(_.disablePlugins(ScoverageSbtPlugin))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       libraryDependencies ++= Seq(
         "com.raquo" %%% "laminar" % "0.14.5",
         "org.julienrf" %%% "faithful-cats" % "2.0.0",
-        "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
+        "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
         ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
       ),
       scalaJSUseMainModuleInitializer := true
@@ -285,7 +285,7 @@ val `example-cqrs-public-server` =
     .in(file("examples/cqrs/public-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       Compile / unmanagedResources += (`example-cqrs-web-client` / Compile / fastOptJS)
         .map(_.data)
         .value,
@@ -315,7 +315,7 @@ lazy val `example-cqrs-commands-endpoints` =
     .in(file("examples/cqrs/commands-endpoints"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       libraryDependencies ++= Seq(
         "org.scala-stm" %% "scala-stm" % "0.11.1",
         "io.circe" %% "circe-generic" % circeVersion
@@ -329,7 +329,7 @@ val `example-cqrs-commands` =
     .in(file("examples/cqrs/commands"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       libraryDependencies ++= Seq(
         "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
@@ -355,7 +355,7 @@ lazy val `example-cqrs-queries-endpoints` =
 val `example-cqrs-queries` =
   project
     .in(file("examples/cqrs/queries"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .dependsOn(`http4s-server`, `http4s-client-jvm`)
     .dependsOn(
       `example-cqrs-queries-endpoints`,
@@ -366,7 +366,7 @@ val `example-cqrs-queries` =
 val `example-cqrs` =
   project
     .in(file("examples/cqrs/infra"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .settings(
       Global / cancelable := true,
       libraryDependencies ++= Seq(
@@ -395,7 +395,7 @@ val `example-documented` =
 val `example-authentication` =
   project
     .in(file("examples/authentication"))
-    .settings(noPublishSettings, `scala 2.12 to 2.13`)
+    .settings(noPublishSettings, `scala 2.12 to dotty`)
     .settings(
       libraryDependencies ++= Seq(
         "com.github.jwt-scala" %% "jwt-circe" % "9.4.4",
@@ -412,7 +412,7 @@ val `example-basic-http4s-server` =
     .in(file("examples/basic/http4s-server"))
     .settings(
       noPublishSettings,
-      `scala 2.12 to 2.13`,
+      `scala 2.12 to dotty`,
       publishArtifact := false,
       libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.9",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
