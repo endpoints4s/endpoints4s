@@ -179,7 +179,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       (__ \ name).writeNullable(tpe.writes)
     )
 
-  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+  override def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
   ): Record[PreciseField[A]] = {
     val path = __ \ name

@@ -242,7 +242,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       )
     )
 
-  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+  override def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
   ): Record[PreciseField[A]] =
     Record(

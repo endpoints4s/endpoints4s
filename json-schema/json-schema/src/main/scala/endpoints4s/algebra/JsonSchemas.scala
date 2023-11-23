@@ -364,7 +364,8 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
     */
   def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
-  ): Record[JsonSchemas.PreciseField[A]]
+  ): Record[JsonSchemas.PreciseField[A]] =
+    sys.error("Unsupported algebra version: 1.11.0. Please update your interpreter dependency.")
 
   /** The JSON schema of a record with a single optional field with the given `name`
     *

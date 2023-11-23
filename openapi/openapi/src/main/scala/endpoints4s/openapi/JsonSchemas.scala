@@ -463,7 +463,7 @@ trait JsonSchemas extends algebra.JsonSchemas with TuplesSchemas {
     )
   }
 
-  def preciseField[A](name: String, docs: Documentation)(implicit
+  override def preciseField[A](name: String, docs: Documentation)(implicit
       tpe: JsonSchema[A]
   ): Record[PreciseField[A]] =
     new Record(

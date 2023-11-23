@@ -123,7 +123,7 @@ class JsonSchemasTest extends AnyFreeSpec {
     ): String =
       s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"
 
-    def preciseField[A](name: String, docs: Option[String])(implicit
+   override def preciseField[A](name: String, docs: Option[String])(implicit
         tpe: String
     ): String =
       s"$name:$tpe?${docs.fold("")(doc => s"{$doc}")}"

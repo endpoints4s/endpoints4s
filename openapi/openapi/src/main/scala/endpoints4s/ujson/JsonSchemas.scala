@@ -273,7 +273,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
           value => ujson.Obj(name -> tpe.encoder.encode(value))
     }
 
-  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+  override def preciseField[A](name: String, documentation: Option[String] = None)(implicit
       tpe: JsonSchema[A]
   ): Record[PreciseField[A]] =
     new Record[PreciseField[A]] {
