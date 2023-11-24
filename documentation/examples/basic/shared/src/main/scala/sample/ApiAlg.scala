@@ -2,7 +2,7 @@ package sample
 
 import endpoints4s.algebra.BasicAuthentication.Credentials
 import endpoints4s.algebra._
-import io.circe.generic.auto._
+import io.circe.generic.JsonCodec
 
 trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodecs with BasicAuthentication {
 
@@ -36,8 +36,11 @@ trait ApiAlg extends Endpoints with circe.JsonEntitiesFromCodecs with BasicAuthe
 
 }
 
+@JsonCodec
 case class User(name: String, age: Int)
 
+@JsonCodec
 case class ActionParameter()
 
+@JsonCodec
 case class ActionResult(s: String)

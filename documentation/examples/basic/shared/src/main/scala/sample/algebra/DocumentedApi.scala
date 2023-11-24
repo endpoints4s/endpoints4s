@@ -1,7 +1,7 @@
 package sample.algebra
 
 import endpoints4s.algebra.{BasicAuthentication, circe, Endpoints}
-import io.circe.generic.auto._
+import io.circe.generic.JsonCodec
 
 trait DocumentedApi extends Endpoints with BasicAuthentication with circe.JsonEntitiesFromCodecs {
 
@@ -38,4 +38,5 @@ trait DocumentedApi extends Endpoints with BasicAuthentication with circe.JsonEn
 
 }
 
+@JsonCodec
 case class Item(name: String)
