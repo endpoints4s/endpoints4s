@@ -2,11 +2,7 @@ package endpoints4s.algebra.server
 
 import org.apache.pekko.http.scaladsl.model.HttpMethods.{GET}
 import org.apache.pekko.http.scaladsl.model.HttpRequest
-import org.apache.pekko.http.scaladsl.model.headers.{
-  `Last-Modified`,
-  `Content-Type`,
-  `Content-Encoding`
-}
+import org.apache.pekko.http.scaladsl.model.headers.{`Last-Modified`, `Content-Encoding`}
 import org.apache.pekko.http.scaladsl.model.DateTime
 import org.apache.pekko.http.scaladsl.model.ContentType
 import org.apache.pekko.http.scaladsl.model.MediaTypes
@@ -80,15 +76,9 @@ trait AssetsTestSuite[T <: endpoints4s.algebra.AssetsTestApi] extends ServerAsse
       serveAssetsEndpoint(serverApi.assetEndpoint, assetResponse) { port =>
         val request =
           HttpRequest(method = GET, uri = s"http://localhost:$port/assets/asset.txt")
-        whenReady(send(request)) { case (response, entity) =>
-          assert(
-            response
-              .header[`Content-Type`]
-              .contains(
-                `Content-Type`(
-                  ContentType.WithMissingCharset(MediaTypes.`text/plain`)
-                )
-              )
+        whenReady(send(request)) { case (response, _) =>
+          response.entity.contentType shouldEqual ContentType.WithMissingCharset(
+            MediaTypes.`text/plain`
           )
           ()
         }
