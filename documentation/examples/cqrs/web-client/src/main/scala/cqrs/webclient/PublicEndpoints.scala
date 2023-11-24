@@ -1,11 +1,11 @@
 package cqrs.webclient
 
-import endpoints4s.xhr
-import endpoints4s.xhr.EndpointsSettings
+import endpoints4s.fetch
+import endpoints4s.fetch.EndpointsSettings
 
 object PublicEndpoints
     extends cqrs.publicserver.PublicEndpoints
-    with xhr.faithful.Endpoints
-    with xhr.JsonEntitiesFromCodecs {
+    with fetch.future.Endpoints
+    with fetch.JsonEntitiesFromCodecs {
   lazy val settings: EndpointsSettings = EndpointsSettings()
 }

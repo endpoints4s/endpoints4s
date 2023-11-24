@@ -1,14 +1,14 @@
 package quickstart
 
-import endpoints4s.xhr
-import endpoints4s.xhr.EndpointsSettings
+import endpoints4s.fetch
+import endpoints4s.fetch.EndpointsSettings
 
 import scala.concurrent.Future
 
 object CounterClientFuture
     extends CounterEndpoints
-    with xhr.future.Endpoints
-    with xhr.JsonEntitiesFromSchemas {
+    with fetch.future.Endpoints
+    with fetch.JsonEntitiesFromSchemas {
 
   lazy val settings: EndpointsSettings = EndpointsSettings()
 

@@ -6,10 +6,11 @@ import com.raquo.laminar.api.L._
 import cats.implicits._
 import cqrs.publicserver.commands.{AddRecord, CreateMeter}
 import org.scalajs.dom
-import faithful.cats.Instances._
 import cqrs.queries.Meter
-import faithful.Future
 import org.scalajs.dom.HTMLInputElement
+
+import scala.concurrent.Future
+import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 import scala.util.Try
 
 object Main {
@@ -41,7 +42,9 @@ object Main {
             metersVar.update(_ + (createdMeter.id -> createdMeter))
             input.value = ""
           }
-          .handleError(error => dom.window.alert(s"Unable to create the meter (error is $error)"))
+          .recover { case error =>
+            dom.window.alert(s"Unable to create the meter (error is $error)")
+          }
         ()
       }
     }
@@ -62,7 +65,9 @@ object Main {
               .map { updatedMeter =>
                 metersVar.update(_ + (updatedMeter.id -> updatedMeter))
               }
-              .handleError(error => dom.window.alert(s"Unable to add the value (error is $error)"))
+              .recover { case error =>
+                dom.window.alert(s"Unable to add the value (error is $error)")
+              }
             ()
         }
       }
