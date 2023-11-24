@@ -270,19 +270,11 @@ val `example-cqrs-web-client` =
       `scala 2.12 to dotty`,
       libraryDependencies ++= Seq(
         "com.raquo" %%% "laminar" % "0.14.5",
-        ("org.julienrf" %%% "faithful-cats" % "2.0.0").cross(CrossVersion.for3Use2_13),
+        "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.5.0",
         ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
       ),
-      scalaJSUseMainModuleInitializer := true,
-      excludeDependencies ++= {
-        if (scalaBinaryVersion.value.startsWith("3")) {
-          List(
-            ExclusionRule("org.typelevel", "cats-kernel_sjs1_2.13"),
-            ExclusionRule("org.typelevel", "cats-core_sjs1_2.13")
-          )
-        } else Nil
-      }
+      scalaJSUseMainModuleInitializer := true
     )
     .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
     .dependsOn(`example-cqrs-public-endpoints-js`)
