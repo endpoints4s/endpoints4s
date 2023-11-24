@@ -45,7 +45,7 @@ val sharedJVM = shared.jvm
 
 val client =
   project.enablePlugins(ScalaJSPlugin).settings(
-    libraryDependencies += "org.endpoints4s" %%% "xhr-client" % "$xhr-client-version$"
+    libraryDependencies += "org.endpoints4s" %%% "fetch-client" % "$fetch-client-version$"
   ).dependsOn(sharedJS)
 
 val server =
@@ -65,7 +65,7 @@ in addition to the required algebra interface @ref[`algebra`](algebras/endpoints
 to define the communication endpoints and to automatically derive the
 JSON schemas of the entities from their Scala type definitions.
 
-The `client` project uses a @ref[Scala.js web (XHR)](interpreters/scalajs-web-xhr.md) client interpreter.
+The `client` project uses a @ref[Scala.js web (Fetch)](interpreters/scalajs-web-fetch.md) client interpreter.
 
 Finally, the `server` project uses a server interpreter backed by @ref[Pekko HTTP](interpreters/pekko-http.md).
 It also uses the scala-stm library for implementing the business logic.
@@ -85,7 +85,7 @@ deserialize the request and response entities.
 ## Client implementation
 
 A client implementation of the endpoints can be obtained by mixing so-called “interpreters” to the `CounterEndpoints`
-trait defined above. In this example, you want to get a JavaScript (Scala.js) client that uses `XMLHttpRequest` under
+trait defined above. In this example, you want to get a JavaScript (Scala.js) client that uses `Fetch` under
 the hood. Defines the following `CounterClient` object in the `client` project:
 
 @@snip [CounterClient.scala](/documentation/examples/quickstart/client/src/main/scala/quickstart/CounterClient.scala) { #relevant-code }

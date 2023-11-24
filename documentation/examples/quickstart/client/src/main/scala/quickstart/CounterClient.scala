@@ -1,8 +1,8 @@
 package quickstart
 
 //#relevant-code
-import endpoints4s.xhr
-import endpoints4s.xhr.EndpointsSettings
+import endpoints4s.fetch
+import endpoints4s.fetch.EndpointsSettings
 
 /** Defines an HTTP client for the endpoints described in the `CounterEndpoints` trait.
   * The derived HTTP client uses XMLHttpRequest to perform requests and returns
@@ -10,8 +10,8 @@ import endpoints4s.xhr.EndpointsSettings
   */
 object CounterClient
     extends CounterEndpoints
-    with xhr.thenable.Endpoints
-    with xhr.JsonEntitiesFromSchemas {
+    with fetch.thenable.Endpoints
+    with fetch.JsonEntitiesFromSchemas {
   lazy val settings: EndpointsSettings = EndpointsSettings()
 }
 //#relevant-code

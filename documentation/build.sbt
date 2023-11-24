@@ -100,7 +100,7 @@ val manual =
       paradoxProperties ++= Map(
         "version" -> version.value,
         "pekko-http-server-version" -> (`pekko-http-server` / version).value,
-        "xhr-client-version" -> (`xhr-client` / version).value,
+        "fetch-client-version" -> (`fetch-client` / version).value,
         "pekko-version" -> pekkoActorVersion,
         "pekko-http-version" -> pekkoHttpVersion,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
@@ -154,7 +154,7 @@ val `example-quickstart-client` =
       noPublishSettings,
       `scala 2.12 to dotty`
     )
-    .dependsOn(`example-quickstart-endpoints-js`, `xhr-client`)
+    .dependsOn(`example-quickstart-endpoints-js`, `fetch-client`)
 
 val `example-quickstart-server` =
   project
@@ -226,7 +226,7 @@ val `example-basic-client` =
       scalaJSUseMainModuleInitializer := true,
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % "2.3.0"
     )
-    .dependsOn(`example-basic-shared-js`, `xhr-client-circe`)
+    .dependsOn(`example-basic-shared-js`, `fetch-client-circe`)
 
 val `example-basic-pekkohttp-server` =
   project
@@ -270,13 +270,12 @@ val `example-cqrs-web-client` =
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
         "com.raquo" %%% "laminar" % "0.14.5",
-        "org.julienrf" %%% "faithful-cats" % "2.0.0",
         "io.github.cquiroz" %%% "scala-java-time" % "2.2.2",
         ("org.scala-js" %%% "scalajs-java-securerandom" % "1.0.0").cross(CrossVersion.for3Use2_13)
       ),
       scalaJSUseMainModuleInitializer := true
     )
-    .dependsOn(`xhr-client-faithful`, `xhr-client-circe`)
+    .dependsOn(`fetch-client-circe`)
     .dependsOn(`example-cqrs-public-endpoints-js`)
 
 // public server implementation, *implements* the public endpoints’ definitions and *uses* the commands and queries definitions
