@@ -7,7 +7,6 @@ val jsonSchema = project.in(file("json-schema")).settings(noPublishSettings)
 
 // Interpreters
 val openapi = project.in(file("openapi")).settings(noPublishSettings)
-val xhr = project.in(file("xhr")).settings(noPublishSettings)
 val fetch = project.in(file("fetch")).settings(noPublishSettings)
 val `pekko-http` = project.in(file("pekko-http")).settings(noPublishSettings)
 val sttp = project.in(file("sttp")).settings(noPublishSettings)
