@@ -15,7 +15,7 @@ class EndpointsTestApi
     with algebra.TextEntitiesTestApi
     with algebra.SumTypedEntitiesTestApi {
 
-  implicit def userCodec = userJsonSchema
+  implicit def userCodec: JsonSchema[algebra.User] = userJsonSchema
 
   def EffectSync: Sync[Effect] = Sync[IO]
 

@@ -18,16 +18,16 @@ trait ChunkedRequestEntities
 
   def chunksRequestDuplex: RequestDuplex
 
-  def textChunksRequest: RequestEntity[Chunks[String]] =
+  def textChunksRequest: RequestEntity[this.Chunks[String]] =
     chunkedRequestEntity(string => new TextEncoder("utf-8").encode(string))
 
-  def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]] =
+  def bytesChunksRequest: RequestEntity[this.Chunks[Array[Byte]]] =
     chunkedRequestEntity(byteArray => Uint8Array.from(byteArray.map(_.toShort).toJSArray))
 
   private[fetch] def chunkedRequestEntity[A](
       toUint8Array: A => Uint8Array,
       framing: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array] = identity
-  ): RequestEntity[Chunks[A]] = { (as, request) =>
+  ): RequestEntity[this.Chunks[A]] = { (as, request) =>
     val readableStream = dom.ReadableStream[Uint8Array](
       new dom.ReadableStreamUnderlyingSource[Uint8Array] {
         start = js.defined((controller: dom.ReadableStreamController[Uint8Array]) => {
@@ -60,16 +60,16 @@ trait ChunkedResponseEntities
     with EndpointsWithCustomErrors
     with Chunks {
 
-  def textChunksResponse: ResponseEntity[Chunks[String]] =
+  def textChunksResponse: ResponseEntity[this.Chunks[String]] =
     chunkedResponseEntity(uint8array => Right(new TextDecoder("utf-8").decode(uint8array)))
 
-  def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]] =
+  def bytesChunksResponse: ResponseEntity[this.Chunks[Array[Byte]]] =
     chunkedResponseEntity(uint8array => Right(uint8array.toArray.map(_.toByte)))
 
   private[fetch] def chunkedResponseEntity[A](
       fromUint8Array: Uint8Array => Either[Throwable, A],
       framing: dom.ReadableStream[Uint8Array] => dom.ReadableStream[Uint8Array] = identity
-  ): ResponseEntity[Chunks[A]] = { response =>
+  ): ResponseEntity[this.Chunks[A]] = { response =>
     val readableStream = dom.ReadableStream[A](
       new dom.ReadableStreamUnderlyingSource[A] {
         start = js.defined((controller: dom.ReadableStreamController[A]) => {
@@ -194,11 +194,11 @@ trait ChunkedJsonRequestEntities
     with Framing {
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]] = jsonChunksRequest(noopFraming)
+  ): RequestEntity[this.Chunks[A]] = jsonChunksRequest(noopFraming)
 
-  override def jsonChunksRequest[A](framing: Framing)(implicit
+  override def jsonChunksRequest[A](framing: this.Framing)(implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]] = {
+  ): RequestEntity[this.Chunks[A]] = {
     val encoder = stringCodec(codec)
     chunkedRequestEntity(
       { a =>
@@ -218,11 +218,11 @@ trait ChunkedJsonResponseEntities
 
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = jsonChunksResponse(noopFraming)
+  ): ResponseEntity[this.Chunks[A]] = jsonChunksResponse(noopFraming)
 
-  override def jsonChunksResponse[A](framing: Framing)(implicit
+  override def jsonChunksResponse[A](framing: this.Framing)(implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = {
+  ): ResponseEntity[this.Chunks[A]] = {
     val decoder = stringCodec(codec)
     chunkedResponseEntity(
       { uint8array =>

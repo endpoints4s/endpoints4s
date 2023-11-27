@@ -54,13 +54,13 @@ trait ChunkedRequestEntities extends Chunks {
     *
     * @group operations
     */
-  def textChunksRequest: RequestEntity[Chunks[String]]
+  def textChunksRequest: RequestEntity[this.Chunks[String]]
 
   /** A request entity carrying chunks of `Array[Byte]` values
     *
     * @group operations
     */
-  def bytesChunksRequest: RequestEntity[Chunks[Array[Byte]]]
+  def bytesChunksRequest: RequestEntity[this.Chunks[Array[Byte]]]
 }
 
 /** @group algebras */
@@ -71,13 +71,13 @@ trait ChunkedResponseEntities extends Chunks {
     *
     * @group operations
     */
-  def textChunksResponse: ResponseEntity[Chunks[String]]
+  def textChunksResponse: ResponseEntity[this.Chunks[String]]
 
   /** A response entity carrying chunks of `Array[Byte]` values
     *
     * @group operations
     */
-  def bytesChunksResponse: ResponseEntity[Chunks[Array[Byte]]]
+  def bytesChunksResponse: ResponseEntity[this.Chunks[Array[Byte]]]
 }
 
 /** Enriches the [[ChunkedEntities]] algebra with constructors of request
@@ -109,7 +109,7 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
   )
   def jsonChunksRequest[A](implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]]
+  ): RequestEntity[this.Chunks[A]]
 
   /** A request entity carrying chunks of JSON values
     *
@@ -117,9 +117,9 @@ trait ChunkedJsonRequestEntities extends ChunkedRequestEntities with JsonCodecs 
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksRequest[A](framing: Framing)(implicit
+  def jsonChunksRequest[A](framing: this.Framing)(implicit
       codec: JsonCodec[A]
-  ): RequestEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
+  ): RequestEntity[this.Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 
 /** @group algebras */
@@ -131,7 +131,7 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
   )
   def jsonChunksResponse[A](implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]]
+  ): ResponseEntity[this.Chunks[A]]
 
   /** A response entity carrying chunks of JSON values
     *
@@ -139,9 +139,9 @@ trait ChunkedJsonResponseEntities extends ChunkedResponseEntities with JsonCodec
     * @tparam A Type of values serialized into JSON
     * @group operations
     */
-  def jsonChunksResponse[A](framing: Framing)(implicit
+  def jsonChunksResponse[A](framing: this.Framing)(implicit
       codec: JsonCodec[A]
-  ): ResponseEntity[Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
+  ): ResponseEntity[this.Chunks[A]] = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
 
 /** Algebra interface for describing how chunks of chunked transfer-encoding requests and responses should be framed.
@@ -159,5 +159,5 @@ trait Framing {
   /** Frames are delimited by a new-line separator
     * @group operations
     */
-  def newLineDelimiterFraming: Framing = unsupportedInterpreter(algebraVersion = "1.7.0")
+  def newLineDelimiterFraming: this.Framing = unsupportedInterpreter(algebraVersion = "1.7.0")
 }
