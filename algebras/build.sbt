@@ -26,7 +26,7 @@ val `algebra-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
-      versionPolicyIntention := Compatibility.None,
+//      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
         "org.apache.pekko" %% "pekko-actor" % pekkoActorVersion,
@@ -74,7 +74,7 @@ val `algebra-circe-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
-      versionPolicyIntention := Compatibility.None,
+//      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq()
     )
     .dependsOn(`algebra-circe`, `algebra-testkit`)
