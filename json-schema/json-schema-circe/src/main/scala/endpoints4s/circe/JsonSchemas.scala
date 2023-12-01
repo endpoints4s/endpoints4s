@@ -1,6 +1,7 @@
 package endpoints4s
 package circe
 
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.algebra.circe.CirceCodec
 import io.circe._
 
@@ -238,6 +239,24 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         io.circe.Decoder
           .decodeOption(tpe.decoder)
           .tryDecode(cursor.downField(name))
+      )
+    )
+
+  override def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
+  ): Record[PreciseField[A]] =
+    Record(
+      io.circe.Encoder.AsObject.instance[PreciseField[A]] {
+        case PreciseField.Absent         => JsonObject.empty
+        case PreciseField.Null           => JsonObject(name -> Json.Null)
+        case PreciseField.Present(value) => JsonObject(name -> tpe.encoder.apply(value))
+      },
+      io.circe.Decoder.instance[PreciseField[A]](cursor =>
+        cursor.downField(name).focus match {
+          case None            => Right(PreciseField.Absent)
+          case Some(Json.Null) => Right(PreciseField.Null)
+          case Some(value)     => tpe.decoder.decodeJson(value).map(PreciseField.Present.apply)
+        }
       )
     )
 

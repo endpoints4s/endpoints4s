@@ -1,5 +1,6 @@
 package endpoints4s.ujson
 
+import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.{ujson => _, _}
 
 import scala.collection.compat._
@@ -270,6 +271,32 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
             else ujson.Obj(name -> tpe.encoder.encode(value))
         else
           value => ujson.Obj(name -> tpe.encoder.encode(value))
+    }
+
+  override def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
+  ): Record[PreciseField[A]] =
+    new Record[PreciseField[A]] {
+
+      val decoder = {
+        case ujson.Obj(fields) =>
+          fields.get(name) match {
+            case Some(ujson.Null) => Valid(PreciseField.Null)
+            case Some(json)       => tpe.decoder.decode(json).map(PreciseField.Present.apply)
+            case None             => Valid(PreciseField.Absent)
+          }
+        case json => Invalid(s"Invalid JSON object: $json")
+      }
+
+      val encoder = new Encoder[PreciseField[A], ujson.Obj] {
+
+        def encode(maybeValue: PreciseField[A]) =
+          maybeValue match {
+            case PreciseField.Absent         => ujson.Obj()
+            case PreciseField.Null           => ujson.Obj(name -> ujson.Null)
+            case PreciseField.Present(value) => ujson.Obj(name -> tpe.codec.encode(value))
+          }
+      }
     }
 
   def taggedRecord[A](recordA: Record[A], tag: String): Tagged[A] =

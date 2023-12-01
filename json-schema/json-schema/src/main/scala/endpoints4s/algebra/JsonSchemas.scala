@@ -349,6 +349,24 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       tpe: JsonSchema[A]
   ): Record[Option[A]]
 
+  /** The JSON schema of a record with a single field `name` of type `A` with fine control
+    *  over presence and null
+    *
+    *   - Encoder interpreters may produce a JSON object with one property of the given `name`,
+    *     which can be set to the `null` value,
+    *   - Decoder interpreters successfully decode `Absent` if the field is absent, `Null` if
+    *     it is present but has the value `null`. They fail if the field is
+    *     present but contains an invalid value,
+    *   - Documentation interpreters produce the JSON schema of a JSON object with an
+    *     optional property of the given `name`.
+    *
+    * @group operations
+    */
+  def preciseField[A](name: String, documentation: Option[String] = None)(implicit
+      tpe: JsonSchema[A]
+  ): Record[JsonSchemas.PreciseField[A]] =
+    sys.error("Unsupported algebra version: 1.11.0. Please update your interpreter dependency.")
+
   /** The JSON schema of a record with a single optional field with the given `name`
     *
     *   - Decoders fallback to the `defaultValue` if the field is absent from
@@ -866,4 +884,14 @@ trait JsonSchemas extends TuplesSchemas with PartialInvariantFunctorSyntax {
       .withExample(Duration.ofDays(7))
       .withDescription("ISO 8601 Duration")
 
+}
+
+object JsonSchemas {
+  sealed trait PreciseField[+A]
+
+  object PreciseField {
+    case object Absent extends PreciseField[Nothing]
+    case object Null extends PreciseField[Nothing]
+    case class Present[A](value: A) extends PreciseField[A]
+  }
 }

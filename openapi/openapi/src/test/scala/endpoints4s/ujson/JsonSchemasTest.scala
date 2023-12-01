@@ -75,6 +75,32 @@ class JsonSchemasTest extends AnyFreeSpec {
     )
   }
 
+  "precise field" in {
+    checkRoundTrip(
+      preciseField[Int]("x"),
+      ujson.Obj("x" -> ujson.Num(42)),
+      algebra.JsonSchemas.PreciseField.Present(42)
+    )
+    checkRoundTrip(
+      preciseField[Int]("x"),
+      ujson.Obj(),
+      algebra.JsonSchemas.PreciseField.Absent
+    )
+    checkRoundTrip(
+      preciseField[Int]("x"),
+      ujson.Obj("x" -> ujson.Null),
+      algebra.JsonSchemas.PreciseField.Null
+    )
+  }
+
+  "invalid precise field" in {
+    checkDecodingFailure(
+      preciseField[Int]("x"),
+      ujson.Obj("x" -> ujson.Str("foo")),
+      "Invalid integer value: \"foo\"" :: Nil
+    )
+  }
+
   "two records" in {
     checkRoundTrip(
       field[Long]("foo") zip field[Boolean]("bar"),
@@ -245,7 +271,7 @@ class JsonSchemasTest extends AnyFreeSpec {
 
     val rectSchema = (field[Int]("w") zip field[Int]("h"))
       .tagged("Rect")
-      .xmap { case (w, h) => Rect(w, h) } (rect => (rect.w, rect.h))
+      .xmap { case (w, h) => Rect(w, h) }(rect => (rect.w, rect.h))
 
     val schema = circleSchema orElseMerge rectSchema
     checkRoundTrip(
