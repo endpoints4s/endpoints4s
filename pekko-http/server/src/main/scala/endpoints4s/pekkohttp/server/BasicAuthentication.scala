@@ -45,26 +45,29 @@ trait BasicAuthentication extends algebra.BasicAuthentication with EndpointsWith
             }
           )
 
-      lazy val matchAndParseHeadersDirective: Directive1[Validated[UrlAndHeaders]] =
-        Directives.extractRequest.map(authHeader.decode).flatMap {
-          case Valid(None) =>
-            Directives.complete(
-              HttpResponse(
-                PekkoStatusCodes.Unauthorized,
-                collection.immutable.Seq[HttpHeader](
-                  `WWW-Authenticate`(HttpChallenges.basic("Realm"))
-                )
-              )
-            )
+      lazy val unauthorized: Directive1[Validated[UrlAndHeaders]] = Directives.complete(
+        HttpResponse(
+          PekkoStatusCodes.Unauthorized,
+          collection.immutable.Seq[HttpHeader](
+            `WWW-Authenticate`(HttpChallenges.basic("Realm"))
+          )
+        )
+      )
+
+      lazy val matchAndParseHeadersDirective: Directive1[Validated[UrlAndHeaders]] = for {
+        uh <- matchAndProvideParsedUrlAndHeadersData(method, url, headers)
+        credentials <- Directives.extractRequest.map(authHeader.decode)
+        result <- credentials match {
           case Valid(Some(credentials)) =>
-            matchAndProvideParsedUrlAndHeadersData(method, url, headers)
-              .map { validatedUrlAndHeaders =>
-                validatedUrlAndHeaders.map { case (urlData, headersData) =>
-                  (urlData, headersData, credentials)
-                }
+            Directives.provide {
+              uh.map { case (u, h) =>
+                (u, h, credentials)
               }
-          case invalid: Invalid => Directives.provide(invalid)
+            }
+          case Valid(None)      => unauthorized
+          case invalid: Invalid => Directives.provide[Validated[UrlAndHeaders]](invalid)
         }
+      } yield result
 
       def parseEntityDirective(urlAndHeaders: UrlAndHeaders): Directive1[Out] =
         entity.map { entityData =>
