@@ -44,6 +44,29 @@ trait ServerTestBase[T <: algebra.Endpoints]
       response: => Resp
   )(runTests: Int => Unit): Unit
 
+  trait EndpointImplementation {
+    type Req
+    type Resp
+    def endpoint: serverApi.Endpoint[Req, Resp]
+    def impl: Req => Resp
+  }
+  def EndpointImplementation[Req1, Resp1](
+      e: serverApi.Endpoint[Req1, Resp1],
+      i: Req1 => Resp1
+  ): EndpointImplementation = new EndpointImplementation {
+    type Req = Req1
+    type Resp = Resp1
+    def endpoint = e
+    def impl = i
+  }
+
+  /** @param runTests A function that is called after the server is started and before it is stopped. It takes
+    *                 the TCP port number as parameter.
+    */
+  def serveManyEndpoints(
+      endpoints: EndpointImplementation*
+  )(runTests: Int => Unit): Unit
+
   /** @param runTests A function that is called after the server is started and before it is stopped. It takes
     *                 the TCP port number as parameter.
     */

@@ -1,7 +1,6 @@
 package endpoints4s.http4s.server
 
 import java.net.ServerSocket
-
 import cats.effect.IO
 import endpoints4s.{Invalid, Valid}
 import endpoints4s.algebra.server.{
@@ -15,7 +14,6 @@ import endpoints4s.algebra.server.{
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 import org.http4s.blaze.server.BlazeServerBuilder
-
 import endpoints4s.algebra.server.AssetsTestSuite
 import cats.effect.unsafe.implicits.global
 
@@ -44,21 +42,8 @@ class ServerInterpreterTest
   private def serveGeneralEndpoint[Req, Resp](
       endpoint: serverApi.Endpoint[Req, Resp],
       request2response: Req => Resp
-  )(runTests: Int => Unit): Unit = {
-    val port = {
-      val socket = new ServerSocket(0)
-      try socket.getLocalPort
-      finally if (socket != null) socket.close()
-    }
-
-    val service = HttpRoutes.of[IO](endpoint.implementedBy(request2response))
-    val httpApp = Router("/" -> service).orNotFound
-    val server =
-      BlazeServerBuilder[IO]
-        .bindHttp(port, "localhost")
-        .withHttpApp(httpApp)
-    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
-  }
+  )(runTests: Int => Unit): Unit =
+    serveManyEndpoints(EndpointImplementation(endpoint, request2response))(runTests)
 
   def assetsResources(pathPrefix: Option[String]) =
     serverApi.assetsResources(pathPrefix)
@@ -82,4 +67,22 @@ class ServerInterpreterTest
       endpoint: serverApi.Endpoint[Resp, Resp]
   )(runTests: Int => Unit): Unit =
     serveGeneralEndpoint(endpoint, identity[Resp])(runTests)
+
+  def serveManyEndpoints(endpoints: EndpointImplementation*)(runTests: Int => Unit): Unit = {
+    val port = {
+      val socket = new ServerSocket(0)
+      try socket.getLocalPort
+      finally if (socket != null) socket.close()
+    }
+
+    val service = HttpRoutes.of[IO](
+      serverApi.routesFromEndpoints(endpoints.map(e => e.endpoint.implementedBy(e.impl)): _*)
+    )
+    val httpApp = Router("/" -> service).orNotFound
+    val server =
+      BlazeServerBuilder[IO]
+        .bindHttp(port, "localhost")
+        .withHttpApp(httpApp)
+    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
+  }
 }
