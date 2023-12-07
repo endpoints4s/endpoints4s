@@ -43,7 +43,7 @@ class ServerInterpreterTest
       endpoint: serverApi.Endpoint[Req, Resp],
       request2response: Req => Resp
   )(runTests: Int => Unit): Unit =
-    serveManyEndpoints(EndpointImplementation(endpoint, request2response))(runTests)
+    serveManyEndpoints(EndpointWithImplementation(endpoint, request2response))(runTests)
 
   def assetsResources(pathPrefix: Option[String]) =
     serverApi.assetsResources(pathPrefix)
@@ -68,7 +68,7 @@ class ServerInterpreterTest
   )(runTests: Int => Unit): Unit =
     serveGeneralEndpoint(endpoint, identity[Resp])(runTests)
 
-  def serveManyEndpoints(endpoints: EndpointImplementation*)(runTests: Int => Unit): Unit = {
+  def serveManyEndpoints(endpoints: EndpointWithImplementation*)(runTests: Int => Unit): Unit = {
     val port = {
       val socket = new ServerSocket(0)
       try socket.getLocalPort

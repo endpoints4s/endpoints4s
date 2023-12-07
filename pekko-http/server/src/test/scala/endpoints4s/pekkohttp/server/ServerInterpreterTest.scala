@@ -47,7 +47,7 @@ class ServerInterpreterTest
     }
   }
 
-  def serveManyEndpoints(endpoints: EndpointImplementation*)(runTests: Int => Unit): Unit = {
+  def serveManyEndpoints(endpoints: EndpointWithImplementation*)(runTests: Int => Unit): Unit = {
     val routes = endpoints.map(e => e.endpoint.implementedBy(e.impl))
     serveRoute(RouteConcatenation.concat(routes: _*))(runTests)
   }

@@ -85,13 +85,13 @@ class ChunkedEntitiesServerInterpreterTest
 
   override def serveEndpoint[Req, Resp](endpoint: serverApi.Endpoint[Req, Resp], response: => Resp)(
       runTests: Int => Unit
-  ): Unit = serveManyEndpoints(EndpointImplementation(endpoint, (_: Any) => response))(runTests)
+  ): Unit = serveManyEndpoints(EndpointWithImplementation(endpoint, (_: Any) => response))(runTests)
 
   override def serveIdentityEndpoint[Resp](endpoint: serverApi.Endpoint[Resp, Resp])(
       runTests: Int => Unit
-  ): Unit = serveManyEndpoints(EndpointImplementation(endpoint, identity[Resp]))(runTests)
+  ): Unit = serveManyEndpoints(EndpointWithImplementation(endpoint, identity[Resp]))(runTests)
 
-  def serveManyEndpoints(endpoints: EndpointImplementation*)(runTests: Int => Unit): Unit = {
+  def serveManyEndpoints(endpoints: EndpointWithImplementation*)(runTests: Int => Unit): Unit = {
     val port = {
       val socket = new ServerSocket(0)
       try socket.getLocalPort
