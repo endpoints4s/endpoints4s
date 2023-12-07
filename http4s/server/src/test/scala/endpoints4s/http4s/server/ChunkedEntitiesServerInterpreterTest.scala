@@ -3,11 +3,7 @@ package endpoints4s.http4s.server
 import java.net.ServerSocket
 
 import endpoints4s.{Invalid, Valid}
-import endpoints4s.algebra.server.{
-  ChunkedJsonEntitiesTestSuite,
-  DecodedUrl,
-  EndpointsTestSuite
-}
+import endpoints4s.algebra.server.{ChunkedJsonEntitiesTestSuite, DecodedUrl, EndpointsTestSuite}
 import org.http4s.server.Router
 import org.http4s.{HttpRoutes, Uri}
 
@@ -73,7 +69,9 @@ class ChunkedEntitiesServerInterpreterTest
 
     val service = HttpRoutes.of[IO](
       endpoint.implementedByEffect((reqStream: fs2.Stream[IO, Req]) => {
-        IO.fromFuture(IO.delay(logic(org.apache.pekko.stream.scaladsl.Source.fromGraph(reqStream.toSource))))
+        IO.fromFuture(
+          IO.delay(logic(org.apache.pekko.stream.scaladsl.Source.fromGraph(reqStream.toSource)))
+        )
       })
     )
     val httpApp = Router("/" -> service).orNotFound
@@ -87,31 +85,21 @@ class ChunkedEntitiesServerInterpreterTest
 
   override def serveEndpoint[Req, Resp](endpoint: serverApi.Endpoint[Req, Resp], response: => Resp)(
       runTests: Int => Unit
-  ): Unit = {
-    val port = {
-      val socket = new ServerSocket(0)
-      try socket.getLocalPort
-      finally if (socket != null) socket.close()
-    }
-    val service = HttpRoutes.of[IO](endpoint.implementedBy(_ => response))
-    val httpApp = Router("/" -> service).orNotFound
-    val server =
-      BlazeServerBuilder[IO]
-        .bindHttp(port, "localhost")
-        .withHttpApp(httpApp)
-    server.resource.use(_ => IO(runTests(port))).unsafeRunSync()
-    ()
-  }
+  ): Unit = serveManyEndpoints(EndpointWithImplementation(endpoint, (_: Any) => response))(runTests)
 
   override def serveIdentityEndpoint[Resp](endpoint: serverApi.Endpoint[Resp, Resp])(
       runTests: Int => Unit
-  ): Unit = {
+  ): Unit = serveManyEndpoints(EndpointWithImplementation(endpoint, identity[Resp]))(runTests)
+
+  def serveManyEndpoints(endpoints: EndpointWithImplementation*)(runTests: Int => Unit): Unit = {
     val port = {
       val socket = new ServerSocket(0)
       try socket.getLocalPort
       finally if (socket != null) socket.close()
     }
-    val service = HttpRoutes.of[IO](endpoint.implementedBy(identity[Resp]))
+    val service = HttpRoutes.of[IO](
+      serverApi.routesFromEndpoints(endpoints.map(e => e.endpoint.implementedBy(e.impl)): _*)
+    )
     val httpApp = Router("/" -> service).orNotFound
     val server =
       BlazeServerBuilder[IO]

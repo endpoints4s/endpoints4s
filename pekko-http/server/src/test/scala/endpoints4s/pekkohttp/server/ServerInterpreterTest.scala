@@ -9,7 +9,7 @@ import org.apache.pekko.http.scaladsl.model.{
   Uri,
   StatusCodes => Pekko
 }
-import org.apache.pekko.http.scaladsl.server.{Directives, Route}
+import org.apache.pekko.http.scaladsl.server.{Directives, Route, RouteConcatenation}
 import org.apache.pekko.http.scaladsl.testkit.ScalatestRouteTest
 import org.apache.pekko.stream.scaladsl.Source
 import endpoints4s.{Invalid, Valid, algebra}
@@ -45,6 +45,11 @@ class ServerInterpreterTest
       Await.result(serverBinding.flatMap(_.unbind()), 10.seconds)
       ()
     }
+  }
+
+  def serveManyEndpoints(endpoints: EndpointWithImplementation*)(runTests: Int => Unit): Unit = {
+    val routes = endpoints.map(e => e.endpoint.implementedBy(e.impl))
+    serveRoute(RouteConcatenation.concat(routes: _*))(runTests)
   }
 
   def serveEndpoint[Req, Resp](

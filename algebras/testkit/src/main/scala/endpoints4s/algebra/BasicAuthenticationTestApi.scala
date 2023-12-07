@@ -10,6 +10,11 @@ trait BasicAuthenticationTestApi extends EndpointsTestApi with algebra.BasicAuth
     ok(textResponse)
   )
 
+  val unprotectedEndpoint = endpoint(
+    get(path / "users"),
+    ok(textResponse)
+  )
+
   val protectedEndpointWithParameter = authenticatedEndpoint(
     Get,
     path / "users" / segment[Long]("id"),

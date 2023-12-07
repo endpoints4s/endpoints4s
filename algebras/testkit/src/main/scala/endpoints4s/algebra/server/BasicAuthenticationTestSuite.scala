@@ -62,6 +62,23 @@ trait BasicAuthenticationTestSuite[T <: BasicAuthenticationTestApi] extends Endp
       }
     }
 
+    "fall through to another endpoint if url doesn't match" in {
+      serveManyEndpoints(
+        EndpointWithImplementation(
+          serverApi.protectedEndpointWithParameter,
+          (_: Any) => Some("Protected")
+        ),
+        EndpointWithImplementation(serverApi.unprotectedEndpoint, (_: Any) => "Unprotected")
+      ) { port =>
+        val request = HttpRequest(uri = s"http://localhost:$port/users")
+        whenReady(sendAndDecodeEntityAsText(request)) { case (response, entity) =>
+          response.status shouldBe StatusCodes.OK
+          entity shouldBe "Unprotected"
+          ()
+        }
+      }
+    }
+
   }
 
 }
