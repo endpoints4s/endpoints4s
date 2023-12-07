@@ -57,4 +57,4 @@ jobs:
         distribution: temurin
         java-version: 11
         cache: sbt
-    - run: sbt versionPolicyCheck scalafmtCheck
+    - run: sbt +versionPolicyCheck scalafmtCheck
