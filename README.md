@@ -31,7 +31,7 @@ See the [open issues](https://github.com/endpoints4s/endpoints4s/issues).
 
 ## Sponsors
 
-[Bestmile](https://bestmile.com) supports engineering work on the project.
+If you find endpoints4s useful, please consider asking your company to support this project by [becoming a sponsor](https://opencollective.com/endpoints4s).
 
 ## Support
 
