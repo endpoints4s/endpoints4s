@@ -31,7 +31,7 @@ See the [open issues](https://github.com/endpoints4s/endpoints4s/issues).
 
 ## Sponsors
 
-If you find endpoints4s useful, please consider asking your company to support this project by [becoming a sponsor](https://opencollective.com/endpoints4s).
+If you find endpoints4s useful, please consider asking your company to support this project by [becoming a sponsor](https://opencollective.com/endpoints4s). Your donations will help the project stay up to date and fund work on important [issues or feature requests](https://github.com/endpoints4s/endpoints4s/issues?q=is%3Aissue+is%3Aopen+label%3Abounty).
 
 ## Support
 
