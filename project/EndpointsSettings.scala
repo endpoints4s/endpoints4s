@@ -113,7 +113,7 @@ object EndpointsSettings {
   val pekkoHttpVersion = "1.0.0"
   val http4sVersion = "0.23.6"
   val http4sDomVersion = "0.2.3"
-  val ujsonVersion = "1.4.0"
+  val ujsonVersion = "3.1.4"
 
   val scalaTestVersion = "3.2.17"
   val scalaTestDependency =

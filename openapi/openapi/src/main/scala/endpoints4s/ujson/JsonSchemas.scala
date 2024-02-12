@@ -4,7 +4,6 @@ import endpoints4s.algebra.JsonSchemas.PreciseField
 import endpoints4s.{ujson => _, _}
 
 import scala.collection.compat._
-import scala.collection.mutable
 
 /** @group interpreters
   */
@@ -351,9 +350,10 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
 
         def encode(from: t.Out): ujson.Obj = {
           val (a, b) = t.unapply(from)
-          new ujson.Obj(
-            recordA.encoder.encode(a).value ++ recordB.encoder.encode(b).value
-          )
+          val result = ujson.Obj()
+          result.value ++= recordA.encoder.encode(a).value
+          result.value ++= recordB.encoder.encode(b).value
+          result
         }
       }
     }
@@ -553,9 +553,11 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
       }
 
       val encoder = map => {
-        new ujson.Obj(mutable.LinkedHashMap(map.map { case (k, v) =>
-          (k, jsonSchema.codec.encode(v))
-        }.toSeq: _*))
+        val result = ujson.Obj()
+        map.foreach { case (k, v) =>
+          result.value.put(k, jsonSchema.codec.encode(v))
+        }
+        result
       }
     }
 }
