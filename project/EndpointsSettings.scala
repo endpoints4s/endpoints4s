@@ -110,7 +110,7 @@ object EndpointsSettings {
   val playVersion = "2.8.13"
   val sttpVersion = "3.3.18"
   val pekkoActorVersion = "1.0.2"
-  val pekkoHttpVersion = "1.0.0"
+  val pekkoHttpVersion = "1.0.1"
   val http4sVersion = "0.23.6"
   val http4sDomVersion = "0.2.3"
   val ujsonVersion = "1.4.0"
