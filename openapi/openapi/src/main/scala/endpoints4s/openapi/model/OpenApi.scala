@@ -112,7 +112,7 @@ object OpenApi {
 
         val required = obj.properties.filter(_.isRequired).map(_.name)
         if (required.nonEmpty) {
-          result.value.put("required", ujson.Arr(required))
+          result.value.put("required", ujson.Arr.from(required))
         }
         obj.additionalProperties.foreach(p =>
           result.value.put("additionalProperties", schemaJson(p))
@@ -275,7 +275,7 @@ object OpenApi {
     if (operation.parameters.nonEmpty) {
       obj.value.put(
         "parameters",
-        ujson.Arr(
+        ujson.Arr.from(
           operation.parameters.map(parameterJson)
         )
       )
