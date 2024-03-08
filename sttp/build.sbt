@@ -12,6 +12,7 @@ val `sttp-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "sttp-client",
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "com.softwaremill.sttp.client3" %% "core" % sttpVersion,
         "com.softwaremill.sttp.client3" %% "httpclient-backend" % sttpVersion % Test

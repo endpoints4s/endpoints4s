@@ -26,7 +26,7 @@ val `algebra-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-testkit",
-//      versionPolicyIntention := Compatibility.None,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
         "org.apache.pekko" %% "pekko-actor" % pekkoActorVersion,
@@ -43,9 +43,9 @@ val `algebra-testkit` =
     .dependsOnLocalCrossProjectsWithNative("json-schema-testkit")
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
-val `algebra-testkit-js` = algebra.js
-val `algebra-testkit-jvm` = algebra.jvm
-val `algebra-testkit-native` = algebra.native
+val `algebra-testkit-js` = `algebra-testkit`.js
+val `algebra-testkit-jvm` = `algebra-testkit`.jvm
+val `algebra-testkit-native` = `algebra-testkit`.native
 
 val `algebra-circe` =
   crossProject(JSPlatform, JVMPlatform)
@@ -74,7 +74,7 @@ val `algebra-circe-testkit` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "algebra-circe-testkit",
-//      versionPolicyIntention := Compatibility.None,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq()
     )
     .dependsOn(`algebra-circe`, `algebra-testkit`)
