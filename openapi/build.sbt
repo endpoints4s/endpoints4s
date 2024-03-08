@@ -16,6 +16,7 @@ lazy val openapi =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "openapi",
+      versionPolicyIntention := Compatibility.None,
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
       libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion,
     )
