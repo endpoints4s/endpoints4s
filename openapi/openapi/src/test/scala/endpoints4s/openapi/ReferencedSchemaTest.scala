@@ -65,16 +65,6 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |        ]
         |      },
         |      "post" : {
-        |        "requestBody" : {
-        |          "content" : {
-        |            "application/json" : {
-        |              "schema" : {
-        |                "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
-        |              }
-        |            }
-        |          },
-        |          "description" : "Books list"
-        |        },
         |        "responses" : {
         |          "400" : {
         |            "description" : "Client error",
@@ -108,6 +98,16 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |            "description" : ""
         |          }
         |        },
+        |        "requestBody" : {
+        |          "content" : {
+        |            "application/json" : {
+        |              "schema" : {
+        |                "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Book"
+        |              }
+        |            }
+        |          },
+        |          "description" : "Books list"
+        |        },
         |        "tags" : [
         |          "Books",
         |          "Another tag"
@@ -133,10 +133,6 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |  ],
         |  "components" : {
         |    "schemas" : {
-        |      "Color" : {
-        |        "type" : "string",
-        |        "enum" : ["Red", "Blue"]
-        |      },
         |      "endpoints4s.openapi.ReferencedSchemaTest.Storage.Online" : {
         |        "type" : "object",
         |        "properties" : {
@@ -153,6 +149,23 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          "storageType",
         |          "link"
         |        ]
+        |      },
+        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage" : {
+        |        "oneOf" : [
+        |          {
+        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library"
+        |          },
+        |          {
+        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
+        |          }
+        |        ],
+        |        "discriminator" : {
+        |          "propertyName" : "storageType",
+        |          "mapping" : {
+        |            "Library" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library",
+        |            "Online" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
+        |          }
+        |        }
         |      },
         |      "endpoints4s.openapi.ReferencedSchemaTest.Book" : {
         |        "type" : "object",
@@ -196,22 +209,9 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          "storage"
         |        ]
         |      },
-        |      "endpoints4s.openapi.ReferencedSchemaTest.Storage" : {
-        |        "oneOf" : [
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library"
-        |          },
-        |          {
-        |            "$ref" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
-        |          }
-        |        ],
-        |        "discriminator" : {
-        |          "propertyName" : "storageType",
-        |          "mapping" : {
-        |            "Library" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Library",
-        |            "Online" : "#/components/schemas/endpoints4s.openapi.ReferencedSchemaTest.Storage.Online"
-        |          }
-        |        }
+        |      "Color" : {
+        |        "type" : "string",
+        |        "enum" : ["Red", "Blue"]
         |      },
         |      "endpoints.Errors" : {
         |        "type" : "array",

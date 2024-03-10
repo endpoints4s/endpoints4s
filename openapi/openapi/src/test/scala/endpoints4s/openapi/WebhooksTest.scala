@@ -58,16 +58,6 @@ class WebhooksTest extends AnyWordSpec with Matchers {
         |  "paths" : {
         |    "/subscribe" : {
         |      "post" : {
-        |        "parameters" : [
-        |          {
-        |            "name" : "callbackURL",
-        |            "in" : "query",
-        |            "schema" : {
-        |              "type" : "string"
-        |            },
-        |            "required" : true
-        |          }
-        |        ],
         |        "responses" : {
         |          "400" : {
         |            "description" : "Client error",
@@ -93,6 +83,16 @@ class WebhooksTest extends AnyWordSpec with Matchers {
         |            "description" : ""
         |          }
         |        },
+        |        "parameters" : [
+        |          {
+        |            "name" : "callbackURL",
+        |            "in" : "query",
+        |            "schema" : {
+        |              "type" : "string"
+        |            },
+        |            "required" : true
+        |          }
+        |        ],
         |        "callbacks" : {
         |          "message" : {
         |            "{$request.query.callbackURL}" : {

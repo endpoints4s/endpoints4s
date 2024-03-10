@@ -13,7 +13,7 @@ val `pekko-http-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "pekko-http-client",
-//      versionPolicyIntention := Compatibility.None,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
         "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
@@ -40,7 +40,7 @@ val `pekko-http-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "pekko-http-server",
-//      versionPolicyIntention := Compatibility.None,
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.apache.pekko" %% "pekko-http" % pekkoHttpVersion,
         "org.apache.pekko" %% "pekko-stream" % pekkoActorVersion % Provided,
