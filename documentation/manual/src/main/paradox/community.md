@@ -23,6 +23,7 @@ and open a pull request!
 
 Here is a list of organizations that use endpoints4s.
 
+- [Codacy](https://www.codacy.com/)
 - [Quine](https://quine.io/)
 - [Rivero](https://www.rivero.tech/)
 - [Simacan](https://www.simacan.com/)
