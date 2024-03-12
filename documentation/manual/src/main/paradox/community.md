@@ -24,6 +24,8 @@ and open a pull request!
 Here is a list of organizations that use endpoints4s.
 
 - [Bestmile](https://bestmile.com/)
+- [Quine](https://quine.io/)
 - [Rivero](https://www.rivero.tech/)
+- [Simacan](https://www.simacan.com/)
 
 Are you using endpoints4s? Please consider [adding your organization to the list](https://github.com/endpoints4s/endpoints4s/edit/master/documentation/manual/src/main/paradox/community.md).
