@@ -330,7 +330,7 @@ val `example-cqrs-commands` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       libraryDependencies ++= Seq(
-        "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.17.1" % Test,
         "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion % Test,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
@@ -372,7 +372,7 @@ val `example-cqrs` =
         "org.http4s" %% "http4s-blaze-server" % http4sVersion,
         "org.http4s" %% "http4s-async-http-client" % http4sVersion,
         "org.typelevel" %% "cats-effect-testing-scalatest" % "1.5.0" % Test,
-        "org.scalacheck" %% "scalacheck" % "1.17.0" % Test,
+        "org.scalacheck" %% "scalacheck" % "1.17.1" % Test,
         scalaTestDependency
       )
     )

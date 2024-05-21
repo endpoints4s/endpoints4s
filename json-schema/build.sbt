@@ -12,7 +12,7 @@ val `json-schema` =
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
         "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
-        "org.scalacheck" %%% "scalacheck" % "1.17.0" % Test,
+        "org.scalacheck" %%% "scalacheck" % "1.17.1" % Test,
         scalaTestDependency
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
