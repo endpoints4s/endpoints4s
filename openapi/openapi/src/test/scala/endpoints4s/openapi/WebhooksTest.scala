@@ -98,6 +98,7 @@ class WebhooksTest extends AnyWordSpec with Matchers {
         |            "{$request.query.callbackURL}" : {
         |              "post" : {
         |                "requestBody" : {
+        |                  "required" : true,
         |                  "content" : {
         |                    "application/json" : {
         |                      "schema" : {

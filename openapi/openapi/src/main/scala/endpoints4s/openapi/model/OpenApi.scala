@@ -327,6 +327,7 @@ object OpenApi {
 
   private def requestBodyJson(body: RequestBody): ujson.Value = {
     val result = ujson.Obj()
+    result.value.put("required", ujson.True)
     result.value.put("content", mapJson(body.content)(mediaTypeJson))
     body.description.foreach { description =>
       result.value.put("description", ujson.Str(description))

@@ -99,6 +99,7 @@ class ReferencedSchemaTest extends AnyWordSpec with Matchers {
         |          }
         |        },
         |        "requestBody" : {
+        |          "required" : true,
         |          "content" : {
         |            "application/json" : {
         |              "schema" : {
