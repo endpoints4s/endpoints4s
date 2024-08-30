@@ -43,6 +43,7 @@ class ArraysTest extends AnyWordSpec with Matchers {
         |    "/foo" : {
         |      "post" : {
         |        "requestBody" : {
+        |          "required" : true,
         |          "content" : {
         |            "application/json" : {
         |              "schema" : {
