@@ -29,8 +29,9 @@ trait EndpointsWithCustomErrors
     for (e <- endpoints) {
       val key = e.path
       val newValue = pathItems.get(key) match {
-        case Some(current) => PathItem(current.operations ++ e.item.operations)
-        case None          => PathItem(e.item.operations)
+        case Some(current) =>
+          PathItem(collection.immutable.ListMap(current.operations.toSeq: _*) ++ e.item.operations)
+        case None => PathItem(collection.immutable.ListMap(e.item.operations.toSeq: _*))
       }
       pathItems.update(key, newValue)
     }
