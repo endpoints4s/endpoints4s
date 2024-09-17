@@ -70,7 +70,13 @@ object OpenApi {
 
   private def mapJson[A](map: collection.Map[String, A])(f: A => ujson.Value): ujson.Obj = {
     val result = ujson.Obj()
-    map.foreach { case (k, v) => result.value.put(k, f(v)) }
+    //preserve order defined by user or sort by key to minimize diff
+    val stableMap = map match {
+      case map: collection.mutable.LinkedHashMap[String, A] => map
+      case map: collection.immutable.ListMap[String, A]     => map
+      case map                                              => map.toSeq.sortBy(_._1)
+    }
+    stableMap.foreach { case (k, v) => result.value.put(k, f(v)) }
     result
   }
 
