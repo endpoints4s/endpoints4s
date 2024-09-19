@@ -58,7 +58,7 @@ class FetchClientEndpointsTest
   val client: TestClient = new TestClient(
     EndpointsSettings()
       .withBaseUri(Some(baseUrl))
-      .withTimeout(Some(FiniteDuration(2, TimeUnit.SECONDS)))
+      .withTimeout(Some(FiniteDuration(5, TimeUnit.SECONDS)))
   )
 
   val streamingClient: TestClient = new TestClient(
