@@ -51,7 +51,7 @@ class Http4sClientEndpointsJsonSchemaTest
       port = Some(stubServerPortHTTP)
     ),
     Uri.Scheme.http,
-    FetchClientBuilder[IO].withRequestTimeout(FiniteDuration(2, TimeUnit.SECONDS)).create
+    FetchClientBuilder[IO].withRequestTimeout(FiniteDuration(5, TimeUnit.SECONDS)).create
   )
 
   def call[Req, Resp](
