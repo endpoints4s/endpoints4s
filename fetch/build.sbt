@@ -10,7 +10,7 @@ val `fetch-client` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client",
-      versionPolicyIntention := Compatibility.None,
+      //versionPolicyIntention := Compatibility.None,
       mimaBinaryIssueFilters ++= Seq(
         // Was private to Scala users
         ProblemFilters.exclude[DirectMissingMethodProblem](
@@ -54,7 +54,7 @@ val `fetch-client-circe` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "fetch-client-circe",
-      versionPolicyIntention := Compatibility.None,
+      //versionPolicyIntention := Compatibility.None,
       //disable coverage for scala.js: https://github.com/scoverage/scalac-scoverage-plugin/issues/196
       coverageEnabled := false,
       libraryDependencies += "io.circe" %%% "circe-parser" % circeVersion,
