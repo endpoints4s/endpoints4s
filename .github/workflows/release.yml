@@ -39,7 +39,7 @@ jobs:
       - run: sbt +publishSigned
       - run: sbt sonatypeBundleRelease
       - name: Build documentation
-        run: sbt "++ 2.13 manual/makeSite"
+        run: sbt ";++ 2.13; manual/makeSite"
       - name: Publish documentation
         uses: JamesIves/github-pages-deploy-action@v4
         with:
