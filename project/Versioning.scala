@@ -51,9 +51,9 @@ object Versioning {
           case Compatibility.BinaryCompatible => last.bumpMinor
           case Compatibility.BinaryAndSourceCompatible => last.bumpBugfix
         }
-      bumpedVersion.string + qualifier
+      bumpedVersion.unapply + qualifier
     } else {
-      last.string + "+n"
+      last.unapply + "+n"
     }
   }
 
