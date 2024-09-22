@@ -62,11 +62,11 @@ object EndpointsSettings {
   )
   val `scala 2.12 to 2.13` = Seq(
     scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.13.14", "2.12.19")
+    crossScalaVersions := Seq("2.13.14", "2.12.20")
   )
   val `scala 2.12 to dotty` = Seq(
     scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.13.14", "3.3.3", "2.12.19")
+    crossScalaVersions := Seq("2.13.14", "3.3.3", "2.12.20")
   )
 
   val publishSettings = commonSettings ++ Seq(
