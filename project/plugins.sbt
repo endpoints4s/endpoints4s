@@ -18,7 +18,7 @@ addSbtPlugin("com.github.sbt" % "sbt-release" % "1.4.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-site" % "1.5.0")
 addSbtPlugin("com.github.sbt" % "sbt-site-paradox" % "1.5.0")
-addSbtPlugin("io.github.jonas" % "sbt-paradox-material-theme" % "0.6.0")
+addSbtPlugin("com.github.sbt" % "sbt-paradox-material-theme" % "0.7.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
 
