@@ -74,6 +74,20 @@ trait JsonEntitiesFromSchemasTestSuite[
           )
         }
 
+        // Valid URL, empty entity with no content-type
+        whenReady(
+          sendAndDecodeEntityAsText(
+            HttpRequest(HttpMethods.PUT, s"http://localhost:$port/user/42")
+              .withEntity(ContentTypes.NoContentType, "".getBytes)
+          )
+        ) { case (response, entity) =>
+          print(response)
+          assert(response.status.intValue() == 400)
+          ujson.read(entity) shouldBe ujson.Arr(
+            ujson.Str("Invalid JSON document")
+          )
+        }
+
         // Valid URL and invalid entity (2)
         whenReady(
           sendAndDecodeEntityAsText(
