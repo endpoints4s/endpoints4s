@@ -1,6 +1,6 @@
 val sbtCrossProjectVersion = "1.2.0"
 
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.2")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.4")
 
 libraryDependencies += "org.scala-js" %% "scalajs-env-jsdom-nodejs" % "1.1.0"
 libraryDependencies += "org.scala-js" %% "scalajs-env-selenium" % "1.1.1"
