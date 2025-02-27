@@ -413,7 +413,7 @@ val `example-basic-http4s-server` =
       noPublishSettings,
       `scala 2.12 to 2.13`,
       publishArtifact := false,
-      libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.13",
+      libraryDependencies += "org.slf4j" % "slf4j-simple" % "2.0.17",
       libraryDependencies += "org.http4s" %%% "http4s-blaze-server" % http4sVersion,
       libraryDependencies += "org.http4s" %% "http4s-circe" % http4sVersion
     )
