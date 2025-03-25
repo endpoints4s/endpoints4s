@@ -26,6 +26,8 @@ jobs:
           cache: sbt
           gpg-private-key: ${{ secrets.PGP_SECRET }}
           gpg-passphrase: PGP_PASSPHRASE
+      - name: Install sbt
+        uses: sbt/setup-sbt@v1
       - run: npm install jsdom@12.2.0
       - run: sudo apt-get install graphviz
       - name: Set version qualifier
