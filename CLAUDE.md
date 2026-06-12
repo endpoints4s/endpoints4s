@@ -21,10 +21,10 @@ This is the central abstraction; understanding it is essential to working in thi
 
 - **Interpreters** are concrete `trait` implementations that fix those abstract types and methods to
   a particular meaning:
-  - **Server interpreters** (`pekko-http/server`, `http4s/server`, `akka-http/server`): an
+  - **Server interpreters** (`pekko-http/server`, `http4s/server`): an
     `Endpoint[A, B]` becomes a request handler `(A => B) => Route`.
-  - **Client interpreters** (`sttp/client`, `http4s/client`, `xhr/client`, `fetch/client`,
-    `pekko-http/client`, `akka-http/client`): an `Endpoint[A, B]` becomes a function `A => Result[B]`.
+  - **Client interpreters** (`sttp/client`, `http4s/client`, `fetch/client`,
+    `pekko-http/client`): an `Endpoint[A, B]` becomes a function `A => Result[B]`.
   - **Documentation interpreters** (`openapi/`): an `Endpoint[A, B]` becomes an OpenAPI `Item`.
 
   A user mixes the algebra trait and an interpreter trait together; the same endpoint definitions
@@ -42,11 +42,9 @@ algebras/        Algebra interfaces (algebra, algebra-circe, algebra-playjson) +
 json-schema/     JsonSchemas algebra + circe / playjson / generic derivation interpreters + utility
 openapi/         Interpreter generating OpenAPI documentation
 pekko-http/      Pekko-http based client and server interpreters
-akka-http/       Akka-http based client and server interpreters
 http4s/          http4s based client and server interpreters
 sttp/            sttp based client interpreter
-xhr/             Scala.js client interpreters based on XMLHttpRequest
-fetch/           Scala.js client interpreters based on Fetch
+fetch/           Scala.js client interpreter based on Fetch
 stub-server/     HTTP server used by client interpreter tests (must be running for client tests)
 documentation/   User manual (paradox) and runnable examples
 sbt-assets/      Sbt plugin for asset handling
