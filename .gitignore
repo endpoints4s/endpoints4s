@@ -16,3 +16,6 @@ project/metals.sbt
 .envrc
 shell.nix
 nix
+
+# Claude Code
+.claude/
