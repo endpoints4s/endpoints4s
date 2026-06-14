@@ -26,7 +26,7 @@ addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.8.0")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.2.0")
 
-addSbtPlugin("com.github.sbt" % "sbt-boilerplate" % "0.7.0")
+addSbtPlugin("com.github.sbt" % "sbt-boilerplate" % "0.8.0")
 
 lazy val `sbt-assets` = RootProject(file("../sbt-assets"))
 
