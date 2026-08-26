@@ -10,7 +10,8 @@ final class OpenApi private (
     val info: Info,
     private val innerPaths: collection.Map[String, PathItem],
     val components: Components,
-    val servers: Seq[Server]
+    val servers: Seq[Server],
+    val externalDocs: Option[ExternalDocumentationObject]
 ) extends Serializable {
 
   def paths: Map[String, PathItem] = innerPaths.toMap
@@ -21,11 +22,11 @@ final class OpenApi private (
   override def equals(other: Any): Boolean =
     other match {
       case that: OpenApi =>
-        info == that.info && paths == that.paths && components == that.components && servers == that.servers
+        info == that.info && paths == that.paths && components == that.components && servers == that.servers && externalDocs == that.externalDocs
       case _ => false
     }
 
-  override def hashCode(): Int = Hashing.hash(info, paths, components, servers)
+  override def hashCode(): Int = Hashing.hash(info, paths, components, servers, externalDocs)
 
   val tags: Set[Tag] = OpenApi.extractTags(innerPaths)
 
@@ -33,9 +34,10 @@ final class OpenApi private (
       info: Info = info,
       paths: collection.Map[String, PathItem] = innerPaths,
       components: Components = components,
-      servers: Seq[Server] = servers
+      servers: Seq[Server] = servers,
+      externalDocs: Option[ExternalDocumentationObject] = externalDocs
   ): OpenApi =
-    new OpenApi(info, paths, components, servers)
+    new OpenApi(info, paths, components, servers, externalDocs)
 
   def withInfo(info: Info): OpenApi =
     copy(info = info)
@@ -48,6 +50,9 @@ final class OpenApi private (
 
   def withServers(servers: Seq[Server]): OpenApi =
     copy(servers = servers)
+
+  def withExternalDocs(externalDocs: Option[ExternalDocumentationObject]): OpenApi =
+    copy(externalDocs = externalDocs)
 }
 
 object OpenApi {
@@ -55,10 +60,10 @@ object OpenApi {
   val openApiVersion = "3.0.0"
 
   def apply(info: Info, paths: Map[String, PathItem], components: Components): OpenApi =
-    new OpenApi(info, paths, components, Nil)
+    new OpenApi(info, paths, components, Nil, None)
 
   def apply(info: Info, paths: collection.Map[String, PathItem], components: Components): OpenApi =
-    new OpenApi(info, paths, components, Nil)
+    new OpenApi(info, paths, components, Nil, None)
 
   def apply(
       info: Info,
@@ -66,7 +71,7 @@ object OpenApi {
       components: Components,
       servers: Seq[Server]
   ): OpenApi =
-    new OpenApi(info, paths, components, servers)
+    new OpenApi(info, paths, components, servers, None)
 
   private def mapJson[A](map: collection.Map[String, A])(f: A => ujson.Value): ujson.Obj = {
     val result = ujson.Obj()
@@ -408,6 +413,9 @@ object OpenApi {
       val result = ujson.Obj()
       result.value.put("openapi", ujson.Str(openApiVersion))
       result.value.put("info", infoJson(openApi.info))
+      for (externalDocs <- openApi.externalDocs) {
+        result.value.put("externalDocs", externalDocumentationObjectJson(externalDocs))
+      }
       result.value.put("paths", pathsJson(openApi.innerPaths))
 
       if (openApi.servers.nonEmpty) {
