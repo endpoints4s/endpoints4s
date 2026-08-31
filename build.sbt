@@ -1,5 +1,4 @@
 import EndpointsSettings._
-import xerial.sbt.Sonatype.GitHubHosting
 
 // Algebra interfaces
 val algebras = project.in(file("algebras")).settings(noPublishSettings)
@@ -23,15 +22,33 @@ noPublishSettings
 
 ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
-ThisBuild / publishTo := sonatypePublishToBundle.value
-
 Global / onChangedBuildSource := ReloadOnSourceChanges
 
 Global / excludeLintKeys += coverageEnabled
 
-ThisBuild / sonatypeProjectHosting := Some(
-  GitHubHosting("endpoints4s", "endpoints4s", "julien@richard-foy.fr")
+ThisBuild / scmInfo := Some(
+  ScmInfo(
+    url("https://github.com/endpoints4s/endpoints4s"),
+    "scm:git@github.com:endpoints4s/endpoints4s.git"
+  )
 )
+ThisBuild / developers := List(
+  Developer(
+    id = "endpoints4s",
+    name = "endpoints4s",
+    email = "julien@richard-foy.fr",
+    url = url("https://github.com/endpoints4s")
+  )
+)
+// Remove all additional repository other than Maven Central from POM
+ThisBuild / pomIncludeRepository := { _ => false }
+ThisBuild / publishMavenStyle := true
+
+ThisBuild / publishTo := {
+  val centralSnapshots = "https://central.sonatype.com/repository/maven-snapshots/"
+  if (isSnapshot.value) Some("central-snapshots" at centralSnapshots)
+  else localStaging.value
+}
 
 // Set the default version so that it is pushed as a tag by sbt-release.
 ThisBuild / version := (LocalProject("algebraJVM") / version).value
