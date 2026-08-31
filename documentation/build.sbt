@@ -2,7 +2,6 @@ import EndpointsSettings._
 import LocalCrossProject._
 import sbtcrossproject.CrossProject
 import sbtcrossproject.CrossPlugin.autoImport.{CrossType, crossProject}
-import xerial.sbt.Sonatype.GitHubHosting
 import com.lightbend.paradox.markdown.Writer
 
 val `algebra-jvm` = LocalProject("algebraJVM")
@@ -90,8 +89,7 @@ val manual =
       ghpagesBranch := "master",
       Compile / paradoxMaterialTheme := {
         val theme = (Compile / paradoxMaterialTheme).value
-        val repository =
-          (ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl.toURI
+        val repository = scmInfo.value.get.browseUrl.toURI
         theme
           .withRepository(repository)
           .withSocial(repository)
@@ -104,7 +102,7 @@ val manual =
         "pekko-version" -> pekkoActorVersion,
         "pekko-http-version" -> pekkoHttpVersion,
         "scaladoc.base_url" -> s".../${(packageDoc / siteSubdirName).value}",
-        "github.base_url" -> s"${(ThisBuild / sonatypeProjectHosting).value.get.scmInfo.browseUrl}/blob/v${version.value}"
+        "github.base_url" -> s"${scmInfo.value.get.browseUrl}/blob/v${version.value}"
       ),
       paradoxDirectives += ((_: Writer.Context) =>
         org.endpoints4s.paradox.coordinates.CoordinatesDirective
