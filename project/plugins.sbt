@@ -35,4 +35,4 @@ ThisBuild / ivyLoggingLevel := UpdateLogging.Quiet
 
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % "always"
 
-addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "3.2.1")
+addSbtPlugin("ch.epfl.scala" % "sbt-version-policy" % "3.3.0")
