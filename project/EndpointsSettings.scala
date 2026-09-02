@@ -76,14 +76,6 @@ object EndpointsSettings {
   )
 
   val publishSettings = commonSettings ++ Seq(
-    pomExtra :=
-      <developers>
-        <developer>
-          <id>julienrf</id>
-          <name>Julien Richard-Foy</name>
-          <url>http://julien.richard-foy.fr</url>
-        </developer>
-      </developers>,
     apiURL := Some(
       url(s"http://endpoints4s.github.io/api")
     ),
