@@ -23,7 +23,7 @@ addSbtPlugin("com.github.sbt" % "sbt-unidoc" % "0.5.0")
 
 addSbtPlugin("com.github.sbt" % "sbt-ghpages" % "0.8.0")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.3.1")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "2.4.4")
 
 addSbtPlugin("com.github.sbt" % "sbt-boilerplate" % "0.7.0")
 
