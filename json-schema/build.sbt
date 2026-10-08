@@ -56,12 +56,9 @@ lazy val `json-schema-generic` =
       libraryDependencies ++= {
         val commonDependencies = Seq(scalaTestDependency)
         // Scala Native artifacts are only published since shapeless 2.3.12 and shapeless3-deriving 3.4.3
-        val isNative = crossProjectPlatform.value == NativePlatform
         val shapelessDependency =
-          if (scalaVersion.value.startsWith("2."))
-            "com.chuusai" %%% "shapeless" % (if (isNative) "2.3.12" else "2.3.10")
-          else
-            "org.typelevel" %%% "shapeless3-deriving" % (if (isNative) "3.6.0" else "3.0.4")
+          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.13"
+          else "org.typelevel" %%% "shapeless3-deriving" % "3.6.0"
         shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
