@@ -459,7 +459,8 @@ class JsonSchemasTest extends AnyFreeSpec {
   }
 
   "uuid" in {
-    val uuid = UUID.randomUUID()
+    // `UUID.randomUUID()` needs `SecureRandom`, which is not available on Scala Native
+    val uuid = new UUID(scala.util.Random.nextLong(), scala.util.Random.nextLong())
     checkRoundTrip(
       uuidJsonSchema,
       ujson.Str(uuid.toString),

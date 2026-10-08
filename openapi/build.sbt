@@ -9,7 +9,7 @@ import com.typesafe.tools.mima.core.{
 }
 
 lazy val openapi =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("openapi"))
     .settings(
@@ -21,13 +21,19 @@ lazy val openapi =
       libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion,
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .dependsOnLocalCrossProjects("algebra", "json-schema")
-    .dependsOnLocalCrossProjectsWithScope(
+    .dependsOnLocalCrossProjectsWithNative("algebra", "json-schema")
+    .dependsOnLocalCrossProjectsWithScopeWithNative(
       "algebra-testkit" -> Test,
-      "json-schema-testkit" -> Test,
-      "json-schema-generic" -> Test
+      "json-schema-testkit" -> Test
     )
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .jsConfigure(_.dependsOn(LocalProject("json-schema-genericJS") % Test))
+    .jvmConfigure(_.dependsOn(LocalProject("json-schema-genericJVM") % Test))
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
+    .nativeSettings(
+      // json-schema-generic is not available for Scala Native
+      Test / unmanagedSources / excludeFilter := "ReferencedSchemaTest.scala" || "StableJsonTest.scala"
+    )
 
 lazy val `openapi-js` = openapi.js
 lazy val `openapi-jvm` = openapi.jvm
+lazy val `openapi-native` = openapi.native
