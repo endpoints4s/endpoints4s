@@ -26,14 +26,11 @@ lazy val openapi =
       "algebra-testkit" -> Test,
       "json-schema-testkit" -> Test
     )
-    .jsConfigure(_.dependsOn(LocalProject("json-schema-genericJS") % Test))
-    .jvmConfigure(_.dependsOn(LocalProject("json-schema-genericJVM") % Test))
+    .dependsOnLocalCrossProjectsWithScopeWithNative("json-schema-generic" -> Test)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
     .nativeSettings(
       // `UUID.randomUUID()` needs `SecureRandom`, which this provides on top of openssl
       libraryDependencies += "com.github.lolgab" %%% "scala-native-crypto" % "0.4.0" % Test,
-      // json-schema-generic is not available for Scala Native
-      Test / unmanagedSources / excludeFilter := "ReferencedSchemaTest.scala" || "StableJsonTest.scala"
     )
 
 lazy val `openapi-js` = openapi.js
