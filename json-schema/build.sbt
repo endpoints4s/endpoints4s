@@ -46,7 +46,7 @@ val `json-schema-testkit-jvm` = `json-schema-testkit`.jvm
 val `json-schema-testkit-native` = `json-schema-testkit`.native
 
 lazy val `json-schema-generic` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema-generic"))
     .settings(
@@ -55,9 +55,10 @@ lazy val `json-schema-generic` =
       name := "json-schema-generic",
       libraryDependencies ++= {
         val commonDependencies = Seq(scalaTestDependency)
+        // Scala Native artifacts are only published since shapeless 2.3.12 and shapeless3-deriving 3.4.3
         val shapelessDependency =
-          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.10"
-          else "org.typelevel" %%% "shapeless3-deriving" % "3.0.4"
+          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.13"
+          else "org.typelevel" %%% "shapeless3-deriving" % "3.6.0"
         shapelessDependency +: commonDependencies
       },
       (Test / boilerplateSource) := baseDirectory.value / ".." / "src" / "test" / "boilerplate",
@@ -65,14 +66,18 @@ lazy val `json-schema-generic` =
                                 else Seq("-Yretain-trees"))
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
-    .dependsOnLocalCrossProjects("json-schema")
-    .dependsOnLocalCrossProjectsWithScope(
-      "json-schema-circe" -> Test
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
+    .dependsOnLocalCrossProjectsWithNative("json-schema")
+    // json-schema-circe is not available for Scala Native
+    .jsConfigure(_.dependsOn(LocalProject("json-schema-circeJS") % Test))
+    .jvmConfigure(_.dependsOn(LocalProject("json-schema-circeJVM") % Test))
+    .nativeSettings(
+      Test / unmanagedSources / excludeFilter := "JsonSchemasCirceTest.scala"
     )
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
+lazy val `json-schema-generic-native` = `json-schema-generic`.native
 
 lazy val `json-schema-circe` =
   crossProject(JSPlatform, JVMPlatform)
