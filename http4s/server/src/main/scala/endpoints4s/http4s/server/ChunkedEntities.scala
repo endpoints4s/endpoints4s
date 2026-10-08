@@ -91,7 +91,9 @@ trait ChunkedJsonEntities
           case Some((head, tail)) =>
             val (pull, newBuffer) = buffer
               .append(head.iterator.mkString)
-              .foldLeft((Pull.output(Chunk.empty[String]), new StringBuilder)) {
+              .foldLeft[(Pull[Effect, String, Unit], StringBuilder)](
+                (Pull.output(Chunk.empty[String]), new StringBuilder)
+              ) {
                 case ((pullAcc, tmpBuffer), char) =>
                   if (char == '\n') {
                     (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)

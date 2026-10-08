@@ -105,6 +105,8 @@ object EndpointsSettings {
   val pekkoActorVersion = "1.0.3"
   val pekkoHttpVersion = "1.0.1"
   val http4sVersion = "0.23.6"
+  // http4s-server needs a version published for Scala Native
+  val http4sServerVersion = "0.23.38"
   val http4sDomVersion = "0.2.3"
   val ujsonVersion = "3.3.1"
 
