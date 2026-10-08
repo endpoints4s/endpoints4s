@@ -1,5 +1,6 @@
 import EndpointsSettings._
 import LocalCrossProject._
+import sbtversionpolicy.Compatibility
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
@@ -20,7 +21,8 @@ val `http4s-server` =
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      // versionPolicyIntention := Compatibility.None,
+      // http4s was upgraded from 0.23.6 to a version available for Scala Native
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
         "org.http4s" %%% "http4s-core" % http4sServerVersion,
         "org.http4s" %%% "http4s-dsl" % http4sServerVersion

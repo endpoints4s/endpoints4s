@@ -93,13 +93,12 @@ trait ChunkedJsonEntities
               .append(head.iterator.mkString)
               .foldLeft[(Pull[Effect, String, Unit], StringBuilder)](
                 (Pull.output(Chunk.empty[String]), new StringBuilder)
-              ) {
-                case ((pullAcc, tmpBuffer), char) =>
-                  if (char == '\n') {
-                    (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)
-                  } else {
-                    (pullAcc, tmpBuffer.append(char))
-                  }
+              ) { case ((pullAcc, tmpBuffer), char) =>
+                if (char == '\n') {
+                  (pullAcc >> Pull.output(Chunk(tmpBuffer.toString())), new StringBuilder)
+                } else {
+                  (pullAcc, tmpBuffer.append(char))
+                }
               }
             pull >> go(tail, newBuffer, firstChunk = false)
           case None =>
