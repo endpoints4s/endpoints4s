@@ -64,9 +64,7 @@ ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+
 ThisBuild / libraryDependencySchemes ++= Seq(
   "org.log4s" %%% "log4s" % "semver-spec",
   // Its version (`<scala version>+<Scala.js version>`) changes with every Scala.js update
-  "org.scala-js" %% "scalajs-scalalib" % "always",
-  // Scala 3 projects use the 2.13 artifact
-  "org.scala-js" % "scalajs-scalalib_2.13" % "always",
+  ("org.scala-js" %% "scalajs-scalalib" % "always").cross(CrossVersion.for3Use2_13),
   // Transitive dependency of scala-java-time-tzdb, only used by the testkits
   "io.github.cquiroz" %% "cldr-api_sjs1" % "always"
 )
