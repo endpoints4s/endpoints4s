@@ -62,7 +62,11 @@ ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
 ThisBuild / libraryDependencySchemes ++= Seq(
-  "org.log4s" %%% "log4s" % "semver-spec"
+  "org.log4s" %%% "log4s" % "semver-spec",
+  // Its version (`<scala version>+<Scala.js version>`) changes with every Scala.js update
+  ("org.scala-js" %% "scalajs-scalalib" % "always").cross(CrossVersion.for3Use2_13),
+  // Transitive dependency of scala-java-time-tzdb, only used by the testkits
+  "io.github.cquiroz" %% "cldr-api_sjs1" % "always"
 )
 
 import ReleaseTransformations._

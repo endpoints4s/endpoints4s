@@ -11,8 +11,8 @@ val `json-schema` =
       publishSettings,
       name := "algebra-json-schema",
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.7.0",
-        "org.scalacheck" %%% "scalacheck" % "1.17.0" % Test,
+        "org.scala-lang.modules" %%% "scala-collection-compat" % "2.12.0",
+        "org.scalacheck" %%% "scalacheck" % "1.18.1" % Test,
         scalaTestDependency
       ),
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
@@ -34,8 +34,8 @@ val `json-schema-testkit` =
       name := "algebra-json-schema-testkit",
       libraryDependencies ++= Seq(
         "org.scalatest" %%% "scalatest" % scalaTestVersion,
-        "io.github.cquiroz" %%% "scala-java-time" % "2.4.0",
-        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.4.0"
+        "io.github.cquiroz" %%% "scala-java-time" % "2.6.0",
+        "io.github.cquiroz" %%% "scala-java-time-tzdb" % "2.6.0"
       )
     )
     .dependsOn(`json-schema`)
