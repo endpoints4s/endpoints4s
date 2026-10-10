@@ -18,19 +18,18 @@ lazy val openapi =
       name := "openapi",
       // versionPolicyIntention := Compatibility.None,
       (Compile / boilerplateSource) := (Compile / baseDirectory).value / ".." / "src" / "main" / "boilerplate",
-      libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion,
+      libraryDependencies += "com.lihaoyi" %%% "ujson" % ujsonVersion
     )
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .dependsOnLocalCrossProjectsWithNative("algebra", "json-schema")
     .dependsOnLocalCrossProjectsWithScopeWithNative(
       "algebra-testkit" -> Test,
-      "json-schema-testkit" -> Test
+      "json-schema-testkit" -> Test,
+      "json-schema-generic" -> Test
     )
-    .dependsOnLocalCrossProjectsWithScopeWithNative("json-schema-generic" -> Test)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
     .nativeSettings(
-      // `UUID.randomUUID()` needs `SecureRandom`, which this provides on top of openssl
-      libraryDependencies += "com.github.lolgab" %%% "scala-native-crypto" % "0.4.0" % Test,
+      libraryDependencies += "com.github.lolgab" %%% "scala-native-crypto" % "0.4.0" % Test
     )
 
 lazy val `openapi-js` = openapi.js
