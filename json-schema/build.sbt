@@ -55,7 +55,6 @@ lazy val `json-schema-generic` =
       name := "json-schema-generic",
       libraryDependencies ++= {
         val commonDependencies = Seq(scalaTestDependency)
-        // Scala Native artifacts are only published since shapeless 2.3.12 and shapeless3-deriving 3.4.3
         val shapelessDependency =
           if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.13"
           else "org.typelevel" %%% "shapeless3-deriving" % "3.6.0"
@@ -68,19 +67,14 @@ lazy val `json-schema-generic` =
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
     .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
     .dependsOnLocalCrossProjectsWithNative("json-schema")
-    // json-schema-circe is not available for Scala Native
-    .jsConfigure(_.dependsOn(LocalProject("json-schema-circeJS") % Test))
-    .jvmConfigure(_.dependsOn(LocalProject("json-schema-circeJVM") % Test))
-    .nativeSettings(
-      Test / unmanagedSources / excludeFilter := "JsonSchemasCirceTest.scala"
-    )
+    .dependsOnLocalCrossProjectsWithScopeWithNative("json-schema-circe" -> Test)
 
 lazy val `json-schema-generic-js` = `json-schema-generic`.js
 lazy val `json-schema-generic-jvm` = `json-schema-generic`.jvm
 lazy val `json-schema-generic-native` = `json-schema-generic`.native
 
 lazy val `json-schema-circe` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("json-schema-circe"))
     .settings(
@@ -90,18 +84,19 @@ lazy val `json-schema-circe` =
       libraryDependencies += "io.circe" %%% "circe-core" % circeVersion,
       (Compile / boilerplateSource) := baseDirectory.value / ".." / "src" / "main" / "boilerplate"
     )
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
     .enablePlugins(spray.boilerplate.BoilerplatePlugin)
-    .dependsOnLocalCrossProjects(
+    .dependsOnLocalCrossProjectsWithNative(
       "algebra-circe", // Needed only because of CirceCodec, but that class doesn’t depend on the algebra
       "json-schema"
     )
-    .dependsOnLocalCrossProjectsWithScope(
+    .dependsOnLocalCrossProjectsWithScopeWithNative(
       "json-schema-testkit" -> Test
     )
 
 lazy val `json-schema-circe-js` = `json-schema-circe`.js
 lazy val `json-schema-circe-jvm` = `json-schema-circe`.jvm
+lazy val `json-schema-circe-native` = `json-schema-circe`.native
 
 lazy val `json-schema-playjson` =
   crossProject(JSPlatform, JVMPlatform)
