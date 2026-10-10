@@ -59,6 +59,11 @@ ThisBuild / version := (LocalProject("algebraJVM") / version).value
 // interpreter modules may override this setting.
 ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
+ThisBuild / versionPolicyIgnored ++= Seq(
+  "org.scala-native" % "scalalib_native0.5_2.12",
+  "org.scala-native" % "scalalib_native0.5_2.13",
+  "org.scala-native" % "scala3lib_native0.5_3"
+)
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
 ThisBuild / libraryDependencySchemes ++= Seq(
