@@ -12,7 +12,7 @@ val `pekko-http-client` = LocalProject("pekko-http-client")
 val `pekko-http-server` = LocalProject("pekko-http-server")
 
 val `http4s-client-jvm` = LocalProject("http4s-clientJVM")
-val `http4s-server` = LocalProject("http4s-server")
+val `http4s-server` = LocalProject("http4s-serverJVM")
 
 val `xhr-client` = LocalProject("xhr-client")
 val `xhr-client-circe` = LocalProject("xhr-client-circe")

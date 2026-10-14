@@ -537,7 +537,7 @@ trait JsonSchemas extends algebra.NoDocsJsonSchemas with TuplesSchemas {
         case ujson.Obj(items) =>
           val builder = Map.newBuilder[String, A]
           builder.sizeHint(items)
-          items
+          items.iterator
             .map { case (name, value) =>
               jsonSchema.decoder.decode(value).map((name, _))
             }
