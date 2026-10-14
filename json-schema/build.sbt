@@ -56,7 +56,7 @@ lazy val `json-schema-generic` =
       libraryDependencies ++= {
         val commonDependencies = Seq(scalaTestDependency)
         val shapelessDependency =
-          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.10"
+          if (scalaVersion.value.startsWith("2.")) "com.chuusai" %%% "shapeless" % "2.3.13"
           else "org.typelevel" %%% "shapeless3-deriving" % "3.0.4"
         shapelessDependency +: commonDependencies
       },
