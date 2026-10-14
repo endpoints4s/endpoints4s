@@ -12,12 +12,7 @@ object Versioning {
     * @param scalaFullVersion   Scala full version
     * @return The latest stable release of the module.
     */
-  def lastVersion(module: String, providedCrossVersion: CrossVersion, scalaBinaryVersion: String, scalaFullVersion: String): String = {
-    // temporary hack for the native-0.4 -> native-0.5 transition
-    val crossVersion = providedCrossVersion match {
-      case native05: CrossVersion.Binary if native05.prefix == "native0.5_" => native05.withPrefix("native0.4_")
-      case other => other
-    }
+  def lastVersion(module: String, crossVersion: CrossVersion, scalaBinaryVersion: String, scalaFullVersion: String): String = {
     val artifactName =
       CrossVersion(crossVersion, scalaFullVersion, scalaBinaryVersion)
         .getOrElse(sys.error(s"Unable to compute the artifact name of the module ${module}"))
