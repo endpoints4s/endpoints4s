@@ -132,8 +132,12 @@ trait JsonSchemas extends algebra.JsonSchemas:
       case (EmptyTuple, EmptyTuple) =>
         emptyRecord.xmap(_ => EmptyTuple)(_ => ()).asInstanceOf[Record[Types]]
       case _: (head *: tail, labelHead *: labelsTail) =>
+        // Both matches cover all of `Tuple`, so nothing is lost by turning the exhaustivity check
+        // off. With it on, the checker decomposes every element type of the tuple in each of the
+        // inlined copies of this method, and since Scala 3.8 (whose standard library carries TASTy)
+        // that makes a single `genericRecord` call take more than a minute to compile.
         val (maybeDoc, docsTail) =
-          /*inline*/ docAnnotations match
+          (docAnnotations: @unchecked) match
             case docHead *: docsTail =>
               // TODO Remove asInstanceOf, but the compiler crashes if the above line is `case (docHead: Option[docs]) *: docsTail`
               (docHead.asInstanceOf[Option[docs]].map(_.text), docsTail)
@@ -141,7 +145,7 @@ trait JsonSchemas extends algebra.JsonSchemas:
               // Should not happen if Docs has the same length as Types and Labels
               (None, EmptyTuple)
         val (maybeDefaultValue, defaultValuesTail) =
-          /*inline*/ defaultValues match
+          (defaultValues: @unchecked) match
             case defaultValueHead *: defaultValuesTail =>
               // TODO Remove asInstanceOf
               (defaultValueHead.asInstanceOf[Option[head]], defaultValuesTail)
