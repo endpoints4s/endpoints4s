@@ -57,16 +57,21 @@ ThisBuild / version := (LocalProject("algebraJVM") / version).value
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
-ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
+ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
 ThisBuild / libraryDependencySchemes ++= Seq(
-  "org.log4s" %%% "log4s" % "semver-spec",
+  "org.log4s" %%% "log4s" % "semver-spec"
+)
+
+ThisBuild / versionPolicyIgnored ++= Seq(
   // Its version (`<scala version>+<Scala.js version>`) changes with every Scala.js update
-  ("org.scala-js" %% "scalajs-scalalib" % "always").cross(CrossVersion.for3Use2_13),
-  // Transitive dependency of scala-java-time-tzdb, only used by the testkits
-  "io.github.cquiroz" %% "cldr-api_sjs1" % "always"
+  "org.scala-js" %% "scalajs-scalalib",
+  // Its version (`<scala version>+<Scala Native version>`) changes with every Scala Native update
+  "org.scala-native" % "scalalib_native0.5_2.13",
+  "org.scala-native" % "scalalib_native0.5_2.12",
+  "org.scala-native" % "scala3lib_native0.5_3",
 )
 
 import ReleaseTransformations._
