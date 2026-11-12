@@ -1,5 +1,6 @@
 import EndpointsSettings._
 import LocalCrossProject._
+import sbtversionpolicy.Compatibility
 
 val `algebra-jvm` = LocalProject("algebraJVM")
 val `algebra-testkit-jvm` = LocalProject("algebra-testkitJVM")
@@ -13,25 +14,41 @@ val `json-schema-circe-js` = LocalProject("json-schema-circeJS")
 val `openapi-js` = LocalProject("openapiJS")
 
 val `http4s-server` =
-  project
+  crossProject(JVMPlatform, NativePlatform)
+    .crossType(CrossType.Pure)
     .in(file("server"))
     .settings(
       publishSettings,
       `scala 2.12 to dotty`,
       name := "http4s-server",
-      // versionPolicyIntention := Compatibility.None,
+      // http4s was upgraded from 0.23.6 to a version available for Scala Native
+      versionPolicyIntention := Compatibility.None,
       libraryDependencies ++= Seq(
-        "org.http4s" %% "http4s-core" % http4sVersion,
-        "org.http4s" %% "http4s-dsl" % http4sVersion,
-        "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test
+        "org.http4s" %%% "http4s-core" % http4sServerVersion,
+        "org.http4s" %%% "http4s-dsl" % http4sServerVersion
       )
     )
-    .dependsOn(
-      `algebra-jvm`,
-      `openapi-jvm`,
-      `algebra-testkit-jvm` % Test,
-      `algebra-circe-testkit-jvm` % Test
+    .jvmConfigure(_.dependsOn(`algebra-jvm`, `openapi-jvm`))
+    .nativeConfigure(
+      _.dependsOn(LocalProject("algebraNative"), LocalProject("openapiNative"))
     )
+    .jvmSettings(
+      libraryDependencies += "org.http4s" %% "http4s-blaze-server" % http4sVersion % Test
+    )
+    .jvmConfigure(
+      _.dependsOn(
+        `algebra-testkit-jvm` % Test,
+        `algebra-circe-testkit-jvm` % Test
+      )
+    )
+    .nativeConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .nativeSettings(
+      // the tests need blaze, which is not available for Scala Native
+      Test / unmanagedSources / excludeFilter := AllPassFilter
+    )
+
+val `http4s-server-jvm` = `http4s-server`.jvm
+val `http4s-server-native` = `http4s-server`.native
 
 val `http4s-client` =
   crossProject(JSPlatform, JVMPlatform)
