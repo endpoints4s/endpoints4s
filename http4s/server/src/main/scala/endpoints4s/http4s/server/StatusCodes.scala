@@ -3,6 +3,8 @@ package endpoints4s.http4s.server
 import endpoints4s.algebra
 import org.http4s.{Status => Http4sStatus}
 
+import scala.annotation.nowarn
+
 /** [[algebra.StatusCodes]] interpreter that decodes and encodes methods.
   *
   * @group interpreters
@@ -45,6 +47,9 @@ trait StatusCodes extends algebra.StatusCodes {
   override def RangeNotSatisfiable = Http4sStatus.RangeNotSatisfiable
   override def ExpectationFailed = Http4sStatus.ExpectationFailed
   override def MisdirectedRequest = Http4sStatus.MisdirectedRequest
+  // Deprecated in http4s 0.23.31 in favor of `UnprocessableContent`, which doesn't exist in older
+  // versions that users of this module may still run with
+  @nowarn("cat=deprecation")
   override def UnprocessableEntity = Http4sStatus.UnprocessableEntity
   override def Locked = Http4sStatus.Locked
   override def FailedDependency = Http4sStatus.FailedDependency
