@@ -62,7 +62,11 @@ ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
 ThisBuild / versionPolicyIgnored ++= Seq(
   "org.scala-native" % "scalalib_native0.5_2.12",
   "org.scala-native" % "scalalib_native0.5_2.13",
-  "org.scala-native" % "scala3lib_native0.5_3"
+  "org.scala-native" % "scala3lib_native0.5_3",
+  // New transitive dependency (via cats-core) of the circe version required by Scala Native
+  "org.typelevel" % "simulacrum-scalafix-annotations_2.12",
+  "org.typelevel" % "simulacrum-scalafix-annotations_2.13",
+  "org.typelevel" % "simulacrum-scalafix-annotations_3"
 )
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
