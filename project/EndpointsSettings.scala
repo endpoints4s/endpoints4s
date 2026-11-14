@@ -55,24 +55,19 @@ object EndpointsSettings {
     },
     // Remove scala-compiler dependency automatically added by the sbt-heroku plugin
     libraryDependencies -= "org.scala-lang" % "scala-compiler" % scalaVersion.value % Runtime,
-    coverageScalacPluginVersion := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, n)) if n >= 13 => "2.2.0"
-        case _                       => "2.5.2"
-      }
-    }
+    coverageScalacPluginVersion := "2.5.2"
   )
   val `scala 2.13` = Seq(
-    scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.13.14")
+    scalaVersion := "2.13.18",
+    crossScalaVersions := Seq("2.13.18")
   )
   val `scala 2.12 to 2.13` = Seq(
-    scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.13.14", "2.12.19")
+    scalaVersion := "2.13.18",
+    crossScalaVersions := Seq("2.13.18", "2.12.19")
   )
   val `scala 2.12 to dotty` = Seq(
-    scalaVersion := "2.13.14",
-    crossScalaVersions := Seq("2.13.14", "3.3.3", "2.12.19")
+    scalaVersion := "2.13.18",
+    crossScalaVersions := Seq("2.13.18", "3.3.3", "2.12.19")
   )
 
   val publishSettings = commonSettings ++ Seq(
@@ -103,7 +98,7 @@ object EndpointsSettings {
 
   // --- Common dependencies
 
-  val circeVersion = "0.14.1"
+  val circeVersion = "0.14.17"
   val playjsonVersion = "2.9.3"
   val playVersion = "2.8.13"
   val sttpVersion = "3.3.18"
