@@ -48,7 +48,7 @@ val `algebra-testkit-jvm` = `algebra-testkit`.jvm
 val `algebra-testkit-native` = `algebra-testkit`.native
 
 val `algebra-circe` =
-  crossProject(JSPlatform, JVMPlatform)
+  crossProject(JSPlatform, JVMPlatform, NativePlatform)
     .crossType(CrossType.Pure)
     .in(file("algebra-circe"))
     .settings(
@@ -61,10 +61,11 @@ val `algebra-circe` =
       )
     )
     .dependsOn(`algebra`, `algebra-testkit` % Test)
-    .jsConfigure(_.disablePlugins(ScoverageSbtPlugin))
+    .configurePlatforms(JSPlatform, NativePlatform)(_.disablePlugins(ScoverageSbtPlugin))
 
 val `algebra-circe-js` = `algebra-circe`.js
 val `algebra-circe-jvm` = `algebra-circe`.jvm
+val `algebra-circe-native` = `algebra-circe`.native
 
 val `algebra-circe-testkit` =
   crossProject(JSPlatform, JVMPlatform)

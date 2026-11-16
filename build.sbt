@@ -57,7 +57,10 @@ ThisBuild / version := (LocalProject("algebraJVM") / version).value
 // We want to keep binary compatibility as long as we can for the algebra,
 // but it is OK to publish breaking releases of interpreters. So,
 // interpreter modules may override this setting.
-ThisBuild / versionPolicyIntention := Compatibility.BinaryAndSourceCompatible
+// Relaxed from `BinaryAndSourceCompatible` because Scala Native support requires bumping
+// circe, shapeless and Scala.js, which changes the version of the dependencies of the modules.
+// Reset to `BinaryAndSourceCompatible` after the next release.
+ThisBuild / versionPolicyIntention := Compatibility.BinaryCompatible
 // Ignore dependencies to modules with version like `1.2.3+n`
 ThisBuild / versionPolicyIgnoredInternalDependencyVersions := Some("^\\d+\\.\\d+\\.\\d+\\+n".r)
 
@@ -68,10 +71,17 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 ThisBuild / versionPolicyIgnored ++= Seq(
   // Its version (`<scala version>+<Scala.js version>`) changes with every Scala.js update
   "org.scala-js" %% "scalajs-scalalib",
+  "org.scala-js" % "scalajs-scalalib_2.13", // used by Scala 3 too
+  // Scala 3 library pulled transitively by the Scala Native / Scala.js artifacts of the bumped dependencies
+  "org.scala-lang" % "scala3-library_3",
   // Its version (`<scala version>+<Scala Native version>`) changes with every Scala Native update
   "org.scala-native" % "scalalib_native0.5_2.13",
   "org.scala-native" % "scalalib_native0.5_2.12",
   "org.scala-native" % "scala3lib_native0.5_3",
+  // New transitive dependency (via cats-core) of the circe version required by Scala Native
+  "org.typelevel" % "simulacrum-scalafix-annotations_2.12",
+  "org.typelevel" % "simulacrum-scalafix-annotations_2.13",
+  "org.typelevel" % "simulacrum-scalafix-annotations_3"
 )
 
 import ReleaseTransformations._
